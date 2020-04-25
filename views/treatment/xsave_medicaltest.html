@@ -1,0 +1,44 @@
+  <span onclick="this.parentElement.style.display='none'"
+  class="w3-button w3-large w3-display-topright">&times;</span>
+
+<div class="w3-row-padding"  >
+<div class="w3-half">
+  <div class="w3-full" >
+    <label>Test Name</label><br/>
+    <input class="w3-input w3-border" type="text" id="testname" name="testname"  value="" style="width:100%;height:35px">
+  </div>
+  <div class="w3-full">
+    <label>Actual Value</label><br/>
+      <input class="w3-input w3-border " type="text" id="actval" name="actval"  value = "" style="width:100%;height:35px">
+  </div>
+  <div class="w3-full" >
+    <label>Lower Value</label><br/>
+      <input class="w3-input w3-border  type="text" id="lowval" name="lowval"  value="" style="width:100%;height:35px">
+  </div>
+  <div class="w3-full" >
+    <label>Typical Value</label><br/>
+      <input class="w3-input w3-border" type="text" id="typval" name="typval"  value = "" style="width:100%;height:35px">
+  </div>
+  <div class="w3-full" >
+    <label>Upper Value</label><br/>
+      <input class="w3-input w3-border " type="text" id="upval" name="upval"  value="" style="width:100%;height:35px">
+  </div>
+
+
+</div>
+
+<div class="w3-half" >
+  <label>Remarks</label><br/>
+  <textarea class="text" cols="40" id="remarks" name="remarks" rows="5" style="height:100px;line-height:1.0;"></textarea>
+</div>
+
+</div>
+
+{{=medtestform}}
+   
+<div class="w3-container w3-padding-4">
+<div class="w3-bar">
+  <a class="w3-button w3-left  w3-green" id="presCanel"    onclick="medtestCancel()" style="height:40px;width:20%">Cancel</a>
+  <button class="w3-button w3-right w3-black" id="presSave" onclick="medtestSave()" style="height:40px;width:20%"><i class="fa fa-save w3-margin-right"></i>Click to Save</button> 
+</div>
+</div>   

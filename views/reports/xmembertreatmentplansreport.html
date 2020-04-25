@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>PMS</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  
+ <link href="../static/assets.css/bootstrap-responsive.min.css" rel="stylesheet" />
+  <link href="../static/assets/css/styles.css" rel="stylesheet" />
+  <link href="../static/css/web2py.css" rel="stylesheet" />
+  <link href="../static/css/web2py_bootstrap.css" rel="stylesheet" />
+  <link href="../static/css/font-awesome.css" rel="stylesheet" />
+  <link rel="stylesheet" href="../static/css/w3.css" />  
+  
+    
+   {{include 'web2py_ajax.html'}}     
+ <div class="flash alert" style='background:black;color:white'>{{=response.flash or ''}}</div>
+ <div class="flash alert" style='background:black;color:white'>{{=session.flash or ''}}</div>
+</head>
+
+<body>
+<div class="w3-row-padding  w3-medium">
+<div class="w3-third">
+<a class="w3-btn w3-blue w3-left" href="//pdfcrowd.com/url_to_pdf/">Save to PDF</a>
+</div>
+<div class="w3-third w3-center">
+      <img  src="https://mydentalplan.in/image/unnamed.png" class="w3-image" style="height:25%;width:25%"><br/><br/>    
+</div>
+
+<div class="w3-third w3-right">
+  <a href="{{=returnurl}}" class="w3-button w3-right  w3-black" style="height:40px;width:20%">Back</a>
+</div>
+
+</div>
+
+<div class="w3-row-padding  w3-medium w3-border w3-border-black">
+  <div class="w3-half">
+     <div class=" w3-panel w3-card w3-border w3-border-white">
+        <h4><span class="caption-subject bold uppercase" style="font:18">{{=provname}}</span>
+        <span style="text-align:right;float:right">Registration:&nbsp;&nbsp;{{=registration}}</span></h4>
+       <h4>{{=provaddr}}</h4>
+       <h5>{{=provcontact}}</h5>
+       
+     </div>
+  </div>
+  <div class="w3-half">
+     <div class=" w3-panel w3-card w3-border w3-border-white w3-right-align">
+       <h3>Patient Treatment Report</h3>
+      <h5>{{=request.now.strftime('%b, %d %Y')}}</h5>
+      <br/>
+    
+     </div>
+  </div>
+</div>
+<br/>
+<div class="w3-row-padding  w3-medium w3-border w3-border-black">
+  <div class="w3-half">
+     <div class=" w3-panel w3-card w3-border w3-border-white">
+        <header class="w3-container w3-black">
+          <h5>Patient Information</h5>
+      </header>
+       <div class="w3-container"> 
+        <h4>{{=patientname}}</h4>
+       <h4>{{=memberaddress}}</h4>
+       <h5>{{=membercontact}}</h5>
+      
+       </div>
+     </div>
+  </div>
+  <div class="w3-half">
+     <div class=" w3-panel w3-card w3-border w3-border-white">
+        <header class="w3-container w3-black">
+          <h5>Member Information</h5>
+      </header>
+       <div class="w3-container"> 
+       <h4>{{=membername}}</h4>
+       <h4>{{=memberaddress}}</h4>
+       <h5>{{=membercontact}}</h5>
+       </div>
+    
+     </div>
+  </div>
+</div>
+<br/>
+
+{{if(nonmember==True):}}
+<div class="w3-row-padding  w3-medium w3-border w3-border-black w3-hide">
+{{else:}}
+<div class="w3-row-padding  w3-medium w3-border w3-border-black">
+{{pass}}
+  <div class="w3-half">
+     <div class=" w3-panel w3-card w3-border w3-border-white">
+        <header class="w3-container w3-black">
+          <h5>Company Information</h5>
+      </header>
+       <div class="w3-container"> 
+       <h4>{{=company}}</h3>
+       </div>
+     </div>
+  </div>
+  <div class="w3-half">
+     <div class=" w3-panel w3-card w3-border w3-border-white">
+        <header class="w3-container w3-black">
+          <h5>Plan Information</h5>
+      </header>
+       <div class="w3-container"> 
+       <h4>Plan:  {{=hmoplan}}</h3>
+       <h4>Valid: {{=premenddt}}</h4>
+       </div>
+    
+     </div>
+  </div>
+</div>
+<div class="w3-row-padding  w3-medium w3-border w3-border-black">
+  <div class="w3-half w3-hide">
+     <div class=" w3-panel w3-card w3-border w3-border-white">
+        <header class="w3-container w3-black">
+          <h5>Treatment Plan Information</h5>
+      </header>
+       <div class="w3-container"> 
+<div class="w3-row">
+<div class="w3-container w3-half">
+ <h5>Treatment Plan:</h5>
+</div>
+<div class="w3-container w3-half">
+
+</div>
+</div>
+<div class="w3-row">
+<div class="w3-container w3-half">
+ <h5>Status:</h5>
+</div>
+<div class="w3-container w3-half">
+
+</div>
+</div><div class="w3-row">
+<div class="w3-container w3-half">
+ <h5>Start Date:</h5>
+</div>
+<div class="w3-container w3-half">
+
+</div>
+</div><div class="w3-row ">
+<div class="w3-container w3-half">
+ <h5>End Date:</h5>
+</div>
+<div class="w3-container w3-half">
+
+</div>
+</div>
+       </div>
+     </div>
+  </div>
+  <div class="w3-full">
+     <div class=" w3-panel w3-card w3-border w3-border-white">
+        <header class="w3-container w3-black">
+          <h5>Amount Details</h5>
+      </header>
+       <div class="w3-container"> 
+            <div class="w3-row">
+            <div class="w3-container w3-quarter">
+             <h5>Total Cost:</h5>
+            </div>
+            <div class="w3-container w3-quarter">
+            <h5>{{=totalcost}}</h5>
+            </div>
+            <div class="w3-container w3-quarter">
+             <h5>Total Paid:</h5>
+            </div>
+            <div class="w3-container w3-quarter">
+            <h5>{{=totalpaid}}</h5>
+            </div>
+            </div>
+            
+            <div style="display:none">
+            <div class="w3-row">
+            <div class="w3-container w3-quarter">
+             <h5>Total Copay:</h5>
+            </div>
+            <div class="w3-container w3-quarter">
+            <h5>{{=totalcopay}}</h5>
+            </div>
+            <div class="w3-container w3-quarter">
+             <h5>Total Copay Paid:</h5>
+            </div>
+            <div class="w3-container w3-quarter">
+            <h5>{{=totalcopaypaid}}</h5>
+            </div>
+            </div>         
+            <div class="w3-row">
+            <div class="w3-container w3-quarter">
+             <h5>Total Ins Pays:</h5>
+            </div>
+            <div class="w3-container w3-quarter">
+            <h5>{{=totalinspays}}</h5>
+            </div>
+            <div class="w3-container w3-quarter">
+             <h5>Total Ins Paid:</h5>
+            </div>
+            <div class="w3-container w3-quarter">
+            <h5>{{=totalinspaid}}</h5>
+            </div>
+            </div>         
+            </div>
+            
+            <div class="w3-row">
+            <div class="w3-container w3-quarter">
+             <h5>Total Due:</h5>
+            </div>
+            <div class="w3-container w3-quarter">
+            <h5>{{=totaldue}}</h5>
+            </div>
+            </div>         
+
+            
+       </div>
+    
+     </div>
+  </div>
+</div>
+<div class="w3-row-padding w3-cpntainer  w3-medium ">
+        <header class="w3-container w3-black">
+          <h5>Treatments</h5>
+      </header>
+       <div class="w3-container"> 
+     {{=formB}}
+       </div>
+
+</div>
+</br>
+<a class="w3-btn w3-blue" href="//pdfcrowd.com/url_to_pdf/">Save to PDF</a>
+</body>
+</html>

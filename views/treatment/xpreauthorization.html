@@ -1,0 +1,463 @@
+
+						    {{=formTreatment.custom.begin}} 
+					
+     						    <div style="display:none">{{=formTreatment.custom.widget.patientmember}}</div>
+						    <form enctype="multipart/form-data" action="" method="post">
+						    {{=formTreatment.hidden_fields()}}
+						    <div class="portlet-title mem_details">
+                                                            <div class="caption"><i class="fa fa-user"></i>&nbsp;Treatment for <strong>{{=patientname}} ({{=patientmember}})</strong></div>
+						    </div>
+                                                    <div class="col-sm-12 md_r">
+                                                        
+                                                    <div class="col-sm-12 md_r">							
+                                                        <div class="col-md-4" style="margin-bottom:30px">
+                                                                <label class="m_title">Chief Complaint</label>
+								{{if(preauthorized == True):}}
+								<br/>
+								{{pass}}
+                                                                {{=formTreatment.custom.widget.chiefcomplaint}}
+								
+                                                        </div>
+                                        
+                                                        <div class="col-md-4">
+                                                           
+                                                            <label class="m_title">Treatment No.</label>
+								<br/>
+
+								{{=formTreatment.custom.widget.treatment}}
+                                                           
+                                                        </div>
+							
+                                                        <div class="col-md-4">
+                                                               
+                                                                <label class="m_title">Attending Doctor</label>
+								<br/>
+								{{=formTreatment.custom.widget.doctor}}
+                                                               
+                                                       </div>
+						    </div>
+						    
+						    <div class="col-sm-12 md_r">							
+                                                        <div class="col-md-4" >
+                                                               
+                                                                <label class="m_title">Treatment Date</label>
+						                   <br/>
+                                                                     {{=formTreatment.custom.widget.startdate}}    
+                                                              
+                                                       </div> 
+							<div class="col-md-4" >
+                                                               
+                                                                <label class="m_title">Treatment Status</label><br/>
+                                                                     {{=formTreatment.custom.widget.status}}    
+                                                              
+                                                       </div> 						       
+							<div class="col-md-4" >
+                                                               
+                                                                <label class="m_title">Treatment End Date</label><br/>
+                                                                     {{=formTreatment.custom.widget.enddate}}    
+                                                              
+                                                       </div> 						       
+                                                  </div>
+						  <div class="col-sm-12 md_r">	
+							<div class="col-md-3" style="display:none">
+							    <label class="m_title">Total UCR Fee</label>
+							    <p><strong>{{=formTreatment.custom.widget.ucrfee}}</strong></p>
+							</div>
+							<div class="col-md-3">
+							    <label class="m_title">Total Treatment Cost</label><br/>
+							    {{=formTreatment.custom.widget.treatmentcost}}
+							</div>
+							<div class="col-md-3">
+							    <label class="m_title">Total Co-pay</label><br/>
+							    {{=formTreatment.custom.widget.copay}}
+							</div>
+							<div class="col-md-3">
+							    <label class="m_title">Total Authorized Pay</label><br/>
+							    {{=formTreatment.custom.widget.inspay}}
+							</div>
+						  </div>
+						  
+						  {{=formTreatment.custom.widget.remarks}}
+						  <div style="display:none">
+						  {{=formTreatment.custom.widget.xaction}}
+						  </div>						  
+						  <div>
+                                                     {{if(medicalalerts == True):}}
+						     <p style="color:red"><strong>Patient is allergic to some medicine and may be suffering from either High BP or Diabetes or Heart Problem. Please consult patient's Medical History for more details</strong></p>
+						     {{pass}}
+						  </div>
+					    {{if((preauthorized==False)&(authorized==False)):}}
+					    <div class="col-sm-12 md_r"> 
+					    <div class="col-md-6">
+                                                   <div class="form-group">
+                                                         <label class="m_title">Dental Procedure</label>
+                                                          <div class="input-group">
+                                                                <span class="input-group-addon">
+                                                                    <i class="fa fa-plus-square"></i>
+                                                                </span>
+                                                                {{=formTreatment.custom.widget.vwdentalprocedure}}
+							  </div>
+							
+                                                   </div>
+						   <div style="position: absolute;z-index:500000" id="dentalsuggestions" class="suggestions"  >
+						   </div>
+                                           </div>
+				           <div class="col-md-6" >
+                                                   <div class="form-group">
+                                                         <label class="m_title">Dental Procedure Code</label>
+                                                          <div class="input-group">
+                                                                <span class="input-group-addon">
+                                                                    <i class="fa fa-plus-square"></i>
+                                                                </span>
+                                                                {{=formTreatment.custom.widget.vwdentalprocedurecode}}
+							  </div>
+							
+                                                   </div>
+						   <div style="position: absolute;z-index:500000" id="xdentalsuggestions" class="suggestions"  >
+						   </div>
+                                           </div>
+					   			   
+					   
+				    </div>	
+				    {{pass}}
+						  
+						    <div class="btn-group">
+							<span > 
+							{{if((preauthorized == False)&(authorized == False)):}}
+							<!--<a style="color:#fff"  class="btn sbold green" onclick="location.href='{{=URL('treatment','add_procedure',vars=dict(page=page,providerid=providerid,memberid=memberid,patientid=patientid,tplanid=tplanid,treatmentid=treatmentid,doctorid=doctorid))}}'" >-->
+						       <!--<i class="fa fa-plus"></i>&nbsp;&nbsp;Add Procedure-->
+						       <!--</a>-->
+						        <div id="addprocedure">
+							<a style="color:#fff"  class="btn sbold green" onClick="add_proceduregrid()" >
+						       <i class="fa fa-square-o"></i>&nbsp;&nbsp;Add Procedure
+						       </a>
+						       </div>
+						       
+						       
+						       {{pass}}
+						       {{if((authorization==True)&(preauthorized == False)&(authorized==False)):}}
+							<a style="color:#fff"  class="btn sbold green" onClick="sendforauthorization()" >
+						       <i class="fa fa-square-o"></i>&nbsp;&nbsp;Send For Pre-Authorization
+						       </a>
+						       {{pass}}
+						       
+						       {{if((authorization==True)&((preauthorized == True))&(authorized==False) & (webadmin == True)):}}
+							<a style="color:#fff"  class="btn sbold green" onClick="authorizetreatment()"  >
+						       <i class="fa fa-check-square-o"></i>&nbsp;&nbsp;Authorize Treatment
+						       </a>
+						       <p style="color:blue"><strong>Enter authorized amount for each procedure and then click this button to Authorize the Treatment Plan</strong></p>
+						       {{pass}}
+						       
+						       
+						       </span>
+						    </div>
+						    
+						        {{=formProcedure}}						       
+                                                        <div class="col-md-12" style="margin-bottom:30px">
+                                                                <label class="m_title">Provider Notes</label><br/>
+                                                                {{=formTreatment.custom.widget.description}}
+                                                        </div>
+                                                        <div class="col-md-12" style="margin-bottom:30px">
+						                {{if(writablflag):}}
+								<button type="submit" class="btn green">Save</button>
+								{{pass}}
+								<a href="{{=returnurl}}">Cancel </a>
+									    
+                                                        </div>
+
+						    <div>
+						       {{if((authorization == True)&(preauthorized == False)&(preauthorizeerror == False)&(authorized==False)):}}
+						       <p style="color:blue"><strong>Please send this treatment for Pre-Authorization</strong></p>
+						       {{pass}}
+						       {{if((authorization == True)&(preauthorizeerror == True)&(authorized==False)):}}
+						       <p style="color:red"><strong>There was an error during Pre-Authorization. Please try again!</strong></p>
+						       {{pass}}
+						       
+						       {{if((authorization == True)&(preauthorizeerror == False)&(preauthorized==True)&(authorized==False)):}}
+						       <p style="color:blue"><strong>Treatment successfully sent for Pre-authorization!</strong></p>
+						       {{pass}}
+						       
+						       {{if((authorization == True)&(authorizeerror == True)&(authorized==False)):}}
+						       <p style="color:red"><strong>There was an error during Authorization. Please try again!</strong></p>
+						       {{pass}}
+						       
+
+						       {{if((authorization == True)&(authorizeerror == False)&(authorized==True)):}}
+						       <p style="color:blue"><strong>This treatment is Authorized to pay!</strong></p>
+						       {{pass}}
+						    </div>
+									  
+                                                    <!--</div>-->
+                                                   </div><!---col-sm-12 md_r-->
+						    					   
+						    </form >  
+						    
+						    <div class="form-group" style="display:none">
+							<input type="text"  style="display:none" name="proccode" id = "proccode" readonly>  
+							<input type="text"  style="display:none" value={{=procedureid}} name="procid" id = "procid" readonly>  
+							<input type="text" style="display:none"  name="procucr" id = "procucr" readonly>  
+							<input type="text"  style="display:none"  name="procdesc" id = "procdesc" readonly>	
+							<!--=formTreatment.custom.widget.vwdentalprocedure}}  -->
+							<!--=formTreatment.custom.widget.quadrant}}-->
+							<!--=formTreatment.custom.widget.tooth}}-->
+						          <!--=formTreatment.custom.widget.enddate}}    -->
+							<!--=formTreatment.custom.widget.status}}-->
+							 {{=formTreatment.custom.submit}}
+							 {{=formTreatment.custom.widget.dentalprocedure}}
+							 {{=formTreatment.custom.widget.treatmentplan}}
+							 {{=formTreatment.custom.widget.inspay}}
+							 {{=formTreatment.custom.widget.copay}}
+							 {{=formTreatment.custom.widget.xmemberid}}
+							 {{=formTreatment.custom.widget.patientid}}
+						    </div>
+						    
+						     {{=formTreatment.custom.end}} 
+                                    
+<script>
+
+function submitform(){
+
+   
+    document.image_form.submit();
+}
+function form_submit() {
+
+
+   title = document.getElementById("form_title").value
+   tooth = document.getElementById("form_tooth").value
+   quad = document.getElementById("form_quadrant").value
+   imgdate = document.getElementById("form_image").value
+   desc = document.getElementById("form_description").value
+   
+   
+   }  
+
+ function onClick(element) {
+  
+  
+  document.getElementById("img01").src = element.src;
+  document.getElementById("myModal").style.display = "block";
+
+ 
+
+  document.getElementById("form_title").value = document.getElementById("title" +  element.id).value
+  document.getElementById("form_patientname").value = document.getElementById("patientname" +  element.id).value
+  document.getElementById("form_tooth").value = document.getElementById("tooth" +  element.id).value
+  document.getElementById("form_quadrant").value = document.getElementById("quadrant" +  element.id).value
+  document.getElementById("form_imageid").value = document.getElementById("imageid"  +  element.id).value
+  document.getElementById("form_imagedate").value = document.getElementById("imagedate"   +  element.id).value
+  document.getElementById("form_description").value = document.getElementById("description"   +  element.id).value
+  if(document.getElementById("is_active"   +  element.id).checked == false)
+  {
+    document.getElementById("form_delete").checked = true
+  }
+
+}  
+
+
+ function presCancel(){
+    
+    document.getElementById("no_table_medicine").value = 0;
+    document.getElementById("no_table_strength").value = "";
+    document.getElementById("no_table_strengthuom").value = 0;
+    document.getElementById("no_table_frequency").value = "";
+    document.getElementById("no_table_dosage").value = "";
+    document.getElementById("no_table_quantity").value = "";
+    document.getElementById("no_table_presremarks").value = "";
+
+    
+ }
+
+ function presSave(){
+  
+    
+    ajax('{{=URL("treatment", "save_prescription", vars=dict(page=page, memberpage = memberpage, memberid=memberid,membername=membername,treatmentid=treatmentid,tplanid=tplanid,\
+    providerid=providerid,providername=providername,patientid=patientid,patientmember=patientmember,patientname=patientname))}}',['doctor', 'medicine','strength','strengthuom','dosage','frequency','prescriptiondate','quantity','presremarks'] , 'tab_15_3');
+ }
+ 
+ function medtestCancel(){
+    
+    document.getElementById("testname").value = "";
+    document.getElementById("upval").value = "";
+    document.getElementById("lowval").value = "";
+    document.getElementById("typval").value = "";
+    document.getElementById("actval").value = "";
+    document.getElementById("remarks").value = "";
+    
+ }
+
+ function medtestSave(){
+  
+   
+    ajax('{{=URL("treatment", "save_medicaltest", vars=dict(page=page, memberpage = memberpage, memberid=memberid,membername=membername,treatmentid=treatmentid,tplanid=tplanid,\
+    providerid=providerid,providername=providername,patientid=patientid,patientmember=patientmember,patientname=patientname))}}', ['testname', 'upval','lowval','typval','actval','remarks'] , 'tab_15_4')
+ }
+ 
+ 
+
+function getMore(){
+
+
+var page = parseInt(document.getElementById('ximagepage').value);
+page = page + 1;
+document.getElementById('ximagepage').value = page;
+
+
+ajax('{{=URL("treatment","image_selector",vars=dict(patientid=patientid, providerid=providerid))}}', ['ximagepage'], 'tab_15_5');
+ 
+ 
+};
+
+
+function getLess(){
+  
+
+    var page = parseInt(document.getElementById('ximagepage').value);
+
+    if(page==0){
+      return;
+    }
+    page = page -1
+    
+    document.getElementById('ximagepage').value = page
+
+ 
+    ajax('{{=URL("treatment","image_selector",vars=dict(patientid=patientid, providerid=providerid))}}', ['ximagepage'], 'tab_15_5');    
+ };
+
+ 
+ jQuery("#no_table_vwdentalprocedure").keyup(function(){
+
+       $("#dentalsuggestions").show();
+       var x = $('#no_table_vwdentalprocedure').val();
+      ajax('{{=URL('admin', 'vwdentalprocedure_selector')}}', ['vwdentalprocedure'], 'dentalsuggestions')});
+      
+      
+ $(document).ready(function(){
+   
+
+   
+    
+      $("#addprocedure").hide();
+    
+     $("#dentalsuggestions") .click(function(){
+       var x = $('#no_table_vwdentalprocedure').val();
+       var procs = x.split(':')  
+
+       $("#no_table_vwdentalprocedure").val(procs[0].trim())
+       $("#no_table_vwdentalprocedurecode").val(procs[1].trim())
+       $("#dentalsuggestions").hide();
+      add_proceduregrid();
+    });
+    
+    $("#xdentalsuggestions") .click(function(){
+    
+ 
+       var x = $('#no_table_vwdentalprocedurecode').val();
+       var procs = x.split(':')  
+
+
+       $("#no_table_vwdentalprocedurecode").val(procs[0])
+       $("#no_table_vwdentalprocedure").val(procs[1])
+       
+	$("#xdentalsuggestions").hide();
+	add_proceduregrid();
+    });
+    
+    
+});
+
+
+
+$("#no_table_medicine").change(function(){
+    
+
+       var x = $('#no_table_medicine').val();
+       var y = $('#no_table_medicine :selected').text();
+       var z = $('#no_table_medicine :selected').index();
+
+      
+      var meds = y.split(":")
+      
+       $('#no_table_strength').val(meds[1]);
+       
+       $('#no_table_strengthuom').val(meds[2]);
+      
+      
+      
+       
+    });
+    
+    
+jQuery("#no_table_vwdentalprocedure").keyup(function(){
+
+       $("#dentalsuggestions").show();
+       var x = $('#no_table_vwdentalprocedure').val();
+       ajax('{{=URL('admin', 'vwdentalprocedure_selector', vars=dict(patientid = patientid, memberid=memberid,freetreatment=freetreatment,newmember=newmember))}}', ['vwdentalprocedure'], 'dentalsuggestions')
+});
+
+
+jQuery("#no_table_vwdentalprocedurecode").keyup(function(){
+
+       $("#xdentalsuggestions").show();
+       var x = $('#no_table_vwdentalprocedurecode').val();
+       ajax('{{=URL('admin', 'vwdentalprocedurecode_selector', vars=dict(patientid = patientid, memberid=memberid,freetreatment=freetreatment,newmember=newmember))}}', ['vwdentalprocedurecode'], 'xdentalsuggestions')
+});
+
+    
+ function chartSave(){
+
+    var charttitle = document.getElementById('charttitle').value
+    var chartdate = document.getElementById('chartdate').value
+    var chartnotes = document.getElementById('chartnotes').value
+    var destchartfile = document.getElementById('destchartfile').value
+    var chartfile = document.getElementById('chartfile')
+    
+    ajax('{{=URL("treatment", "save_chart", vars=dict(providerid=providerid,treatmentid=treatmentid,tplanid=tplanid,patientid=patientid,memberid=memberid,patientname=patientname))}}', ['destchartfile', 'chartfile', 'charttitle', 'chartdate','chartnotes'] , 'DentalchartNotes');
+
+}
+
+ 
+function onstatuschange(){
+
+
+var statusopt = document.getElementById("no_table_status");
+var statusval = statusopt.options[statusopt.selectedIndex].value;
+
+
+}
+
+function addProcedure(){
+
+var xaction = document.getElementById("no_table_xaction")
+xaction.value = "AddProcedure"
+}
+
+function sendforauthorization(){
+
+
+    ajax('{{=URL("treatment", "preauthorization", vars=dict(page=page,imagepage=imagepage,treatmentid=treatmentid,providerid=providerid,authorization=authorization,preauthorized=preauthorized,authorized=authorized,webadmin=webadmin))}}', ['authorization', 'preauthorized','authorized',  'webadmin'], 'tab_15_1');
+
+    
+}
+
+function authorizetreatment(){
+
+
+    ajax('{{=URL("treatment", "authorizetreatment", vars=dict(page=page,imagepage=imagepage,treatmentid=treatmentid,providerid=providerid,authorization=authorization,preauthorized=preauthorized,authorized=authorized,webadmin=webadmin))}}', ['authorization', 'preauthorized','authorized',  'webadmin'], 'tab_15_1');
+
+    
+}
+
+function add_proceduregrid(){
+
+    alert("Enter Add Procedure Grid")
+    ajax('{{=URL("treatment", "add_proceduregrid", vars=dict(page=page,imagepage=imagepage,treatmentid=treatmentid,providerid=providerid,authorization=authorization,preauthorized=preauthorized,authorized=authorized,webadmin=webadmin))}}', ['vwdentalprocedure', 'vwdentalprocedurecode'], 'tab_15_1');
+    
+}
+ </script> 
+ 
+ 
+ 
+ 
+ 

@@ -1,0 +1,34 @@
+{{extend 'layoutenroll2.html'}}
+
+<script>
+function returntoregistration()
+{
+   
+    window.location.replace('/my_dentalplan/default/member_register')
+}
+
+
+</script>
+
+<div>
+     
+    <h3>Registration Error</h3><br/>
+    
+    {{if(error=="companynotregistered"):}}
+    <h5>Your Organization is not registered with MyDental Plan: Please contact MyDental Plan or company HR Department</h5>
+    {{pass}}
+    {{if(error=="registereduser"):}}
+    <h5>User already exists: Please contact MyDental Plan or company HR Department</h5>
+    {{pass}}
+    {{if(error=="registrationerror"):}}
+    <h5>Registration Error: Please contact MyDental Plan or company HR Department</h5>
+    {{pass}}
+    {{if(error=="planrateerror"):}}
+    <h5>Plan Rate for your company has not been setup in the system: Please contact MyDental Plan or company HR Department</h5>
+    {{pass}}
+    
+    <input  type="button" class="form_details_button" onclick="javascript: returntoregistration()" value="Return to Registration">
+    
+    
+
+</div>

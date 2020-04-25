@@ -1,0 +1,7 @@
+  <select id="patients" class="form_details " style="width:100%;height:35px" onchange="changePatients()">
+        <option value='0'>--Select--</option>
+    
+        {{for pat in patients:}}
+             <option value='{{=pat.auxid}}'>{{=pat.fname}},{{=pat.lname}},{{=pat.patienttype}}</option>
+        {{pass}}
+    </select>

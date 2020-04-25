@@ -1,0 +1,31 @@
+{{extend 'pms2_layoutw3.html'}}
+
+
+<header class="w3-container w3-dark-grey ">
+   
+    <div class="w3-container">
+      <strong>Treatment Plans</strong>&nbsp;&nbsp;<a class="w3-btn w3-pale-grey"  href={{=URL('treatment','treatmentplan_create',vars=dict(\
+            memberid=memberid,providerid=providerid,providername=providername,page=page))}}><i class="fa fa-plus"></i></a>
+    
+   
+    </div>
+     
+</header>
+
+<div class="w3-row-padding w3-container  w3-small ">
+       <div class="w3-container"> 
+     {{=form}}
+       </div>
+
+</div>
+
+
+
+  
+            
+   
+
+
+
+
+

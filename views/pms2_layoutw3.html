@@ -1,0 +1,362 @@
+
+<html>
+<title>My_PMS2</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="../static/css/web2py.css"  />
+<link rel="stylesheet" href="../static/css/web2py_bootstrap.css" />
+<link rel="stylesheet" href="../static/css/web2py_bootstrap_nojs.css" />
+<link rel="stylesheet" href="../static/css/w3.css" />  
+<link rel="stylesheet" href="../static/css/mydental.css" />  
+
+<!--<link rel="stylesheet" href="https://www.w3schools.com/lib/w3-theme-white.css">-->
+<!--<link rel="stylesheet" href="https://www.w3schools.com/lib/w3-theme-purple.css">-->
+
+<!--<link rel="icon" href="../static/raysti/images/favicon.ico" type="image/x-icon">-->
+<link rel="stylesheet" href="../static/raysti/styles/lib.css">
+<link rel="stylesheet" href="../static/raysti/styles/app.css">
+<link rel="stylesheet" href="../static/css/font-awesome.css" />  
+<style>
+html,body,h1,h2,h3,h4,h5 {font-family: "Arial", sans-serif}
+
+
+
+</style>
+
+{{include 'web2py_ajax.html'}} 
+
+<script src="{{=URL('static','js/jstz.js')}}"></script>
+
+{{import pytz}}
+{{from pytz import timezone}}
+
+  
+<body  class="w3-light-grey" onload="refreshPage()">
+
+<!-- Top container -->
+<div class="w3-bar w3-top w3-black w3-large" style="z-index:4">
+  <button class="w3-bar-item w3-button w3-hide-large w3-hover-none w3-hover-text-light-grey" onclick="w3_open();"><i class="fa fa-bars"></i>  Menu</button>
+  <div class="w3-left">
+    <a class="w3-text-white" href="{{=URL('admin','providerhome')}}"><i class="fa fa-home w3-xxlarge"></i>Home</a>&nbsp;&nbsp; 
+    <a class="w3-text-white" href="{{=returnurl}}" ><i class="fa fa-reply w3-xlarge"></i>Back</a>&nbsp;&nbsp; 
+ 
+   <i class="fa fa-dashboard w3-xlarge"></i><span><strong>Welcome, {{=providername}}</strong></span>
+  </div>
+  
+  
+  
+  
+   <div class="w3-right">
+    <span class="w3-closebtn" >{{=A(IMG(_src=URL('static','images/logout_32.jpg'), _alt="Logout"), _title=T("Logout"),_class='button',_href=URL("admin","logout"),_style='height:35px;')}}</span>
+    <span class="w3-closebtn w3-large">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+    <label id = "localtime" class="w3-large">
+  
+
+  </div>
+  </div>
+  
+
+<!-- Sidebar/menu -->
+<nav class="w3-sidebar w3-collapse w3-white " style="z-index:3;width:300px;" id="mySidebar"><br>
+  <div class="w3-container w3-row">
+    <div class="w3-col">
+      <img  src="https://www.mydentalplan.us/my_dentalplan/static/assets/img/logo-my-dental-plan_color.png" class="w3-image" style="width:80%"><br/><br/>    
+    </div>
+  
+  </div>
+
+  <div class="w3-bar-block">
+                         
+  
+    <a href="#" class="w3-bar-item w3-button w3-padding-16 w3-hide-large w3-dark-grey w3-hover-black" onclick="w3_close()" title="close menu"><i class="fa fa-remove fa-fw"></i>  Close Menu</a>
+    
+    <hr>
+    
+    <a href="{{=URL('admin','providerhome',vars=dict(providerid=providerid,page=1))}}" class="w3-bar-item w3-button w3-padding">
+            <span class="sidebar-list-item-icon glyphicon glyphicon-home"></span>
+            <span class="sidebar-list-item-title">Home</span>    
+    </a>
+    <hr>
+    
+    <a href="{{=URL('member','list_patients',vars=dict(providerid=providerid,page=1))}}" class="w3-bar-item w3-button w3-padding">
+            <span class="sidebar-list-item-icon glyphicon glyphicon-user"></span>
+            <span class="sidebar-list-item-title">Members</span>    
+    </a>
+    
+    <a href="{{=URL('member','list_nonmembers',vars=dict(providerid=providerid,page=1))}}" class="w3-bar-item w3-button w3-padding">
+            <span class="sidebar-list-item-icon glyphicon glyphicon-user"></span>
+            <span class="sidebar-list-item-title">Walk-in Patients</span>    
+    </a>
+
+  <a href="{{=URL('treatment','list_treatments',vars=dict(providerid=providerid,page=1))}}" class="w3-bar-item w3-button w3-padding">
+              <span class="sidebar-list-item-icon glyphicon glyphicon-leaf"></span>
+              <span class="sidebar-list-item-title">Cases</span>
+  </a>
+                            
+  <a href="{{=URL("dentalimage","list_dentalimages",vars=dict(providerid=providerid,page=0))}}" class="w3-bar-item w3-button w3-padding">
+            <span class="sidebar-list-item-icon glyphicon glyphicon-picture"></span>
+            <span class="sidebar-list-item-title">Images</span>
+  </a>
+  <a href="{{=URL('appointment','calendar',vars=dict(providerid=providerid,page=1))}}" class="w3-bar-item w3-button w3-padding">
+            <span class="sidebar-list-item-icon glyphicon glyphicon-calendar"></span>
+            <span class="sidebar-list-item-title">Appointments</span>
+  </a>
+
+  <!--<a href="{{=URL("payment","list_payment",vars=dict(providerid=providerid,page=0))}}" class="w3-bar-item w3-button w3-padding">-->
+            <!--<span class="sidebar-list-item-icon fa fa-inr"></span>-->
+            <!--<span class="sidebar-list-item-title">Payments</span>-->
+  <!--</a>-->
+
+<hr>
+  <a href="{{=URL('utility', 'reminders',vars=dict(providerid=providerid,page=1))}}" class="w3-bar-item w3-button w3-padding">
+            <span class="sidebar-list-item-icon glyphicon glyphicon-gift"></span>
+            <span class="sidebar-list-item-title">Birthdays Reminders</span>
+  </a>
+
+  <a href="{{=URL('appointment', 'reminders',vars=dict(providerid=providerid,page=1))}}" class="w3-bar-item w3-button w3-padding">
+            <span class="sidebar-list-item-icon glyphicon glyphicon-calendar"></span>
+            <span class="sidebar-list-item-title">Appointment Reminders</span>
+  </a>
+
+  <a href="{{=URL('utility', 'list_memberpatient',vars=dict(providerid=providerid,page=1,notification="Email"))}}" class="w3-bar-item w3-button w3-padding">
+            <span class="sidebar-list-item-icon glyphicon glyphicon-envelope"></span>
+            <span class="sidebar-list-item-title">Send Emails</span>
+  </a>
+
+  <a href="{{=URL('utility', 'list_memberpatient',vars=dict(providerid=providerid,page=1,notification="SMS"))}}" class="w3-bar-item w3-button w3-padding">
+            <span class="sidebar-list-item-icon glyphicon glyphicon-comment"></span>
+            <span class="sidebar-list-item-title">Send SMS</span>
+  </a>
+  <hr>
+  <a href="{{=returnurl}}" class="w3-bar-item w3-button w3-padding">
+            <span class="sidebar-list-item-icon glyphicon glyphicon-backward"></span>
+            <span class="sidebar-list-item-title">Back</span>
+  </a>
+  <a href="{{=URL('admin','logout')}}" class="w3-bar-item w3-button w3-padding">
+            <span class="sidebar-list-item-icon glyphicon glyphicon-log-out"></span>
+            <span class="sidebar-list-item-title">Logout</span>
+  </a>
+    
+  </div>
+</nav>
+
+
+<!-- Overlay effect when opening sidebar on small screens -->
+<div class="w3-overlay w3-hide-large w3-animate-opacity" onclick="w3_close()" style="cursor:pointer" title="close side menu" id="myOverlay"></div>
+
+<!-- !PAGE CONTENT! -->
+<div class="w3-main main-content" style="margin-left:300px;margin-top:40px;">
+
+
+<section class="container-fluid body-section">
+  <div class="w3-row-padding w3-margin-bottom">
+    <div class="w3-quarter">
+      <div class="w3-container w3-white w3-padding-0">
+                  <!-- dashboard-panels -->
+                  <div class="dashboard-panels w3-pale-blue">
+                    <span class="dashboard-badge">
+                      <a href="{{=URL('member','new_nonmember',vars=dict(providerid=providerid,page=0))}}"><i class="fa fa-plus-square w3-blue w3-xxlarge"></i>
+                     </a>
+                    </span>
+                    <div class="dashboard-header w3-blue">
+                      {{if(session.newmembers > 0):}}
+                        <h4><strong><a href="{{=URL('member','list_patients',vars=dict(providerid=providerid,page=1))}}" class="w3-text-white">Members</a></strong>&nbsp;
+                        <a id="newmember" href="{{=URL('member','list_patients',vars=dict(providerid=providerid,page=1,newmember=True))}}" class="w3-text-white"><strong class="w3-red">( New:{{=session.newmembers}})</strong></a></h4>
+                        
+                      {{else:}}
+                        <h4><strong>Members</strong></h4>
+                      {{pass}}
+                    </div>
+                    <div class="dashboard-content">
+                          <div class="w3-cell-row">
+                            <div class="w3-container w3-margin-left w3-cell">
+                             <p><strong>Active Members:</strong></p>
+                             <p><strong>Inactive Members:</strong></p>
+                             <p><strong>Walk-In Patients:</strong></p>
+                            </div>
+                           
+                            <div class="w3-container w3-cell">
+                             <p>{{=session.members}}</p>
+                             <p>{{=session.exmembers}}</p>
+                             <p>{{=session.nonmembers}}</p>
+                            </div>                     
+                         </div>                     
+                    </div>
+                  </div>
+                  <!-- end:dashboard-panels -->      
+          </div>
+    </div>
+
+    <div class="w3-quarter">
+      <div class="w3-container w3-white w3-padding-0 ">
+                  <!-- dashboard-panels -->
+                  <div class="dashboard-panels w3-sand">
+                    <span class="dashboard-badge">
+                      <a href="{{=URL('treatment','new_treatment',vars=dict(providerid=providerid,page=1))}}"><i class="fa fa-plus-square w3-brown w3-xxlarge"></i></a>
+                    </span>
+                    <div class="dashboard-header w3-brown ">
+                      <h4><strong><a href="{{=URL('treatment','list_treatments',vars=dict(providerid=providerid,page=1))}}" class="w3-text-sand">Treatments</a></strong></h4>
+                    </div>
+                    <div class="dashboard-content">
+                          <div class="w3-cell-row">
+                            <div class="w3-container w3-margin-left w3-cell">
+                             <p><strong>Treatments:</strong></p>
+                            </div>
+                           
+                            <div class="w3-container w3-cell">
+                             <p>{{=session.treatmentplans}}</p>
+                            </div>                     
+                         </div>                     
+                    </div>
+                  </div>
+                  <!-- end:dashboard-panels -->      
+      </div>
+    </div>
+    <div class="w3-quarter">
+      <div class="w3-container w3-white w3-padding-0">
+                  <!-- dashboard-panels -->
+                  <div class="dashboard-panels w3-pale-green">
+                    <!--<span class="dashboard-badge">-->
+                     <!--<a href="{{=URL("payment","list_payment",vars=dict(providerid=providerid,page=0))}}" > <i class="fa fa-plus-square w3-green w3-xxlarge"></i></a>-->
+                    <!--</span>-->
+                    <div class="dashboard-header w3-green">
+                      <h4>Payments</h4>
+                    </div>
+                    <div class="dashboard-content">
+                          <div class="w3-cell-row">
+                            <div class="w3-container w3-margin-left w3-cell">
+                             <p><strong>Outstanding Payments:</strong></p>
+                            </div>
+                           
+                            <div class="w3-container w3-cell">
+                             <p>0</p>
+                            </div>                     
+                         </div>                     
+                    </div>
+                  </div>
+                  <!-- end:dashboard-panels -->      
+      </div>
+    </div>
+    <div class="w3-quarter">
+      <div class="w3-container w3-white w3-padding-0">
+                  <!-- dashboard-panels -->
+                  <div class="dashboard-panels w3-pale-yellow">
+                
+                    <span class="dashboard-badge">
+                      <a href="{{=URL('appointment','new_appointment',vars=dict(providerid=providerid,page=1))}}"><i class="fa fa-plus-square w3-amber w3-xxlarge"></i></a>
+                    </span>
+                    <div class="dashboard-header w3-amber">
+                      <h4><strong><a href="{{=URL('appointment', 'calendar',vars=dict(providerid=providerid,page=1))}}" class="w3-text-black">Appointments</a></strong></h4>
+                    </div>
+                    <div class="dashboard-content">
+                          <div class="w3-cell-row">
+                            <div class="w3-container w3-margin-left w3-cell">
+                             <p><strong>Total Appts:</strong></p>
+                             <p><strong>Todays Appts:</strong></p>
+                             <p><strong>Tomorrows Appts:</strong></p>
+                            </div>
+                           
+                            <div class="w3-container w3-cell">
+                             <p>{{=session.appointments}}</p>
+                             <p>{{=session.todayappts}}</p>
+                             <p>{{=session.tomorrowappts}}</p>
+                            </div>                     
+                         </div>                     
+                    </div>
+                  </div>
+                  <!-- end:dashboard-panels -->      
+      </div>
+
+  </div>
+    
+ </div>   
+
+<div class="w3-container" > 
+<div class="flash">{{=response.flash or ''}}</div>
+</div>
+</section>
+
+
+
+
+
+
+{{block center}}
+{{include}}
+{{end}}
+
+            
+
+
+
+
+<footer class="w3-container w3-blue-grey w3-border w3-text-white" style="text-align:right">
+  <a  href="https://www.mydentalplan.in" class="w3-text-white" target="_blank"> &copy;2015 mydentalplan.in </a>
+</footer>
+
+
+ </div> 
+ <!---END Page Content-->
+</body>
+
+<script>
+
+
+
+// Get the Sidebar
+var mySidebar = document.getElementById("mySidebar");
+
+// Get the DIV with overlay effect
+var overlayBg = document.getElementById("myOverlay");
+
+// Toggle between showing and hiding the sidebar, and add overlay effect
+function w3_open() {
+    if (mySidebar.style.display === 'block') {
+        mySidebar.style.display = 'none';
+        overlayBg.style.display = "none";
+    } else {
+        mySidebar.style.display = 'block';
+        overlayBg.style.display = "block";
+    }
+}
+
+// Close the sidebar with the close button
+function w3_close() {
+    mySidebar.style.display = "none";
+    overlayBg.style.display = "none";
+}
+
+function refreshPage(){
+
+  var xtz = jstz.determine().name();
+  
+  var dateString = "";
+  var now = new Date();
+  m = now.getMonth() + 1;
+  y = now.getFullYear();
+  d = now.getDate();
+    
+  if(xtz.includes("Kolkata") | xtz.includes("Kolkatta") | xtz.includes("Calcutta"))
+  {
+    dateString = d + "/" + m + "/" + y;
+  }
+  else
+  {
+    dateString = now.toLocaleDateString();
+  }
+  
+  document.getElementById('localtime').innerHTML = dateString + " " + now.toLocaleTimeString();       
+
+  setTimeout("refreshPage()", 60000);
+  
+ 
+   
+}
+refreshPage();
+</script>
+</html>

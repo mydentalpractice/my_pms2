@@ -1,0 +1,30 @@
+{{extend 'layout.html'}}
+<div>
+<h6>{{=A(T('<< Home'),_href=URL('default','index'))}}</h6>
+
+{{=formA.custom.begin}}
+    <table>
+        <caption style="text-align:left"><h4>Add Test2</h4></caption>
+        <tr>
+            <td>
+                <th class="ElTextElement " style="z-index:10004;overflow:visible;color:;text-align:left;line-height:normal;font-weight:normal;font-style:normal;left:25px;top:255px;font-family:Arial;border-width:0px;border-style:solid;width:133px;" id="el1413744_70f98847f55b0ad49c9401f54db7359b" >Field21</th>
+            </td>
+            <td>
+                                 {{=formA.custom.widget.field21}}
+            </td>
+         </tr>            
+         <tr>
+            <td>
+                <th class="ElTextElement " style="z-index:10004;overflow:visible;color:;text-align:left;line-height:normal;font-weight:normal;font-style:normal;left:25px;top:255px;font-family:Arial;border-width:0px;border-style:solid;width:133px;" id="el1413744_70f98847f55b0ad49c9401f54db7359b" >Field22</th>
+            </td>
+            <td>
+                                {{=formA.custom.widget.field22}}
+            </td>
+         </tr>            
+    </table>
+    {{=formA.custom.submit}}
+    <button class="form_details_button" onclick="window.location='/my_dentalplan/default/create_test2/';return false">Add Test2</button>
+    <!--<input type="button" class="form_details_button" onclick="javascript: newDependant()" value="Add Dependant">-->
+
+  {{=formA.custom.end}}  
+</div>

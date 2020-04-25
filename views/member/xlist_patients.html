@@ -1,0 +1,28 @@
+{{extend 'pms2_layoutw4.html'}}
+
+ <div class="flash alert" style='background:black;color:white'>{{=response.flash or ''}}</div>
+ <div class="flash alert" style='background:black;color:white'>{{=session.flash or ''}}</div>
+
+  <div class="row">
+       <div class="col-md-12">
+         <div class="portlet light bordered" style="border: 1px solid #dadada!important;">
+            <div class="portlet-title" style="border-bottom: 1px solid rgb(230, 230, 230); background:none">
+                <div class="caption font-dark">
+                      <i class="fa fa-users" style="color:#000"></i>
+                      <span class="caption-subject bold uppercase">Members</span>
+                </div>
+                
+              {{=form}}
+            </div>
+         </div>
+       </div>  
+   </div>
+
+
+
+
+
+            
+
+
+

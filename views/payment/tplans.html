@@ -1,0 +1,7 @@
+ <select class="form-control" id="treatmentplans" style="width:100%;height:35px" onchange="changeTreatmentPlan()">
+  <option value='0'>--Select--</option>
+  {{ for tp in tplans: }}
+        <option  value={{=tp.id}}>{{=tp.treatmentplan}}</option>
+      {{pass}}
+  {{pass}}
+</select> 

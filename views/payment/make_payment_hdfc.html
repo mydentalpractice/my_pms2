@@ -1,0 +1,160 @@
+<html>
+<head>
+    <title>Sample Page</title>
+
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+
+    <style type="text/css">
+	    h1       { font-family:'Gentium Book Basic'; font-size:24pt; color:#08185A; font-weight:100; margin-bottom:0.1em}
+        h2.co    { font-family:Arial,sans-serif; font-size:24pt; color:#FFFFFF; margin-top:0.1em; margin-bottom:0.1em; font-weight:100}
+        h3.co    { font-family:Arial,sans-serif; font-size:16pt; color:#000000; margin-top:0.1em; margin-bottom:0.1em; font-weight:100}
+        h3       { font-family:Arial,sans-serif; font-size:30pt; color:#08185A; }
+        body     { font-family:Gentium Book Basic; font-size:15px; color:#08185A; margin-top:0px;}
+	    th 		 { font-size:15px;background:#008080;color:#FFFFFF;font-weight:bold;height:30px;}
+	    td 		 { font-size:15px;}
+	    .pageTitle { font-size:24px;}
+        #mode {
+            width: 126px;
+        }
+
+    </style>
+        <script src="{{=URL('static','js/crypto3.1.2/rollups/sha512.js')}}"></script>
+        <script src="{{=URL('static','js/crypto3.1.2/rollups/md5.js')}}"></script>
+        <script language="JavaScript" type="text/javascript">
+        function a2()
+        {
+            document.getElementById('a1').style.display = "none";
+        }
+
+        function checkit() {
+
+
+            var value = document.getElementById('channel').value;
+            {
+            if (value === '0') {
+                document.getElementById('a1').style.display = "none";
+            }
+            else {
+                document.getElementById('a1').style.display = "inline";
+
+            }
+        }
+ }
+
+	function callHDFC() {
+
+  var salt = "d67fa952ec2f66c394d3192f17e01550";
+  var hashkey = "account_id|amount|reference_no|return_url|mode";
+  var hashkey11 =  "account_id|address|amount|channel|city|country|currency|description|email|mode|name|phone|postal_code|reference_no|return_url|ship_address|ship_city|ship_country|ship_email|ship_name|ship_phone|ship_postal_code|ship_state|state";
+
+  var str = salt;
+
+  var keys = hashkey11.split("|");
+
+  for(var i=0; i<keys.length; i++) {
+	  if(keys[i]=="page_id") {
+	    str = str + "|";
+	  } else if(keys[i]=="algo") {
+
+	  } else {
+    var handle = document.getElementById(keys[i]);
+    if(handle!=null) {
+      str = str + "|" + handle.value;
+    }
+	  }
+  }
+
+document.getElementById('innerDiv1').innerHTML=str;
+
+  var hash = CryptoJS.MD5(str);
+	//  hash = (hash+"").toUpperCase();
+
+		hash = (hash+"").toUpperCase();
+
+		document.getElementById('secure_hash').value=hash;
+
+	//alert(str+"======hash:=="+hash);
+
+		document.getElementById('innerDiv2').innerHTML="secure_hash|"+hashkey11;
+
+	document.getElementById('innerDiv').innerHTML=hash;
+
+		//alert(hash);
+
+		document.getElementById('payment').submit();
+
+}
+
+window.onload = function(){
+
+callHDFC();
+}
+
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+</head>
+<body onload="callHDFC()" style="background-color:lightgray; margin-left:300px; margin-right:300px; margin-top:0px;">
+    <center>
+        <div style="background-color:white;">
+
+
+
+
+
+<form action="https://secure.ebs.in/pg/ma/payment/request/" id="payment" name="payment" method="POST">
+<table>
+<input type="hidden" id="account_id"value="{{=account_id}}" name="account_id"/><tbody>
+<input type="hidden" id="address" value="{{=address}}" name="address"/>
+<input type="hidden" id="amount" value="{{=amount}}" name="amount"/>
+
+<input type="hidden" id="channel"  value="{{=channel}}" name="channel"/>
+<input type="hidden" id="city"  value="{{=city}}" name="city"/>
+<input type="hidden" id="country"  value="{{=country}}" name="country"/>
+<input type="hidden"  id="currency" value="{{=currency}}" name="currency"/>
+<input type="hidden"  id="description" value="{{=description}}" name="description"/>
+
+<input type="hidden" id="email" value="{{=email}}" name="email"/>
+
+<input type="hidden" id="mode" value="{{=mode}}" name="mode"/>
+<input type="hidden" id="name" value="{{=name}}" name="name"/>
+
+<input type="hidden" id="phone" value="{{=phone}}" name="phone"/>
+<input type="hidden" id="postal_code" value="{{=postal_code}}" name="postal_code"/>
+<input type="hidden" id="reference_no" value="{{=reference_no}}" name="reference_no"/>
+<input type="hidden" id="return_url" value="{{=return_url}}" name="return_url"/>
+<input type="hidden" id="ship_address" value="{{=ship_address}}" name="ship_address"/>
+<input type="hidden" id="ship_city" value="{{=ship_city}}" name="ship_city"/>
+<input type="hidden" id="ship_country" value="{{=ship_country}}" name="ship_country"/>
+<input type="hidden" id="ship_name" value="{{=ship_name}}" name="ship_name"/>
+<input type="hidden" id="ship_phone" value="{{=ship_phone}}" name="ship_phone"/>
+<input type="hidden" id="ship_postal_code" value="{{=ship_postal_code}}" name="ship_postal_code"/>
+<input type="hidden" id="ship_state" value="{{=ship_state}}" name="ship_state"/>
+<input type="hidden" id="state" value="{{=state}}" name="state"/>
+<input type="hidden" id="secure_hash" value="" name="secure_hash"/>
+<button type="hidden" style="display:none;" onclick="javascript:callHDFC();"> SUBMIT </button>
+</form>
+<div type="hidden"  id="prompt" style="color:red;">Please wait...your payment is being submitted to HDFC</div>
+
+        </center>
+	<a name="submitted"  href="javascript:callHDFC()"  >Click to pay now</a>&nbsp;<br/>
+	<br/><br/>
+			<div type="hidden" style="display:none;" id="innerDiv2" style="color:red;">YOU WILL GET ORDER OF REQUEST TO CALCULATE HASH</div>
+                 <br/><br/>
+			<div type="hidden"  id="innerDiv1" style="color:BLUE;">YOU WILL GET PLAIN HASH VALUE HERE ON SUBMIT</div>
+			<br/><br/>
+	<div type="hidden" style="display:none;" id="innerDiv" style="color:red;">YOU WILL GET HASH VALUE HERE ON SUBMIT</div>
+
+</body>
+</html>

@@ -1,0 +1,46 @@
+{{extend 'super_layoutw4.html'}}
+
+   
+
+     <div class="row">
+      
+       <div class="col-md-12">
+         <div class="portlet light bordered" style="border: 1px solid #dadada!important;">
+            {{=formC.custom.begin}}
+            <div class="portlet-title" style="border-bottom: 1px solid rgb(230, 230, 230); background:none">
+                <div class="caption font-dark">
+                    <i class="fa fa-medkit" style="color:#000"></i>
+                    <span class="caption-subject bold uppercase">SMS Service Date: {{=stractdt}}</span>
+                </div>
+                <br/>
+                {{=message}}
+             <div style="display:none">
+             {{=formC.custom.widget.activitydate}}
+             </div>
+            
+            </div>
+            {{=formC.custom.end}}
+         </div>
+       </div>  
+   </div>
+   
+
+<button onclick="stopsmsservice()">Stop SMS Service</button>
+
+<script>
+var activityTrack = setInterval(startsmsservice, {{=timeinterval}});
+
+
+function startsmsservice() {
+
+    var dt = document.getElementById("no_table_activitydate").value;
+
+    window.open("/my_pms2/superadmin/smsservice?groupapptsms=1&activitydate=" + dt,"_self")
+}
+
+function stopsmsservice(){
+    clearInterval(activityTrack)
+    window.open("/my_pms2/superadmin/superadmin")
+}
+
+</script>

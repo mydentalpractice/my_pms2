@@ -1,0 +1,12 @@
+<span onclick="this.parentElement.style.display='none'"
+  class="w3-button w3-large w3-display-topright">&times;</span>
+ <div class="w3-container w3-full">
+  <label>Medical Notes</label><br/>
+  <textarea class="text" cols="40" id="mednotes" name="mednotes" value="{{=mednotes}}" style="height:50%;width:100%;line-height:1.0;">{{=mednotes}}</textarea>
+ </div>
+<div class="w3-container w3-padding-4">
+<div class="w3-bar">
+  <a class="w3-button w3-left  w3-green" id="mednotesCanel"    onclick="mednotesCancel()" style="height:40px;width:20%">Cancel</a>
+  <button class="w3-button w3-right w3-black" id="mednotesSave" onclick="mednotesSave()" style="height:40px;width:20%"><i class="fa fa-save w3-margin-right"></i>Click to Save</button> 
+</div>
+</div>   

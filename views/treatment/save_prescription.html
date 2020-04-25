@@ -1,0 +1,146 @@
+						    <form enctype="multipart/form-data" action="" method="post">
+							<div class="col-md-12">
+							    <div class="col-md-4">
+							       <div class="form-group">
+								    <label class="m_title">Date</label>
+								      <div class="input-group">
+									    {{=formPres.custom.widget.prescriptiondate}}
+								      </div>
+							       </div>
+							    </div>
+							   
+							</div>
+   
+							<div class="col-md-12">
+							    <div class="col-md-8">
+								   <div class="form-group">
+								    <label class="m_title">Drug</label>
+									  <div class="input-group">
+										{{=formPres.custom.widget.medicine}}
+									  </div>
+								   </div>
+							      </div>
+							      <div class="col-md-2">
+								   <div class="form-group">
+								    <label class="m_title">Strength</label>
+									  <div class="input-group">
+										{{=formPres.custom.widget.strength}}
+									  </div>
+								   </div>
+							      </div>
+							      <div class="col-md-2">
+								   <div class="form-group">
+								    <label class="m_title">Measure</label>
+									  <div class="input-group">
+										{{=formPres.custom.widget.strengthuom}}
+									  </div>
+								   </div>
+							      </div>
+							</div>
+  
+							<div class="col-md-12">
+							       <div class="col-md-4">
+								      <div class="form-group">
+								       <label class="m_title">Frequency</label>
+									     <div class="input-group">
+										   {{=formPres.custom.widget.frequency}}
+									     </div>
+								      </div>
+								 </div>
+								 <div class="col-md-4">
+								      <div class="form-group">
+								       <label class="m_title">Duration</label>
+									     <div class="input-group">
+										   {{=formPres.custom.widget.dosage}}
+									     </div>
+								      </div>
+								 </div>
+								 <div class="col-md-4">
+								      <div class="form-group">
+								       <label class="m_title">Quantity</label>
+									     <div class="input-group">
+										   {{=formPres.custom.widget.quantity}}
+									     </div>
+								      </div>
+								 </div>
+								 
+						       </div>
+							<div class="col-md-12">
+							    <div class="col-md-12">
+								<div class="form-group">
+								    <label class="m_title">Instructions</label>
+								     <div class="input-group">
+									   {{=formPres.custom.widget.presremarks}}
+								     </div>
+								</div>
+							    </div>
+							</div>
+							<div class="actions" style="    text-align: right;">
+						        <a class="btn btn-circle btn-icon-only btn-default" onclick="location.href='{{=URL('prescription','prescription_report',vars=dict(page=page,providerid=providerid,memberid=memberid,patientid=patientid,doctorid=doctorid))}}'">
+							    <i class="fa fa-print"></i>
+						        </a>
+							</div>
+							<div class="col-md-12" style="margin-bottom:30px">
+							    <div class="table-responsive">
+								<table class="table table-striped table-bordered table-hover">
+								    <thead>
+									<tr>
+									    <th> Drug </th>
+									    <th> Frequency </th>
+									    <th> Duration </th>
+									    <th> Date </th>
+									    <th> Prescribed By </th>
+									    <th> Instruction </th>
+									    
+									 </tr>
+								    </thead>
+								    <tbody>
+								    
+									{{for i in xrange(0, len(prescriptions),1): }}
+									<tr>
+									
+									    <td>{{=prescriptions[i].medicine}}&nbsp;&nbsp;{{=prescriptions[i].strength}}{{=prescriptions[i].strengthuom}}&nbsp;&nbsp;{{=prescriptions[i].medicinetype}}&nbsp;&nbsp;{{=prescriptions[i].quantity}}</td>
+									    <td>{{=prescriptions[i].frequency}}</td>
+									    <td>{{=prescriptions[i].dosage}}</td>
+									    <td>{{=prescriptions[i].prescriptiondate}}</td>
+									    <td>{{=prescriptions[i].doctorname}}</td>
+									    <td>{{=prescriptions[i].remarks}}</td>
+									    
+								       </tr>
+									{{pass}}
+								    </tbody>
+								</table>
+							    </div>
+							</div>     
+		     
+  
+   
+							<div class="col-md-12" style="margin-bottom:30px">
+							     <div class="col-md-12">
+								 <a class = "btn green" id="presSave" onClick="presSave()">Save</a>
+								 <a id="presCancel" onClick="presCancel()">Cancel </a>
+							     </div>
+							</div>
+
+						    </form>
+
+<script>
+$("#no_table_medicine").change(function(){
+    
+       alert('Medicine')
+       var x = $('#no_table_medicine').val();
+       var y = $('#no_table_medicine :selected').text();
+       var z = $('#no_table_medicine :selected').index();
+
+      
+      var meds = y.split(":")
+      
+       $('#no_table_strength').val(meds[1]);
+       
+       $('#no_table_strengthuom').val(meds[2]);
+      
+      
+      
+       
+    });
+</script>

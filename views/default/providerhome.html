@@ -1,0 +1,31 @@
+{{extend 'layoutenroll2.html'}}
+<table style="margin-left:10px">
+<tr>
+<td>
+{{=A(IMG(_src=URL('static','images/logout.jpg'), _alt="Logout"), _title=T("Logout"),_class='button',_href=URL("admin","logout"))}}
+</td>
+</tr>
+</table>
+<br/>
+<h2 style="margin-left:10px">Home of {{=providername}}</h2> 
+
+<table style="margin-left:10px">
+<tr>
+<td>
+{{=A(IMG(_src=URL('static','images/members_btn.jpg'), _alt="Members"), _title=T("Members"),_class='button',_href=URL("members","list_members"))}}
+</td>
+<td>
+{{=A(IMG(_src=URL('static','images/blank_btn.jpg'), _alt="Blank"), _title=T("Blank"),_class='button')}}
+</td>
+<td>
+{{=A(IMG(_src=URL('static','images/tplans_btn.jpg'), _alt="Treatment plans"), _title=T("Treatment Plans"),_class='button',_href=URL("treatment","list_treatmentplans",vars=dict(providerid=providerid,page=page)))}}
+</td>
+<td>
+{{=A(IMG(_src=URL('static','images/blank_btn.jpg'), _alt="Blank"), _title=T("Blank"),_class='button')}}
+</td>
+<td>
+{{=A(IMG(_src=URL('static','images/patients_btn.jpg'), _alt="Patients"), _title=T("Patients"),_class='button',_href=URL("members","list_patients"))}}
+</td>
+</tr>
+</table>
+

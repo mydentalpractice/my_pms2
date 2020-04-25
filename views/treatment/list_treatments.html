@@ -1,0 +1,126 @@
+{{extend 'pms2_layoutw4.html'}}
+
+
+<style>
+
+
+.dataTables_filter{ float:right !important;}
+ .dataTables_filter input {width: 377px !important;}
+#suggestions { position: relative; }
+.suggestions { background: white;z-index: 50000 !important;height: 250px; overflow-y: auto;border-bottom:1px solid #eeeeee;}
+.suggestions DIV { padding: 2px 4px 2px 4px; }
+</style>
+
+
+    <div class="row">
+     <div class="col-md-12">
+         <!-- BEGIN EXAMPLE TABLE PORTLET-->
+          <div class="portlet light bordered" style="border: 0px solid #dadada!important;">
+	    {{=form.custom.begin}}
+	    <div class="col-md-12" style="margin-bottom: 18px;">
+		<div class="input-group">
+		<table>
+		<tr>
+		<td style="width:70%">
+		
+			{{=form.custom.widget.pattreatment1}}
+		     
+		</td>
+		<td style="width:25%">
+		    <span class="input-group-btn" style="width:25%">
+                        <button id="LT" class="btn ivory bl" style="margin:0px 3px;" onClick="loader(this.id),listTreatments()" type="submit" ><span style="float: left;" class="ic">Treatments</span><i class="fa fa-spinner fa-spin" id="loaderDIVLT" style="display:none"></i></button>
+                        <button id="NT" class="btn ivory bl" style="margin:0px 3px;" onClick="loader(this.id),newTreatment()" type="submit" ><span style="float: left;" class="ic">New Treatment</span><i class="fa fa-spinner fa-spin" id="loaderDIVNT" style="display:none"></i></button>
+			
+		    </span>
+		</td>
+		</tr>
+		</table>
+		</div>
+		
+	    </div>
+	  
+	    
+	    <div id="hide" style="z-index:50000; ">
+	      <p id="phide">Click <strong>X</strong> to close the List after selection</p>
+	    </div>
+	    <div style="position: absolute;" id="suggestions" class="suggestions"></div>	    
+	    
+	    <div style="display:none">
+		{{=form.custom.widget.xpattreatment1}}
+		{{=form.custom.widget.xaction}}
+	
+	     </div>
+	     
+	    {{=form.custom.end}}
+	    {{if(formA != None):}}
+		{{=formA}}
+	    {{pass}}
+	</div>    	   
+    </div>
+    </div>
+
+
+<script>
+  
+       
+$(document).ready(function(){
+   
+    $("#suggestions").hide();
+    $("#hide").hide();
+    
+     $("#phide").click(function(){
+        $("#hide").hide();
+	$("#suggestions").hide();
+    }); 
+    
+    $("#suggestions") .click(function(){
+      
+	x= $("#no_table_pattreatment1").val();
+
+	
+	$("#no_table_xpattreatment1").val(x);
+    
+	strarr = x.split(":");
+	
+	$("#no_table_pattreatment1").val(strarr[0]);
+
+
+
+	$("#suggestions").hide();
+	$("#hide").hide()
+	$("#treatments").click()
+	
+    
+    });
+    
+});
+
+jQuery("#no_table_pattreatment1").keyup(function(){
+       
+       $("#suggestions").show();
+       $("#hide").show();
+       var x = $('#no_table_pattreatment1').val();
+       $("#no_table_xpattreatment1").val(x);
+       
+       ajax('{{=URL('admin', 'treatment_selector')}}', ['xpattreatment1'], 'suggestions')
+       
+});
+
+function newTreatment(){
+
+
+var xaction = document.getElementById("no_table_xaction")
+
+xaction.value = "newTreatment"
+
+}
+ 
+function listTreatments(){
+
+var xaction = document.getElementById("no_table_xaction")
+
+xaction.value = "listTreatments"
+
+}
+       
+</script>

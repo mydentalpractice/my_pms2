@@ -1,0 +1,25 @@
+ <div class="w3-container ">
+        <div class="w3-twothird">
+          <label class="w3-text-black">Title</label><br/> 
+	  <input class="w3-input" id="charttitle" value="{{=charttitle}}" style="width:98%;height:35px;"></input>
+	  
+        </div>
+        <div class="w3-third" >
+          <label class="w3-text-black">Chart Date</label><br/>
+	   <input class="w3-input" type="date" id="chartdate" name="chartdate" value="{{=chartdate}}" style="width:90%;height:35px;" required pattern="[0-9]{2}/[0-9]{2}/[0-9]{4}"></input>
+         
+        </div>
+      </div>  
+
+      <div class="w3-container   w3-medium" style='line-height:1.5;'>
+	<label>Chart Notes</label>
+	
+	<textarea class="text" cols="40" id="chartnotes" name="chartnotes"  value="{{=chartnotes}}" style="height:50%;width:100%;line-height:1.0;">{{=chartnotes}}</textarea>
+      </div>   
+      <br/>
+      <div class="w3-container   w3-medium">
+	<div class="w3-bar">
+	  <!--<a class="w3-button w3-left  w3-green" id="dentalchartCancel"    onclick="chartCancel()" style="height:40px;width:20%">Cancel</a>-->
+	  <button class="w3-button w3-right w3-black" id="dentalchartSave" onclick="chartSave()" style="height:40px;width:40%"><i class="fa fa-save w3-margin-right"></i>Click to Save</button> 
+	</div>
+      </div>

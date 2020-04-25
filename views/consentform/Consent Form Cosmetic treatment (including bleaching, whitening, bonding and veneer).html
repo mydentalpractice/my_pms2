@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>MDP- METIC TREATMENT (INCLUDING BLEACHING, WHITENING, BONDING AND VENEER)</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link href="https://fonts.googleapis.com/css?family=Poppins:100,100i,200,200i,300,300i,400,400i,500,500i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
+</head>
+  <script src="https://docraptor.com/docraptor-1.0.0.js"></script>
+  <script>
+    var downloadPDF = function() {
+      DocRaptor.createAndDownloadDoc("YOUR_API_KEY_HERE", {
+        test: true, // test documents are free, but watermarked
+        type: "pdf",
+        document_content: document.querySelector('html').innerHTML, // use this page's HTML
+        // document_content: "<h1>Hello world!</h1>",               // or supply HTML directly
+        // document_url: "http://example.com/your-page",            // or use a URL
+        // javascript: true,                                        // enable JavaScript processing
+        // prince_options: {
+        //   media: "screen",                                       // use screen styles instead of print styles
+        // }
+      })
+    }
+  </script>
+  <style>
+body{font-family: 'Poppins', sans-serif !important;}
+.np{    padding: 0px;}
+    .npl{padding-left: 0px;text-align: left;}
+    .npl p{    margin-bottom: 5px !important;    font-size: 14px;}
+    .npr{padding-right: 0px;text-align: right;}
+    .pb{padding-bottom: 5px;}
+        .bor{display: grid;
+    padding: 0px;float: left;}
+    .pt{padding-top: 30px;}
+    #pdf-button{    background: #1d77b3;
+    border: none;
+    color: #fff;
+    margin: 20px 0px;
+    padding: 8px;}
+    .bg_blue{    background: #fff;padding: 0px 0px;}
+    .bg_blue1{    background: #fff;padding: 0px 0px;}
+    strong{font-weight: 600;}
+    td{font-size: 10px; padding: 3px 0px;}
+    td:first-child {font-weight: 500;    width: max-content;
+    float: left;}
+    .bt_text{    text-align: center;
+    font-size: 16px;
+    color: #fff;
+    margin-top: 8px;
+    font-weight: 600;}
+    ul {
+    list-style-image: url('https://mydentalplan.in/teeth_icon.png');
+}
+li{font-size:9px;}
+@media only screen and (max-width: 400px) and (min-width: 300px)  {
+
+    .bt_text{font-size: 12px !important;}
+ul{font-size: 11px !important;}
+  .npl p{ font-size:9px !important;}
+      .btm{font-size: 10px !important;}
+      .pt{padding-top:0px !important;}
+}
+@media only screen and (max-width: 400px) and (min-width: 300px)  {
+  .bt_text{font-size: 12px !important;}
+ul{font-size: 8px !important;}
+  .npl p{ font-size:14px !important;}
+     
+      .pt{padding-top:0px !important;}
+.pad{padding: 10px 10px !important;}
+.btm{text-align:left !important;}
+}
+
+
+</style>
+  <style>
+    @media print {
+      #pdf-button {
+        display: none;
+      }
+     
+       
+
+ /* All your print styles go here */
+ #btnPrint{ display: none !important; } 
+ .button{ display: none !important; } 
+ a{display: none !important}
+ p{font-size: 12px !important}
+}
+  </style>
+
+<body>
+  <div class="container">
+    <div class="col-sm-12">
+ <!--Id Card Front part start-->
+
+          <div class="col-sm-12 bor">
+            <!--logo start-->
+              <div class="col-sm-12"> <input id="pdf-button" type="button" value="Download PDF" onclick="downloadPDF()" /></div>
+          <div class="container-fluid">
+                 <div class="col-sm-12">
+                   
+                     <div class="col-sm-6 text-right marg" style="margin-left:-14px;" >Date:&nbsp;&nbsp;<strong>{{=consentdate}}</strong></div>
+                 </div>
+          </div> 
+          <div class="container-fluid background right" style="margin-bottom:0%;"> 
+              <div class="col-sm-12 text-center right" style="margin-top:2%; ">
+                     <h4 style="color:#1875b2;" class="right"><strong>{{if(len(prov[0].practicename) > 0):}}<strong>{{=prov[0].practicename}}</strong>{{pass}}</strong></h4>
+                                        <h5 style="color:#1875b2;" class="right"><strong>{{=prov[0].providername}}</strong><br>State Dental Council Registration Number: {{=registration}}</h5>
+                                        <p>{{if(len(prov[0].practicename) > 0):}}{{=prov[0].practicename}}{{pass}}{{if(len(prov[0].address1) > 0):}}
+                    {{=prov[0].address1}},&nbsp;&nbsp;
+                    {{pass}}
+                    {{if(len(prov[0].address2) > 0):}}
+                    {{=prov[0].address2}},&nbsp;&nbsp;
+                    {{pass}}      
+                    {{if(len(prov[0].address3) > 0):}}
+                    {{=prov[0].address3}},&nbsp;&nbsp; 
+                    {{pass}}
+                    
+                    {{if(len(prov[0].city) > 0):}}
+                    {{=prov[0].city}}{{pass}},{{if(len(prov[0].st) > 0):}} {{=prov[0].st}}{{pass}} {{if(len(prov[0].pin) > 0):}} - {{=prov[0].pin}}{{pass}}<br/>
+                    Phone: {{=prov[0].cell}}&nbsp;&nbsp;&nbsp;&nbsp;Email: {{=prov[0].email}}&nbsp;&nbsp;&nbsp;&nbsp;</p>
+              </div> 
+          </div>  
+       <!--Header start-->
+          <div class="col-sm-12 bg">
+               <div class="col-xs-12 npl">
+                 
+                <p>Patient: <span style="text-decoration: underline;">{{=patientmember}}</span></p>
+                <p>Date: <strong>{{=consentdate}}</strong> I, <span style="text-decoration: underline;">{{=patientmember}}</span>, authorize and request Dr.(s) , <span style="text-decoration: underline;">&nbsp; &nbsp;{{=doctorname}}</span>and/or such assistants as may be selected by him (them) to provide <span style="text-decoration: underline;">{{=dentalprocedure}}</span> to address the conditions or symptoms based on the diagnostic studies and/or evaluations already performed and which have been explained to me.The doctor has also explained to me in detail about the diagnosis, treatment, medications and the postoperative complications which may arise due to the operation. </p>
+      <!--Header end-->               
+      <!--Body Start-->         
+            <p>I UNDERSTAND that treatment of my dentition for which I desire cosmetic dental procedures to be performed may entail certain risks and possible unsuccessful results, with even the possibility of failure to achieve the results which may be desired or expected. I agree to assume those risks, possible unsuccessful results and/or failure associated with, but not limited to the following: (Even though care and diligence is exercised in this subject treatment, there are no guarantees of anticipated or desired results nor of the longevity of the treatment). </p>
+
+            <p><b>1.</b> Reduction or roughening of tooth structure: In making preparation of teeth for the reception of cosmetic veneers, it may be necessary to slightly reduce or roughen the surface of the tooth to which the veneer(s) may be bonded. This preparation will be done as conservatively as possible. If the veneer covering breaks or conies off, the uncovered tooth may become more decay susceptible. </p>
+
+            <p><b>2.</b> Sensitivity of teeth: Even though, in the majority of the cases (whitening, bleaching, bonding, and veneering teeth) there is usually no appreciable sensitivity, this type of treatment may cause teeth to become sensitive. Should sensitivity occur and persist for any length of time, please contact this office for an examination. </p>
+
+            <p><b>3.</b> Chipping, breaking or loosening of the veneer. No matter how well done, this could occur. Many factors may contribute to this happening such as: mastication of excessively hard materials; changes in occlusal (biting) forces; traumatic blows to the mouth; breakdown of the bonding agents; and other such conditions over which the doctor has no control. </p>
+
+            <p><b>4.</b> Sensitive or allergic reactions of soft tissues to whitening, bleaching, or bonding agents: Even though this is an unusual occurrence, the gums or soft tissues of the mouth which may be exposed to the various agents used in these procedures may exhibit an allergic response. Also, gum tissues may in some cases exhibit signs of inflammation. Should this occur, please contact this office to be examined. </p>
+
+            <p><b>5.</b> Esthetics/Appearance: Every effort possible will be made to match and coordinate both the form and shade of veneers and/or bonding agents which will be placed in order to be cosmetically pleasing to the patient. However, there are some differences which may exist between the natural dentition and the materials which are artificial, making it impossible to have the shade and/or form perfectly match your natural dentition. </p>
+
+            <p><b>6.</b> Longevity: It is in possible to place any specific time criteria on the length of time that veneers and bonding should last or for the lightened appearance of whitened or bleached teeth to maintain the lightened shades. These time periods may vary from a very short time to a very long time depending upon many conditions existing from patient to patient, and/or upon each patient's individual habits or circumstances, which may be either internal, external or both. </p>
+
+            <p><b>7.</b> It is the patient's responsibility to immediately inform the doctor and seek attention from him/her should any undue or unexpected problems occur or if the patient is dissatisfied. Also, all instructions must be diligently followed, including scheduling and attending all appointments. </p>
+
+           
+           <p>I certify that I have read, have had explained to me, and fully understand the foregoing Consent to <span style="text-decoration: underline;">{{=dentalprocedure}}</span>,  drug and anesthetic procedures, and that it is my intention to have the foregoing carried out as stated. I have been advised of information concerning the longevity of the procedure. However, I have discussed this as well as the nature of the services and procedures and I consent to the above procedure knowing its risks and limitations.</p>
+
+      <!--Body End--> 
+
+
+               <!--Footer start--> 
+               <div class="col-sm-6 np">
+                    <p><b>Doctor Name:</b><span style="text-decoration: underline;">&nbsp; &nbsp;{{=doctorname}}</span></p>
+                    <p><b>Doctor Signature:</b>________________________</p>
+                    <p><b>State Dental Council Registration Number:</b>&nbsp;&nbsp;{{=docreg}}</p>
+                    <p><b>Patient Name:-</b><span style="text-decoration: underline;">{{=patientmember}}</span></p>
+                    <p><b>Patient Signature:-</b>________________________</p>
+                    <p><b>Witness (if available) :-</b>________________________</p>
+                    <p><b>Parent / Guardian if patient is minor:-</b>________________________</p>                                                
+                    <p><b>Date:-</b> {{=consentdate}}&nbsp;&nbsp;<b>Date:-</b> {{=consentdate}}</p>
+                    <p><a id="can" href="{{=returnurl}}">Cancel </a></p>
+               </div>
+                <!--Footer end-->                
+               </div>
+               
+              
+            </div>  
+       <!--customer details end-->
+       
+      </div>
+      <div class="col-sm-2"></div>
+</div>
+<!--Id Card Front part End-->
+
+
+
+ 
+
+
+
+
+
+   </div>
+
+</body>
+</html>

@@ -1,0 +1,81 @@
+{{extend 'super_layoutw4.html'}}
+
+{{=formCSR.custom.begin}}
+
+
+
+
+                        <div class="row">
+                            <div class="col-md-12">
+                                <!-- BEGIN EXAMPLE TABLE PORTLET-->
+                                <div class="portlet light bordered">
+                                    <div class="portlet-title">
+                                        <div class="caption font-white">
+                                            <i class="fa fa-road" style="color:#fff"></i>
+                                            <span class="caption-subject bold uppercase">Provider Notes for {{=patientname}}</span>
+                                        </div>
+                                    </div>
+                                    <div id='csr'>
+                                    <div class="col-md-12">
+                                        <div class="col-sm-12 md_r">
+                                                <div class="col-md-12" style="margin-bottom:00px;display:none" >
+                                                    <label class="m_title">New Provider Note</label>
+                                                    {{=formCSR.custom.widget.newcsr}}
+                                                </div>
+                                                <br/>
+                                                <div class="col-md-12" style="margin-top:10px;margin-bottom:10px">
+    						    <a class = "btn green" id="casereport" onClick="addCSR()" style="display:none">Add</a>
+                                                   <!--<button type="submit" class="btn green">Add </button>-->
+                                                   <a href="{{=returnurl}}">Cancel </a>
+                                                </div>
+						 {{if(len(csrs)>0):}}
+                                                    <label class="m_title">&nbsp;&nbsp;</label>
+						{{pass}}
+						<div class="table-responsive">
+						    <table border="0">
+							<thead>
+							    <tr>
+								<th><label class="m_title">Provider Notes</label></th>
+							    </tr>
+							</thead>
+							<tbody>
+	                                                    {{for i in xrange(0, len(csrs),1): }}
+							    <tr>
+								<td><pre>{{=csrs[i].casereport}}</pre></td>
+							   </tr>
+							   {{pass}}
+							</tbody>
+						    </table>
+                                          
+						</div>
+					
+                                        </div>
+                                    </div>
+				    
+				    </div> <!-- CSR-->
+                                </div>
+                                <!-- END EXAMPLE TABLE PORTLET-->
+                            </div>
+                        </div>
+                        
+                        
+<div style="display:none">                        
+ {{=patientid}}
+ {{=providerid}}
+ 
+<div>
+
+{{=formCSR.custom.end}}
+
+<script>
+
+function addCSR(){
+
+    newcsr = document.getElementById("no_table_newcsr").value
+   
+    
+     ajax('{{=URL("casereport", "addcsr", vars=dict(page=page,providerid=providerid,patientid=patientid,treatmentid=treatmentid,source=source))}}', ['newcsr'] , 'csr');
+    
+}
+
+</script>

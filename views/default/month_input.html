@@ -1,0 +1,48 @@
+{{extend 'layout.html'}}
+<style>
+#suggestions { position: relative; }
+.suggestions { background: white; border: solid 1px #55A6C8; }
+.suggestions DIV { padding: 2px 4px 2px 4px; }
+
+
+
+.mystyle {
+    width: 100%;
+    padding: 25px;
+    background-color: coral;
+    color: white;
+    font-size: 25px;
+    box-sizing: border-box;
+
+</style>
+
+</style>
+
+<form>
+ <input type="text" id="month" autocomplete="off" name="month" style="width: 250px" /><br />
+ <div id="hide" >
+ <p>Click here to hide the patient list after selection</p>
+ </div>
+ <div style="position: absolute;" id="suggestions" class="suggestions">
+   
+ </div>
+
+</form>
+<script>
+jQuery("#month").keyup(function(){
+      $("#hide").show();
+      ajax('{{=URL('default', 'month_selector')}}', ['month'], 'suggestions')});
+
+
+
+$(document).ready(function(){
+    $("#hide").hide();
+    $("p").click(function(){
+      
+       ajax('{{=URL('default', 'month_hide')}}', ['month'], 'suggestions')
+        $("#hide").hide();
+        });
+});
+
+
+</script>

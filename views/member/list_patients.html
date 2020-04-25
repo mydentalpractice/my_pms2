@@ -1,0 +1,106 @@
+
+{{extend 'pms2_layoutw4.html'}}
+
+
+<style>
+.dataTables_filter{ float:right !important;}
+ .dataTables_filter input {width: 377px !important;}
+#suggestions { position: relative; }
+.suggestions { background: white;z-index: 50000 !important;height: 250px; overflow-y: auto;border-bottom:1px solid #eeeeee;}
+.suggestions DIV { padding: 2px 4px 2px 4px; }
+</style>
+
+
+    <div class="row">
+     <div class="col-md-12">
+         <!-- BEGIN EXAMPLE TABLE PORTLET-->
+          <div class="portlet light bordered" style="border: 0px solid #dadada!important;">
+	    {{=form.custom.begin}}
+	    <div class="col-md-12" style="margin-bottom: 18px;">
+		<div class="input-group" style="width:51%">
+		    {{=form.custom.widget.patientmember1}}
+		    
+		    <span class="input-group-btn">
+			<button class="btn blue uppercase bold" id="members" type="submit">Members</button>
+		    </span>
+		</div>
+		
+	    </div>
+	   
+	    
+	    <div id="hide" style="z-index:50000; ">
+	      <p id="phide">Click <strong>X</strong> to close the Patient List after selection</p>
+	    </div>
+	    <div style="position: absolute;" id="suggestions" class="suggestions"></div>	    
+	    
+	    <div style="display:none">
+		{{=form.custom.widget.xpatientmember1}}
+	
+	     </div>
+	    {{=form.custom.end}}
+	    {{if(formA != None):}}
+		{{=formA}}
+	    {{pass}}
+	</div>    	   
+    </div>
+    </div>
+
+<script>
+  
+       
+$(document).ready(function(){
+   
+    $("#suggestions").hide();
+    $("#hide").hide();
+    
+     $("#phide").click(function(){
+        $("#hide").hide();
+	$("#suggestions").hide();
+    }); 
+    
+    $("#suggestions") .click(function(){
+      
+	x= $("#no_table_patientmember1").val();
+
+	
+	$("#no_table_xpatientmember1").val(x);
+	
+	strarr = x.split(":");
+	
+	$("#no_table_patientmember1").val(strarr[0]);
+
+	$("#suggestions").hide();
+	$("#hide").hide()
+	$("#members").click()
+	
+    
+    });
+    
+});
+
+jQuery("#no_table_patientmember1").keyup(function(){
+       
+       $("#suggestions").show();
+       
+     var len = $("#no_table_patientmember1").val().length;
+       
+       if(len <= 2){
+	   
+           $("#suggestions").hide();
+	   
+       }
+       
+       if(len >= 3)
+       {
+	$("#hide").show();
+	var x = $('#no_table_patientmember1').val();
+	$("#no_table_xpatientmember1").val(x);
+	
+	ajax('{{=URL('admin', 'member_selector')}}', ['xpatientmember1'], 'suggestions')
+       }
+       
+});
+
+ 
+       
+</script>

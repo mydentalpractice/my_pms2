@@ -1,0 +1,85 @@
+
+<html lang="en">
+
+<head>
+
+<title>W3.CSS Template</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+{{
+  response.files.insert(0,URL('static','css/w3.css'))
+  response.files.insert(1,URL('static','css/web2py.css'))
+  response.files.insert(2,URL('static','css/web2py_bootstrap.css'))
+  response.files.insert(6,URL('static','css/font-awesome.css'))
+  response.files.insert(9,URL('static','css/web2py_bootstrap_nojs.css'))
+  
+
+  response.files.insert(11,URL('static','raysti/styles/lib.css'))
+  response.files.insert(12,URL('static','raysti/styles/app.css'))
+  response.files.insert(13,URL('static','css/font-awesome.css'))
+  
+  }}
+  
+  
+<link rel="stylesheet" href="https://www.w3schools.com/lib/w3-theme-white.css">
+
+{{include 'web2py_ajax.html'}}   
+
+</head>
+
+
+
+<!-- Top container -->
+<div class="w3-bar w3-top w3-black w3-large" style="z-index:4">
+ 
+  <div class="w3-left">
+    <a class="w3-text-white" href="{{=URL('admin','providerhome')}}"><i class="fa fa-home w3-xlarge"></i>Home</a>&nbsp;&nbsp; 
+    <a class="w3-text-white" href="{{=returnurl}}" ><i class="fa fa-reply w3-xlarge"></i>Back</a>&nbsp;&nbsp; 
+ 
+   <i class="fa fa-dashboard"></i><span><strong>Welcome, {{=providername}}</strong></span>
+  </div>
+  
+  
+  
+  
+   <div class="w3-right">
+   {{=request.now.strftime('%b, %d %Y %H:%M:%S')}}&nbsp;&nbsp; &nbsp;&nbsp; 
+    
+    
+  </div>
+  
+
+</div>
+
+<br/>
+
+<!-- !PAGE CONTENT! -->
+
+
+<body class="w3-container w3-padding-16">
+
+
+
+{{block center}}
+{{include}}
+{{end}}
+
+            
+
+
+
+
+<footer class="w3-container w3-blue-grey w3-border w3-text-white" style="text-align:right">
+  <a  href="https://www.mydentalplan.in" class="w3-text-white" target="_blank"> &copy;2015 mydentalplan.in </a>
+</footer>
+
+
+
+ <!---END Page Content-->
+</body>
+
+
+    
+
+</html>
+

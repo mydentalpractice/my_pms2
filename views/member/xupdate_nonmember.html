@@ -1,0 +1,179 @@
+{{extend 'pms2_layoutw3.html'}}
+
+
+<header class="w3-container w3-blue-grey">
+      <h4><strong>Patient Information</strong>&nbsp;&nbsp;<a class="w3-btn w3-right"  href={{=URL('member','delete_nonmember',vars=dict(page=page,memberid=memberid,\
+            providerid=providerid,providername=providername))}}><i class="fa fa-trash w3-margin-right"></i></a></h4>
+</header>
+
+
+
+    
+
+{{=formA.custom.begin}}
+<div class=" w3-container w3-bar">
+  <a href="{{=returnurl}}" class="w3-button w3-left  w3-green" style="height:40px;width:20%">Cancel</a>
+  
+  <button class="w3-button w3-right w3-black" style="height:40px;width:20%"><i class="fa fa-save w3-margin-right"></i>Click to Save</button> 
+</div>
+
+
+
+  
+  <header class="w3-container w3-black">
+    <h5>Patient Profile</h5>
+  </header>
+
+
+      <div class="w3-row-padding  ">
+        <div class="w3-half" style='line-height:1.5;'>
+          <label class="w3-text-black">Patient ID</label><br/> 
+            {{=formA.custom.widget.patientmember}}
+        </div>
+        <div class="w3-half" style='line-height:1.5;'>
+          <label class="w3-text-black">Start Date</label>
+        {{=formA.custom.widget.startdate}}
+        </div>
+      </div>  
+        
+   
+      <div class="w3-row-padding  ">
+        <div class="w3-half" style='line-height:1.5;'>
+          <label class="w3-text-black">First Name</label><br/>
+            {{=formA.custom.widget.fname}}
+        </div>
+        <div class="w3-half" style='line-height:1.5;'>
+          <label class="w3-text-black">Middle Name</label>
+          {{=formA.custom.widget.mname}}
+        </div>
+      </div>  
+
+    <div class="w3-row-padding  ">        
+        <div class="w3-half" style='line-height:1.5;'>
+          <label class="w3-text-black">Last Name</label><br/>
+            {{=formA.custom.widget.lname}}
+        </div>
+        <div class="w3-half" style='line-height:1.5;'>
+          <label class="w3-text-black">Gender</label>
+          {{=formA.custom.widget.gender}}
+        </div>
+      </div>  
+      <div class="w3-row-padding  ">
+        <div class="w3-half" style='line-height:1.5;'>
+          <label class="w3-text-black">DOB</label><br/>
+            {{=formA.custom.widget.dob}}
+        </div>
+      
+      </div>  
+  
+
+  <div class="w3-row-padding  ">
+    <div class="w3-half" style='line-height:1.5;'>
+      <label class="w3-text-black">Paid</label>&nbsp;&nbsp;{{=formA.custom.widget.paid}}
+        
+    </div>
+  </div>  
+
+<br/>
+      
+    
+      
+  <header class="w3-container w3-black">
+    <h5>Contact Details</h5>
+  </header>
+      
+  <div class="w3-row-padding  ">
+    <div class="w3-half" style='line-height:1.5;'>
+      <label class="w3-text-black">Address1</label><br/>
+        {{=formA.custom.widget.address1}}
+    </div>
+    <div class="w3-half" style='line-height:1.5;'>
+      <label class="w3-text-black">Address2</label><br/>
+      {{=formA.custom.widget.address2}}
+    </div>
+  </div>  
+
+  <div class="w3-row-padding  ">
+    <div class="w3-half" style='line-height:1.5;'>
+      <label class="w3-text-black">Address3</label><br/>
+        {{=formA.custom.widget.address3}}
+    </div>
+    <div class="w3-half" style='line-height:1.5;'>
+      <label class="w3-text-black">City</label><br/>
+      {{=formA.custom.widget.city}}
+    </div>
+  </div>  
+  <div class="w3-row-padding  ">
+    <div class="w3-half" style='line-height:1.5;'>
+      <label class="w3-text-black">State</label><br/>
+        {{=formA.custom.widget.st}}
+    </div>
+    <div class="w3-half" style='line-height:1.5;'>
+      <label class="w3-text-black">Pin</label>
+      {{=formA.custom.widget.pin}}
+    </div>
+  </div>  
+
+  <div class="w3-row-padding  ">
+    <div class="w3-half" style='line-height:1.5;'>
+      <label class="w3-text-black">Cell</label><br/>
+        {{=formA.custom.widget.cell}}
+    </div>
+    <div class="w3-half" style='line-height:1.5;'>
+      <label class="w3-text-black">Telephone</label>
+      {{=formA.custom.widget.telephone}}
+    </div>
+  </div>  
+
+<div class="w3-row-padding  ">
+  
+    <div class="w3-half" style='line-height:1.5;'>
+      <label class="w3-text-black">Email</label>
+      {{=formA.custom.widget.email}}
+    </div>
+  </div>  
+  
+<header class="w3-container w3-black w3-hide">
+  <h5>Picture</h5>
+</header>
+ <div class="w3-half w3-hide" style='line-height:1.5;'>
+      <label class="w3-text-black">Photo</label>
+      
+      {{=formA.custom.widget.image}}
+</div>
+
+<div class="row">&nbsp;</div>
+
+<div class="w3-container w3-padding-4">
+<div class="w3-bar">
+  <a href="{{=returnurl}}" class="w3-button w3-left  w3-green" style="height:40px;width:20%">Cancel</a>
+  
+  <button class="w3-button w3-right w3-black" style="height:40px;width:20%"><i class="fa fa-save w3-margin-right"></i>Click to Save</button> 
+</div>
+</div>
+ 
+
+
+<div class='w3-hide'>
+     {{=formA.custom.widget.status}}
+{{=formA.custom.widget.company}}
+{{=formA.custom.widget.provider}}
+{{=formA.custom.widget.hmoplan}}
+ {{=formA.custom.widget.groupregion}}
+ 
+ {{=formA.custom.widget.groupref}}
+ {{=formA.custom.widget.enrollmentdate}}
+ {{=formA.custom.widget.terminationdate}}
+ {{=formA.custom.widget.premstartdt}}
+ {{=formA.custom.widget.premenddt}}
+ {{=formA.custom.widget.pan}}
+ {{=formA.custom.widget.webkey}}
+ {{=formA.custom.widget.upgraded}}
+ {{=formA.custom.widget.renewed}}
+ {{=formA.custom.widget.webmember}}
+ {{=formA.custom.widget.hmopatientmember}}
+ {{=formA.custom.widget.newmember}}
+ {{=formA.custom.widget.freetreatment}}
+    
+</div>
+{{=formA.custom.end}}

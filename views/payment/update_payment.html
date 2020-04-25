@@ -1,0 +1,238 @@
+{{extend 'pms2_layoutw4.html'}}
+
+{{=formA.custom.begin}}
+
+
+
+
+                        <div class="row">
+                            <div class="col-md-12">
+                                <!-- BEGIN EXAMPLE TABLE PORTLET-->
+                                <div class="portlet light bordered">
+                                    
+                                    <div class="col-md-12">
+                                    <!-- BEGIN Portlet PORTLET-->
+                                    <div class="col-sm-12 md_r">
+                                        <div class="portlet-body" style="padding:20px">
+                                            <div class="col-md-12 np">
+                                                   <div class="col-md-4">
+                                                       <div class="form-group">
+							     <label class="m_title">Patient</label>
+                                                             <div class="input-group" style="width:100%">
+								   {{=patient}}
+                                                              </div>
+                                                       </div>
+                                                  </div>
+					    
+                                                  <div class="col-md-4">
+                                                       <div class="form-group">
+                                                        <label class="m_title">Treatment</label><br/>
+                                                              <div class="input-group" style="width:100%">
+							      {{=treatment}}
+							      </div>
+                                                       </div>
+                                                  </div>
+						  
+						  <div class="col-md-4">
+                                                       <div class="form-group">
+                                                        <label class="m_title">Status</label><br/>
+                                                              <div class="input-group" style="width:100%">
+								{{if(formA.custom.widget.fp_status == "S"):}}
+								    <label class="m_title" style="color:black">Success</label>
+								{{else:}}
+								    {{=formA.custom.widget.fp_status}}
+								{{pass}}
+										     
+							      </div>
+                                                       </div>
+                                                  </div>
+						  <div class="col-md-12 np">
+                                                   <div class="col-md-4">
+                                                       <div class="form-group">
+							     <label class="m_title">Refernce</label>
+                                                             <div class="input-group" style="width:100%">
+								   {{=formA.custom.widget.fp_paymentref}}
+                                                              </div>
+                                                       </div>
+                                                  </div>
+					    
+                                                  <div class="col-md-4">
+                                                       <div class="form-group">
+                                                        <label class="m_title">Payment Type</label><br/>
+                                                              <div class="input-group" style="width:100%">
+							      {{=formA.custom.widget.fp_paymenttype}}
+							      </div>
+                                                       </div>
+                                                  </div>
+						  
+						  <div class="col-md-4">
+                                                       <div class="form-group">
+                                                        <label class="m_title">Payment Details</label><br/>
+                                                              <div class="input-group" style="width:100%">
+								    {{=formA.custom.widget.fp_paymentdetail}}
+							      </div>
+                                                       </div>
+                                                  </div>						  
+						 					  
+						 </div>
+						 
+	                                         <div class="col-md-12 np">
+						    <div class="col-md-4">
+							 <div class="mt-repeater-input">
+								      <label class="m_title">Treatment Fee</label>
+								      <br>
+								      {{=treatmentcost}}
+							 </div>  
+						    
+						     </div>
+    
+						    <div class="col-md-4">
+					   
+							<div class="mt-repeater-input">
+								     <label class="m_title">Authorized Payment by Insurance</label>
+								     <br>
+								     {{=inspays}}
+							</div>  
+						
+						    </div>
+					      
+
+						    <div class="col-md-4">
+					   
+							<div class="mt-repeater-input">
+								  <label class="m_title">CoPay by Patient</label>
+								  <br>
+								  {{=copay}}
+							</div>  
+						
+						    </div>
+						</div>     
+					    
+				    
+					    
+					    
+                                             <div class="col-md-12 np">
+                                           
+						  
+                                                  <div class="col-md-3">
+                                             
+                                                       <div class="mt-repeater-input">
+                                                                    <label class="m_title">Payment Date</label>
+                                                                    <br>
+                                                                    {{=formA.custom.widget.paymentdate}}
+                                                       </div>  
+                                                  
+                                                   </div>
+						   
+                                                       <div class="col-md-3">
+                                                           <div class="mt-repeater-input">
+                                                                        <label class="m_title">Amount</label>
+                                                                        <br/>
+                                                                         {{=formA.custom.widget.amount}}
+                                                           </div>  
+                                                       </div> 
+						       
+                                                       <div class="col-md-3" style="display:none">
+                                                           <div class="mt-repeater-input">
+                                                                        <label class="m_title">Payment Type</label>
+									<br/>
+                                                                       {{=formA.custom.widget.paymenttype}}
+                                                           </div>  
+                                                       </div>  
+                                                       <div class="col-md-3" style="display:none">
+                                                           <div class="mt-repeater-input">
+                                                                        <label class="m_title">Payment Mode</label>
+									<br/>
+                                                                      {{=formA.custom.widget.paymentmode}}
+                                                           </div>  
+                                                       </div>
+                                           </div>   
+                                           <div class="col-md-12" style="margin:5px 5px 30px 5px">
+                                                    <label class="m_title">Notes</label>
+                                                    {{=formA.custom.widget.notes}}
+                                            </div> 
+					 
+                                            <div class="col-md-12" style="margin-bottom:30px">
+					       <span>
+											       
+                                               <a href="{{=returnurl}}">Cancel</a>&nbsp;&nbsp;
+                                             
+					       </span>
+					       
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                    <!-- END Portlet PORTLET-->
+                                  </div>
+
+                                </div>
+                                <!-- END EXAMPLE TABLE PORTLET-->
+                                
+
+
+
+
+
+
+                            </div>
+                        </div>
+                        
+                        
+<div style="display:none">
+{{=formA.custom.widget.is_active}}
+{{=formA.custom.widget.treatmentplan}}
+{{=formA.custom.widget.patientmember}}
+{{=formA.custom.widget.provider}}
+</div> 
+                        
+
+{{=formA.custom.end}}
+
+
+
+<script>
+
+
+<!--jQuery(document).ready(function(){-->
+<!--<!--alert(smsfile)-->-->
+<!--var tpopts = document.getElementById("treatmentplans");-->
+<!--var tp = tpopts.options[tpopts.selectedIndex].value;-->
+<!--var x = document.getElementById("payment_treatmentplan");-->
+    <!--x.value = tp;-->
+
+    <!--ajax('{{=URL('payment','members')}}', ['treatmentplan'], 'tplandiv');-->
+
+<!--});-->
+
+
+function changeTreatmentPlan(){
+
+
+var tpopts = document.getElementById("treatmentplans");
+var tp = tpopts.options[tpopts.selectedIndex].value;
+var x = document.getElementById("payment_treatmentplan");
+    x.value = tp;
+
+    ajax('{{=URL('payment','paymentsummary')}}', ['treatmentplan','patientmember','provider'], 'treatmentcost');
+
+
+
+};
+
+function changeMembers(){
+
+<!--alert('Enter changeMemebrs')-->
+var ppopts = document.getElementById("patients");
+<!--alert(ppopts)-->
+var pp = ppopts.options[ppopts.selectedIndex].value;
+<!--alert(pp)-->
+var x = document.getElementById("payment_patientmember");
+    x.value = pp;
+    
+ajax('{{=URL('payment','tplans')}}', ['patientmember','provider'], 'tplandiv');
+
+
+   
+};
+</script>

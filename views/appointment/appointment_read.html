@@ -1,0 +1,8 @@
+{{extend 'layout.html'}}
+
+<h2>Read appointment</h2>
+{{=A(T('edit appointment'),_href=URL('appointment_update',args=request.args(0)))}}
+{{=A(T('<<Calendar'),_href=URL('jaiminipms','appointment','mycal'))}}
+<br/>
+
+{{=form}}

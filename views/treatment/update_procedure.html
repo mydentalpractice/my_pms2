@@ -1,0 +1,153 @@
+{{extend 'pms2_layoutw4.html'}}
+
+
+
+{{=formProcedure.custom.begin}} 
+  
+             
+                        
+                        <div class="row mdp" id="Treatment">
+                        
+  
+                            <div class="col-md-12">
+                                <!-- BEGIN EXAMPLE TABLE PORTLET-->
+                                <div class="portlet light bordered">
+                                    <div class="portlet-title">
+                                        <div class="caption font-white">
+                                            <i class="fa fa-stethoscope" style="color:#fff"></i>
+                                                        <span class="caption-subject bold uppercase">Update Procedure </span>
+                                            
+                                        </div>
+                                       
+                                    </div>
+                                    <div class="col-md-12">
+                                    <!-- BEGIN Portlet PORTLET-->
+                                    <div class="col-sm-12 md_r">
+                                        <div class="portlet-body" style="padding:2px">
+					   <div class="col-md-4" style="margin-bottom:5px">
+						 <label class="m_title">Procedure Code</label><br/>
+						 <strong>{{=formProcedure.custom.widget.procedurecode}}</strong>
+					   </div>
+				       
+					   <div class="col-md-4" style="margin-bottom:5px">
+						 <label class="m_title">Procedure</label><br/>
+						 <strong>{{=formProcedure.custom.widget.procedure}}</strong>
+					   </div>
+					   {{if(session.religare == None):}}
+					   <div class="col-md-4" style="margin-bottom:5px; display:none">
+						 <label class="m_title">Status</label><br/>
+						 <strong>{{=formProcedure.custom.widget.procstatus}}</strong>
+					   </div>
+					   {{else:}}
+					   <div class="col-md-4" style="margin-bottom:5px;">
+						 <label class="m_title">Status</label><br/>
+						 <strong>{{=formProcedure.custom.widget.procstatus}}</strong>
+					   </div>
+					   {{pass}}
+					</div>
+				     </div>	
+				     
+					
+                                    <div class="col-sm-12 md_r"> 
+					   {{if(session.religare == None):}}
+					   <div class="col-md-3" style="margin-bottom:5px;display:none">
+						 <label class="m_title">UCR Fee</label><br/>
+						 <strong>{{=formProcedure.custom.widget.ucr}}</strong>
+					   </div>
+					   {{else:}}
+					   <div class="col-md-3" style="margin-bottom:5px;display:none">
+						 <label class="m_title">UCR Fee</label><br/>
+						 <strong>{{=formProcedure.custom.widget.ucr}}</strong>
+					   </div>
+					   {{pass}}
+                                           <div class="col-md-3">
+						<label class="m_title">Procedure Fee</label><br/>
+						
+						<strong>{{=formProcedure.custom.widget.procedurecost}}</strong>
+                                           </div>    
+					   {{if((hmopatientmember==True)|(session.religare != None)):}}
+                                           <div class="col-md-3">
+						<label class="m_title">Authorized Insurance Payment</label>
+						<br/>
+						<strong>{{=formProcedure.custom.widget.inspays}}</strong>
+                                           </div>    
+					   
+                                           <div class="col-md-3">
+						<label class="m_title">Patient Copay</label><br/>
+						<strong>{{=formProcedure.custom.widget.copay}}</strong>
+                                           </div>    
+					{{else:}}
+                                           <div class="col-md-3" style="display:none">
+						<label class="m_title">Authorized Fee</label>
+						<br/>
+						<strong>{{=formProcedure.custom.widget.inspays}}</strong>
+                                           </div>    
+					   
+                                           <div class="col-md-3" style="display:none">
+						<label class="m_title">Procedure Copay</label><br/>
+						<strong>{{=formProcedure.custom.widget.copay}}</strong>
+                                           </div>    
+					
+					{{pass}}
+				    </div>		
+                                    <div class="col-sm-12 md_r"> 
+                                           <div class="col-md-4">
+						<label class="m_title">Tooth</label><br/>
+						{{=formProcedure.custom.widget.tooth}}
+                                           </div>    
+				    
+                                           <div class="col-md-4">
+						<label class="m_title">Quadrant</label><br/>
+						{{=formProcedure.custom.widget.quadrant}}
+                                           </div>    
+				    </div>
+				    <br/>
+				    <div class="col-md-12" style="margin-bottom:3px;">
+					     <label class="m_title">Remarks</label><br/>
+					     {{=formProcedure.custom.widget.remarks}}
+				     </div>
+				     <br/>
+				    <div class="col-md-12" style="margin-bottom:30px">
+					
+					<span><button type="submit" class="btn green">Save</button></span>
+					
+					 <a href="{{=returnurl}}" >Cancel </a>
+				     </div>
+				     
+ 
+                                        
+                                    </div>
+                                    <!-- END Portlet PORTLET-->
+                                  </div>
+
+                                </div>
+                                <!-- END EXAMPLE TABLE PORTLET-->                                
+
+                        </div>
+                        
+               
+
+
+<script>
+function totalcalculation()
+{
+   
+    var proccost = 0
+    var inspays = 0
+    var copay = 0
+    
+    
+       
+    proccost = parseFloat(document.getElementById('no_table_procedurecost').value);
+    inspays = parseFloat(document.getElementById('no_table_inspays').value);
+    
+    copay = proccost - inspays
+    
+    document.getElementById('no_table_copay').value = copay;  
+    
+}
+</script>
+
+
+{{=formProcedure.custom.end}}
+

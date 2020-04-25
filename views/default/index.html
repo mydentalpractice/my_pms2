@@ -1,0 +1,40 @@
+{{left_sidebar_enabled=False}}
+
+{{extend 'layout0.html'}}
+<div id="index" align="center">
+<table>
+<tr>
+<td valign="top">
+<a href="http://www.mydentalplan.in">
+ <img src="../static/images/logo_my_dental_plan.png" align="left">
+</a>
+</td>
+</tr>
+<tr>
+<td>
+{{if(auth.is_logged_in()):}}
+<h3>Welcome to MyDentalPlan.in</h3>
+{{else:}}
+<h4>Please login to HMO Management System</h4>
+{{pass}}
+</td>
+</tr>
+<tr>
+<td>
+{{if(auth.is_logged_in()):}}
+<br/>
+HMO Management System 
+Copyright 2015 Macco Systems Inc.
+Version 1.00.01
+{{else:}}
+{{=formlogin}}
+{{if not 'request_reset_password' in auth.settings.actions_disabled:}}
+  <a href="{{=URL('default','admin_resetpassword')}}">{{=T('Forgot Password')}}</a>
+  {{pass}}
+{{pass}}
+</td>
+</tr>
+</table>
+<div>
+
+

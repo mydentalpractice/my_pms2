@@ -1,0 +1,82 @@
+{{extend 'layout.html'}}
+
+<body onload="loadFunc()">
+<script src="{{=URL('static','js/jstz.js')}}"></script>
+  
+  
+
+{{import pytz}}
+{{from datetime import datetime}}
+{{from pytz import timezone}}
+
+{{tz = timezone('Asia/Kolkata')}}
+{{dt = datetime.now(tz)}}
+
+<input id="timezonevalue" value="Asia/Kolkata">
+
+<div id = 'timezone'>
+<input id = "tz" type="text" readonly>
+<label id = "tz1" >
+<div>
+
+</body>
+<script>
+
+function loadFunc(){
+   
+   
+   alert("in Load");
+  
+   ytz = jstz.determine();
+   xtz = ytz.name();
+   alert(xtz);
+
+   sessionStorage.setItem('timezone', tz)   ;
+   
+   document.getElementById("timezonevalue").value = xtz;
+   alert(xtz);
+   
+   var dateString = ""
+   
+    var now = new Date()
+    m = now.getMonth()
+    y = now.getFullYear()
+    d = now.getDate()
+    
+    if(xtz.includes("Kolkata") | xtz.includes("Kolkatta") | xtz.includes("Calcutta"))
+    {
+      dateString = d + "/" + m + "/" + y
+    }
+    else
+    {
+      dateString = now.toLocaleDateString();
+    }
+    
+    alert("Date String = " + dateString)
+    
+    <!--var dt  = x.toString().split("GMT")[0];-->
+    
+   
+   
+   <!--a = x.toLocaleDateString();-->
+   
+   
+   <!--b = x.toLocaleTimeString();-->
+
+   
+   <!--alert("localTimeString" +  b)-->
+   
+   
+   document.getElementById('tz').value = dateString + " " + now.toLocaleTimeString()
+   document.getElementById('tz1').innerHTML = dateString + " " + now.toLocaleTimeString()
+   
+   <!--ajax('{{=URL("default", "time_calculator") + "/"}}' + xtz, ['timezonevalue','tz'] , 'timezone');-->
+   
+   <!--ajax('{{=URL("default", "time_calculator") + "?timezonevalue="}}' + xtz, ['timezonevalue','tz'] , 'timezone');-->
+   
+  
+   
+};
+    
+
+</script>

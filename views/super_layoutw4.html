@@ -1,0 +1,369 @@
+
+<!--[if IE 8]> <html lang="en" class="ie8 no-js"> <![endif]-->
+<!--[if IE 9]> <html lang="en" class="ie9 no-js"> <![endif]-->
+<!--[if !IE]><!-->
+<html lang="en">
+    <!--<![endif]-->
+    <!-- BEGIN HEAD -->
+
+    <head>
+        <meta charset="utf-8" />
+        <title>My Dental Plan | Dashboard</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta content="width=device-width, initial-scale=1" name="viewport" />
+        <meta content="" name="description" />
+        <meta content="" name="author" />
+        
+        
+        {{include 'cssstaticfiles.html'}}       
+        {{include 'loader.html'}}
+        
+        
+        {{include 'web2py_ajax.html'}} 
+
+        <script src="{{=URL('static','js/jstz.js')}}"></script>
+        {{import pytz}}
+        {{from pytz import timezone}}
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-colorpicker/2.3.3/js/bootstrap-colorpicker.min.js"></script>        
+
+        </head>
+    <!-- END HEAD -->
+<script>
+function goBack() {
+    window.history.back();
+}
+</script>
+<style>
+div.flash{z-index: 30023 !important;}.datepicker,.datepicker-dropdown,.datepicker-orient-left,.datepicker-orient-top{position: absolute !important;z-index: 20000 !important;top:392px !important}.title{color:#fff !important;}.page-header-fixed .page-container {margin-top: 65px;}.page-header.navbar{height: 80px !important;}.dashboard-stat .visual{width: 45%;margin-bottom:0px; height: 67px;}.dashboard-stat{    margin-top: 2px;}.count{font-size: 15px;color: #fff;font-weight: 400;}.dash_font{font-size:15px;font-weight: 600; color: #000 !important;}.page-header.navbar .menu-toggler.sidebar-toggler{    margin-top:34px !important;}.ico{float: right;padding-right: 11px;font-size: 20px;}.dashboard-stat .details {position: absolute;right:8px;padding-top: 6px;top:20px;}
+.dashboard-stat.dashboard-stat-v2 .visual {padding-top: 22px;}.m-portlet__body{overflow-y: scroll;height: 350px !important;}.m-portlet__cal{overflow-y: scroll;height: 550px !important;}.page-header.navbar .top-menu .navbar-nav>li.dropdown-user .dropdown-toggle { padding: 21px 6px 13px 8px;}
+@media only screen and (max-width: 700px) and (min-width: 200px)  {.dto{margin-top: 23px !important;}.dto1{margin-top: -17px;}}
+body{overflow:scroll !important;}
+
+.page-header-fixed .page-container {margin-top: 91px;}
+.page-header.navbar{height: auto !important;}
+.dashboard-stat .visual{width: 45%;margin-bottom:0px; height: 67px;}
+.dashboard-stat{    margin-top: 2px;}
+.count{font-size: 15px;color: #fff;font-weight: 400;}
+
+.page-header.navbar .menu-toggler.sidebar-toggler{    margin-top: 69px !Important;}
+.dashboard-stat.purple,.dashboard-stat.green{height:62px !important}
+.dashboard-stat .details {position: absolute;right:8px;padding-top: 6px;top:20px;}
+.dashboard-stat.dashboard-stat-v2 .visual {padding-top: 22px;}
+    .m-portlet__body{overflow-y: scroll;height: 300px !important;}
+    .page-header.navbar .top-menu .navbar-nav>li.dropdown-user .dropdown-toggle { padding: 21px 6px 13px 8px;}
+</style>
+
+    <body class="page-header-fixed page-sidebar-closed-hide-logo page-content-white" onload="refreshPage()">
+    
+        <div class="page-wrapper">
+            <!-- BEGIN HEADER -->
+            <div class="page-header navbar navbar-fixed-top">
+                <!-- BEGIN HEADER INNER -->
+                <div class="page-header-inner ">
+                    <!-- BEGIN LOGO -->
+                   <div class="page-logo">
+                        <img style="width:100%" src="/my_pms2/static/img/mdp_practice_logo.png" alt="" />
+                      
+                        <div class="menu-toggler sidebar-toggler "  >
+                            <span  ></span>
+                        </div>
+                    
+                    </div>
+                    <div class="flash alert" style="align:center;color:white;background:black;">{{=response.flash or ''}}</div>
+                    <div class="flash alert" style="align:center;color:white;background:black;">{{=session.flash or ''}}</div>
+                    <!-- END LOGO -->
+                    
+                    <!-- BEGIN RESPONSIVE MENU TOGGLER -->
+                    <a href="javascript:;" class="menu-toggler responsive-toggler" data-toggle="collapse" data-target=".navbar-collapse">
+                        <span></span>
+                    </a>
+                     <div class="row">
+                              <!--  START: Patients / Members (RED)-->
+                            <div class="col-lg-2 col-md-3 col-sm-2 col-xs-12" style="padding: 12px 11px;">
+                                    <div class="dashboard-stat dashboard-stat-v2 blue dto">
+                                        <div id="SP" style="margin:0px 3px;">
+                                            <span style="padding: 3px 2px;" class="ic">
+                                                <font class="dash_font">Providers: {{=session.assignedprovs}}
+                                                    <br>Registered: {{=session.regprovs}}
+                                                    <br>Non-Reg: {{=session.nonregprovs}}</span>
+                                                    <a title="Members List" href="">
+                                                      <span class="f_right"><i class="fa fa-list" aria-hidden="true" style="color:black"></i></span>
+                                                    </a>
+
+
+                                            </span>
+                                        </div>
+                                       
+                                    </div>
+                            </div>
+                            <!-- END: Patients / Members (RED)-->
+                            <!--  START: Patients / Members (RED)-->
+                            <div class="col-lg-2 col-md-3 col-sm-2 col-xs-12" style="padding: 12px 11px;">
+                                    <div class="dashboard-stat dashboard-stat-v2 green dto">
+                                        <div id="SP" style="margin:0px 3px;">
+                                            <span style="padding: 3px 2px;" class="ic">
+                                                <font class="dash_font">
+                                                         Members: {{=session.totmembers}}
+                                                        <br> Walkins: {{=session.totwalkins}}
+                                                     <a title="Members List" href=""><span class="f_right"><i class="fa fa-list" aria-hidden="true" style="color:black"></i></span></a>
+                                            </span>
+                                        </div>
+                                    </div>
+                            </div>
+<!-- END: Patients / Members (RED)-->
+ <!--  START: WALK IN Patients(BLUE)-->
+                            <div class="col-lg-2 col-md-3 col-sm-2 col-xs-12" style="padding: 12px 11px;">
+                                    <div class="dashboard-stat dashboard-stat-v2 purple dto1">
+                                        <div id="SP" style="margin:0px 3px;">
+                                            <span style="padding: 3px 2px;" class="ic">
+                                                <font class="dash_font">Case Papers<br> 
+                                                    <span class="count dash_font" data-counter="counterup" data-value="6">{{=session.tottreatments}}</span>
+                                                    
+                                                    <a title="Walk-In Patients List" href="">
+                                                      <span class="f_right"><i class="fa fa-list" aria-hidden="true" style="color:black"></i></span>
+                                                    </a>
+                                                    
+                                                </font>
+                                            </span>
+                                        </div>
+                                    </div>
+                            </div>
+<!--  END: WALK IN Patients(BLUE)-->
+<!--  START: APPTMNTS(GREEM)-->
+                            <div class="col-lg-2 col-md-3 col-sm-2 col-xs-12" style="padding: 12px 11px;">
+                                    <div class="dashboard-stat dashboard-stat-v2 red dto1">
+                                        <div id="SP" style="margin:0px 3px;">
+                                            <span style="padding: 3px 2px;" class="ic">
+                                                <font class="dash_font">
+                                                    Payments : {{=session.totcost}}
+                                                    <br>Total Paid : {{=session.totdue}}
+                                                    <br>Total Due : {{=session.totpaid}}
+                                                
+                                                      <a title="Appointment Calendar" href="">
+                                                        <span class="f_right"><i class="fa fa-list" aria-hidden="true" style="color:black"></i></span>
+                                                      </a>
+                                                </span>
+                                            </font>
+                                            </span>
+                                          
+
+                                        </div>
+                                       
+                                    </div>
+                            </div>
+                            <!--  END: APPTMNTS(GREEM)-->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                             
+                           
+                           
+                           <!--  START: APPTMNTS(GREEM)-->
+                            <!--<div class="col-lg-2 col-md-3 col-sm-6 col-xs-12" style="padding: 12px 11px;">
+                                     <div class="page-logo">
+                                <a title="Dashboard" href="{{=URL('admin','providerhome')}}">
+                                    <img style="margin-top: -4px;margin-left: 20px;" src="/my_pms2/static/img/religare-logo.png" alt="" />
+                                </a>
+                                
+                            </div>
+                            </div>-->
+                            <!--  END: APPTMNTS(GREEM)-->
+
+
+
+
+
+
+
+
+                        </div>                    
+                    <!-- END RESPONSIVE MENU TOGGLER -->
+                    <!-- BEGIN TOP NAVIGATION MENU -->
+
+                    <!-- END TOP NAVIGATION MENU -->
+                </div>
+                <!-- END HEADER INNER -->
+            </div>
+            <!-- END HEADER -->
+            <!-- BEGIN HEADER & CONTENT DIVIDER -->
+            <div class="clearfix"> </div>
+            <!-- END HEADER & CONTENT DIVIDER -->
+            <!-- BEGIN CONTAINER -->
+       
+            <div class="page-container">
+                <!-- BEGIN SIDEBAR -->
+              <div class="page-sidebar navbar-collapse collapse">
+                        <!-- BEGIN SIDEBAR MENU -->
+                        
+                        <ul class="page-sidebar-menu  page-header-fixed page-sidebar-menu-closed" data-keep-expanded="false" data-auto-scroll="true" data-slide-speed="200" style="padding-top: 20px">
+                      
+                            <!-- DOC: To remove the sidebar toggler from the sidebar you just need to completely remove the below "sidebar-toggler-wrapper" LI element -->
+                            <!-- BEGIN SIDEBAR TOGGLER BUTTON -->
+                          <li class="sidebar-toggler-wrapper hide">
+                                <div class="sidebar-toggler">
+                                    <span></span>
+                                </div>
+                            </li>
+                            <!-- END SIDEBAR TOGGLER BUTTON -->
+                            
+                            
+                            <li class="nav-item start active open" style="margin-top: 50px;">
+                                <a href="{{=URL('superadmin','superadmin')}}" class="nav-link nav-toggle">
+                                    <i class="fa fa-home"></i>
+                                    <span class="title">Dashboard</span>
+                                    <span class="selected"></span>
+                                    
+                                </a>
+
+                                        <a href={{=URL("admin","logout")}}>
+                                            <i class="fa fa-sign-out"></i>
+                                          <span class="title">Log Out</span>
+                                   
+
+                                          </a>
+                                                                    </ul>
+                            </li>
+
+                       
+                       </ul>
+ 
+                           
+                       
+                        <!-- END SIDEBAR MENU -->
+                        <!-- END SIDEBAR MENU -->
+                    </div>
+                <!-- END SIDEBAR -->
+                <!-- BEGIN CONTENT -->
+                <br>
+                <div class="page-content-wrapper scrol">
+                    <!-- BEGIN CONTENT BODY -->
+                    <div class="page-content">
+                        <!-- BEGIN PAGE HEADER-->
+                        
+                        <!-- BEGIN PAGE BAR -->
+                        <div class="page-bar" style="background: #e6e6e6;position: relative !important;margin: 0px !important;width: 100% !important;">
+                            <ul class="page-breadcrumb">
+                               <li>
+                                   <a onclick="goBack()" href="#">&lt;&lt; Back</a>
+                                   
+                                </li>
+                              
+                                <li>
+                                    <span></span>
+                                </li>
+
+                            </ul>
+                            <!--date-->
+                            <ul class="page-breadcrumb" style="float: right;">
+                                <li><span>  <label id = "localtime"></label></span></li>
+                            </ul>
+                           <!--date-->
+                            
+                        </div>
+                        <!-- END PAGE BAR -->
+                        <!-- BEGIN PAGE TITLE-->
+                      <br>
+                        <!-- END PAGE TITLE-->
+                        
+                        <!-- END PAGE HEADER-->
+                        
+                        
+                        {{block center}}
+                        {{include}}
+                        {{end}}
+
+                       
+                    </div>
+                    <!-- END CONTENT BODY -->
+                </div>
+                <!-- END CONTENT -->
+            
+            </div>
+            <!-- END CONTAINER -->
+            
+            <!-- BEGIN FOOTER -->
+            <div class="page-footer">
+                <div class="page-footer-inner" style="color:#fff"> 2017 &copy; &nbsp;|&nbsp;
+                    <a href="#" title="" target="_blank" style="color:#fff">My Dental Plan Healthcare Pvt Ltd</a>
+                </div>
+                <div class="scroll-to-top">
+                    <i class="icon-arrow-up"></i>
+                </div>
+            </div>
+            <!-- END FOOTER -->
+        </div>
+        <!-- BEGIN QUICK NAV -->
+       
+       
+        <!-- END QUICK NAV -->
+        {{include 'jsstaticfiles.html'}}     
+        
+        
+       
+       
+        
+        
+        
+        <script>
+            $(document).ready(function()
+            {
+                $('#clickmewow').click(function()
+                {
+                    $('#radio1003').attr('checked', 'checked');
+                });
+                
+                
+            })
+            
+            
+            function refreshPage(){
+
+                var xtz = jstz.determine().name();
+                
+                var dateString = "";
+                var now = new Date();
+                m = now.getMonth() + 1;
+                y = now.getFullYear();
+                d = now.getDate();
+                  
+                if(xtz.includes("Kolkata") | xtz.includes("Kolkatta") | xtz.includes("Calcutta"))
+                {
+                  dateString = d + "/" + m + "/" + y;
+                }
+                else
+                {
+                  dateString = now.toLocaleDateString();
+                }
+                
+                document.getElementById('localtime').innerHTML = dateString + " " + now.toLocaleTimeString();       
+              
+              
+               
+                
+               
+                 
+              }
+              refreshPage();
+
+        </script>
+    </body>
+
+</html>
+
+ 

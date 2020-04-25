@@ -1,0 +1,158 @@
+{{extend 'layoutenroll2.html'}}
+
+<script>
+function memberEnroll()
+{
+   
+    window.location.replace("/my_dentalplan/default/member_login")
+
+
+}
+
+</script>
+
+
+<div>
+     
+    <h3>Payment Receipt</h3><br/>
+    <h4>{{=ResponseHeader}}</h4><br/>
+    
+    <table>
+    
+    <tr>
+            <td>
+                <th class="ElTextElement " style="z-index:10004;overflow:visible;color:;text-align:left;line-height:normal;font-weight:normal;font-style:normal;left:25px;top:255px;font-family:Arial;border-width:0px;border-style:solid;width:133px;" id="el1413744_70f98847f55b0ad49c9401f54db7359b" >Payment ID</th>
+            </td>
+            <td>
+                                 {{=PaymentID}}
+            </td>
+    </tr>
+    <tr>
+            <td>
+                <th class="ElTextElement " style="z-index:10004;overflow:visible;color:;text-align:left;line-height:normal;font-weight:normal;font-style:normal;left:25px;top:255px;font-family:Arial;border-width:0px;border-style:solid;width:133px;" id="el1413744_70f98847f55b0ad49c9401f54db7359b" >Transaction ID</th>
+            </td>
+            <td>
+                        {{=TransactionID}}
+                                
+            </td>
+    </tr>   
+    
+    <tr>
+            <td>
+                <th class="ElTextElement " style="z-index:10004;overflow:visible;color:;text-align:left;line-height:normal;font-weight:normal;font-style:normal;left:25px;top:255px;font-family:Arial;border-width:0px;border-style:solid;width:133px;" id="el1413744_70f98847f55b0ad49c9401f54db7359b" >Merchant ID</th>
+            </td>
+            <td>
+                        {{=MerchantRefNo}}
+                                
+            </td>
+    </tr>   
+    <tr>
+            <td>
+                <th class="ElTextElement " style="z-index:10004;overflow:visible;color:;text-align:left;line-height:normal;font-weight:normal;font-style:normal;left:25px;top:255px;font-family:Arial;border-width:0px;border-style:solid;width:133px;" id="el1413744_70f98847f55b0ad49c9401f54db7359b" >Billing Name</th>
+            </td>
+            <td>
+                        {{=BillingName}}
+                                
+            </td>
+    </tr>   
+    <tr>
+            <td>
+                <th class="ElTextElement " style="z-index:10004;overflow:visible;color:;text-align:left;line-height:normal;font-weight:normal;font-style:normal;left:25px;top:255px;font-family:Arial;border-width:0px;border-style:solid;width:133px;" id="el1413744_70f98847f55b0ad49c9401f54db7359b" >Billing Address</th>
+            </td>
+            <td>
+                        {{=BillingAddress}}
+                                
+            </td>
+    </tr>   
+    <tr>
+            <td>
+                <th class="ElTextElement " style="z-index:10004;overflow:visible;color:;text-align:left;line-height:normal;font-weight:normal;font-style:normal;left:25px;top:255px;font-family:Arial;border-width:0px;border-style:solid;width:133px;" id="el1413744_70f98847f55b0ad49c9401f54db7359b" >Premium Amount</th>
+            </td>
+            <td>
+                        {{if(Amount == 'Error'):}}
+                            &nbsp;
+                        {{else:}}
+                        {{=txamount}}
+                        {{pass}}
+                        
+            </td>
+    </tr>   
+    <tr>
+            <td>
+                <th class="ElTextElement " style="z-index:10004;overflow:visible;color:;text-align:left;line-height:normal;font-weight:normal;font-style:normal;left:25px;top:255px;font-family:Arial;border-width:0px;border-style:solid;width:133px;" id="el1413744_70f98847f55b0ad49c9401f54db7359b" >Service Tax</th>
+            </td>
+            <td>
+                        {{if(Amount == 'Error'):}}
+                            &nbsp;
+                        {{else:}}
+                        {{=servicetax}}
+                        {{pass}}
+                        
+                        
+            </td>
+    </tr>   
+    <tr>
+            <td>
+                <th class="ElTextElement " style="z-index:10004;overflow:visible;color:;text-align:left;line-height:normal;font-weight:normal;font-style:normal;left:25px;top:255px;font-family:Arial;border-width:0px;border-style:solid;width:133px;" id="el1413744_70f98847f55b0ad49c9401f54db7359b" >Transaction Charges</th>
+            </td>
+            <td>
+                        {{if(Amount == 'Error'):}}
+                            &nbsp;
+                        {{else:}}
+                        {{=swipecharge}}
+                        {{pass}}
+
+                        
+                        
+            </td>
+    </tr>   
+    
+    <tr>
+            <td>
+                <th class="ElTextElement " style="z-index:10004;overflow:visible;color:;text-align:left;line-height:normal;font-weight:normal;font-style:normal;left:25px;top:255px;font-family:Arial;border-width:0px;border-style:solid;width:133px;" id="el1413744_70f98847f55b0ad49c9401f54db7359b" >Amount Paid</th>
+            </td>
+            <td>
+                        {{=Amount}}
+                        
+                        
+            </td>
+    </tr>   
+       
+    <tr>
+            <td>
+                <th class="ElTextElement " style="z-index:10004;overflow:visible;color:;text-align:left;line-height:normal;font-weight:normal;font-style:normal;left:25px;top:255px;font-family:Arial;border-width:0px;border-style:solid;width:133px;" id="el1413744_70f98847f55b0ad49c9401f54db7359b" >Payment Date</th>
+            </td>
+            <td>
+                        {{=DateCreated}}
+                                
+            </td>
+    </tr>   
+    <tr>
+            <td>
+                <th class="ElTextElement " style="z-index:10004;overflow:visible;color:;text-align:left;line-height:normal;font-weight:normal;font-style:normal;left:25px;top:255px;font-family:Arial;border-width:0px;border-style:solid;width:133px;" id="el1413744_70f98847f55b0ad49c9401f54db7359b" >Transaction Code</th>
+            </td>
+            <td>
+                        {{=ResponseCode}}
+                                
+            </td>
+    </tr>   
+    <tr>
+            <td>
+                <th class="ElTextElement " style="z-index:10004;overflow:visible;color:;text-align:left;line-height:normal;font-weight:normal;font-style:normal;left:25px;top:255px;font-family:Arial;border-width:0px;border-style:solid;width:133px;" id="el1413744_70f98847f55b0ad49c9401f54db7359b" >Transaction Status</th>
+            </td>
+            <td>
+                        {{=ResponseMessage}}
+                                
+            </td>
+    </tr>   
+    
+    
+    </table>
+<input  type="button" class="form_details_button" onclick="javascript: memberEnroll()" value="Home">
+ {{if(Amount == 'Error'):}}
+    &nbsp;
+{{else:}}
+<button class="form_details_button" onclick="window.location='/my_dentalplan/default/emailpaymentreceipt/{{=PaymentID}}/{{=TransactionID}}/{{=MerchantRefNo}}/{{=BillingName}}/{{=BillingAddress}}/{{=txamount}}/{{=servicetax}}/{{=swipecharge}}/{{=Amount}}/{{=DateCreated}}/{{=ResponseCode}}/{{=ResponseMessage}}';return false">Email Payment Receipt</button>&nbsp;&nbsp;
+
+{{pass}}
+</div>

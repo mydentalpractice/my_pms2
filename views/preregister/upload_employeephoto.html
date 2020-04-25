@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Dental Case Sheet</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  
+   {{include 'web2py_ajax.html'}}    
+   
+</head>
+<body>
+<style>
+.title{border-bottom: 1px solid rgb(39, 169, 227);
+    background: rgb(39, 169, 227);
+    margin: 0px 0px 16px 0px;
+    padding: 12px 20px;color:#fff;}
+    .form-control{border-radius:0px !important}
+       label{color: #27a9e3;} 
+       .cont{    border: 1px solid #95d1ec;
+    padding: 27px 20px;
+    margin: 20px;}
+    .np{padding:0px;}
+     @media only screen and (max-width: 500px) and (min-width: 300px)  {
+
+    .ct{width:90% !important; margin:0px auto !important;}   
+    }
+   
+</style>
+<div class="row">
+  <div class="col-sm-12" style="border-bottom: 1px solid #eee;">
+      <div class="container" style="width:60%; margin:0px auto;">
+      <h1><img src="https://www.mydentalplan.us/my_dentalplan/static/assets/img/logo-my-dental-plan_color.png" class="img-responsive">
+ </div></h1>
+
+    </div>
+  </div>
+</div>
+
+
+<form action="" enctype="multipart/form-data" method="post"> 
+<input name="_formname" type="hidden" value="image_form">
+
+<div class="container ct" style="width:60%; margin:0px auto;">
+  <div class="row">
+    <div class="col-sm-12" style="margin-top: 20px; border: 1px solid #27a9e3; padding: 0px;">
+      <h3 class="title"><center>Employee Photo</center></h3>
+         <div class="col-sm-12">
+	      
+	      
+	      <div class="form-group">
+	       <label for="comment">Select Employee Photo to Upload:</label>
+	       <input class="upload" name="image_file" type="file">
+	      </div>
+	      
+	      <div class="col-sm-6 col-sm-offset-3" style="margin-bottom:20px">
+		<button type="submit" class="btn btn-primary">Return</button>
+	      </div>
+        </div>
+    </div>
+  </div>
+</div>
+</form>
+</body>
+</html>

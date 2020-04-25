@@ -1,0 +1,1260 @@
+{{extend 'super_layoutw4.html'}}
+  <style>
+#suggestions { position: relative;z-index:300000 }
+.suggestions { background: white; border: solid 1px #55A6C8; }
+.suggestions DIV { padding: 2px 4px 2px 4px; }
+
+#dentalsuggestions { position: relative; z-index:300000}
+.dentalsuggestions { background: white; border: solid 1px #55A6C8; }
+.dentalsuggestions DIV { padding: 2px 4px 2px 4px; }
+</style>
+        
+    <!-- jQuery UI 4 commented on 11/19/2018-->
+<!--<script type="text/javascript" src="../static/wspaint/lib/jquery.ui.core.1.10.3.min.js"></script>-->
+<!--<script type="text/javascript" src="../static/wspaint/lib/jquery.ui.widget.1.10.3.min.js"></script>-->
+<!--<script type="text/javascript" src="../static/wspaint/lib/jquery.ui.mouse.1.10.3.min.js"></script>-->
+<!--<script type="text/javascript" src="../static/wspaint/lib/jquery.ui.draggable.1.10.3.min.js"></script>-->
+
+<!-- wColorPicker 2 commented on 11/19/2018-->
+<!--<link rel="Stylesheet" type="text/css" href="../static/wspaint/lib/wColorPicker.min.css" />-->
+<!--<script type="text/javascript" src="../static/wspaint/lib/wColorPicker.min.js"></script>-->
+
+<!-- wPaint 6 commented on 11/19/2018-->
+<!--<link rel="Stylesheet" type="text/css" href="../static/wspaint/wPaint.min.css" />-->
+<!--<script type="text/javascript" src="../static/wspaint/wPaint.min.js"></script>-->
+<!--<script type="text/javascript" src="../static/wspaint/plugins/main/wPaint.menu.main.min.js"></script>-->
+<!--<script type="text/javascript" src="../static/wspaint/plugins/text/wPaint.menu.text.min.js"></script>-->
+<!--<script type="text/javascript" src="../static/wspaint/plugins/shapes/wPaint.menu.main.shapes.min.js"></script>-->
+<!--<script type="text/javascript" src="../static/wspaint/plugins/file/wPaint.menu.main.file.min.js"></script>-->
+
+                        <div class="row">
+                            <div class="col-md-12">
+                                <!-- BEGIN EXAMPLE TABLE PORTLET-->
+                                <div class="portlet light bordered">
+                                    <div class="portlet-title tabbable-line">
+					
+					<div class="portlet-title" style="padding:0px 20px  !important">
+                                        <div class="caption font-white" style="    width: 100%;">
+					    <i class="fa fa-user" style="color:#fff"></i>
+                                            <span class="caption-subject bold uppercase">Case Paper for {{=patientname}} ({{=patientmember}}) <small>(Enrolled Member: {{=membername}})</small></span>
+                                            <span style="text-align:right;float:right">{{=doctorname}}</span>
+                                        </div>
+                                    </div>
+				    
+                                     
+                                    </div>
+                                    <div class="portlet-body" style="margin: 8px 20px 35px 20px;">
+                                        
+                                        <div class="tabbable-line">
+                                            <ul class="nav nav-tabs">
+                                                <li class="">
+                                                    <a href="#tab_15_7" data-toggle="tab" aria-expanded="false">Provider Notes Log</a>
+                                                </li>
+					    
+                                                <li class="" style="display:none">
+                                                    <a href="#tab_15_0" data-toggle="tab" aria-expanded="false"> Consent Form </a>
+                                                </li>
+					    
+                                                <li class="active">
+                                                    <a href="#tab_15_1" data-toggle="tab" aria-expanded="true"> Case Paper </a>
+                                                </li>
+                                                <li class="">
+                                                    <a href="#tab_15_2" data-toggle="tab" aria-expanded="false"> Medical History </a>
+                                                </li>
+                                                <li class="" style="display:none">
+                                                    <a href="#tab_15_3" data-toggle="tab" aria-expanded="false"> Prescriptions </a>
+                                                </li>
+                                                <li class="" style="display:none">
+                                                    <a href="#tab_15_4" data-toggle="tab" aria-expanded="false"> Medical Test </a>
+                                                </li>
+                                                <li>
+                                                    <a href="#tab_15_5" data-toggle="tab" aria-expanded="false"> Dental Images </a>
+                                                </li>
+                                                <li>
+                                                    <a href="#tab_15_6" data-toggle="tab" aria-expanded="false"> Dental Chart</a>
+                                                </li>
+                                            </ul>
+                                            
+                                            
+                                            <div class="tab-content">
+					    
+                                                <!--- BEGIN CASE REPORT TAB-->
+                                                <div class="tab-pane" id="tab_15_7">
+						<div class="col-sm-12">  
+						 <a  style="color:#fff;" class="btn bold green pull-left" onclick="location.href='{{=URL('superadmin','casereport',vars=dict(page=1,treatmentid=treatmentid,providerid=providerid,patientid=patientid,source='treatment'))}}'" target="_blank"><i class="fa fa-folder"></i>&nbsp;&nbsp;Provider Notes Log</a>  
+						 </div>  
+						 <br/>
+						</div>
+						<!--- END CASE REPORT TAB-->
+					    
+                                                <!--- BEGIN CONSENT FORM TAB-->
+                                                <div class="tab-pane " id="tab_15_0">
+						<div class="col-sm-12">  
+						 <a  style="color:#fff;" class="btn bold green pull-left" onclick="location.href='{{=URL('consentform','consentform',vars=dict(memberpage=memberpage,imagepage=page,page=1,providerid=providerid,memberref=patientmember,memberid=memberid,patientid=patientid,treatmentid=treatmentid,doctorid=doctorid,source='treatment'))}}'" target="_blank"><i class="fa fa-folder"></i>&nbsp;&nbspConsent Form</a>  
+						 </div>  
+						 <br/>
+						</div>
+						<!--- END CONSENT FORM TAB-->
+					    
+						
+                                                <!--- BEGIN TREATMENT TAB-->
+                                                <div class="tab-pane active" id="tab_15_1">
+						    {{=formTreatment.custom.begin}} 
+     						    
+						    <form enctype="multipart/form-data" action="" method="post">
+						    {{=formTreatment.hidden_fields()}}
+						    <div class="portlet-title mem_details">
+                                                            <div class="caption"><i class="fa fa-user"></i>&nbsp;Case Paper  for <strong>{{=patientname}} ({{=patientmember}})</strong></div>
+						    </div>
+                                                    <div class="col-sm-12 md_r">
+                                                        
+                                                    <div class="col-sm-12 md_r">							
+                                                        <div class="col-md-4" style="margin-bottom:30px">
+                                                                <label class="m_title">Chief Complaint</label>
+                                                                {{=formTreatment.custom.widget.chiefcomplaint}}
+                                                        </div>
+                                        
+                                                        <div class="col-md-4">
+                                                           
+                                                            <label class="m_title">Case No.</label>
+								{{=formTreatment.custom.widget.treatment}}
+                                                           
+                                                        </div>
+							
+                                                        <div class="col-md-4">
+                                                               
+                                                                <label class="m_title">Attending Doctor</label>
+								{{=formTreatment.custom.widget.doctor}}
+                                                               
+                                                       </div>
+						    </div>
+						    
+						    <div class="col-sm-12 md_r">							
+                                                        <div class="col-md-4" >
+                                                               
+                                                                <label class="m_title">Case Date</label>
+                                                                     {{=formTreatment.custom.widget.startdate}}    
+                                                              
+                                                       </div> 
+                                                        <div class="col-md-4" style="display:none">
+                                                              
+                                                                <label class="m_title">Total UCR Fee</label>
+                                                                <p><strong>{{=formTreatment.custom.widget.ucrfee}}</strong></p>
+                                                               
+                                                       </div>
+                                                        <div class="col-md-4">
+                                                               
+                                                                <label class="m_title">Cost</label>
+								    {{=formTreatment.custom.widget.treatmentcost}}
+								    {{=formTreatment.custom.widget.remarks}}
+                                                             
+                                                       </div>
+                                                  </div>
+						  <div>
+                                                     {{if(medicalalerts == True):}}
+						     <p style="color:red"><strong>Patient is allergic to some medicine and may be suffering from either High BP or Diabetes or Heart Problem. Please consult patient's Medical History for more details</strong></p>
+						     {{pass}}
+						  </div>
+						    <div class="btn-group" style="display:none">
+							<span > 
+							<a style="color:#fff"  class="btn sbold green" onclick="location.href='{{=URL('treatment','add_procedure',vars=dict(page=page,providerid=providerid,memberid=memberid,patientid=patientid,tplanid=tplanid,treatmentid=treatmentid,doctorid=doctorid))}}'" >
+						       <i class="fa fa-plus"></i>&nbsp;&nbsp;Add Procedure
+						       </a>
+						       </span>
+						    </div>
+									  
+						        {{=formProcedure}}						       
+                                                        <div class="col-md-12" style="margin-bottom:30px">
+                                                                <label class="m_title">Provider Notes</label>
+                                                                {{=formTreatment.custom.widget.description}}
+                                                        </div>
+                                                        <div class="col-md-12" style="margin-bottom:30px">
+								<button type="submit" class="btn green" style="display:none">Save</button>
+								<a href="{{=returnurl}}">Cancel </a>
+                                                        </div>
+
+                                                    <!--</div>-->
+                                                   </div><!---col-sm-12 md_r-->
+						    					   
+						    </form >  
+						    
+						    <div class="form-group" style="display:none">
+							<input type="text"  style="display:none" name="proccode" id = "proccode" readonly>  
+							<input type="text"  style="display:none" value={{=procedureid}} name="procid" id = "procid" readonly>  
+							<input type="text" style="display:none"  name="procucr" id = "procucr" readonly>  
+							<input type="text"  style="display:none"  name="procdesc" id = "procdesc" readonly>	
+							<!--=formTreatment.custom.widget.vwdentalprocedure}}  -->
+							<!--=formTreatment.custom.widget.quadrant}}-->
+							<!--=formTreatment.custom.widget.tooth}}-->
+						          <!--=formTreatment.custom.widget.enddate}}    -->
+							<!--=formTreatment.custom.widget.status}}-->
+							 {{=formTreatment.custom.submit}}
+							 {{=formTreatment.custom.widget.dentalprocedure}}
+							 {{=formTreatment.custom.widget.treatmentplan}}
+							 {{=formTreatment.custom.widget.inspay}}
+							 {{=formTreatment.custom.widget.copay}}
+							 {{=formTreatment.custom.widget.xmemberid}}
+							 {{=formTreatment.custom.widget.patientid}}
+						    </div>
+						    
+						     {{=formTreatment.custom.end}} 
+                                                </div>  <!-- tab_15_``-->
+						                                                
+                                                <!-- END OF TREATMENT TAB-->
+                                                
+						
+                                                <!-- BEGIN MEDICAL NOTES TAB-->
+                                                <div class="tab-pane" id="tab_15_2">
+						    {{=formNotes.custom.begin}} 
+						    <form enctype="multipart/form-data" action="" method="post">
+						    {{=formNotes.hidden_fields()}}
+                                                    <div class="col-sm-12 md_r">
+                                                        <div class="portlet-title mem_details">
+                                                            <div class="caption">
+                                                                <i class="fa fa-notepad"></i>&nbsp;Medical History </div>
+                                                            
+                                                        </div>
+                                                        <div class="portlet-body" style="padding:20px">
+                                                          
+                                                            <div class="col-md-8 np">
+                                                                   <div class="col-sm-12"> <label class="m_title">Name</label></div>
+                                                                    <div class="col-sm-2" style="display:none">
+                                                                        <select name="group-a[0][select-input]" class="form-control">
+                                                                                <option value="Mr" selected="">Mr</option>
+                                                                                <option value="Mrs">Mrs</option>
+                                                                                <option value="Miss">Miss</option>
+                                                                        </select>
+
+                                                                    </div>
+                                                                    <div class="col-sm-10"><p><strong>{{=formNotes.custom.widget.patientmember}}</strong></p></div>
+                                                                     
+                                                            </div>
+                                                            <div class="col-md-4">
+                                                                  <div class="form-group">
+                                                                    <label class="m_title"> Date</label>
+                                                                    {{=formNotes.custom.widget.notesdate}}
+                                                                  </div>
+                                                             </div>
+                                                             <div class="col-md-3">
+                                                                  <div class="form-group">
+                                                                    <label class="m_title">Gender</label>
+                                                                    {{=formNotes.custom.widget.xgender}}
+                                                                  </div>
+                                                             </div>
+                                                       							     
+                                                               <div class="col-md-3">
+                                                                  <div class="form-group">
+                                                                    <label class="m_title"> DOB</label>
+                                                                    {{=formNotes.custom.widget.dob}}
+                                                                  </div>
+                                                             </div>
+                                                             <div class="col-md-3">
+                                                                  <div class="form-group">
+                                                                    <label class="m_title"> Age</label>
+                                                                    {{=formNotes.custom.widget.age}}
+                                                                  </div>
+                                                             </div>
+                                                             <div class="col-md-3">
+                                                                  <div class="form-group">
+                                                                    <label class="m_title"> Mobile</label>
+                                                                    {{=formNotes.custom.widget.cell}}
+                                                                  </div>
+                                                             </div>
+                                                             <div class="col-md-3">
+                                                                  <div class="form-group">
+                                                                    <label class="m_title"> Occupation</label>
+                                                                    {{=formNotes.custom.widget.occupation}}
+                                                                  </div>
+                                                             </div>
+                                                             <div class="col-md-3">
+                                                                  <div class="form-group">
+                                                                    <label class="m_title"> Phone</label>
+                                                                    {{=formNotes.custom.widget.telephone}}
+                                                                  </div>
+                                                             </div>
+                                                             <div class="col-md-3">
+                                                                  <div class="form-group">
+                                                                    <label class="m_title"> Email</label>
+                                                                    {{=formNotes.custom.widget.email}}
+                                                                  </div>
+                                                             </div>
+                                                             <div class="col-md-3">
+                                                                  <div class="form-group">
+                                                                    <label class="m_title"> Res/Off</label>
+                                                                     {{=formNotes.custom.widget.resoff}}
+                                                                  </div>
+                                                             </div>
+                                                             <div class="col-md-9">
+                                                                  <div class="form-group">
+                                                                    <label class="m_title"> Address</label>
+                                                                     {{=formNotes.custom.widget.address}}
+                                                                  </div>
+                                                             </div>
+                                                             <div class="col-md-3">
+                                                                  <div class="form-group">
+                                                                    <label class="m_title"> Name of Doctor/Friend if any</label>
+                                                                     {{=formNotes.custom.widget.referer}}
+                                                                  </div>
+                                                             </div>
+                                                             <div class="col-md-12">
+                                                                  <p class="m_title"><strong>Please let us know about your health status (Tick if you have any) :</strong></p>
+                                                                  <div class="col-md-12">
+                                                                        <div class="mt-checkbox-inline">
+                                                                            <label class="mt-checkbox mt-checkbox-outline">
+                                                                                {{=formNotes.custom.widget.bp}} High Blood Pressure
+                                                                                <span></span>
+                                                                            </label>
+                                                                            <label class="mt-checkbox mt-checkbox-outline">
+                                                                                {{=formNotes.custom.widget.anaemia}} Anaemia
+                                                                                <span></span>
+                                                                            </label>
+                                                                            <label class="mt-checkbox mt-checkbox-outline">
+                                                                                {{=formNotes.custom.widget.epilepsy}} Epilepsy
+                                                                                <span></span>
+                                                                            </label>
+                                                                            <label class="mt-checkbox mt-checkbox-outline">
+                                                                                {{=formNotes.custom.widget.diabetes}} Diabetes
+                                                                                <span></span>
+                                                                            </label>
+                                                                            <label class="mt-checkbox mt-checkbox-outline">
+                                                                                 {{=formNotes.custom.widget.asthma}} Asthma
+                                                                                <span></span>
+                                                                            </label>
+                                                                            <label class="mt-checkbox mt-checkbox-outline">
+                                                                                 {{=formNotes.custom.widget.sinus}} Sinus Trouble
+                                                                                <span></span>
+                                                                            </label>
+                                                                            <label class="mt-checkbox mt-checkbox-outline">
+                                                                                 {{=formNotes.custom.widget.heart}} Heart Trouble
+                                                                                <span></span>
+                                                                            </label>
+                                                                            <label class="mt-checkbox mt-checkbox-outline">
+                                                                                 {{=formNotes.custom.widget.jaundice}} Jaundice
+                                                                                <span></span>
+                                                                            </label>
+                                                                            <label class="mt-checkbox mt-checkbox-outline">
+                                                                                 {{=formNotes.custom.widget.tb}} Tuberculosis
+                                                                                <span></span>
+                                                                            </label>
+                                                                            <label class="mt-checkbox mt-checkbox-outline">
+                                                                                 {{=formNotes.custom.widget.anaemia}} Cardiac Pacemaker
+                                                                                <span></span>
+                                                                            </label>
+                                                                            <label class="mt-checkbox mt-checkbox-outline">
+                                                                                 {{=formNotes.custom.widget.arthritis}} Arthritis
+                                                                                <span></span>
+                                                                            </label>
+                                                                            <label class="mt-checkbox mt-checkbox-outline">
+                                                                                 {{=formNotes.custom.widget.anyother}} Any Other
+                                                                                <span></span>
+                                                                            </label>
+                                                                            
+                                                                        </div>
+                                                    </div>
+                                                              </div>
+
+                                                              <div class="col-md-12">
+                                                                <div class="col-sm-8">
+                                                                    <p class="m_title"><strong>Are you Allergic to Penicillin or any Drugs or medicine?</strong></p>
+								   
+                                                                </div>
+                                                                <div class="col-sm-4">
+                                                                    <label class="mt-radio mt-radio-outline"> Yes
+								    {{if(formNotes.custom.widget.allergic['value'] == True):}}
+                                                                        <input id='allergic_yes' value = "1" type="radio"  checked name="allergic">
+								    {{else:}}
+                                                                        <input id='allergic_yes' value = "1" type="radio"  name="allergic">
+    								    {{pass}}
+                                                                        <span></span>
+                                                                    </label>
+                                                                      <label class="mt-radio mt-radio-outline"> No
+								    {{if(formNotes.custom.widget.allergic['value'] == False):}}
+                                                                        <input id='allergic_no' value="0" type="radio" checked name="allergic">
+								    {{else:}}
+									<input id='allergic_no' value = "0" type="radio"  name="allergic">
+								    {{pass}}
+                                                                        <span></span>
+                                                                    </label>          
+
+                                                                </div>
+                                                             </div> 
+                                                              <div class="col-md-12">
+                                                                <div class="col-sm-8">
+                                                                    <p class="m_title"><strong>Have you ever had excessive bleeding requiring specical treatment?</strong></p>
+                                                                </div>
+                                                                <div class="col-sm-4">
+                                                                    <label class="mt-radio mt-radio-outline"> Yes
+								    {{if(formNotes.custom.widget.excessivebleeding['value'] == True):}}
+                                                                        <input type="radio" value="1" id="excessivebleeding_yes"name="excessivebleeding" checked>
+								    {{else:}}
+                                                                        <input type="radio" value="1" id="excessivebleeding_yes"name="excessivebleeding" >
+								    {{pass}}
+                                                                        <span></span>
+                                                                    </label>
+                                                                      <label class="mt-radio mt-radio-outline"> No
+								      {{if(formNotes.custom.widget.excessivebleeding['value'] == False):}}
+                                                                        <input type="radio" value="0" id="excessivebleeding_no" name="excessivebleeding" checked>
+								      {{else:}}
+                                                                        <input type="radio" value="0" id="excessivebleeding_no" name="excessivebleeding" >
+								      {{pass}}
+								      
+                                                                        <span></span>
+                                                                    </label>          
+
+                                                                </div>
+                                                             </div>
+                                                              <div class="col-md-12">
+                                                                <div class="col-sm-8">
+                                                                    <p class="m_title"><strong>Have you ever had any other serious illness?</strong></p>
+                                                                </div>
+                                                                <div class="col-sm-4">
+								    <label class="mt-radio mt-radio-outline"> Yes
+								    {{if(formNotes.custom.widget.seriousillness['value'] == True):}}
+                                                                        <input type="radio" value="1" id="seriousillness_yes"name="seriousillness" checked>
+								    {{else:}}
+                                                                        <input type="radio" value="1" id="seriousillness_yes"name="seriousillness" >
+								    {{pass}}
+                                                                        <span></span>
+                                                                    </label>
+                                                                      <label class="mt-radio mt-radio-outline"> No
+								      {{if(formNotes.custom.widget.seriousillness['value'] == False):}}
+                                                                        <input type="radio" value="0" id="seriousillness_no" name="seriousillness" checked>
+								      {{else:}}
+                                                                        <input type="radio" value="0" id="seriousillness_no" name="seriousillness" >
+								      {{pass}}
+                                                                        <span></span>
+                                                                    </label>          
+								      
+                                                                </div>
+                                                             </div>
+                                                              <div class="col-md-12">
+                                                                <div class="col-sm-8">
+                                                                    <p class="m_title"><strong>Have you ever been hospitalized?</strong></p>
+                                                                </div>
+                                                                <div class="col-sm-4">
+								    <label class="mt-radio mt-radio-outline"> Yes
+								    {{if(formNotes.custom.widget.hospitalized['value'] == True):}}
+                                                                        <input type="radio" value="1" id="hospitalized_yes"name="hospitalized" checked>
+								    {{else:}}
+                                                                        <input type="radio" value="1" id="hospitalized_yes"name="hospitalized" >
+								    {{pass}}
+                                                                        <span></span>
+                                                                    </label>
+                                                                      <label class="mt-radio mt-radio-outline"> No
+								      {{if(formNotes.custom.widget.hospitalized['value'] == False):}}
+                                                                        <input type="radio" value="0" id="hospitalized_no" name="hospitalized" checked>
+								      {{else:}}
+                                                                        <input type="radio" value="0" id="hospitalized_no" name="hospitalized" >
+								      {{pass}}
+                                                                        <span></span>
+                                                                    </label>          
+								      
+
+                                                                </div>
+                                                             </div>
+                                                              <div class="col-md-12">
+                                                                <div class="col-sm-8">
+                                                                    <p class="m_title"><strong>Are you taking any medications at present?</strong></p>
+                                                                </div>
+                                                                <div class="col-sm-4">
+								    <label class="mt-radio mt-radio-outline"> Yes
+								    {{if(formNotes.custom.widget.medications['value'] == True):}}
+                                                                        <input type="radio" value="1" id="medications_yes"name="medications" checked>
+								    {{else:}}
+                                                                        <input type="radio" value="1" id="medications_yes"name="medications" >
+								    {{pass}}
+                                                                        <span></span>
+                                                                    </label>
+                                                                      <label class="mt-radio mt-radio-outline"> No
+								      {{if(formNotes.custom.widget.medications['value'] == False):}}
+                                                                        <input type="radio" value="0" id="medication_no" name="medications" checked>
+								      {{else:}}
+                                                                        <input type="radio" value="0" id="medication_no" name="medications" >
+								      {{pass}}
+                                                                        <span></span>
+                                                                    </label>          
+								      
+                                                                </div>
+                                                             </div>
+                                                              <div class="col-md-12">
+                                                                <div class="col-sm-8">
+                                                                    <p class="m_title"><strong>Have you undergone any surgery under anaesthesia in the past?</strong></p>
+                                                                </div>
+                                                                <div class="col-sm-4">
+								    <label class="mt-radio mt-radio-outline"> Yes
+								    {{if(formNotes.custom.widget.surgery['value'] == True):}}
+                                                                        <input type="radio" value="1" id="surgery_yes"name="surgery" checked>
+								    {{else:}}
+                                                                        <input type="radio" value="1" id="surgery_yes"name="surgery" >
+								    {{pass}}
+                                                                        <span></span>
+                                                                    </label>
+                                                                      <label class="mt-radio mt-radio-outline"> No
+								      {{if(formNotes.custom.widget.surgery['value'] == False):}}
+                                                                        <input type="radio" value="0" id="surgery_no" name="surgery" checked>
+								      {{else:}}
+                                                                        <input type="radio" value="0" id="surgery_no" name="surgery" >
+								      {{pass}}
+                                                                        <span></span>
+                                                                    </label>          
+								      
+                                                                </div>
+                                                             </div>
+                                                              <div class="col-md-12">
+                                                                <div class="col-sm-8">
+                                                                    <p class="m_title"><strong>Women Are you pregnant now?</strong></p>
+                                                                </div>
+                                                                <div class="col-sm-4">
+								    <label class="mt-radio mt-radio-outline"> Yes
+								    {{if(formNotes.custom.widget.pregnant['value'] == True):}}
+                                                                        <input type="radio" value="1" id="pregnant_yes"name="pregnant" checked>
+								    {{else:}}
+                                                                        <input type="radio" value="1" id="pregnant_yes"name="pregnant" >
+								    {{pass}}
+                                                                        <span></span>
+                                                                    </label>
+                                                                      <label class="mt-radio mt-radio-outline"> No
+								      {{if(formNotes.custom.widget.pregnant['value'] == False):}}
+                                                                        <input type="radio" value="0" id="pregnant_no" name="pregnant" checked>
+								      {{else:}}
+                                                                        <input type="radio" value="0" id="pregnant_no" name="pregnant" >
+								      {{pass}}
+                                                                        <span></span>
+                                                                    </label>          
+								      
+                                                                </div>
+                                                             </div>
+                                                             <div class="col-md-12">
+                                                                <div class="col-sm-8">
+                                                                    <p class="m_title"><strong>Are you breast feeding?</strong></p>
+                                                                </div>
+                                                                <div class="col-sm-4">
+								    <label class="mt-radio mt-radio-outline"> Yes
+								    {{if(formNotes.custom.widget.breastfeeding['value'] == True):}}
+                                                                        <input type="radio" value="1" id="breastfeeding_yes"name="breastfeeding" checked>
+								    {{else:}}
+                                                                        <input type="radio" value="1" id="breastfeeding_yes"name="breastfeeding" >
+								    {{pass}}
+                                                                        <span></span>
+                                                                    </label>
+                                                                      <label class="mt-radio mt-radio-outline"> No
+								      {{if(formNotes.custom.widget.breastfeeding['value'] == False):}}
+                                                                        <input type="radio" value="0" id="breastfeeding_no" name="breastfeeding" checked>
+								      {{else:}}
+                                                                        <input type="radio" value="0" id="breastfeeding_no" name="breastfeeding" >
+								      {{pass}}
+                                                                        <span></span>
+                                                                    </label>          
+								      
+                                                                </div>
+                                                             </div>
+                                                              <div class="col-md-12">
+                                                                  <div class="form-group">
+                                                                    <label class="m_title">Any Other</label>
+                                                                     {{=formNotes.custom.widget.anyothercomplaint}}
+                                                                  </div>
+                                                             </div>
+                                                             <div class="col-md-6">
+                                                                  <div class="form-group">
+                                                                    <label class="m_title">Chief Complaint</label>
+								    {{=formNotes.custom.widget.chiefcomplaint}}
+
+                                                                  </div>
+                                                             </div>
+                                                             <div class="col-md-6">
+                                                                  <div class="form-group">
+                                                                    <label class="m_title">Duration of Complaint</label>
+								     {{=formNotes.custom.widget.duration}}
+
+                                                                  </div>
+                                                             </div>
+
+                                                              <div class="col-md-12" style="margin-bottom:30px">
+								<button type="submit" class="btn green" style="display:none">Save</button>
+								<a href="{{=returnurl}}">Cancel </a>
+                                                            </div>
+
+                                                        </div>
+                                                 </div>
+						    <div style="display:none">
+						    <input class="form-control" type="text" id="notes_memberid" name="notes_memberid" value="{{=memberid}}">
+						    <input class="form-control" type="text" id="notes_patientid" name="notes_patientid" value="{{=patientid}}">
+						    <input class="form-control" type="text" id="notes_providerid" name="notes_providerid" value="{{=providerid}}">
+						    </div>
+
+
+						    </form>    
+						    {{=formNotes.custom.end}} 
+                                                </div>						                                              
+                                                <!-- END OF MEDICAL NOTES TAB-->
+                                                
+                                                
+                                                <!--- BEGIN PRESCRIPTION FORM TAB-->
+                                                <div class="tab-pane " id="tab_15_3">
+						<div class="col-sm-12">  
+						 <a  style="color:#fff;" class="btn bold green pull-left" onclick="location.href='{{=URL('prescription','prescriptions',vars=dict(page=1,providerid=providerid,memberid=memberid,patientid=patientid,tplanid=tplanid,treatmentid=treatmentid,doctorid=doctorid,returnurl=returnurl))}}'" target="_blank"><i class="fa fa-folder"></i>&nbsp;&nbsp;Prescription Form</a>  
+						 </div>  
+						 <br/>
+						</div>
+						<!--- END PRESCRIPTION FORM TAB-->
+                                                
+                                                
+                                                <!-- START OF PRESCRIPTION TAB-->
+                                                <div class="tab-pane" id="tab_15_13">
+						    <form enctype="multipart/form-data" action="" method="post">
+							<div class="col-md-12">
+							    <div class="col-md-4">
+							       <div class="form-group">
+								    <label class="m_title">Date</label>
+								      <div class="input-group">
+									    {{=formPres.custom.widget.prescriptiondate}}
+								      </div>
+							       </div>
+							    </div>
+							   
+							</div>
+					<div class="col-md-12">
+							    <div class="col-md-8">
+								   <div class="form-group">
+								    <label class="m_title">Drug</label>
+									  <div class="input-group">
+										{{=formPres.custom.widget.medicine}}
+									  </div>
+								   </div>
+							      </div>
+							      <div class="col-md-2">
+								   <div class="form-group">
+								    <label class="m_title">Strength</label>
+									  <div class="input-group">
+										{{=formPres.custom.widget.strength}}
+									  </div>
+								   </div>
+							      </div>
+							      <div class="col-md-2">
+								   <div class="form-group">
+								    <label class="m_title">Measure</label>
+									  <div class="input-group">
+										{{=formPres.custom.widget.strengthuom}}
+									  </div>
+								   </div>
+							      </div>
+							</div>
+  
+							<div class="col-md-12">
+							       <div class="col-md-4">
+								      <div class="form-group">
+								       <label class="m_title">Frequency</label>
+									     <div class="input-group">
+										   {{=formPres.custom.widget.frequency}}
+									     </div>
+								      </div>
+								 </div>
+								 <div class="col-md-4">
+								      <div class="form-group">
+								       <label class="m_title">Duration</label>
+									     <div class="input-group">
+										   {{=formPres.custom.widget.dosage}}
+									     </div>
+								      </div>
+								 </div>
+								 <div class="col-md-4">
+								      <div class="form-group">
+								       <label class="m_title">Quantity</label>
+									     <div class="input-group">
+										   {{=formPres.custom.widget.quantity}}
+									     </div>
+								      </div>
+								 </div>
+								 
+						       </div>
+							<div class="col-md-12">
+							    <div class="col-md-12">
+								<div class="form-group">
+								    <label class="m_title">Instructions</label>
+								     <div class="input-group">
+									   {{=formPres.custom.widget.presremarks}}
+								     </div>
+								</div>
+							    </div>
+							</div>
+					    <div class="actions" style="    text-align: right;">
+                                            <!--<a class="btn btn-circle btn-icon-only btn-default" onclick="location.href='{{=URL('prescription','new_prescription',vars=dict(page=page,providerid=providerid,providername=providername,memberid=memberid,patientid=patientid,doctorid=doctorid))}}'">-->
+                                                <!--<i class="fa fa-plus"></i>-->
+                                            <!--</a>-->
+                                    
+                                            <a class="btn btn-circle btn-icon-only btn-default" onclick="location.href='{{=URL('prescription','prescription_report',vars=dict(page=page,providerid=providerid,memberid=memberid,patientid=patientid,doctorid=doctorid))}}'">
+                                                <i class="fa fa-print"></i>
+                                            </a>
+                                            <!--<a class="btn btn-circle btn-icon-only btn-default" href="javascript:;">-->
+                                                <!--<i class="fa fa-chevron-down"></i>-->
+                                            <!--</a>-->
+                                           
+                                        </div>							
+						      
+							<div class="col-md-12" style="margin-bottom:30px">
+							    <div class="table-responsive">
+								<table class="table table-striped table-bordered table-hover">
+								    <thead>
+									<tr>
+									    <th> Drug </th>
+									    <th> Frequency </th>
+									    <th> Duration </th>
+									    <th> Date </th>
+									    <th> Prescribed By </th>
+									    <th> Instruction </th>
+									    
+									 </tr>
+								    </thead>
+								    <tbody>
+								    
+									{{for i in xrange(0, len(prescriptions),1): }}
+									<tr>
+									
+									    <td>{{=prescriptions[i].medicine}}&nbsp;&nbsp;{{=prescriptions[i].strength}}{{=prescriptions[i].strengthuom}}&nbsp;&nbsp;{{=prescriptions[i].medicinetype}}&nbsp;&nbsp;{{=prescriptions[i].quantity}}</td>
+									    <td>{{=prescriptions[i].frequency}}</td>
+									    <td>{{=prescriptions[i].dosage}}</td>
+									    <td>{{=prescriptions[i].prescriptiondate}}</td>
+									    <td>{{=prescriptions[i].doctorname}}</td>
+									    <td>{{=prescriptions[i].remarks}}</td>
+									    
+									    
+								       </tr>
+									{{pass}}
+								    </tbody>
+								</table>
+							    </div>
+							</div>     
+		     
+  
+   
+							<div class="col-md-12" style="margin-bottom:30px">
+							     <div class="col-md-12">
+								 <a class = "btn green" id="presSave" onClick="presSave()">Save</a>
+								 <a id="presCancel" onClick="presCancel()">Cancel </a>
+							     </div>
+							</div>
+
+						    </form>
+                                                </div>
+                                                <!-- END OF PRESCRIPTION TAB-->
+                                                
+                                                <!-- START OF MEDICAL TEST-->
+                                                <div class="tab-pane" id="tab_15_4">
+						     <form enctype="multipart/form-data" action="" method="post">
+                                                     <div class="col-sm-12 md_r">
+                                                        <div class="portlet-title mem_details">
+                                                            <div class="caption"><i class="fa fa-notepad"></i>&nbsp;Medical Test </div>
+                                                        </div>
+                                                        <div class="portlet-body" style="padding:20px">
+                                                            <div class="col-md-4">
+                                                                   <div class="form-group">
+                                                                    <label class="m_title">Test Name</label>
+                                                                          <div class="input-group">
+									    <input type="text" id="testname" name="testname" class="form-control" Value="" required=""> 
+                                                                          </div>
+                                                                   </div>
+                                                           </div> 
+                                                           <div class="col-md-4">
+                                                                   <div class="form-group">
+                                                                    <label class="m_title">Actual Value</label>
+                                                                          <div class="input-group">
+                                                                                <input type="text" id="actval" name="actval" class="form-control" Value="" required=""> 
+                                                                          </div>
+                                                                   </div>
+                                                           </div>
+                                                           <div class="col-md-4">
+                                                                   <div class="form-group">
+                                                                    <label class="m_title">Lower Value</label>
+                                                                          <div class="input-group">
+                                                                                <input id="lowval" name="lowval" type="text" class="form-control" Value="" required=""> 
+                                                                          </div>
+                                                                   </div>
+                                                           </div>
+                                                            <div class="col-md-4">
+                                                                   <div class="form-group">
+                                                                    <label class="m_title">Typical Value</label>
+                                                                          <div class="input-group">
+                                                                                <input id="typval" name="typval" type="text" class="form-control" Value="" required=""> 
+                                                                          </div>
+                                                                   </div>
+                                                           </div>
+                                                            <div class="col-md-4">
+                                                                   <div class="form-group">
+                                                                    <label class="m_title">Upper Value</label>
+                                                                          <div class="input-group">
+                                                                                <input id="upval" name="upval" type="text" class="form-control" Value="" required=""> 
+                                                                          </div>
+                                                                   </div>
+                                                           </div>
+                                                            <div class="col-md-12" style="margin-bottom:30px">
+                                                                    <label class="m_title">Remarks</label>
+                                                                    <textarea class="form-control" id="remarks" name="remarks" rows="5" placeholder=""></textarea>
+                                                            </div>
+                                                            <div class="col-md-12" style="margin-bottom:30px">
+								{{=medtestgrid}}
+                                                            </div>
+							    
+                                                            <div class="col-md-12" style="margin-bottom:30px">
+								
+								<a class = "btn green" id="medtestSave" onClick="medtestSave()" style="display:none">Save</a>
+								<a id="medtestCancel" onClick="medtestCancel()">Cancel </a>
+                                                            </div>
+
+                                                        </div>
+                                                 </div>
+						     </form>                                                
+                                                </div>
+                                                <!-- END OF MEDICAL TEST-->
+                                                
+                                                <!-- START OF DENTAL IMAGES-->
+                                                <div class="tab-pane" id="tab_15_5">
+						
+						<form enctype="multipart/form-data" action="{{=URL('treatment','image_update')}}" method="post">
+						{{=formImage.custom.begin}}
+						 <div class="col-sm-12" style="display:none">  
+						 <a  style="color:#fff;" class="btn bold green pull-right" onclick="location.href='{{=URL('dentalimage','dentalimage_new',vars=dict(memberpage=memberpage,imagepage=page,page=1,providerid=providerid,memberref=patientmember,memberid=memberid,patientid=patientid,treatmentid=treatmentid,source='treatment'))}}'" target="_blank"><i class="fa fa-plus"></i> New Image</a>  
+						 </div>  
+
+						
+						
+                                                <div class="col-sm-12 md_r">
+							{{if(len(images) >0):}}
+                                                        <div class="portlet-title mem_details">
+                                                            <div class="caption">
+                                                                <i class="fa fa-notepad"></i>&nbsp;Dental Images </div>
+                                                        </div>
+							{{else:}}
+                                                        <div class="portlet-title mem_details">
+                                                            <div class="caption">
+                                                                <i class="fa fa-notepad"></i>&nbsp;No Dental Images to display! </div>
+                                                        </div>
+							{{pass}}							
+                                                    <div class="col-sm-8 col-sm-offset-2">
+							{{if(len(images) >0):}}
+                                                        <div class="portlet-body" style="padding:20px">
+							    
+							    <div class="btn-group" style="width:100%">
+							       <button class="btn  uppercase bold w3-right" type="button"  id="negDiv1"  style="align:right" onclick="getLess()">Next&#10095;&#10095;</button>
+							       <button class="btn  uppercase bold w3-left" id="plusDiv1"  type="button" style="align:left" onclick="getMore()">&#10094;&#10094; Prev. </button>
+							    </div>					  
+							   
+							    <div id="myCarousel" class="carousel slide" data-ride="carousel">
+                                                            <!-- Indicators -->
+                                                            <ol class="carousel-indicators">
+                                                              <li data-target="#myCarousel" data-slide-to="0" class="active"></li>
+                                                              <li data-target="#myCarousel" data-slide-to="1" class=""></li>
+                                                               <li data-target="#myCarousel" data-slide-to="2" class=""></li>
+                                                                <li data-target="#myCarousel" data-slide-to="3" class=""></li>
+                                                                 <li data-target="#myCarousel" data-slide-to="4" class=""></li>
+                                                                  <li data-target="#myCarousel" data-slide-to="5" class=""></li>
+                                                             
+                                                            </ol>
+                                                            <!-- Wrapper for slides -->
+							    <div class="carousel-inner">
+								    {{for i in xrange(0, len(images),1): }}
+									{{if(i % 4 == 0):}}
+									{{pass}}
+									<input class="form-control" type="text" id="imageid{{=i}}" style="display:none" value="{{=images[i].dentalimage.id}}" >
+									<input class="form-control" type="text" id="title{{=i}}"  style="display:none" value="{{=images[i].dentalimage.title}}" >
+									<input class="form-control" type="text" id="tooth{{=i}}"  style="display:none" value="{{=images[i].dentalimage.tooth}}" >
+									<input class="form-control" type="text" id="quadrant{{=i}}"  style="display:none" value="{{=images[i].dentalimage.quadrant}}">
+									<input class="form-control" type="text" id="patientname{{=i}}"  style="display:none" value="{{=images[i].dentalimage.patientname}}" >
+									{{if(images[i].dentalimage.imagedate != None):}}
+									<input class="form-control" type="text" id="imagedate{{=i}}"  style="display:none" value="{{=images[i].dentalimage.imagedate.strftime('%d/%m/%Y')}}" >
+									{{pass}}
+									<input class="form-control" type="textarea" id="description{{=i}}"  style="display:none" value="{{=images[i].dentalimage.description}}" >
+									{{if(images[i].dentalimage.is_active == True):}}
+									  <input class="form-control" type="checkbox" id="is_active{{=i}}"  style="display:none"  checked >
+									{{else:}}
+									  <input class="form-control" type="checkbox" style="display:none"  id="is_active{{=i}}" >
+									{{pass}}
+									
+									{{if(i==0):}}
+									    <div class="item active">
+									      {{if(images[i].dentalimage.imagedate != None):}}
+									      <h1 class="band">{{=images[i].dentalimage.title}}&nbsp;&nbsp;{{=images[i].dentalimage.imagedate.strftime('%d/%m/%Y')}}</h1>
+									      {{pass}}
+									      <a data-toggle="modal" data-target="#myModal"><img id={{=i}} onclick="onClick(this)" src="{{=URL('dentalimage','download',args=images[i].dentalimage.image)}}" style="width:100%;height:50%;"></a>
+									      <h1 class="band">{{=images[i].dentalimage.patientname}}&nbsp;&nbsp;{{=images[i].vw_memberpatientlist.patientmember}}</h1>
+									    </div>
+									{{else:}}
+									    <div class="item">
+									    {{if(images[i].dentalimage.imagedate != None):}}
+									    <h1 class="band">{{=images[i].dentalimage.title}}&nbsp;&nbsp;{{=images[i].dentalimage.imagedate.strftime('%d/%m/%Y')}}</h1>
+									    {{pass}}
+									      <a data-toggle="modal" data-target="#myModal"><img id={{=i}} onclick="onClick(this)" src="{{=URL('dentalimage','download',args=images[i].dentalimage.image)}}"  style="width:100%;height:50%;"></a>
+									      <h1 class="band">{{=images[i].dentalimage.patientname}}&nbsp;&nbsp;{{=images[i].vw_memberpatientlist.patientmember}}</h1>
+									    </div>
+									{{pass}}                                            
+								      {{pass}}
+							
+                                                               </div>
+
+                                                            <!-- Left and right controls -->
+                                                            <a class="left carousel-control" href="#myCarousel" data-slide="prev">
+                                                              <span class="glyphicon glyphicon-chevron-left"></span>
+                                                              <span class="sr-only">Previous</span>
+                                                            </a>
+                                                            <a class="right carousel-control" href="#myCarousel" data-slide="next">
+                                                              <span class="glyphicon glyphicon-chevron-right"></span>
+                                                              <span class="sr-only">Next</span>
+                                                            </a>
+                                                          </div>
+							</div>
+                                                         {{pass}}
+							                                                    
+                                                    </div>
+                                                </div>
+						 <div style="display:none">
+					{{=formImage.custom.submit}}
+				    </div>
+						{{=formImage.custom.end}}
+						</form>                                                
+                                                </div>
+                                                <!-- END OF DENTAL IMAGES-->                                                
+                                                
+                                                <!-- START OF DENTAL CHART-->
+                                                <div class="tab-pane" id="tab_15_6">
+						<div class="col-sm-12">  
+						 <a  style="color:#fff;" class="btn bold green pull-left" onclick="location.href='{{=URL('superadmin','dentalchart',vars=dict(page=1,providerid=providerid,memberid=memberid,patientid=patientid,treatmentid=treatmentid,doctorid=doctorid,source='treatment'))}}'" target="_blank"><i class="fa fa-folder"></i>&nbsp;&nbsp;Dental Chart</a>  
+
+						 </div>  
+						 <br/>
+						</div>
+                                                <!-- END OF DENTAL CHART-->                                            
+                                            </div>
+                                        </div>
+                                       
+                                    </div>
+                                </div>
+                 
+
+
+ <!-- Modal -->
+  
+  <form enctype="multipart/form-data" method="post" id="image_form" action="{{=URL('treatment','image_update')}}">
+    <div class="modal fade" id="myModal" role="dialog">
+      <div class="modal-dialog modal-md">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+	  <label class="m_title">Title </label>
+	  <input type="text" class="form-control" id="form_title" name="form_title" placeholder="Title" required=""> 
+        </div>
+	 
+        <div class="modal-body" style="display: grid;">
+            <div class="col-md-12" style="margin-top:20px">
+                <div class="col-md-12"><img id="img01"  style="width:100%;"></div>
+              
+            </div>
+             <div class="col-md-12">
+
+		<div class="col-md-12">
+                   <div class="form-group">
+                    <label class="m_title">Patient </label>
+                    <input type="text" class="form-control" placeholder="Patient" id="form_patientname" name="form_patientname" value="" required=""> 
+                    <p><strong></strong></p>
+                 </div>
+               </div>
+               
+                <div class="col-md-4">
+                   <div class="form-group">
+                    <label class="m_title">Date </label>
+                    <input class="input-group form-control form-control-inline date date-picker" id="form_imagedate" name="form_imagedate" size="16" type="text" value="" data-date-format="dd/mm/yyyy">
+                </div>
+
+                </div>
+                <div class="col-md-4">
+                   <div class="form-group">
+                    <label class="m_title">Tooth </label>
+                    <input type="text" class="form-control" placeholder="Tooth" id="form_tooth" name="form_tooth"  > 
+                    <p><strong></strong></p>
+                </div>
+               </div>
+                <div class="col-md-4">
+                   <div class="form-group">
+                    <label class="m_title">Quadrant </label>
+                    <input type="text" class="form-control" placeholder="Quadrant" id="form_quadrant" name="form_quadrant" value="" > 
+                    <p><strong></strong></p>
+                   </div>
+
+                </div>
+                
+            </div>
+
+
+            <div class="col-md-12">
+                <div class="col-md-12">
+                   <div class="form-group">
+                    <label class="m_title">Intra Oral X-ray/Image Details</label>
+                    <textarea class="form-control" rows="3" id="form_description" name="form_description" placeholder="" style="width:100%"></textarea>
+                   </div>
+
+                </div>
+                <div class="col-md-4">
+                   <label class="mt-checkbox">
+                        <input type="checkbox" id="form_delete" name="form_delete" > Delete
+                        <span></span>
+                    </label>
+               </div>
+                
+                
+            </div>
+
+
+          <div class="col-md-12" style="margin-bottom:30px">
+	   
+            <!--<a href="javascript: submitform()">Search</a>-->
+	    <button class="btn blue uppercase bold" name="submit" form="image_form" type="submit">Save</button>
+	    
+        </div>
+
+</div>
+    
+      </div>
+    </div>
+    
+    <div style="display:none">
+	 <input class="form-control" type="text" name="xproviderid" id="xproviderid" value="{{=providerid}}">
+	 <input class="form-control" type="text" name="xpage" id="xpage" value="{{=page}}">
+	 <input class="form-control" type="text" name="xmemberpage" id="xmemberpage" value="{{=memberpage}}">
+	 <input class="form-control" type="text" name="ximagepage" id="ximagepage" value="{{=imagepage}}">
+	
+	 <input class="form-control" type="text" id="xpatientid" name="xpatientid" value="{{=patientid}}">
+	
+	 <input class="form-control" type="text" id="xpatient" name="xpatient" value="{{=patientname}}">
+	 <input class="form-control" type="text" id="xtreatmentid" name="xtreatmentid" value="{{=treatmentid}}">
+	  
+	 <input type="text" class="form-control" id="form_imageid" name="form_imageid" placeholder="Image ID" required=""> 
+	 
+	 <!--<input type="text" class="form-control" id="xprescriptiondate" name="xprescriptiondate" required=""> -->
+	
+    </div>
+
+
+  </div>
+</form>
+  <!-- Modal -->
+
+                 
+       
+       
+<script>
+
+function submitform(){
+
+
+    document.image_form.submit();
+}
+function form_submit() {
+
+
+   title = document.getElementById("form_title").value
+   tooth = document.getElementById("form_tooth").value
+   quad = document.getElementById("form_quadrant").value
+   imgdate = document.getElementById("form_image").value
+   desc = document.getElementById("form_description").value
+   
+   
+   }  
+
+ function onClick(element) {
+  
+  
+  document.getElementById("img01").src = element.src;
+  document.getElementById("myModal").style.display = "block";
+
+ 
+
+  document.getElementById("form_title").value = document.getElementById("title" +  element.id).value
+  document.getElementById("form_patientname").value = document.getElementById("patientname" +  element.id).value
+  document.getElementById("form_tooth").value = document.getElementById("tooth" +  element.id).value
+  document.getElementById("form_quadrant").value = document.getElementById("quadrant" +  element.id).value
+  document.getElementById("form_imageid").value = document.getElementById("imageid"  +  element.id).value
+  document.getElementById("form_imagedate").value = document.getElementById("imagedate"   +  element.id).value
+  document.getElementById("form_description").value = document.getElementById("description"   +  element.id).value
+  if(document.getElementById("is_active"   +  element.id).checked == false)
+  {
+    document.getElementById("form_delete").checked = true
+  }
+
+}  
+
+
+ function presCancel(){
+    
+    document.getElementById("no_table_medicine").value = 0;
+    document.getElementById("no_table_strength").value = "";
+    document.getElementById("no_table_strengthuom").value = 0;
+    document.getElementById("no_table_frequency").value = "";
+    document.getElementById("no_table_dosage").value = "";
+    document.getElementById("no_table_quantity").value = "";
+    document.getElementById("no_table_presremarks").value = "";
+
+    
+ }
+
+ function presSave(){
+  
+    
+    ajax('{{=URL("treatment", "save_prescription", vars=dict(page=page, memberpage = memberpage, memberid=memberid,membername=membername,treatmentid=treatmentid,tplanid=tplanid,\
+    providerid=providerid,providername=providername,patientid=patientid,patientmember=patientmember,patientname=patientname))}}',['doctor', 'medicine','strength','strengthuom','dosage','frequency','prescriptiondate','quantity','presremarks'] , 'tab_15_3');
+ }
+ 
+ function medtestCancel(){
+    
+    document.getElementById("testname").value = "";
+    document.getElementById("upval").value = "";
+    document.getElementById("lowval").value = "";
+    document.getElementById("typval").value = "";
+    document.getElementById("actval").value = "";
+    document.getElementById("remarks").value = "";
+    
+ }
+
+ function medtestSave(){
+  
+   
+    ajax('{{=URL("treatment", "save_medicaltest", vars=dict(page=page, memberpage = memberpage, memberid=memberid,membername=membername,treatmentid=treatmentid,tplanid=tplanid,\
+    providerid=providerid,providername=providername,patientid=patientid,patientmember=patientmember,patientname=patientname))}}', ['testname', 'upval','lowval','typval','actval','remarks'] , 'tab_15_4')
+ }
+ 
+ 
+
+function getMore(){
+
+
+var page = parseInt(document.getElementById('ximagepage').value);
+page = page + 1;
+document.getElementById('ximagepage').value = page;
+
+
+ajax('{{=URL("treatment","image_selector",vars=dict(patientid=patientid, providerid=providerid))}}', ['ximagepage'], 'tab_15_5');
+ 
+ 
+};
+
+
+function getLess(){
+  
+
+    var page = parseInt(document.getElementById('ximagepage').value);
+
+    if(page==0){
+      return;
+    }
+    page = page -1
+    
+    document.getElementById('ximagepage').value = page
+
+ 
+    ajax('{{=URL("treatment","image_selector",vars=dict(patientid=patientid, providerid=providerid))}}', ['ximagepage'], 'tab_15_5');    
+ };
+
+ 
+ jQuery("#no_table_vwdentalprocedure").keyup(function(){
+
+       $("#dentalsuggestions").show();
+       var x = $('#no_table_vwdentalprocedure').val();
+      ajax('{{=URL('admin', 'vwdentalprocedure_selector')}}', ['vwdentalprocedure'], 'dentalsuggestions')});
+      
+      
+ $(document).ready(function(){
+   
+
+   
+    
+    $("#suggestions") .click(function(){
+      
+	x= $("#no_table_vwdentalprocedure").val();
+
+	
+	$("#no_table_vwdentalprocedure").val(x);
+	
+	var strarr = x.split(":")
+	$("#no_table_patientmember").val(strarr[0])
+
+	$("#suggestions").hide();
+	
+    
+    });
+    
+     $("#dentalsuggestions") .click(function(){
+       var x = $('#no_table_vwdentalprocedure').val();
+       var procs = x.split(':')  
+       var y = procs[2]
+ 
+       y = y.replace("UCR(","")
+     
+       y = y.replace(')','')
+    
+       
+       $("#no_table_vwdentalprocedure").val(procs[0])
+       $("#no_table_treatmentcost").val(y)
+       $("#no_table_ucrfee").val(y)
+       
+       $("#proccode").val(procs[1])
+       $("#procucr").val(y)
+       $("#procid").val(procs[3])
+    
+	$("#dentalsuggestions").hide();
+    });
+    
+   
+    
+    $("no_table_vwdentalprocedure").focusout(function(){
+       
+   
+       var x = $('#no_table_vwdentalprocedure').val();
+       var y = $('#no_table_vwdentalprocedure :selected').text();
+       var z = $('#no_table_vwdentalprocedure :selected').index();
+       var procs=x.split("|")
+
+      
+       $("#no_table_vwdentalprocedure").val(procs[0]);
+       $("#no_table_treatmentcost").val(procs[3]);
+       $("#no_table_copay").val(procs[5]);
+       
+       $("#proccode").val(procs[1]);
+       $("#procdesc").val(procs[2]); 
+       $("#ucrfee").val(procs[4]); 
+      
+    });
+});
+
+
+
+$("#no_table_medicine").change(function(){
+    
+
+       var x = $('#no_table_medicine').val();
+       var y = $('#no_table_medicine :selected').text();
+       var z = $('#no_table_medicine :selected').index();
+
+      
+      var meds = y.split(":")
+      
+       $('#no_table_strength').val(meds[1]);
+       
+       $('#no_table_strengthuom').val(meds[2]);
+      
+      
+      
+       
+    });
+    
+ function chartSave(){
+
+    var charttitle = document.getElementById('charttitle').value
+    var chartdate = document.getElementById('chartdate').value
+    var chartnotes = document.getElementById('chartnotes').value
+    var destchartfile = document.getElementById('destchartfile').value
+    var chartfile = document.getElementById('chartfile')
+    
+    ajax('{{=URL("treatment", "save_chart", vars=dict(providerid=providerid,treatmentid=treatmentid,tplanid=tplanid,patientid=patientid,memberid=memberid,patientname=patientname))}}', ['destchartfile', 'chartfile', 'charttitle', 'chartdate','chartnotes'] , 'DentalchartNotes');
+
+}
+
+ 
+
+ </script>

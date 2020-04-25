@@ -1,0 +1,26 @@
+{{extend 'layoutenroll2.html'}}
+
+<script>
+function returntoregister()
+{
+   
+    window.location.replace("/my_dentalplan/default/member_register")
+
+
+}
+
+</script>
+
+<div>
+     
+    <h3>Registration Success</h3><br/>
+    
+    {{if(ret == True):}}
+    <h5>An email with login details has been sent to your email address!</h5>
+    {{else:}}
+    <h5>Error in sending login email address!</h5>
+    {{pass}}
+
+    <input  type="button" class="form_details_button" onclick="javascript: returntoregister()" value="Return to Member Registration">
+
+</div>

@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>MDP-Consent Cosmetic Dentistry Form</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link href="https://fonts.googleapis.com/css?family=Poppins:100,100i,200,200i,300,300i,400,400i,500,500i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
+</head>
+  <script src="https://docraptor.com/docraptor-1.0.0.js"></script>
+  <script>
+    var downloadPDF = function() {
+      DocRaptor.createAndDownloadDoc("YOUR_API_KEY_HERE", {
+        test: true, // test documents are free, but watermarked
+        type: "pdf",
+        document_content: document.querySelector('html').innerHTML, // use this page's HTML
+        // document_content: "<h1>Hello world!</h1>",               // or supply HTML directly
+        // document_url: "http://example.com/your-page",            // or use a URL
+        // javascript: true,                                        // enable JavaScript processing
+        // prince_options: {
+        //   media: "screen",                                       // use screen styles instead of print styles
+        // }
+      })
+    }
+  </script>
+  <style>
+body{font-family: 'Poppins', sans-serif !important;}
+.np{    padding: 0px;}
+    .npl{padding-left: 0px;text-align: left;}
+    .npl p{    margin-bottom: 5px !important;    font-size: 14px;}
+    .npr{padding-right: 0px;text-align: right;}
+    .pb{padding-bottom: 5px;}
+        .bor{display: grid;
+    padding: 0px;float: left;}
+    .pt{padding-top: 30px;}
+    #pdf-button{    background: #1d77b3;
+    border: none;
+    color: #fff;
+    margin: 20px 0px;
+    padding: 8px;}
+    .bg_blue{    background: #fff;padding: 0px 0px;}
+    .bg_blue1{    background: #fff;padding: 0px 0px;}
+    strong{font-weight: 600;}
+    td{font-size: 10px; padding: 3px 0px;}
+    td:first-child {font-weight: 500;    width: max-content;
+    float: left;}
+    .bt_text{    text-align: center;
+    font-size: 16px;
+    color: #fff;
+    margin-top: 8px;
+    font-weight: 600;}
+    ul {
+    list-style-image: url('https://mydentalplan.in/teeth_icon.png');
+}
+li{font-size:9px;}
+@media only screen and (max-width: 400px) and (min-width: 300px)  {
+
+    .bt_text{font-size: 12px !important;}
+ul{font-size: 11px !important;}
+  .npl p{ font-size:9px !important;}
+      .btm{font-size: 10px !important;}
+      .pt{padding-top:0px !important;}
+}
+@media only screen and (max-width: 400px) and (min-width: 300px)  {
+  .bt_text{font-size: 12px !important;}
+ul{font-size: 8px !important;}
+  .npl p{ font-size:14px !important;}
+     
+      .pt{padding-top:0px !important;}
+.pad{padding: 10px 10px !important;}
+.btm{text-align:left !important;}
+}
+
+
+</style>
+  <style>
+    @media print {
+      #pdf-button {
+        display: none;
+      }
+     
+       
+
+ /* All your print styles go here */
+ #btnPrint{ display: none !important; } 
+ .button{ display: none !important; } 
+ a{display: none !important}
+ p{font-size: 12px !important}
+}
+  </style>
+
+<body>
+  <div class="container">
+    <div class="col-sm-12">
+ <!--Id Card Front part start-->
+
+          <div class="col-sm-12 bor">
+            <!--logo start-->
+              <div class="col-sm-12"> <input id="pdf-button" type="button" value="Download PDF" onclick="downloadPDF()" /></div>
+          <div class="container-fluid">
+                 <div class="col-sm-12">
+                   
+                     <div class="col-sm-6 text-right marg" style="margin-left:-14px;" >Date:&nbsp;&nbsp;<strong>{{=consentdate}}</strong></div>
+                 </div>
+          </div> 
+          <div class="container-fluid background right" style="margin-bottom:0%;"> 
+              <div class="col-sm-12 text-center right" style="margin-top:2%; ">
+                     <h4 style="color:#1875b2;" class="right"><strong>{{if(len(prov[0].practicename) > 0):}}<strong>{{=prov[0].practicename}}</strong>{{pass}}</strong></h4>
+                                        <h5 style="color:#1875b2;" class="right"><strong>{{=prov[0].providername}}</strong><br>State Dental Council Registration Number: {{=registration}}</h5>
+                                        <p>{{if(len(prov[0].practicename) > 0):}}{{=prov[0].practicename}}{{pass}}{{if(len(prov[0].address1) > 0):}}
+                    {{=prov[0].address1}},&nbsp;&nbsp;
+                    {{pass}}
+                    {{if(len(prov[0].address2) > 0):}}
+                    {{=prov[0].address2}},&nbsp;&nbsp;
+                    {{pass}}      
+                    {{if(len(prov[0].address3) > 0):}}
+                    {{=prov[0].address3}},&nbsp;&nbsp; 
+                    {{pass}}
+                    
+                    {{if(len(prov[0].city) > 0):}}
+                    {{=prov[0].city}}{{pass}},{{if(len(prov[0].st) > 0):}} {{=prov[0].st}}{{pass}} {{if(len(prov[0].pin) > 0):}} - {{=prov[0].pin}}{{pass}}<br/>
+                    Phone: {{=prov[0].cell}}&nbsp;&nbsp;&nbsp;&nbsp;Email: {{=prov[0].email}}&nbsp;&nbsp;&nbsp;&nbsp;</p>
+              </div> 
+          </div>  
+       <!--Header start-->
+          <div class="col-sm-12 bg">
+               <div class="col-xs-12 npl">
+                 
+                <p>Patient: <span style="text-decoration: underline;">{{=patientmember}}</span></p>
+                <p>Date: <strong>{{=consentdate}}</strong> I, <span style="text-decoration: underline;">{{=patientmember}}</span>, authorize and request Dr.(s) , <span style="text-decoration: underline;">&nbsp; &nbsp;{{=doctorname}}</span>and/or such assistants as may be selected by him (them) to provide <span style="text-decoration: underline;">{{=dentalprocedure}}</span> to address the conditions or symptoms based on the diagnostic studies and/or evaluations already performed and which have been explained to me.The doctor has also explained to me in detail about the diagnosis, treatment, medications and the postoperative complications which may arise due to the operation. </p>
+      <!--Header end-->               
+      <!--Body Start-->         
+            <p><b>1.</b> I authorize and direct my doctor(s), with associates or assistants of his (their) choice, to provide such additional services as he (they) may deem reasonable and necessary, including, but not limited to, the administration of anesthetic agents, the performance of necessary laboratory, radiological (x-ray), and other diagnostic procedures; and the administration of medications orally, by injection, by infusion, or by any other dentally accepted route of administration. If an unforeseen condition arises in the course of treatment which calls for the performance of procedures in addition to or different from that now contemplated I further authorize and direct my doctor(s), with associates or assistants of his(their) choice, to do whatever he (they) deem necessary and advisable under the circumstances, including the decision not to proceed with the cosmetic treatment.</p>
+
+            <p><b>2.</b> Alternatives to cosmetic dentistry / cosmetic reconstruction have been explained to me, including their risks. I have considered these alternatives to treatment and their risks but I request the cosmetic dentistry/cosmetic reconstruction knowing the treatment is in part elective and cosmetic and not due to any breakdown of my teeth. I consent to the tooth reduction or loss of tooth structure necessary to accomplish the cosmetic requirements I would like to have.</p>
+
+            <p><b>3.</b> I am aware that the practice of dentistry and cosmetic dentistry/cosmetic reconstruction is not an exact science and I acknowledge that no guarantees have been made to me concerning the success of my cosmetic dentistry/cosmetic reconstruction and the associated treatment and procedures. I am aware that there is a risk that the cosmetic dentistry/cosmetic reconstruction will require ongoing maintenance care, remaking of crowns, bridges and veneers and the longevity is directly related to what I eat and drink and my home-care habits.</p>
+
+            <p><b>4.</b> The cosmetic dentistry/cosmetic reconstruction procedure has been explained to me and I understand the nature of these procedures and anesthetic to be used as follows: (Description in layman terms of the specific cosmetic procedure and anesthetic to be used).</p>
+
+            <p><b>5.</b> As with any dental procedure, there are possible complications of which you must be aware. These include, but are not limited to: limited oral function; post-operative pain; bleeding; infection or abscess which may require treatment or drainage; temporary bruising of the face, allergic reactions to metal and medications; a change in sensation or numbness to the lip, chin, face and/ or tongue which may be of a temporary or permanent nature; periodontal infection or condition requiring additional treatment; injury to the teeth; temporomandibular joint (jaw) problems requiring additional treatment and poor healing which may result in an alteration or change in the planned treatment. I have also been advised that there is a risk that the crowns, veneers and bridges may break which could require additional procedures to correct.</p>
+
+            <p><b>6.</b> I understand that some or all of the cosmetic dentistry/cosmetic reconstruction is elective and only done for my cosmetic interest but there are dental conditions that if left untreated, the following may occur: limited oral function; gum or bone disease, loss of bone; inflammation; infection; sensitivity; looseness and/or loss of teeth; shifting of teeth with bite changes; temporomandibular joint (jaw) problems and an inability to have the same treatment, but due to the changes in the oral conditions or medical conditions, additional and more extensive treatment will have to be considered.</p>
+
+            <p><b>7.</b> I have been advised that the use of tobacco, coffee, alcohol or sugar and some prescription drugs will limit the cosmetic success of the treatment and require additional treatment to correct the problems. The reasons may include but not only limited to staining, decreased tissue health, periodontal disease, recurrent decay and fracture of teeth and restorations. Because there is no way to accurately predict the capabilities of each patient, I agree to follow my doctor’s home care instructions and to report to my doctor for regular examinations, professional dental cleaning and maintenance as instructed.</p>
+
+            <p><b>8.</b> I agree not to operate a motor vehicle or hazardous device for at least hours or more until fully recovered from the effects of the anesthesia or drugs given of my care as selected by my doctor.</p>
+
+            <p><b>9.</b> I understand I have had an opportunity to ask and have my questions answered. I understand my insurance may or may not cover dentistry for cosmetic reasons and I am responsible for all dental treatment regardless of my insurance plan.</p>
+
+            <p><b>10.</b> To my knowledge I have given an accurate report of my physical, dental and mental health history. If I am currently in treatment for any health problems I certify that I have discussed the proposed treatment with my health care provider and have received his or her consent to undergo this cosmetic procedure.</p>
+
+
+            <p>I certify that I have read, have had explained to me, and fully understand the foregoing Consent to <span style="text-decoration: underline;">{{=dentalprocedure}}</span>,  drug and anesthetic procedures, and that it is my intention to have the foregoing carried out as stated. I have been advised of information concerning the longevity of the procedure. However, I have discussed this as well as the nature of the services and procedures and I consent to the above procedure knowing its risks and limitations.</p>
+
+      <!--Body End--> 
+
+
+               <!--Footer start--> 
+               <div class="col-sm-6 np">
+                    <p><b>Doctor Name:</b><span style="text-decoration: underline;">&nbsp; &nbsp;{{=doctorname}}</span></p>
+                    <p><b>Doctor Signature:</b>________________________</p>
+                    <p><b>State Dental Council Registration Number:</b>&nbsp;&nbsp;{{=docreg}}</p>
+                    <p><b>Patient Name:-</b><span style="text-decoration: underline;">{{=patientmember}}</span></p>
+                    <p><b>Patient Signature:-</b>________________________</p>
+                    <p><b>Witness (if available) :-</b>________________________</p>
+                    <p><b>Parent / Guardian if patient is minor:-</b>________________________</p>                                                
+                    <p><b>Date:-</b> {{=consentdate}}&nbsp;&nbsp;<b>Date:-</b> {{=consentdate}}</p>
+                    <p><a id="can" href="{{=returnurl}}">Cancel </a></p>
+               </div>
+                <!--Footer end-->                
+               </div>
+               
+              
+            </div>  
+       <!--customer details end-->
+       
+      </div>
+      <div class="col-sm-2"></div>
+</div>
+<!--Id Card Front part End-->
+
+
+
+ 
+
+
+
+
+
+   </div>
+
+</body>
+</html>

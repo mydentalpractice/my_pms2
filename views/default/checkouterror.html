@@ -1,0 +1,19 @@
+{{extend 'layoutenroll2.html'}}
+
+<script>
+function memberenrollment()
+{
+    window.location.replace("/my_dentalplan/member/member_enrollment/")
+}
+
+</script>
+
+<div>
+     
+    <h3>Checkout Error</h3><br/>
+    
+
+    <h5>You cannot checkout without a Provider(Dentist) and Region assigned to you! Please contact My Dental Plan!</h5>
+    <input  type="button" class="form_details_button" onclick="javascript: returnpage('{{=logmode}}')" value="Return to Enrollment/Login">
+
+</div>

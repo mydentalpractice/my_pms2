@@ -1,0 +1,234 @@
+
+<!DOCTYPE html>
+<!-- saved from url=(0074)https://decembercreatives.com/my_dental_plan/admin/Prescription_Form_2.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  
+  <meta name="Generator" content="EditPlus®">
+  <meta name="Author" content="">
+  <meta name="Keywords" content="">
+  <meta name="Description" content="">
+  <title>Prescription</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <script src="https://code.jquery.com/jquery-1.12.4.min.js" integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ=" crossorigin="anonymous"></script>  
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.3.5/jspdf.min.js"></script>
+</head>
+ 
+<style>  
+        table {  
+            font-family: arial, sans-serif;  
+            border-collapse: collapse;  
+            width: 100%;  
+            font-size: 13px;
+        }  
+  
+        td, th {  
+            border: 1px solid #dddddd;  
+            text-align: left;  
+            padding: 8px;  
+        }  
+  tr th{    background-color: #e6e6e6 !important;
+    color: #000000 !important;font-size: 13px;}
+        
+        #create_pdf,#can{background: #3480b1;border: none;margin-top: 0px;color: #fff;padding: 5px 14px;}
+    </style> 
+
+ 
+ <body style="font-family:Verdana">
+ 
+
+ <div class="container" style="width: 60%;margin:0px auto;">
+  <form class="form" style="max-width: none; width: 100%;margin-top: 4%;border: 1px solid #1875b2; margin-bottom: 5%;"> 
+     <div class="container-fluid background right" style="margin-bottom:0%;margin-top:2%;"> 
+                          
+
+                           <div class="container-fluid ">
+                        <div class="col-sm-6">
+                          <div class="col-sm-12 text-left marg" style="margin-left:-14px;"><input type="button" id="create_pdf" value="Generate PDF"></div>
+                        </div>
+                        <div class="col-sm-6">
+                          <div class="col-sm-12 text-right marg" style="margin-left:-14px;">Date: <strong>{{=prescdate}}</strong></div>
+                        </div>
+                      
+                           </div>
+
+                    <div class="col-sm-12 text-center right" style="margin-top:4%; ">
+                      <h4 style="color:#1875b2;" class="right">{{if(len(prov[0].practicename) > 0):}}<strong>{{=prov[0].practicename}}</strong>{{pass}}</h4>
+                      <h5 style="color:#1875b2;" class="right"><strong>{{=prov[0].providername}}</strong>&nbsp;&nbsp;&nbsp;State Dental Council Registration Number: {{=registration}}</h5>
+                      <p>{{if(len(prov[0].practicename) > 0):}}{{=prov[0].practicename}}{{pass}}{{if(len(prov[0].address1) > 0):}}
+	{{=prov[0].address1}},&nbsp;&nbsp;
+	{{pass}}
+	{{if(len(prov[0].address2) > 0):}}
+	{{=prov[0].address2}},&nbsp;&nbsp;
+	{{pass}}      
+	{{if(len(prov[0].address3) > 0):}}
+	{{=prov[0].address3}},&nbsp;&nbsp; 
+	{{pass}}
+	
+	{{if(len(prov[0].city) > 0):}}
+	{{=prov[0].city}}{{pass}},{{if(len(prov[0].st) > 0):}} {{=prov[0].st}}{{pass}} {{if(len(prov[0].pin) > 0):}} - {{=prov[0].pin}}{{pass}}<br/>
+	Phone: {{=prov[0].cell}}&nbsp;&nbsp;&nbsp;&nbsp;Email: {{=prov[0].email}}&nbsp;&nbsp;&nbsp;&nbsp;</p>
+                     </div> 
+                          
+
+
+                     
+                    <div class="container-fluid">
+                    <div class="col-sm-12">
+                    <img class="img-responsive" style="margin-top:-25%; position:absolute;z-index:-5;opacity:.8;">
+                    <div class="table-responsive" style="font-size:10px; ">
+                     <br/>
+                     <br/>
+                     <table class="table table-bordered" style="margin-top:1%; ">
+                     <h5 style="color:#1875b2;" class="right">
+                      <strong>Patient:&nbsp;&nbsp;{{=pat[0].fullname}}&nbsp;&nbsp;({{=pat[0].patientmember}})&nbsp;&nbsp;(1)</strong>
+                      </h5>
+			<thead>
+			  <tr style="background-color:#1875b2;color:#ffffff">
+			     <th> Medicine </th>
+			      <th> Frequency </th>
+			      <th> Duration </th>
+			      <th> Instruction </th>
+			  </tr>
+			</thead>
+			<tbody>
+			  {{for i in xrange(0, len(prescriptions),1): }}
+			    <tr>
+				    <td>{{=prescriptions[i][1]}}</td>
+				    <td>{{=prescriptions[i][2]}}</td>
+				    <td>{{=prescriptions[i][3]}}</td>
+				    <td>{{=prescriptions[i][4]}}</td>
+			      </tr>
+			      {{pass}}
+			</tbody>
+                      </table>
+                      </div>
+                    </div></div>
+                    <div class="container-fluid text-right" style="margin-top:1%; ">
+                        <div class="col-sm-12">
+			 
+                          Prescribed By<br>
+                        <strong>{{if(len(doc[0].name) > 0):}}{{=doc[0].name}}{{pass}}</strong>
+                          <p>State Dental Council Registration Number: {{if(len(doc[0].registration) > 0):}}{{=doc[0].registration}}{{pass}}<br/>
+                            Cell: {{if(len(doc[0].cell) > 0):}}{{=doc[0].cell}}{{pass}}<br/>
+                            Email:{{if(len(doc[0].email) > 0):}}{{=doc[0].email}}{{pass}}<br/>
+                           </p>
+                          <p><a id="can" href="{{=returnurl}}">Cancel </a></p>
+                        </div>
+                    </div>
+
+
+                      
+                    </div></form>
+</div>
+
+  
+     <script>  
+    (function () {  
+        var  
+         form = $('.form'),  
+         cache_width = form.width(),  
+         a4 = [595.28, 841.89]; // for a4 size paper width and height  
+  
+        $('#create_pdf').on('click', function () {  
+            $('body').scrollTop(0);  
+            createPDF();  
+        });  
+        //create pdf  
+        function createPDF() {  
+             document.getElementById('create_pdf').style.visibility='hidden';
+              document.getElementById('can').style.visibility='hidden';
+             
+            getCanvas().then(function (canvas) {  
+                var  
+                 img = canvas.toDataURL("image/png"),  
+                 doc = new jsPDF({  
+                     unit: 'px',  
+                     format: 'a4'  
+                 });  
+                doc.addImage(img, 'JPEG', 20, 20);  
+                doc.save('prescription.pdf');  
+                form.width(cache_width);  
+            });  
+        }  
+  
+        // create canvas object  
+        function getCanvas() {  
+            form.width((a4[0] * 1.33333) - 80).css('max-width', 'none');  
+            return html2canvas(form, {  
+                imageTimeout: 2000,  
+                removeContainer: true  
+            });  
+        }  
+  
+    }());  
+</script>  
+    <script>  
+    /* 
+ * jQuery helper plugin for examples and tests 
+ */  
+    (function ($) {  
+        $.fn.html2canvas = function (options) {  
+            var date = new Date(),  
+            $message = null,  
+            timeoutTimer = false,  
+            timer = date.getTime();  
+            html2canvas.logging = options && options.logging;  
+            html2canvas.Preload(this[0], $.extend({  
+                complete: function (images) {  
+                    var queue = html2canvas.Parse(this[0], images, options),  
+                    $canvas = $(html2canvas.Renderer(queue, options)),  
+                    finishTime = new Date();  
+  
+                    $canvas.css({ position: 'absolute', left: 0, top: 0 }).appendTo(document.body);  
+                    $canvas.siblings().toggle();  
+  
+                    $(window).click(function () {  
+                        if (!$canvas.is(':visible')) {  
+                            $canvas.toggle().siblings().toggle();  
+                            throwMessage("Canvas Render visible");  
+                        } else {  
+                            $canvas.siblings().toggle();  
+                            $canvas.toggle();  
+                            throwMessage("Canvas Render hidden");  
+                        }  
+                    });  
+                    throwMessage('Screenshot created in ' + ((finishTime.getTime() - timer) / 1000) + " seconds<br />", 4000);  
+                }  
+            }, options));  
+  
+            function throwMessage(msg, duration) {  
+                window.clearTimeout(timeoutTimer);  
+                timeoutTimer = window.setTimeout(function () {  
+                    $message.fadeOut(function () {  
+                        $message.remove();  
+                    });  
+                }, duration || 2000);  
+                if ($message)  
+                    $message.remove();  
+                $message = $('<div ></div>').html(msg).css({  
+                    margin: 0,  
+                    padding: 10,  
+                    background: "#000",  
+                    opacity: 0.7,  
+                    position: "fixed",  
+                    top: 10,  
+                    right: 10,  
+                    fontFamily: 'Tahoma',  
+                    color: '#fff',  
+                    fontSize: 12,  
+                    borderRadius: 12,  
+                    width: 'auto',  
+                    height: 'auto',  
+                    textAlign: 'center',  
+                    textDecoration: 'none'  
+                }).hide().fadeIn().appendTo('body');  
+            }  
+        };  
+    })(jQuery);  
+  
+</script> 
+
+</body></html>

@@ -1,0 +1,38 @@
+                                    <div class="col-md-12">
+                                        <div class="col-sm-12 md_r">
+                                                <div class="col-md-12" style="margin-bottom:00px">
+                                                    <label class="m_title">New Provider Note</label>
+                                                    {{=formCSR.custom.widget.newcsr}}
+                                                </div>
+                                                <br/>
+                                                <div class="col-md-12" style="margin-top:10px;margin-bottom:10px">
+    						    <a class = "btn green" id="casereport" onClick="addCSR()">Add</a>
+                                                   <!--<button type="submit" class="btn green">Add </button>-->
+                                                   <a href="{{=returnurl}}">Cancel </a>
+                                                </div>
+						
+                                              
+						 <div class="col-md-12" style="margin-bottom:0px">
+						<div class="table-responsive">
+						    <table border="0">
+							<thead>
+							    <tr>
+								<th><label class="m_title">Provider Note</label></th>
+							    </tr>
+							</thead>
+							<tbody>
+	                                                    
+	                                                    {{for i in xrange(0, len(csrs),1): }}
+							    <tr>
+								<td><pre>{{=csrs[i].casereport}}</pre></td>
+							   </tr>
+							   {{pass}}
+							</tbody>
+						    </table>
+                                          
+						</div>
+						</div>
+					
+                                        </div>
+                                    </div>
+				    

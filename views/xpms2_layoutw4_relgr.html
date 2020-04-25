@@ -1,0 +1,535 @@
+
+<!--[if IE 8]> <html lang="en" class="ie8 no-js"> <![endif]-->
+<!--[if IE 9]> <html lang="en" class="ie9 no-js"> <![endif]-->
+<!--[if !IE]><!-->
+<html lang="en">
+    <!--<![endif]-->
+    <!-- BEGIN HEAD -->
+
+    <head>
+        <meta charset="utf-8" />
+        <title>My Dental Plan | Dashboard</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta content="width=device-width, initial-scale=1" name="viewport" />
+        <meta content="" name="description" />
+        <meta content="" name="author" />
+        
+        <link rel="icon" href="data:,">
+            
+        
+        {{include 'allcssstaticfiles.html'}}       
+        {{include 'loader.html'}}
+        
+        <script src="{{=URL('static','js/jstz.js')}}"></script>
+        {{import pytz}}
+        {{from pytz import timezone}}
+
+         
+        </head>
+    <!-- END HEAD -->
+    
+
+<script>
+
+ // These variables are used by the web2py_ajax_init function in web2py_ajax.js (which is loaded below).
+    var w2p_ajax_confirm_message = "{{=T('Are you sure you want to delete this object?')}}";
+    var w2p_ajax_disable_with_message = "{{=T('Working...')}}";
+    //var w2p_ajax_date_format = "{{=T('%Y-%m-%d')}}";
+    //var w2p_ajax_datetime_format = "{{=T('%Y-%m-%d %H:%M:%S')}}";
+    var w2p_ajax_date_format = "{{=T('%d/%m/%Y')}}";
+    var w2p_ajax_datetime_format = "{{=T('%d/%m/%Y %H:%M:%S')}}";
+    
+    var ajax_error_500 = '{{=T.M('An error occured, please [[reload %s]] the page') % URL(args=request.args, vars=request.get_vars) }}'
+    
+function goBack() {
+    window.history.back();
+}
+</script>
+<style>
+
+
+div.flash{    z-index: 30023 !important;}
+.datepicker,.datepicker-dropdown,.datepicker-orient-left,.datepicker-orient-top{position: absolute !important;;
+    z-index: 20000 !important;top:392px !important}
+    .title{color:#fff !important;}
+.page-sidebar-closed.page-sidebar-closed-hide-logo .page-header.navbar .page-logo{width:170px !Important}
+.page-header-fixed .page-container {margin-top: 65px;}
+.page-header.navbar{height: 80px !important;}
+.dashboard-stat .visual{width: 45%;margin-bottom:0px; height: 67px;}
+.dashboard-stat{    margin-top: 2px;}
+.count{font-size: 15px;color: #fff;font-weight: 400;}
+.dash_font{font-size:15px;font-weight: 600; color: #000 !important;}
+.page-header.navbar .menu-toggler.sidebar-toggler{    margin-top:34px !important;}
+.ico{float: right;padding-right: 11px;font-size: 20px;}
+.dashboard-stat .details {position: absolute;right:8px;padding-top: 6px;top:20px;}
+.dashboard-stat.dashboard-stat-v2 .visual {padding-top: 22px;}
+    .m-portlet__body{overflow-y: scroll;height: 350px !important;}
+    .m-portlet__cal{overflow-y: scroll;height: 550px !important;}
+    .page-header.navbar .top-menu .navbar-nav>li.dropdown-user .dropdown-toggle { padding: 21px 6px 13px 8px;}
+@media only screen and (max-width: 700px) and (min-width: 200px)  {
+    .dto{margin-top: 23px !important;}
+.dto1{    margin-top: -17px;}
+}
+ 
+
+
+ </style>
+
+
+    <body  class="page-header-fixed page-sidebar-closed-hide-logo page-content-white page-sidebar-closed" onload="refreshPage()">
+    
+        <div class="page-wrapper">
+            
+            {{if((response.flash != None) & (response.flash != '')):}}
+            <div class="flash" style="align:center;color:white;background:black;height:100px">{{=response.flash or ''}}</div>
+            {{pass}}
+            {{if((session.flash != None) & (session.flash != '')):}}
+            <div class="flash" style="align:center;color:white;background:black;height:100px">{{=session.flash or ''}}</div>
+            {{pass}}
+            <!-- BEGIN HEADER -->
+            <div class="page-header navbar navbar-fixed-top">
+                <!-- BEGIN HEADER INNER -->
+                <div class="page-header-inner " id="dashboardHeader">
+                    <!-- BEGIN LOGO -->
+                    <div class="col-sm-6 col-xs-6">
+                        <a title="Dashboard" href="{{=URL('admin','providerhome')}}">
+                            <img class="img-responsive"  style="margin-top:17px;width:150px" src="/my_pms2/static/img/dash_logo.png" alt="" />
+                        </a>
+                    </div>
+                    <div class="col-sm-6 col-xs-6">
+                        <a title="Dashboard" href="{{=URL('religare','religare')}}">
+                            <img class="img-responsive" style="margin-top:17px;margin-left: 10px;width:150px;float:right" src="https://www.mydentalpractice.in//my_pms2/static/img/Religare-Logo.jpg" alt="" />
+                        </a>
+                    </div>
+                    
+                    <!-- END LOGO -->
+                    <!-- BEGIN RESPONSIVE MENU TOGGLER -->
+                    <a href="javascript:;" class="menu-toggler responsive-toggler" data-toggle="collapse" data-target=".navbar-collapse">
+                        <span></span>
+                    </a>
+                    <!-- END RESPONSIVE MENU TOGGLER -->
+                    
+                    
+                    <!-- START DASHBOARD-->
+                    <div class="row" style="height: 80px;display:none">
+                     
+                            <!--  START: Patients / Members (RED)-->
+                            <div class="col-lg-2 col-md-3 col-sm-6 col-xs-12" style="padding: 12px 11px;">
+                                    <div class="dashboard-stat dashboard-stat-v2 blue dto">
+                                        <div id="SP" style="margin:0px 3px;">
+                                            <span style="padding: 3px 2px;" class="ic">
+                                                <font class="dash_font">Members:
+                                                                                                    
+                                                    {{if(session.newmembers > 0):}}
+                                                            <span data-counter="counterup" class="dash_font"><a href="{{=URL('member','list_patients',vars=dict(providerid=providerid,page=1))}}" class="dash_font">{{=session.members + session.exmembers}}</a>
+                                                                <br>Active {{=session.members}}</span>
+                                                    
+                                                    {{else:}}
+                                                           <span data-counter="counterup" class="dash_font"><a href="{{=URL('member','list_patients',vars=dict(providerid=providerid,page=1))}}" class="dash_font">{{=session.members + session.exmembers }}</a>
+                                                           <br>
+                                                           </span>
+                                                    {{pass}}
+                                                    
+                                                    <a title="Members List" href="{{=URL('member','list_patients', vars=dict(page=1,providerid=providerid))}}">
+                                                      <span class="f_right"><i class="fa fa-list" aria-hidden="true" style="color:black"></i></span>
+                                                    </a>
+                                                </font>                                            
+                                            </span>
+                                        </div>
+                                       
+                                    </div>
+                            </div>
+                            <!-- END: Patients / Members (RED)-->
+                            
+                            <!--  START: WALK IN Patients(BLUE)-->
+                            <div class="col-lg-2 col-md-3 col-sm-6 col-xs-12" style="padding: 12px 11px;">
+                                    <div class="dashboard-stat dashboard-stat-v2 green dto1">
+                                        <div id="SP" style="margin:0px 3px;">
+                                            <span style="padding: 3px 2px;" class="ic">
+                                                <font class="dash_font">Walk In Patients 
+                                                    <br> 
+                                                    <span class="count dash_font" data-counter="counterup" data-value="6">{{=session.nonmembers}}
+                                                    <a title="New Walk-in Patient" href="{{=URL('member','new_nonmember', vars=dict(page=1,providerid=providerid,returnurl=URL('admin','providerhome')))}}">
+                                                      <span class="f_right ico"><i class="fa fa-plus-circle" aria-hidden="true" style="color:red"></i></span>
+                                                    </a>
+                                                    <a title="Walk-In Patients List" href="{{=URL('member','list_nonmembers', vars=dict(page=1,providerid=providerid))}}">
+                                                      <span class="f_right"><i class="fa fa-list" aria-hidden="true" style="color:black"></i></span>
+                                                    </a>
+                                                    </span>
+                                                </font>
+                                            </span>
+                                        </div>
+                                    </div>
+                            </div>
+                            <!--  END: WALK IN Patients(BLUE)-->
+                            
+                             <!--  START: TREATEMTS(GREEN)-->
+                            <div class="col-lg-2 col-md-3 col-sm-6 col-xs-12" style="padding: 12px 11px;">
+                                    <div class="dashboard-stat dashboard-stat-v2 purple dto1">
+                                        <div id="SP" style="margin:0px 3px;">
+                                            <span style="padding: 3px 2px;" class="ic">
+                                                <font class="dash_font">Treatments
+                                                    <br> 
+                                                    <span class="count dash_font" data-counter="counterup" data-value="6">{{=session.treatmentplans}}</span>
+                                                    <a title="Treatment List" href="{{=URL('treatment','list_treatments', vars=dict(page=1,providerid=providerid))}}">
+                                                        <span class="f_right"><i class="fa fa-list" aria-hidden="true" style="color:black"></i></span>
+                                                    </a>
+
+                                                </font>
+                                            </span>
+                                        </div>
+                                       
+                                    </div>
+                            </div>
+                            <!--  END: TREATEMTS(GREEN)-->
+                            
+                             <!--  START: APPTMNTS(AMBER)-->
+                            <div class="col-lg-2 col-md-3 col-sm-6 col-xs-12" style="padding: 12px 11px;">
+                                    <div class="dashboard-stat dashboard-stat-v2 red dto1">
+                                        <div id="SP" style="margin:0px 3px;">
+                                            <span style="padding: 3px 2px;" class="ic">
+                                                <font class="dash_font">Appointments : 
+                                                <span class="count dash_font" data-counter="counterup" data-value="6" style="font-size: 12px !important;">{{=session.appointments}}<br>
+                                                    {{=session.todayappts}}  Today | {{=session.tomorrowappts}}  Tomorrow
+                                                    <a title="New Appointment" href="{{=URL('appointment','new_appointment', vars=dict(providerid=providerid,returnurl=returnurl))}}">
+                                                      <span class="f_right ico"><i class="fa fa-plus-circle" aria-hidden="true" style="color:red"></i></span>
+                                                    </a>
+
+                                                      <a title="Appointment Calendar" href="{{=URL('admin','providerhome')}}">
+                                                        <span class="f_right"><i class="fa fa-list" aria-hidden="true" style="color:black"></i></span>
+                                                      </a>
+                                                </span>
+                                            </font>
+                                            </span>
+                                          
+
+                                        </div>
+                                       
+                                    </div>
+                            </div>
+                            <!--  END: APPTMNTS(GREEM)-->
+                            
+                            <!--  START: LOGO(MDP Practice/Religare)-->
+                            <div class="col-lg-2 col-md-3 col-sm-6 col-xs-12" style="padding: 12px 11px;">
+                                     <div class="page-logo">
+                                <a title="Quick MDP" href="{{=URL('admin','providerhome')}}">
+                                    {{if(session.religare == True):}}
+                                    <img style="margin-top: -4px;margin-left: 6px;width:80%" src="/my_pms2/static/img/mdp_practice_logo.png" alt="" />
+                                    <img style="margin-top: 4px;margin-left: 4px;width:10%" src="/my_pms2/static/img/religare-logo_small.png" alt="" />      
+                                    {{else:}}
+                                    <img style="margin-top: -4px;margin-left: 6px;width:90%" src="/my_pms2/static/img/mdp_practice_logo.png" alt="" />
+                                    {{pass}}                                    
+                                </a>
+                                
+                            </div>
+                            </div>
+                            <!--  END: APPTMNTS(GREEM)-->
+                    </div>        
+                    <!-- END DASHBOARD-->
+                </div>
+                <!-- END HEADER INNER -->                
+            </div>
+            <!-- END HEADER -->
+            
+            <!-- BEGIN HEADER & CONTENT DIVIDER -->
+            <div class="page-container">
+                <!-- BEGIN SIDEBAR -->
+                <div class="page-sidebar navbar-collapse collapse" >
+                        <ul class="page-sidebar-menu  page-header-fixed page-sidebar-menu-closed" data-keep-expanded="false" data-auto-scroll="true" data-slide-speed="200" style="padding-top: 20px">
+                      
+                                    <!-- DOC: To remove the sidebar toggler from the sidebar you just need to completely remove the below "sidebar-toggler-wrapper" LI element -->
+                                    <!-- BEGIN SIDEBAR TOGGLER BUTTON -->
+                                    <li class="sidebar-toggler-wrapper hide">
+                                        <div class="sidebar-toggler">
+                                            <span></span>
+                                        </div>
+                                    </li>
+                                    <!-- END SIDEBAR TOGGLER BUTTON -->
+                            
+                            
+                                    <li class="nav-item start active open" style="margin-top: 50px;">
+                                        <a href="{{=URL('admin','providerhome')}}" class="nav-link nav-toggle">
+                                            <i class="fa fa-home"></i>
+                                            <span class="title">Dashboard</span>
+                                            <span class="selected"></span>
+                                            
+                                        </a>
+                                    </li>
+                                    <li class="nav-item" style="display:none">
+                                        <a href="{{=URL('member','list_patients',vars=dict(providerid=providerid,page=1))}}" class="nav-link ">
+                                         <i class="fa fa-users"></i>
+                                            <span class="title">Members</span>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item  " style="display:none">
+                                        <a href="{{=URL('member','list_nonmembers',vars=dict(providerid=providerid,page=1))}}" class="nav-link ">
+                                         <i class="fa fa-user"></i>
+                                            <span class="title">Walk-in-Patients</span>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item  " style="display:none">
+                                        <a href="{{=URL('treatment','list_treatments',vars=dict(providerid=providerid,page=1))}}" class="nav-link ">
+                                         <i class="fa fa-leaf"></i>
+                                            <span class="title">Treatments</span>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item  " style="display:none">
+                                        <a href="{{=URL("dentalimage","list_dentalimages",vars=dict(providerid=providerid,page=0))}}" class="nav-link ">
+                                         <i class="fa fa-image"></i>
+                                            <span class="title">Images</span>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item  " style="display:none">
+                                        <a href="{{=URL('appointment','appointment',vars=dict(providerid=providerid,page=1))}}" class="nav-link ">
+                                         <i class="fa fa-calendar"></i>
+                                            <span class="title">Appointments</span>
+                                        </a>
+                                    </li>
+                           
+                           
+                                    <li class="nav-item  " style="display:none">
+                                        <a href="{{=URL('prescription','prescriptions',vars=dict(providerid=providerid,page=1))}}" class="nav-link ">
+                                            <i class="fa fa-file-text-o"></i>
+                                            <span class="title">Prescriptions</span>
+                                        </a>
+                                    </li>
+                          
+             
+                          
+                                    <li class="nav-item" style="display:none">
+                                        <a href="{{=URL('payment','list_payment',vars=dict(providerid=providerid,page=1,patname=""))}}" class="nav-link ">
+                                         <i class="fa fa-money"></i>
+                                            <span class="title">Payment</span>
+                                        </a>
+                                    </li>
+                           
+                                    <li class="nav-item  " style="display:none">
+                                        <a href="{{=URL('consentform','consentform',vars=dict(providerid=providerid,page=1))}}" class="nav-link ">
+                                         <i class="fa fa-pencil-square-o"></i>
+                                            <span class="title">Consent Forms</span>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item"  style="display:none">
+                                        <a href="{{=URL('dentalchart','dentalchart',vars=dict(providerid=providerid,page=1,patientid=846,memberid=1089,treatmentid=2))}}" class="nav-link ">
+                                         <i class="fa fa-area-chart"></i>
+                                            <span class="title">Dental Chart</span>
+                                        </a>
+                                    </li>
+                            
+                                    <li class="nav-item  " style="display:none">
+                                        <a href="javascript:;" class="nav-link nav-toggle">
+                                            <i class="fa fa fa-bell-o"></i>
+                                            <span class="title">SMS/Email Notifications</span>
+                                            <span class="arrow"></span>
+                                        </a>
+                                        <ul class="sub-menu">
+                                            <li class="nav-item  ">
+                                                <a href="{{=URL('utility','birthday_reminders',vars=dict(providerid=providerid))}}" class="nav-link ">
+                                                  <i class="fa fa-gift"></i>
+                                                    <span class="title">Birthday Reminders</span>
+                                                </a>
+                                            </li>
+                                            <li class="nav-item  ">
+                                                <a href="{{=URL('utility','appointment_reminders',vars=dict(providerid=providerid))}}" class="nav-link ">
+                                                  <i class="fa fa-calendar"></i>
+                                                    <span class="title">Appointment Reminders</span>
+                                                </a>
+                                            </li>
+                                            <li class="nav-item  ">
+                                                <a href="{{=URL('utility', 'list_memberpatient',vars=dict(providerid=providerid,page=1,notification="Email"))}}" class="nav-link ">
+                                                  <i class="fa fa-envelope"></i>
+                                                    <span class="title">Send Emails</span>
+                                                </a>
+                                            </li>
+                                            <li class="nav-item  ">
+                                                <a href="{{=URL('utility', 'list_memberpatient',vars=dict(providerid=providerid,page=1,notification="SMS"))}}" class="nav-link ">
+                                                  <i class="fa fa-comment"></i>
+                                                    <span class="title">Send SMS</span>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                            
+                                    <li class="nav-item  " style="display:none">
+                                        <a href="javascript:;" class="nav-link nav-toggle"  >
+                                            <i class="fa fa fa-clock-o"></i>
+                                            <span class="title">End of Day</span>
+                                            <span class="arrow"></span>
+                                        </a>
+                                        <ul class="sub-menu">
+                                            <li class="nav-item  " style="display:none">
+                                                <a href="{{=URL('payment','commit_payment',vars=dict(page=0,providerid=providerid,patname=""))}}" class="nav-link ">
+                                                  <i class="fa fa-gift"></i>
+                                                    <span class="title">Payment Commit</span>
+                                                </a>
+                                            </li>
+        
+                                        </ul>
+                                    </li>
+                       
+                       
+                                    <li class="nav-item  " style="display:none">
+                                        <a href="javascript:;" class="nav-link nav-toggle">
+                                            <i class="fa fa-cog"></i>
+                                            <span class="title">Settings</span>
+                                            <span class="arrow"></span>
+                                        </a>
+                                        <ul class="sub-menu" style="top: -159px;">
+        
+                                            <li class="nav-item  ">
+                                                <a href="{{=URL('doctor', 'list_roles')}}" class="nav-link ">
+                                                  <i class="fa fa-road"></i>
+                                                    <span class="title">Roles</span>
+                                                </a>
+                                            </li>
+                                       
+                                            <li class="nav-item  ">
+                                                <a href="{{=URL('doctor', 'list_specialities')}}" class="nav-link ">
+                                                  <i class="fa fa-bolt"></i>
+                                                    <span class="title">Specialists</span>
+                                                </a>
+                                            </li>
+                                       
+                                            <li class="nav-item  ">
+                                                <a href="{{=URL('prescription', 'list_medicine')}}" class="nav-link ">
+                                                  <i class="fa fa-medkit" ></i>
+                                                    <span class="title">Medicines</span>
+                                                </a>
+                                            </li>
+        
+                                            <li class="nav-item  ">
+                                                <a href="{{=URL('doctor', 'list_doctors')}}" class="nav-link ">
+                                                  <i class="fa fa-user-md"></i>
+                                                    <span class="title">Clinic Staff Details</span>
+                                                </a>
+                                            </li>
+                                            
+                                            <li class="nav-item  ">
+                                                <a href="{{=URL('appointment', 'appointment_block')}}" class="nav-link ">
+                                                  <i class="fa fa-user-md"></i>
+                                                    <span class="title">Block Appointment</span>
+                                                </a>
+                                            </li>
+
+                                            
+                                       
+                                        </ul>
+                                    </li>
+                                    <li class="nav-item  " style="background:#0f6633">
+                                        <a href={{=URL("religare","religare")}} class="nav-link ">
+                                        <img  style="height:16px;width:16px" src="/my_pms2/static/assets/global/img/religare_menu_icon.png" alt="RLGR">
+                                            <span class="title">Religare</span>
+                                        </a>
+                                    </li>
+
+                                    <li class="nav-item  ">
+                                        <a href={{=URL("admin","logout")}} class="nav-link ">
+                                       
+                                         <i class="fa fa-sign-out"></i>
+                                            <span class="title">Logout</span>
+                                        </a>
+                                    </li>
+                       
+                       </ul>
+ 
+                           
+                       
+                       
+               </div>
+                <!-- END SIDEBAR -->
+                
+                <!-- BEGIN CONTENT -->
+                <br>
+                <div class="page-content-wrapper scrol">
+                    <!-- BEGIN CONTENT BODY -->
+                    <div class="page-content">
+                        <!-- BEGIN PAGE BAR -->
+                        <div class="page-bar" style="background: #0f6633 !important;">
+                              <ul class="page-breadcrumb" style="width:60%;text-align: center;">
+                               <li>
+                                    <span> Welcome! {{=providername}}</span>
+                                </li>
+                              </ul>
+                              
+                           
+                            <!--date-->
+                           
+
+                            <ul class="page-breadcrumb" style="float: right;">
+                               
+                                <li><span><label id = "localtime"></label> &nbsp;&nbsp; &nbsp;&nbsp;</span></li>
+                            </ul>
+                           <!--date-->
+                           
+                        </div>
+                        <!-- END PAGE BAR -->
+                        <br>
+                        {{block center}}
+                        {{include}}
+                        {{end}}
+                       
+                    </div>
+                    <!-- END CONTENT BODY -->
+                </div>
+                <!-- END CONTENT -->
+            
+            </div>
+            <!-- END CONTAINER -->
+            
+            <!-- BEGIN FOOTER -->
+            <div class="page-footer">
+                <div class="page-footer-inner" style="color:#fff"> 2017 &copy; &nbsp;|&nbsp;
+                    <a href="http://mydentalplan.in/" title="" target="_blank" style="color:#fff !important">My Dental Plan Healthcare Pvt Ltd </a>| Toll free 1800-102-7526
+                </div>
+                <div class="scroll-to-top">
+                    <i class="icon-arrow-up"></i>
+                </div>
+            </div>
+            <!-- END FOOTER -->
+        </div>
+        
+    
+        {{include 'alljsstaticfiles.html'}}  
+              
+        
+        <script>
+       
+        
+  
+            
+            function refreshPage(){
+
+                var xtz = jstz.determine().name();
+                
+                var dateString = "";
+                var now = new Date();
+                m = now.getMonth() + 1;
+                y = now.getFullYear();
+                d = now.getDate();
+                  
+                if(xtz.includes("Kolkata") | xtz.includes("Kolkatta") | xtz.includes("Calcutta"))
+                {
+                  dateString = d + "/" + m + "/" + y;
+                }
+                else
+                {
+                  dateString = now.toLocaleDateString();
+                }
+                
+                document.getElementById('localtime').innerHTML =  dateString + " " + now.toLocaleTimeString();       
+              
+                setTimeout("refreshPage()", 60000);
+                
+               
+                 
+              }
+            refreshPage();
+            
+            function readMe(){
+                alert("Enter Readme")
+            }
+
+        </script>
+    </body>
+
+</html>

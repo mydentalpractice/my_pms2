@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>My PMS2</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<link rel="stylesheet" href="../static/css/w3.css" />  
+<link rel="stylesheet" href="../static/css/font-awesome.css" />  
+<link rel="stylesheet" href="https://www.w3schools.com/lib/w3-theme-white.css">
+
+{{include 'web2py_ajax.html'}} 
+
+<script>
+	window.onload = function() {
+		var act = function() {
+			document.forwardPG.submit()
+		};
+		window.setTimeout(act, 5000);  <!--5000-->
+	};
+</script>
+</head>
+
+<body>
+
+
+<div class="w3-container">
+<img src="../static/images/logo-my-dental-plan_color.png">
+</div>
+
+  <header class="w3-container w3-black">
+    <h3>Payment is being processed, please wait....</h3>
+  </header>
+  
+
+<!--<form action="https://test.fonepaisa.com/pg/pay" method="post"-->
+<form action="{{=payurl}}" method="post"
+	name="forwardPG">
+	<input type="text" name="msg_name" style="width:60%" value="request_payment"><br/> 
+	<input type="text" name="id" style="width:60%" value="{{=xid}}"> <br/>
+	<input type="text"
+		name="merchant_id" style="width:60%" value="{{=merchantid}}"> <br/> 
+	<input
+		type="text" name="merchant_display" style="width:60%" value="{{=merchantdisplay}}"><br/> 
+	<input type="text" name="invoice_amt" style="width:60%" value="{{=invoiceamt}}"><br/> 
+	<input type="text" name="email" style="width:60%" value="{{=email}}"> <br/> 
+	<input
+		type="text" name="mobile_no" style="width:60%" value="{{=mobileno}}"> <br/> 
+	<input
+		type="text" name="callback_url" style="width:60%" value="{{=callbackurl}}"> <br/> 
+	<input
+		type="text" name="callback_failure_url"
+		style="width:60%" value="{{=callbackfailureurl}}"> <br/> 
+	<input type="text"
+		name="invoice" style="width:60%" value="{{=invoice}}"> <br/> 
+	<input type="text"
+		name="sign" style="width:60%" value="{{=xhash}}"><br/> 
+	<input type="text"
+		name="addnl_info" style="width:60%" value="{{=addlinfo}}"><br/> 
+
+
+</form>  
+
+
+
+</body>
+
+
+</html> 
+

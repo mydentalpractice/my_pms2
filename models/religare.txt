@@ -1,0 +1,178 @@
+03/04/2017
+==========
+1. Made changes to Cities module - Added Mumbai North, Mumbai South, Delhi South
+
+2. create table provider_rhi
+CREATE TABLE `provider_rhi` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `provider` varchar(20) DEFAULT NULL,
+  `title` varchar(45) DEFAULT NULL,
+  `providername` varchar(50) DEFAULT NULL,
+  `practicename` varchar(50) DEFAULT NULL,
+  `address1` varchar(128) DEFAULT NULL,
+  `address2` varchar(128) DEFAULT NULL,
+  `address3` varchar(128) DEFAULT NULL,
+  `city` varchar(50) DEFAULT NULL,
+  `st` varchar(50) DEFAULT NULL,
+  `pin` varchar(20) DEFAULT NULL,
+  `p_address1` varchar(128) DEFAULT NULL,
+  `p_address2` varchar(128) DEFAULT NULL,
+  `p_address3` varchar(128) DEFAULT NULL,
+  `p_city` varchar(45) DEFAULT NULL,
+  `p_st` varchar(45) DEFAULT NULL,
+  `p_pin` varchar(45) DEFAULT NULL,
+  `telephone` varchar(20) DEFAULT NULL,
+  `cell` varchar(20) DEFAULT NULL,
+  `fax` varchar(20) DEFAULT NULL,
+  `email` varchar(50) DEFAULT NULL,
+  `taxid` varchar(20) DEFAULT NULL,
+  `enrolleddate` date DEFAULT NULL,
+  `assignedpatientmembers` int(11) DEFAULT NULL,
+  `captguarantee` double DEFAULT NULL,
+  `schedulecapitation` double DEFAULT NULL,
+  `capitationytd` double DEFAULT NULL,
+  `captiationmtd` double DEFAULT NULL,
+  `languagesspoken` longtext,
+  `specialization` longtext,
+  `sitekey` varchar(20) DEFAULT NULL,
+  `groupregion` int(11) DEFAULT NULL,
+  `registration` varchar(128) DEFAULT NULL,
+  `registered` char(1) DEFAULT 'F',
+  `pa_providername` varchar(255) DEFAULT NULL,
+  `pa_practicename` varchar(128) DEFAULT NULL,
+  `pa_practiceaddress` varchar(255) DEFAULT NULL,
+  `pa_dob` date DEFAULT NULL,
+  `pa_parent` varchar(255) DEFAULT NULL,
+  `pa_address` varchar(255) DEFAULT NULL,
+  `pa_pan` varchar(45) DEFAULT NULL,
+  `pa_regno` varchar(45) DEFAULT NULL,
+  `pa_date` datetime DEFAULT NULL,
+  `pa_accepted` char(1) DEFAULT 'F',
+  `pa_approved` char(1) DEFAULT 'F',
+  `pa_approvedby` int(11) DEFAULT NULL,
+  `pa_approvedon` datetime DEFAULT NULL,
+  `pa_day` varchar(45) DEFAULT NULL,
+  `pa_month` varchar(45) DEFAULT NULL,
+  `pa_location` varchar(128) DEFAULT NULL,
+  `pa_practicepin` varchar(45) DEFAULT NULL,
+  `groupsms` char(1) DEFAULT 'F',
+  `groupemail` char(1) DEFAULT 'F',
+  `is_active` char(1) DEFAULT NULL,
+  `created_on` datetime DEFAULT NULL,
+  `created_by` int(11) DEFAULT NULL,
+  `modified_on` datetime DEFAULT NULL,
+  `modified_by` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `created_by__idx` (`created_by`),
+  KEY `modified_by__idx` (`modified_by`)
+ 
+) ENGINE=InnoDB AUTO_INCREMENT=713 DEFAULT CHARSET=utf8;
+
+
+3. copy provider into provider_rhi  - insert into provider_rhi  select * from provider
+
+4. update provider_rhi set is_active = 'F'
+
+5. update provider_rhi set is_active = 'T' where provider in(
+'P10233','P10234','P10236','P10237','P10238','P10239','P10241','P10280','P10286','P10299','P10300','P10301','P10303','P10306','P10315','P10316','P10317',
+'P10330','P10415','P10464'
+,'P10528'
+,'P10529'
+,'P10631'
+,'P10632'
+,'P10634'
+,'P10635'
+,'P10640'
+,'P10641'
+,'P10642'
+,'P10646'
+,'P10647'
+,'P10650'
+,'P10655'
+,'P10656'
+,'P10658'
+,'P10659'
+,'P10660'
+,'P10661'
+,'P10663'
+,'P10672'
+,'P10674'
+,'P10676'
+,'P10677'
+,'P10679'
+,'P10684'
+,'P10685'
+,'P10686'
+,'P10774'
+,'P10775'
+,'P10777'
+,'P10803'
+,'P10638'
+,'P10767'
+,'P10287'
+,'P10297'
+,'P10305'
+,'P10445'
+,'P10636'
+,'P10673'
+,'P10788'
+,'P10235'
+,'P10240'
+,'P10307'
+,'P10351'
+,'P10487'
+,'P10630'
+,'P10653'
+,'P10682'
+,'P10691'
+,'P10629'
+,'P10637'
+,'P10643'
+,'P10318'
+,'P10320'
+,'P10322'
+,'P10386'
+,'P10406'
+,'P10645'
+,'P10651'
+,'P10652'
+,'P10654'
+,'P10662'
+,'P10678'
+,'P10100'
+,'P10101'
+,'P10102'
+,'P10103'
+,'P10105'
+,'P10110'
+,'P10111'
+,'P10112'
+,'P10114'
+,'P10123'
+,'P10124'
+,'P10126'
+,'P10261'
+,'P10273'
+,'P10274'
+,'P10275'
+,'P10276'
+,'P10334'
+,'P10340'
+,'P10365'
+,'P10402'
+,'P10409'
+,'P10412'
+,'P10414'
+,'P10444'
+,'P10507'
+,'P10742'
+,'P10776'
+,'P10778'
+,'P10792'
+,'P10794'
+,'P10799'
+,'P10581'
+,'P10107')
+
+6. Inserted new regions
+DELS, MUMN, MUMS

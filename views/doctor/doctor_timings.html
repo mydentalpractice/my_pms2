@@ -1,0 +1,298 @@
+{{extend 'pms2_layoutw4.html'}}
+
+{{=formA.custom.begin}}
+
+                        <div class="row">
+                            <div class="col-md-12">
+                                <!-- BEGIN EXAMPLE TABLE PORTLET-->
+                                <div class="portlet light bordered">
+                                    <div class="portlet-title" style="padding:0px 20px  !important">
+                                        <div class="caption font-white" style="    width: 100%;">
+                                            <span class="caption-subject bold uppercase">Visiting Timings for {{=doctorname}}</span>
+                                        </div>                                    
+                                    
+                                       
+                                    </div>
+                                    <div class="col-md-offset-2 col-md-8 col-md-offset-2">
+                                    <!-- BEGIN Portlet PORTLET-->
+  <div id="menu2" class="tab-pane fade in active">
+
+  
+
+    <!--MON-->
+    <fieldset class="form-group row">
+      <div class="col-sm-12">
+        <div class="form-check ">
+          <label class="form-check-label">
+             <strong> Monday </strong>{{=formA.custom.widget.mon_day_chk}} I visit this clinic on Monday
+          </label>
+        </div>
+          <div class="form-check">
+          <label class="form-check-label">
+            {{=formA.custom.widget.mon_lunch_chk}} I take a break for lunch
+          </label>
+        </div>
+      </div>
+      
+      <div class="form-group">
+      <label for="email">I visit clinic at</label>
+      {{=formA.custom.widget.mon_starttime_1}}
+      <label for="email">leave clinic at</label>
+      {{=formA.custom.widget.mon_endtime_1}}
+      </div>
+      <div class="form-group">
+      <label for="email">I visit clinic at</label>
+      {{=formA.custom.widget.mon_starttime_2}}
+      <label for="email">leave clinic at</label>
+      {{=formA.custom.widget.mon_endtime_2}}
+      </div>
+     
+     
+    </fieldset> 
+       
+        
+        
+
+ <!--TUE-->
+    <fieldset class="form-group row">
+      <div class="col-sm-12">
+        <div class="form-check ">
+          <label class="form-check-label">
+             <strong> Tuesday </strong>{{=formA.custom.widget.tue_day_chk}} I visit this clinic on Tuesday
+          </label>
+        </div>
+          <div class="form-check">
+          <label class="form-check-label">
+            {{=formA.custom.widget.tue_lunch_chk}} I take a break for lunch
+          </label>
+        </div>
+      </div>
+      
+      <div class="form-group">
+      <label for="email">I visit clinic at</label>
+      {{=formA.custom.widget.tue_starttime_1}}
+      <label for="email">leave clinic at</label>
+      {{=formA.custom.widget.tue_endtime_1}}
+      </div>      
+      <div class="form-group">
+      <label for="email">I visit clinic at</label>
+      {{=formA.custom.widget.tue_starttime_2}}
+      <label for="email">leave clinic at</label>
+      {{=formA.custom.widget.tue_endtime_2}}
+      </div>
+     
+     
+    </fieldset> 
+
+    <!--WED-->
+    <fieldset class="form-group row">
+      <div class="col-sm-12">
+        <div class="form-check ">
+          <label class="form-check-label">
+             <strong> Wednesday </strong>{{=formA.custom.widget.wed_day_chk}} I visit this clinic on Wednesday
+          </label>
+        </div>
+          <div class="form-check">
+          <label class="form-check-label">
+            {{=formA.custom.widget.wed_lunch_chk}} I take a break for lunch
+          </label>
+        </div>
+      </div>
+      
+      <div class="form-group">
+      <label for="email">I visit clinic at</label>
+      {{=formA.custom.widget.wed_starttime_1}}
+      <label for="email">leave clinic at</label>
+      {{=formA.custom.widget.wed_endtime_1}}
+      </div>      
+      <div class="form-group"> 
+      <label for="email">I visit clinic at</label>
+      {{=formA.custom.widget.wed_starttime_2}}
+      <label for="email">leave clinic at</label>
+      {{=formA.custom.widget.wed_endtime_2}}
+      </div>
+     
+    </fieldset> 
+    
+    <!--THU-->
+    <fieldset class="form-group row">
+      <div class="col-sm-12">
+        <div class="form-check ">
+          <label class="form-check-label">
+             <strong> Thursday </strong>{{=formA.custom.widget.thu_day_chk}} I visit this clinic on Thursday
+          </label>
+        </div>
+          <div class="form-check">
+          <label class="form-check-label">
+            {{=formA.custom.widget.thu_lunch_chk}} I take a break for lunch
+          </label>
+        </div>
+      </div>
+      
+      <div class="form-group">
+      <label for="email">I visit clinic at</label>
+      {{=formA.custom.widget.thu_starttime_1}}
+      <label for="email">leave clinic at</label>
+      {{=formA.custom.widget.thu_endtime_1}}
+      </div>      
+      <div class="form-group">
+      <label for="email">I visit clinic at</label>
+      {{=formA.custom.widget.thu_starttime_2}}
+      <label for="email">leave clinic at</label>
+      {{=formA.custom.widget.thu_endtime_2}}
+      </div>
+     
+    </fieldset> 
+    
+    <!--FRI-->
+    <fieldset class="form-group row">
+      <div class="col-sm-12">
+        <div class="form-check ">
+          <label class="form-check-label">
+             <strong> Friday </strong>{{=formA.custom.widget.fri_day_chk}} I visit this clinic on Friday
+          </label>
+        </div>
+          <div class="form-check">
+          <label class="form-check-label">
+            {{=formA.custom.widget.fri_lunch_chk}} I take a break for lunch
+          </label>
+        </div>
+      </div>
+      
+      <div class="form-group">
+      <label for="email">I visit clinic at</label>
+      {{=formA.custom.widget.fri_starttime_1}}
+      <label for="email">leave clinic at</label>
+      {{=formA.custom.widget.fri_endtime_1}}
+      </div>      
+      <div class="form-group">
+      <label for="email">I visit clinic at</label>
+      {{=formA.custom.widget.fri_starttime_2}}
+      <label for="email">leave clinic at</label>
+      {{=formA.custom.widget.fri_endtime_2}}
+      </div>
+     
+    </fieldset> 
+    
+    <!--SAT-->
+    <fieldset class="form-group row">
+      <div class="col-sm-12">
+        <div class="form-check ">
+          <label class="form-check-label">
+             <strong> Saturday </strong>{{=formA.custom.widget.sat_day_chk}} I visit this clinic on Saturday
+          </label>
+        </div>
+          <div class="form-check">
+          <label class="form-check-label">
+            {{=formA.custom.widget.sat_lunch_chk}} I take a break for lunch
+          </label>
+        </div>
+      </div>
+      
+      <div class="form-group">
+      <label for="email">I visit clinic at</label>
+      {{=formA.custom.widget.sat_starttime_1}}
+      <label for="email">leave clinic at</label>
+      {{=formA.custom.widget.sat_endtime_1}}
+      </div>      
+      <div class="form-group">
+      <label for="email">I visit clinic at</label>
+      {{=formA.custom.widget.sat_starttime_2}}
+      <label for="email">leave clinic at</label>
+      {{=formA.custom.widget.sat_endtime_2}}
+      </div>
+     
+    </fieldset> 
+    
+    <!--SUN-->
+    <fieldset class="form-group row">
+      <div class="col-sm-12">
+        <div class="form-check ">
+          <label class="form-check-label">
+             <strong> Sunday </strong>{{=formA.custom.widget.sun_day_chk}} I visit this clinic on Sunday
+          </label>
+        </div>
+          <div class="form-check">
+          <label class="form-check-label">
+            {{=formA.custom.widget.sun_lunch_chk}} I take a break for lunch
+          </label>
+        </div>
+      </div>
+      
+      <div class="form-group">
+      <label for="email">I visit clinic at</label>
+      {{=formA.custom.widget.sun_starttime_1}}
+      <label for="email">leave clinic at</label>
+      {{=formA.custom.widget.sun_endtime_1}}
+      </div>      
+      <div class="form-group">
+      <label for="email">I visit clinic at</label>
+      {{=formA.custom.widget.sun_starttime_2}}
+      <label for="email">leave clinic at</label>
+      {{=formA.custom.widget.sun_endtime_2}}
+      </div>
+    </fieldset> 
+   
+ 
+    <div class="col-md-12" style="margin-bottom:30px">
+      <button type="submit" class="btn green">Save </button>
+      <a href="{{=returnurl}}">Cancel </a>
+      
+   </div>
+
+<div style="display:none">
+{{=formA.custom.widget.mon_del_chk}}
+{{=formA.custom.widget.tue_del_chk}}
+{{=formA.custom.widget.wed_del_chk}}
+{{=formA.custom.widget.thu_del_chk}}
+{{=formA.custom.widget.fri_del_chk}}
+{{=formA.custom.widget.sat_del_chk}}
+{{=formA.custom.widget.sun_del_chk}}
+
+
+{{=formA.custom.widget.mon_visitinghours}}
+{{=formA.custom.widget.tue_visitinghours}}
+{{=formA.custom.widget.wed_visitinghours}}
+{{=formA.custom.widget.thu_visitinghours}}
+{{=formA.custom.widget.fri_visitinghours}}
+{{=formA.custom.widget.sat_visitinghours}}
+{{=formA.custom.widget.sun_visitinghours}}
+
+
+{{=formA.custom.widget.visitinghours}}
+
+</div>
+
+
+  
+</div>
+
+
+                                    <!-- END Portlet PORTLET-->
+                                  </div>
+
+                                </div>
+                                <!-- END EXAMPLE TABLE PORTLET-->
+                            </div>
+                        </div>
+
+<script>
+function setmonday()
+{
+  if (document.getElementById('monRadio').checked) 
+  {
+      document.getElementById('no_table_mon_day').value = "Monday"
+  } else {
+      document.getElementById('no_table_mon_day').value = ""
+  }
+}
+
+
+</script>
+
+{{=formA.custom.end}}
+
+
+
+
+

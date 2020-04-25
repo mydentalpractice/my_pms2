@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+	<title>My Dental Plan - New User Login</title>
+
+    <meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0' name='viewport' />
+    <meta name="viewport" content="width=device-width" />
+    <!--<link href="../static/assets/css/bootstrap.min.css" rel="stylesheet" />-->
+    <!--<link href="../static/assets/css/styles.css" rel="stylesheet" />-->
+     <!--<link href="../static/css/web2py.css" rel="stylesheet" />-->
+    <!--<link href="../static/assets/css/font-awesome.css" rel="stylesheet">-->
+    <!--<link href="https://netdna.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.css" rel="stylesheet">-->
+    
+    <link href="../static/assets/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="../static/assets.css/bootstrap-responsive.min.css" rel="stylesheet" />
+    <link href="../static/assets/css/styles.css" rel="stylesheet" />
+    <link href="../static/css/web2py.css" rel="stylesheet" />
+    <link href="../static/css/web2py_bootstrap.css" rel="stylesheet" />
+    <!--<link href="../static/assets/css/font-awesome.css" rel="stylesheet">  -->
+    <!--<link href="https://netdna.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.css" rel="stylesheet">  -->
+    
+   {{include 'web2py_ajax.html'}}    
+   
+</head>
+
+<body>
+<div class="image-container set-full-height" style="background-color:#ffffff">
+     <!--   My Dental Plan Branding   -->
+    <a href="https://www.mydentalplan.in" target="_blank">
+         <div class="logo-container">
+            <div class="logo">
+                <img src="../static/assets/img/logo-my-dental-plan_color.png">
+            </div>
+            <div class="brand">  
+            </div>
+        </div>
+    </a>
+    <!--   Big container   -->
+    <div class="container">
+        <div class="row">
+        <div class="col-sm-8 col-sm-offset-2">
+           
+            <!--      Wizard container        -->   
+            <div class="wizard-container"> 
+		<form  method="post" name="formLogin" id="formLogin">
+		    {{=formlogin.custom.begin}}                
+		    <div class="card wizard-card ct-wizard-azzure" id="wizard">
+                <!--        You can switch "ct-wizard-azzure"  with one of the next bright colors: "ct-wizard-blue", "ct-wizard-green", "ct-wizard-orange", "ct-wizard-red"             -->
+                    	<div class="wizard-header">
+                        	<h3>
+                        	   <b>Registered User</b> Login to My Dental Plan <br>
+                        	   <small>Login and become a member with My Dental Plan.</small>
+                        	</h3>
+                    	</div>
+                    	<ul>
+                           
+                            <li><a href="#login" data-toggle="tab">Login</a></li>
+                        </ul>
+                        <div class="tab-content">
+                            <div class="tab-pane" id="member"><!--member tab starts here-->
+                              <div class="row">
+                                  <div class="col-sm-12">
+                                    <h4 class="info-text">Becoming a My Dental Plan member couldn't be easier!</h4>
+                                  </div>
+                                  <div class="col-sm-10 col-sm-offset-1">
+                                       <p>Login to My Dental Plan portal using your username and password.  Upload your passport size photo, enter your basic details such as your first name, last name, date of birth, address, pincode (mandatory) and also pincode of choice to choose your dentist. </p>
+                                       
+                                       <p>Based on your pincode of choice of choosing your provider, My Dental Plan will allot a provider as close as possible.</p>
+                                       <img src="../static/assets/img/logo-my-dental-plan_color.png">
+                                  </div>
+                                  </div>
+                            </div><!--member tab ends here-->
+                            
+                            <div class="tab-pane" id="login"><!--login tab starts here-->
+                                <div class="row">
+                                    <h4 class="info-text"> Login</h4>
+                                    <div class="col-sm-6 col-sm-offset-1">
+                                          <div class="form-group">
+                                            <label>Username</label>
+                                              {{=formlogin.custom.widget.username}}</span>
+                                          </div>
+                                         <div class="form-group">
+                                            <label>Password</label>
+					    
+                                            {{=formlogin.custom.widget.password}}
+					     <br/><a href={{=URL('my_dentalplan','default','member_resetpassword')}}>Forgot your password?</a>
+                                            </div>
+                                    </div>
+                                    <div class="col-sm-4">
+                                         <div class="form-group">
+                                             <b>Welcome to My Dental Plan - Login</b>
+                                            <p class="description">Join My Dental Plan and avail upto 40% discount on all the treatments in all the empanelled clinics across India." You have INDEED made the right choice!</p>
+                                          </div>
+                                          
+                                          <div class="form-group">
+                                            <b>Can't sign in?  Forgot your password</b>
+					     <p class="description"> Click <a href={{=URL('my_dentalplan','default','member_resetpassword')}}>here</a> and we'll send you password reset instructions.</p>
+					    
+                                      
+                                          </div>
+                                          
+                                    </div>
+                                </div>
+                            </div><!--login tab ends here-->
+                        </div>
+                        <div class="wizard-footer">
+                            	<div class="pull-right">
+                                    <input type='button' class='btn btn-next btn-fill btn-info btn-wd btn-sm' name='next' value='Next' />
+                                    <input type='submit' class='btn btn-finish btn-fill btn-info btn-wd btn-sm' onclick="javascript: validate()" name='finish' value='Login' />
+                                </div>
+                                <div class="pull-left">
+                                    <input type='button' class='btn btn-previous btn-fill btn-default btn-wd btn-sm' name='previous' value='Previous' />
+                                </div>
+                                <div class="clearfix"></div>
+                        </div>	
+                </div>
+		{{=formlogin.custom.end}}
+                </form>
+            </div> <!-- wizard container -->
+        </div>
+        </div> <!-- row -->
+    </div> <!--  big container -->
+    
+    <div class="footer">
+      <div class="container">
+              © 2015 My Dental Plan. All Rights Reserved.
+              <Br><a href={{=URL('my_dentalplan','default','termsandconditions')}} target="_blank">Terms & Conditions</a>
+	      
+      </div>
+    </div>
+</div>
+</body>
+    <script src="../static/assets/js/jquery-1.10.2.js" type="text/javascript"></script>
+	<script src="../static/assets/js/bootstrap.min.js" type="text/javascript"></script>	
+	<!--   plugins 	 -->
+	<script src="../static/assets/js/jquery.bootstrap.wizard.js" type="text/javascript"></script>
+	<script src="../static/assets/js/wizard.js"></script>
+	
+      <script>
+      function validate()
+      {
+	username =  document.getElementById('auth_user_username').value
+	if(username == "")
+	{
+	    alert("Username cannot be empty!!!")
+	}
+      }
+      
+      </script>
+	
+</html>

@@ -1,0 +1,391 @@
+{{extend 'pms2_layoutw4.html'}}
+
+{{=formMedHist.custom.begin}}
+
+
+						    <div class="row">
+							<div class="col-md-12">
+							
+						          <div class="portlet light bordered">
+								<div class="portlet-title">
+								    <div class="caption font-white">
+									 <i class="fa fa-road" style="color:#fff"></i>
+									 <span class="caption-subject bold uppercase">Medical History for {{=formMedHist.custom.widget.patientmember}}</span>
+								     </div>
+								</div>
+								
+                                                            <div class="col-md-2">
+                                                                  <div class="form-group">
+                                                                    <label class="m_title"> Date</label>
+                                                                    {{=formMedHist.custom.widget.notesdate}}
+                                                                  </div>
+                                                             </div>
+                                                             <div class="col-md-2">
+                                                                  <div class="form-group">
+                                                                    <label class="m_title">Gender</label>
+                                                                    {{=formMedHist.custom.widget.xgender}}
+                                                                  </div>
+                                                             </div>
+                                                       							     
+                                                               <div class="col-md-2">
+                                                                  <div class="form-group">
+                                                                    <label class="m_title"> DOB</label>
+                                                                    {{=formMedHist.custom.widget.dob}}
+                                                                  </div>
+                                                             </div>
+                                                             <div class="col-md-2">
+                                                                  <div class="form-group">
+                                                                    <label class="m_title"> Age</label>
+                                                                    {{=formMedHist.custom.widget.age}}
+                                                                  </div>
+                                                             </div>
+                                                             <div class="col-md-2">
+                                                                  <div class="form-group">
+                                                                    <label class="m_title"> Height (Ft.Inch)</label>
+                                                                    {{=formMedHist.custom.widget.height}}
+                                                                  </div>
+                                                             </div>
+                                                             <div class="col-md-2">
+                                                                  <div class="form-group">
+                                                                    <label class="m_title"> Weight (Kg)</label>
+                                                                    {{=formMedHist.custom.widget.weight}}
+                                                                  </div>
+                                                             </div>
+							     
+                                                             <div class="col-md-2">
+                                                                  <div class="form-group">
+                                                                    <label class="m_title"> Mobile</label>
+                                                                    {{=formMedHist.custom.widget.cell}}
+                                                                  </div>
+                                                             </div>
+                                                             <div class="col-md-2">
+                                                                  <div class="form-group">
+                                                                    <label class="m_title"> Phone</label>
+                                                                    {{=formMedHist.custom.widget.telephone}}
+                                                                  </div>
+                                                             </div>
+                                                             <div class="col-md-2">
+                                                                  <div class="form-group">
+                                                                    <label class="m_title"> Email</label>
+                                                                    {{=formMedHist.custom.widget.email}}
+                                                                  </div>
+                                                             </div>
+							     
+                                                             <div class="col-md-2">
+                                                                  <div class="form-group">
+                                                                    <label class="m_title"> Occupation</label>
+                                                                    {{=formMedHist.custom.widget.occupation}}
+                                                                  </div>
+                                                             </div>
+                                                             <div class="col-md-2">
+                                                                  <div class="form-group">
+                                                                    <label class="m_title"> Res/Off</label>
+                                                                     {{=formMedHist.custom.widget.resoff}}
+                                                                  </div>
+                                                             </div>
+							     <div class="col-md-2">
+                                                                  <div class="form-group">
+                                                                    <label class="m_title"> Name of Doctor/Friend if any</label>
+                                                                     {{=formMedHist.custom.widget.referer}}
+                                                                  </div>
+                                                             </div>
+                                                             <div class="col-md-8">
+                                                                  <div class="form-group">
+                                                                    <label class="m_title"> Address</label>
+                                                                     {{=formMedHist.custom.widget.address}}
+                                                                  </div>
+                                                             </div>
+                                                             
+                                                             <div class="col-md-12">
+                                                                  <p class="m_title"><strong>Please let us know about your health status (Tick if you have any) :</strong></p>
+                                                                  <div class="col-md-12">
+                                                                        <div class="mt-checkbox-inline">
+                                                                            <label class="mt-checkbox mt-checkbox-outline">
+                                                                                {{=formMedHist.custom.widget.bp}} High Blood Pressure
+                                                                                <span></span>
+                                                                            </label>
+                                                                            <label class="mt-checkbox mt-checkbox-outline">
+                                                                                {{=formMedHist.custom.widget.anaemia}} Anaemia
+                                                                                <span></span>
+                                                                            </label>
+                                                                            <label class="mt-checkbox mt-checkbox-outline">
+                                                                                {{=formMedHist.custom.widget.epilepsy}} Epilepsy
+                                                                                <span></span>
+                                                                            </label>
+                                                                            <label class="mt-checkbox mt-checkbox-outline">
+                                                                                {{=formMedHist.custom.widget.diabetes}} Diabetes
+                                                                                <span></span>
+                                                                            </label>
+                                                                            <label class="mt-checkbox mt-checkbox-outline">
+                                                                                 {{=formMedHist.custom.widget.asthma}} Asthma
+                                                                                <span></span>
+                                                                            </label>
+                                                                            <label class="mt-checkbox mt-checkbox-outline">
+                                                                                 {{=formMedHist.custom.widget.sinus}} Sinus Trouble
+                                                                                <span></span>
+                                                                            </label>
+                                                                            <label class="mt-checkbox mt-checkbox-outline">
+                                                                                 {{=formMedHist.custom.widget.heart}} Heart Trouble
+                                                                                <span></span>
+                                                                            </label>
+                                                                            <label class="mt-checkbox mt-checkbox-outline">
+                                                                                 {{=formMedHist.custom.widget.jaundice}} Jaundice
+                                                                                <span></span>
+                                                                            </label>
+                                                                            <label class="mt-checkbox mt-checkbox-outline">
+                                                                                 {{=formMedHist.custom.widget.tb}} Tuberculosis
+                                                                                <span></span>
+                                                                            </label>
+                                                                            <label class="mt-checkbox mt-checkbox-outline">
+                                                                                 {{=formMedHist.custom.widget.anaemia}} Cardiac Pacemaker
+                                                                                <span></span>
+                                                                            </label>
+                                                                            <label class="mt-checkbox mt-checkbox-outline">
+                                                                                 {{=formMedHist.custom.widget.arthritis}} Arthritis
+                                                                                <span></span>
+                                                                            </label>
+                                                                            <label class="mt-checkbox mt-checkbox-outline">
+                                                                                 {{=formMedHist.custom.widget.anyother}} Any Other
+                                                                                <span></span>
+                                                                            </label>
+                                                                            
+                                                                        </div>
+                                                    </div>
+                                                              </div>
+
+                                                              <div class="col-md-12">
+                                                                <div class="col-sm-8">
+                                                                    <p class="m_title"><strong>Are you Allergic to Penicillin or any Drugs or medicine?</strong></p>
+								   
+                                                                </div>
+                                                                <div class="col-sm-4">
+                                                                    <label class="mt-radio mt-radio-outline"> Yes
+								    {{if(formMedHist.custom.widget.allergic['value'] == True):}}
+                                                                        <input id='allergic_yes' value = "1" type="radio"  checked name="allergic">
+								    {{else:}}
+                                                                        <input id='allergic_yes' value = "1" type="radio"  name="allergic">
+    								    {{pass}}
+                                                                        <span></span>
+                                                                    </label>
+                                                                      <label class="mt-radio mt-radio-outline"> No
+								    {{if(formMedHist.custom.widget.allergic['value'] == False):}}
+                                                                        <input id='allergic_no' value="0" type="radio" checked name="allergic">
+								    {{else:}}
+									<input id='allergic_no' value = "0" type="radio"  name="allergic">
+								    {{pass}}
+                                                                        <span></span>
+                                                                    </label>          
+
+                                                                </div>
+                                                             </div> 
+                                                              <div class="col-md-12">
+                                                                <div class="col-sm-8">
+                                                                    <p class="m_title"><strong>Have you ever had excessive bleeding requiring specical treatment?</strong></p>
+                                                                </div>
+                                                                <div class="col-sm-4">
+                                                                    <label class="mt-radio mt-radio-outline"> Yes
+								    {{if(formMedHist.custom.widget.excessivebleeding['value'] == True):}}
+                                                                        <input type="radio" value="1" id="excessivebleeding_yes"name="excessivebleeding" checked>
+								    {{else:}}
+                                                                        <input type="radio" value="1" id="excessivebleeding_yes"name="excessivebleeding" >
+								    {{pass}}
+                                                                        <span></span>
+                                                                    </label>
+                                                                      <label class="mt-radio mt-radio-outline"> No
+								      {{if(formMedHist.custom.widget.excessivebleeding['value'] == False):}}
+                                                                        <input type="radio" value="0" id="excessivebleeding_no" name="excessivebleeding" checked>
+								      {{else:}}
+                                                                        <input type="radio" value="0" id="excessivebleeding_no" name="excessivebleeding" >
+								      {{pass}}
+								      
+                                                                        <span></span>
+                                                                    </label>          
+
+                                                                </div>
+                                                             </div>
+                                                              <div class="col-md-12">
+                                                                <div class="col-sm-8">
+                                                                    <p class="m_title"><strong>Have you ever had any other serious illness?</strong></p>
+                                                                </div>
+                                                                <div class="col-sm-4">
+								    <label class="mt-radio mt-radio-outline"> Yes
+								    {{if(formMedHist.custom.widget.seriousillness['value'] == True):}}
+                                                                        <input type="radio" value="1" id="seriousillness_yes"name="seriousillness" checked>
+								    {{else:}}
+                                                                        <input type="radio" value="1" id="seriousillness_yes"name="seriousillness" >
+								    {{pass}}
+                                                                        <span></span>
+                                                                    </label>
+                                                                      <label class="mt-radio mt-radio-outline"> No
+								      {{if(formMedHist.custom.widget.seriousillness['value'] == False):}}
+                                                                        <input type="radio" value="0" id="seriousillness_no" name="seriousillness" checked>
+								      {{else:}}
+                                                                        <input type="radio" value="0" id="seriousillness_no" name="seriousillness" >
+								      {{pass}}
+                                                                        <span></span>
+                                                                    </label>          
+								      
+                                                                </div>
+                                                             </div>
+                                                              <div class="col-md-12">
+                                                                <div class="col-sm-8">
+                                                                    <p class="m_title"><strong>Have you ever been hospitalized?</strong></p>
+                                                                </div>
+                                                                <div class="col-sm-4">
+								    <label class="mt-radio mt-radio-outline"> Yes
+								    {{if(formMedHist.custom.widget.hospitalized['value'] == True):}}
+                                                                        <input type="radio" value="1" id="hospitalized_yes"name="hospitalized" checked>
+								    {{else:}}
+                                                                        <input type="radio" value="1" id="hospitalized_yes"name="hospitalized" >
+								    {{pass}}
+                                                                        <span></span>
+                                                                    </label>
+                                                                      <label class="mt-radio mt-radio-outline"> No
+								      {{if(formMedHist.custom.widget.hospitalized['value'] == False):}}
+                                                                        <input type="radio" value="0" id="hospitalized_no" name="hospitalized" checked>
+								      {{else:}}
+                                                                        <input type="radio" value="0" id="hospitalized_no" name="hospitalized" >
+								      {{pass}}
+                                                                        <span></span>
+                                                                    </label>          
+								      
+
+                                                                </div>
+                                                             </div>
+                                                              <div class="col-md-12">
+                                                                <div class="col-sm-8">
+                                                                    <p class="m_title"><strong>Are you taking any medications at present?</strong></p>
+                                                                </div>
+                                                                <div class="col-sm-4">
+								    <label class="mt-radio mt-radio-outline"> Yes
+								    {{if(formMedHist.custom.widget.medications['value'] == True):}}
+                                                                        <input type="radio" value="1" id="medications_yes"name="medications" checked>
+								    {{else:}}
+                                                                        <input type="radio" value="1" id="medications_yes"name="medications" >
+								    {{pass}}
+                                                                        <span></span>
+                                                                    </label>
+                                                                      <label class="mt-radio mt-radio-outline"> No
+								      {{if(formMedHist.custom.widget.medications['value'] == False):}}
+                                                                        <input type="radio" value="0" id="medication_no" name="medications" checked>
+								      {{else:}}
+                                                                        <input type="radio" value="0" id="medication_no" name="medications" >
+								      {{pass}}
+                                                                        <span></span>
+                                                                    </label>          
+								      
+                                                                </div>
+                                                             </div>
+                                                              <div class="col-md-12">
+                                                                <div class="col-sm-8">
+                                                                    <p class="m_title"><strong>Have you undergone any surgery under anaesthesia in the past?</strong></p>
+                                                                </div>
+                                                                <div class="col-sm-4">
+								    <label class="mt-radio mt-radio-outline"> Yes
+								    {{if(formMedHist.custom.widget.surgery['value'] == True):}}
+                                                                        <input type="radio" value="1" id="surgery_yes"name="surgery" checked>
+								    {{else:}}
+                                                                        <input type="radio" value="1" id="surgery_yes"name="surgery" >
+								    {{pass}}
+                                                                        <span></span>
+                                                                    </label>
+                                                                      <label class="mt-radio mt-radio-outline"> No
+								      {{if(formMedHist.custom.widget.surgery['value'] == False):}}
+                                                                        <input type="radio" value="0" id="surgery_no" name="surgery" checked>
+								      {{else:}}
+                                                                        <input type="radio" value="0" id="surgery_no" name="surgery" >
+								      {{pass}}
+                                                                        <span></span>
+                                                                    </label>          
+								      
+                                                                </div>
+                                                             </div>
+                                                              <div class="col-md-12">
+                                                                <div class="col-sm-8">
+                                                                    <p class="m_title"><strong>Women Are you pregnant now?</strong></p>
+                                                                </div>
+                                                                <div class="col-sm-4">
+								    <label class="mt-radio mt-radio-outline"> Yes
+								    {{if(formMedHist.custom.widget.pregnant['value'] == True):}}
+                                                                        <input type="radio" value="1" id="pregnant_yes"name="pregnant" checked>
+								    {{else:}}
+                                                                        <input type="radio" value="1" id="pregnant_yes"name="pregnant" >
+								    {{pass}}
+                                                                        <span></span>
+                                                                    </label>
+                                                                      <label class="mt-radio mt-radio-outline"> No
+								      {{if(formMedHist.custom.widget.pregnant['value'] == False):}}
+                                                                        <input type="radio" value="0" id="pregnant_no" name="pregnant" checked>
+								      {{else:}}
+                                                                        <input type="radio" value="0" id="pregnant_no" name="pregnant" >
+								      {{pass}}
+                                                                        <span></span>
+                                                                    </label>          
+								      
+                                                                </div>
+                                                             </div>
+                                                             <div class="col-md-12">
+                                                                <div class="col-sm-8">
+                                                                    <p class="m_title"><strong>Are you breast feeding?</strong></p>
+                                                                </div>
+                                                                <div class="col-sm-4">
+								    <label class="mt-radio mt-radio-outline"> Yes
+								    {{if(formMedHist.custom.widget.breastfeeding['value'] == True):}}
+                                                                        <input type="radio" value="1" id="breastfeeding_yes"name="breastfeeding" checked>
+								    {{else:}}
+                                                                        <input type="radio" value="1" id="breastfeeding_yes"name="breastfeeding" >
+								    {{pass}}
+                                                                        <span></span>
+                                                                    </label>
+                                                                      <label class="mt-radio mt-radio-outline"> No
+								      {{if(formMedHist.custom.widget.breastfeeding['value'] == False):}}
+                                                                        <input type="radio" value="0" id="breastfeeding_no" name="breastfeeding" checked>
+								      {{else:}}
+                                                                        <input type="radio" value="0" id="breastfeeding_no" name="breastfeeding" >
+								      {{pass}}
+                                                                        <span></span>
+                                                                    </label>          
+								      
+                                                                </div>
+                                                             </div>
+                                                              <div class="col-md-12">
+                                                                  <div class="form-group">
+                                                                    <label class="m_title">Any Other</label>
+                                                                     {{=formMedHist.custom.widget.anyothercomplaint}}
+                                                                  </div>
+                                                             </div>
+                                                             <div class="col-md-6">
+                                                                  <div class="form-group">
+                                                                    <label class="m_title">Chief Complaint</label>
+								    {{=formMedHist.custom.widget.chiefcomplaint}}
+
+                                                                  </div>
+                                                             </div>
+                                                             <div class="col-md-6">
+                                                                  <div class="form-group">
+                                                                    <label class="m_title">Duration of Complaint</label>
+								     {{=formMedHist.custom.widget.duration}}
+
+                                                                  </div>
+                                                             </div>
+
+                                                              <div class="col-md-12" style="margin-bottom:30px">
+								<button type="submit" id="SM" onclick="loader(this.id)" class="btn green">Save <i class="fa fa-spinner fa-spin" id="loaderDIVSM" style="display:none"></i></button>
+								<a href="{{=returnurl}}">Cancel </a>
+                                                            </div>
+							     
+							   </div>
+							   
+							</div>
+						    </div>
+						    
+							  
+							  
+
+<div style="display:none">
+    <input class="form-control" type="text" id="notes_memberid" name="notes_memberid" value="{{=memberid}}">
+    <input class="form-control" type="text" id="notes_patientid" name="notes_patientid" value="{{=patientid}}">
+    <input class="form-control" type="text" id="notes_providerid" name="notes_providerid" value="{{=providerid}}">
+</div>
+					    
+{{=formMedHist.custom.end}}

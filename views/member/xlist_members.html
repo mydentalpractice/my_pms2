@@ -1,0 +1,298 @@
+<html>
+<title>W3.CSS Template</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="../static/css/web2py.css"  />
+<link rel="stylesheet" href="../static/css/web2py_bootstrap.css" />
+<link rel="stylesheet" href="../static/css/web2py_bootstrap_nojs.css" />
+<link rel="stylesheet" href="../static/css/w3.css" />  
+
+<link rel="stylesheet" href="http://www.w3schools.com/lib/w3-theme-white.css">
+<link rel="shortcut icon" href="../static/raysti/images/favicon.ico" type="image/x-icon">
+<link rel="icon" href="../static/raysti/images/favicon.ico" type="image/x-icon">
+<link rel="stylesheet" href="../static/raysti/styles/lib.css">
+<link rel="stylesheet" href="../static/raysti/styles/app.css">
+<link rel="stylesheet" href="../static/css/font-awesome.css" />  
+<style>
+html,body,h1,h2,h3,h4,h5 {font-family: "Arial", sans-serif}
+</style>
+
+
+
+{{include 'web2py_ajax.html'}}   
+  
+<body class="w3-light-grey">
+
+<!-- Top container -->
+<div class="w3-bar w3-top w3-black w3-large" style="z-index:4">
+  <button class="w3-bar-item w3-button w3-hide-large w3-hover-none w3-hover-text-light-grey" onclick="w3_open();"><i class="fa fa-bars"></i>  Menu</button>
+  <div class="w3-left">
+ 
+   <i class="fa fa-dashboard"></i><span><strong>Welcome, {{=providername}}</strong></span>
+  </div>
+  
+   <div class="w3-right">
+   {{=request.now.strftime('%b, %d %Y %H:%M:%S')}}&nbsp;&nbsp; &nbsp;&nbsp; 
+    
+  </div>
+  </div>
+
+<!-- Sidebar/menu -->
+<nav class="w3-sidebar w3-collapse w3-white w3-animate-left" style="z-index:3;width:300px;" id="mySidebar"><br>
+  <div class="w3-container w3-row">
+    <div class="w3-col">
+      <img  src="http://www.mydentalplan.us/my_dentalplan/static/assets/img/logo-my-dental-plan_color.png" class="w3-image" style="width:80%"><br/><br/>    
+    </div>
+  
+  </div>
+
+  <div class="w3-bar-block">
+                         
+  
+    <a href="#" class="w3-bar-item w3-button w3-padding-16 w3-hide-large w3-dark-grey w3-hover-black" onclick="w3_close()" title="close menu"><i class="fa fa-remove fa-fw"></i>  Close Menu</a>
+    
+    <hr>
+    
+    <a href="{{=URL('member','list_members',vars=dict(providerid=providerid,page=1))}}" class="w3-bar-item w3-button w3-padding">
+            <span class="sidebar-list-item-icon glyphicon glyphicon-home"></span>
+            <span class="sidebar-list-item-title">Home</span>    
+    </a>
+    <hr>
+    
+    <a href="{{=URL('member','list_members',vars=dict(providerid=providerid,page=1))}}" class="w3-bar-item w3-button w3-padding">
+            <span class="sidebar-list-item-icon glyphicon glyphicon-user"></span>
+            <span class="sidebar-list-item-title">Members</span>    
+    </a>
+    
+    <a href="#" class="w3-bar-item w3-button w3-padding">
+            <span class="sidebar-list-item-icon glyphicon glyphicon-user"></span>
+            <span class="sidebar-list-item-title">Non-Members</span>    
+    </a>
+
+  <a href="{{=URL('treatment','list_treatmentplans',vars=dict(providerid=providerid,page=1))}}" class="w3-bar-item w3-button w3-padding">
+              <span class="sidebar-list-item-icon glyphicon glyphicon-leaf"></span>
+              <span class="sidebar-list-item-title">Treatment PLans</span>
+  </a>
+                            
+  <a href="{{=URL("dentalimage","list_dentalimages",vars=dict(providerid=providerid,page=0))}}" class="w3-bar-item w3-button w3-padding">
+            <span class="sidebar-list-item-icon glyphicon glyphicon-picture"></span>
+            <span class="sidebar-list-item-title">Images</span>
+  </a>
+  <a href="{{=URL('appointment','calendar',vars=dict(providerid=providerid,page=0))}}" class="w3-bar-item w3-button w3-padding">
+            <span class="sidebar-list-item-icon glyphicon glyphicon-calendar"></span>
+            <span class="sidebar-list-item-title">Appoinments</span>
+  </a>
+
+  <a href="#" class="w3-bar-item w3-button w3-padding">
+            <span class="sidebar-list-item-icon fa fa-inr"></span>
+            <span class="sidebar-list-item-title">Payments</span>
+  </a>
+  <a href="#" class="w3-bar-item w3-button w3-padding">
+            <span class="sidebar-list-item-icon fa fa-hospital-o"></span>
+            <span class="sidebar-list-item-title">Prescriptions</span>
+  </a>
+
+<hr>
+  <a href="{{=URL('utility', 'reminders',vars=dict(providerid=providerid,page=0))}}" class="w3-bar-item w3-button w3-padding">
+            <span class="sidebar-list-item-icon glyphicon glyphicon-gift"></span>
+            <span class="sidebar-list-item-title">Birthdays Reminders</span>
+  </a>
+
+  <a href="{{=URL('appointment', 'reminders',vars=dict(providerid=providerid,page=0))}}" class="w3-bar-item w3-button w3-padding">
+            <span class="sidebar-list-item-icon glyphicon glyphicon-calendar"></span>
+            <span class="sidebar-list-item-title">Appoinment Reminders</span>
+  </a>
+
+  <a href="{{=URL('utility', 'list_memberpatient',vars=dict(providerid=providerid,page=1,notification="Email"))}}" class="w3-bar-item w3-button w3-padding">
+            <span class="sidebar-list-item-icon glyphicon glyphicon-envelope"></span>
+            <span class="sidebar-list-item-title">Send Emails</span>
+  </a>
+
+  <a href="{{=URL('utility', 'list_memberpatient',vars=dict(providerid=providerid,page=1,notification="SMS"))}}" class="w3-bar-item w3-button w3-padding">
+            <span class="sidebar-list-item-icon glyphicon glyphicon-comment"></span>
+            <span class="sidebar-list-item-title">Send SMS</span>
+  </a>
+  <hr>
+  <a href="{{=returnurl}}" class="w3-bar-item w3-button w3-padding">
+            <span class="sidebar-list-item-icon glyphicon glyphicon-backward"></span>
+            <span class="sidebar-list-item-title">Back</span>
+  </a>
+  <hr>
+  <a href="{{=URL('admin','logout')}}" class="w3-bar-item w3-button w3-padding">
+            <span class="sidebar-list-item-icon glyphicon glyphicon-log-out"></span>
+            <span class="sidebar-list-item-title">Logout</span>
+  </a>
+    
+  </div>
+</nav>
+
+
+<!-- Overlay effect when opening sidebar on small screens -->
+<div class="w3-overlay w3-hide-large w3-animate-opacity" onclick="w3_close()" style="cursor:pointer" title="close side menu" id="myOverlay"></div>
+
+<!-- !PAGE CONTENT! -->
+<div class="w3-main main-content" style="margin-left:300px;margin-top:40px;">
+
+
+<section class="container-fluid body-section">
+  <div class="w3-row-padding w3-margin-bottom">
+    <div class="w3-quarter">
+      <div class="w3-container w3-white w3-padding-0">
+                  <!-- dashboard-panels -->
+                  <div class="dashboard-panels w3-pale-blue">
+                    <span class="dashboard-badge">
+                      <a href="{{=URL('member','list_members',vars=dict(providerid=providerid,page=1))}}"><img class="add-icon" src="../static/raysti/images/icons/svg/002-eye.svg" alt="View"></a>
+                    </span>
+                    <div class="dashboard-header w3-blue-gray">
+                      <h4>Members</h4>
+                    </div>
+                    <div class="dashboard-content">
+                          <div class="w3-cell-row">
+                            <div class="w3-container w3-margin-left w3-cell">
+                             <p><strong>Members:</strong></p>
+                             <p><strong>Non-Members:</strong></p>
+                            </div>
+                           
+                            <div class="w3-container w3-cell">
+                             <p>{{=session.members}}</p>
+                             <p>{{=session.nonmembers}}</p>
+                            </div>                     
+                         </div>                     
+                    </div>
+                  </div>
+                  <!-- end:dashboard-panels -->      
+          </div>
+    </div>
+
+    <div class="w3-quarter">
+      <div class="w3-container w3-white w3-padding-0 ">
+                  <!-- dashboard-panels -->
+                  <div class="dashboard-panels w3-pale-blue">
+                    <span class="dashboard-badge">
+                      <a href="{{=URL('treatment','list_treatmentplans',vars=dict(providerid=providerid,page=1))}}"><img class="add-icon" src="../static/raysti/images/icons/svg/002-eye.svg" alt="View"></a>
+                    </span>
+                    <div class="dashboard-header w3-blue-gray ">
+                      <h4>Treatment Plans</h4>
+                    </div>
+                    <div class="dashboard-content">
+                          <div class="w3-cell-row">
+                            <div class="w3-container w3-margin-left w3-cell">
+                             <p><strong>Treatment Plans:</strong></p>
+                            </div>
+                           
+                            <div class="w3-container w3-cell">
+                             <p>{{=session.treatmentplans}}</p>
+                            </div>                     
+                         </div>                     
+                    </div>
+                  </div>
+                  <!-- end:dashboard-panels -->      
+      </div>
+    </div>
+    <div class="w3-quarter">
+      <div class="w3-container w3-white w3-padding-0">
+                  <!-- dashboard-panels -->
+                  <div class="dashboard-panels w3-pale-blue">
+                    <span class="dashboard-badge">
+                     <a href="#" class="fa fa-inr w3-white  w3-xlarge"> </a>
+                    </span>
+                    <div class="dashboard-header w3-blue-gray">
+                      <h4>Payments</h4>
+                    </div>
+                    <div class="dashboard-content">
+                          <div class="w3-cell-row">
+                            <div class="w3-container w3-margin-left w3-cell">
+                             <p><strong>Outstanding Payments:</strong></p>
+                            </div>
+                           
+                            <div class="w3-container w3-cell">
+                             <p>0</p>
+                            </div>                     
+                         </div>                     
+                    </div>
+                  </div>
+                  <!-- end:dashboard-panels -->      
+      </div>
+    </div>
+    <div class="w3-quarter">
+      <div class="w3-container w3-white w3-padding-0">
+                  <!-- dashboard-panels -->
+                  <div class="dashboard-panels w3-pale-blue">
+                    <span class="dashboard-badge">
+                      <a href="{{=URL('appointment','calendar',vars=dict(providerid=providerid,page=0))}}"><img class="add-icon" src="../static/raysti/images/icons/svg/011-calendar.svg" alt="View"></a>
+                    </span>
+                    <div class="dashboard-header w3-blue-gray">
+                      <h4>Appointments</h4>
+                    </div>
+                    <div class="dashboard-content">
+                          <div class="w3-cell-row">
+                            <div class="w3-container w3-margin-left w3-cell">
+                             <p><strong>Todays Appts:</strong></p>
+                             <p><strong>Active Appts:</strong></p>
+                            </div>
+                           
+                            <div class="w3-container w3-cell">
+                             <p>{{=session.appointments}}</p>
+                             <p>{{=session.appointments}}</p>
+                            </div>                     
+                         </div>                     
+                    </div>
+                  </div>
+                  <!-- end:dashboard-panels -->      
+      </div>
+
+  </div>
+    
+ </div>   
+ 
+</section>
+
+
+
+
+       <div class="w3-container w3-arial"> 
+     {{=form}}
+       </div>
+
+
+
+            
+
+
+
+<footer class="w3-container w3-blue-grey w3-border w3-text-white" style="text-align:right">
+  <a  href="http://www.mydentalplan.in" class="w3-text-white" target="_blank"> &copy;2015 mydentalplan.in </a>
+</footer>
+
+
+ </div> 
+ <!---END Page Content-->
+</body>
+<script>
+// Get the Sidebar
+var mySidebar = document.getElementById("mySidebar");
+
+// Get the DIV with overlay effect
+var overlayBg = document.getElementById("myOverlay");
+
+// Toggle between showing and hiding the sidebar, and add overlay effect
+function w3_open() {
+    if (mySidebar.style.display === 'block') {
+        mySidebar.style.display = 'none';
+        overlayBg.style.display = "none";
+    } else {
+        mySidebar.style.display = 'block';
+        overlayBg.style.display = "block";
+    }
+}
+
+// Close the sidebar with the close button
+function w3_close() {
+    mySidebar.style.display = "none";
+    overlayBg.style.display = "none";
+}
+</script>
+</html>

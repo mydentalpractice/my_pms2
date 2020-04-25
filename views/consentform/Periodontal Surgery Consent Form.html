@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>MDP- IDA-Consent for Periodontal Surgery</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link href="https://fonts.googleapis.com/css?family=Poppins:100,100i,200,200i,300,300i,400,400i,500,500i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
+</head>
+  <script src="https://docraptor.com/docraptor-1.0.0.js"></script>
+  <script>
+    var downloadPDF = function() {
+      DocRaptor.createAndDownloadDoc("YOUR_API_KEY_HERE", {
+        test: true, // test documents are free, but watermarked
+        type: "pdf",
+        document_content: document.querySelector('html').innerHTML, // use this page's HTML
+        // document_content: "<h1>Hello world!</h1>",               // or supply HTML directly
+        // document_url: "http://example.com/your-page",            // or use a URL
+        // javascript: true,                                        // enable JavaScript processing
+        // prince_options: {
+        //   media: "screen",                                       // use screen styles instead of print styles
+        // }
+      })
+    }
+  </script>
+  <style>
+body{font-family: 'Poppins', sans-serif !important;}
+li{font-size: 13px !important;list-style: decimal;}
+
+ul>li {
+  margin:0;
+ text-indent:-2em;
+  list-style-type:none;
+  counter-increment:item;
+}
+ 
+ul>li:before {
+  display:inline-block;
+  width:1.5em;
+  padding-right:4px;
+  font-weight:bold;
+  text-align:right;
+  content:counter(item) ".";
+}
+.np{    padding: 0px;}
+    .npl{padding-left: 0px;text-align: left;}
+    .npl p{    margin-bottom: 5px !important;    font-size: 14px;}
+    .npr{padding-right: 0px;text-align: right;}
+    .pb{padding-bottom: 5px;}
+    .bor{display: grid;padding: 0px;float: left;}
+    .pt{padding-top: 30px;}
+    #pdf-button{    background: #1d77b3;
+    border: none;
+    color: #fff;
+    margin: 20px 0px;
+    padding: 8px;}
+    .bg_blue{    background: #fff;padding: 0px 0px;}
+    .bg_blue1{    background: #fff;padding: 0px 0px;}
+    strong{font-weight: 600;}
+    td{font-size: 10px; padding: 3px 0px;}
+    td:first-child {font-weight: 500;    width: max-content;
+    float: left;}
+    .bt_text{    text-align: center;
+    font-size: 16px;
+    color: #fff;
+    margin-top: 8px;
+    font-weight: 600;}
+    ul {
+    list-style-image: url('https://mydentalplan.in/teeth_icon.png');
+}
+li{font-size:9px;}
+@media only screen and (max-width: 400px) and (min-width: 300px)  {
+
+    .bt_text{font-size: 12px !important;}
+ul{font-size: 11px !important;}
+  .npl p{ font-size:9px !important;}
+      .btm{font-size: 10px !important;}
+      .pt{padding-top:0px !important;}
+}
+@media only screen and (max-width: 400px) and (min-width: 300px)  {
+  .bt_text{font-size: 12px !important;}
+ul{font-size: 8px !important;}
+  .npl p{ font-size:14px !important;}
+     
+      .pt{padding-top:0px !important;}
+.pad{padding: 10px 10px !important;}
+.btm{text-align:left !important;}
+}
+
+
+</style>
+  <style>
+    @media print {
+      #pdf-button {
+        display: none;
+      }
+     
+       
+
+ /* All your print styles go here */
+ #btnPrint{ display: none !important; } 
+ .button{ display: none !important; } 
+ a{display: none !important}
+ p{font-size: 12px !important}
+}
+  </style>
+
+<body>
+  <div class="container">
+    <div class="col-sm-12">
+ <!--Id Card Front part start-->
+
+          <div class="col-sm-12 bor">
+            <!--logo start-->
+              <div class="col-sm-12"> <input id="pdf-button" type="button" value="Download PDF" onclick="downloadPDF()" /></div>
+          <div class="container-fluid">
+                 <div class="col-sm-12">
+                   
+                     <div class="col-sm-6 text-right marg" style="margin-left:-14px;" >Date:&nbsp;&nbsp;<strong>{{=consentdate}}</strong></div>
+                 </div>
+          </div> 
+          <div class="container-fluid background right" style="margin-bottom:0%;"> 
+              <div class="col-sm-12 text-center right" style="margin-top:2%; ">
+                     <h4 style="color:#1875b2;" class="right"><strong>{{if(len(prov[0].practicename) > 0):}}<strong>{{=prov[0].practicename}}</strong>{{pass}}</strong></h4>
+                                        <h5 style="color:#1875b2;" class="right"><strong>{{=prov[0].providername}}</strong><br>State Dental Council Registration Number: {{=registration}}</h5>
+                                        <p>{{if(len(prov[0].practicename) > 0):}}{{=prov[0].practicename}}{{pass}}{{if(len(prov[0].address1) > 0):}}
+                    {{=prov[0].address1}},&nbsp;&nbsp;
+                    {{pass}}
+                    {{if(len(prov[0].address2) > 0):}}
+                    {{=prov[0].address2}},&nbsp;&nbsp;
+                    {{pass}}      
+                    {{if(len(prov[0].address3) > 0):}}
+                    {{=prov[0].address3}},&nbsp;&nbsp; 
+                    {{pass}}
+                    
+                    {{if(len(prov[0].city) > 0):}}
+                    {{=prov[0].city}}{{pass}},{{if(len(prov[0].st) > 0):}} {{=prov[0].st}}{{pass}} {{if(len(prov[0].pin) > 0):}} - {{=prov[0].pin}}{{pass}}<br/>
+                    Phone: {{=prov[0].cell}}&nbsp;&nbsp;&nbsp;&nbsp;Email: {{=prov[0].email}}&nbsp;&nbsp;&nbsp;&nbsp;</p>
+              </div> 
+          </div>  
+       <!--Header start-->
+          <div class="col-sm-12 bg">
+               <div class="col-xs-12 npl">
+                 
+                <p>Patient: <span style="text-decoration: underline;">{{=patientmember}}</span></p>
+                <p>Date: <strong>{{=consentdate}}</strong> I, <span style="text-decoration: underline;">{{=patientmember}}</span>, authorize and request Dr.(s) , <span style="text-decoration: underline;">&nbsp; &nbsp;{{=doctorname}}</span>and/or such assistants as may be selected by him (them) to provide <span style="text-decoration: underline;">{{=dentalprocedure}}</span> to address the conditions or symptoms based on the diagnostic studies and/or evaluations already performed and which have been explained to me.The doctor has also explained to me in detail about the diagnosis, treatment, medications and the postoperative complications which may arise due to the operation. </p>
+      <!--Header end-->               
+      <!--Body Start-->         
+            <p><b>•  Diagnosis</b>
+On careful oral examination and study of my dental condition, Dr.<span style="text-decoration: underline;">&nbsp; &nbsp;{{=doctorname}}</span> has advised me that I have periodontal (gum) disease. I understand that periodontal disease weakens support of my teeth by separating the gum from the teeth and can also be destructive for the bone that supports the teeth. This separation of the gums (pockets) allows for greater accumulation of bacteria under the gum and can result in further erosion or loss of bone and gum supporting the roots of my teeth. If untreated, periodontal disease can cause teeth loss and has other adverse consequences.
+ </p>
+
+            <p><b>•  Recommended Treatment</b>
+My dentist has recommended periodontal surgery. I understand that sedation may be utilized and that a local anesthetic will be administered to me as part of the treatment. I further understand that antibiotics and other substances may be applied to the roots of my teeth.
+During this procedure, my gum will be opened to permit better access to the roots and to the eroded bone. Inflamed and infected gum tissue will be removed and the root surfaces will be thoroughly cleaned. Bone irregularities may be reshaped and bone regenerative material may be placed around my teeth. My gum will then be sutured back into position and a periodontal bandage or dressing may be placed.
+</p>
+
+            <ul>
+                 <li>I further understand that unforeseen conditions may call for a modification or change from the anticipated surgical plan. These may include, but are not limited to:</li>
+            <li>Extraction of decayed teeth to enhance healing of adjacent teeth.</li>
+            <li>The removal of a decayed root of a multi-rooted tooth so as to preserve the tooth.</li>
+            <li>Termination of the procedure prior to completion of all the surgery originally outlined.</li>
+           </ul>
+            <p>Expected Benefits The purpose of periodontal surgery is to reduce infection and inflammation and to restore my gum and bone. The surgery is intended to help me keep my teeth in the operated areas and to make my oral hygiene effective.
+            </p>
+
+            <p><b>•  Principal Risks and Complications</b>
+I understand that a small number of patients do not respond successfully to periodontal surgery and in such cases, the involved teeth may eventually be lost. Periodontal surgery may not be successful in preserving function or appearance. Because each patient's condition is unique, long-term success may not be possible.
+
+           </p>
+
+            <p>I understand that complications may result from the periodontal surgery, drugs or anesthetics.</p>
+
+              <p><b>•  These complications include, but are not limited to:</b></p>
+              <ul>
+                 <li>post-surgical infection,</li>
+                 <li>bleeding,</li>
+                 <li>swelling and pain,</li>
+                 <li>facial discoloration,</li>
+                 <li>transient but on occasion permanent numbness of the jaw, lip, tongue, teeth, chin or gum (more likely with performing a connective tissue or free gingival grafting procedure),</li>
+                 <li>jaw joint injuries or associated muscle spasm,</li>
+                 <li>tooth sensitivity to hot, cold, sweet or acidic foods,</li>
+                 <li>shrinkage of the gum upon healing resulting in elongation of some teeth and greater spaces between some teeth,</li>
+                 <li>cracking or bruising of the corners of the mouth,</li>
+                 <li>restricted ability to open the mouth for few days or more,</li>
+                 <li>impact on speech,</li>
+                 <li>allergic reactions and</li>
+                 <li>accidental swallowing of foreign matter.</li>
+                </ul>
+          <p> The exact duration of any complications cannot be determined and may be irreversible. There is no method that will accurately predict or evaluate how my gum and bone will heal. I understand that there may be a need for a second procedure if the initial results are not satisfactory.</p>
+          <p>In addition, the success of periodontal procedures can be affected by medical condition, dietary and nutritional problems, smoking, alcohol consumption, clenching and grinding of teeth, inadequate oral hygiene and medications that I may be taking.</p>
+          <p><p>To my knowledge, I have reported to my dentist any prior drug reactions, allergies, diseases, symptoms, habits or conditions that might in any way relate to this surgical procedure.
+          I understand that taking care as recommended by my dentist and medications as prescribed is important to the ultimate success of the procedure.</p>
+
+ <p><b>•  Alternatives to Suggested Treatment</b></p>
+ <ul>
+ <li>understand that alternatives to periodontal surgery include:</li>
+ <li>Possible advancement of my condition may result in premature loss of teeth.</li>
+ <li>Extraction of teeth involved with periodontal disease.</li>
+ <li>Non-surgical scraping of tooth roots and lining of the gum (scaling and root planning), with or without medication, in an attempt to further reduce bacteria and tartar under the gumline.</li>
+</ul>
+ 
+
+<p><b>•  Necessary Follow-up Care and Self-Care</b>
+I understand that it is important for me to see my dentist on a regular basis. Existing restorative dentistry can be an important factor in the success or failure of periodontal therapy. From time to time, my dentist may make recommendations for the placement of restorations, the replacement or modification of existing restorations, the joining together of two or more of my teeth, the extraction of one or more teeth, the performance of root canal therapy or the movement of one, several or all of my teeth. I understand that the failure to follow such recommendations could lead to ill effects. I recognize that natural teeth and their artificial replacements should be maintained daily in a clean, hygienic manner. I will need to come for appointments following my surgery so that my healing may be monitored and my dentist can evaluate and report on the outcome of surgery upon completion of healing. Smoking or alcohol intake may adversely affect gum healing and may limit the successful outcome of my surgery.</p>
+<p>I know that it is important </p>
+<ul>
+<li>To abide by the specific prescriptions and instructions given by the dentist and </li>
+<li>To see my dentist for periodic examination and preventive treatment. Maintenance also may include adjustment of prosthetic appliances.</li>
+</ul>
+<p><b>•  No Warranty or Guarantee</b></p>
+<p>I hereby acknowledge that no guarantee, warranty or assurance has been given to me that the proposed treatment will be successful. In most cases, the treatment should provide benefit in reducing the cause of my condition and should produce healing which will help me keep my teeth. Due to individual patient differences, however, a dentist cannot predict certain success. There is a risk of failure, relapse, additional treatment or even worsening of my present condition, including the possible loss of certain teeth, despite the best of care.
+</p>
+
+
+
+
+
+           
+           <p>I certify that I have read, have had explained to me, and fully understand the foregoing Consent to <span style="text-decoration: underline;">{{=dentalprocedure}}</span>,  drug and anesthetic procedures, and that it is my intention to have the foregoing carried out as stated. I have been advised of information concerning the longevity of the procedure. However, I have discussed this as well as the nature of the services and procedures and I consent to the above procedure knowing its risks and limitations.</p>
+
+      <!--Body End--> 
+
+
+               <!--Footer start--> 
+               <div class="col-sm-6 np">
+                    <p><b>Doctor Name:</b><span style="text-decoration: underline;">&nbsp; &nbsp;{{=doctorname}}</span></p>
+                    <p><b>Doctor Signature:</b>________________________</p>
+                    <p><b>State Dental Council Registration Number:</b>&nbsp;&nbsp;{{=docreg}}</p>
+                    <p><b>Patient Name:-</b><span style="text-decoration: underline;">{{=patientmember}}</span></p>
+                    <p><b>Patient Signature:-</b>________________________</p>
+                    <p><b>Witness (if available) :-</b>________________________</p>
+                    <p><b>Parent / Guardian if patient is minor:-</b>________________________</p>                                                
+                    <p><b>Date:-</b> {{=consentdate}}&nbsp;&nbsp;<b>Date:-</b> {{=consentdate}}</p>
+                    <p><a id="can" href="{{=returnurl}}">Cancel </a></p>
+               </div>
+                <!--Footer end-->                
+               </div>
+               
+              
+            </div>  
+       <!--customer details end-->
+       
+      </div>
+      <div class="col-sm-2"></div>
+</div>
+<!--Id Card Front part End-->
+
+
+
+ 
+
+
+
+
+
+   </div>
+
+</body>
+</html>

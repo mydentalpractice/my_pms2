@@ -1,0 +1,78 @@
+{{extend 'pms2_layoutw4.html'}}
+{{=form.custom.begin}}
+                        
+                        <div class="row">
+                            <div class="col-md-12">
+                                <!-- BEGIN EXAMPLE TABLE PORTLET-->
+                                <div class="portlet light bordered">
+                                    <div class="portlet-title">
+                                        <div class="caption font-white">
+                                            <i class="fa fa-calendar" style="color:#fff"></i>
+                                            <span class="caption-subject bold uppercase">Appointment Reminders</span>
+                                        </div>
+                                       
+                                    </div>
+                                    <div class="col-md-12">
+                                    <!-- BEGIN Portlet PORTLET-->
+                                    <div class="col-sm-12 md_r">
+                                       
+                                        <div class="portlet-body" style="padding:20px">
+                                            <div class="col-md-12 np">
+                                                 
+                                                  <div class="col-md-6">
+                                                     <div class="form-group">
+                                                       <div class="mt-repeater-input">
+                                                                    <label class="m_title">Start Date</label>
+                                                                    <br>
+                                                                    {{=form.custom.widget.start}}
+                                                       </div>  
+                                                       </div>  
+                                                   </div>
+                                                   <div class="col-md-6">
+                                                     <div class="form-group">
+                                                       <div class="mt-repeater-input">
+                                                                    <label class="m_title">End Date</label>
+                                                                    <br>
+                                                                    {{=form.custom.widget.end}}
+                                                       </div>  
+                                                       </div>  
+                                                   </div>
+                                       
+                                                   <div class="form-group">
+                                                   
+                                                    <div class="col-md-9">
+                                                        <div class="mt-radio-inline">
+                                                            <label class="mt-radio">
+                                                                <input type="radio" name="remindertype" id="rdsms" value="SMS" checked> SMS 
+                                                                <span></span>
+                                                            </label>
+                                                            <label class="mt-radio">
+                                                                <input type="radio" name="remindertype" id="rdemail" value="Email" > Email 
+                                                                <span></span>
+                                                            </label>
+                                                            
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                             
+                                           
+                                            
+                                            <div class="col-md-12" style="margin-bottom:30px">
+						<button type="submit" class="btn green">Send</button>
+						<a href="{{=returnurl}}">Cancel </a>                                            
+					    </div>
+
+                                        </div>
+                                    </div>
+                                    <!-- END Portlet PORTLET-->
+                                  </div>
+
+                                </div>
+                                <!-- END EXAMPLE TABLE PORTLET-->
+                                
+
+                            </div>
+                        </div>
+                        
+{{=form.custom.end}}

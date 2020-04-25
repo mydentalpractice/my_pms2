@@ -1,0 +1,400 @@
+{{extend 'pms2_layoutw4.html'}}
+
+ <script src="https://www.postdicom.com/cloud-api/PostDicomCloudApi.2.0.min.js" type="text/javascript"></script>   
+
+{{=formA.custom.begin}}
+
+                        <div class="row">
+                            <div class="col-md-12">
+                                <!-- BEGIN EXAMPLE TABLE PORTLET-->
+                                <div class="portlet light bordered">
+                                    <div class="portlet-title">
+                                        <div class="caption font-white">
+                                            <i class="fa fa-image" style="color:#fff"></i>
+                                            <span class="caption-subject bold uppercase"> Upload DICOM Image: {{=patientname}} &nbsp;|&nbsp;Member ID: {{=patientmember}}</span>
+					    <span class="caption-subject bold uppercase"> Treatment: {{=treatment}}</span>
+                                        </div>
+                                       
+                                    </div>
+				    <br/>
+					<div class="col-md-12">
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+						   <label>DICOM User UID</label>
+                                                    <div class="input-group">
+                                                        <span class="input-group-addon"><i class="fa fa-user"></i></span>
+                                                         {{=formA.custom.widget.dicomUserUuid}}
+                                                    </div>
+                                                </div>
+                                            </div>
+					    
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+						   <label>DICOM Account Uuid</label>
+						
+                                                    <div class="input-group">
+                                                        <span class="input-group-addon"><i class="fa fa-user"></i></span>
+                                                         {{=formA.custom.widget.dicomAcctUuid}}
+                                                    </div>
+                                                </div>
+                                            </div>
+					    
+                                            <div class="col-md-4">
+                                                 <div class="form-group">
+						   <label>DICOM Institution ID</label>
+						 
+                                                    <div class="input-group">
+                                                        <span class="input-group-addon"><i class="fa fa-user"></i></span>
+                                                        {{=formA.custom.widget.dicomInstUuid}} 
+                                                    </div>
+                                                </div>
+                                            </div>
+				    </div>
+				    
+                                    <div class="col-md-12">
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+						   <label>DICOM Patient Name</label>
+                                                    <div class="input-group">
+                                                        <span class="input-group-addon"><i class="fa fa-user"></i></span>
+                                                         {{=formA.custom.widget.dicomPatName}}
+                                                    </div>
+                                                </div>
+                                            </div>
+					    
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+						   <label>DICOM Patient Uuid</label>
+						
+                                                    <div class="input-group">
+                                                        <span class="input-group-addon"><i class="fa fa-user"></i></span>
+                                                         {{=formA.custom.widget.dicomPatUuid}}
+                                                    </div>
+                                                </div>
+                                            </div>
+					    
+                                            <div class="col-md-4">
+                                                 <div class="form-group">
+						   <label>DICOM Patient ID</label>
+						 
+                                                    <div class="input-group">
+                                                        <span class="input-group-addon"><i class="fa fa-user"></i></span>
+                                                        {{=formA.custom.widget.dicomPatid}} 
+                                                    </div>
+                                                </div>
+                                            </div>
+				    </div>
+				    <div class="col-md-12">
+				    
+				    <div class="col-md-6">
+                                                 <div class="form-group">
+						   <label>DICOM Patient Order Uuid</label>
+						 
+                                                    <div class="input-group">
+                                                        <span class="input-group-addon"><i class="fa fa-user"></i></span>
+                                                        {{=formA.custom.widget.dicomPatOrderUuid}} 
+                                                    </div>
+                                                </div>
+						
+                                     </div>    
+				     <div class="col-md-6">
+                                                 <div class="form-group">
+						   <label>DICOM Procedure Description</label>
+						 
+                                                    <div class="input-group">
+                                                        <span class="input-group-addon"><i class="fa fa-user"></i></span>
+                                                        {{=formA.custom.widget.dicomProcDesc}} 
+                                                    </div>
+                                                </div>
+						
+                                     </div>    
+				     
+				     </div>
+				    <div class="col-md-12">
+				    <div class="col-md-12">
+                                                 <div class="form-group">
+						   <label>DICOM Image Url</label>
+						 
+                                                    <div class="input-group">
+                                                        <span class="input-group-addon"><i class="fa fa-user"></i></span>
+                                                        {{=formA.custom.widget.dicomURL}} 
+                                                    </div>
+                                                </div>
+                                     </div>    
+                                     </div>    
+                                            
+				    <div class="col-md-12">   
+				    <div class="col-md-12">   
+					<div class="btn-group" style="margin: 0px 15px 20px 0px;">
+					<input id="upload_file_input" name="upload_file_input" type="file" onchange="loader(this.id),SelectFiles(event,1)" multiple style=" display:none; width:50%; color: #002825; cursor: pointer; font-size: 14px; float: left; outline: none;" />
+					<label id="folder_upload_class_cursor1" class="folder_upload_class" for="upload_file_input">Choose Files<i class="fa fa-spinner fa-spin" id="loaderDIVupload_file_input" style="display:none"></i></label><span id="upload_file_name"></span>
+					</div>
+					<br/>
+					<a id="UP1" class="btn sboad"  onClick="loader(this.id),uploadDICOMFile()">Upload DICOM File<i class="fa fa-spinner fa-spin" id="loaderDIVUP1" style="display:none"></i></a>
+				    </div>  
+				    </div>  
+				    
+                                        </div>    
+                                        
+                                    <!-- END Portlet PORTLET-->
+                                </div>
+                           </div>
+		       </div>
+
+
+
+{{=formA.custom.end}}
+<br/>
+<script>
+var userUuid;
+var accountUuid;
+var institutionUuid;
+var userName;
+
+var patientName;
+var patientID;
+var patientUuid;
+var patientOrderUuid;
+var procDesc;
+
+var imageURL;
+
+var mdpFolder;
+var mdpFolderUuid;
+
+var patFolder;
+var patFolderUuid;
+
+var selectedFilesList;
+
+
+var getFolderListFlag;
+var createFolderFlag;
+
+
+
+
+function SelectFiles(event, type) {
+    <!--alert('Select Files Complete')-->
+    selectedFilesList = event.target.files
+    
+    var x = document.getElementById("upload_file_input")
+    document.getElementById("upload_file_name").innerText = x.files[0].name;
+    
+    uploadDICOMFile();
+    
+    <!--var x = document.getElementById("folder_upload_class_cursor1");-->
+    <!--var y = document.getElementById("UP1")-->
+
+    <!--if (x.style.display === "block") {-->
+        <!--x.style.display = "none";-->
+        
+    <!--} else {-->
+        <!--x.style.display = "block";-->
+	<!--x.style.float = "left";-->
+    <!--}-->
+    <!--if (y.style.display === "block") {-->
+        <!--y.style.display = "none";-->
+        
+    <!--} else {-->
+        <!--y.style.display = "block";-->
+	   <!--y.style.float = "left";-->
+    <!--}-->
+    
+
+     
+    
+}
+	
+
+function initialize_CB(result)
+{
+   <!--alert('Intialization Completed');-->
+   <!--alert(result.Success);-->
+    if (result.Success) {
+	   <!--alert("inside success")-->
+		<!--console.log(result.Account);-->
+		<!-- alert(result.Account.AccountUuid); -->
+		<!-- alert(result.Account.UserList[0].InstitutionList[0].InstitutionUuid); -->
+		<!-- alert(result.Account.UserList[0].FullName + " " + result.Account.UserList[0].UserName + " " + result.Account.UserList[0].UserUuid); -->
+		userUuid = result.Account.UserList[0].UserUuid;
+		accountUuid = result.Account.AccountUuid;
+		institutionUuid = result.Account.UserList[0].InstitutionList[0].InstitutionUuid;
+		patientName = result.Account.UserList[0].FullName;
+		userName = result.Account.UserList[0].UserName;
+		
+		document.getElementById("no_table_dicomUserUuid").value = userUuid;
+		document.getElementById("no_table_dicomAcctUuid").value = accountUuid;
+		document.getElementById("no_table_dicomInstUuid").value = institutionUuid;
+		
+	}
+}
+
+
+function getFolderList_CB(result)
+{
+	<!--alert('Get Folder List Completed')-->
+	mdpFolder = false;
+	mdpFolderUuid = "";	
+	if(result.Success)
+	{
+		<!--alert('Get Folder List Success')-->
+		if(result.Folder.SubFolderCount > 0){
+		    var i;
+		    for (i = 0; i < result.Folder.SubFolderCount; i++) {
+			if(result.Folder.SubFolderList[i].FolderName == 'MyDentalPlan'){
+			    mdpFolder = true;
+			    mdpFolderUuid = result.Folder.SubFolderList[i].FolderUuid;
+			    break;
+			}
+		    }
+		}
+		<!--- If MyDenalPlan does not exist, then create one-->	
+		if(mdpFolder == false){
+		    <!--alert("MDP Folder Does Not Exists") -->
+		    myApi.CreateFolder(userUuid, "", "MyDentalPlan", createFolder_CB);
+		}
+		else{
+		    myApi.GetFolderList(userUuid, mdpFolderUuid, "", true, getSubFolderlist_CB);
+		}
+	}
+}
+
+
+
+
+
+function createFolder_CB(result)
+{
+	mdpFolderUuid = "";
+	mdpFolder = false;
+	if(result.Success)
+	{
+	    mdpFolderUuid = result.FolderUuid;
+	    mdpFolder = true;
+	    myApi.GetFolderList(userUuid, mdpFolderUuid, "", true, getSubFolderlist_CB);
+	    
+	    
+	}
+}
+
+
+function getSubFolderlist_CB(result)
+{
+	
+	patFolder = false;
+	patFolderUuid = "";	
+	if(result.Success)
+	{
+		if(result.Folder.SubFolderCount > 0){
+		    var i;
+		    for (i = 0; i < result.Folder.SubFolderCount; i++) {
+			if(result.Folder.SubFolderList[i].FolderName == "{{=patientmember}}"){
+			    patFolder = true;
+			    patFolderUuid = result.Folder.SubFolderList[i].FolderUuid;
+			    break;
+			}
+		    }   		    
+		}
+		<!--- If patient Sub folder does not exist, then create one-->	
+		if(patFolder == false){
+		    <!--alert("Patient Sub Folder Does Not Exists") -->
+		    myApi.CreateFolder(userUuid, mdpFolderUuid, "{{=patientmember}}", createSubFolder_CB);
+		}
+		else{
+		    myApi.UploadDicomFilesIntoFolder(userUuid, institutionUuid, patFolderUuid, selectedFilesList, uploadDicomFilesToFolder_CB);
+		}		
+	}
+}
+
+function createSubFolder_CB(result)
+{
+	patFolder = false;
+	patFolderUuid = "";
+	if(result.Success)
+	{
+	    patFolderUuid = result.FolderUuid;
+	    patFolder = true;
+	    myApi.UploadDicomFilesIntoFolder(userUuid, institutionUuid, patFolderUuid, selectedFilesList, uploadDicomFilesToFolder_CB);
+	}
+}
+
+
+function uploadDicomFilesToFolder_CB(result)
+{
+	console.log(result)
+	if(result.State == "Upload Completed")
+	{
+		<!--alert("Upload Completed")-->
+		patientName = ""
+		patientID = ""
+		patientUuid = ""
+		patientOrderUuid = ""
+		procDesc = ""
+		if(result.PatietOrderList.length >0)
+		{
+		        
+			patientName = result.PatietOrderList[0].PatientName;
+			patientID = result.PatietOrderList[0].PatientId;
+			patientUuid = result.PatietOrderList[0].PatientUuid
+			patientOrderUuid = result.PatietOrderList[0].PatientOrderUuid
+			procDesc = result.PatietOrderList[0].RequestedProcedureDescription
+
+			document.getElementById("no_table_dicomPatName").value = patientName;
+			document.getElementById("no_table_dicomPatid").value = patientID;		
+			document.getElementById("no_table_dicomPatUuid").value = patientUuid;
+			document.getElementById("no_table_dicomPatOrderUuid").value = patientOrderUuid;		
+			document.getElementById("no_table_dicomProcDesc").value = procDesc;	
+			
+			myApi.GetViewUrl(userUuid, patientOrderUuid, getViewUrl_CB);
+			
+		}
+		
+		
+	}
+}
+
+function getViewUrl_CB(result)
+{
+	<!--alert('getviewurl completed');-->
+	if(result.Success)
+	{
+	    imageURL = result.Result
+	    document.getElementById("no_table_dicomURL").value = imageURL;	
+	    <!--alert('Success' + " " + imageURL)-->
+	    <!--window.open(imageURL);-->
+	}
+}
+
+var myApi = new postDicomCloudApi("650d30b3-2938-4f4f-86f5-4aa651a4c95a", "10ee24cd-5cad-4d46-b5ae-b4f0167ac794");
+myApi.Initialize(initialize_CB);
+
+
+
+function uploadDICOMFile(){
+
+    
+    <!--- Create MyDentalPlan folder if it does not exists-->
+    myApi.GetFolderList(userUuid, "", "", true, getFolderList_CB); 
+    <!--if(mdpFolder == false){-->
+	<!--alert("MDP Folder Does Not Exists") -->
+	<!--myApi.CreateFolder(userUuid, "", "MyDentalPlan", createFolder_CB);-->
+    <!--}-->
+    
+   <!--<!--- Create Patient specific folder if it does not exist-->-->
+    <!--myApi.GetFolderList(userUuid, mdpFolderUuid, "", true, getSubFolderlist_CB); -->
+    <!--if(patFolder == false){-->
+	<!--<!--alert("Patient Sub Folder Does Not Exists") -->-->
+	<!--myApi.CreateFolder(userUuid, mdpFolderUuid, #=patientmember}}, createSubFolder_CB);-->
+    <!--}-->
+    
+    <!--<!-- Upload selected file into the sub-folder specific to the patient-->-->
+    <!--myApi.UploadDicomFilesIntoFolder(userUuid, institutionUuid, patFolderUuid, selectedFilesList, uploadDicomFilesToFolder_CB);    -->
+    
+    <!--<!-- Get View Image URL -->-->
+    <!--myApi.GetViewUrl(userUuid, patientOrderUuid, getViewUrl_CB);-->
+    
+
+}
+
+</script>

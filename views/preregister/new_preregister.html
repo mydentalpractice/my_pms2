@@ -1,0 +1,212 @@
+{{extend 'pms2_layoutw4.html'}}
+
+{{=formA.custom.begin}}
+  
+<style>
+.datepicker .datepicker-dropdown .dropdown-menu .datepicker-orient-left .datepicker-orient-top{position: absolute !important;;
+    z-index: 20000 !important;}
+
+</style>             
+                        
+                        <div class="row">
+                            <div class="col-md-12">
+                                <!-- BEGIN EXAMPLE TABLE PORTLET-->
+                                <div class="portlet light bordered">
+                                    <div class="portlet-title">
+                                        <div class="caption font-white">
+                                            <i class="fa fa-list" style="color:#fff"></i>
+                                            <span class="caption-subject bold uppercase"> Pre Registration</span>
+                                        </div>
+                                       
+                                    </div>
+                                    <div class="col-md-12">
+                                    <!-- BEGIN Portlet PORTLET-->
+                                    <div class="col-sm-12 md_r">
+                                        <div class="portlet-title mem_details">
+                                            <div class="caption">
+                                                <i class="fa fa-user"></i>&nbsp;Patient Profile </div>
+                                        </div>
+                                        <div class="portlet-body">
+                                        <!--row1-->
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                  <label class="m_title">Employee ID</label>
+                                                    <div class="input-group">
+                                                         {{=formA.custom.widget.employeeid}}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                 <div class="form-group">
+                                                            <label class="m_title">Gender</label>
+                                                            <div class="input-group">
+                                                                <span class="input-group-addon"><i class="fa fa-user"></i></span>
+                                                                {{=formA.custom.widget.gender}}
+                                                            </div>
+                                               </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                 <div class="form-group">
+                                                  <label class="m_title">DOB</label>
+                                                    <div class="input-group">
+                                                        {{=formA.custom.widget.dob}}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        
+                                             <div class="col-md-4">
+                                                 <div class="form-group">
+                                                  <label class="m_title">First Name</label><span style="color:red">*</span>
+                                                    <div class="input-group">
+                                                        <span class="input-group-addon"><i class="fa fa-user"></i></span>
+                                                        {{=formA.custom.widget.fname}} 
+                                                    </div>
+                                                </div>
+                                            </div>
+                                             
+                                            <div class="col-md-4">
+                                                 <div class="form-group">
+                                                  <label class="m_title">Last Name</label><span style="color:red">*</span>
+                                                    <div class="input-group">
+                                                        <span class="input-group-addon"><i class="fa fa-user"></i></span>
+                                                        {{=formA.custom.widget.lname}}
+                                                    </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="col-md-4">
+                                                 <div class="form-group">
+                                                  <label class="m_title">Company</label><span style="color:red">*</span>
+                                                    <div class="input-group">
+                                                        <span class="input-group-addon"><i class="fa fa-user"></i></span>
+                                                        {{=formA.custom.widget.company}}
+                                                    </div>
+                                                    </div>
+                                                </div>
+                                          
+                                                                                   
+                                        <!--row1-->
+                                        
+                                    </div>
+                                    <!-- END Portlet PORTLET-->
+                                    
+                                    
+                                    
+                                    
+                                    
+                                    
+                                    <!-- BEGIN Portlet PORTLET-->
+                                    <div class="col-sm-12 md_r">
+                                        <!--<div class="portlet-title mem_details">-->
+                                            <!--<div class="caption">-->
+                                                <!--<i class="fa fa-phone"> &nbsp;</i>Contact Details </div>-->
+                                            
+                                        <!--</div>-->
+                                        <div class="portlet-body">
+                                        <!--row1-->
+                                            <div class="col-md-3">
+                                                <div class="form-group">
+                                                  <label class="m_title">Address</label>
+                                                    <div class="input-group">
+                                                        <span class="input-group-addon"><i class="fa fa-user"></i></span>
+                                                        {{=formA.custom.widget.address}}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                 <div class="form-group">
+                                                  <label class="m_title">City</label>
+                                                    <div class="input-group" style="width: 100%;">
+                                                        {{=formA.custom.widget.city}}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="form-group">
+                                                  <label class="m_title">State</label>
+                                                    <div class="input-group" style="width: 100%;">
+                                                        {{=formA.custom.widget.st}}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                             <div class="col-md-3">
+                                                <div class="form-group">
+                                                  <label class="m_title">Pin</label>
+                                                    <div class="input-group">
+                                                        <span class="input-group-addon"><i class="fa fa-user"></i></span>
+                                                        {{=formA.custom.widget.pin}}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                             <div class="col-md-3">
+                                                <div class="form-group">
+                                                  <label class="m_title">Cell</label><span style="color:red">*</span>
+                                                    <div class="input-group">
+                                                        <span class="input-group-addon"><i class="fa fa-user"></i></span>
+                                                        {{=formA.custom.widget.cell}}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                             <div class="col-md-3">
+                                                <div class="form-group">
+                                                  <label class="m_title">Email</label>
+                                                    <div class="input-group">
+                                                        <span class="input-group-addon"><i class="fa fa-user"></i></span>
+                                                        {{=formA.custom.widget.email}}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            
+                                            <div class="col-md-12">
+                                                <div class="form-group">
+                                                  <label class="m_title">Treatments </label>
+                                                    <div class="input-group">
+                                                        <span class="input-group-addon"><i class="fa fa-user"></i></span>
+                                                        {{=formA.custom.widget.treatmentplandetails}}
+                                                    </div>
+                                                </div>
+                                            </div> 
+                                            <div class="col-md-12">
+                                                <div class="form-group">
+                                                  <label class="m_title">Notes </label>
+                                                    <div class="input-group">
+                                                        <span class="input-group-addon"><i class="fa fa-user"></i></span>
+                                                        {{=formA.custom.widget.description}}
+                                                    </div>
+                                                </div>
+                                            </div>                                             
+                                            
+                                           <div class="col-md-12" style="margin: 30px 0px;">
+                                              <button type="submit" class="btn green">Save </button>
+                                               <a href="{{=returnurl}}" >Cancel </a>
+                                            </div> 
+                                        <!--row1-->
+                                       
+                                        </div>
+                                    </div>
+                                    <!-- END Portlet PORTLET-->
+
+                            </div>
+                        </div>
+                        
+               
+
+
+ 
+ <div style="display:none">
+ 
+
+
+
+ 
+
+ 
+  
+</div>
+  
+    
+{{=formA.custom.end}}
+
+

@@ -1,0 +1,20 @@
+{{extend 'layoutenroll2.html'}}
+
+
+
+
+    <div class="w3-center">
+    <h3>{{=mssg}}</h3><br/>
+    
+    {{if(retVal == True):}}
+    <h5>Username successfully sent to {{=email}}!</h5>
+    {{else:}}
+    <h5>Error in sending Username to {{=email}}!</h5>
+    {{pass}}
+    
+    <a href="{{=returnurl}}">Return to Login </a>
+    
+    </div>
+
+
+

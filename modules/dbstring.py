@@ -1,0 +1,1 @@
+db = DAL('mysql://root:root@localhost:3306/prod_dup',pool_size=10,check_reserved=['all'],migrate_enabled=False,lazy_tables=True)

@@ -1,0 +1,16 @@
+{{extend 'pms2_layoutw3.html'}}
+
+<header class="w3-container w3-blue-grey">
+      <h4><strong>{{=formheader}}</strong></h4>
+</header> 
+<div class="w3-container w3-padding-16">
+
+{{=formA}}
+{{if(retVal == False):}}
+<h5 style="color:red">Error in sending SMS Messages to SMSCountry<h5>
+{{pass}}
+{{if(retVal == True):}}
+<h5 style="color:red">Success in sending SMS Messages to SMSCountry<h5>
+{{pass}}
+
+</div>

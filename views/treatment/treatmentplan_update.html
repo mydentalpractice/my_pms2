@@ -1,0 +1,154 @@
+{{extend 'pms2_layoutw3.html'}}
+
+{{=formA.custom.begin}}
+<header class="w3-container w3-blue-grey">
+      <h4><strong>Modify Treament Plan</strong></h4>
+</header>
+
+<div class="w3-container w3-hide">
+{{=formA.custom.widget.primarypatient}}  
+{{=formA.custom.widget.patient}}   
+{{=formA.custom.widget.patienttype}}
+{{=formA.custom.widget.patientname}}
+</div> 
+
+
+<div class="w3-row-padding ">
+  <div class="w3-half" style='line-height:1.5;'>
+    <label>Treatment Plan</label><br/>
+    {{=formA.custom.widget.treatmentplan}}
+  </div>
+  <div class="w3-half" style='line-height:1.5;'>
+    <label>Member</label><br/>
+    <select class="form_details " id="primarypatients" style="width:100%;height:35px" onchange="changePrimaryPatients()">
+	  <option value='0'>--Select--</option>
+	   {{ for pp in pps: }}
+	       {{if (pp.id == memberid):}}
+		 <option selected="selected" value={{=pp.id}}>{{=pp.fname}},{{=pp.lname}} ({{=pp.patientmember}})</option>
+	       {{else:}}
+	       <option value={{=pp.id}}>{{=pp.fname}},{{=pp.lname}} ({{=pp.patientmember}})</option>
+	       {{pass}}
+	   {{pass}}
+       </select>         
+    
+  </div>
+</div>
+
+<div class="w3-row-padding  ">
+  <div class="w3-half" style='line-height:1.5;'>
+    <label>Provider</label><br/>
+    {{=formA.custom.widget.provider}}
+  </div>
+  <div class="w3-half" style='line-height:1.5;'>
+    <label>Patient</label><br/>
+    <div id='patientdiv'>
+		<select class="form_details " id="patients" style="width:100%;height:35px" onchange="changePatients()">
+		    <option value='0'>--Select--</option>
+	    
+		</select>
+    </div>   
+  </div>
+</div>
+
+
+
+
+<div class="w3-row-padding  ">
+  <div class="w3-half" style='line-height:1.5;'>
+    <label>Start Date</label><br/>
+    {{=formA.custom.widget.startdate}}
+  </div>
+  <div class="w3-half" style='line-height:1.5;'>
+    <label>End Date</label><br/>
+  {{=formA.custom.widget.enddate}}
+  </div>
+</div>
+
+<div class="w3-row-padding  ">
+  <div class="w3-half" style='line-height:1.5;'>
+    <label>Total Treatment Cost</label><br/>
+    {{=formA.custom.widget.totaltreatmentcost}}
+  </div>
+  <div class="w3-half" style='line-height:1.5;'>
+    <label>Total Copay</label><br/>
+  {{=formA.custom.widget.totalcopay}}
+  </div>
+</div>
+<div class="w3-row-padding  ">
+  <div class="w3-half" style='line-height:1.5;'>
+    <label>Total Ins. Pays</label><br/>
+    {{=formA.custom.widget.totalinspays}}
+  </div>
+  <div class="w3-half" style='line-height:1.5;'>
+    <label>Status</label><br/>
+  {{=formA.custom.widget.status}}
+  </div>
+</div>
+<div class="w3-row-padding  ">
+<div class="w3-container w3-full">
+  <label>Description</label><br/>
+   {{=formA.custom.widget.description}}
+</div>    
+</div>  
+<div class="w3-container w3-padding-0 w3-hide">
+{{=formA.custom.submit}}
+</div>
+
+
+<div class="w3-container w3-padding-4">
+<div class="w3-bar">
+  <a href="{{=returnurl}}" class="w3-button w3-left  w3-green" style="height:40px;width:20%">Cancel</a>
+  
+  <button class="w3-button w3-right w3-black" style="height:40px;width:20%"><i class="fa fa-save w3-margin-right"></i>Click to Save</button> 
+</div>
+</div>
+
+{{=formA.custom.end}}
+<br/>
+
+<script>
+
+jQuery(document).ready(function(){
+<!--alert(smsfile)-->
+var ppopts = document.getElementById("primarypatients");
+var pp = ppopts.options[ppopts.selectedIndex].value;
+
+var x = document.getElementById("no_table_primarypatient");
+    x.value = pp;
+
+ajax('{{=URL('treatment','patientsonupdate')}}', ['primarypatient', 'patient'], 'patientdiv');   
+});
+
+function changePrimaryPatients(){
+
+
+var ppopts = document.getElementById("primarypatients");
+var pp = ppopts.options[ppopts.selectedIndex].value;
+var x = document.getElementById("no_table_primarypatient");
+    x.value = pp;
+
+    ajax('{{=URL('treatment','patients')}}', ['primarypatient'], 'patientdiv');
+
+
+   
+};
+
+function changePatients(){
+
+
+var ppopts = document.getElementById("patients");
+var pp = ppopts.options[ppopts.selectedIndex].value;
+var qq = ppopts.options[ppopts.selectedIndex].text;
+
+var x = document.getElementById("no_table_patient");
+    x.value = pp;
+var pat = qq.split(",");
+var z = document.getElementById("no_table_patienttype");
+z.value = pat[2]
+var w = document.getElementById("no_table_patientname");
+w.value = pat[0] + " " + pat[1]
+
+   
+};
+
+</script>

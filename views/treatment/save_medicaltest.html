@@ -1,0 +1,63 @@
+  						     <form enctype="multipart/form-data" action="" method="post">
+
+                                                     <div class="col-sm-12 md_r">
+                                                        <div class="portlet-title mem_details">
+                                                            <div class="caption"><i class="fa fa-notepad"></i>&nbsp;Medical Test </div>
+                                                        </div>
+                                                        <div class="portlet-body" style="padding:20px">
+                                                            <div class="col-md-4">
+                                                                   <div class="form-group">
+                                                                    <label class="m_title">Test Name</label>
+                                                                          <div class="input-group">
+									    <input type="text" id="testname" name="testname" class="form-control" Value="" required=""> 
+                                                                          </div>
+                                                                   </div>
+                                                           </div> 
+                                                           <div class="col-md-4">
+                                                                   <div class="form-group">
+                                                                    <label class="m_title">Actual Value</label>
+                                                                          <div class="input-group">
+                                                                                <input type="text" id="actval" name="actval" class="form-control" Value="" required=""> 
+                                                                          </div>
+                                                                   </div>
+                                                           </div>
+                                                           <div class="col-md-4">
+                                                                   <div class="form-group">
+                                                                    <label class="m_title">Lower Value</label>
+                                                                          <div class="input-group">
+                                                                                <input id="lowval" name="lowval" type="text" class="form-control" Value="" required=""> 
+                                                                          </div>
+                                                                   </div>
+                                                           </div>
+                                                            <div class="col-md-4">
+                                                                   <div class="form-group">
+                                                                    <label class="m_title">Typical Value</label>
+                                                                          <div class="input-group">
+                                                                                <input id="typval" name="typval" type="text" class="form-control" Value="" required=""> 
+                                                                          </div>
+                                                                   </div>
+                                                           </div>
+                                                            <div class="col-md-4">
+                                                                   <div class="form-group">
+                                                                    <label class="m_title">Upper Value</label>
+                                                                          <div class="input-group">
+                                                                                <input id="upval" name="upval" type="text" class="form-control" Value="" required=""> 
+                                                                          </div>
+                                                                   </div>
+                                                           </div>
+                                                            <div class="col-md-12" style="margin-bottom:30px">
+                                                                    <label class="m_title">Remarks</label>
+                                                                    <textarea class="form-control" id="remarks" name="remarks" rows="5" placeholder=""></textarea>
+                                                            </div>
+                                                            <div class="col-md-12" style="margin-bottom:30px">
+								  {{=medtestgrid}}
+                                                            </div>
+							    
+                                                            <div class="col-md-12" style="margin-bottom:30px">
+								<a class = "btn green" id="medtestSave" onClick="medtestSave()">>Save</a>
+								<a id="medtestCancel" onClick="medtestCancel()">Cancel </a>
+                                                            </div>
+
+                                                        </div>
+                                                 </div>
+						     </form>                                                

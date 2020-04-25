@@ -1,0 +1,96 @@
+
+{{extend 'pms2_layoutw4.html'}}
+<style>
+.dataTables_filter{ float:right !important;}
+ .dataTables_filter input {width: 377px !important;}
+</style>
+
+
+<style>
+#suggestions { position: relative; }
+.suggestions { background: white; border: solid 1px #55A6C8; }
+.suggestions DIV { padding: 2px 4px 2px 4px; }
+</style>
+
+
+   
+    
+    
+     <div class="row">
+       <div class="col-md-12">
+         <div class="portlet light bordered" style="border: 1px solid #dadada!important;">
+            <div class="portlet-title" style="border-bottom: 1px solid rgb(230, 230, 230); background:none">
+                <div class="caption font-dark">
+                    <i class="fa fa-money" style="color:#000"></i>
+                    <span class="caption-subject bold uppercase"> Payments&nbsp;&nbsp; <span class="caption-subject uppercase"> {{=patient}}</span></span>
+                </div>
+            
+		<div class="caption font-dark" style="float:left">
+		    <h4><strong>Enter First Last Name</strong></h4>
+		    {{=form}}
+		</div>
+	      
+		<div class="col-md-12" style="margin:5px 0px;display:none">
+		   <h5><strong>Running Payment Total of all Treatments of this Patient</strong></h5>
+			<div class="col-md-3"><strong>Total Treatment Cost:</strong> {{=totalcost}}</div>
+			<div class="col-md-3"><strong>Total Authorized Payment:</strong> {{=totalinspays}}</div>
+			<div class="col-md-2"><strong>Total Copay:</strong> {{=totalcopay}}</div>
+			 <div class="col-md-2"><strong>Total Paid</strong>  {{=totalpaid}}</div>
+			  <div class="col-md-2"><strong>Total Due </strong> {{=totaldue}}</div>
+		</div>
+	      
+            </div>
+         </div>
+       </div>  
+   </div>
+   
+    
+    
+         <!-- END EXAMPLE TABLE PORTLET-->
+    </div>
+   </div>
+   
+   
+
+<script>
+  
+
+
+
+jQuery("#no_table_patientmember1").keyup(function(){
+       
+       $("#suggestions").show();
+       var x = $('#no_table_patientmember1').val();
+       $("#no_table_xpatientmember").val(x);
+       
+       ajax('{{=URL('admin', 'patient_selector')}}', ['xpatientmember1'], 'suggestions')
+});
+       
+$(document).ready(function(){
+   
+    $("#suggestions").show();
+    
+    $("#suggestions") .click(function(){
+      
+	x= $("#no_table_patientmember1").val();
+
+	
+	$("#no_table_xpatientmember1").val(x);
+	
+	strarr = x.split(":");
+	
+	$("#no_table_patientmember1").val(strarr[0]);
+
+	$("#suggestions").hide();
+	
+    
+    });
+    
+});
+
+
+
+
+ 
+       
+</script>

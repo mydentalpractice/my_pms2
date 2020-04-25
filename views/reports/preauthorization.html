@@ -1,0 +1,192 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+     <meta charset="utf-8" />
+        <title>My Dental Plan | Reports</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta content="width=device-width, initial-scale=1" name="viewport" />
+        <meta content="" name="description" />
+        <meta content="" name="author" />
+	
+	    <!-- BEGIN WEB2PY STYLES -->
+        <link rel="stylesheet" href="../static/css/web2py.css"  />
+        <link rel="stylesheet" href="../static/css/web2py_bootstrap.css" />
+        <link rel="stylesheet" href="../static/css/web2py_bootstrap_nojs.css" />
+        <link rel="stylesheet" href="../static/css/w3.css" />  
+        <link rel="stylesheet" href="../static/css/mydental.css" />  
+        <!-- END WEB2PY STYLES -->
+	
+        <!-- BEGIN GLOBAL MANDATORY STYLES -->
+        <link href="http://fonts.googleapis.com/css?family=Open+Sans:400,300,600,700&subset=all" rel="stylesheet" type="text/css" />
+        <link href="../static/assets/global/plugins/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
+        <link href="../static/assets/global/plugins/simple-line-icons/simple-line-icons.min.css" rel="stylesheet" type="text/css" />
+        <link href="../static/assets/global/plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+        <link href="../static/assets/global/plugins/bootstrap-switch/css/bootstrap-switch.min.css" rel="stylesheet" type="text/css" />
+        <!-- END GLOBAL MANDATORY STYLES -->
+        <!-- BEGIN PAGE LEVEL PLUGINS -->
+        <link href="../static/assets/global/plugins/datatables/datatables.min.css" rel="stylesheet" type="text/css" />
+        <link href="../static/assets/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.css" rel="stylesheet" type="text/css" />
+        <!-- END PAGE LEVEL PLUGINS -->
+        <!-- BEGIN THEME GLOBAL STYLES -->
+        <link href="../static/assets/global/css/components.min.css" rel="stylesheet" id="style_components" type="text/css" />
+        <link href="../static/assets/global/css/plugins.min.css" rel="stylesheet" type="text/css" />
+        <!-- END THEME GLOBAL STYLES -->
+        <!-- BEGIN THEME LAYOUT STYLES -->
+        <link href="../static/assets/layouts/layout/css/layout.min.css" rel="stylesheet" type="text/css" />
+        <link href="../static/assets/layouts/layout/css/themes/darkblue.min.css" rel="stylesheet" type="text/css" id="style_color" />
+        <link href="../static/assets/layouts/layout/css/custom.min.css" rel="stylesheet" type="text/css" />
+        <!-- END THEME LAYOUT STYLES -->
+    
+    
+       <script src="https://code.jquery.com/jquery-1.12.4.min.js" integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ=" crossorigin="anonymous"></script>  
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.3.5/jspdf.min.js"></script>
+</head>
+
+<body style="overflow-y:scroll !Important">
+    <style>  
+        table {  
+            font-family: arial, sans-serif;  
+            border-collapse: collapse;  
+            width: 100%;  
+        }  
+  
+        td, th {  
+            border: 1px solid #dddddd;  
+            text-align: left;  
+            padding: 8px;  
+        }  
+  
+        tr:nth-child(even) {  
+            background-color: #dddddd;  
+        }  
+        @media print
+   {
+      btn {display:none;}
+   }
+    </style> 
+    <body class="page-header-fixed page-sidebar-closed-hide-logo page-content-white" style="overflow-x: hidden;">
+        <div class="page-wrapper">
+          
+            
+            <!-- BEGIN CONTAINER -->
+            <div class="page-container">
+               
+                <!-- BEGIN CONTENT -->
+                <div class="page-content-wrapper">
+                    <!-- BEGIN CONTENT BODY -->
+                    <div class="container-fluid" style="background: #fff;">
+                      
+                      
+                        
+                        
+                   
+                        
+ 
+   <form class="form" style="max-width: none; width: 100%;">  
+  
+  
+        <div class="portlet light bordered">
+                                 
+                                    <div class="col-md-12">
+                                    <!-- BEGIN Portlet PORTLET-->
+                                    <div class="col-md-5 col-sm-12 md_r">
+                                        <div class="portlet-title mem_details">
+                                            <div class="caption">
+                                                <i class="fa fa-user"></i>&nbsp;Practice Information</div>
+                                            
+                                        </div>
+                                        <div class="portlet-body">
+                                           <div class="col-md-12">
+                                                    <h4 class="m_title">{{if(len(prov[0].practicename) > 0):}}<strong>{{=prov[0].practicename}}{{pass}}</h4>
+                                                    <p><strong>{{=prov[0].providername}}</strong><br>State Dental Council Registration Number: {{=prov[0].registration }}</p>
+                                                     <p>{{if(len(prov[0].practicename) > 0):}}{{=prov[0].practicename}}{{pass}}{{if(len(prov[0].address1) > 0):}}
+						    {{=prov[0].address1}},&nbsp;&nbsp;
+						    {{pass}}
+						    {{if(len(prov[0].address2) > 0):}}
+						    {{=prov[0].address2}},&nbsp;&nbsp;
+						    {{pass}}      
+						    {{if(len(prov[0].address3) > 0):}}
+						    {{=prov[0].address3}},&nbsp;&nbsp; 
+						    {{pass}}
+						    
+						    {{if(len(prov[0].city) > 0):}}
+						    {{=prov[0].city}}{{pass}},{{if(len(prov[0].st) > 0):}} {{=prov[0].st}}{{pass}} {{if(len(prov[0].pin) > 0):}} - {{=prov[0].pin}}{{pass}}<br/>
+						    Phone: {{=prov[0].cell}}&nbsp;&nbsp;&nbsp;&nbsp;Email: {{=prov[0].email}}&nbsp;&nbsp;&nbsp;&nbsp;</p>
+                                             </div>
+
+                                           </div>
+
+                                    </div>
+                                    <div class="col-md-1"></div>
+                                     <div class="col-md-6 col-sm-12 md_r">
+                                        <div class="portlet-title mem_details">
+                                            <div class="caption">
+                                                <i class="fa fa-user"></i>&nbsp;Member Information</div>
+                                            
+                                        </div>
+                                        <div class="portlet-body">
+                                           <div class="col-md-12">
+                                                    <h4 class="m_title">{{=membername}}</h4>
+                                                    
+                                                     <p><i class="fa fa-phone fa-1x">&nbsp;</i>{{=membercontact}}</p>
+                                                     <p>Plan:{{=hmoplan}}</p>
+                                                   <p>Valid-till: {{=premenddt}}</p>
+                                             </div>
+
+                                           </div>
+                                           
+                                    </div>
+                                    
+                                    
+                                   
+                                    
+
+
+
+                                     <!-- BEGIN Portlet PORTLET-->
+                                    <div class="col-sm-12 md_r">
+                                         <div class="portlet-body">
+                                        <div class="table-responsive">
+                                           {{=formB}}
+                                        </div>
+                                        <div class="table-responsive">
+                                           {{=formC}}
+                                        </div>
+                                    </div>
+                                    </div>
+                                    <!-- END Portlet PORTLET-->
+                                
+                                    <!-- END Portlet PORTLET-->
+
+                                </div>
+                               
+                                  
+                                 
+                                 
+                                 
+                                </div>  
+  
+  
+        </div>  
+    </form>    
+				
+
+
+                        
+                        
+                    </div>
+                    <!-- END CONTENT BODY -->
+                </div>
+                <!-- END CONTENT -->
+		
+              
+            </div>
+            <!-- END CONTAINER -->
+           
+        </div>
+       
+
+        
+    </body>
+
+</html>
+  

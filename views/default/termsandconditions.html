@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+	<title>My Dental Plan - Register New User</title>
+	<meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0' name='viewport' />
+    <meta name="viewport" content="width=device-width" />
+    <link href="../static/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="../static/css/styles.css" rel="stylesheet" />
+    <link href="../static/css/font-awesome.css" rel="stylesheet">  
+</head>
+<body>
+<!--<div class="image-container set-full-height" style="background-image: url('assets/img/BG_Register.jpg')">-->
+<div class="image-container set-full-height" style="background-color:#ffffff">
+    <!--   My Dental Plan Branding starts here -->
+    <a href="https://www.mydentalplan.in">
+         <div class="logo-container">
+            <div class="logo">
+                <img src="../static/images/logo-my-dental-plan_color.png">
+            </div>
+        </div>
+    </a>
+    <!-- My Dental Plan Branding ends here-->
+    <!--   Big container   -->
+    <div class="container">
+        <div class="row">
+        <div class="col-sm-8 col-sm-offset-2">
+            <!--      Wizard container        -->   
+            <div class="wizard-container"> 
+                <form action="" method="">
+                <div class="card wizard-card ct-wizard-orange" id="wizard">
+                <!--        You can switch "ct-wizard-orange"  with one of the next bright colors: "ct-wizard-blue", "ct-wizard-green", "ct-wizard-orange", "ct-wizard-red"  -->
+                    	<div class="wizard-header">
+                        	<h3>
+                        	   <b>Welcome</b> to My Practice Management System<br>
+                        	   <small>Register with us.</small>
+                        	</h3>
+                    	</div>
+                    	<ul>
+                            <li><a href="#NewUserRegister" data-toggle="tab">Terms & Conditions -My Practice Management System</a></li>
+                        </ul>
+                        <div class="tab-content">
+                            
+                            <div class="tab-pane" id="NewUserRegister">
+                                <div class="row">
+                                    <div class="col-sm-12">
+                                        <h4 class="info-text"> Terms & Conditions - My Dental Plan</h4>
+                                    </div>
+                                    
+                                    <div class="col-sm-10 col-sm-offset-1">
+                                       	<div>Disclaimer: Mydental plan is an offering in India which promotes dental wellness through bringing awareness among the population on the importance of oral health and its impact on quality of life. These products are not insurance products or insurance offerings. Mydental Plan promotes preventive health and aims to provide oral health care at affordable cost by subsidising the treatment costs and offering free preventive oral health packages. The preferred provider network of MyDental Plan includes third party dentists and dental practices of repute and having met the quality standards of My Dental Plan and have agreed to perform the treatments at a particular cost and quality. <br><br>MyDental plan has Quality Audit committee that audits the dental practice in terms of quality of infrastructure, processes and treatment care. Mydental plan does not own any practices or is in direct financial beneficiary of any treatments undertaken. My Dental Plan shall not be liable to any negligence or misconduct of the providers. My Dental Plan on its best effort basis endeavors to ensure that the dentists engaged by My Dental Plan are doing so for a societal cause and in case any unethical practice is suspected against the practitioner, My Dental Plan disciplinary committee may de-empanel such a service provider from My Dental Plan's network. <br><br> My Dental Plan allots the subscriber to a clinic without bias based on the preference of location of the subscriber. My Dental Plan does not hold any reservations for or against any practitioner. It offers the service provider's details to relevant members only basis the need and convenience of the member. My Dental Plan reserves a right to terminate the certification of dentists in case they fail to adhere to the pricing norms or materially fail to carry out of any of their obligations. My Dental Plan is entitled to use the data of the subscribers for any research or epidemiological purposes. My Dental Plan appreciates feedback from its members (via feedback section and contact us section of this website) & ensures resolution to all fair requests and does not encourage use of any public media/forum with respect to any issues with the services offered to its members.</div>
+                                        
+                                    </div>    
+                                </div>
+                            </div>
+                        </div>
+                        <div class="wizard-footer">
+                            	<div class="pull-right">
+                                    <input type='button' class='btn btn-next btn-fill btn-warning btn-wd btn-sm' name='next' value='Next' />
+                                    <a href="{{=URL('my_dentalplan','default','member_register')}}"><input type='button' class='btn btn-finish btn-fill btn-warning btn-wd btn-sm' name='finish' value='Close' /></a>
+                                </div>
+                                <div class="pull-left"> 
+                                </div>
+                                <div class="clearfix"></div>
+                        </div>	
+                </div>
+                </form>
+            </div> <!-- wizard container -->
+        </div>
+        </div><!-- end row -->
+    </div> <!--  big container -->
+     <div class="footer">
+      <div class="container">
+      © 2015 My Dental Plan. All Rights Reserved.
+      <Br><a href="{{=URL('default','termsandconditions')}}">Terms & Conditions</a>
+            <!-- <small><i class="fa fa-heart heart"></i> <a href="https://www.mydentalplan.in">sujcreativeinc</a></small>-->
+      </div>
+    </div>
+
+</body>
+    <script src="../static/assets/js/jquery-1.10.2.js" type="text/javascript"></script>
+	<script src="../static/assets/js/bootstrap.min.js" type="text/javascript"></script>
+	<!--   plugins 	 -->
+	<script src="../static/assets/js/jquery.bootstrap.wizard.js" type="text/javascript"></script>
+	<script src="../static/assets/js/wizard.js"></script>
+</html>

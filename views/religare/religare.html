@@ -1,0 +1,113 @@
+
+{{extend 'pms2_layoutw4_relgr.html'}}
+
+<style>
+.login .content .form-actions{border:none !important}
+</style>
+{{=form.custom.begin}}  
+
+                        <div class="row">
+                            <div class="container" style="width: 100%;margin: 0px auto;">
+                                <!-- BEGIN EXAMPLE TABLE PORTLET-->
+                                <div class="portlet light bordered">
+                                    <div class="portlet-title tabbable-line">
+					<div class="portlet-title" style="padding:0px 20px  !important">
+					    <div class="caption font-white" style="    width: 100%;">
+						<i class="fa fa-user" style="color:#fff"></i>
+						<span class="caption-subject bold uppercase">Religare OTP Authentication</span>
+					    </div>
+					</div>
+                                    </div>		
+				    
+                                    <div class="col-md-12">
+                                    <!-- BEGIN Portlet PORTLET-->
+                                    <div class="col-sm-12 md_r">
+                                       
+                                        <div class="portlet-body" style="padding:20px">
+                                            <div class="col-md-12 np">
+						<div class="col-sm-12">	
+						    {{if(sendotp == True):}}
+							    <div id="sendotp" class="form-group">
+								<!--ie8, ie9 does not support html5 placeholder, so we just show field title for that-->
+								<label>Enter Smiling Card Code</label>
+								<div class="input-icon">
+								    <i class="fa fa-credit-card"></i>
+								    {{=form.custom.widget.voucher_code}}
+								</div>
+								<span style="color:red">{{=message}}</span>
+							    </div>
+						    {{else:}}
+							<div style="display:none">
+							{{=form.custom.widget.voucher_code}}
+							</div>
+						    {{pass}}
+							
+						    {{if(validateotp == True):}}
+							    <div id="valotp" class="form-group" >
+								<label class="control-label visible-ie8 visible-ie9">OTP</label>
+								<div class="input-icon">
+								    <i class="fa fa-lock"></i>
+								    {{=form.custom.widget.otp}}
+								</div>
+							    </div>
+						    {{pass}}
+								
+						</div>
+						
+						
+						
+
+						<div class="col-sm-12">	
+							  {{if(sendotp == True):}}
+							     <button id="SND" type="submit" onclick="loader(this.id),sendOTP()" class="btn green"> <span style="float: left;color:#000 !important">Send OTP</span><i class="fa fa-spinner fa-spin" id="loaderDIVSND" style="display:none"></i></button>
+							  {{pass}}
+							  {{if(validateotp == True):}}
+							     <button id="VAL" type="submit" onclick="loader(this.id),validateOTP()" class="btn green"> <span style="float: left;color:#000 !important">Validate OTP</span><i class="fa fa-spinner fa-spin" id="loaderDIVVAL" style="display:none"></i></button>
+							  {{pass}}
+							 <a href="{{=returnurl}}" class="btn green">Cancel </a>                                            
+						</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- END Portlet PORTLET-->
+                                  </div>
+
+                                </div>
+                                <!-- END EXAMPLE TABLE PORTLET-->
+                                
+
+                            </div>
+                        </div>
+						
+	    <div style="display:none">                
+		{{=form.custom.widget.ackid}}
+		 {{=form.custom.widget.customer_id}}
+		  {{=form.custom.widget.xaction}}	
+		 {{=form.custom.widget.policy_number}}
+		 {{=form.custom.widget.mobile_number}}
+	    </div>		    
+            {{=form.custom.end}}  
+            <!--</form>-->
+            
+           
+      
+        
+<script>
+    function sendOTP(){
+	var xaction = document.getElementById("no_table_xaction")
+	
+	xaction.value = "sendOTP"
+    }        
+
+    function validateOTP(){
+	var xaction = document.getElementById("no_table_xaction")
+	xaction.value = "validateOTP"
+    }        
+
+</script>
+
+
+
+
+
+

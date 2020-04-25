@@ -1,0 +1,100 @@
+{{extend 'pms2_layoutw4.html'}}
+
+{{=formMedTest.custom.begin}}
+
+			<div class="row">
+			    <div class="col-md-12">
+				<div class="portlet light bordered">
+				    <div class="portlet-title">
+					<div class="caption font-white">
+					     <i class="fa fa-road" style="color:#fff"></i>
+					     <span class="caption-subject bold uppercase">Medical Test for {{=patientname}}</span>
+					 </div>
+				    </div>
+				    <div class="col-md-12">
+					<div class="col-md-2">
+					    <div class="form-group">
+					      <label class="m_title"> Date</label>
+					      {{=formMedTest.custom.widget.testdate}}
+					    </div>
+					</div>
+					<div class="col-md-2">
+					    <div class="form-group">
+					      <label class="m_title"> Test Name</label>
+					      {{=formMedTest.custom.widget.testname}}
+					    </div>
+					</div>
+				    </div>
+				    <div class="col-md-12">				    
+					<div class="col-md-3">
+					    <div class="form-group">
+					      <label class="m_title">Actual Value</label>
+					      {{=formMedTest.custom.widget.actualvalue}}
+					    </div>
+					</div>
+					<div class="col-md-3">
+					    <div class="form-group">
+					      <label class="m_title">Lower Value</label>
+					      {{=formMedTest.custom.widget.lowervalue}}
+					    </div>
+					</div>
+								    
+					<div class="col-md-3">
+					    <div class="form-group">
+					      <label class="m_title">Typical Value</label>
+					      {{=formMedTest.custom.widget.typicalvalue}}
+					    </div>
+					</div>
+					<div class="col-md-3">
+					    <div class="form-group">
+					      <label class="m_title">Upper Value</label>
+					      {{=formMedTest.custom.widget.uppervalue}}
+					    </div>
+					</div>
+				    </div>
+				    <div class="col-md-12">	
+					<div class="col-md-6">
+					    <div class="form-group">
+					      <label class="m_title">Remarks</label>
+					      {{=formMedTest.custom.widget.remarks}}
+					    </div>
+					</div>
+				    </div>
+				    <div class="col-md-12">	
+					<div class="col-md-6">
+					    <div class="form-group">
+					      <label class="m_title">Medical Tests</label>
+					      {{=medtestgrid}}
+					    </div>
+					</div>
+				    </div>
+				    
+				    
+				    <div class="col-md-12">	
+				    
+					<div class="col-md-12" style="margin-bottom:30px">
+					  <button type="submit" id="SM" onclick="loader(this.id)" class="btn green">Save <i class="fa fa-spinner fa-spin" id="loaderDIVSM" style="display:none"></i></button>
+					  <a href="{{=returnurl}}">Cancel </a>
+					</div>
+				    </div>
+								
+								
+								
+				</div>
+			    </div>
+			</div>
+							
+
+
+
+                        
+                        
+<div style="display:none">                        
+ {{=patientid}}
+ {{=providerid}}
+ {{=memberid}}
+ 
+</div>
+
+{{=formMedTest.custom.end}}
+

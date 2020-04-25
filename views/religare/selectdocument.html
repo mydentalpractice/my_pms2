@@ -1,0 +1,122 @@
+{{extend 'pms2_layoutw4_relgr.html'}}
+{{=form.custom.begin}}
+                        
+                        <div class="row">
+                            <div class="container" style="width: 100%;margin: 0px auto;">
+                                <!-- BEGIN EXAMPLE TABLE PORTLET-->
+                                <div class="portlet light bordered">
+                                    <div class="portlet-title tabbable-line">
+					<div class="portlet-title" style="padding:0px 20px  !important">
+					    <div class="caption font-white" style="    width: 100%;">
+						<i class="fa fa-user" style="color:#fff"></i>
+						<span class="caption-subject bold uppercase">Upload Government Photo ID</span>
+					    </div>
+					</div>
+                                    </div>		
+				    
+                                    <div class="col-md-12">
+                                    <!-- BEGIN Portlet PORTLET-->
+                                    <div class="col-sm-12 md_r">
+                                       
+                                        <div class="portlet-body" style="padding:20px">
+                                            <div class="col-md-12 np">
+						<div class="col-sm-12">	
+                                                   <div class="col-md-12">
+                                                     <div class="form-group">
+                                                       <div class="mt-repeater-input">
+                                                                    <label class="m_title">Document Date</label>
+                                                                    <br>
+                                                                    {{=form.custom.widget.docdate}}
+                                                       </div>  
+                                                       </div>  
+                                                   </div>
+						   
+						   
+						   </div>						   
+
+					    
+					    
+						<div class="col-sm-12">	
+                                                  <div class="col-md-6">
+                                                     <div class="form-group">
+                                                       <div class="mt-repeater-input">
+                                                                    <label class="m_title">Customer Name</label>
+                                                                    <br>
+                                                                    {{=form.custom.widget.membername}}
+                                                       </div>  
+                                                       </div>  
+                                                   </div>
+                                                 
+                                                  <div class="col-md-6">
+                                                     <div class="form-group">
+                                                       <div class="mt-repeater-input">
+                                                                    <label class="m_title">Customer ID</label>
+                                                                    <br>
+                                                                    {{=form.custom.widget.customer_id}}
+                                                       </div>  
+                                                       </div>  
+                                                   </div>
+						</div>
+						<div class="col-sm-12">	
+                                                   <div class="col-md-6">
+                                                     <div class="form-group">
+                                                       <div class="mt-repeater-input">
+                                                                    <label class="m_title">Policy Number</label>
+                                                                    <br>
+                                                                    {{=form.custom.widget.policy_number}}
+                                                       </div>  
+                                                       </div>  
+                                                   </div>
+                                                   <div class="col-md-6"  style="display:none">
+                                                     <div class="form-group">
+                                                       <div class="mt-repeater-input">
+                                                                    <label class="m_title">Mobile Number</label>
+                                                                    <br>
+                                                                    {{=form.custom.widget.mobile_number}}
+                                                       </div>  
+                                                       </div>  
+                                                   </div>
+						   </div>
+						   
+						<div class="col-sm-12">	
+                                                   <div class="col-md-12">
+                                                     <div class="form-group">
+                                                       <div class="mt-repeater-input">
+                                                                    <label class="m_title">Govt. Photo ID</label>
+                                                                    <br>
+                                                                    {{=form.custom.widget.rlgdocument}}
+                                                       </div>  
+                                                       </div>  
+                                                   </div>
+						   
+						   
+						   </div>		
+						    
+						   <div class="col-sm-12">	
+							<div class="col-md-12" style="margin-bottom:30px">
+							    <button id="VD" type="submit" onclick="loader(this.id)" class="btn green"><span style="float: left;color:#000 !important">View Govt. Photo ID</span><i class="fa fa-spinner fa-spin" id="loaderDIVVD" style="display:none"></i></button>
+							    <a href="{{=returnurl}}" id="VDC" onclick="loader(this.id)" class="btn green"><span style="float: left;color:#000 !important">Cancel</span><i class="fa fa-spinner fa-spin" id="loaderDIVVDC" style="display:none"></i></a>                                            
+							</div>
+						   </div>
+						   
+                                       
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- END Portlet PORTLET-->
+                                  </div>
+
+                                </div>
+                                <!-- END EXAMPLE TABLE PORTLET-->
+                                
+
+                            </div>
+                        </div>
+<div style="display:none">
+		{{=form.custom.submit}}
+		 {{=form.custom.widget.created_on}}
+		 {{=form.custom.widget.modified_on}}
+ </div>
+                        
+{{=form.custom.end}}
+

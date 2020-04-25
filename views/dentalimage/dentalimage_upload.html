@@ -1,0 +1,31 @@
+{{extend 'layout.html'}}
+
+{{=formA}}
+
+{{if (dsimages != None):}}
+<table>
+    
+        {{for i in xrange(0, len(dsimages)): }}
+       <tr>
+           <td>  
+	    {{if((dsimages[i].image != '') & (dsimages[i].image != None)):}}
+		 <img width="10px" height="10px" onclick="onClick(this)"  src="{{=URL('dentalimage','download',args=dsimages[i].image)}}"/>
+	   {{else:}}
+	       No Image
+	   {{pass}}
+           </td>
+       </tr>
+      {{pass}}
+   </table>   
+ {{pass}} 
+
+<div id="modal01" class="w3-modal" onclick="this.style.display='none'">
+  <img class="w3-modal-content" id="img01" style="width:100%">
+</div>
+
+<script>
+function onClick(element) {
+  document.getElementById("img01").src = element.src;
+  document.getElementById("modal01").style.display = "block";
+}
+</script>

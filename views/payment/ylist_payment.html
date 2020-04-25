@@ -1,0 +1,30 @@
+
+{{extend 'pms2_layoutw4.html'}}
+
+    <div class="row">
+     <div class="col-md-12">
+         <!-- BEGIN EXAMPLE TABLE PORTLET-->
+         <div class="portlet light bordered">
+             <div class="portlet-title" style="background:none">
+                 <div class="caption font-white">
+                     <span class="caption-subject font-green sbold uppercase"><i class="fa fa-money"></i> Payment&nbsp;</span>
+                     <span ><a href="{{=URL('payment','create_payment',vars=dict(\
+            tplanid=tplanid, memberid=memberid,providerid=providerid,providername=providername,page=page))}}"  class="btn green"  ><i class="fa fa-plus"></i> New Payment  &nbsp;</a></span>
+                     <span ><a href="{{=URL('payment','commit_payment',vars=dict(\
+            tplanid=tplanid, memberid=memberid,providerid=providerid,providername=providername,page=page))}}"  class="btn green" data-toggle="modal" data-target="#myModal"><i class="fa fa-retweet"></i>  Commit Payments  </a></span>
+                 </div>
+                
+             </div>
+             
+             {{=form}}  
+             {{if(memberid > 0):}}
+             <div class="col-md-12" style="margin:20px 0px">
+                     <div class="col-md-4"><strong>Total Treatment Cost:</strong> {{=totalcost}}</div>
+                      <div class="col-md-4"><strong>Total Paid</strong>  {{=totalpaid}}</div>
+                       <div class="col-md-4"><strong>Total Due </strong> {{=totaldue}}</div>
+             </div>
+             {{pass}}
+         </div>
+         <!-- END EXAMPLE TABLE PORTLET-->
+    </div>
+   </div>

@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>MDP - Apicoectomies Apicalsurgery Consent Form</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link href="https://fonts.googleapis.com/css?family=Poppins:100,100i,200,200i,300,300i,400,400i,500,500i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
+</head>
+  <script src="https://docraptor.com/docraptor-1.0.0.js"></script>
+  <script>
+    var downloadPDF = function() {
+      DocRaptor.createAndDownloadDoc("YOUR_API_KEY_HERE", {
+        test: true, // test documents are free, but watermarked
+        type: "pdf",
+        document_content: document.querySelector('html').innerHTML, // use this page's HTML
+        // document_content: "<h1>Hello world!</h1>",               // or supply HTML directly
+        // document_url: "http://example.com/your-page",            // or use a URL
+        // javascript: true,                                        // enable JavaScript processing
+        // prince_options: {
+        //   media: "screen",                                       // use screen styles instead of print styles
+        // }
+      })
+    }
+  </script>
+  <style>
+body{font-family: 'Poppins', sans-serif !important;}
+.np{    padding: 0px;}
+    .npl{padding-left: 0px;text-align: left;}
+    .npl p{    margin-bottom: 5px !important;    font-size: 14px;}
+    .npr{padding-right: 0px;text-align: right;}
+    .pb{padding-bottom: 5px;}
+        .bor{display: grid;
+    padding: 0px;float: left;}
+    .pt{padding-top: 30px;}
+    #pdf-button{    background: #1d77b3;
+    border: none;
+    color: #fff;
+    margin: 20px 0px;
+    padding: 8px;}
+    .bg_blue{    background: #fff;padding: 0px 0px;}
+    .bg_blue1{    background: #fff;padding: 0px 0px;}
+    strong{font-weight: 600;}
+    td{font-size: 10px; padding: 3px 0px;}
+    td:first-child {font-weight: 500;    width: max-content;
+    float: left;}
+    .bt_text{    text-align: center;
+    font-size: 16px;
+    color: #fff;
+    margin-top: 8px;
+    font-weight: 600;}
+    ul {
+    list-style-image: url('https://mydentalplan.in/teeth_icon.png');
+}
+li{font-size:9px;}
+@media only screen and (max-width: 400px) and (min-width: 300px)  {
+
+    .bt_text{font-size: 12px !important;}
+ul{font-size: 11px !important;}
+  .npl p{ font-size:9px !important;}
+      .btm{font-size: 10px !important;}
+      .pt{padding-top:0px !important;}
+}
+@media only screen and (max-width: 400px) and (min-width: 300px)  {
+  .bt_text{font-size: 12px !important;}
+ul{font-size: 8px !important;}
+  .npl p{ font-size:14px !important;}
+     
+      .pt{padding-top:0px !important;}
+.pad{padding: 10px 10px !important;}
+.btm{text-align:left !important;}
+}
+
+
+</style>
+  <style>
+    @media print {
+      #pdf-button {
+        display: none;
+      }
+     
+       
+
+ /* All your print styles go here */
+ #btnPrint{ display: none !important; } 
+ .button{ display: none !important; } 
+ a{display: none !important}
+ p{font-size: 12px !important}
+}
+  </style>
+
+<body>
+  <div class="container">
+    <div class="col-sm-12">
+ <!--Id Card Front part start-->
+
+          <div class="col-sm-12 bor">
+            <!--logo start-->
+              <div class="col-sm-12"> <input id="pdf-button" type="button" value="Download PDF" onclick="downloadPDF()" /></div>
+          <div class="container-fluid">
+                 <div class="col-sm-12">
+                   
+                     <div class="col-sm-6 text-right marg" style="margin-left:-14px;" >Date:&nbsp;&nbsp;<strong>{{=consentdate}}</strong></div>
+                 </div>
+          </div> 
+          <div class="container-fluid background right" style="margin-bottom:0%;"> 
+              <div class="col-sm-12 text-center right" style="margin-top:2%; ">
+                     <h4 style="color:#1875b2;" class="right"><strong>{{if(len(prov[0].practicename) > 0):}}<strong>{{=prov[0].practicename}}</strong>{{pass}}</strong></h4>
+                                        <h5 style="color:#1875b2;" class="right"><strong>{{=prov[0].providername}}</strong><br>State Dental Council Registration Number: {{=registration}}</h5>
+                                        <p>{{if(len(prov[0].practicename) > 0):}}{{=prov[0].practicename}}{{pass}}{{if(len(prov[0].address1) > 0):}}
+                    {{=prov[0].address1}},&nbsp;&nbsp;
+                    {{pass}}
+                    {{if(len(prov[0].address2) > 0):}}
+                    {{=prov[0].address2}},&nbsp;&nbsp;
+                    {{pass}}      
+                    {{if(len(prov[0].address3) > 0):}}
+                    {{=prov[0].address3}},&nbsp;&nbsp; 
+                    {{pass}}
+                    
+                    {{if(len(prov[0].city) > 0):}}
+                    {{=prov[0].city}}{{pass}},{{if(len(prov[0].st) > 0):}} {{=prov[0].st}}{{pass}} {{if(len(prov[0].pin) > 0):}} - {{=prov[0].pin}}{{pass}}<br/>
+                    Phone: {{=prov[0].cell}}&nbsp;&nbsp;&nbsp;&nbsp;Email: {{=prov[0].email}}&nbsp;&nbsp;&nbsp;&nbsp;</p>
+              </div> 
+          </div>  
+       <!--Header start-->
+          <div class="col-sm-12 bg">
+               <div class="col-xs-12 npl">
+                 
+                <p>Patient: <span style="text-decoration: underline;">{{=patientmember}}</span></p>
+                <p>Date: <strong>{{=consentdate}}</strong> I, <span style="text-decoration: underline;">{{=patientmember}}</span>, authorize and request Dr.(s) , <span style="text-decoration: underline;">&nbsp; &nbsp;{{=doctorname}}</span>and/or such assistants as may be selected by him (them) to provide <span style="text-decoration: underline;">{{=dentalprocedure}}</span> to address the conditions or symptoms based on the diagnostic studies and/or evaluations already performed and which have been explained to me.The doctor has also explained to me in detail about the diagnosis, treatment, medications and the postoperative complications which may arise due to the operation. </p>
+      <!--Header end-->               
+      <!--Body Start-->         
+            <p>I UNDERSTAND that APICOECTOMIES include possible inherent risks such as, but not limited to the following: </p>
+
+            <p><b>1. Injury to the nerves:</b> This would include injuries causing numbness of the lips; the tongue; any tissues of the mouth; and/or cheeks or face. This numbness could occur and may be of a temporary nature, lasting a few days, a few weeks; a few months; or could possibly be permanent, and could be the result of surgical procedures or anesthetic administration.</p>
+
+            <p><b>2. Bleeding, bruising, swelling:</b> Bleeding may last several hours. If bleeding is profuse, you must contact us as soon as possible. Some swelling is normal, but if severe, you should notify us. Bruises or hematomas may persist for some time.</p>
+
+            <p><b>3. Infection:</b> No matter how carefully surgical sterility is maintained, it is possible, due to existing non-sterile or infected oral environment, infections may occur postoperatively. At times, infections may be of a serious nature. Should severe swelling occur, particularly accompanied with fever or malaise, attention as soon possible should be received.</p>
+
+            <p><b>4. Sinus or Mandibular Canal Involvement:</b> In some cases, the roots of the teeth that are going to be apically treated lie in closer apposition to the Maxillary Sinuses or to the Mandibular Canal, including the Mental Foramen than they appear to be radiographically. Even though a rare occurrence, there is a slight possibility that the Maxillary Sinus or the Mandibular Canal may be perforated, or the nerves emanating from the Mental Foramen may be traumatized during the surgical procedure involved with removing the apices of the infected teeth.</p>
+
+            <p><b>5. Injury to adjacent teeth or adjacent roots:</b> There is a possibility of injury to an adjacent tooth or to roots of teeth during the procedure. If an adjacent tooth or roots of teeth are inadvertently nicked or otherwise damaged during the surgical procedures, conventional endodontic treatment, endodontic surgery, or extraction may be required.</p>
+
+            <p><b>6. Bacterial Endocarditis:</b> Because of normal existence of bacteria in the oral cavity, the tissues of the heart, as a result of reasons known or unknown, may be susceptible to bacterial infection transmitted through blood vessels, and Bacterial Endocarditis (an infection of the hear t) could occur. Pre-existing conditions causing valvular dysfunction are the most likely cause of this complication. It is my responsibility to inform the dentist of any heart problems known or suspected.</p>
+
+            <p><b>7. Failure:</b> Even though the surgical procedure is properly performed, there exists the possibility that the attempt to preserve the tooth will fail due to the tooth and tissues not responding as they should, thereby necessitating extraction of the tooth.</p>
+
+            <p><b>8. Unusual reactions to medications given or prescribed:</b> Reactions, either mild or severe, may possibly occur from anesthetics or other medications administered or prescribed. All prescription drugs must be taken according to instructions. Women using oral contraceptives must be aware that antibiotics that may be necessary to control infection can render these Contraceptives ineffective. Other methods of contraception must be utilized during the treatment period.</p>
+
+            <p><b>9. It is my responsibility to seek attention should any undue circumstances occur postoperatively and I shall diligently follow any preoperative and postoperative instructions given me.</b></p>
+
+            <p>I certify that I have read, have had explained to me, and fully understand the foregoing Consent to <span style="text-decoration: underline;">{{=dentalprocedure}}</span>,  drug and anesthetic procedures, and that it is my intention to have the foregoing carried out as stated. I have been advised of information concerning the longevity of the procedure. However, I have discussed this as well as the nature of the services and procedures and I consent to the above procedure knowing its risks and limitations.</p>
+
+      <!--Body End--> 
+
+
+               <!--Footer start--> 
+               <div class="col-sm-6 np">
+                    <p><b>Doctor Name:</b><span style="text-decoration: underline;">&nbsp; &nbsp;{{=doctorname}}</span></p>
+                    <p><b>Doctor Signature:</b>________________________</p>
+                    <p><b>State Dental Council Registration Number:</b>&nbsp;&nbsp;{{=docreg}}</p>
+                    <p><b>Patient Name:-</b><span style="text-decoration: underline;">{{=patientmember}}</span></p>
+                    <p><b>Patient Signature:-</b>________________________</p>
+                    <p><b>Witness (if available) :-</b>________________________</p>
+                    <p><b>Parent / Guardian if patient is minor:-</b>________________________</p>                                                
+                    <p><b>Date:-</b> {{=consentdate}}&nbsp;&nbsp;<b>Date:-</b> {{=consentdate}}</p>
+                    <p><a id="can" href="{{=returnurl}}">Cancel </a></p>
+               </div>
+                <!--Footer end-->                
+               </div>
+               
+              
+            </div>  
+       <!--customer details end-->
+       
+      </div>
+      <div class="col-sm-2"></div>
+</div>
+<!--Id Card Front part End-->
+
+
+
+ 
+
+
+
+
+
+   </div>
+
+</body>
+</html>

@@ -1,0 +1,38 @@
+<html>
+<head>
+
+<script>
+	window.onload = function() {
+		var act = function() {
+			document.forwardPG.submit()
+		};
+		window.setTimeout(act, 60000);  <!--5000-->
+	};
+</script>
+</head>
+
+<h3 style=>Please wait as payment is being processed...</h3>
+<form action="https://test.fonepaisa.com/pg/pay" method="post"
+	name="forwardPG">
+	<input type="text" name="msg_name" style="width:60%" value="request_payment"><br/> 
+	<input type="text" name="id" style="width:60%" value="{{=xid}}"> <br/>
+	<input type="text"
+		name="merchant_id" style="width:60%" value="{{=merchantid}}"> <br/> 
+	<input
+		type="text" name="merchant_display" style="width:60%" value="{{=merchantdisplay}}"><br/> 
+	<input type="text" name="invoice_amt" style="width:60%" value="{{=invoiceamt}}"><br/> 
+	<input type="text" name="email" style="width:60%" value="{{=email}}"> <br/> 
+	<input
+		type="text" name="mobile_no" style="width:60%" value="{{=mobileno}}"> <br/> 
+	<input
+		type="text" name="callback_url" style="width:60%" value="{{=callbackurl}}"> <br/> 
+	<input
+		type="text" name="callback_failure_url"
+		style="width:60%" value="{{=callbackfailureurl}}"> <br/> 
+	<input type="text"
+		name="invoice" style="width:60%" value="{{=invoice}}"> <br/> 
+	<input type="text"
+		name="sign" style="width:60%" value="{{=xhash}}"><br/> 
+</form>
+<body>
+</body>

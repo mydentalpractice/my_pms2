@@ -1,0 +1,176 @@
+{{extend 'pms2_layoutw4.html'}}
+
+{{=formA.custom.begin}}
+
+                        <div class="row">
+                            <div class="col-md-12">
+                                <!-- BEGIN EXAMPLE TABLE PORTLET-->
+                                <div class="portlet light bordered">
+                                    <div class="portlet-title">
+                                        <div class="caption font-white">
+                                            <i class="fa fa-image" style="color:#fff"></i>
+                                            <span class="caption-subject bold uppercase"> New Dental Image: {{=patientname}} &nbsp;|&nbsp;Member ID: {{=memberref}}</span>
+                                        </div>
+                                       
+                                    </div>
+                                    <div class="col-md-12">
+                                    <!-- BEGIN Portlet PORTLET-->
+                                     <div class="portlet-body">
+                                        <!--row1-->
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                  
+                                                    <div class="input-group">
+                                                        <span class="input-group-addon"><i class="fa fa-user"></i></span>
+                                                         {{=formA.custom.widget.title}}
+                                                        
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                 <div class="mt-repeater-input">
+                                                        {{=formA.custom.widget.imagedate}}                                                            
+                                                            
+                                               </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                 <div class="form-group">
+                                                  
+                                                    <div class="input-group">
+                                                        <span class="input-group-addon"><i class="fa fa-user"></i></span>
+                                                        {{=formA.custom.widget.tooth}} 
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                 <div class="form-group">
+                                                  
+                                                    <div class="input-group">
+                                                        <span class="input-group-addon"><i class="fa fa-user"></i></span>
+                                                        {{=formA.custom.widget.quadrant}} 
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                 <div class="form-group">
+                                                  
+                                                    <div class="input-group">
+                                                       <h4 class="m_title">Member</h4>
+                                                         {{=membername}}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                             <div class="col-md-4">
+                                                 <div class="form-group">
+                                                  
+                                                    <div class="input-group">
+                                                        <span class="input-group-addon"><i class="fa fa-user"></i></span>
+                                                       <select id="patients" class='form-control'>
+							{{ for i in xrange(0, len(dspatients)): }}
+							     {{if(dspatients[i][0] == patientid):}}
+								   <option   selected value={{=dspatients[i][0]}}> {{=dspatients[i][1]}}:{{=dspatients[i][2]}}</option>
+							     {{else:}}
+							     <option   value={{=dspatients[i][0]}}>{{=dspatients[i][1]}}:{{=dspatients[i][2]}}</option>
+							     {{pass}}
+							 {{pass}}
+						      </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-8">
+                                                 <div class="form-group">
+                                                  
+                                                    <div class="input-group">
+                                                        
+                                                        {{=formA.custom.widget.description}}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                             <div class="col-md-4">
+                                                 <div class="form-group">
+                                                  
+                                                    <div class="input-group">
+                                                        
+                                                         Image:
+                                                        {{=formA.custom.widget.image}}
+    
+                                                    </div>
+                                                </div>
+                                            </div>
+					    <div class="col-md-4">
+                                                 <div class="form-group">
+                                                  
+                                                    <div class="input-group">
+                                                        
+                                                         DICOM Image:
+							<div class="btn-group" style="margin: 0px 15px 20px 0px;">
+							<a href="{{=URL('dentalimage','uploadDICOMImage',vars=dict(providername=providername,providerid=providerid,patientid=patientid,memberid=memberid,treatmentid=treatmentid,returnurl=returnurl,page=page,memberpage=memberpage,imagepage=imagepage,source=source))}}" target="_blank">Upload DICOM Image</a>
+
+
+
+
+						       </div>  
+    
+                                                    </div>
+                                                </div>
+                                            </div>
+					    					    
+					     
+                                          <div class="col-md-12">   
+                                              <div class="btn-group" style="margin: 0px 15px 20px 0px;">
+					      <button id="sample_editable_1_new" class="btn sbold" style="background: #3cc051; color: #fff;"><i class="fa fa-refresh"></i>&nbsp; Save image</button>
+                                             </div>  
+                                        </div>    
+                                            
+                                            
+                                        <!--row1-->
+                                        
+                                      
+                                        
+                                        </div>
+                                    <!-- END Portlet PORTLET-->
+                                    
+                                   
+
+
+
+                                    
+                                
+
+
+
+
+
+
+                            </div>
+                        </div>
+
+<div  style="display:none">
+    {{=formA.custom.widget.patient}}
+    {{=formA.custom.widget.patienttype}}
+    {{=formA.custom.widget.patientmember}}
+    {{=formA.custom.widget.patientname}}
+    {{=formA.custom.widget.provider}}
+
+</div>    
+
+{{=formA.custom.end}}
+<br/>
+<script>
+$(document).ready(function(){
+   
+    $("#patients").change(function(){
+       var x = $('#patients').val();
+       var y = $('#patients :selected').text();
+       var z = $('#patients :selected').index();
+       
+       splitarr = y.split(':')       
+       
+       $("#dentalimage_patient").val(x);
+       $("#dentalimage_patienttype").val(splitarr[0]);
+       $("#dentalimage_patientname").val(splitarr[1]);
+       
+      
+    });
+});
+</script>

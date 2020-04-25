@@ -1,0 +1,36 @@
+{{extend 'pms2_layoutw3.html'}}
+
+
+  <header class="w3-container w3-blue-grey">
+  {{if(membername <> ""):}}
+        <h4><strong>Treatments for family of {{=membername}}</strong></h4>
+  {{else:}}
+          <h4><strong>Treatments</strong></h4>
+  {{pass}}
+  </header>
+
+<div class="row">&nbsp;</div>
+
+
+<div class="w3-container"> 
+<div class="w3-container"> 
+ <a href="{{=URL('treatment','treatmentplan_create',vars=dict(\
+            memberid=memberid,providerid=providerid,providername=providername,page=page))}}" class="w3-btn w3-black">Add</a>
+ </div>
+    
+     {{=form}}
+       </div>
+
+</div>
+
+
+
+
+  
+            
+   
+
+
+
+
+

@@ -1,0 +1,88 @@
+
+{{extend 'pms2_layoutw4.html'}}
+<style>
+.dataTables_filter{ float:right !important;}
+ .dataTables_filter input {width: 377px !important;}
+</style>
+
+
+<style>
+#suggestions { position: relative; }
+.suggestions { background: white; border: solid 1px #55A6C8; }
+.suggestions DIV { padding: 2px 4px 2px 4px; }
+</style>
+
+
+    <div class="row">
+     <div class="col-md-12">
+         <!-- BEGIN EXAMPLE TABLE PORTLET-->
+          <div class="portlet light bordered" style="border: 0px solid #dadada!important;">
+	    {{=form.custom.begin}}
+	    <div class="col-md-12" style="margin-bottom: 18px;">
+		<div class="input-group">
+		    {{=form.custom.widget.patientmember1}}
+		    
+		    <span class="input-group-btn">
+			<button class="btn blue uppercase bold" type="submit">New Treatment</button>
+		    </span>
+		</div>
+		<div style="position: absolute;" id="suggestions" class="suggestions"></div>
+	    </div>
+	    <div style="display:none">
+		{{=form.custom.widget.xpatientmember1}}
+		{{=form.custom.submit}}
+	     </div>
+
+	    {{=form.custom.end}}
+	</div>    	   
+    </div>
+    </div>
+    
+         <!-- END EXAMPLE TABLE PORTLET-->
+    </div>
+   </div>
+   
+   
+
+<script>
+  
+
+
+
+jQuery("#no_table_patientmember1").keyup(function(){
+       
+       $("#suggestions").show();
+       var x = $('#no_table_patientmember1').val();
+       $("#no_table_xpatientmember1").val(x);
+       
+       ajax('{{=URL('admin', 'patient_selector')}}', ['xpatientmember1'], 'suggestions')
+});
+       
+$(document).ready(function(){
+   
+    $("#suggestions").show();
+    
+    $("#suggestions") .click(function(){
+      
+	x= $("#no_table_patientmember1").val();
+
+	
+	$("#no_table_xpatientmember1").val(x);
+	
+	strarr = x.split(":");
+	
+	$("#no_table_patientmember1").val(strarr[0]);
+
+	$("#suggestions").hide();
+	
+    
+    });
+    
+});
+
+
+
+
+ 
+       
+</script>

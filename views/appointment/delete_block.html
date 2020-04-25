@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+
+<!--[if IE 8]> <html lang="en" class="ie8 no-js"> <![endif]-->
+<!--[if IE 9]> <html lang="en" class="ie9 no-js"> <![endif]-->
+<!--[if !IE]><!-->
+<html lang="en">
+    <!--<![endif]-->
+    <!-- BEGIN HEAD -->
+
+    <head>
+        <meta charset="utf-8" />
+        <title>My Dental Plan | Appoitment</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta content="width=device-width, initial-scale=1" name="viewport" />
+        <meta content="" name="description" />
+        <meta content="" name="author" />
+	
+	<!-- BEGIN WEB2PY STYLES -->
+   <script type="text/javascript"><!--
+    // These variables are used by the web2py_ajax_init function in web2py_ajax.js (which is loaded below).
+    var w2p_ajax_confirm_message = "{{=T('Are you sure you want to delete this object?')}}";
+    var w2p_ajax_disable_with_message = "{{=T('Working...')}}";
+    //var w2p_ajax_date_format = "{{=T('%Y-%m-%d')}}";
+    //var w2p_ajax_datetime_format = "{{=T('%Y-%m-%d %H:%M:%S')}}";
+    var w2p_ajax_date_format = "{{=T('%d/%m/%Y')}}";
+    var w2p_ajax_datetime_format = "{{=T('%d/%m/%Y %H:%M:%S')}}";
+    
+    var ajax_error_500 = '{{=T.M('An error occured, please [[reload %s]] the page') % URL(args=request.args, vars=request.get_vars) }}'
+    //-->
+    
+    
+    
+    </script>
+    
+    
+{{
+response.files.insert(0,URL('static','js/jquery.js'))
+
+response.files.insert(2,URL('static','js/calendar.js'))
+response.files.insert(3,URL('static','js/web2py.js'))
+response.include_meta()
+response.include_files()
+
+from datetime import datetime
+}}
+
+
+      
+        
+        <!-- END WEB2PY STYLES -->
+	
+        <!-- BEGIN GLOBAL MANDATORY STYLES -->
+        <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,300,600,700&subset=all" rel="stylesheet" type="text/css" />
+        <link href="../static/assets/global/plugins/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
+        <link href="../static/assets/global/plugins/simple-line-icons/simple-line-icons.min.css" rel="stylesheet" type="text/css" />
+        <link href="../static/assets/global/plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+        <link href="../static/assets/global/plugins/bootstrap-switch/css/bootstrap-switch.min.css" rel="stylesheet" type="text/css" />
+        <!-- END GLOBAL MANDATORY STYLES -->
+        <!-- BEGIN PAGE LEVEL PLUGINS -->
+        <link href="../static/assets/global/plugins/bootstrap-daterangepicker/daterangepicker.min.css" rel="stylesheet" type="text/css" />
+        <link href="../static/assets/global/plugins/bootstrap-datepicker/css/bootstrap-datepicker3.min.css" rel="stylesheet" type="text/css" />
+        <link href="../static/assets/global/plugins/bootstrap-timepicker/css/bootstrap-timepicker.min.css" rel="stylesheet" type="text/css" />
+        <link href="../static/assets/global/plugins/bootstrap-datetimepicker/css/bootstrap-datetimepicker.min.css" rel="stylesheet" type="text/css" />
+         <link href="../static/assets/global/plugins/clockface/css/clockface.css" rel="stylesheet" type="text/css" />
+	 
+        <link href="../static/assets/global/plugins/fullcalendar/fullcalendar.min.css" rel="stylesheet" type="text/css" />
+
+	
+        <!-- END PAGE LEVEL PLUGINS -->
+        <!-- BEGIN THEME GLOBAL STYLES -->
+        <link href="../static/assets/global/css/components.min.css" rel="stylesheet" id="style_components" type="text/css" />
+        <link href="../static/assets/global/css/plugins.min.css" rel="stylesheet" type="text/css" />
+        <!-- END THEME GLOBAL STYLES -->
+        <!-- BEGIN THEME LAYOUT STYLES -->
+        <link href="../static/assets/layouts/layout/css/layout.min.css" rel="stylesheet" type="text/css" />
+        <link href="../static/assets/layouts/layout/css/themes/darkblue.min.css" rel="stylesheet" type="text/css" id="style_color" />
+        <link href="../static/assets/layouts/layout/css/custom.min.css" rel="stylesheet" type="text/css" />
+        <!-- END THEME LAYOUT STYLES -->
+
+        
+         <script src="{{=URL('static','js/jstz.js')}}"></script>
+        {{import pytz}}
+        {{from pytz import timezone}}
+        <style>
+        .calendar thead {}
+        .calendar thead tr, .calendar thead .headrow {
+          background-color: #eee;
+          color: #000000;
+        }
+        </style>        
+        
+      
+        </head>
+    <!-- END HEAD -->
+    <!-- END HEAD -->
+
+
+                        
+                        <div class="row">
+                            <div class="col-md-12">
+                                <!-- BEGIN EXAMPLE TABLE PORTLET-->
+                                <div class="portlet light bordered">
+                                    <div class="portlet-title">
+                                        <div class="caption font-white">
+                                            <i class="fa fa-calendar" style="color:#fff"></i>
+                                            <span class="caption-subject bold uppercase">Delete Block {{=title}}  from {{=startdate}} to {{=enddate}} </span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12">
+                                    <!-- BEGIN Portlet PORTLET-->
+                                    <div class="col-sm-12 md_r">
+					{{=form}}
+				    </div>
+                                    <!-- END Portlet PORTLET-->
+                                  </div>
+
+                                </div>
+                                <!-- END EXAMPLE TABLE PORTLET-->
+                                
+
+                            </div>
+                        </div>
+                        
+</body>
+<html>

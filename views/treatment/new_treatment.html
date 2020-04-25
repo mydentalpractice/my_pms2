@@ -1,0 +1,337 @@
+{{extend 'pms2_layoutw4.html'}}
+<style>
+#suggestions { position: relative;z-index:500000 }
+.suggestions { background: white; border: solid 1px #55A6C8; }
+.suggestions DIV { padding: 2px 4px 2px 4px; }
+
+#dentalsuggestions { position: relative; z-index:500000}
+.dentalsuggestions { background: white; border: solid 1px #55A6C8; }
+.dentalsuggestions DIV { padding: 2px 4px 2px 4px; }
+
+#xdentalsuggestions { position: relative; z-index:500000}
+.xdentalsuggestions { background: white; border: solid 1px #55A6C8; }
+.xdentalsuggestions DIV { padding: 2px 4px 2px 4px; }
+
+</style>
+
+
+{{=formTreatment.custom.begin}} 
+  
+             
+                        
+                        <div class="row mdp" id="Treatment">
+                        <span onclick="this.parentElement.style.display='none'" class="w3-button w3-large w3-display-topright">&times;</span>
+  
+                            <div class="col-md-12">
+                                <!-- BEGIN EXAMPLE TABLE PORTLET-->
+                                <div class="portlet light bordered">
+                                    <div class="portlet-title">
+                                        <div class="caption font-white">
+                                            <i class="fa fa-stethoscope" style="color:#fff"></i>
+                                                {{if(membername <> ""):}}
+                                                       <span class="caption-subject bold uppercase"> New Treatment for {{=patientname}} (Enrolled Member: {{=membername}})</span>
+                                                 {{else:}}
+                                                        <span class="caption-subject bold uppercase"> New Treatment</span>
+                                                 {{pass}}                                            
+                                            
+                                        </div>
+                                       
+                                    </div>
+                                    <div class="col-md-12">
+                                    <!-- BEGIN Portlet PORTLET-->
+                                    <div class="col-sm-12 md_r">
+                                        <div class="portlet-title mem_details">
+                                            <div class="caption">
+                                                <i class="fa fa-user"></i>&nbsp;Treatment </div>
+                                        </div>
+                                        <div class="portlet-body" style="padding:20px">
+					   <div class="col-md-4" style="margin-bottom:30px">
+						 <label class="m_title">Attending Doctor</label>
+						 {{=formTreatment.custom.widget.doctor}}
+					   </div>
+				       
+                                           <div class="col-md-4">
+                                               <div class="form-group">
+                                                <label class="m_title">Patient</label>
+                                                      <div class="input-group">
+                                                            <span class="input-group-addon">
+                                                                <i class="fa fa-user"></i>
+                                                            </span>
+                                                             {{=formTreatment.custom.widget.patientmember}} 
+                                                      </div>
+						      
+						      <div style="position: absolute;" id="suggestions" class="suggestions">
+						       </div>
+                                               </div>
+                                          </div>
+                                           <div class="col-md-4" style="z-index: 400000;">
+					   
+                                               <div class="mt-repeater-input">
+                                                            <label class="m_title">Treatment Date</label>
+                                                            <br>
+                                                            {{=formTreatment.custom.widget.startdate}}
+                                               </div>  
+                                           </div>    
+					</div>
+				     </div>	
+					
+                                    <div class="col-sm-12 md_r"> 
+                                           <div class="col-md-4" style="z-index: 300000;display:none">
+						<label class="m_title">Total UCR Fees</label>
+						<br>
+						{{=formTreatment.custom.widget.treatmentcost}}
+                                           </div>    
+                                           <div class="col-md-4" style="z-index: 300000;">
+						<label class="m_title">Total Treatment Cost</label>
+						<br>
+						{{=formTreatment.custom.widget.actualtreatmentcost}}
+                                           </div>    
+                                           <div class="col-md-4" style="z-index: 300000; display:none">
+						<label class="m_title">Total Copay</label>
+						<br>
+						{{=formTreatment.custom.widget.copay}}
+                                           </div>    
+				    
+				    </div>					
+					
+                                    <div class="col-sm-12 md_r">                     
+                                           <div class="col-md-3" style="z-index: 300000;">
+                                                   <div class="form-group">
+                                                    <label class="m_title">Dental Procedure Code</label>
+                                                          <div class="input-group">
+                                                                <span class="input-group-addon">
+                                                                    <i class="fa fa-plus-square"></i>
+                                                                </span>
+                                                                {{=formTreatment.custom.widget.vwdentalprocedurecode}} 
+                                                        </div>
+                                                   </div>
+						   <div style="position: absolute;z-index:500000" id="xdentalsuggestions" class="suggestions"  >
+						   </div>
+                                           </div>
+                                           
+
+
+
+                                           <div class="col-md-3" style="z-index: 300000;">
+                                                   <div class="form-group">
+                                                    <label class="m_title">Dental Procedure</label>
+                                                          <div class="input-group">
+                                                                <span class="input-group-addon">
+                                                                    <i class="fa fa-plus-square"></i>
+                                                                </span>
+                                                                {{=formTreatment.custom.widget.vwdentalprocedure}} 
+                                                        </div>
+                                                   </div>
+						   <div style="position: absolute;z-index:500000" id="dentalsuggestions" class="suggestions"  >
+						   </div>
+                                           </div>
+                                           
+                                           <div class="col-md-3">
+                                                   <div class="form-group">
+                                                    <label class="m_title">Quadrant</label>
+                                                          <div class="input-group">
+                                                                <span class="input-group-addon">
+                                                                    <i class="fa fa-plus-square"></i>
+                                                                </span>
+                                                                {{=formTreatment.custom.widget.quadrant}} 
+                                                          </div>
+                                                   </div>
+                                           </div>
+                                          
+                                           <div class="col-md-3">
+                                                   <div class="form-group">
+                                                    <label class="m_title">Tooth</label>
+                                                          <div class="input-group">
+                                                                <span class="input-group-addon">
+                                                                    <i class="fa fa-plus-square"></i>
+                                                                </span>
+                                                                {{=formTreatment.custom.widget.tooth}} </div>
+                                                   </div>
+                                           </div>  
+                                                <span><button type="submit" class="btn green">Add Procedure</button></span>
+						 {{=formProcedure}}
+					</div>  
+
+					
+					    
+                                           <div class="col-md-12" style="margin-bottom:30px">
+                                                    <label class="m_title">Notes</label>
+                                                    {{=formTreatment.custom.widget.description}}
+                                            </div>
+					    
+					   <div class="col-md-12" style="margin-bottom:30px">
+                                                <a href="{{=returnurl}}" >Cancel </a>
+						{{if(treatmentid != 0):}}
+						<div class="btn-group">
+						   <span  > <a style="color:#fff"  class="btn sbold green" onclick="location.href='{{=URL('treatment','update_treatment',vars=dict(page=page,providerid=providerid,treatmentid=treatmentid))}}'" >
+						       <i class="fa fa-plus"></i>&nbsp;&nbsp;Continue Treatment Processing...</a>
+						</div>
+						{{pass}}
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                    <!-- END Portlet PORTLET-->
+                                  </div>
+
+                                </div>
+                                <!-- END EXAMPLE TABLE PORTLET-->                                
+
+                            </div>
+                        </div>
+                        
+               
+
+
+
+ <div style="display:none">
+ {{=formTreatment.custom.widget.status}}
+     {{=formTreatment.custom.submit}}
+     {{=formTreatment.custom.widget.dentalprocedure}}
+     {{=formTreatment.custom.widget.treatmentplan}}
+     {{=formTreatment.custom.widget.treatment}}
+      {{=formTreatment.custom.widget.xmemberid}}
+       {{=formTreatment.custom.widget.xfullname}}
+    {{=formTreatment.custom.widget.xpatientmember}}
+    {{=formTreatment.custom.submit}} 
+<input type="text"  name="proccode" id = "proccode" readonly>  
+     <input type="text"  name="procucr" id = "procucr" readonly>  
+     <input type="text"   name="procdesc" id = "procdesc" readonly>
+     <input type="text"   name="procid" id = "procid" readonly>
+ {{=formTreatment.custom.widget.inspay}}
+      {{=formTreatment.custom.widget.copay}}
+       {{=formTreatment.custom.widget.treatmentcost}}
+       {{=formTreatment.custom.widget.enddate}}     
+  </div>
+
+
+{{=formTreatment.custom.end}}
+
+<script>
+function openTreatment(evt, mdpEvent) {
+  var i, x, tablinks;
+  x = document.getElementsByClassName("mdp");
+  for (i = 0; i < x.length; i++) {
+      x[i].style.display = "none";
+  }
+  tablinks = document.getElementsByClassName("tablink");
+  for (i = 0; i < x.length; i++) {
+      tablinks[i].className = tablinks[i].className.replace(" w3-green", "");
+  }
+  document.getElementById(mdpEvent).style.display = "block";
+  evt.currentTarget.className += " w3-green";
+};
+
+
+jQuery("#no_table_vwdentalprocedurecode").keyup(function(){
+
+       $("#xdentalsuggestions").show();
+       var x = $('#no_table_vwdentalprocedurecode').val();
+       ajax('{{=URL('admin', 'vwdentalprocedurecode_selector', vars=dict(patientid = patientid, memberid=memberid,freetreatment=freetreatment))}}', ['vwdentalprocedurecode'], 'xdentalsuggestions')});
+
+
+jQuery("#no_table_vwdentalprocedure").keyup(function(){
+
+       $("#dentalsuggestions").show();
+       var x = $('#no_table_vwdentalprocedure').val();
+       ajax('{{=URL('admin', 'vwdentalprocedure_selector', vars=dict(patientid = patientid, memberid=memberid,freetreatment=freetreatment))}}', ['vwdentalprocedure'], 'dentalsuggestions')});
+      
+jQuery("#no_table_patientmember").keyup(function(){
+
+       $("#suggestions").show();
+       var x = $('#no_table_patientmember').val();
+       
+       $("#no_table_xpatientmember").val(x);  
+       
+       
+      ajax('{{=URL('treatment', 'treatmentpatient_selector')}}', ['patientmember','xmemberid'], 'suggestions')});
+
+$(document).ready(function(){
+   
+    $("#hide").hide();
+    $("#phide").click(function(){
+       ajax('{{=URL('treatment', 'treatment_hide')}}',  ['patientmember','xmemberid'], 'suggestions')
+        $("#hide").hide();
+    });   
+   
+   
+    $("#suggestions").show();
+    
+    $("#suggestions") .click(function(){
+      
+	x= $("#no_table_patientmember").val();
+
+	
+	$("#no_table_xpatientmember").val(x);
+	
+	var strarr = x.split(":")
+	$("#no_table_patientmember").val(strarr[0].trim())
+
+	$("#suggestions").hide();
+	
+    
+    });
+    
+    
+    $("#dentalsuggestions") .click(function(){
+    
+ 
+       var x = $('#no_table_vwdentalprocedure').val();
+       var y = $('#no_table_vwdentalprocedure').text();
+
+       var procs = x.split(':')  
+
+
+       $("#no_table_vwdentalprocedure").val(procs[0].trim())
+       $("#proccode").val(procs[1].trim())
+       $("#no_table_vwdentalprocedurecode").val(procs[1].trim())
+       $("#procucr").val(0)
+       $("#procid").val(0)
+     
+	$("#dentalsuggestions").hide();
+    });
+    
+    $("#xdentalsuggestions") .click(function(){
+    
+ 
+       var x = $('#no_table_vwdentalprocedurecode').val();
+       var procs = x.split(':')  
+
+
+       $("#no_table_vwdentalprocedurecode").val(procs[0])
+       $("#proccode").val(procs[0])
+       $("#no_table_vwdentalprocedure").val(procs[1])
+       
+       $("#procucr").val(0)
+       $("#procid").val(0)
+     
+	$("#xdentalsuggestions").hide();
+    });
+    
+    
+    <!--$("#vwdentalprocedure").change(function(){-->
+       <!--var x = $('#vwdentalprocedure').val();-->
+       <!--var y = $('#vwdentalprocedure :selected').text();-->
+       <!--var z = $('#vwdentalprocedure :selected').index();-->
+       <!--var procs=x.split("|")-->
+       
+       <!--$("#no_table_dentalprocedure").val(procs[0]);-->
+       <!--$("#no_table_treatmentcost").val(procs[3]);-->
+       <!--$("#no_table_copay").val(procs[5]);-->
+       
+       <!--$("#proccode").val(procs[1]);-->
+       <!--$("#procdesc").val(procs[2]); -->
+       <!--$("#ucrfee").val(procs[4]); -->
+      
+    <!--});-->
+});
+
+
+
+
+
+
+
+
+
+</script>

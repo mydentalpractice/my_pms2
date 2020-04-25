@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="pms-app">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>PMS Medical Website</title>
+    <!--<link rel="shortcut icon" href="images/favicon.ico" type="image/x-icon">-->
+    <!--<link rel="icon" href="images/favicon.ico" type="image/x-icon">-->
+    <link rel="stylesheet" href="styles/lib.css">
+    <link rel="stylesheet" href="styles/app.css">
+
+</head>
+
+<body ng-controller="MembersController">
+    <!-- navigation template -->
+    <nav class="navbar navbar-default">
+        <div class="container-fluid">
+            <!-- navbar-logo -->
+            <div class="navbar-logo"> <img src="images/pms_logo.png" alt="Website Logo"> </div>
+            <!-- end:navbar-logo-->
+            <div class="navbar-avatar">
+                <img src="images/avatar/doctor.png" alt="Doctor avatar">
+            </div>
+            <div class="navbar-avatar-title">
+                <p ng-bind="doctorName"></p>
+            </div>
+            <div>
+                <ul class="nav navbar-nav navbar-right">
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><img class="gear-icon" src="images/icons/svg/020-settings.svg"/></span></a>
+                        <ul class="dropdown-menu" role="menu">
+                            <li><a href="#">Action</a></li>
+                            <li><a href="#">Another action</a></li>
+                            <li><a href="#">Something else here</a></li>
+                            <li class="divider"></li>
+                            <li><a href="#">Separated link</a></li>
+                            <li class="divider"></li>
+                            <li><a href="#">One more separated link</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+
+        </div>
+    </nav>
+    <!-- end:navigation template -->
+
+    <div class="main-content">
+        <!-- sidebar & main-content-->
+        <div>
+            <aside class="col-lg-3 main-sidebar">
+                <div class="sidebar-header">
+                    <span class="menu-navigation-icon glyphicon glyphicon-align-justify"></span><span class="loginDashboard">Login/Dashboard</span>
+                </div>
+                <div class="sidebar-navigation">
+                    <ul class="sidebar-list">
+                        <li class="sidebar-list-items">
+                            <a href="index.html">
+                                <span class="sidebar-list-item-icon glyphicon glyphicon-home"></span>
+                                <span class="sidebar-list-item-title">DASHBOARD</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-list-items">
+                            <a href="members.html">
+                                <span class="sidebar-list-item-icon glyphicon glyphicon-user"></span>
+                                <span class="sidebar-list-item-title">MEMBERS</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-list-items">
+                            <a href="#">
+                                <span class="sidebar-list-item-icon glyphicon glyphicon-leaf"></span>
+                                <span class="sidebar-list-item-title">TREATMENTS</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-list-items">
+                            <a href="#">
+                                <span class="sidebar-list-item-icon glyphicon glyphicon-picture"></span>
+                                <span class="sidebar-list-item-title">IMAGES</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-list-items">
+                            <a href="#">
+                                <span class="sidebar-list-item-icon glyphicon glyphicon-gift"></span>
+                                <span class="sidebar-list-item-title">BIRTHDAY REMINDERS</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-list-items">
+                            <a href="#">
+                                <span class="sidebar-list-item-icon glyphicon glyphicon-calendar"></span>
+                                <span class="sidebar-list-item-title">APPOINTMENTS</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-list-items">
+                            <a href="#">
+                                <span class="sidebar-list-item-icon glyphicon glyphicon-envelope"></span>
+                                <span class="sidebar-list-item-title">SEND EMAILS</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-list-items">
+                            <a href="#">
+                                <span class="sidebar-list-item-icon glyphicon glyphicon-comment"></span>
+                                <span class="sidebar-list-item-title">SEND SMS</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+            </aside>
+            <!-- end:aside -->
+            <section class="col-lg-9 container-fluid members-section">
+              <div class="col-lg-9 center-div">
+                <!-- dashboard-panels -->
+                <div class="col-md-3">
+                  <button class="btn btn-info btn-black-members-buttons btn-block">MEMBERS:1920</button>
+                </div><!-- end:dashboard-panels -->
+                <!-- dashboard-panels -->
+                <div class="col-md-3">
+                  <button class="btn btn-info btn-black-members-buttons btn-block">MEMBERS:1920</button>
+                </div><!-- end:dashboard-panels -->
+                <!-- dashboard-panels -->
+                <div class="col-md-3">
+                  <button class="btn btn-info btn-black-members-buttons btn-block">MEMBERS:1920</button>
+                </div><!-- end:dashboard-panels -->
+                <!-- dashboard-panels -->
+                <div class="col-md-3">
+                  <button class="btn btn-info btn-black-members-buttons btn-block">MEMBERS:1920</button>
+                </div><!-- end:dashboard-panels -->
+              </div>
+              <div class="row">&nbsp;</div>
+              <div class="row">&nbsp;</div>
+                <div class="col-lg-12 center-div">
+                    <div class="col-lg-12 search-members-section">
+                        <div class="search-members-header">
+                            <h3>SEARCH MEMBERS</h3></div>
+                        <div class="search-members-content">
+                            <div class="row container-fluid">
+                                <input type="text" class="form-control" placeholder="TREATMENT PLAN" />
+                            </div>
+                            <div>&nbsp;</div>
+                            <div class="row">
+                                <div class="col-lg-6">
+                                    <input type="text" class="form-control" placeholder="FIRST NAME" />
+                                </div>
+                                <div class="col-lg-6">
+                                    <input type="text" class="form-control" placeholder="LAST NAME" />
+                                </div>
+                            </div>
+                            <div>&nbsp;</div>
+                            <div class="row">
+                                <div class="col-lg-6">
+                                    <input type="text" class="form-control" placeholder="EMAIL" />
+                                </div>
+                                <div class="col-lg-6">
+                                    <input type="text" class="form-control" placeholder="CELL" />
+                                </div>
+                            </div>
+                            <div>&nbsp;</div>
+                            <div class="row">
+                                <div class="col-lg-12">
+                                    <button class="btn btn-success btn-black btn-block">SUBMIT</button>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- search-members-content -->
+                    </div>
+                    <!-- search-members-section -->
+                </div>
+                <!-- end:dashboard-section -->
+                <div class="row">&nbsp;</div>
+                <div class="row">&nbsp;</div>
+                <div class="row">&nbsp;</div>
+                <div class="row">&nbsp;</div>
+                <div class="row">&nbsp;</div>
+                <div class="row">&nbsp;</div>
+            </section>
+            <!-- TODO: PAJ - Complete Members list table -->
+            <div class="col-lg-12 members-table" st-table="smartTableData" st-safe-src="smartTableDataList">
+                <div class="members-headers">
+                  <!-- @ngInject -->
+                  <div st-pagination="" st-items-by-page="smartTablePageSize" st-displayed-pages="5" st-template="src/app/members/paginationTemplate.html"></div>
+                </div>
+                <!-- end:members-headers -->
+                <!-- table -->
+                <div class="col-lg-11 center-div">
+                  <table class="table table-striped table-hover members-cell">
+                      <thead>
+                          <tr>
+                              <!-- smart table -->
+                              <th st-sort="id">Sl #</th>
+                              <th st-sort="memberDetails">Member ID</th>
+                              <th st-sort="patientName">Patient's Name</th>
+                              <th st-sort="contactNumber">First Contact</th>
+                              <th>&nbsp;</th>
+                              <th>Email</th>
+                              <th>Members</th>
+                              <th>Treatments</th>
+                              <th>Images</th>
+                              <th>Reports</th>
+                              <th>Payments</th>
+                              <th>Treatment Reports</th>
+                              <!-- end:smart table -->
+                          </tr>
+                          <tr>
+                              <!--  -->
+                              <th><input st-search="id" placeholder="#" class="input-sm form-control search-input-serial" type="search" /></th>
+                              <th><input st-search="memberDetails" placeholder="Search Member " class="input-sm form-control search-input " type="search " /></th>
+                              <th><input st-search="patientName" placeholder="Search Patient" class="input-sm form-control search-input " type="search " /></th>
+                              <th><input st-search="contactNumber" placeholder="Search Contact " class="input-sm form-control search-input " type="search " /></th>
+                              <th>&nbsp;</th>
+                              <th>&nbsp;</th>
+                              <th>&nbsp;</th>
+                              <th>&nbsp;</th>
+                              <th>&nbsp;</th>
+                              <th>&nbsp;</th>
+                              <th>&nbsp;</th>
+                              <th>&nbsp;</th>
+                          </tr>
+                      </thead>
+                      <tr ng-repeat="item in smartTableData">
+                          <td>{{item.id}}</td>
+                          <td>{{item.memberDetails}}</td>
+                          <td>{{item.patientName}}</td>
+                          <td>{{item.contactNumber}}</td>
+                          <td><button class="btn btn-info table-button view-details" ng-click="viewDetails(item)">View Details</button></td>
+                          <td>
+                            <a class="dentist-icon">
+                              <img class="email-icon" src="images/icons/svg/018-message.svg" alt="email-icon">
+                            </a>
+                          </td>
+                          <td>
+                            <a class="dentist-icon">
+                              <img class="dentist" src="images/icons/svg/014-dentist.svg" alt="dentist">
+                            </a>
+                          </td>
+                          <td>
+                            <a class="dentist-icon">
+                              <img class="dentist-tools" src="images/icons/svg/013-dentist-tools.svg" alt="dentist-tools">
+                            </a>
+                          </td>
+                          <td>
+                            <a class="dentist-icon">
+                              <img class="magnifying-glass" src="images/icons/svg/017-loupe.svg" alt="magnifying glass">
+                            </a>
+                          </td>
+                          <td>
+                            <a class="dentist-icon">
+                              <img class="clipboard" src="images/icons/svg/012-note-on-a-clipboard.svg" alt="clipboard">
+                            </a>
+                          </td>
+                          <td>
+                            <a class="dentist-icon">
+                              <img class="credit-card" src="images/icons/svg/004-credit-cards-payment.svg" alt="credit-card">
+                            </a>
+                          </td>
+                          <td>
+                            <a class="dentist-icon">
+                              <img class="treatment-icon" src="images/icons/svg/015-teeth.svg" alt="treatment-icon">
+                            </a>
+                          </td>
+                      </tr>
+                      <tfoot class="center-div-td">
+                          <tr>
+                              <td colspan="10">
+                              </td>
+                          </tr>
+                      </tfoot>
+                  </table>
+                </div>
+                <!-- end:table -->
+            </div>
+            <!-- end:members-table -->
+            <!-- end:members-section -->
+
+
+
+            <div>&nbsp;</div>
+            <div>&nbsp;</div>
+            <div>&nbsp;</div>
+            <div>&nbsp;</div>
+            <div>&nbsp;</div>
+            <div>&nbsp;</div>
+        </div>
+        <!-- end:sidebar & main-content-->
+        <!-- members-table -->
+        <!-- end:members-table -->
+        <div class="row common-links">
+            <div class="common-nav-links">
+                <div class="col-lg-12 common-navigation-menu">
+                    <p>
+                        <ul>
+                          <li>
+                            <span>
+                              <img src="images/icons/svg/019-people.svg" alt="appointment-icon">
+                            </span>
+                            <a href="#">Appointments</a>
+                          </li>
+                          <li>
+                            <span>
+                              <img src="images/icons/svg/009-smartphone.svg" alt="sms-icon">
+                            </span>
+                            <a href="#">SMS</a>
+                          </li>
+                          <li>
+                            <span>
+                              <img src="images/icons/svg/021-message_white.svg" alt="email-icon">
+                            </span>
+                            <a href="#">Email</a>
+                          </li>
+                          <li>
+                            <span>
+                              <img src="images/icons/svg/006-birthday-cake.svg" alt="birthday-icon">
+                            </span>
+                            <a href="#">Patient's Birthdays</a>
+                          </li>
+                          <li>
+                            <span>
+                              <img src="images/icons/svg/011-calendar.svg" alt="calendar-icon">
+                            </span>
+                            <a href="#">Calender</a>
+                          </li>
+                            <li>
+                              <span>
+                                <img src="images/icons/svg/005-notification-bell.svg" alt="notification-icon">
+                              </span>
+                              <a href="#">Notifications</a>
+                            </li>
+                              <li>
+                                <span>
+                                  <img src="images/icons/svg/007-business.svg" alt="business-icon">
+                                </span>
+                                <a href="#">Contacts</a>
+                              </li>
+                              <li>
+                                <span>
+                                  <img src="images/icons/svg/010-cash.svg" alt="cash-icon">
+                                </span>
+                                <a href="#">Payments</a>
+                              </li>
+                        </ul>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div>&nbsp;</div>
+    <div>&nbsp;</div>
+    <div>&nbsp;</div>
+    <footer class="container-fluid footer-section">
+        <p>&copy; Design by RAYSITI</p>
+    </footer>
+
+    <script src="scripts/lib.js"></script>
+
+    <script src="scripts/app.js"></script>
+</body>
+
+</html>

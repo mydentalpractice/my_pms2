@@ -1,0 +1,127 @@
+
+{{extend 'super_layoutw4.html'}}
+<style>
+.dataTables_filter{ float:right !important;}
+ .dataTables_filter input {width: 377px !important;}
+</style>
+
+
+<style>
+#suggestions { position: relative; }
+.suggestions { background: white; border: solid 1px #55A6C8; }
+.suggestions DIV { padding: 2px 4px 2px 4px; }
+</style>
+
+
+    <div class="row">
+     <div class="col-md-12">
+         <!-- BEGIN EXAMPLE TABLE PORTLET-->
+          <div class="portlet light bordered" style="border: 0px solid #dadada!important;">
+	    {{=form.custom.begin}}
+	    <div class="col-md-12" style="margin-bottom: 18px;">
+		<div class="input-group">
+		    {{=form.custom.widget.patientmember}}
+		    
+		    <span class="input-group-btn">
+			<button class="btn blue uppercase bold" type="submit">Payments</button>
+		    </span>
+		</div>
+		<div style="position: absolute;" id="suggestions" class="suggestions"></div>
+	    </div>
+	    <div style="display:none">
+		{{=form.custom.widget.xpatientmember}}
+		{{=form.custom.submit}}
+	     </div>
+
+	    {{=form.custom.end}}
+	</div>    	   
+    </div>
+    </div>
+    
+    {{if(memberid >= 0):}}
+     <div class="row">
+       <div class="col-md-12">
+         <div class="portlet light bordered" style="border: 1px solid #dadada!important;">
+            <div class="portlet-title" style="border-bottom: 1px solid rgb(230, 230, 230); background:none">
+                <div class="caption font-dark">
+                    <i class="fa fa-money" style="color:#000"></i>
+                    <span class="caption-subject bold uppercase"> List of Payments for&nbsp;&nbsp; <span class="caption-subject uppercase"> {{=patient}}</span></span>
+                </div>
+                <div class="actions">
+                    <div class="btn-group btn-group-devided" data-toggle="buttons">
+                         <div class="col-md-12">
+                             <div class="btn-group" style="display:none">
+                                <span  > <a style="color:#fff"  class="btn sbold green" onclick="location.href='{{=URL('payment','create_payment',vars=dict(tplanid=tplanid, patientid=patientid,patient=patient,fullname=fullname,memberid=memberid,providerid=providerid,providername=providername,page=page))}}'" >
+                                    <i class="fa fa-plus"></i>&nbsp;&nbsp;New Payment</a>
+				
+                                <span  > <a style="color:#fff"  class="btn sbold green" data-toggle="modal" data-target="#myModal" onclick="location.href='{{=URL('payment','commit_payment',vars=dict(tplanid=tplanid, patientid=patientid,patient=patient, fullname=fullname, memberid=memberid,providerid=providerid,providername=providername,page=page))}}'" >
+                                    <i class="fa fa-retweet"></i>&nbsp;&nbsp;Commit Payment</a>
+                             </div>
+                         </div>
+                     </div>
+                </div>
+              {{=formA}}
+             <div class="col-md-12" style="margin:20px 0px">
+                     <div class="col-md-4"><strong>Total Treatment Cost:</strong> {{=totalcost}}</div>
+                      <div class="col-md-4"><strong>Total Paid</strong>  {{=totalpaid}}</div>
+                       <div class="col-md-4"><strong>Total Due </strong> {{=totaldue}}</div>
+             </div>
+	      
+            </div>
+         </div>
+       </div>  
+   </div>
+    {{pass}}
+     <a href="{{=returnurl}}">Cancel </a>
+    
+         <!-- END EXAMPLE TABLE PORTLET-->
+	   
+
+	 
+    </div>
+   </div>
+   
+   
+
+<script>
+  
+
+
+
+jQuery("#no_table_patientmember").keyup(function(){
+       
+       $("#suggestions").show();
+       var x = $('#no_table_patientmember').val();
+       $("#no_table_xpatientmember").val(x);
+       
+       ajax('{{=URL('admin', 'patient_selector')}}', ['xpatientmember'], 'suggestions')
+});
+       
+$(document).ready(function(){
+   
+    $("#suggestions").show();
+    
+    $("#suggestions") .click(function(){
+      
+	x= $("#no_table_patientmember").val();
+
+	
+	$("#no_table_xpatientmember").val(x);
+	
+	strarr = x.split(":");
+	
+	$("#no_table_patientmember").val(strarr[0]);
+
+	$("#suggestions").hide();
+	
+    
+    });
+    
+});
+
+
+
+
+ 
+       
+</script>

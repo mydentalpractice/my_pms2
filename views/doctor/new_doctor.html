@@ -1,0 +1,150 @@
+{{extend 'pms2_layoutw4.html'}}
+
+{{=formA.custom.begin}}
+
+
+                        <div class="row">
+                            <div class="col-md-12">
+                                <!-- BEGIN EXAMPLE TABLE PORTLET-->
+                                <div class="portlet light bordered">
+                                    <div class="portlet-title" style="padding:0px 20px  !important">
+                                        <div class="caption font-white" style="    width: 100%;">
+                                           <i class="fa fa-medkit" style="color:#000"></i>
+                                            <span class="caption-subject bold uppercase">New Practice Doctor</span>
+                                        </div>
+                                       
+                                    </div>
+                                    <div class="col-md-offset-2 col-md-8 col-md-offset-2">
+                                    <!-- BEGIN Portlet PORTLET-->
+                                   
+     
+<div class="tab-content">
+  <div id="home" class="tab-pane fade in active">
+    
+    <form>
+    <div class="col-md-6">
+           <div class="form-group">
+            <label class="m_title">Doctor/Office Staff Name</label>
+                  <div class="input-group">
+                        {{=formA.custom.widget.name}}
+                  </div>
+                        
+           </div>
+      </div>
+      {{if(request.vars.personnel == 'doctor'):}}
+      <div class="col-md-6">
+           <div class="form-group">
+            <label class="m_title">State Dental Council Registration Number</label>
+                  <div class="input-group">
+                        {{=formA.custom.widget.registration}}
+                  </div>
+           </div>
+      </div>
+      
+      
+      <div class="col-md-6">
+           <div class="form-group">
+            <label class="m_title">Specialist</label>
+                  <div class="input-group">
+                        {{=formA.custom.widget.speciality}}
+                  </div>
+           </div>
+      </div>
+      {{pass}}
+      <div class="col-md-6">
+           <div class="form-group">
+            <label class="m_title">Role</label>
+                  <div class="input-group">
+                        {{=formA.custom.widget.role}}
+                  </div>
+           </div>
+      </div>
+      
+       
+      <div class="col-md-6">
+           <div class="form-group">
+            <label class="m_title">Mobile Number</label>
+                  <div class="input-group">
+                        {{=formA.custom.widget.cell}}
+                  </div>
+           </div>
+      </div>
+       <div class="col-md-6">
+           <div class="form-group">
+            <label class="m_title">Email Id</label>
+                  <div class="input-group">
+                        {{=formA.custom.widget.email}}
+                  </div>
+           </div>
+      </div>
+       
+      <div class="col-md-6">
+           <div class="form-group">
+            <label class="m_title">Doctor / Office Staff</label>
+                  <div class="input-group">
+                        {{=formA.custom.widget.stafftype}}
+                  </div>
+           </div>
+      </div>
+      
+       {{if(request.vars.personnel == 'doctor'):}}
+      <div class="col-md-6">
+           <div class="form-group">
+            <label class="m_title">Calendar Color</label>
+                  <div class="input-group">
+                        {{=formA.custom.widget.color}}
+                      <script>
+                              $('#doctor_color').colorpicker({});
+                        </script>
+                  </div>
+           </div>
+      </div>
+      
+      <div class="col-md-12">
+           <div class="form-group">
+                  <label class="m_title">Chief Dentist / Owner</label>&nbsp;&nbsp;{{=formA.custom.widget.practice_owner}}
+                  <div style="float:right"><label class="m_title" >{{=formA.custom.widget.groupemail}}&nbsp;&nbsp;Group Email</label>&nbsp;&nbsp;</div>
+                  <div style="float:right"><label class="m_title" >{{=formA.custom.widget.groupsms}}&nbsp;&nbsp;Group SMS</label>&nbsp;&nbsp;</div>
+                  <div style="float:right"><label class="m_title" >{{=formA.custom.widget.docemail}}&nbsp;&nbsp;Individual Email</label>&nbsp;&nbsp;</div>
+                  <div style="float:right"><label class="m_title" >{{=formA.custom.widget.docsms}}&nbsp;&nbsp;Individual SMS</label>&nbsp;&nbsp;</div>
+                        
+                  
+                        
+           </div>
+      </div>
+      {{pass}}
+      
+   <div class="col-md-12" style="margin-bottom:30px">
+      <button type="submit" class="btn green">Save </button>
+      <a href="{{=returnurl}}">Cancel </a>
+      
+   </div>
+  </form>
+
+
+
+  </div>
+ 
+                                  
+                                    <!-- END Portlet PORTLET-->
+                                  </div>
+
+                                </div>
+                                <!-- END EXAMPLE TABLE PORTLET-->
+                                
+
+
+
+
+
+
+                            </div>
+                          
+                        </div>
+
+<div style="display:none">              
+{{=formA.custom.widget.providerid}}
+{{=formA.custom.widget.is_active}}
+{{=formA.custom.widget.notes}}
+</div>
+{{=formA.custom.end}}

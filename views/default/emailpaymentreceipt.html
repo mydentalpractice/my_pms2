@@ -1,0 +1,27 @@
+{{extend 'layoutenroll2.html'}}
+
+<script>
+function memberEnroll()
+{
+   
+    window.location.replace("/my_dentalplan/member/member_enrollment/")
+
+
+}
+
+</script>
+
+<div>
+     
+    <h3>Payment Receipt</h3><br/>
+    
+    {{if(ret == True):}}
+    <h5>Payment receipt successfully sent to your email address!</h5>
+    {{else:}}
+    <h5>Error in sending payment to your email address!</h5>
+    {{pass}}
+
+     <input  type="button" class="form_details_button" onclick="javascript: returnpage('{{=logmode}}')" value="Home">
+
+
+</div>

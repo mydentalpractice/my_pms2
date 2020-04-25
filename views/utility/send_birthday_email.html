@@ -1,0 +1,110 @@
+{{extend 'pms2_layoutw4.html'}}
+{{=formA.custom.begin}}
+
+<div style="display:none"> 
+{{=formA.custom.widget.emailtemplate}}
+</div>
+                        
+                        <div class="row">
+                            <div class="col-md-12">
+                                <!-- BEGIN EXAMPLE TABLE PORTLET-->
+                                <div class="portlet light bordered">
+                                    <div class="portlet-title">
+                                        <div class="caption font-white">
+                                            <i class="fa fa-calendar" style="color:#fff"></i>
+                                            <span class="caption-subject bold uppercase"> Email </span>
+                                        </div>
+                                       
+                                    </div>
+                                    <div class="col-md-12">
+                                    <!-- BEGIN Portlet PORTLET-->
+                                    <div class="col-sm-6 col-sm-offset-6 md_r">
+                                       
+                                        <div class="portlet-body" style="padding:20px">
+                                            <div class="col-md-12 np">
+                                                 
+                                                  <div class="col-md-12">
+                                                     <div class="form-group">
+                                                       <div class="mt-repeater-input">
+							    <label class="m_title">Email Templates</label>
+							    <br/>
+								<select class="form-control" id="emailfiles" onchange="changeEmailFiles()">
+								    <option value='0'>--Select--</option>
+								    {{index=0}}
+								    {{ for index in range(len(emailfiles)): }}
+									<option value={{=index+1}}>{{=emailfiles[index]}}</option>
+									
+								    {{pass}}
+								</select>    
+       
+                                                       </div>  
+                                                   </div>
+						    <div class="form-group">
+						      <div class="mt-repeater-input">
+								   <label class="m_title">To</label>
+								   <br/>
+								   {{=formA.custom.widget.to}}
+						      </div>  
+						  </div>
+                                                  
+                                                   <div id="emaildiv" class="col-md-12">
+                                                     <div class="form-group">
+                                                       <div class="mt-repeater-input">
+                                                                    
+                                                       </div>  
+                                                       </div>  
+                                                   </div>
+                                               
+                                            </div>
+                                             
+                                           
+                                            
+                                            <div class="col-md-12" style="margin-bottom:30px">
+                                               <button type="submit" class="btn green">Send</button>
+						<a href="{{=returnurl}}">Cancel </a>            
+                                               
+                                            </div>
+					    
+					    {{if(retVal == False):}}
+					    <h5 style="color:red">Error in sending birthday email(s) to the patient(s)<h5>
+					    {{pass}}
+					    {{if(retVal == True):}}
+					    <h5 style="color:red">Success in sending birthday email(s) to the patient(s)<h5>
+					    {{pass}}					    
+
+                                        </div>
+                                    </div>
+                                    <!-- END Portlet PORTLET-->
+                                  </div>
+
+                                </div>
+                                <!-- END EXAMPLE TABLE PORTLET-->
+                                
+
+
+
+
+
+
+                            </div>
+                        </div>
+                        
+{{=formA.custom.end}}                    
+
+<script>
+function changeEmailFiles(){
+
+var emailfiles = document.getElementById("emailfiles");
+var emailfile = emailfiles.options[emailfiles.selectedIndex].text;
+
+
+var x = document.getElementById("no_table_emailtemplate");
+    x.value = emailfile;
+   
+ajax('{{=URL('utility','emailmessage')}}', ['emailtemplate'], 'emaildiv');   
+   
+
+   
+};
+
+</script>

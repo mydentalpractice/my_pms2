@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>MDP- Cash Payment Sucess</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link href="https://fonts.googleapis.com/css?family=Poppins:100,100i,200,200i,300,300i,400,400i,500,500i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
+</head>
+  <script src="https://docraptor.com/docraptor-1.0.0.js"></script>
+  <script>
+    var downloadPDF = function() {
+      DocRaptor.createAndDownloadDoc("YOUR_API_KEY_HERE", {
+        test: true, // test documents are free, but watermarked
+        type: "pdf",
+        document_content: document.querySelector('html').innerHTML, // use this page's HTML
+        // document_content: "<h1>Hello world!</h1>",               // or supply HTML directly
+        // document_url: "http://example.com/your-page",            // or use a URL
+        // javascript: true,                                        // enable JavaScript processing
+        // prince_options: {
+        //   media: "screen",                                       // use screen styles instead of print styles
+        // }
+      })
+    }
+  </script>
+  <style>
+body{font-family: 'Poppins', sans-serif !important;}
+table{width: 100% !important;}
+th{background: #d8d4d4;padding: 6px 1px;color:#000 !important}
+a{color:#000 !important}
+.right{text-align: center}
+.np{    padding: 0px;}
+    .npl{padding-left: 0px;text-align: left;}
+    .npl p{    margin-bottom: 5px !important;    font-size: 14px;}
+    .npr{padding-right: 0px;text-align: right;}
+    .pb{padding-bottom: 5px;}
+        .bor{display: grid;
+    padding: 0px;float: left;}
+    .pt{padding-top: 30px;}
+    #pdf-button{    background: #1d77b3;
+    border: none;
+    color: #fff;
+    margin: 20px 0px;
+    padding: 8px;}
+    .bg_blue{    background: #fff;padding: 0px 0px;}
+    .bg_blue1{    background: #fff;padding: 0px 0px;}
+    strong{font-weight: 600;}
+    td{font-size: 10px; padding: 3px 0px;}
+    
+    .bt_text{    text-align: center;
+    font-size: 16px;
+    color: #fff;
+    margin-top: 8px;
+    font-weight: 600;}
+    ul {
+    list-style-image: url('https://mydentalplan.in/teeth_icon.png');
+}
+li{font-size:9px;}
+@media only screen and (max-width: 400px) and (min-width: 300px)  {
+
+    .bt_text{font-size: 12px !important;}
+ul{font-size: 11px !important;}
+  .npl p{ font-size:9px !important;}
+      .btm{font-size: 10px !important;}
+      .pt{padding-top:0px !important;}
+}
+@media only screen and (max-width: 400px) and (min-width: 300px)  {
+  .bt_text{font-size: 12px !important;}
+ul{font-size: 8px !important;}
+  .npl p{ font-size:14px !important;}
+     
+      .pt{padding-top:0px !important;}
+.pad{padding: 10px 10px !important;}
+.btm{text-align:left !important;}
+}
+
+
+</style>
+  <style>
+    @media print {
+      #pdf-button {
+        display: none;
+      }
+     
+       
+
+ /* All your print styles go here */
+ #btnPrint{ display: none !important; } 
+ .button{ display: none !important; } 
+ a{display: none !important}
+ p{font-size: 12px !important}
+ th,a{background: #d8d4d4;padding: 6px 1px;color:#000 !important}
+ a{color:#000 !important}
+}
+  </style>
+
+<body>
+  <div class="container">
+        <div class="col-sm-12" style="border: 1px solid #1d77b3;">
+     <!--Id Card Front part start-->
+
+             <table style="width:100%">
+                  <tr>
+                    <td style="text-align: left;"><input id="pdf-button" type="button" value="Download PDF" onclick="downloadPDF()" /></td>
+                    <td style="text-align: right;">Date:&nbsp;&nbsp;<strong>{{=todaydate}}</strong></td>
+                  </tr>
+                  <tr>
+                    <td colspan="2" class="right"> <h4 style="color:#1875b2;" class="right"><strong>{{=practicename}}</strong> </h4>
+
+                      <h5 style="color:#1875b2;" class="right"><strong>{{=providername}}</strong><br>State Dental Council Registration Number: {{=provideregnon}}</h5>
+                      <p style="color:#1875b2;" class="right">{{=practicename}},{{=practiceaddress1}},</p>
+                      <p style="color:#1875b2;" class="right">{{=practiceaddress2}}  </p> 
+                      <p style="color:#1875b2;" class="right">Phone: {{=practicephone}} | Email: {{=practiceemail}}</p>
+                    </td>
+                  </tr>
+                   <tr>
+                    <td colspan="2" class="right"> 
+                     <p style="text-align:center;font-size:18px !important;padding: 10px 0px;border-top:3px solid #000 !important;border-bottom:3px solid #000 !important;margin-bottom: 18px ;width:100%"><strong>RECEIPT</strong></p> 
+                    </td>
+                  </tr>
+                  <tr>
+                     <td class="right">{{=patientname}}, {{=patientmember}} <br>Cell: {{=patientcell}} </td>
+                     <td class="right">Company Ref :{{=groupref}} <br> {{=companyname}}<br> {{=planname}}</td>
+                  </tr>
+
+            </table>
+<table class="table table-bordered" style="margin-top:1%; ">
+                       <tbody>
+                        <tr>
+                        {{if(status == "S"):}}
+                                                   
+                          <td ><strong>Transaction Status: </strong>Success</td>
+                        {{else:}}
+                          <td bgcolor="#FF0000"><strong>Transaction Status: </strong><font color"red">{{=errormsg}}</font></td>
+                       {{pass}}
+                        </tr>                       
+                         <tr>
+                            <td><strong>Merchant ID :</strong> {{=merchantid}}</td>
+                            <td><strong>Merchant :</strong>{{=merchantdisplay}}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Payment reference :</strong> {{=paymentref}}</td>
+                            <td><strong>Payment Date :</strong> {{=paymentdate}}  </td>
+                        </tr>
+                        <tr>
+                            <td><strong>Payment type :</strong> {{=paymenttype}}</td>
+                            <td><strong>Payment Detail :</strong> {{=paymentdetail}}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Card type :</strong>{{=cardtype}}</td>
+                            <td><strong>Invoice :</strong>{{=invoice}}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Attending Doctor:</strong>{{=doctorname}}</td>
+                            <td><strong>Provider :</strong>{{=providername}}</td>
+                        </tr>
+                        <tr>
+                            <td  colspan="2"><strong>Treatment Plan:</strong>{{=treatment}}</td>
+                         </tr>
+                         <tr>
+                            <td colspan="2"><strong>Procedure Description:<br></strong>
+                                {{=formProcedure}}
+                            </td>
+                         </tr>
+                          <tr>
+                             <td colspan="2"><strong>Invoice Amount : </strong>Rs.{{=invoiceamt}}</td>
+                          </tr>
+                          <tr>
+                           <td><strong>Amount paid :</strong>  Rs.{{=amount}}   </td>
+                           <td><strong>Amount Due : </strong>Rs.{{=totaldue}}</td>
+                          </tr>
+                         <tr>
+                          <td colspan="2"><strong>Other information :</strong> {{=otherinfo}}  </td>
+                        </tr>
+                        
+                        </tbody>
+                      </table>
+                       <div style="float:right;font-size: 13px; ">(This is computer generated invoice. No signature required)</div>
+
+                      </div>
+                      <p><a id="can" href="{{=returnurl}}">Cancel </a></p>
+          <div class="col-sm-2"></div>
+        </div>
+<!--Id Card Front part End-->
+
+
+
+  </div>
+
+</body>
+</html>

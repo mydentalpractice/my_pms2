@@ -1,0 +1,36 @@
+
+{{extend 'pms2_layoutw4.html'}}
+
+
+     <div class="row">
+       <div class="col-md-12">
+         <div class="portlet light bordered" style="border: 1px solid #dadada!important;">
+            <div class="portlet-title" style="border-bottom: 1px solid rgb(230, 230, 230); background:none">
+                <div class="caption font-dark">
+                    <i class="fa fa-stethoscope" style="color:#000"></i>
+                    <span class="caption-subject bold uppercase"> Treatment List</span>
+                </div>
+                <div class="actions">
+                    <div class="btn-group btn-group-devided" data-toggle="buttons">
+                         <div class="col-md-6">
+                             {{if(patientid > 0):}}
+                             <div class="btn-group">
+                                <span  > <a style="color:#fff"  id="NT0" class="btn sbold green" onclick="loader(this.id),location.href='{{=URL('treatment','new_treatment',vars=dict(page=page,providerid=providerid,memberid=memberid,patientid=patientid,treatmentid=0,tplanid=0))}}'" >
+                                    <i class="fa fa-plus"></i>&nbsp;&nbsp;New Treatment <i class="fa fa-spinner fa-spin" id="loaderDIVNT0" style="display:none"></i></a>
+                                
+                             </div>
+                             {{else:}}
+                             <div class="btn-group">
+                                <span  > <a style="color:#fff"  id="NT1" class="btn sbold green" onclick="loader(this.id),location.href='{{=URL('treatment','patient_treatment',vars=dict(page=page,providerid=providerid))}}'" >
+                                    <i class="fa fa-plus"></i>&nbsp;&nbsp;New Treatment <i class="fa fa-spinner fa-spin" id="loaderDIVNT1" style="display:none"></i></a>
+                                
+                             </div>
+                             {{pass}}
+                         </div>
+                     </div>
+                </div>
+              {{=form}}
+            </div>
+         </div>
+       </div>  
+   </div>

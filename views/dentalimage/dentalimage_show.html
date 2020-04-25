@@ -1,0 +1,33 @@
+{{extend 'pms2_layoutw4.html'}}
+
+{{=formA.custom.begin}}
+
+<div  style="display:none">
+    {{=formA.custom.widget.patient}}
+    {{=formA.custom.widget.patienttype}}
+    {{=formA.custom.widget.patientmember}}
+    {{=formA.custom.widget.patientname}}
+    {{=formA.custom.widget.provider}}
+
+</div>    
+
+{{=formA.custom.end}}
+<br/>
+<script>
+$(document).ready(function(){
+   
+    $("#patients").change(function(){
+       var x = $('#patients').val();
+       var y = $('#patients :selected').text();
+       var z = $('#patients :selected').index();
+       
+       splitarr = y.split(':')       
+       
+       $("#dentalimage_patient").val(x);
+       $("#dentalimage_patienttype").val(splitarr[0]);
+       $("#dentalimage_patientname").val(splitarr[1]);
+       
+      
+    });
+});
+</script>

@@ -1,0 +1,47 @@
+{{extend 'super_layoutw4.html'}}
+
+
+     <div class="row">
+       <div class="col-md-12">
+         <div class="portlet light bordered" style="border: 1px solid #dadada!important;">
+            <div class="portlet-title" style="border-bottom: 1px solid rgb(230, 230, 230); background:none">
+                <div class="caption font-dark">
+                    <i class="fa fa-medkit" style="color:#000"></i>
+                    <span class="caption-subject bold uppercase">Provider List</span>
+                </div>
+              {{=form}}
+            </div>
+         </div>
+       </div>  
+   </div>
+
+<div>
+    <div class="caption font-dark">
+        <i class="fa fa-medkit" style="color:#000"></i>
+        <span class="caption-subject bold uppercase">Activity Date</span>
+    </div>
+                
+    {{=formC.custom.begin}}
+    {{=formC.custom.widget.activitydate}}
+    {{=formC.custom.end}}
+
+</div>
+
+<button onclick="startActivityTracker()">Start Activity Tracker</button>
+<button onclick="startSMSService()">Start SMS Service</button>
+
+<script>
+
+function startActivityTracker() {
+    var dt = document.getElementById("no_table_activitydate").value
+   
+    window.open("/my_pms2/superadmin/activitytracker?groupapptsms=0&activitydate="+dt)
+}
+
+function startSMSService() {
+    var dt = document.getElementById("no_table_activitydate").value
+   
+    window.open("/my_pms2/superadmin/smsservice?groupapptsms=0&activitydate="+dt)
+}
+
+</script>

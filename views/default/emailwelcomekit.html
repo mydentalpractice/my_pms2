@@ -1,0 +1,26 @@
+{{extend 'layoutenroll2.html'}}
+
+<script>
+function memberlist()
+{
+   
+    window.location.replace("/my_dentalplan/member/list_webmember/")
+
+
+}
+
+</script>
+
+<div>
+     
+    <h3>Welcome Kit</h3><br/>
+    
+    {{if(ret == True):}}
+    <h5>Welcome Kit successfully sent to {{=member}} email address!</h5>
+    {{else:}}
+    <h5>Error in sending Welcome Kit to {{=member}} email address!</h5>
+    {{pass}}
+
+    <input  type="button" class="form_details_button" onclick="javascript: memberlist()" value="Return to Member List">
+
+</div>

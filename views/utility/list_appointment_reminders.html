@@ -1,0 +1,53 @@
+{{extend 'pms2_layoutw4.html'}}
+                        <div class="row">
+                            <div class="col-md-12">
+                                <!-- BEGIN EXAMPLE TABLE PORTLET-->
+                                <div class="portlet light bordered">
+                                    <div class="portlet-title">
+                                        <div class="caption font-white">
+                                            <i class="fa fa-calendar" style="color:#fff"></i>
+                                            <span class="caption-subject bold uppercase">Appointment Reminders  : From: {{=start}}   To:{{=end}}</span>
+                                        </div>
+                                       
+                                    </div>
+                                    <div class="col-md-12">
+                                    <!-- BEGIN Portlet PORTLET-->
+                                        <div class="portlet-body">
+                                            <div class="table-responsive">
+                                             {{=formA}}<a href="{{=returnurl}}">Cancel</a> 
+                                                   
+                                            </div>
+                                        </div>
+                                                <div class="form-group" style="display:none">
+                                                   
+                                                    <div class="col-md-9">
+                                                        <div class="mt-radio-inline">
+                                                            <label class="mt-radio">
+                                                                {{if(notification=="SMS"):}}
+                                                                    <input type="radio" name="remindertype" id="rdsms" value="SMS" checked> SMS 
+                                                                {{else:}}
+                                                                    <input type="radio" name="remindertype" id="rdsms" value="SMS"> SMS 
+                                                                {{pass}}
+                                                                <span></span>
+                                                            </label>
+                                                            <label class="mt-radio">
+                                                             
+                                                             {{if(notification=="Email"):}}
+                                                                <input type="radio" name="remindertype" id="rdemail" value="Email"  checked> Email 
+                                                              {{else:}}                          
+                                                                <input type="radio" name="remindertype" id="rdemail" value="Email" > Email 
+                                                              {{pass}}
+                                                                <span></span>
+                                                            </label>
+                                                            
+                                                        </div>
+                                                    </div>
+                                                </div>                                        
+                                    <!-- END Portlet PORTLET-->
+                                  </div>
+
+                                </div>
+                                <!-- END EXAMPLE TABLE PORTLET-->
+                            </div>
+                        </div>
+                        

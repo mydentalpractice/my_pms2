@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<!-- saved from url=(0074)https://decembercreatives.com/my_dental_plan/admin/Prescription_Form_2.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  
+  <meta name="Generator" content="EditPlus®">
+  <meta name="Author" content="">
+  <meta name="Keywords" content="">
+  <meta name="Description" content="">
+  <title>Prescription</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+ <style>
+   
+
+.marg{padding-top:20px; }
+.np{padding:0px; }
+.padding{padding:5%;}
+.margin{margin-bottom:5%;} 
+.white{color:white; }
+.background{background-image:url("../assets/pages/img/curve.png");background-size: cover;
+    height: 218px;
+    background-repeat: no-repeat;}
+@media screen and (max-width: 1200px) and (min-width:300px){
+   .right{text-align:right; }
+    }
+
+
+ </style></head>
+ 
+
+
+ 
+ <body style="font-family:Verdana">
+
+<div class="container-fluid col-sm-offset-3 col-sm-6" style="margin-top:4%;border:1px solid #1875b2; margin-bottom:5%;">
+<div class="container-fluid background right" style="margin-bottom:0%;margin-top:2%;"> 
+         <div class="container-fluid np" style="margin-top:3%; ">
+                  <div class="col-sm-12">
+		  
+                      <img class="img-responsive" style="width:100%;" src="../static/assets/pages/img/curve1.png">
+                   </div>
+	</div>
+
+       <div class="container-fluid ">
+	  <div class="col-sm-6">
+		  <div class="col-sm-12 text-left marg" style="margin-left:-14px;" ><a  href="//pdfcrowd.com/url_to_pdf/"><strong>Print to PDF</strong></a></div>
+	  </div>
+	  <div class="col-sm-6">
+		  <div class="col-sm-12 text-right marg" style="margin-left:-14px;" >Date:&nbsp;&nbsp;<strong>{{=prescdate}}</strong></div>
+	  </div>
+	
+       </div>
+
+<div class="col-sm-12 text-center right" style="margin-top:9%; ">
+	<h4 style="color:#1875b2;" class="right">
+	{{if(len(prov[0].practicename) > 0):}}<strong>{{=prov[0].practicename}}</strong>{{pass}}
+	</h4>
+	<h5 style="color:#1875b2;" class="right">
+	<strong>{{=prov[0].providername}}</strong>&nbsp;&nbsp;&nbsp;State Dental Council Registration Number: {{=registration}}
+	</h5>
+	
+        </div> 
+         
+        <div class="col-sm-12 text-center right" style="margin-top:2%;">
+	{{if(len(prov[0].address1) > 0):}}
+	{{=prov[0].address1}},&nbsp;&nbsp;
+	{{pass}}
+	{{if(len(prov[0].address2) > 0):}}
+	{{=prov[0].address2}},&nbsp;&nbsp;
+	{{pass}}      
+	{{if(len(prov[0].address3) > 0):}}
+	{{=prov[0].address3}},&nbsp;&nbsp; 
+	{{pass}}
+	
+	{{if(len(prov[0].city) > 0):}}
+	{{=prov[0].city}}{{pass}},{{if(len(prov[0].st) > 0):}} {{=prov[0].st}}{{pass}} {{if(len(prov[0].pin) > 0):}} - {{=prov[0].pin}}{{pass}}<br/>
+	Phone: {{=prov[0].cell}}&nbsp;&nbsp;&nbsp;&nbsp;Email: {{=prov[0].email}}&nbsp;&nbsp;&nbsp;&nbsp;
+	</div>
+
+
+ 
+<div class="container-fluid">
+<div class="col-sm-12">
+<img class="img-responsive" style="margin-top:-25%; position:absolute;z-index:-5;opacity:.8;  " src="../static/assets/pages/img/teeth.png" >
+<div class="table-responsive" style="font-size:10px; ">
+ <br/>
+ <br/>
+ <table class="table table-bordered" style="margin-top:1%; ">
+ <h5 style="color:#1875b2;" class="right">
+	<strong>Patient:&nbsp;&nbsp;{{=pat[0].fullname}}&nbsp;&nbsp;({{=pat[0].patientmember}})</strong>
+  </h5>
+    <thead>
+      <tr style="background-color:#1875b2;color:#ffffff">
+         <th> Medicine </th>
+	  <th> Frequency </th>
+	  <th> Duration </th>
+	  <th> Instruction </th>
+      </tr>
+    </thead>
+    <tbody>
+      {{for i in xrange(0, len(prescriptions),1): }}
+	<tr>
+	    <td>{{=prescriptions[i].medicine}}&nbsp;&nbsp;{{=prescriptions[i].strength}}{{=prescriptions[i].strengthuom}}&nbsp;&nbsp;{{=prescriptions[i].medicinetype}}&nbsp;&nbsp;{{=prescriptions[i].quantity}}</td>
+	    <td>{{=prescriptions[i].frequency}}</td>
+	    <td>{{=prescriptions[i].dosage}}</td>
+	    <td>{{=prescriptions[i].remarks}}</td>
+	 
+	  </tr>
+	  {{pass}}
+    </tbody>
+  </table>
+  </div>
+</div></div><br>
+<div class="container-fluid text-right" style="margin-top:10%; ">
+  <div class="col-sm-12">
+    Prescribed By<br>
+    <strong>{{=doc[0].name}}</strong><br/>
+    State Dental Council Registration Number:&nbsp;&nbsp;{{=doc[0].registration}}&nbsp;&nbsp;&nbsp;Cell:&nbsp;&nbsp;{{=doc[0].cell}}&nbsp;&nbsp;Email:&nbsp;&nbsp;{{=doc[0].email}}<br/><br/>
+    <a href="{{=returnurl}}">Cancel </a>
+  </div>
+</div>
+
+
+<div class="container-fluid" style="margin-top:10%; ">
+<div class="col-sm-12">
+<img class="img-responsive" " src="../static/assets/pages/img/curve2.png">
+</div></div>
+
+
+  
+</div>
+
+
+
+</body></html>

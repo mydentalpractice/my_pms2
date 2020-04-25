@@ -1,0 +1,37 @@
+
+{{extend 'pms2_layoutw4.html'}}
+
+
+<style>
+.dataTables_filter{ float:right !important;}
+ .dataTables_filter input {width: 377px !important;}
+#suggestions { position: relative; }
+.suggestions { background: white;z-index: 50000 !important;height: 250px; overflow-y: auto;border-bottom:1px solid #eeeeee;}
+.suggestions DIV { padding: 2px 4px 2px 4px; }
+</style>
+
+
+    <div class="row">
+     <div class="col-md-12">
+         <!-- BEGIN EXAMPLE TABLE PORTLET-->
+          <div class="portlet light bordered" style="border: 0px solid #dadada!important;">
+	    <div class="col-md-12" style="margin-bottom: 18px;">
+		<div class="input-group" style="width:51%">
+		    <span class="input-group-btn"> 
+			
+			<a style="color:#fff"  class="btn sbold green" onclick="location.href='{{=URL('preregister','new_preregister',vars=dict(page=0,providerid=providerid,companycode=companycode))}}'" >
+			    <i class="fa fa-plus"></i>&nbsp;&nbsp;New Pre-Register
+			</a>
+		    </span>
+		</div>
+		
+	    </div>
+	   
+	    
+	    {{if(formA != None):}}
+		{{=formA}}
+	    {{pass}}
+	</div>    	   
+    </div>
+    </div>
+

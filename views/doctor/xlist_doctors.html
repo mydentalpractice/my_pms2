@@ -1,0 +1,28 @@
+{{extend 'pms2_layoutw4.html'}}
+
+
+     <div class="row">
+       <div class="col-md-12">
+         <div class="portlet light bordered" style="border: 1px solid #dadada!important;">
+            <div class="portlet-title" style="border-bottom: 1px solid rgb(230, 230, 230); background:none">
+                <div class="caption font-dark">
+                    <i class="fa fa-user-md" style="color:#000"></i>
+                    <span class="caption-subject bold uppercase">List Doctors and Office Staff</span>
+                </div>
+                <div class="actions">
+                    <div class="btn-group btn-group-devided" data-toggle="buttons">
+                         <div class="col-md-6">
+                         
+                             <div class="btn-group">
+                                <span  > <a style="color:#fff"  class="btn sbold green" onclick="location.href='{{=URL('doctor','new_doctor',vars=dict(page=page,providerid=providerid,providername=providername))}}'" >
+                                    <i class="fa fa-plus"></i>&nbsp;&nbsp;New Doctor/Office Staff</a>
+                                
+                             </div>
+                         </div>
+                     </div>
+                </div>
+              {{=form}}
+            </div>
+         </div>
+       </div>  
+   </div>

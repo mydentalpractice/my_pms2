@@ -1,0 +1,40 @@
+
+
+
+<select id="members" class="form_details " style="width:100%;height:35px" onchange="changeMembers()">
+        <option value='0'>--Select--</option>
+         
+        {{for member in members:}}
+         {{if(member.id == memberid):}}   
+             <option  selected="selected" value='{{=member.id}}'>{{=member.fname}},{{=member.lname}},{{=member.patientmember}}</option>
+          {{else:}}
+             <option  value='{{=member.id}}'>{{=member.fname}},{{=member.lname}},{{=member.patientmember}}</option>
+          {{pass}}
+         {{pass}}         
+        {{pass}}
+</select>
+
+ </div>	
+
+</div>
+</div>
+
+<div class="w3-row-padding  ">
+  <div class="w3-half" style='line-height:1.5;'>
+    <label>Treatment Cost</label>&nbsp;&nbsp;&nbsp;
+    {{=totaltreatmentcost}}
+  </div>
+  <div class="w3-half" style='line-height:1.5;' >
+    <label>Total Due</label>&nbsp;&nbsp;&nbsp;
+    {{=totaldue}}
+  </div>
+</div>
+
+
+<script>
+var ppopts = document.getElementById("members");
+var pp = ppopts.options[ppopts.selectedIndex].value;
+
+var x = document.getElementById("payment_patientmember");
+    x.value = pp;
+</script>

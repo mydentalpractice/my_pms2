@@ -1,0 +1,62 @@
+{{extend 'pms2_layoutw4_relgr.html'}}
+
+                        
+                        <div class="row">
+                            <div class="container" style="width: 100%;margin: 0px auto;">
+                                <!-- BEGIN EXAMPLE TABLE PORTLET-->
+                                <div class="portlet light bordered">
+                                    <div class="portlet-title tabbable-line">
+					<div class="portlet-title" style="padding:0px 20px  !important">
+					    <div class="caption font-white" style="    width: 100%;">
+						<i class="fa fa-user" style="color:#fff"></i>
+						<span class="caption-subject bold uppercase">Religare Error:  {{=errorheader}}</span>
+					    </div>
+					</div>
+                                    </div>		
+				    
+                                    <div class="col-md-12">
+                                    <!-- BEGIN Portlet PORTLET-->
+                                    <div class="col-sm-12 md_r">
+                                       
+                                        <div class="portlet-body" style="padding:20px">
+                                            <div class="col-md-12 np">
+						<div class="col-sm-12">	
+                                                  <div class="col-md-12">
+                                                     <div class="form-group">
+                                                       <div class="mt-repeater-input">
+                                                                    <label class="m_title">Error Message</label>
+                                                                    <br>
+                                                                    {{=errormssg}}
+                                                       </div>  
+						      </div>  
+                                                   </div>
+						</div>
+						<div class="col-sm-12">	
+						     <div class="col-md-12" style="margin-bottom:30px">
+							    <a href="{{=returnurl}}" id="RET" onclick="loader(this.id)" class="btn green"><span style="float: left;color:#000 !important">Return</span><i class="fa fa-spinner fa-spin" id="loaderDIVRET" style="display:none"></i></a>                                            
+						    </div>
+						</div>
+						
+                                       
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- END Portlet PORTLET-->
+                                  </div>
+
+                                </div>
+                                <!-- END EXAMPLE TABLE PORTLET-->
+                                
+
+                            </div>
+                        </div>
+                        
+
+
+
+
+
+
+
+
+

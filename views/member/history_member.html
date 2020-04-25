@@ -1,0 +1,399 @@
+{{extend 'pms2_layoutw3.html'}}
+
+
+
+<script>
+$(function(){
+  var $cur = $('#group .current');
+  var $items = $('#group .item');
+  
+  function hideButtons() {
+    $cur = $('#group .current');
+    var index = $cur.index();
+    if(index > 0) {
+      $('#prev').show();
+    } else {
+      $('#prev').hide();
+    }
+    
+    if(index < $items.length - 1) {
+      $('#next').show();
+    } else {
+      $('#next').hide();
+    }
+    
+    
+  }
+  
+  hideButtons();
+  
+  $('#next').click(function(){
+    $cur.next().addClass('current');
+    $cur.removeClass('current');
+    hideButtons();
+  });
+  $('#prev').click(function(){
+    $cur.prev().addClass('current');
+    $cur.removeClass('current');
+    hideButtons();
+  });
+});
+</script>
+
+
+
+  
+
+<header class="w3-container w3-blue-grey">
+      <h4><strong>Member Patient Dental/Medical History</strong>&nbsp;&nbsp;</h4>
+</header>
+
+
+<div class="w3-container w3-padding-4">
+<div class="w3-bar">
+  <button id = "prev" class="w3-button w3-left w3-black" style="display:none;height:40px;width:20%">Previous</button> 
+  <button id = "next" class="w3-button w3-right w3-black" style="height:40px;width:20%">Next/button> 
+</div>
+</div>
+ 
+{{=formHist.custom.begin}} 
+<div id="group">
+    <div id="one" class="current item">
+     
+         <h4 class="w3-text-blue"><strong >Heart Problems</strong></h4>
+    
+
+  <div class="w3-row-padding  ">
+    <div class="w3-third" style='line-height:1.5;'>
+        {{=formHist.custom.widget.chestpain}}
+      <label class="w3-text-black">Chest pain</label>
+    </div>
+    <div class="w3-third" style='line-height:1.5;'>
+      {{=formHist.custom.widget.shortbreath}}
+      <label class="w3-text-black">Shortness of breadth</label>
+    </div>
+    <div class="w3-third" style='line-height:1.5;'>
+        {{=formHist.custom.widget.bloodpressure}}
+      <label class="w3-text-black">Blood pressure problem</label>
+    </div>
+    
+  </div>           
+  
+  
+  <div class="w3-row-padding  ">
+    <div class="w3-third" style='line-height:1.5;'>
+      {{=formHist.custom.widget.heartmurmur}}
+      <label class="w3-text-black">Heart murmur</label>
+    </div>
+    <div class="w3-third" style='line-height:1.5;'>
+        {{=formHist.custom.widget.heartvalve}}
+      <label class="w3-text-black">Heart valve problem</label>
+    </div>
+    <div class="w3-third" style='line-height:1.5;'>
+      {{=formHist.custom.widget.heartmedicince}}
+      <label class="w3-text-black">Taking heart medication</label>
+    </div>
+    
+  </div>           
+  
+  
+  <div class="w3-row-padding  ">
+    <div class="w3-third" style='line-height:1.5;'>
+        {{=formHist.custom.widget.rheumaticfever}}
+      <label class="w3-text-black">Rheumatic fever</label>
+    </div>
+    <div class="w3-third" style='line-height:1.5;'>
+      {{=formHist.custom.widget.pacemaker}}
+      <label class="w3-text-black">Pacemaker</label>
+    </div>
+    <div class="w3-third" style='line-height:1.5;'>
+        {{=formHist.custom.widget.artificialvalve}}
+      <label class="w3-text-black">Artificial heart valve</label>
+    </div>
+  </div>           
+  
+
+    <h4 class="w3-text-blue"><strong >Blood Problems</strong></h4>
+    
+  
+  <div class="w3-row-padding  ">
+    <div class="w3-third" style='line-height:1.5;'>
+        {{=formHist.custom.widget.bruising}}
+      <label class="w3-text-black">Easy bruising</label>
+    </div>
+    <div class="w3-third" style='line-height:1.5;'>
+      {{=formHist.custom.widget.nosebleeds}}
+      <label class="w3-text-black">Frequent nosebleeds</label>
+    </div>
+    <div class="w3-third" style='line-height:1.5;'>
+        {{=formHist.custom.widget.bleeding}}
+      <label class="w3-text-black">Abnormal bleeding</label>
+    </div>
+  </div>           
+  
+  <div class="w3-row-padding  ">
+    <div class="w3-third" style='line-height:1.5;'>
+        {{=formHist.custom.widget.blooddisease}}
+      <label class="w3-text-black">Blood disease (anemia)</label>
+    </div>
+    <div class="w3-third" style='line-height:1.5;'>
+      {{=formHist.custom.widget.bloodtransfusion}}
+      <label class="w3-text-black">Ever require blood transfusion</label>
+    </div>
+  </div>           
+  
+  
+  <h4 class="w3-text-blue"><strong >Allergy Problems</strong></h4>
+    
+  
+  <div class="w3-row-padding  ">
+    <div class="w3-third" style='line-height:1.5;'>
+        {{=formHist.custom.widget.hayfever}}
+      <label class="w3-text-black">Hay fever</label>
+    </div>
+    <div class="w3-third" style='line-height:1.5;'>
+      {{=formHist.custom.widget.sinus}}
+      <label class="w3-text-black">Sinus problems</label>
+    </div>
+    <div class="w3-third" style='line-height:1.5;'>
+        {{=formHist.custom.widget.skinrash}}
+      <label class="w3-text-black">Skin rashes</label>
+    </div>
+    
+  </div>           
+  <div class="w3-row-padding  ">
+    <div class="w3-third" style='line-height:1.5;'>
+        {{=formHist.custom.widget.allergymedicine}}
+      <label class="w3-text-black">Taking Allergy medication</label>
+    </div>
+    <div class="w3-third" style='line-height:1.5;'>
+      {{=formHist.custom.widget.asthma}}
+      <label class="w3-text-black">Asthama</label>
+    </div>
+    
+  </div>           
+  
+    </div>
+    
+  
+    <div id="two" class="item">
+
+ 
+ 
+  <h4 class="w3-text-blue"><strong >Intestinal Problems</strong></h4> 
+  <div class="w3-row-padding  ">
+    <div class="w3-third" style='line-height:1.5;'>
+        {{=formHist.custom.widget.ulcers}}
+      <label class="w3-text-black">Ulcers</label>
+    </div>
+    <div class="w3-third" style='line-height:1.5;'>
+      {{=formHist.custom.widget.weight}}
+      <label class="w3-text-black">Weight gain or loss</label>
+    </div>
+    <div class="w3-third" style='line-height:1.5;'>
+        {{=formHist.custom.widget.diet}}
+      <label class="w3-text-black">Special diet</label>
+    </div>
+    
+  </div>           
+  <div class="w3-row-padding  ">
+    <div class="w3-third" style='line-height:1.5;'>
+        {{=formHist.custom.widget.constipation}}
+      <label class="w3-text-black">Constipatin/Diarrhea</label>
+    </div>
+    <div class="w3-third" style='line-height:1.5;'>
+      {{=formHist.custom.widget.kidneyproblem}}
+      <label class="w3-text-black">Kideny or bladder problems</label>
+    </div>
+    
+  </div>       
+  
+  
+  <h4 class="w3-text-blue"><strong >Bone or Joint Problems</strong></h4> 
+   
+
+  <div class="w3-row-padding  ">
+    <div class="w3-third" style='line-height:1.5;'>
+        {{=formHist.custom.widget.arthritis}}
+      <label class="w3-text-black">Arthritis</label>
+    </div>
+    <div class="w3-third" style='line-height:1.5;'>
+      {{=formHist.custom.widget.backneckpain}}
+      <label class="w3-text-black">Back or neck pain</label>
+    </div>
+    <div class="w3-third" style='line-height:1.5;'>
+        {{=formHist.custom.widget.jointrplc}}
+      <label class="w3-text-black">Joint replacement (e.g. total hip, pins or implants)</label>
+    </div>
+    
+  </div> 
+  
+  
+  <h4 class="w3-text-blue"><strong >Diabetes</strong></h4> 
+  
+    <div class="w3-row-padding  ">
+    <div class="w3-third" style='line-height:1.5;'>
+        {{=formHist.custom.widget.urination}}
+      <label class="w3-text-black">Urine more than 6 times a day</label>
+    </div>
+    <div class="w3-third" style='line-height:1.5;'>
+      {{=formHist.custom.widget.drymouth}}
+      <label class="w3-text-black">Thirsty or mouth is dry much of a time</label>
+    </div>
+    <div class="w3-third" style='line-height:1.5;'>
+        {{=formHist.custom.widget.diabeteshistory}}
+      <label class="w3-text-black">Family history of diabetes</label>
+    </div>
+    
+  </div>  
+
+  <h4 class="w3-text-blue"><strong >TB, Liver, Brain</strong></h4> 
+    <div class="w3-row-padding  ">
+    <div class="w3-third" style='line-height:1.5;'>
+        {{=formHist.custom.widget.tb}}
+      <label class="w3-text-black">Tuberculosis or other respitory disease</label>
+    </div>
+    <div class="w3-third" style='line-height:1.5;'>
+      {{=formHist.custom.widget.hepatitis}}
+      <label class="w3-text-black">Hepatitis, jaundice or liver trouble</label>
+    </div>
+    <div class="w3-third" style='line-height:1.5;'>
+        {{=formHist.custom.widget.faintingspells}}
+      <label class="w3-text-black">Fainting Spells, Seizures or Epilensy</label>
+    </div>
+    
+  </div>  
+    <div class="w3-row-padding  ">
+    <div class="w3-third" style='line-height:1.5;'>
+        {{=formHist.custom.widget.strokes}}
+      <label class="w3-text-black">Strokes</label>
+    </div>
+    <div class="w3-third" style='line-height:1.5;'>
+      {{=formHist.custom.widget.headaches}}
+      <label class="w3-text-black">Frequent or severe headaches</label>
+    </div>
+    <div class="w3-third" style='line-height:1.5;'>
+        {{=formHist.custom.widget.eplilepsy}}
+      <label class="w3-text-black">Epilepsy or other neurological disease</label>
+    </div>
+    
+  </div>  
+  
+    <div class="w3-row-padding  ">
+    <div class="w3-third" style='line-height:1.5;'>
+        {{=formHist.custom.widget.headinjury}}
+      <label class="w3-text-black">History of head injuries</label>
+    </div>
+    
+  </div>  
+
+
+    </div>
+    
+    
+    <div id="three" class="item">
+  
+  
+  
+ 
+   <h4 class="w3-text-blue"><strong >Eye</strong></h4> 
+   <div class="w3-row-padding  ">
+    <div class="w3-third" style='line-height:1.5;'>
+        {{=formHist.custom.widget.glaucoma}}
+      <label class="w3-text-black">Glaucoma</label>
+    </div>
+    <div class="w3-third" style='line-height:1.5;'>
+      {{=formHist.custom.widget.contacts}}
+      <label class="w3-text-black">Do you wear contact lenses</label>
+    </div>
+    
+  </div>    
+  
+
+ <h4 class="w3-text-blue"><strong >Others</strong></h4>   
+   <div class="w3-row-padding  ">
+    <div class="w3-third" style='line-height:1.5;'>
+        {{=formHist.custom.widget.thyroid}}
+      <label class="w3-text-black">Thyroid problems</label>
+    </div>
+    <div class="w3-third" style='line-height:1.5;'>
+      {{=formHist.custom.widget.swollenglands}}
+      <label class="w3-text-black">Persistent cough or swollen glands</label>
+    </div>
+    <div class="w3-third" style='line-height:1.5;'>
+        {{=formHist.custom.widget.cancer}}
+      <label class="w3-text-black">Cancer/Tumor</label>
+    </div>
+    
+  </div>  
+  
+   <div class="w3-row-padding  ">
+    <div class="w3-third" style='line-height:1.5;'>
+        {{=formHist.custom.widget.std}}
+      <label class="w3-text-black">Herpes or other STD</label>
+    </div>
+    <div class="w3-third" style='line-height:1.5;'>
+      {{=formHist.custom.widget.hiv}}
+      <label class="w3-text-black">HIV-positive/AIDS</label>
+    </div>
+    
+  </div>  
+
+<h4 class="w3-text-blue"><strong >Behavorial</strong></h4>   
+  <div class="w3-row-padding  ">
+    <div class="w3-third" style='line-height:1.5;'>
+        {{=formHist.custom.widget.alcholol}}
+      <label class="w3-text-black">Do you drink alcohol? if so, how much?</label>
+      {{=formHist.custom.widget.alcoholqty}}
+      
+    </div>
+    <div class="w3-third" style='line-height:1.5;'>
+      {{=formHist.custom.widget.smoking}}
+      <label class="w3-text-black">Do you smoke? If so, how much?</label>
+      {{=formHist.custom.widget.smokeqty}}
+    </div>
+    <div class="w3-third" style='line-height:1.5;'>
+        {{=formHist.custom.widget.drugabuse}}
+      <label class="w3-text-black">History of alcohol or drug abuse?</label>
+    </div>
+    
+  </div>  
+    <div class="w3-row-padding  ">
+    <div class="w3-third" style='line-height:1.5;'>
+        {{=formHist.custom.widget.premedication}}
+      <label class="w3-text-black">Premedications required by physician</label>
+      
+    </div>
+    <div class="w3-twothird" style='line-height:1.5;'>
+      <label class="w3-text-black">Do you have any disease, condition, or problem not listed previously, that you feel we should know about, if so, please describe:</label>
+        {{=formHist.custom.widget.unlisted}}
+    </div>
+    </div>
+    </div>
+    
+  
+  
+  
+    </div>  
+    
+    
+    
+</div>
+
+
+<br/>
+
+
+ 
+     
+
+
+<div class="w3-container w3-padding-4">
+<div class="w3-bar">
+  <a href="{{=returnurl}}" class="w3-button w3-left  w3-green" style="height:40px;width:20%">Cancel</a>
+  
+  <button class="w3-button w3-right w3-black" style="height:40px;width:20%"><i class="fa fa-save w3-margin-right"></i>Click to Save</button> 
+</div>
+</div>
+
+{{=formHist.custom.end}}

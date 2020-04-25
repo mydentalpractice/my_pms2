@@ -1,0 +1,193 @@
+{{extend 'pms2_layoutw4.html'}}
+
+
+<style>
+#suggestions { position: relative; z-index:300000}
+.suggestions { background: white; border: solid 1px #55A6C8; }
+.suggestions DIV { padding: 2px 4px 2px 4px; }
+</style>
+
+
+<div class="row">
+{{=form.custom.begin}} 
+    <div class="col-md-12"  >
+    
+	<div class="row" style="width:100%">
+	    <div class="col-md-12" style="margin-bottom: 18px;">
+		<label class="m_title">Prescribing Doctor</label>	    
+		<div class="input-group">
+		       {{=form.custom.widget.doctor}}
+		</div>
+		
+	    </div>
+	</div>
+	    
+        <div class="row" style="width:100%">
+            <div class="col-md-12" style="margin-bottom: 18px;">
+                <div class="input-group">
+                       {{=form.custom.widget.patientmember}}
+			<span class="input-group-btn">
+			    <a class = "btn green" id="prescriptions" onClick="getPrescriptions()">Search Prescriptions</a>
+			    <!--<button class="btn blue uppercase bold" type="submit">Search Prescriptions</button>-->
+			</span>
+		</div>
+                
+            </div>
+        </div>
+    <div id="hide" style="display:none;" >
+	<p id="phide">Click <strong>X</strong> to close the Patient List after selection</p>
+    </div>
+    <div style="position: absolute;" id="suggestions" class="suggestions"  >
+    </div>
+
+  
+  <br/>
+  <br/>
+  <div class="col-md-12">
+    <div id = "presgrid">
+                                <div class="portlet light bordered" style="display:none">
+                                    {{if(len(prescriptions)>0):}}
+                                    <div class="portlet-title" style="padding:0px 20px  !important">
+                                        <div class="caption font-white" style="    width: 100%;">
+                                            R<sub>x</sub>&nbsp;&nbsp;
+                                            <span class="caption-subject bold uppercase">{{=prescriptions[0].fullname}}&nbsp;({{=prescriptions[0].patientmember}}) &nbsp;&nbsp;<small>{{=prescriptions[0].gender}}&nbsp;&nbsp;{{=prescriptions[0].age}}</small><br> </span> 
+                                            <span style="text-align:right;float:right"></span>
+                                        </div>
+                                       
+                                    </div>
+                                    <div class="col-md-12">
+                                    <!-- BEGIN Portlet PORTLET-->
+                                    <div class="actions" style="    text-align: right;">
+                                            <a class="btn btn-circle btn-icon-only btn-default" onclick="location.href='{{=URL('prescription','new_prescription',vars=dict(page=page,providerid=providerid,providername=providername,memberid=memberid,patientid=patientid,doctorid=1))}}'">
+                                                <i class="fa fa-plus"></i>
+                                            </a>
+                                    
+                                            <a class="btn btn-circle btn-icon-only btn-default" onclick="location.href='{{=URL('prescription','prescription_report',vars=dict(page=page,providerid=providerid,memberid=memberid,patientid=patientid))}}'">
+                                                <i class="fa fa-print"></i>
+                                            </a>
+                                            <a class="btn btn-circle btn-icon-only btn-default" href="javascript:;">
+                                                <i class="fa fa-chevron-down"></i>
+                                            </a>
+                                           
+                                        </div>
+                                       
+                                      <div class="portlet-body">
+                                        <div class="table-responsive">
+                                            <table class="table table-striped table-bordered table-hover">
+                                                <thead>
+                                                    <tr>
+                                                        <th> Drug </th>
+                                                        <th> Frequency </th>
+                                                        <th> Duration </th>
+                                                        <th> Date </th>
+                                                        <th> Instruction </th>
+							
+                                                     </tr>
+                                                </thead>
+                                                <tbody>
+                                                
+                                                    {{for i in xrange(0, len(prescriptions),1): }}
+                                                    <tr>
+						    
+                                                        <td>{{=prescriptions[i].medicine}}&nbsp;&nbsp;{{=prescriptions[i].strength}}{{=prescriptions[i].strengthuom}}&nbsp;&nbsp;{{=prescriptions[i].medicinetype}}&nbsp;&nbsp;{{=prescriptions[i].quantity}}</td>
+                                                        <td>{{=prescriptions[i].frequency}}</td>
+                                                        <td>{{=prescriptions[i].dosage}}</td>
+                                                        <td>{{=prescriptions[i].prescriptiondate}}</td>
+                                                        <td>{{=prescriptions[i].remarks}}</td>
+							<td>
+							    <a class="btn btn-circle btn-icon-only btn-default" onclick="location.href='{{=URL('prescription','update_prescription',vars=dict(page=page,providerid=providerid,providername=providername,prescriptionid=prescriptions[i].id))}}'">
+								<i class="fa fa-edit"></i>
+							    </a>
+							</td>
+							<td>
+							    <a class="btn btn-circle btn-icon-only btn-default" onclick="location.href='{{=URL('prescription','delete_prescription',vars=dict(page=page,providerid=providerid,providername=providername,prescriptionid=prescriptions[i].id))}}'">
+								<i class="fa fa-trash"></i>
+							    </a>
+							</td>
+							
+							
+                                                   </tr>
+                                                    {{pass}}
+                                                </tbody>
+                                            </table>
+                                          
+                                        </div>
+                                    </div>
+                                  
+                                    <!-- END Portlet PORTLET-->
+                                  </div>
+
+                                    {{pass}}
+                                
+                                </div>
+    </div>
+  
+  </div>
+    <div style="display:none;">
+	{{=form.custom.widget.xpatientmember}}
+	{{=form.custom.submit}}
+    </div>
+
+
+    {{=form.custom.end}} 
+        <!-- BEGIN EXAMPLE TABLE PORTLET-->
+        
+         
+        <!-- END EXAMPLE TABLE PORTLET-->
+    </div>
+</div>
+
+<script>
+
+function getPrescriptions(){
+
+
+    patientmember = document.getElementById("no_table_patientmember").value
+   
+    
+    ajax('{{=URL("prescription", "get_prescriptions", vars=dict(page=page))}}', ['xpatientmember','doctor'] , 'presgrid');
+    
+    
+}
+
+
+
+
+jQuery("#no_table_patientmember").keyup(function(){
+
+       $("#suggestions").show();
+       var x = $('#no_table_patientmember').val();
+       $("#no_table_xpatientmember").val(x);
+       
+      ajax('{{=URL('admin', 'patient_selector')}}', ['xpatientmember'], 'suggestions')});
+      
+
+      
+$(document).ready(function(){
+   
+   
+    
+     $("#suggestions").show();
+    
+    $("#suggestions") .click(function(){
+      
+	x= $("#no_table_patientmember").val();
+
+	$("#no_table_xpatientmember").val(x);
+
+	var strarr = x.split(":")
+
+	$("#no_table_patientmember").val(strarr[0])
+	
+	$("#suggestions").hide();
+	
+    
+    });
+    
+    getPrescriptions()
+    
+ });
+         
+</script>
+
+	

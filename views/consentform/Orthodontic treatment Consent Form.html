@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>MDP- Consent Orthodontic Treatment Form</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link href="https://fonts.googleapis.com/css?family=Poppins:100,100i,200,200i,300,300i,400,400i,500,500i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
+</head>
+  <script src="https://docraptor.com/docraptor-1.0.0.js"></script>
+  <script>
+    var downloadPDF = function() {
+      DocRaptor.createAndDownloadDoc("YOUR_API_KEY_HERE", {
+        test: true, // test documents are free, but watermarked
+        type: "pdf",
+        document_content: document.querySelector('html').innerHTML, // use this page's HTML
+        // document_content: "<h1>Hello world!</h1>",               // or supply HTML directly
+        // document_url: "http://example.com/your-page",            // or use a URL
+        // javascript: true,                                        // enable JavaScript processing
+        // prince_options: {
+        //   media: "screen",                                       // use screen styles instead of print styles
+        // }
+      })
+    }
+  </script>
+  <style>
+body{font-family: 'Poppins', sans-serif !important;}
+.np{    padding: 0px;}
+    .npl{padding-left: 0px;text-align: left;}
+    .npl p{    margin-bottom: 5px !important;    font-size: 14px;}
+    .npr{padding-right: 0px;text-align: right;}
+    .pb{padding-bottom: 5px;}
+        .bor{display: grid;
+    padding: 0px;float: left;}
+    .pt{padding-top: 30px;}
+    #pdf-button{    background: #1d77b3;
+    border: none;
+    color: #fff;
+    margin: 20px 0px;
+    padding: 8px;}
+    .bg_blue{    background: #fff;padding: 0px 0px;}
+    .bg_blue1{    background: #fff;padding: 0px 0px;}
+    strong{font-weight: 600;}
+    td{font-size: 10px; padding: 3px 0px;}
+    td:first-child {font-weight: 500;    width: max-content;
+    float: left;}
+    .bt_text{    text-align: center;
+    font-size: 16px;
+    color: #fff;
+    margin-top: 8px;
+    font-weight: 600;}
+    ul {
+    list-style-image: url('https://mydentalplan.in/teeth_icon.png');
+}
+li{font-size:9px;}
+@media only screen and (max-width: 400px) and (min-width: 300px)  {
+
+    .bt_text{font-size: 12px !important;}
+ul{font-size: 11px !important;}
+  .npl p{ font-size:9px !important;}
+      .btm{font-size: 10px !important;}
+      .pt{padding-top:0px !important;}
+}
+@media only screen and (max-width: 400px) and (min-width: 300px)  {
+  .bt_text{font-size: 12px !important;}
+ul{font-size: 8px !important;}
+  .npl p{ font-size:14px !important;}
+     
+      .pt{padding-top:0px !important;}
+.pad{padding: 10px 10px !important;}
+.btm{text-align:left !important;}
+}
+
+
+</style>
+  <style>
+    @media print {
+      #pdf-button {
+        display: none;
+      }
+     
+       
+
+ /* All your print styles go here */
+ #btnPrint{ display: none !important; } 
+ .button{ display: none !important; } 
+ a{display: none !important}
+ p{font-size: 12px !important}
+}
+  </style>
+
+<body>
+  <div class="container">
+    <div class="col-sm-12">
+ <!--Id Card Front part start-->
+
+          <div class="col-sm-12 bor">
+            <!--logo start-->
+              <div class="col-sm-12"> <input id="pdf-button" type="button" value="Download PDF" onclick="downloadPDF()" /></div>
+          <div class="container-fluid">
+                 <div class="col-sm-12">
+                   
+                     <div class="col-sm-6 text-right marg" style="margin-left:-14px;" >Date:&nbsp;&nbsp;<strong>{{=consentdate}}</strong></div>
+                 </div>
+          </div> 
+          <div class="container-fluid background right" style="margin-bottom:0%;"> 
+              <div class="col-sm-12 text-center right" style="margin-top:2%; ">
+                     <h4 style="color:#1875b2;" class="right"><strong>{{if(len(prov[0].practicename) > 0):}}<strong>{{=prov[0].practicename}}</strong>{{pass}}</strong></h4>
+                                        <h5 style="color:#1875b2;" class="right"><strong>{{=prov[0].providername}}</strong><br>State Dental Council Registration Number: {{=registration}}</h5>
+                                        <p>{{if(len(prov[0].practicename) > 0):}}{{=prov[0].practicename}}{{pass}}{{if(len(prov[0].address1) > 0):}}
+                    {{=prov[0].address1}},&nbsp;&nbsp;
+                    {{pass}}
+                    {{if(len(prov[0].address2) > 0):}}
+                    {{=prov[0].address2}},&nbsp;&nbsp;
+                    {{pass}}      
+                    {{if(len(prov[0].address3) > 0):}}
+                    {{=prov[0].address3}},&nbsp;&nbsp; 
+                    {{pass}}
+                    
+                    {{if(len(prov[0].city) > 0):}}
+                    {{=prov[0].city}}{{pass}},{{if(len(prov[0].st) > 0):}} {{=prov[0].st}}{{pass}} {{if(len(prov[0].pin) > 0):}} - {{=prov[0].pin}}{{pass}}<br/>
+                    Phone: {{=prov[0].cell}}&nbsp;&nbsp;&nbsp;&nbsp;Email: {{=prov[0].email}}&nbsp;&nbsp;&nbsp;&nbsp;</p>
+              </div> 
+          </div>  
+       <!--Header start-->
+          <div class="col-sm-12 bg">
+               <div class="col-xs-12 npl">
+                 
+                <p>Patient: <span style="text-decoration: underline;">{{=patientmember}}</span></p>
+                <p>Date: <strong>{{=consentdate}}</strong> I, <span style="text-decoration: underline;">{{=patientmember}}</span>, authorize and request Dr.(s) , <span style="text-decoration: underline;">&nbsp; &nbsp;{{=doctorname}}</span>and/or such assistants as may be selected by him (them) to provide <span style="text-decoration: underline;">{{=dentalprocedure}}</span> to address the conditions or symptoms based on the diagnostic studies and/or evaluations already performed and which have been explained to me.The doctor has also explained to me in detail about the diagnosis, treatment, medications and the postoperative complications which may arise due to the operation. </p>
+      <!--Header end-->               
+      <!--Body Start-->         
+            <p>I UNDERSTAND that treatment of dental conditions pertaining to ORTHODONTIC TREATMENT (straightening or repositioning of teeth) includes certain risks and potential unsuccessful results. Even though great care and diligence will be used in treatment, no promises or guarantees for desired results can be made nor expected. </p>
+
+            <p><b>1.</b> Complete cooperation of the patient is essential. Once treatment is begun, each appointment must be attended as scheduled. Each delayed or missed appointment will prolong the time necessary to complete treatment (which can never be precisely determined) and may create problems making it impossible to achieve the desired results. </p>
+
+            <p><b>2.</b> Instructions must be diligently followed. There will be instructions given concerning special oral hygiene measures which must be followed. Also, as treatment progresses, certain adjunctive appliances may be necessary. Instructions will be given as to their care ant use which must also be followed exactly. Informational and instructional literature will be given. It is the responsibility of the patient to thoroughly study and understand this material. </p>
+
+            <p><b>3.</b> Decalcification (permanent markings on the teeth), decay, and/or gum disease can occur if teeth are not brushed properly ant thoroughly during the treatment period. Sweets and between meal snacks must be eliminated, If desired results are to be achieved, this is absolutely necessary. Continuing checkups and dental care from the patient's general dentist during the course of treatment is essential. </p>
+
+            <p><b>4.</b> Teeth may become nun-vital. This is always a possibility, with or without orthodontic treatment. Trauma from a blow, deep fillings, etc. may cause the nerve tissue in a tooth to die. This can happen over a long period of time. Even though this problem may exist, it may be undetectable at the beginning of orthodontic treatment, but through tooth movement it may exhibit itself. Root canal treatment may then become necessary in order to preserve the tooth or teeth. </p>
+
+            <p><b>5.</b> Root resorption is a condition where roots may become shortened during treatment. Under healthy conditions, this is no serious disadvantage. However, if gum disease occurs in later life, the longevity of the teeth could be compromised. Other conditions can cause root resorption such as: trauma, cuts, impaction, endocrine disorders, or idiopathic (unknown) reasons. </p>
+
+            <p><b>6.</b> Temporomandibular Joint (TMJ) dysfunction can occur before, during or after orthodontic treatment. Many times the TMJ, even though the damage had begun long before the orthodontic treatment, because of the subtle changes in the bite through treatment, symptoms of this damage such as clicking, popping, crackling, pain, headaches, etc., may then become evident. Even though there were no apparent symptoms previously, these may begin to exhibit themselves during treatment. Should such symptoms occur, it may be necessary for the patient to be referred to a TMJ specialist. </p>
+
+            <p><b>7.</b> Shifting of teeth might occur after braces are removed. For this reason, retainers are constructed which must be diligently worn for a period of time which will vary between patients. Retainers are made of materials that are subject to breakage no matter how well constructed. Retainers must be handled and used carefully. Repair charges may be made. Instructions will be given concerning these appliances. </p>
+
+            <p><b>8.</b> I recognize that it is my responsibility to follow instructions completely and seek attention in a timely manner should any unexpected problems occur by informing this office immediately. I must explicitly follow any instructions, either written or oral, which have been given to me relating to this orthodontic treatment. </p>
+
+            
+
+
+            <p>I certify that I have read, have had explained to me, and fully understand the foregoing Consent to <span style="text-decoration: underline;">{{=dentalprocedure}}</span>,  drug and anesthetic procedures, and that it is my intention to have the foregoing carried out as stated. I have been advised of information concerning the longevity of the procedure. However, I have discussed this as well as the nature of the services and procedures and I consent to the above procedure knowing its risks and limitations.</p>
+
+      <!--Body End--> 
+
+
+               <!--Footer start--> 
+               <div class="col-sm-6 np">
+                    <p><b>Doctor Name:</b><span style="text-decoration: underline;">&nbsp; &nbsp;{{=doctorname}}</span></p>
+                    <p><b>Doctor Signature:</b>________________________</p>
+                    <p><b>State Dental Council Registration Number:</b>&nbsp;&nbsp;{{=docreg}}</p>
+                    <p><b>Patient Name:-</b><span style="text-decoration: underline;">{{=patientmember}}</span></p>
+                    <p><b>Patient Signature:-</b>________________________</p>
+                    <p><b>Witness (if available) :-</b>________________________</p>
+                    <p><b>Parent / Guardian if patient is minor:-</b>________________________</p>                                                
+                    <p><b>Date:-</b> {{=consentdate}}&nbsp;&nbsp;<b>Date:-</b> {{=consentdate}}</p>
+                    <p><a id="can" href="{{=returnurl}}">Cancel </a></p>
+               </div>
+                <!--Footer end-->                
+               </div>
+               
+              
+            </div>  
+       <!--customer details end-->
+       
+      </div>
+      <div class="col-sm-2"></div>
+</div>
+<!--Id Card Front part End-->
+
+
+
+ 
+
+
+
+
+
+   </div>
+
+</body>
+</html>

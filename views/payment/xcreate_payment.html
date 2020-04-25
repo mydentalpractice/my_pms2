@@ -1,0 +1,135 @@
+{{extend 'pms2_layoutw3.html'}}
+
+{{=formA.custom.begin}}
+<header class="w3-container w3-blue-grey">
+    <h4><strong>New Payment</strong></h5>
+</header>
+<div class="w3-container w3-hide">
+{{=formA.custom.widget.is_active}}
+{{=formA.custom.widget.treatmentplan}}
+{{=formA.custom.widget.patientmember}}
+{{=formA.custom.widget.provider}}
+</div> 
+
+
+<div class="w3-row-padding  ">
+  <div class="w3-half" style='line-height:1.5;'>
+    <label>Treatment Plan</label><br/>
+      <select class="form_details " id="treatmentplans" style="width:100%;height:35px" onchange="changeTreatmentPlan()">
+	  <option value='0'>--Select--</option>
+	   {{ for tp in tps: }}
+	       {{if (tp.id == tplanid):}}
+		 <option selected="selected" value={{=tp.id}}>{{=tp.treatmentplan}}</option>
+	       {{else:}}
+		 <option  value={{=tp.id}}>{{=tp.treatmentplan}}</option>
+	       {{pass}}
+	   {{pass}}
+       </select>         
+
+  </div>
+  
+  <div class="w3-half" style='line-height:1.5;'>
+    <label>Member</label><br/>
+   <div id='tplandiv'>  
+              <select class="form_details " id="patients" onchange="changeMembers()">
+
+		    <option value='0'>--Select--</option>
+    
+		</select>
+  </div>	
+
+  </div>
+</div>
+
+
+
+<div class="w3-row-padding  ">
+  <div class="w3-half" style='line-height:1.5;'>
+    <label>Payment Date</label><br/>
+    {{=formA.custom.widget.paymentdate}}
+  </div>
+  <div class="w3-half" style='line-height:1.5;' >
+    <label>Amount</label><br/>
+    {{=formA.custom.widget.amount}}
+  </div>
+</div>
+
+<div class="w3-row-padding  ">
+  <div class="w3-half" style='line-height:1.5;'>
+    <label>Payment Type</label><br/>
+    {{=formA.custom.widget.paymenttype}}
+  </div>
+  <div class="w3-half" style='line-height:1.5;'>
+    <label>Payment Mode</label><br/>
+  {{=formA.custom.widget.paymentmode}}
+  </div>
+</div>
+
+
+
+
+
+<div class="w3-row-padding  ">
+<div class="w3-container w3-full">
+  <label>Notes</label><br/>
+   {{=formA.custom.widget.notes}}
+</div>    
+</div>  
+
+<div class="w3-container w3-padding-0 w3-hide">
+{{=formA.custom.submit}}
+</div>
+
+<div class="w3-container w3-padding-4">
+<div class="w3-bar">
+  <a href="{{=returnurl}}" class="w3-button w3-left  w3-green" style="height:40px;width:20%">Cancel</a>
+  
+  <button class="w3-button w3-right w3-black" style="height:40px;width:20%"><i class="fa fa-save w3-margin-right"></i>Click to Save</button> 
+</div>
+</div>
+
+{{=formA.custom.end}}
+<br/>
+
+
+<script>
+
+
+jQuery(document).ready(function(){
+<!--alert(smsfile)-->
+var tpopts = document.getElementById("treatmentplans");
+var tp = tpopts.options[tpopts.selectedIndex].value;
+var x = document.getElementById("payment_treatmentplan");
+    x.value = tp;
+
+    ajax('{{=URL('payment','members')}}', ['treatmentplan'], 'tplandiv');
+
+});
+
+
+function changeTreatmentPlan(){
+
+
+var tpopts = document.getElementById("treatmentplans");
+var tp = tpopts.options[tpopts.selectedIndex].value;
+var x = document.getElementById("payment_treatmentplan");
+    x.value = tp;
+
+    ajax('{{=URL('payment','members')}}', ['treatmentplan'], 'tplandiv');
+
+
+
+};
+
+function changeMembers(){
+
+
+var ppopts = document.getElementById("members");
+var pp = ppopts.options[ppopts.selectedIndex].value;
+
+var x = document.getElementById("payment_patientmember");
+    x.value = pp;
+    
+   
+};
+</script>

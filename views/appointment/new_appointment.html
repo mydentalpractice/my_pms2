@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+
+<!--[if IE 8]> <html lang="en" class="ie8 no-js"> <![endif]-->
+<!--[if IE 9]> <html lang="en" class="ie9 no-js"> <![endif]-->
+<!--[if !IE]><!-->
+<html lang="en">
+    <!--<![endif]-->
+    <!-- BEGIN HEAD -->
+
+    <head>
+        <meta charset="utf-8" />
+        <title>My Dental Plan | Appoitment</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta content="width=device-width, initial-scale=1" name="viewport" />
+        <meta content="" name="description" />
+        <meta content="" name="author" />
+	
+	{{include 'cssstaticfiles.html'}}       
+        {{include 'loader.html'}}
+        
+        <script src="{{=URL('static','js/jstz.js')}}"></script>
+        {{import pytz}}
+        {{from pytz import timezone}}	
+	
+	<script type="text/javascript"><!--
+	 // These variables are used by the web2py_ajax_init function in web2py_ajax.js (which is loaded below).
+	 var w2p_ajax_confirm_message = "{{=T('Are you sure you want to delete this object?')}}";
+	 var w2p_ajax_disable_with_message = "{{=T('Working...')}}";
+	 var w2p_ajax_date_format = "{{=T('%d/%m/%Y')}}";
+	 var w2p_ajax_datetime_format = "{{=T('%d/%m/%Y %H:%M:%S')}}";
+	 var ajax_error_500 = '{{=T.M('An error occured, please [[reload %s]] the page') % URL(args=request.args, vars=request.get_vars) }}'
+	 </script>
+	{{
+	    response.include_meta()
+	    response.include_files()
+	    
+	    from datetime import datetime
+	}}
+	
+	<style>
+	.calendar thead {}
+	.calendar thead tr, .calendar thead .headrow {
+	  background-color: #eee;
+	  color: #000000;
+	}
+	</style>        
+        
+      
+</head>
+<!-- END HEAD -->
+ 
+{{if(source == 'home'):}}
+    <body class="page-content-white">
+        <div class="page-wrapper">
+      
+            <!-- BEGIN HEADER & CONTENT DIVIDER -->
+           <div class="flash alert" style="align:center;color:white;background:black;">{{=response.flash or ''}}</div>
+	    <div class="flash alert" style="align:center;color:white;background:black;">{{=session.flash or ''}}</div>
+            <!-- END HEADER & CONTENT DIVIDER -->
+            <!-- BEGIN CONTAINER -->
+            <div >
+
+                <!-- BEGIN CONTENT -->
+                <div >
+                    <!-- BEGIN CONTENT BODY -->
+                    <div >
+                       
+                        <div class="row">
+                            <div class="col-md-12" style="margin: 0px 0px;">
+{{pass}}
+
+{{=form2.custom.begin}}
+<style>
+#suggestions2 { position: relative;z-index:3000;}
+.suggestions2 { background: white; border: solid 1px #55A6C8; }
+.suggestions2 DIV { padding: 2px 4px 2px 4px; }
+</style>
+
+<form enctype="multipart/form-data" action="" method="post">
+
+
+   {{=form2.hidden_fields()}}
+
+     <div class="modal fade in" id="myModal1" role="dialog" style="display: block; padding-right: 16px;">
+       <div class="modal-dialog">
+    
+      <!-- Modal content-->
+      <div class="modal-content">
+	<div class="modal-header">
+	  <a href="{{=returnurl}}" type="button" class="close btn" data-dismiss="modal">X</a>
+	  <h4 class="modal-title"> New Appointment</h4>
+	</div>
+	
+	  
+	<div class="modal-body" style=" padding: 0px;">
+         <div class="col-md-12"     style="margin-top: 31px !important;">
+            <h4 class="m_title">Look up Member for Appointment:</h4>
+                <div class="form-group">
+                   <div class="input-group"  style="width:100%">
+		    {{=form2.custom.widget.patientmember}}
+                    </div>
+                </div>
+		<div id="hide"  style="display:none">
+		    <p id="phide">Click <strong>X</strong> to close the Patient List after selection</p>
+		</div>
+                <div style="position: absolute;" id="suggestions2"
+                    class="suggestions2">
+                </div>
+          </div>
+	
+	  <div id = "cell1">
+	    <div class="col-md-6" >
+	       <h4 class="m_title">Cell:</h4>
+		   <div class="form-group">
+		      <div class="input-group"  style="width:100%">
+		       {{=form2.custom.widget.cell}}
+		       </div>
+		   </div>
+	     </div>
+	  </div>
+	
+         <div class="col-md-6" >
+            <h4 class="m_title">Attending Doctor:</h4>
+                <div class="form-group">
+                   <div class="input-group"  style="width:100%">
+		    {{=form2.custom.widget.doctor}}
+                    </div>
+                </div>
+          </div>
+	  
+         <div class="col-md-12" >
+            <h4 class="m_title">Complaint:</h4>
+                <div class="form-group">
+                   <div class="input-group"  style="width:100%">
+		    {{=form2.custom.widget.title}}
+                    </div>
+                </div>
+          </div>	
+	
+	
+          <div class="col-md-6" >
+            <h4 class="m_title">Start Date Time</h4>
+                <div class="form-group">
+                  <div class="input-group date form_datetime form_datetime bs-datetime">
+                                                            <input type="text" size="16" class="form-control">
+                                                            <span class="input-group-addon">
+							    <div style="display:none">
+							     {{=form2.custom.widget.start_date}}
+							     </div>
+                                                                <button class="btn default date-set" type="button">
+                                                                    <i class="fa fa-calendar"></i>
+                                                                </button>
+                                                            </span>
+                                                        </div>
+                </div>
+          </div>
+	
+	    <div class="col-md-6" >
+            <h4 class="m_title">Duration:</h4>
+                <div class="form-group">
+                   <div class="input-group"  style="width:100%">
+		    {{=form2.custom.widget.duration}}
+                    </div>
+                </div>
+          </div>
+	  
+	<div class="col-md-12" >
+            <h4 class="m_title">Appointment Notes</h4>
+                <div class="form-group">
+                   <div class="input-group">
+                      {{=form2.custom.widget.description}}
+                    </div>
+                </div>
+          </div>	  
+	
+	</div>
+
+	<div class="modal-footer">
+	     <div class="col-sm-12">
+	     
+		 <a id="APTCAN" onclick="loader(this.id)"  href="{{=returnurl}}"  type="button" class="btn green">Cancel <i class="fa fa-spinner fa-spin" id="loaderDIVAPTCAN" style="display:none"></i></a>
+	     	 <button id="APTSAVE" onclick="loader(this.id)"  class="btn green" id="apptsave" type="submit">Click to Save <i class="fa fa-spinner fa-spin" id="loaderDIVAPTSAVE" style="display:none"></i></button>
+		  		 
+		 </div>
+	  
+
+	  </div>
+      </div>
+      
+    </div>
+  </div>      
+  
+
+
+<div style="display:none">
+ {{=form2.custom.widget.end_date}}	
+{{=form2.custom.widget.location}}
+     {{=form2.custom.submit}}
+     {{=form2.custom.widget.memberid}}
+     {{=form2.custom.widget.patientid}}
+     {{=form2.custom.widget.xpatientmember}}
+     {{=form2.custom.widget.xfullname}}
+     {{=form2.custom.widget.xmemberid}}
+     
+  </div>
+  </form>
+{{=form2.custom.end}}
+                            </div>
+                        </div>
+                    </div>
+                    <!-- END CONTENT BODY -->
+                </div>
+                <!-- END CONTENT -->
+
+
+
+        {{include 'jsstaticfiles.html'}}  
+	
+        <script>
+	$(document).ready(function()
+	{
+	    $("#hide").hide()
+	    $("#phide").click(function(){
+		$("#hide").hide();
+		 $("#suggestions2").hide();
+	    });   
+	    
+	    $("#suggestions2") .click(function(){
+	      
+		
+		$("#hide").hide()
+		x= $("#no_table_patientmember").text();
+		
+		
+		$("#no_table_xpatientmember").val(x);
+		
+		
+		var strarr = x.split(":")
+	
+	
+		$("#no_table_patientmember").val(strarr[0])
+	      
+		ajax('{{=URL('appointment', 'getcell')}}',  ['patientmember','xmemberid','xpatientmember'], 'cell1')
+	      
+	      
+		$("#suggestions2").hide();
+		
+		 
+		
+	    
+	    });
+	    
+	    
+	    
+	})
+	
+	jQuery("#no_table_patientmember").keyup(function(){
+	
+	       
+	       $("#suggestions2").show();
+	       var x = $('#no_table_patientmember').val();
+	      
+	       $("#no_table_xpatientmember").val(x);        
+	       ajax('{{=URL('admin', 'newpatient_selector',vars=dict(providerid=providerid))}}' +"&patientmember=" + x, [x,'xmemberid'], 'suggestions2')
+	       $("#hide").show()
+		
+	       
+	});	
+	
+	
+	
+		
+	    
+        </script>
+    </body>
+    
+
+</html>
+
+
+

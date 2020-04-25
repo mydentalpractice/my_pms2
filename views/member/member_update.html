@@ -1,0 +1,241 @@
+{{extend 'pms2_layoutw4.html'}}
+
+{{=formA.custom.begin}}
+<!---START-->                        
+                        <div class="row">
+                        
+                            <div class="col-md-12">
+                                <!-- BEGIN EXAMPLE TABLE PORTLET-->
+                                <div class="portlet light bordered">
+
+                                    <div class="portlet-title">
+                                        <div class="caption font-white">
+                                            <i class="fa fa-list" style="color:#fff"></i>
+                                            <span class="caption-subject bold uppercase"> Member Information</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-md-12">
+                                        <!-- BEGIN Portlet PORTLET Member Profile-->
+                                        <div class="col-sm-12 md_r">
+                                            <div class="portlet-title mem_details">
+                                                <div class="caption">
+                                                    <i class="fa fa-user"></i>&nbsp;Member Profile 
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="portlet-body">
+                                            <!--row1-->
+                                                <div class="col-md-6">
+                                                     <h4 class="m_title">Member ID</h4>
+                                                     <p>{{=formA.custom.widget.patientmember}}</p>
+                                                </div>
+                                                
+                                                <div class="col-md-6">
+                                                     <h4 class="m_title">Employee ID</h4>
+                                                     <p>{{=formA.custom.widget.groupref}}</p>
+                                                </div>
+                                            <!--row1-->
+                                            
+                                            <!--row2-->
+                                                <div class="col-md-6">
+                                                     <h4 class="m_title">Title</h4>
+                                                     <p>{{=formA.custom.widget.title}}</p>
+                                                </div>
+                                            
+                                                 <div class="col-md-6">
+                                                     <h4 class="m_title">First Name</h4>
+                                                      <p>{{=formA.custom.widget.fname}}</p>
+                                                </div>
+                                                <div class="col-md-6">
+                                                     <h4 class="m_title">Middle Name</h4>
+                                                      <p>---</p>
+                                               </div>
+                                            <!--row2-->
+                                             <!--row3-->
+                                                 <div class="col-md-6">
+                                                     <h4 class="m_title">Last Name</h4>
+                                                     <p>{{=formA.custom.widget.lname}}</p>
+                                                 </div>
+                                                <div class="col-md-6">
+                                                     <h4 class="m_title">Status</h4>
+                                                     <p>{{=formA.custom.widget.status}}</p>
+                                                     
+    
+                                                </div>
+                                            <!--row3-->  
+                                            <!--row4-->
+                                                 <div class="col-md-6">
+                                                     <h4 class="m_title">DOB</h4>
+                                                     <p>{{=formA.custom.widget.dob}}</p>
+    
+                                                </div>
+                                                <div class="col-md-6">
+                                                     <h4 class="m_title">Gender</h4>
+                                                     <p>{{=formA.custom.widget.gender}}</p>
+                                                </div>
+                                            <!--row4--> 
+                                            <!--row5-->
+                                                 <div class="col-md-6">
+                                                     <h4 class="m_title">Newly Assigned Member {{=formA.custom.widget.newmember}}</h4>
+                                                </div>
+                                                <div class="col-md-6">
+                                                     <h4 class="m_title">Free Treatment {{=formA.custom.widget.freetreatment}}</h4>
+                                                </div>
+                                            <!--row5-->   
+                                            </div>
+                                        </div>
+                                        <!-- END Portlet PORTLET  Member Profile-->
+                                        
+                                        <!-- BEGIN Portlet PORTLET  Plan Details-->
+                                        <div class="col-sm-12 md_r">
+                                            <div class="portlet-title mem_details">
+                                                <div class="caption">
+                                                    <i class="fa fa-calendar">&nbsp;</i>Plan Details </div>
+                                                
+                                            </div>
+                                            <div class="portlet-body">
+                                            <!--row1-->
+                                                <div class="col-md-6">
+                                                     <h4 class="m_title">Company</h4>
+                                                     <p>{{=formA.custom.widget.company}}</p>
+    
+                                                </div>
+                                                <div class="col-md-6">
+                                                     <h4 class="m_title">Plan</h4>
+                                                     <p>{{=formA.custom.widget.hmoplan}}</p>
+    
+    
+                                                </div>
+                                            <!--row1-->
+                                            <!--row2-->
+                                                 <div class="col-md-6">
+                                                     <h4 class="m_title">Enrollment Date</h4>
+                                                     <p>{{=formA.custom.widget.enrollmentdate}}</p>
+    
+                                                </div>
+                                                <div class="col-md-6">
+                                                     <h4 class="m_title">Premium Due Date</h4>
+                                                     <p>{{=formA.custom.widget.duedate}}</p>
+                                                     
+    
+                                                </div>
+                                            <!--row2-->
+                                             <!--row3-->
+                                                 <div class="col-md-6">
+                                                     <h4 class="m_title">Premium Start Date</h4>
+                                                     <p>{{=formA.custom.widget.premstartdt}}</p>
+    
+                                                </div>
+                                                <div class="col-md-6">
+                                                     <h4 class="m_title">Premium End Date</h4>
+                                                     <p>{{=formA.custom.widget.premenddt}}</p>
+                                                     
+    
+                                                </div>
+                                            <!--row3-->  
+                                            
+                                            </div>
+                                        </div>
+                                        <!-- END Portlet PORTLET  Plan Details-->
+                                        
+                                        <!-- BEGIN Portlet PORTLET Contact Details-->
+                                        <div class="col-sm-12 md_r">
+                                            <div class="portlet-title mem_details">
+                                                <div class="caption">
+                                                    <i class="fa fa-phone"> &nbsp;</i>Contact Details </div>
+                                                
+                                            </div>
+                                            <div class="portlet-body">
+                                            <!--row1-->
+                                                <div class="col-md-6">
+                                                     <h4 class="m_title">Address1</h4>
+                                                     <p>{{=formA.custom.widget.address1}}</p>
+    
+                                                </div>
+                                                <div class="col-md-6">
+                                                     <h4 class="m_title">Address2</h4>
+                                                     <p>{{=formA.custom.widget.address2}}</p>
+    
+    
+                                                </div>
+                                            <!--row1-->
+                                            <!--row2-->
+                                                 <div class="col-md-6">
+                                                     <h4 class="m_title">Address3</h4>
+                                                     <p>{{=formA.custom.widget.address3}}</p>
+    
+                                                </div>
+                                                <div class="col-md-6">
+                                                     <h4 class="m_title">City</h4>
+                                                     <p>{{=formA.custom.widget.city}}</p>
+                                                     
+    
+                                                </div>
+                                            <!--row2-->
+                                             <!--row3-->
+                                                 <div class="col-md-6">
+                                                     <h4 class="m_title">State</h4>
+                                                     <p>{{=formA.custom.widget.st}}</p>
+    
+                                                </div>
+                                                <div class="col-md-6">
+                                                     <h4 class="m_title">Pin</h4>
+                                                     <p>{{=formA.custom.widget.pin}}</p>
+                                                     
+    
+                                                </div>
+                                            <!--row3-->  
+                                            <!--row4-->
+                                                 <div class="col-md-6">
+                                                     <h4 class="m_title">Region</h4>
+                                                     <p>{{=formA.custom.widget.groupregion}}</p>
+    
+                                                </div>
+                                                <div class="col-md-6">
+                                                     <h4 class="m_title">Email</h4>
+                                                     <p>{{=formA.custom.widget.email}}</p>
+                                                     
+    
+                                                </div>
+                                            <!--row4--> 
+                                            <!--row5-->
+                                                 <div class="col-md-6">
+                                                     <h4 class="m_title">Cell</h4>
+                                                     <p>{{=formA.custom.widget.cell}}</p>
+                                                     
+    
+                                                </div>
+                                                <div class="col-md-6">
+                                                     <h4 class="m_title">Telephone </h4>
+                                                     <p>{{=formA.custom.widget.telephone}}</p>
+                                                </div>
+                                            <!--row5-->   
+                                            </div>
+                                        </div>
+                                        <!-- END Portlet PORTLET Contact Detail-->
+    
+                                         <!-- BEGIN Portlet PORTLET Dependants-->
+                                        <div class="col-sm-12 md_r">
+                                            <div class="portlet-title mem_details">
+                                                <div class="caption">
+                                                    <i class="fa fa-users"> &nbsp;</i>Dependants </div>
+                                            </div>
+                                            
+                                             <div class="portlet-body">
+                                                <div class="table-responsive">
+                                                 {{=formB}}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!-- END Portlet PORTLET Dependants-->
+                                    </div>
+
+                                </div>
+                                <!-- END EXAMPLE TABLE PORTLET-->
+
+                            </div>
+                        </div> <!---ROW-->
+{{=formA.custom.end}}                        
+<!-------------------------------------------------------------->                        
+    

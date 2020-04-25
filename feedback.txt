@@ -1,0 +1,107 @@
+1. SMS Confirmation on Appointment created
+   Well Cell Number - 
+
+[IB]: Not Implemented. TBD.  I would recommend in next release
+
+2. Name Click opens Case Sheet.  and any entry on the Appointment is reflected in the case sheet.
+   Last saved information in case sheet is not editable
+[IB]: Not Implemented. Case Report has been implemented, but Appointment comments are still not refleced.
+
+
+
+
+
+4. Treatment will have multiple procedures (Done)
+[IB]: Done. This took a couple of days to implement
+
+5. Prescription add drug, (next version)
+[IB]: Not Implemented - In-line addition of drugs during prescription can be implemented in next release. 
+
+6. Email x-rays (next version)
+
+[IB]: Not implemented. Medium Priority. Can be implemented in next release 
+
+7. Member - highlight expired premiums  (next vrsion)
+[IB]: Not implemented. Medium Priority. Can be implemented in next release 
+
+Below are the points observed and after discussion with Dr. Anand , he mentioned all these points should be fixed before we go ahead for release.
+
+1.       Force import Specialists , Roles and Medicines to all providers by default (Find CSV Attachments) 
+[IB]: Done
+
+
+2.       From Walkin Page, Please remove Free Cleaning & Consultation and during treatment also remove free procedure. (Done)
+[IB]: I have implemented it but this features goes back-and-forth.
+
+
+3.       During the registration and Adding of doctor there is a filed called Registration number, that label RE-Name it as State Dental Council registration number. (Done)
+[IB]: Done
+
+
+4.       Outer Scroll code should not appear kindly replace the single line of code to u by Raghu and need to be pasted in all HTML pages, then Outer scroll will disappear and only inner scroll will appear.  (UI)
+[IB]: Please ask Creative designer to help us
+
+5.      In the Treatment process add the file plan Opted
+[IB]: Do not understand. More explanation needed.
+
+6.      Before starting the treatment for one patients, his chief complaints page i have sent it to you , kindly implement  .
+[IB]: Done
+
+
+7.       In the Dashboard, 3 boxes under that Quick appointment + mark i.e for Quick New Appointment ,  Under Treatment + i.e for adding a quick treatment, is not working.
+[IB]: Done
+
+
+8.      Make the click event on the name of the customer instead of going and clicking on EDIT option every time. 
+[IB]: To be implemented. Low Priority. Whether you click on the name or the button in the same row is not a problem
+
+9.     Under Prescription module and under Prescribing drop down even the Staff names are also populating  
+[IB]: Can you please explain. I am not able to reproduce the error
+
+
+10.    In the payment module, change the spelling of Cheque.(Goto Payments , select some member , Once the search member info is displayed, click on New Payment and on left side u will find the drop down Payment Mode : (Find attachment)  ) (Done)
+[IB]: Done. BTW - Check and Cheque are valid words as per Webster English dictionary
+
+11.  We see to that when we start the New Treatment for the MDP Member/ Walkin member and i want to treat the member i.e RCT but it will not allow me to treat RCT and select this procedure untill and unless i finish FREE bees treatment .
+[IB]: Done - I think I have resovled this by allowing addition of multiple procedures for single treatment.
+
+12.   Change the calendar (to new UI) in Walkin Patient page DOB Filed. (?)
+[IB]: Please explain?
+
+13.   When u do one treatment for a patient and want to do another treatment then every time the provider need to go to Treatment , Press New Treatment and select Patient , so its a long procedure, Instead in the Treatment tab, give  New Treatment button. (Done)
+[IB]: I think I have resovled this by allowing addition of multiple procedures for single treatment.
+
+14.   Make the Drug filed as Text box, on entering of the name of the Medicine , if its auto populates from the Drop down let it select or it should allow the provider to write the medicine name .
+[IB]: Not Implemented. TBD in next release
+
+15.  When a Patients enter the click he may get treated for RCT, Crowns, pacing and many more treatments at one go, so  every time the provider cannot sit and select and create New  Treatment  every time, so it  should allow to select multiple treatments and then allow to SAVE.(Done)
+[IB]: Done - I think I have resovled this by allowing addition of multiple procedures for single treatment.
+
+16.  While doing any New Treatment , in the Top bar, it should fetch and display the Patient name and Member ID .
+[IB]: Done
+
+17.  By Default , in the places like Book a appointment, Prescription, Prescribing Dr, it should auto select the Default MDP Provider name itself if they want to change let them go ahead and change the doctor,.
+[IB]: Done in Treatment. Working in other places
+
+18.  State Dental Council registration number. is not getting displayed in the Prescription Print out .
+[IB]: Not implemented
+
+19.  In the Consent form printout their is the filed for State Dental Council registration number. i.e 1 on the footer and another and bottom left after Doctor signature, both the fields are one but the values are varying while taking the printout , kindly find the attached Consent form for your reference.(The top one is of the owner dentist, the bottom one is for the attending doctor)
+[IB]: The top one is for Practice Owner's Registration Number and the lower left is for Attending Doctor's Registration Number
+
+
+20.  In the Walkin Patients Module their is no Validation for Cell number and Email Id, these two fields are the most important , it is talking all the junk entry and allowing to save, these are only two modes of contacting the person and it is very important to get the valid data of these fields.(Done. We can only check the format validation and not the content.  There is no format validation on cell number)
+[IB]: Done. Email validation is done for the syntax and not whether it is a valid email address. Cell number is validated for not entering anything, but not the correctness of the number. I feel that this is not correct as it means that all the patients will have either email or cell or both
+
+21.   When you enter the Dental Procedure and try to select one, after dental Procedures name and pricing , there are many other values displayed what are these values actually ? (Kindly find the attached image i.e 21 and update me )  (Done)
+[IB]: Done
+
+22.   Somewhere in the software i.e on bottom left or right you need to mention the Software Version number to keep a track
+[IB]: (We are not maintaining version number for now till things are finalized)
+
+
+23.  In the Treatment process add the file plan Opted and during Treatment only those procedures should be popped out which are listed in that procedure. 
+[IB]: (??? - We are listing procedures from 'PREV403' or 'PREM103' based on the plan. In case of WALKIN, I have defaulted a PREMWALKIN Plan which is same as PREV03.)
+
+
+Login with p0014 and p0014 you can check with the member : NAMAN DONELA ( BLRDPS03710003 ) , member is enrolled under preventive plan, when i tried to do a new treatment Ex: Orthodontic retainer which is not listed in the preventive plan , its allowing me for this which is against the requirement , so kindly check this.

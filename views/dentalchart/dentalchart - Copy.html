@@ -1,0 +1,129 @@
+{{extend 'pms2_layoutw3.html'}}
+
+<script type="text/javascript" src="../static/wspaint/lib/jquery.1.10.2.min.js"></script>
+<!-- jQuery UI -->
+<script type="text/javascript" src="../static/wspaint/lib/jquery.ui.core.1.10.3.min.js"></script>
+<script type="text/javascript" src="../static/wspaint/lib/jquery.ui.widget.1.10.3.min.js"></script>
+<script type="text/javascript" src="../static/wspaint/lib/jquery.ui.mouse.1.10.3.min.js"></script>
+<script type="text/javascript" src="../static/wspaint/lib/jquery.ui.draggable.1.10.3.min.js"></script>
+
+<!-- wColorPicker -->
+<link rel="Stylesheet" type="text/css" href="../static/wspaint/lib/wColorPicker.min.css" />
+<script type="text/javascript" src="../static/wspaint/lib/wColorPicker.min.js"></script>
+
+<!-- wPaint -->
+<link rel="Stylesheet" type="text/css" href="../static/wspaint/wPaint.min.css" />
+<script type="text/javascript" src="../static/wspaint/wPaint.min.js"></script>
+<script type="text/javascript" src="../static/wspaint/plugins/main/wPaint.menu.main.min.js"></script>
+<script type="text/javascript" src="../static/wspaint/plugins/text/wPaint.menu.text.min.js"></script>
+<script type="text/javascript" src="../static/wspaint/plugins/shapes/wPaint.menu.main.shapes.min.js"></script>
+<script type="text/javascript" src="../static/wspaint/plugins/file/wPaint.menu.main.file.min.js"></script>
+
+
+
+<header class="w3-container w3-dark-grey">
+    <h5>Dental Chart for  {{=patientname}}&nbsp;&nbsp;&nbsp;&nbsp;Members: {{=membername}}</h5>
+</header>
+
+<div class="w3-hide">
+<input id="chartfile" value={{=chartfile}}></input>
+<input id="destchartfile" value={{=destchartfile}}></input>
+</div>
+
+
+<!--<div class="w3-row-padding  w3-medium w3-center w3-hide">-->
+<!--<img   id="chart" src={{=charturl}} class="w3-image" style="width:50%"><br/><br/>-->
+<!--</div>-->
+
+<div class="w3-row-padding  w3-medium content-box" >
+ </div>
+ <div class="w3-container"
+    <div class="w3-half">YYY</div>
+    <!--<div class="w3-row-padding  w3-medium content-box w3-half" id="wPaint" style="position:absolute; width:800px; height:600px;  background-color:#ffffff; margin:70px auto 20px auto;"></div>-->
+
+    <!--<center style="margin-bottom: 50px;">-->
+      <!--<input type="button" value="toggle menu" onclick="console.log($('#wPaint').wPaint('menuOrientation')); $('#wPaint').wPaint('menuOrientation', $('#wPaint').wPaint('menuOrientation') === 'vertical' ? 'horizontal' : 'vertical');"/>-->
+    <!--</center>-->
+    <!--<div id="wPaint-img" ></div>-->
+    
+    <div class="w3-half">XXXX</div>
+ </div>  
+  
+     
+
+
+<!--<script type="text/javascript">-->
+
+ <!--var images = [-->
+          <!--'..static/wspaint/test/uploads/test1.png',-->
+        <!--];-->
+
+        <!--function saveImg(image) {-->
+          <!--var _this = this;-->
+          <!--var myCanvas = this.canvas;          -->
+          <!--var ximage = myCanvas.toDataURL('image/png');-->
+          <!--document.getElementById('chart').src = ximage;-->
+          <!--ximage = ximage.replace('data:image/png;base64,', '');-->
+          <!--var chartfile = document.getElementById('chartfile').value-->
+          <!--var destchartfile = document.getElementById('destchartfile').value-->
+          <!--$.ajax({-->
+            <!--type: 'POST',-->
+            <!--url: '/my_pms2/dentalchart/saveImage',-->
+            <!--data: {image: ximage,chartfile:chartfile,destchartfile:destchartfile},-->
+            <!--success: function (resp) {-->
+
+              <!--// internal function for displaying status messages in the canvas-->
+              <!--_this._displayStatus('Image saved successfully');-->
+
+              <!--// doesn't have to be json, can be anything-->
+              <!--// returned from server after upload as long-->
+              <!--// as it contains the path to the image url-->
+              <!--// or a base64 encoded png, either will work-->
+              <!--resp = $.parseJSON(resp);-->
+
+              <!--// update images array / object or whatever-->
+              <!--// is being used to keep track of the images-->
+              <!--// can store path or base64 here (but path is better since it's much smaller)-->
+              <!--images.push(resp.img);-->
+
+              <!--// do something with the image-->
+              <!--$('#wPaint-img').attr('src', image);-->
+            <!--}-->
+          <!--});-->
+        <!--}-->
+
+        <!--function loadImgBg () {-->
+
+          <!--// internal function for displaying background images modal-->
+          <!--// where images is an array of images (base64 or url path)-->
+          <!--// NOTE: that if you can't see the bg image changing it's probably-->
+          <!--// becasue the foregroud image is not transparent.-->
+          <!--this._showFileModal('bg', images);-->
+        <!--}-->
+
+        <!--function loadImgFg () {-->
+
+          <!--// internal function for displaying foreground images modal-->
+          <!--// where images is an array of images (base64 or url path)-->
+          <!--this._showFileModal('fg', images);-->
+        <!--}-->
+
+        <!--// init wPaint-->
+        <!--$('#wPaint').wPaint({-->
+          <!--menuOffsetLeft: 5,-->
+          <!--menuOffsetTop: -50,-->
+          <!--saveImg: saveImg,-->
+          <!--loadImgBg: loadImgBg,-->
+          <!--loadImgFg: loadImgFg,-->
+          <!--image: document.getElementById('chartfile').value-->
+          
+    
+        <!--});        -->
+       
+    <!--</script>  -->
+    
+		    
+
+
+      
+

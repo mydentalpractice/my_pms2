@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>PMS</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  
+ <link href="../static/assets.css/bootstrap-responsive.min.css" rel="stylesheet" />
+  <link href="../static/assets/css/styles.css" rel="stylesheet" />
+  <link href="../static/css/web2py.css" rel="stylesheet" />
+  <link href="../static/css/web2py_bootstrap.css" rel="stylesheet" />
+  <link href="../static/css/font-awesome.css" rel="stylesheet" />
+  
+    
+   {{include 'web2py_ajax.html'}}     
+  <style>
+  label {
+    display: inline-block;
+    max-width: 100%;
+    margin-bottom: 5px;
+    font-weight: 700;
+    font-size: 20px;
+}
+  </style>
+</head>
+<body>
+  
+  
+<div class="container">
+ <div class="row">
+ <div class="col-md-4">
+ <img src="https://www.mydentalplan.us/my_dentalplan/static/assets/img/logo-my-dental-plan_color.png" class="img-responsive">
+ </div>
+ <div class="col-md-8">
+ </div>
+ </div>
+</div>
+<br />
+<br />
+ <br />
+  <br />
+   <br />
+
+<div class="container">
+ <div class="row">
+ <div class="col-md-2">
+
+ </div>
+ <div class="col-md-8">
+
+ {{=form.custom.begin}}
+    <div class="form-group">
+      <label for="email">Enter Member ID:</label>
+       <table>
+       <tr>
+       <td>
+       {{=form.custom.widget.patientmember}}
+       </td>
+       <td>
+       <button type="submit" id="search" class="btn btn-primary btn-med" style="color: #fff;background-color: #286090;border-color: #286090;">Search</button>
+       </td>
+       </tr>
+       </table>
+       
+    </div>
+    <a href="{{=URL('admin', 'providerhome')}}" class="form-group"><i class="fa fa-home fa-fw"></i><b style="font-size:18px">Home</b></a><div class="container">
+    
+    
+ {{=form.custom.end}}
+
+ </div>
+ <div class="col-md-2">
+ </div>
+ </div>
+</div>
+</body>
+</html>
+

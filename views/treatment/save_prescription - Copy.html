@@ -1,0 +1,66 @@
+						    <form enctype="multipart/form-data" action="" method="post">
+                                                    <div class="col-sm-12 md_r">
+                                                        <div class="portlet-title mem_details">
+                                                            <div class="caption">
+                                                                <i class="fa fa-notepad"></i>&nbsp;Prescriptions </div>
+                                                            
+                                                        </div>
+                                                        <div class="portlet-body" style="padding:20px">
+                                                            <div class="col-md-4">
+                                                                   <div class="form-group">
+                                                                    <label class="m_title">Medicine Name</label>
+                                                                          <div class="input-group">
+                                                                                <input type="text" id="medicinename" name="medicinename" class="form-control" Value="" required=""> 
+                                                                          </div>
+                                                                   </div>
+                                                           </div> 
+                                                           <div class="col-md-4">
+                                                                   <div class="form-group">
+                                                                    <label class="m_title">Medicine Code</label>
+                                                                          <div class="input-group">
+                                                                                <input type="text" class="form-control"  id="medicinecode" name="medicinecode"  Value="" required=""> 
+                                                                          </div>
+                                                                   </div>
+                                                           </div>
+                                                           <div class="col-md-4">
+                                                                   <div class="form-group">
+                                                                    <label class="m_title">Medicine Dosage</label>
+                                                                          <div class="input-group">
+                                                                                <input type="text" class="form-control" id="medicinedosage" name="medicinedosage"  Value="" required=""> 
+                                                                          </div>
+                                                                   </div>
+                                                           </div>
+                                                            <div class="col-md-4">
+                                                                   <div class="form-group">
+                                                                    <label class="m_title">Medicine Frequency</label>
+                                                                          <div class="input-group">
+                                                                                <input type="text" class="form-control" id="medicinefreq" name="medicinefreq"  Value="" required=""> 
+                                                                          </div>
+                                                                   </div>
+                                                           </div>
+                                                            <div class="col-md-4">
+                                                                   <div class="form-group">
+                                                                    <label class="m_title">Medicine Quantity</label>
+                                                                          <div class="input-group">
+                                                                                <input type="text" class="form-control" id="medicineqty" name="medicineqty"   Value="" required=""> 
+                                                                          </div>
+                                                                   </div>
+                                                           </div>
+                                                            <div class="col-md-12" style="margin-bottom:30px">
+                                                                    <label class="m_title">Remarks</label>
+                                                                    <textarea class="form-control" id="medicinermrks" name="medicinermrks"  rows="3" placeholder=""></textarea>
+                                                            </div>
+							    
+                                                            <div class="col-md-12" style="margin-bottom:30px">
+								{{=presgrid}}
+                                                            </div>
+							    
+                                                            <div class="col-md-12" style="margin-bottom:30px">
+								
+								<a class = "btn green" id="presSave" onClick="presSave()">>Save</a>
+								<a id="presCancel" onClick="presCancel()">Cancel </a>
+                                                            </div>
+
+                                                        </div>
+						    </div>
+						    </form>

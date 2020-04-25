@@ -1,0 +1,1088 @@
+{{extend 'pms2_layoutw4.html'}}
+
+
+
+    
+{{
+
+#response.files.insert(0,URL('static','js/jquery.js'))
+#response.files.insert(2,URL('static','js/calendar.js'))
+#response.files.insert(3,URL('static','js/web2py.js'))
+
+
+from datetime import datetime
+}}
+
+
+
+
+<div id='cal'>
+<style>
+.fc-row .fc-bg {
+    z-index: 1;
+    border-left: 1px solid #d6d6d6;
+}
+.fc-axis span{color:#000 !important}
+.portlet.calendar .fc-button .fc-icon{color:#000 !important}
+.caption-subject .bold .uppercase{color: #000 !important;}
+.nav>li>a {padding: 3px 9px;}
+.nav-pills>li>a, .nav-tabs>li>a {font-size: 14px;}
+.portlet.calendar .fc-toolbar h2{margin-top: -65px;}
+.fc-view, .fc-view > table{top: -33px;}
+#suggestions { position: relative; }
+.suggestions { background: white;z-index: 50000 !important;height: 250px; overflow-y: auto;border-bottom:1px solid #eeeeee;}
+.suggestions DIV { padding: 2px 4px 2px 4px; }
+.m-portlet__head-text{margin: 0px 0px 14px 0px;font-size: 15px;color: #eda026;font-weight: 400;}
+.pat_details tr td{width: 100%;font-size:11px}
+label{font-size:14px}
+h5 {display: inline;}
+.gr{background-color: #28b779  !important;border-color: #28b779  !important;color: #fff;font-size: 12px;font-weight: 600;}
+.or{background-color: #ec871e !important;border-color: #ec871e !important;color: #fff;font-size: 12px;font-weight: 600;}
+.rd{background-color: #fff !important;border-color: #f44336 !important;color: #000;font-size: 12px;font-weight: 600;}
+
+.bl{background-color: #fff !important;border-color: #447bb2 !important;color: #fff;font-size: 12px;font-weight: 600;}
+.bl:hover{background-color: #447bb2 !important;border-color: #447bb2 !important;color: #fff !important;font-size: 9px;font-weight: 600;}
+.tit{display:inline;font-weight: 700;}
+.hi{display: none !important}
+hr{border-bottom: 1px solid #eda026;margin-bottom: 3px;margin-bottom: 3px;margin-top: -9px;}
+
+.m-portlet__cal{height: auto !important;overflow-y:hidden}
+        .calendar thead tr, .calendar thead .headrow {
+          background-color: #eee;
+          color: #000000;
+        }
+	.form-control{height: 31px;}
+.page-content-wrapper .page-content{margin-top: 13px !important;}
+	.page-header.navbar .menu-toggler.sidebar-toggler{margin-top: 76px !important;}
+        .docter{list-style-type:none;padding-top:8px;text-align:left;margin-top:8px;border:1px solid #eee;padding-left: 11px;}
+	.dp{padding-left:6px;font-size:12px}
+        .blue1{border-left:3px solid #160cd1; }
+        .red1{border-left:3px solid #c90047;}
+        .green1{border-left:3px solid #00ff42;}
+        .orange1{border-left:3px solid #ffc000;}
+        .lightgreen1{border-left:3px solid #c6ff00;}
+        .skyblue1{border-left:3px solid #00c6ff;}
+    
+    .dataTables_filter{float:right !important;}
+    .dataTables_filter input{width:377px !important;}
+    .scrolcont{height:100%;}
+    .ic{font-size: 12px;color: #000 !important; padding: 0px 0px;}
+</style>
+
+<script>
+	$(document).ready(function() {
+	
+	    $("#suggestions").show();
+		
+		$("#suggestions") .click(function(){
+		  
+		    x= $("#no_table_patientmember").val();
+	    
+		    
+		    $("#no_table_xpatientmember").val(x);
+		    
+	    
+		    $("#suggestions").hide();
+		    
+		
+		});
+		
+  
+		var date = new Date();
+		var d = date.getDate();
+		var m = date.getMonth();
+		var y = date.getFullYear();
+		
+		$('#xcalendar').fullCalendar({
+		
+      header:
+      {
+        left: '',
+        center: 'title',
+        right: 'month,agendaWeek,agendaDay'
+      },
+      defaultDate: '{{=defdate}}',
+      navLinks: true, // can click day/week names to navigate views
+      selectable: true,
+      selectHelper: true,
+      select: function(start, end) {
+      
+          
+
+	  <!--alert("Start = " + start.format() + " End = " + end.format());-->
+	 
+	 
+	
+        <!--var title = prompt('Event Title:');-->
+        <!--var eventData;-->
+        <!--if (title) {-->
+          <!--eventData = {-->
+            <!--title: title,-->
+            <!--start: start,-->
+            <!--end: end-->
+          <!--};-->
+          <!--$('#xcalendar').fullCalendar('renderEvent', eventData, true); // stick? = true-->
+        <!--}-->
+        $('#xcalendar').fullCalendar('unselect');
+		<!--alert("Event Data = " + eventData.title + " Start=" + eventData.start.format() + " End=" + eventData.end.format());-->
+      },
+	  eventClick: function(event) {
+	    <!--var m = $.fullCalendar.moment(event.end);-->
+		<!--if(event.end != null)-->
+			<!--alert("Event title: " + event.title + "UniqueID = " + event.uniqueid + " Start Date: " +  event.start.format() + "End Date =" + event.end.format());-->
+		<!--else-->
+			<!--alert("Event title: " + event.title + "UniqueID = " + event.uniqueid +  " Start Date: " +  event.start.format());-->
+		
+		
+		    
+		 <!--$('#modalTitle').html(event.title);-->
+		 <!--$('#modalBody').html(event.description);-->
+		 <!--$('#fullCalModal').modal();-->
+
+		$.post("{{=URL('appointment',"appointment_update")}}",
+			    {
+				apptid: event.uniqueid,
+				page: "1",
+				memberpage: "1",
+				providerid: providerid,
+				source:source
+				
+			    }
+			    );
+	  },
+	
+	  eventDrop: function(event,dayDelta,minuteDelta,allDay,revertFunc) {
+          <!--alert("Enter event drop")-->
+	  <!--if(event.end != null)-->
+	  <!--alert("Title = " + event.title + " Start = " + event.start.format() + "ID=" + event.uniqueid + " End = " + event.end.format())-->
+	  <!--else-->
+	  <!--alert("Title = " + event.title + " Start = " + event.start.format() + "ID=" + event.uniqueid  )-->
+	  var endtime = ""
+	  if(event.end != null)
+	    endtime = event.end.format()
+	  else
+	    endtime = ""
+	  
+	   if (!confirm("Are you sure about this change? SMS will be sent on confirmation")) {
+            revertFunc();
+          }  
+	
+	  $.post("{{=URL('admin',"appointment_drop")}}",
+	    {
+	        xuniqueid: event.uniqueid,
+		xtitle: event.title,
+		xstart: event.start.format(),
+		xend: endtime
+		
+		
+	    }
+	  
+	
+	);
+
+	 
+	  
+      },
+      eventAllow: function(dropLocation, draggedEvent) {
+         
+	  
+	  
+	  draggedEvent.start = $.fullCalendar.moment(dropLocation.start);
+	  return true;
+      },
+      editable: true,
+      eventLimit: true, // allow "more" link when too many events
+      events: [
+        {{for i,row in enumerate(rows):}}{{if i!=0:}},{{pass}}
+	    
+		
+		{{if((row.t_appointment.f_start_time >= datetime.strptime(start,'%Y-%m-%d %H:%M')) & (row.t_appointment.f_start_time <= datetime.strptime(end,'%Y-%m-%d %H:%M'))):}}
+		    {
+		       
+			{{if(row.t_appointment.blockappt == False):}}
+			title: '{{=row.t_appointment.f_patientname}}',
+			{{else:}}
+			title: 'Block:{{=row.t_appointment.f_title}}',
+			{{pass}}
+
+			allDay: false,
+			start: new Date('{{=row.t_appointment.f_start_time.strftime('%B %d, %Y %H:%M')}}'),
+			end: new Date('{{=row.t_appointment.f_end_time.strftime('%B %d, %Y %H:%M')}}'),
+			url: '{{=URL('appointment','appointment_update',vars=dict(apptid = row.t_appointment.id,page=page,memberpage=memberpage,providerid=providerid,source=source))}}','
+			color: '{{=row.doctor.color}}',
+			uniqueid: '{{=row.t_appointment.id}}'
+			
+			 
+		    
+		    }
+		{{else:}} 
+		    {
+			{{if(row.t_appointment.is_active == True):}}
+			      
+				{{if(row.t_appointment.blockappt == False):}}
+				title: '{{=row.t_appointment.f_patientname}}',
+				{{else:}}
+				title: 'Block:{{=row.t_appointment.f_title}}',
+				{{pass}}
+				allDay: false,
+				start: new Date('{{=row.t_appointment.f_start_time.strftime('%B %d, %Y %H:%M')}}'),
+				end: new Date('{{=row.t_appointment.f_end_time.strftime('%B %d, %Y %H:%M')}}'),
+				{{if(row.t_appointment.f_title == 'New'):}}
+					url: "{{=URL('appointment','appointment_create',vars=dict(page=1,providerid=providerid,memberid=memberid))}}",
+					color: '{{=row.doctor.color}}',
+					uniqueid: '{{=row.t_appointment.id}}'
+						
+				{{else:}}					
+					url: '{{=URL('appointment','appointment_update',vars=dict(apptid = row.t_appointment.id,page=page,memberpage=memberpage,providerid=providerid,source=source))}}',
+					color: '{{=row.doctor.color}}',
+					uniqueid: '{{=row.t_appointment.id}}'
+				{{pass}}
+			   
+			{{else:}}
+			    {{if(row.t_appointment.blockappt == False):}}
+			    title: '{{=row.t_appointment.f_patientname}}',
+			    {{else:}}
+			    title: 'Block:{{=row.t_appointment.f_title}}',
+			    {{pass}}
+			    allDay: false,
+			    start: new Date('{{=row.t_appointment.f_start_time.strftime('%B %d, %Y %H:%M')}}'),
+			    end: new Date('{{=row.t_appointment.f_end_time.strftime('%B %d, %Y %H:%M')}}'),
+			    url: '{{=URL('appointment','appointment_update', vars=dict(apptid = row.t_appointment.id,page=page,memberpage=memberpage,providerid=providerid,source=source))}}',
+			    color: '{{=row.doctor.color}}',
+			    uniqueid: '{{=row.t_appointment.id}}'
+			    
+			 {{pass}}
+		    
+		    }
+		{{pass}}
+	    {{pass}}
+      ]
+    });
+     $('#prev').on('click', function() {
+         $('#xcalendar').fullCalendar('prev');
+	var moment = $('#xcalendar').fullCalendar('getDate');
+	
+        ajax('{{=URL("appointment", "prevnextappt", vars=dict(action="prev",providerid=providerid))}}' + "&moment="+moment.format(), [] , 'cal');
+     
+  });
+		
+    $('#next').on('click', function() {
+       $('#xcalendar').fullCalendar('next'); // call method
+       var moment = $('#xcalendar').fullCalendar('getDate');
+       
+       ajax('{{=URL("appointment", "prevnextappt", vars=dict(action="next",providerid=providerid))}}' + "&moment="+moment.format(), [] , 'cal');
+	
+  });
+	});
+
+
+</script>
+
+
+<div class="row">
+    
+   <!--<p>-->
+    <!--<button id="prev" type="button" class="fc-prev-button fc-button fc-state-default fc-corner-left fc-corner-right"><span class="fc-icon fc-icon-left-single-arrow"></span></button>   -->
+    <!--<button id="next" type="button" class="fc-next-button fc-button fc-state-default fc-corner-left fc-corner-right"><span class="fc-icon fc-icon-right-single-arrow"></span></button>  -->
+   
+   <!--</p>-->
+   
+    {{=form.custom.begin}}
+    <div class="search-bar">
+        <div class="row" style="width:100%">
+            <div class="col-md-12" style="margin-bottom: 10px;">
+                <div class="input-group">
+		    <table>
+		    <tr>
+		    <td style="width:50%">
+			   {{=form.custom.widget.patientmember1}}
+		   
+		    </td>
+		    <td style="width=50%">
+	            <span class="input-group-btn" style="width:25%">
+                        <button id="SP" class="btn ivory bl" style="margin:0px 24px 0px 2px;" onClick="loader(this.id),searchPatient()" type="submit" ><span style="float: left;" class="ic">Patient Lookup</span><i class="fa fa-spinner fa-spin" id="loaderDIVSP" style="display:none"></i></button>&nbsp;
+                        <button id="NW" class="btn ivory bl" style="margin:0px 3px;" onClick="loader(this.id),newPatient()" type="submit" ><span style="float: left;" class="ic">New Walk-In</span><i class="fa fa-spinner fa-spin" id="loaderDIVNW" style="display:none"></i></button>
+                        <button id="NT" class="btn ivory bl" style="margin: 0px 3px;font-weight:600" onClick="loader(this.id),newTreatment()" type="submit"><span style="float: left;" class="ic">New Treatment</span><i class="fa fa-spinner fa-spin" id="loaderDIVNT" style="display:none"></i></button>
+                        <button id="NI" class="btn ivory bl" style="margin: 0px 3px;" onClick="loader(this.id),newImage()" type="submit"><span style="float: left;" class="ic">New Image </span><i class="fa fa-spinner fa-spin" id="loaderDIVNI" style="display:none"></i></button>
+                        <button id="NP" class="btn ivory bl" style="margin: 0px 3px;" onClick="loader(this.id),newPayment()" type="submit"><span style="float: left;" class="ic">New Payment</span><i class="fa fa-spinner fa-spin" id="loaderDIVNP" style="display:none"></i></button>
+                        <button id="RPT" class="btn ivory bl" style="margin: 0px 3px;" onClick="loader(this.id),newReport()" type="submit"><span style="float: left;" class="ic">Patient Report</span><i class="fa fa-spinner fa-spin" id="loaderDIVRPT" style="display:none"></i></button>
+			
+		    </span>
+		    </td>
+		    </tr>
+		    </table>
+		</div>
+                
+            </div>
+        </div>
+    </div>
+      <div id="hide" style="z-index:50000; ">
+	<p id="phide">Click <strong>X</strong> to close the Patient List after selection</p>
+    </div>
+    <div style="position: absolute;" id="suggestions" class="suggestions">
+  
+    </div>
+  
+
+    <div style="display:none;">
+	{{=form.custom.widget.xpatientmember1}}
+	{{=form.custom.submit}}
+	{{=form.custom.widget.xaction}}
+    </div>
+
+
+    {{=form.custom.end}} 
+ 
+    
+<div class="row">
+
+ <div class="col-sm-12" >        
+	<div class="col-sm-10">
+	<div class="m-portlet__cal">
+	  <div class="portlet light portlet-fit  calendar">
+				   
+                                    <!--<div class="portlet-title" style="border-bottom: 1px solid rgb(230, 230, 230); background:none">
+                                        <div class="caption">
+                                            <i class=" icon-layers font-green"></i>
+                                            <span class="caption-subject font-green  uppercase">Practice Name</span>
+                                            
+                                            
+                                            <span ><a href="javascript:;" id="xevent_add" class="btn green" data-toggle="modal" data-target="#myNewModal"><i class="fa fa-plus"></i> current.globalenv['db'] </a></span>
+                                        </div>
+                                    </div>-->
+				    <!-- 10092017 New Portlet-body code-->
+				    <div class="col-sm-10" style="padding-right: 0px;">
+      
+   
+   			    
+				    
+                                         <div class="m-portlet__cal">
+					 
+					    <button id="prev" onClick="loader(this.id)"  type="button" class="fc-prev-button fc-button fc-state-default fc-corner-left fc-corner-right"><span style="float: left;" class="ic"><span class="fc-icon fc-icon-left-single-arrow"></span></span><i class="fa fa-spinner fa-spin" id="loaderDIVprev" style="display:none"></i></button>   
+					    <button id="next" onClick="loader(this.id)"  type="button" class="fc-next-button fc-button fc-state-default fc-corner-left fc-corner-right"><span style="float: left;" class="ic"><span class="fc-icon fc-icon-right-single-arrow"></span></span><i class="fa fa-spinner fa-spin" id="loaderDIVnext" style="display:none"></i></button>  
+
+					 
+					    <h3 class="event-form-title margin-bottom-20" style="margin-top:80px"></h3>
+                                            
+                                                <div id="xcalendar" class="has-toolbar"> </div>
+						
+                                       
+                                         </div>
+                                    </div> 
+				       <div class="col-sm-2" style="padding-left: 0px;">
+				       <span class="ic"><a  href="{{=URL('appointment','new_appointment', vars=dict(providerid=providerid,returnurl=returnurl))}}"  id="event_add" class="btn bl ic"  style="padding: 5px 5px;margin: 18px 23px; background-color: #4CAF50;!important">New Appointment  </a></span>
+                                        <ul  class="docter">
+                                        
+					    <p class="caption-subject bold uppercase" style="margin: 0px 0px 20px 0px !important;font-size:14px !important">All Doctor's</p> 
+					    {{for i in xrange(0, len(docs),1): }}
+						<li class="dp" style="border-left:3px solid {{=docs[i][1]}};">{{=docs[i][0]}} ({{=docs[i][2]}})</li><br>
+					    {{pass}}
+                                        </ul>
+				  </div>	
+				  
+		
+				    <!--10092017 End of new  Portlet body code-->
+				    
+	  </div>
+	</div>
+	</div>
+	<div class="col-sm-2">
+	<div class="m-portlet m-portlet--full-height">
+	  <div class="m-portlet__head">
+        <div class="m-portlet__head-caption">
+            <div class="m-portlet__head-title">
+                <h3 class="m-portlet__head-text">
+                    Latest Appointment Lists
+                </h3>
+            </div>
+        </div>
+	
+        <div class="m-portlet__head-tools" style="border-bottom: 1px solid #eda026;margin-bottom: 3px;">
+           
+            <ul class="nav nav-pills nav-pills--brand m-nav-pills--align-right m-nav-pills--btn-pill m-nav-pills--btn-sm" style="margin-left:0px">
+	   
+                <li class="nav-item m-tabs__item active" >
+                    <a class="nav-link m-tabs__link active"   data-toggle="tab" href="#m_widget2_tab1_content"  aria-expanded="true" style="color: #000 !important;">
+                    Today
+                    </a>
+                </li>
+                <li class="nav-item m-tabs__item">
+                    <a class="nav-link m-tabs__link" data-toggle="tab" href="#m_widget2_tab2_content" role="tab" aria-expanded="false" style="color: #000 !important;">
+                    Week
+                    </a>
+                </li>
+                <li class="nav-item m-tabs__item">
+                    <a class="nav-link m-tabs__link " data-toggle="tab" href="#m_widget2_tab3_content" role="tab" aria-expanded="false" style="color: #000 !important;">
+                    Month
+                    </a>
+                </li>
+            </ul>
+	    
+        </div>
+    </div>
+    <div class="m-portlet__body" >
+        <div class="tab-content" >
+            <div class="tab-pane active" id="m_widget2_tab1_content" >
+		<div class="m-widget2" >
+		<div class="m-widget2_desc" >
+
+		    
+		    {{for tappt in dailyappts:}}
+		    <table class="pat_details">
+			<label id="apptid{{=tappt.id}}" style="display:none">{{=tappt.id}}</label>
+			<label id="providerid{{=tappt.id}}" style="display:none">{{=tappt.providerid}}</label>
+			<label id="patientid{{=tappt.id}}" style="display:none">{{=tappt.patientid}}</label>
+			<label id="memberid{{=tappt.id}}" style="display:none">{{=tappt.memberid}}</label>
+		    	<tr>
+				{{if((tappt.appointmentblock == "Appointment is blocked")):}}
+				<td><h5 class="tit"><a data-toggle="modal" id={{=tappt.id}} data-target="#myModal1" onClick="onClick(this)"><label id="f_title{{=tappt.id}}">{{=tappt.f_title}}</label></a></h5></td>
+				{{else:}}				
+				<td><h5 class="tit"><a data-toggle="modal" id={{=tappt.id}} data-target="#myModal1" onClick="onClick(this)"><label id="patientname{{=tappt.id}}">{{=tappt.f_patientname}}</label></a></h5></td>
+				{{pass}}
+			
+			</tr>
+		    	<tr>
+				{{if((tappt.patientcell != "")&(tappt.patientcell != None)):}}
+				<td>Cell: <h5 class="tit"><label id="patientcell{{=tappt.id}}">{{=tappt.patientcell}}</label></h5></td>
+				{{pass}}
+			</tr>
+			<tr>
+				{{if((tappt.appointmentblock == "Appointment is blocked")):}}
+				    <td>Status:<h5 class="tit"> <label id="status{{=tappt.id}}">Blocked</label></h5></td>
+				{{else:}}				
+			        {{if((tappt.f_status == "")|(tappt.f_status == None)):}}
+				    <td>Status:<h5 class="tit"> <label id="status{{=tappt.id}}">Open</label></h5></td>
+				{{else:}}
+				    <td>Status:<h5 class="tit"><label id="status{{=tappt.id}}">{{=tappt.f_status}}</label></h5></td>
+				{{pass}}				
+				{{pass}}
+			</tr>
+			<tr>
+			     <td><h5 style="display:inline" ><label id="starttime{{=tappt.id}}">{{=(tappt.f_start_time).strftime('%d/%m/%Y %H:%M')}}</label>  (<label id="duration{{=tappt.id}}">{{=tappt.f_duration}}</label> mins.)</h5></td>
+			</tr>
+			<tr>
+			     <td><h5 style="display:none" ><label id="xstarttime{{=tappt.id}}">{{=(tappt.f_start_time).strftime('%d %B %Y - %H:%M')}}</label>  (<label id="xduration{{=tappt.id}}">{{=tappt.f_duration}}</label> mins.)</h5></td>
+			</tr>
+			
+			<tr>
+			    <td><h5 style="display:inline"><label id="title{{=tappt.id}}" style="display:none">{{=tappt.f_title}}</label></h5></td>
+			</tr>
+			<tr>
+			    <td><h5 style="display:inline"><label id="doctorname{{=tappt.id}}">{{=tappt.doctorname}}</label><label style="display:none" id="doctorid{{=tappt.id}}">{{=tappt.doctorid}}</label></h5></td>
+			</tr>
+			<tr>
+			    <td><h5 style="display:inline"><label id="treatment{{=tappt.id}}" style="display:none">{{=tappt.treatment}}</label><label style="display:none" id="treatmentid{{=tappt.id}}">{{=tappt.treatmentid}}</label></h5></td>
+			</tr>
+			
+                         <tr>
+			     <td><h5 style="display:inline"><label id="description{{=tappt.id}}" style="display:none" >{{=tappt.description}}</label></h5></td>
+			</tr>
+			<tr>
+				
+                        <td>
+			{{if((tappt.appointmentblock != "Appointment is blocked")):}}
+			<a id="{{=tappt.id}}"  class="btn gr" data-toggle="modal" data-target="#myModal1" onClick="onConfirm(this)" style="display:none;">Confirm</a> 
+			<a id={{=tappt.id}}  class="btn or" data-toggle="modal" data-target="#myModal1" onClick="onCheckin(this)">Check-in</a> 
+			<a id={{=tappt.id}}   class="btn bl"  onClick="onReschedule(this)">Reschedule</a>
+			<a id={{=tappt.id}}   class="btn rd"  onClick="onCancel(this)">Cancel</a>
+			{{pass}}
+			
+			</td>
+			</tr>
+		    </table>
+		    <hr>
+		    {{pass}}
+		    
+		    </div>
+		</div>
+            </div>
+            <div class="tab-pane " id="m_widget2_tab2_content">
+		<div class="m-widget2">
+		<div class="m-widget2__desc">
+		    {{for tappt in weeklyappts:}}
+		     <table class="pat_details">
+			<label id="apptid{{=tappt.id}}" style="display:none">{{=tappt.id}}</label>
+			<label id="providerid{{=tappt.id}}" style="display:none">{{=tappt.providerid}}</label>
+			<label id="patientid{{=tappt.id}}" style="display:none">{{=tappt.patientid}}</label>
+			<label id="memberid{{=tappt.id}}" style="display:none">{{=tappt.memberid}}</label>
+		    	<tr>
+				{{if((tappt.appointmentblock == "Appointment is blocked")):}}
+				<td><h5 class="tit"><a data-toggle="modal" id={{=tappt.id}} data-target="#myModal1" onClick="onClick(this)"><label id="f_title{{=tappt.id}}">{{=tappt.f_title}}</label></a></h5></td>
+				{{else:}}				
+				<td><h5 class="tit"><a data-toggle="modal" id={{=tappt.id}} data-target="#myModal1" onClick="onClick(this)"><label id="patientname{{=tappt.id}}">{{=tappt.f_patientname}}</label></a></h5></td>
+				{{pass}}
+			</tr>
+		    	<tr>
+				{{if((tappt.patientcell != "")&(tappt.patientcell != None)):}}
+				<td>Cell: <h5 class="tit"><label id="patientcell{{=tappt.id}}">{{=tappt.patientcell}}</label></h5></td>
+				{{pass}}
+			</tr>
+			<tr>
+			
+				{{if((tappt.appointmentblock == "Appointment is blocked")):}}
+				    <td>Status:<h5 class="tit"> <label id="status{{=tappt.id}}">Blocked</label></h5></td>
+				{{else:}}				
+			        {{if((tappt.f_status == "")|(tappt.f_status == None)):}}
+				    <td>Status:<h5 class="tit"> <label id="status{{=tappt.id}}">Open</label></h5></td>
+				{{else:}}
+				    <td>Status:<h5 class="tit"><label id="status{{=tappt.id}}">{{=tappt.f_status}}</label></h5></td>
+				{{pass}}				
+				{{pass}}
+			</tr>
+			<tr>
+			     <td><h5 style="display:inline" ><label id="starttime{{=tappt.id}}">{{=(tappt.f_start_time).strftime('%d/%m/%Y %H:%M')}}</label>  (<label id="duration{{=tappt.id}}">{{=tappt.f_duration}}</label> mins.)</h5></td>
+			</tr>
+			<tr>
+			     <td><h5 style="display:none" ><label id="xstarttime{{=tappt.id}}">{{=(tappt.f_start_time).strftime('%d %B %Y - %H:%M')}}</label>  (<label id="xduration{{=tappt.id}}">{{=tappt.f_duration}}</label> mins.)</h5></td>
+			</tr>
+			
+			<tr>
+			    <td><h5 style="display:inline"><label id="title{{=tappt.id}}" style="display:none">{{=tappt.f_title}}</label></h5></td>
+			</tr>
+			<tr>
+			    <td><h5 style="display:inline"><label id="doctorname{{=tappt.id}}">{{=tappt.doctorname}}</label><label style="display:none" id="doctorid{{=tappt.id}}">{{=tappt.doctorid}}</label></h5></td>
+			</tr>
+			<tr>
+			    <td><h5 style="display:inline"><label id="treatment{{=tappt.id}}" style="display:none">{{=tappt.treatment}}</label><label style="display:none" id="treatmentid{{=tappt.id}}">{{=tappt.treatmentid}}</label></h5></td>
+			</tr>
+			
+                         <tr>
+			     <td><h5 style="display:inline"><label id="description{{=tappt.id}}" style="display:none" >{{=tappt.description}}</label></h5></td>
+			</tr>
+			<tr>
+				
+                        <td>
+			{{if((tappt.appointmentblock != "Appointment is blocked")):}}
+			<a id="{{=tappt.id}}"  class="btn gr" data-toggle="modal" data-target="#myModal1" onClick="onConfirm(this)" style="display:none;">Confirm</a> 
+			<a id={{=tappt.id}}  class="btn or" data-toggle="modal" data-target="#myModal1" onClick="onCheckin(this)">Check-in</a> 
+			<a id={{=tappt.id}}   class="btn bl"  onClick="onReschedule(this)">Reschedule</a>
+			<a id={{=tappt.id}}   class="btn rd" onClick="onCancel(this)">Cancel</a>
+			{{pass}}
+			</td>
+			</tr>
+		    </table>
+		    <hr>
+		    {{pass}}
+		    
+		    </div>
+		</div>
+            </div>
+            <div class="tab-pane " id="m_widget2_tab3_content">
+		<div class="m-widget2">
+		<div class="m-widget2__desc">
+		    
+		    
+		    {{for tappt in monthlyappts:}}
+		    <table class="pat_details">
+			<label id="apptid{{=tappt.id}}" style="display:none">{{=tappt.id}}</label>
+			<label id="providerid{{=tappt.id}}" style="display:none">{{=tappt.providerid}}</label>
+			<label id="patientid{{=tappt.id}}" style="display:none">{{=tappt.patientid}}</label>
+			<label id="memberid{{=tappt.id}}" style="display:none">{{=tappt.memberid}}</label>
+		    	<tr>
+				{{if((tappt.appointmentblock == "Appointment is blocked")):}}
+				<td><h5 class="tit"><a data-toggle="modal" id={{=tappt.id}} data-target="#myModal1" onClick="onClick(this)"><label id="f_title{{=tappt.id}}">{{=tappt.f_title}}</label></a></h5></td>
+				{{else:}}				
+				<td><h5 class="tit"><a data-toggle="modal" id={{=tappt.id}} data-target="#myModal1" onClick="onClick(this)"><label id="patientname{{=tappt.id}}">{{=tappt.f_patientname}}</label></a></h5></td>
+				{{pass}}
+			
+			</tr>
+		    	<tr>
+				{{if((tappt.patientcell != "")&(tappt.patientcell != None)):}}
+				<td>Cell: <h5 class="tit"><label id="patientcell{{=tappt.id}}">{{=tappt.patientcell}}</label></h5></td>
+				{{pass}}
+			</tr>
+			<tr>
+			{{if((tappt.appointmentblock == "Appointment is blocked")):}}
+				    <td>Status:<h5 class="tit"> <label id="status{{=tappt.id}}">Blocked</label></h5></td>
+				{{else:}}				
+			        {{if((tappt.f_status == "")|(tappt.f_status == None)):}}
+				    <td>Status:<h5 class="tit"> <label id="status{{=tappt.id}}">Open</label></h5></td>
+				{{else:}}
+				    <td>Status:<h5 class="tit"><label id="status{{=tappt.id}}">{{=tappt.f_status}}</label></h5></td>
+				{{pass}}				
+				{{pass}}
+			</tr>
+			<tr>
+			     <td><h5 style="display:inline" ><label id="starttime{{=tappt.id}}">{{=(tappt.f_start_time).strftime('%d/%m/%Y %H:%M')}}</label>  (<label id="duration{{=tappt.id}}">{{=tappt.f_duration}}</label> mins.)</h5></td>
+			</tr>
+			<tr>
+			     <td><h5 style="display:none" ><label id="xstarttime{{=tappt.id}}">{{=(tappt.f_start_time).strftime('%d %B %Y - %H:%M')}}</label>  (<label id="xduration{{=tappt.id}}">{{=tappt.f_duration}}</label> mins.)</h5></td>
+			</tr>
+			<tr>
+			    <td><h5 style="display:inline"><label id="title{{=tappt.id}}" style="display:none">{{=tappt.f_title}}</label></h5></td>
+			</tr>
+			<tr>
+			    <td><h5 style="display:inline"><label id="doctorname{{=tappt.id}}">{{=tappt.doctorname}}</label><label style="display:none" id="doctorid{{=tappt.id}}">{{=tappt.doctorid}}</label></h5></td>
+			</tr>
+			<tr>
+			    <td><h5 style="display:inline"><label id="treatment{{=tappt.id}}" style="display:none">{{=tappt.treatment}}</label><label style="display:none" id="treatmentid{{=tappt.id}}">{{=tappt.treatmentid}}</label></h5></td>
+			</tr>
+			
+                         <tr>
+			     <td><h5 style="display:inline"><label id="description{{=tappt.id}}" style="display:none" >{{=tappt.description}}</label></h5></td>
+			</tr>
+			<tr>
+				
+                        <td>
+			{{if((tappt.appointmentblock != "Appointment is blocked")):}}
+
+			<a id="{{=tappt.id}}"  class="btn gr" data-toggle="modal" data-target="#myModal1" onClick="onConfirm(this)" style="display:none;">Confirm</a> 
+			<a id={{=tappt.id}}  class="btn or" data-toggle="modal" data-target="#myModal1" onClick="onCheckin(this)" >Check-in</a> 
+			<a id={{=tappt.id}}   class="btn bl"  onClick="onReschedule(this)">Reschedule</a>
+			<a id={{=tappt.id}}   class="btn rd"  onClick="onCancel(this)">Cancel</a>
+			{{pass}}
+			</td>
+			</tr>
+		    </table>
+		    <hr>
+		    {{pass}}
+		    
+		    </div>
+		</div>
+            </div>
+        </div>
+    </div>	
+	
+	</div>
+	</div>
+    </div>
+</div>    
+    
+    
+</div>  
+    
+
+
+
+
+<!--- form2 start-->
+
+<!--- form2 end-->
+
+ <!-- Pop up cutomer details-->
+ <!-- Pop up cutomer details-->
+ 
+<!--- Appointment Update Start--> 
+<form enctype="multipart/form-data" method="post" id="appt_form" action="{{=URL('admin','appointment_update')}}">
+<div class="container">
+  
+  <!-- Trigger the modal with a button -->
+  
+
+  <!-- Modal -->
+  <div class="modal fade" id="myModal1" role="dialog">
+    <div class="modal-dialog">
+    
+      <!-- Modal content-->
+      <div class="modal-content">
+	<div class="modal-header">
+	  <button type="button" class="close btn" data-dismiss="modal">×</button>
+	  <h4 class="modal-title">Appointment</h4>
+	</div>
+	 
+	
+	<div class="modal-body" style=" padding: 0px;">
+	 <div class="col-md-10" style="margin-top: 31px !important;">
+	    <h4 class="m_title">Member:</h4>
+		<div class="form-group">
+		   <div class="input-group" style="width:100%">
+		       <input autocomplete="off" class="form-control" id="no_table_patname1" name="patname1"  style="width:100%" type="text" value="" readonly>       
+		       <input autocomplete="off" class="form-control" id="no_table_apptid1" name="apptid1"  style="width:100%;display:none" type="text" value="" readonly>       
+		       <input autocomplete="off" class="form-control" id="providerid1" name="providerid1"  style="width:100%;display:none" type="text" value="" readonly>       
+		       <input autocomplete="off" class="form-control" id="patientid1" name="patientid1"  style="width:100%;display:none" type="text" value="" readonly>       
+		       <input autocomplete="off" class="form-control" id="memberid1" name="memberid1"  style="width:100%;display:none" type="text" value="" readonly>       
+		       
+		    </div>
+		</div>
+		<div id="hide" style="display:none">
+		    <p id="phide">Click <strong>X</strong> to close the Patient List after selection</p>
+		</div>
+		<div style="position: absolute;" id="suggestions" class="suggestions">
+		</div>
+ 
+ 
+	  </div>
+	  <!--<div class="col-md-2" style="margin-top: 31px !important;">-->
+	   <!--<img src="https://www.shareicon.net/data/128x128/2016/09/01/822711_user_512x512.png" class="img-rounded img-responsive" style="width:100%;" alt="Cinque Terre">-->
+ 
+ 
+	  <!--</div>-->
+	   <div class="col-md-6">
+	    <h4 class="m_title">Cell:</h4>
+		<div class="form-group">
+		   <div class="input-group" style="width:100%">
+		    <input autocomplete="off" class="form-control" id="no_table_cell1" name="cell1" placeholder="Enter Cell Number" style="width:100%" type="text" value="">
+		    </div>
+		</div>
+	  </div>
+	  
+	   <!-- Treatments start -->
+	   
+	  
+	  <!--- Treatments end-->
+	    
+	  <div class="col-md-6">
+	    <h4 class="m_title">Attending Doctor:</h4>
+		<div class="form-group">
+		   <div class="input-group" style="width:100%">
+		   <select  class="form-control" id="doctors1" name="doctors1">
+		      {{ for i in xrange(0, len(docs)): }}
+		     
+		  
+		 
+		   <option id="optdoctor" value={{=docs[i][4]}}>{{=docs[i][0]}}</option>
+		   
+		{{pass}}
+		    </select>
+		    </div>
+		</div>
+	    </div>	
+
+	      <div class="col-md-6">
+	    <h4 class="m_title">Appointment Status:</h4>
+		<div class="form-group">
+		   <div class="input-group" style="width:100%">
+		     <input autocomplete="off" class="form-control" id="status1" name="status1" placeholder="Status" style="width:100%" type="text" value="">
+		    </div>
+		</div>
+	    </div>	  
+	
+						  
+	  <div class="col-md-6">
+	    <h4 class="m_title">Start Date Time</h4>
+		<div class="form-group">
+		 
+		   
+		    <input class="form-control form_datetime bs-datetime" id="no_table_start_date1" name="start_date1" type="text" value="">	 
+		   
+						
+		</div>
+	  </div>
+	  
+	    <div class="col-md-6">
+	    <h4 class="m_title">Duration:</h4>
+		<div class="form-group">
+		   <div class="input-group" style="width:100%">
+		    <select class="form-control" id="no_table_duration1" name="duration1" style="width:100%"><option value="30">30</option><option value="45">45</option><option value="60">60</option></select>
+		    </div>
+		</div>
+	  </div>
+	  <div class="col-md-12">
+	    <h4 class="m_title">Complaint:</h4>
+		<div class="form-group">
+		   <div class="input-group" style="width:100%">
+			 <textarea class="form-control" cols="40" id="no_table_title1" name="title1" placeholder="Enter Complaint" rows="5" style="height:100px;line-height:1.0;" value=""></textarea>
+		    
+		    </div>
+		</div>
+	  </div>
+	  <div class="col-md-12">
+	    <h4 class="m_title">Appointment Notes</h4>
+		<div class="form-group">
+		   <div class="input-group">
+		      <textarea class="form-control" cols="40" id="no_table_description1" name="description1" rows="5" style="height:100px;line-height:1.0;"></textarea>
+		    </div>
+		</div>
+	  </div>
+	</div>
+	<div class="modal-footer">
+	     <div class="col-sm-12">
+		  <button type="button" class="btn green" data-dismiss="modal">Cancel</button>
+	          <button class="btn green" id="apptsave" type="submit">Click to Save </button>
+		  
+		 
+		 
+		 </div>
+	  
+
+	  </div>
+      </div>
+      
+    </div>
+  </div>
+  
+</div>
+</form>
+<!--- Appointment Update End--> 
+
+ 
+
+  <div id="fullCalModal" class="modal fade">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span> <span class="sr-only">close</span></button>
+                <h4 id="modalTitle" class="modal-title"></h4>
+            </div>
+            <div id="modalBody" class="modal-body">
+	    <h4 id="modalStart" class="modal-title"></h4>
+	    
+	    </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button class="btn btn-primary">Remove</button>
+            </div>
+        </div>
+    </div>
+</div> 
+
+
+<script>
+
+$(document).ready(function(){
+   
+
+    
+   
+   
+    $("#hide").hide()
+    $("#phide").click(function(){
+       <!--ajax('{{=URL('appointment', 'appointment_hide')}}',  ['patientmember','xmemberid'], 'suggestions')-->
+        $("#hide").hide();
+	 $("#suggestions").hide();
+    });   
+   
+    $("#suggestions").show();
+   
+    $("#suggestions") .click(function(){
+      
+    
+        <!-- <fname lname:memberid>-->
+	x1 = $("#no_table_patientmember1").val();
+	
+      
+	$("#no_table_xpatientmember1").val(x1);
+	
+	var strarr1 = x1.split(":")
+	
+     
+	$("#no_table_patientmember1").val(strarr1[0])
+      
+      	
+      
+      
+	$("#suggestions").hide();
+	$("#hide").hide()
+	 
+	
+    
+    });
+
+       
+    $("#suggestions2").show();
+    
+    $("#suggestions2") .click(function(){
+      
+	
+        $("#hide").hide()
+	x= $("#no_table_patientmember").text();
+	
+	
+	$("#no_table_xpatientmember").val(x);
+	
+	
+	var strarr = x.split(":")
+
+
+	$("#no_table_patientmember").val(strarr[0])
+      
+      	ajax('{{=URL('admin', 'getcell')}}',  ['patientmember','xmemberid','xpatientmember'], 'cell1')
+      
+      
+	$("#suggestions2").hide();
+	
+	 
+	
+    
+    });
+    
+    
+});
+
+jQuery("#no_table_patientmember1").keyup(function(){
+
+       
+       $("#suggestions").show();
+       var x = $('#no_table_patientmember1').val();
+       $("#no_table_xpatientmember1").val(x);
+       
+      ajax('{{=URL('admin', 'patient_selector')}}', ['xpatientmember1'], 'suggestions')
+      
+       $("#hide").show()
+      
+});
+      
+jQuery("#no_table_patientmember").keyup(function(){
+       
+       $("#suggestions2").show();
+       var x = $('#no_table_patientmember').val();
+      
+       $("#no_table_xpatientmember").val(x);        
+       ajax('{{=URL('admin', 'newpatient_selector',vars=dict(providerid=providerid))}}' +"&patientmember=" + x, [x,'xmemberid'], 'suggestions2')
+       
+});
+       
+
+    
+       
+function onConfirm(element){
+
+
+<!--var x = element.id-->
+<!--document.getElementById("status"+x).innerHTML = "Confirmed"-->
+document.getElementById("status1").value = "Confirmed"
+
+onClick(element)
+
+}    
+
+function onReschedule(element){
+
+var x = element.id
+			    
+
+window.location.href = "/my_pms2/appointment/appointment_update?apptid=" + x + "&amp;source=home&page=1,memberpage=1";
+}    
+
+function onCancel(element){
+
+
+var x = element.id
+<!--document.getElementById("status"+x).innerHTML = "Cancelled"-->
+<!--document.getElementById("status1").value = "Cancelled"-->
+window.location.href = "/my_pms2/appointment/delete_appointment?apptid=" + x + "&amp;source=home";
+}    
+
+function onCheckin(element){
+
+
+var x = element.id
+
+document.getElementById("status"+x).innerHTML = "Checked-In"
+<!--document.getElementById("status1").value = "Checked-In"-->
+
+
+onClick(element)
+
+}    
+
+function onClick(element) {
+ 
+  
+  var x = element.id
+ 
+ 
+ 
+   document.getElementById("no_table_apptid1").value = x
+  
+    var patname = document.getElementById("patientname"+x).innerHTML
+  
+  
+  
+  document.getElementById("no_table_patname1").value = patname
+  
+  var patcell = document.getElementById("patientcell"+x).innerHTML
+  
+  document.getElementById("no_table_cell1").value = patcell
+  
+   
+  var status = document.getElementById("status"+x).innerHTML
+  
+  <!--var status = document.getElementById("status1").value-->
+ 
+ 
+ 
+  document.getElementById("status1").value = status
+
+  var starttime = document.getElementById("xstarttime"+x).innerHTML
+  
+ 
+document.getElementById("no_table_start_date1").value = starttime
+
+  var duration = document.getElementById("xduration"+x).innerHTML
+  
+
+  document.getElementById("no_table_duration1").value = duration
+ 
+  
+   var title = document.getElementById("title"+x).innerHTML
+
+
+  document.getElementById("no_table_title1").value = title
+
+
+var desc = document.getElementById("description"+x).innerHTML
+
+
+  document.getElementById("no_table_description1").value = desc
+  
+var docid = document.getElementById("doctorid" + x).innerHTML
+
+document.getElementById("doctors1").value = docid
+
+var trtmntid = document.getElementById("treatmentid" + x).innerHTML
+
+document.getElementById("treatments1").value = trtmntid
+
+
+var providerid = document.getElementById("providerid" + x).innerHTML
+document.getElementById("providerid1").value = providerid
+
+var memberid = document.getElementById("memberid" + x).innerHTML
+document.getElementById("memberid1").value = memberid
+
+var patientid = document.getElementById("patientid" + x).innerHTML
+document.getElementById("patientid1").value = patientid
+
+}  
+
+function searchPatient(){
+
+var xaction = document.getElementById("no_table_xaction")
+xaction.value = "searchPatient"
+}
+
+function newPatient(){
+
+var xaction = document.getElementById("no_table_xaction")
+
+xaction.value = "newPatient"
+
+}
+
+
+function newTreatment(){
+
+var xaction = document.getElementById("no_table_xaction")
+
+xaction.value = "newTreatment"
+
+}
+
+
+
+function newPayment(){
+
+var xaction = document.getElementById("no_table_xaction")
+
+xaction.value = "newPayment"
+
+}
+
+function newImage(){
+
+var xaction = document.getElementById("no_table_xaction")
+
+xaction.value = "newImage"
+
+}
+function newReport(){
+
+var xaction = document.getElementById("no_table_xaction")
+
+xaction.value = "newReport"
+
+}
+
+</script>
+</div>

@@ -1,0 +1,177 @@
+						    <form enctype="multipart/form-data" action="" method="post">
+							<div class="col-md-12">
+							    <div class="col-md-6">
+							       <div class="form-group">
+								    <label class="m_title">Date</label>
+								      <div class="input-group">
+									    {{=formPres.custom.widget.prescriptiondate}}
+								      </div>
+							       </div>
+							    </div>
+							    <div class="col-md-6">
+							    
+							    </div>
+										   
+							</div>
+							
+						        <div class="col-md-12">
+
+							    <div class="col-md-8">
+								   <div class="form-group">
+									 <label class="m_title">Drug</label>							    
+									 
+									 <div class="btn-group">
+							       <a style="color:#fff"  class="btn sbold green" onclick="location.href='{{=URL('prescription','new_medicine', vars=dict(page=0,source="prescriptions",providerid=providerid,doctorid=doctorid1,patientid=patientid1,memberid=memberid1,tplanid=tplanid1,treatmentid=treatmentid1,returnurl=returnurl))}}'" >
+								   <i class="fa fa-plus"></i></a>
+							       
+							    </div>
+
+
+									  <div class="input-group">
+			                                                        {{=formPres.custom.widget.medicine}}
+		                                                          </div>									 
+									 
+									  
+								   </div>
+							      </div>
+							      <div class="col-md-2">
+								   <div class="form-group">
+								    <label class="m_title">Strength</label>
+									  <div class="input-group">
+										{{=formPres.custom.widget.strength}}
+									  </div>
+								   </div>
+							      </div>
+							      <div class="col-md-2">
+								   <div class="form-group">
+								    <label class="m_title">Measure</label>
+									  <div class="input-group">
+										{{=formPres.custom.widget.strengthuom}}
+									  </div>
+								   </div>
+							      </div>
+							</div>
+  
+							<div class="col-md-12">
+							       <div class="col-md-4">
+								      <div class="form-group">
+								       <label class="m_title">Frequency</label>
+									     <div class="input-group">
+										   {{=formPres.custom.widget.frequency}}
+									     </div>
+								      </div>
+								 </div>
+								 <div class="col-md-4">
+								      <div class="form-group">
+								       <label class="m_title">Duration</label>
+									     <div class="input-group">
+										   {{=formPres.custom.widget.dosage}}
+									     </div>
+								      </div>
+								 </div>
+								 <div class="col-md-4">
+								      <div class="form-group">
+								       <label class="m_title">Quantity</label>
+									     <div class="input-group">
+										   {{=formPres.custom.widget.quantity}}
+									     </div>
+								      </div>
+								 </div>
+								 
+						       </div>
+							<div class="col-md-12">
+							    <div class="col-md-12">
+								<div class="form-group">
+								    <label class="m_title">Instructions</label>
+								     <div class="input-group">
+									   {{=formPres.custom.widget.presremarks}}
+								     </div>
+								</div>
+							    </div>
+							</div>
+							
+<div style="display:none">
+{{=formPres.custom.widget.doctorid}}
+{{=formPres.custom.widget.patientid}}
+{{=formPres.custom.widget.memberid}}
+{{=formPres.custom.widget.patientid1}}
+{{=formPres.custom.widget.memberid1}}
+</div>
+							
+					   <div class="actions" style="    text-align: right;">
+						   <a href="{{=returnurl}}">Back </a>&nbsp;&nbsp;		
+						   <a class = "btn green" id="presSave" onClick="presSave()">Save</a>&nbsp;&nbsp;
+						   <a id="presCancel" onClick="presCancel()">Clear</a>
+						   
+					  </div>
+					  <br/>
+
+							
+					  <div class="actions" style="text-align: right; display:none">
+                                            <a class="btn btn-circle btn-icon-only btn-default" type='submit', onclick="location.href='{{=URL('prescription','prescription_report',vars=dict(providerid=providerid,memberid=memberid1,patientid=patientid1,doctorid=doctorid1,treatmentid=treatmentid1,tplanid=tplanid1,returnurl=returnurl))}}'">
+                                                <i class="fa fa-print"></i>
+                                            </a>
+					  </div>							
+						      
+                                <div class="portlet light bordered" >
+                                  
+                                    
+                                    <div class="col-md-12">
+                                    <!-- BEGIN Portlet PORTLET-->
+                                      <div class="portlet-body">
+                                        <div class="table-responsive">
+					    {{=prescriptions}}                                          
+                                        </div>
+                                    </div>
+                                  
+                                    <!-- END Portlet PORTLET-->
+                                  </div>
+
+                                 
+                                
+                                </div>
+  
+   
+
+				  </form>
+
+
+<script>
+ function presCancel(){
+    
+    document.getElementById("no_table_medicine").value = 0;
+    document.getElementById("no_table_strength").value = "";
+    document.getElementById("no_table_strengthuom").value = 0;
+    document.getElementById("no_table_frequency").value = "";
+    document.getElementById("no_table_dosage").value = "";
+    document.getElementById("no_table_quantity").value = "";
+    document.getElementById("no_table_presremarks").value = "";
+
+    
+ }
+
+ function presSave(){
+    ajax('{{=URL("prescription", "save_prescription", vars=dict(page=page,memberid=memberid1,tplanid=tplanid1,treatmentid=treatmentid1,\
+    providerid=providerid,patientid=patientid1,returnurl=returnurl))}}',['doctor', 'medicine','strength','strengthuom','dosage','frequency','prescriptiondate','quantity','presremarks'] , 'presgrid');
+ }
+ 
+ $("#no_table_medicine").change(function(){
+    
+      
+       var x = $('#no_table_medicine').val();
+       var y = $('#no_table_medicine :selected').text();
+       var z = $('#no_table_medicine :selected').index();
+
+      
+      var meds = y.split(":")
+      
+       $('#no_table_strength').val(meds[1]);
+       
+       $('#no_table_strengthuom').val(meds[2]);
+      
+      
+      
+       
+    });
+ 
+</script>

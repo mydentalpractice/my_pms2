@@ -1,0 +1,237 @@
+{{extend 'pms2_layoutw4.html'}}
+<style>
+#suggestions { position: relative; }
+.suggestions { background: white; border: solid 1px #55A6C8; }
+.suggestions DIV { padding: 2px 4px 2px 4px; }
+</style>
+
+
+{{=formTreatment.custom.begin}} 
+  
+             
+                        
+                        <div class="row mdp" id="Treatment">
+                        <span onclick="this.parentElement.style.display='none'" class="w3-button w3-large w3-display-topright">&times;</span>
+  
+                            <div class="col-md-12">
+                                <!-- BEGIN EXAMPLE TABLE PORTLET-->
+                                <div class="portlet light bordered">
+                                    <div class="portlet-title">
+                                        <div class="caption font-white">
+                                            <i class="fa fa-stethoscope" style="color:#fff"></i>
+                                                {{if(membername <> ""):}}
+                                                       <span class="caption-subject bold uppercase"> New Treatment for {{=patientname}} (Enrolled Member: {{=membername}})</span>
+                                                 {{else:}}
+                                                        <span class="caption-subject bold uppercase"> New Treatment</span>
+                                                 {{pass}}                                            
+                                            
+                                        </div>
+                                       
+                                    </div>
+                                    <div class="col-md-12">
+                                    <!-- BEGIN Portlet PORTLET-->
+                                    <div class="col-sm-12 md_r">
+                                        <div class="portlet-title mem_details">
+                                            <div class="caption">
+                                                <i class="fa fa-user"></i>&nbsp;Treatment </div>
+                                            
+                                        </div>
+                                        <div class="portlet-body" style="padding:20px">
+					<div class="col-md-12" style="margin-bottom:30px">
+						 <label class="m_title">Attending Doctor</label>
+						 {{=formTreatment.custom.widget.doctor}}
+					 </div>
+				       
+                                          <div class="col-md-4">
+                                               <div class="form-group">
+                                                <label class="m_title">Patient Lookup</label>
+                                                      <div class="input-group">
+                                                            <span class="input-group-addon">
+                                                                <i class="fa fa-user"></i>
+                                                            </span>
+                                                             {{=formTreatment.custom.widget.patientmember}} 
+                                                      </div>
+						      
+						      <div style="position: absolute;" id="suggestions" class="suggestions">
+						       </div>
+                                               </div>
+                                          </div>
+
+                                           <div class="col-md-4" style="z-index: 300000;">
+                                                   <div class="form-group">
+                                                    <label class="m_title">Dental Treatment</label>
+                                                          <div class="input-group">
+                                                                <span class="input-group-addon">
+                                                                    <i class="fa fa-plus-square"></i>
+                                                                </span>
+                                                                {{=formTreatment.custom.widget.vwdentalprocedure}} 
+                                                        </div>
+                                                   </div>
+                                           </div>
+                                           
+                                           <div class="col-md-4">
+                                                   <div class="form-group">
+                                                    <label class="m_title">Treatment Status</label>
+                                                          <div class="input-group" style="width: 100%;">
+                                                               {{=formTreatment.custom.widget.status}}
+                                                         </div>
+                                                   </div>
+                                           </div> 
+                                           <div class="col-md-4">
+                                                   <div class="form-group">
+                                                    <label class="m_title">Quadrant</label>
+                                                          <div class="input-group">
+                                                                <span class="input-group-addon">
+                                                                    <i class="fa fa-plus-square"></i>
+                                                                </span>
+                                                                {{=formTreatment.custom.widget.quadrant}} 
+                                                          </div>
+                                                   </div>
+                                           </div>
+                                          
+                                           <div class="col-md-4">
+                                                   <div class="form-group">
+                                                    <label class="m_title">Tooth</label>
+                                                          <div class="input-group">
+                                                                <span class="input-group-addon">
+                                                                    <i class="fa fa-plus-square"></i>
+                                                                </span>
+                                                                {{=formTreatment.custom.widget.tooth}} </div>
+                                                   </div>
+                                           </div>  
+
+                                           <div class="col-md-4">
+                                               <div class="mt-repeater-input">
+                                                            <label class="m_title">Start Date</label>
+                                                            <br>
+                                                            {{=formTreatment.custom.widget.startdate}}
+                                               </div>  
+                                           </div>    
+                                           <div class="col-md-12" style="margin-bottom:30px">
+                                                    <label class="m_title">Notes</label>
+                                                    {{=formTreatment.custom.widget.description}}
+                                            </div>
+                                            <div class="col-md-12" style="margin-bottom:30px">
+                                              <button type="submit" class="btn green">Save </button>
+                                             
+                                                <a href="{{=returnurl}}" >Cancel </a>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                    <!-- END Portlet PORTLET-->
+                                  </div>
+
+                                </div>
+                                <!-- END EXAMPLE TABLE PORTLET-->                                
+
+                            </div>
+                        </div>
+                        
+               
+
+
+
+ <div style="display:none">
+     {{=formTreatment.custom.submit}}
+     {{=formTreatment.custom.widget.dentalprocedure}}
+     {{=formTreatment.custom.widget.treatmentplan}}
+     {{=formTreatment.custom.widget.treatment}}
+      {{=formTreatment.custom.widget.xmemberid}}
+     
+     {{=formTreatment.custom.widget.inspay}}
+      {{=formTreatment.custom.widget.copay}}
+       {{=formTreatment.custom.widget.treatmentcost}}
+       {{=formTreatment.custom.widget.enddate}}
+       
+       {{=formTreatment.custom.widget.xfullname}}
+{{=formTreatment.custom.widget.xpatientmember}}
+{{=formTreatment.custom.submit}} 
+
+     <input type="text" style="display:none;" name="proccode" id = "proccode" readonly>  
+     <input type="text" style="display:none;"  name="procdesc" id = "procdesc" readonly>
+
+
+  </div>
+  
+    
+{{=formTreatment.custom.end}}
+
+
+<script>
+function openTreatment(evt, mdpEvent) {
+  var i, x, tablinks;
+  x = document.getElementsByClassName("mdp");
+  for (i = 0; i < x.length; i++) {
+      x[i].style.display = "none";
+  }
+  tablinks = document.getElementsByClassName("tablink");
+  for (i = 0; i < x.length; i++) {
+      tablinks[i].className = tablinks[i].className.replace(" w3-green", "");
+  }
+  document.getElementById(mdpEvent).style.display = "block";
+  evt.currentTarget.className += " w3-green";
+};
+
+jQuery("#no_table_patientmember").keyup(function(){
+
+       $("#suggestions").show();
+       var x = $('#no_table_patientmember').val();
+       
+       $("#no_table_xpatientmember").val(x);  
+       
+       
+      ajax('{{=URL('treatment', 'treatmentpatient_selector')}}', ['patientmember','xmemberid'], 'suggestions')});
+
+$(document).ready(function(){
+   
+    $("#hide").hide();
+    $("#phide").click(function(){
+       ajax('{{=URL('treatment', 'treatment_hide')}}',  ['patientmember','xmemberid'], 'suggestions')
+        $("#hide").hide();
+    });   
+   
+    $("#suggestions").show();
+    
+    $("#suggestions") .click(function(){
+      
+	x= $("#no_table_patientmember").val();
+
+	
+	$("#no_table_xpatientmember").val(x);
+	
+	var strarr = x.split(":")
+	$("#no_table_patientmember").val(strarr[0])
+
+	$("#suggestions").hide();
+	
+    
+    });
+    
+    $("#vwdentalprocedure").change(function(){
+       var x = $('#vwdentalprocedure').val();
+       var y = $('#vwdentalprocedure :selected').text();
+       var z = $('#vwdentalprocedure :selected').index();
+       var procs=x.split("|")
+       alert('x = ' + x)
+       
+       $("#no_table_dentalprocedure").val(procs[0]);
+       $("#no_table_treatmentcost").val(procs[3]);
+       $("#no_table_copay").val(procs[5]);
+       
+       $("#proccode").val(procs[1]);
+       $("#procdesc").val(procs[2]); 
+       $("#ucrfee").val(procs[4]); 
+      
+    });
+});
+
+
+
+
+
+
+
+
+
+</script>

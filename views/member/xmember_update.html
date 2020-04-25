@@ -1,0 +1,173 @@
+{{extend 'pms2_layoutw3.html'}}
+
+<header class="w3-container w3-dark-grey">
+    <h5>Member Information</h5>
+</header>
+<br/>
+
+
+{{=formA.custom.begin}}
+  
+  <header class="w3-container w3-black">
+    <h5>Member Profile</h5>
+  </header>
+
+      <div class="w3-row-padding  ">
+        <div class="w3-half" style='line-height:1.5;'>
+          <label class="w3-text-blue">Member ID</label><br/> 
+            {{=formA.custom.widget.patientmember}}
+        </div>
+        <div class="w3-half" style='line-height:1.5;'>
+          <label class="w3-text-blue">Employee ID</label><br/>
+          {{=formA.custom.widget.groupref}}
+        </div>
+      </div>  
+        
+   
+      <div class="w3-row-padding  ">
+        <div class="w3-half" style='line-height:1.5;'>
+          <label class="w3-text-blue">First Name</label><br/>
+            {{=formA.custom.widget.fname}}
+        </div>
+        <div class="w3-half" style='line-height:1.5;'>
+          <label class="w3-text-blue">Middle Name</label><br/>
+          {{=formA.custom.widget.mname}}
+        </div>
+      </div>  
+
+    <div class="w3-row-padding  ">        
+        <div class="w3-half" style='line-height:1.5;'>
+          <label class="w3-text-blue">Last Name</label><br/>
+            {{=formA.custom.widget.lname}}
+        </div>
+        <div class="w3-half" style='line-height:1.5;'>
+          <label class="w3-text-blue">Status</label><br/>
+          {{=formA.custom.widget.status}}
+        </div>
+      </div>  
+      <div class="w3-row-padding  ">
+        <div class="w3-half" style='line-height:1.5;'>
+          <label class="w3-text-blue">DOB</label><br/>
+            {{=formA.custom.widget.dob}}
+        </div>
+        <div class="w3-half" style='line-height:1.5;'>
+          <label class="w3-text-blue">Gender</label><br/>
+          {{=formA.custom.widget.gender}}
+        </div>
+      </div>  
+      <div class="w3-row-padding  ">
+        <div class="w3-half" style='line-height:1.5;'>
+          <label class="w3-text-blue">Newly Assigned Member</label>&nbsp;&nbsp;
+            {{=formA.custom.widget.newmember}}
+        </div>
+        <div class="w3-half" style='line-height:1.5;'>
+          <label class="w3-text-blue">Free Treatment</label>&nbsp;&nbsp;
+          {{=formA.custom.widget.freetreatment}}
+        </div>
+      </div>  
+      
+      <br/>
+<header class="w3-container w3-black">
+    <h5>Plan Details</h5>
+  </header>
+  <div class="w3-row-padding  ">
+    <div class="w3-half" style='line-height:1.5;'>
+      <label class="w3-text-blue">Company</label><br/>
+        {{=formA.custom.widget.company}}
+    </div>
+    <div class="w3-half" style='line-height:1.5;'>
+      <label class="w3-text-blue">Plan</label><br/>
+      {{=formA.custom.widget.hmoplan}}
+    </div>
+  </div>  
+
+  <div class="w3-row-padding  ">
+    <div class="w3-half" style='line-height:1.5;'>
+      <label class="w3-text-blue">Enrollment Date</label><br/>
+        {{=formA.custom.widget.enrollmentdate}}
+    </div>
+    <div class="w3-half" style='line-height:1.5;'>
+      <label class="w3-text-blue">Premium Due Date</label><br/>
+      {{=formA.custom.widget.duedate}}
+    </div>
+  </div>  
+  <div class="w3-row-padding  ">
+    <div class="w3-half" style='line-height:1.5;'>
+      <label class="w3-text-blue">Premium Start Date</label><br/>
+        {{=formA.custom.widget.premstartdt}}
+    </div>
+    <div class="w3-half" style='line-height:1.5;'>
+      <label class="w3-text-blue">Premium End Date</label><br/>
+      {{=formA.custom.widget.premenddt}}
+    </div>
+  </div>  
+  
+  <br/>      
+      
+  <header class="w3-container w3-black">
+    <h5>Contact Details</h5>
+  </header>
+      
+  <div class="w3-row-padding  ">
+    <div class="w3-half" style='line-height:1.5;'>
+      <label class="w3-text-blue">Address1</label><br/>
+        {{=formA.custom.widget.address1}}
+    </div>
+    <div class="w3-half" style='line-height:1.5;'>
+      <label class="w3-text-blue">Address2</label><br/>
+      {{=formA.custom.widget.address2}}
+    </div>
+  </div>  
+
+  <div class="w3-row-padding  ">
+    <div class="w3-half" style='line-height:1.5;'>
+      <label class="w3-text-blue">Address3</label><br/>
+        {{=formA.custom.widget.address3}}
+    </div>
+    <div class="w3-half" style='line-height:1.5;'>
+      <label class="w3-text-blue">City</label><br/>
+      {{=formA.custom.widget.city}}
+    </div>
+  </div>  
+  <div class="w3-row-padding  ">
+    <div class="w3-half" style='line-height:1.5;'>
+      <label class="w3-text-blue">State</label><br/>
+        {{=formA.custom.widget.st}}
+    </div>
+    <div class="w3-half" style='line-height:1.5;'>
+      <label class="w3-text-blue">Pin</label><br/>
+      {{=formA.custom.widget.pin}}
+    </div>
+  </div>  
+<div class="w3-row-padding  ">
+    <div class="w3-half" style='line-height:1.5;'>
+      <label class="w3-text-blue">Region</label><br/>
+        {{=formA.custom.widget.groupregion}}
+    </div>
+    <div class="w3-half" style='line-height:1.5;'>
+      <label class="w3-text-blue">Email</label><br/>
+      {{=formA.custom.widget.email}}
+    </div>
+  </div>  
+
+  <div class="w3-row-padding  ">
+    <div class="w3-half" style='line-height:1.5;'>
+      <label class="w3-text-blue">Cell</label><br/>
+        {{=formA.custom.widget.cell}}
+    </div>
+    <div class="w3-half" style='line-height:1.5;'>
+      <label class="w3-text-blue">Telephone</label><br/>
+      {{=formA.custom.widget.telephone}}
+    </div>
+  </div>  
+<br/>
+ 
+  <header class="w3-container w3-black">
+    <h5>Dependants</h5>
+  </header>
+  <div class="w3-row-padding  ">
+      {{=formB}}
+  </div>  
+{{=formA.custom.end}}
+
+

@@ -1,0 +1,130 @@
+{{extend 'pms2_layoutw4.html'}}
+
+
+<style>
+#suggestions { position: relative; z-index:300000}
+.suggestions { background: white;z-index: 500 !important;z-index:500 !important;height: 250px; overflow-y: auto;border-bottom:1px solid #eeeeee;}
+.suggestions DIV {background: white; padding: 2px 4px 2px 4px; border-left:1px solid #eeeeee;
+   }
+
+.np{padding:0px;}
+</style>
+
+
+<div class="row">
+{{=form.custom.begin}} 
+    <div class="col-md-12" style="margin-top: -14px;">
+    
+	<div class="row" style="width:100%">
+	    <div class="col-md-12" style="margin-bottom: 18px;">
+		<label class="m_title">Prescribing Doctor</label>	    
+		<div class="input-group">
+		       {{=form.custom.widget.doctor}}
+		</div>
+		
+	    </div>
+	</div>
+	    
+        <div class="row" style="width:100%">
+            <div class="col-md-12">
+                <div class="input-group">
+                       {{=form.custom.widget.patientmember1}}
+          			<span class="input-group-btn">
+          			    <a class = "btn green" id="prescriptions" onClick="getPrescriptions()">Search Prescriptions</a>
+          			    <!--<button class="btn blue uppercase bold" type="submit">Search Prescriptions</button>-->
+          			</span>
+		</div>
+                
+            </div>
+        </div>
+    <div id="hide" style="display:none;" >
+	<p id="phide">Click <strong>X</strong> to close the Patient List after selection</p>
+    </div>
+    <div style="position: absolute;" id="suggestions" class="suggestions"  >
+    </div>
+
+  
+  <br/>
+  <br/>
+  <div class="col-md-12 np">
+    <div id = "presgrid">
+      
+    </div>
+  
+  </div>
+    <div style="display:none;">
+	{{=form.custom.widget.xpatientmember1}}
+	{{=form.custom.submit}}
+	
+    </div>
+
+
+    {{=form.custom.end}} 
+        <!-- BEGIN EXAMPLE TABLE PORTLET-->
+        
+         
+        <!-- END EXAMPLE TABLE PORTLET-->
+    </div>
+</div>
+
+<script>
+
+function getPrescriptions(){
+
+
+    patientmember = document.getElementById("no_table_patientmember1").value
+   
+    
+    ajax('{{=URL("prescription", "get_prescriptions", vars=dict(page=page,providerid=providerid,tplaind=tplanid,treatmentid=treatmentid,returnurl=returnurl))}}', ['xpatientmember1','doctor'] , 'presgrid');
+    
+    
+}
+
+
+
+
+jQuery("#no_table_patientmember1").keyup(function(){
+
+       $("#suggestions").show();
+       var x = $('#no_table_patientmember1').val();
+       $("#no_table_xpatientmember1").val(x);
+       
+      ajax('{{=URL('admin', 'patient_selector')}}', ['xpatientmember1'], 'suggestions')});
+      
+
+      
+$(document).ready(function(){
+   
+
+    
+     $("#suggestions").show();
+    
+    $("#suggestions") .click(function(){
+    
+	
+      
+	x= $("#no_table_patientmember1").val();
+
+	$("#no_table_xpatientmember1").val(x);
+
+	var strarr = x.split(":")
+
+	$("#no_table_patientmember1").val(strarr[0])
+	
+	$("#suggestions").hide();
+	
+    
+    });
+    
+     var x = $('#no_table_patientmember1').val();
+     if(x != "") 
+     {
+	getPrescriptions()     
+     }
+   
+    
+ });
+         
+</script>
+
+	

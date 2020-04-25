@@ -1,0 +1,110 @@
+{{extend 'pms2_layoutw4.html'}}
+
+{{=formA.custom.begin}}
+
+
+                        <div class="row">
+                            <div class="col-md-12">
+                                <!-- BEGIN EXAMPLE TABLE PORTLET-->
+                                <div class="portlet light bordered">
+                                    <div class="portlet-title" style="padding:0px 20px  !important">
+                                        <div class="caption font-white" style="    width: 100%;">
+                                            <span class="caption-subject bold uppercase"><i class="fa fa-medkit" ></i>&nbsp;&nbsp;New Medicine</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-offset-2 col-md-8 col-md-offset-2">
+                                    <!-- BEGIN Portlet PORTLET-->
+                                   
+     
+<div class="tab-content">
+  <div id="home" class="tab-pane fade in active">
+    
+    <form>
+    <div class="col-md-6">
+           <div class="form-group">
+            <label class="m_title">Medicine</label>
+                  <div class="input-group">
+                        {{=formA.custom.widget.medicine}}
+                  </div>
+           </div>
+      </div>
+      <div class="col-md-6">
+           <div class="form-group">
+            <label class="m_title">Medicine Type</label>
+                  <div class="input-group">
+                        {{=formA.custom.widget.medicinetype}}
+                  </div>
+           </div>
+      </div>
+      <div class="col-md-6">
+           <div class="form-group">
+            <label class="m_title">Strength</label>
+                  <div class="input-group">
+                        {{=formA.custom.widget.strength}}
+                  </div>
+           </div>
+      </div>
+      <div class="col-md-6">
+           <div class="form-group">
+            <label class="m_title">Measure</label>
+                  <div class="input-group">
+                        {{=formA.custom.widget.strengthuom}}
+                  </div>
+           </div>
+      </div>
+       
+       
+      <div class="col-md-6">
+           <div class="form-group">
+            <label class="m_title">Instructions</label>
+                  <div class="input-group">
+                        {{=formA.custom.widget.instructions}}
+                  </div>
+           </div>
+      </div>
+       <div class="col-md-6">
+           <div class="form-group">
+            <label class="m_title">Notes</label>
+                  <div class="input-group">
+                        {{=formA.custom.widget.notes}}
+                  </div>
+           </div>
+      </div>
+       
+   
+  
+     
+
+   <div class="col-md-12" style="margin-bottom:30px">
+      <button type="submit" class="btn green">Save </button>
+      <a href="{{=returnurl}}">Cancel </a>
+      
+   </div>
+  </form>
+
+
+
+  </div>
+ 
+                                  
+                                    <!-- END Portlet PORTLET-->
+                                  </div>
+
+                                </div>
+                                <!-- END EXAMPLE TABLE PORTLET-->
+                                
+
+
+
+
+
+
+                            </div>
+                          
+                        </div>
+
+<div style="display:none">              
+{{=formA.custom.widget.providerid}}
+{{=formA.custom.widget.is_active}}
+</div>
+{{=formA.custom.end}}

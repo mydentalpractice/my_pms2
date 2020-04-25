@@ -1,0 +1,142 @@
+{{extend 'pms_layoutw3.html'}}
+
+{{=form.custom.begin}}
+
+<header class="w3-container w3-dark-grey ">
+    
+    <div class="w3-container">
+      <strong>Treatment Plans</strong>&nbsp;&nbsp;<a class="w3-btn w3-pale-grey"  href={{=URL('treatment','treatmentplan_create',vars=dict(\
+            memberid=memberid,providerid=providerid,providername=providername,page=page))}}><i class="fa fa-plus"></i></a>
+    
+   
+    </div>
+     
+</header>
+
+<div class="w3-row-padding  w3-small">
+  <div class="w3-half" style='line-height:1.0;'>
+    <label>Treatment Plan:</label><br/>
+    {{=form.custom.widget.treatmentplan}}
+    
+  </div>
+  <div class="w3-half" style='line-height:1.0;'>
+    <label>Member#:</label><br/>
+    {{=form.custom.widget.memberref}}
+    
+  </div>
+</div>
+
+
+
+<div class="w3-row-padding   w3-small">
+  <div class="w3-half " style='line-height:1.0;'>
+    <label>From Date</label><br/>
+    {{=form.custom.widget.fromdate}}
+    
+  </div>
+  <div class="w3-half" style='line-height:1.0;'>
+    <label>To Date</label><br/>
+    {{=form.custom.widget.todate}}
+   
+  </div>
+</div>
+
+<div class="w3-row-padding   w3-small">
+  <div class="w3-half " style='line-height:1.0;'>
+    <label>Treatment Plan Status</label><br/>
+    {{=form.custom.widget.status}}
+  </div>
+<div class="w3-half " style='line-height:1.0;'>
+    <br/>
+     <button class="w3-btn w3-blue-grey " style="width:100%;line-height:1.5"><i class="fa fa-search w3-margin-right"></i>Search Treatment Plans</button>
+  </div>  
+</div>
+
+
+
+<div style="display:none;">
+{{=form.custom.submit}}
+</div>
+{{=form.custom.end}}
+<h5 class="w3-dark-grey">{{=rangemssg}}</h5>
+
+{{if (dstplans != None):}}
+
+ <div class="w3-half w3-container w3-padding-2 w3-left-align" >
+ {{if (page==0):}}
+   <a class="w3-btn  w3-round-xxlarge w3-black w3-hide" style="width:120px;height:35px"  href="{{=URL('treatment','list_treatmentplans',vars=dict(page=page-1,providerid=providerid,memberid=memberid))}}">Previous</a> 
+ {{else:}}
+   <a class="w3-btn w3-round-xxlarge w3-black" style="width:120px;height:35px" href="{{=URL('treatment','list_treatmentplans',vars=dict(page=page-1,providerid=providerid,memberid=memberid))}}">Previous</a>
+ {{pass}}
+ </div>
+ <div class="w3-half w3-container w3-padding-2 w3-right-align" >
+ {{if len(dstplans)>= items_per_page:}}
+ <a class="w3-btn w3-round-xxlarge w3-black" style="width:120px;height:35px" href="{{=URL('treatment','list_treatmentplans',vars=dict(page=page+1,providerid=providerid,memberid=memberid))}}">Next</a>
+ {{else:}}
+  <a class="w3-btn  w3-round-xxlarge w3-black w3-hide" style="width:120px;height:35px"  href="{{=URL('treatment','list_treatmentplans',vars=dict(page=page+1,providerid=providerid,memberid=memberid))}}">Next</a> 
+ {{pass}}
+ </div>
+{{pass}} 
+
+ <br/>
+{{if (dstplans != None):}}
+{{for i in xrange(0, len(dstplans),1): }}
+{{if i==items_per_page: break}}
+
+  <div class="w3-container  w3-pale-white w3-topbar  w3-border-grey w3-border w3-section ">
+  
+    {{if(i%2 == 0):}}
+    <li class="w3-padding-4">
+      <span class="w3-small"><strong>Treatment Plan:{{=dstplans[i].treatmentplan.treatmentplan}}</strong>&nbsp;&nbsp;&nbsp;&nbsp;<strong>Member:</strong>{{=dstplans[i].patientmember.fname}}&nbsp;&nbsp;{{=dstplans[i].patientmember.lname}}&nbsp;&nbsp;&nbsp;&nbsp;<strong>Patient:</strong>{{=dstplans[i].treatmentplan.patientname}}&nbsp;&nbsp;({{=dstplans[i].treatmentplan.patienttype}})&nbsp;&nbsp;&nbsp;&nbsp;<strong>Status:</strong>{{=dstplans[i].treatmentplan.status}}&nbsp;&nbsp;&nbsp;&nbsp;<strong>Start Dt:</strong>{{=dstplans[i].treatmentplan.startdate}}</span>&nbsp;&nbsp;&nbsp;&nbsp;
+      <span class="w3-small"><strong>Total Treatment Cost:</strong>{{=dstplans[i].treatmentplan.totaltreatmentcost}}&nbsp;&nbsp;<strong>Total Ins. Pays:</strong>{{=dstplans[i].treatmentplan.totalinspays}}&nbsp;&nbsp;&nbsp;&nbsp;<strong>Total Co-Pay:</strong>{{=dstplans[i].treatmentplan.totalcopay}}
+      &nbsp;&nbsp;&nbsp;&nbsp;<strong>Total Member Pays:</strong>{{=dstplans[i].treatmentplan.totaltreatmentcost - dstplans[i].treatmentplan.totalinspays  - dstplans[i].treatmentplan.totalcopay}}</span><br/>
+      <span class="w3-small"><strong>Descritpion:</strong>{{=dstplans[i].treatmentplan.description}}</span><br/>
+      
+      <nav class="w3-topnav w3-theme">
+        <a href="{{=URL('treatment','treatmentplan_update',vars=dict(tplanid=dstplans[i].treatmentplan.id,memberid=dstplans[i].treatmentplan.primarypatient,providerid=providerid,providername=providername,page=page))}}" class="w3-btn w3-white w3-border w3-border-black w3-margin-left w3-margin-right" style="width:10%">Treatment Plan Details</a>
+        <a href="{{=URL('treatment','list_treatments',vars=dict(tplanid=dstplans[i].treatmentplan.id,memberid=dstplans[i].treatmentplan.primarypatient,providerid=providerid,providername=providername,page=page))}}" class="w3-btn w3-white w3-border w3-border-black w3-margin-left w3-margin-right" style="width:10%">Treatments</a>
+        <a href="{{=URL('reports','treatmentreport',vars=dict(tplanid=dstplans[i].treatmentplan.id,providerid=providerid,providername=providername,page=page))}}" class="w3-btn w3-white w3-border w3-border-black w3-margin-left w3-margin-right" style="width:10%">Report</a>
+        <a href="{{=URL('payment','list_payment',vars=dict(tplanid=dstplans[i].treatmentplan.id,providerid=providerid,providername=providername,page=page))}}" class="w3-btn w3-white w3-border w3-border-black w3-margin-left w3-margin-right" style="width:10%">Payments</a>
+      </nav>        
+    </li>  
+    {{else:}}
+    <li class="w3-padding-4 w3-light-grey">
+      <span class="w3-small"><strong>Treatment Plan:{{=dstplans[i].treatmentplan.treatmentplan}}</strong>&nbsp;&nbsp;&nbsp;&nbsp;<strong>Member:</strong>{{=dstplans[i].patientmember.fname}}&nbsp;&nbsp;{{=dstplans[i].patientmember.lname}}&nbsp;&nbsp;&nbsp;&nbsp;<strong>Patient:</strong>{{=dstplans[i].treatmentplan.patientname}}&nbsp;&nbsp;({{=dstplans[i].treatmentplan.patienttype}})&nbsp;&nbsp;&nbsp;&nbsp;<strong>Status:</strong>{{=dstplans[i].treatmentplan.status}}&nbsp;&nbsp;&nbsp;&nbsp;<strong>Start Dt:</strong>{{=dstplans[i].treatmentplan.startdate}}</span>&nbsp;&nbsp;&nbsp;&nbsp;
+      <span class="w3-small"><strong>Total Treatment Cost:</strong>{{=dstplans[i].treatmentplan.totaltreatmentcost}}&nbsp;&nbsp;<strong>Total Ins. Pays:</strong>{{=dstplans[i].treatmentplan.totalinspays}}&nbsp;&nbsp;&nbsp;&nbsp;<strong>Total Co-Pay:</strong>{{=dstplans[i].treatmentplan.totalcopay}}
+      &nbsp;&nbsp;&nbsp;&nbsp;<strong>Total Member Pays:</strong>{{=dstplans[i].treatmentplan.totaltreatmentcost - dstplans[i].treatmentplan.totalinspays  - dstplans[i].treatmentplan.totalcopay}}</span><br/>
+      <span class="w3-small"><strong>Descritpion:</strong>{{=dstplans[i].treatmentplan.description}}</span><br/>
+      
+      <nav class="w3-topnav w3-theme">
+        <a href="{{=URL('treatment','treatmentplan_update',vars=dict(tplanid=dstplans[i].treatmentplan.id,memberid=dstplans[i].treatmentplan.primarypatient,providerid=providerid,providername=providername,page=page))}}" class="w3-btn w3-white w3-border w3-border-black w3-margin-left w3-margin-right" style="width:10%">Treatment Plan Details</a>
+        <a href="{{=URL('treatment','list_treatments',vars=dict(tplanid=dstplans[i].treatmentplan.id,memberid=dstplans[i].treatmentplan.primarypatient,providerid=providerid,providername=providername,page=page))}}" class="w3-btn w3-white w3-border w3-border-black w3-margin-left w3-margin-right" style="width:10%">Treatments</a>
+        <a href="{{=URL('reports','treatmentreport',vars=dict(tplanid=dstplans[i].treatmentplan.id,providerid=providerid,providername=providername,page=page))}}" class="w3-btn w3-white w3-border w3-border-black w3-margin-left w3-margin-right" style="width:10%">Report</a>
+        <a href="{{=URL('payment','list_payment',vars=dict(tplanid=dstplans[i].treatmentplan.id,providerid=providerid,providername=providername,page=page))}}" class="w3-btn w3-white w3-border w3-border-black w3-margin-left w3-margin-right" style="width:10%">Payments</a>
+      </nav>        
+    </li>  
+    {{pass}}
+      
+              
+    </div>
+  {{pass}}
+  {{pass}}    
+
+
+
+ 
+ {{pass}}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

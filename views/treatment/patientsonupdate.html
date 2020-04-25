@@ -1,0 +1,11 @@
+
+
+	 <select id="patients" class="form_details " style="width:100%;height:35px" onchange="changePatients()">
+        {{for pat in patients:}}
+        {{if(pat.auxid == pid):}}
+             <option selected="selected" value='{{=pat.auxid}}'>{{=pat.fname}},{{=pat.lname}},{{=pat.patienttype}}</option>
+        {{else:}}        
+             <option value='{{=pat.auxid}}'>{{=pat.fname}},{{=pat.lname}},{{=pat.patienttype}}</option>	     
+        {{pass}}
+        {{pass}}
+    </select>

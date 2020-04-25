@@ -1,0 +1,146 @@
+{{extend 'pms2_layoutw4.html'}}
+
+
+<style>
+#suggestions { position: relative; z-index:300000}
+.suggestions { background: white; border: solid 1px #55A6C8; }
+.suggestions DIV { padding: 2px 4px 2px 4px; }
+
+#dentalsuggestions { position: relative; z-index:300000}
+.dentalsuggestions { background: white; border: solid 1px #55A6C8; }
+.dentalsuggestions DIV { padding: 2px 4px 2px 4px; }
+
+</style>
+
+
+<div class="row">
+{{=form.custom.begin}} 
+    <div class="col-md-12"  >
+        <div class="row" style="width:100%">
+            <div class="col-md-12" style="margin-bottom: 18px;">
+            <label class="m_title">Date</label>
+                <div class="input-group">
+                       {{=form.custom.widget.consentdate}}
+		</div>
+            </div>
+
+            <div class="col-md-12" style="margin-bottom: 18px;">
+            <label class="m_title">Attending Doctor</label>
+	    
+                <div class="input-group">
+                       {{=form.custom.widget.doctor}}
+		</div>
+            </div>
+            <div class="col-md-12" style="margin-bottom: 18px;z-index:30000">
+            <label class="m_title">Dental Procedure / Treatment</label>
+                <div class="input-group" style="z-index:-5">
+                       {{=form.custom.widget.dentalprocedure}}
+		</div>
+		<div style="position: absolute;" id="dentalsuggestions" class="suggestions"  >
+		</div>
+
+            </div>
+	
+	
+            <div class="col-md-12" style="margin-bottom: 18px;">
+            <label class="m_title">Patient</label>
+                <div class="input-group">
+                       {{=form.custom.widget.patientmember1}}
+		</div>
+		<div id="hide" style="display:none;" >
+		    <p id="phide">Click <strong>X</strong> to close the Patient List after selection</p>
+		</div>
+		<div style="position: absolute;" id="suggestions" class="suggestions"  >
+		</div>
+                
+            </div>
+
+            <div class="col-md-12" style="margin-bottom: 18px;">
+            <label class="m_title">Consent Forms</label>
+	    
+                <div class="input-group">
+                       {{=form.custom.widget.consentform}}
+		</div>
+            </div>
+	    <br/>
+	    <br/>
+	    <div class="col-md-12" style="margin-bottom:30px">
+	       <button type="submit" class="btn green">View/Print </button>
+	       <a href="{{=returnurl}}">Cancel </a>
+	       
+	    </div>
+	    
+        </div>
+  </div>
+<div style="display:none;">
+    {{=form.custom.widget.xpatientmember1}}
+    {{=form.custom.submit}}
+</div>
+
+
+{{=form.custom.end}} 
+</div>
+
+
+<script>
+
+
+
+jQuery("#no_table_dentalprocedure").keyup(function(){
+
+       $("#dentalsuggestions").show();
+       var x = $('#no_table_dentalprocedure').val();
+      ajax('{{=URL('admin', 'dentalprocedure_selector')}}', ['dentalprocedure'], 'dentalsuggestions')});
+
+
+
+jQuery("#no_table_patientmember1").keyup(function(){
+
+       $("#suggestions").show();
+       var x = $('#no_table_patientmember1').val();
+       
+       $("#no_table_xpatientmember1").val(x);
+       
+      ajax('{{=URL('admin', 'patient_selector')}}', ['xpatientmember1'], 'suggestions')});
+      
+
+      
+$(document).ready(function(){
+   
+   
+    
+     $("#suggestions").show();
+    
+    
+    $("#suggestions") .click(function(){
+      
+	x= $("#no_table_patientmember1").val();
+
+	
+	$("#no_table_xpatientmember1").val(x);
+	
+	var strarr = x.split(":")
+
+	$("#no_table_patientmember1").val(strarr[0])
+	
+
+	$("#suggestions").hide();
+	
+    
+    });
+   
+    
+     $("#dentalsuggestions") .click(function(){
+      
+	
+	
+
+	$("#dentalsuggestions").hide();
+	
+    
+    });
+   
+    
+ });
+         
+</script>

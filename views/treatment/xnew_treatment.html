@@ -1,0 +1,213 @@
+{{extend 'pms2_layoutw3.html'}}
+
+<style>
+#suggestions { position: relative; }
+.suggestions { background: white; border: solid 1px #55A6C8; }
+.suggestions DIV { padding: 2px 4px 2px 4px; }
+</style>
+
+ <header class="w3-container w3-blue-grey">
+  {{if(membername <> ""):}}
+        <h4><strong>New Treatment for {{=patientname}} (Enrolled Member: {{=membername}})</strong></h4>
+  {{else:}}
+          <h4><strong>New Treatment</strong></h4>
+  {{pass}}
+  </header>
+<br/>
+
+<div class="w3-bar w3-black">
+  <button class="w3-bar-item w3-button tablink w3-green" onclick="openTreatment(event,'Treatment')">Treatment</button>
+ 
+</div>
+
+
+{{=formTreatment.custom.begin}} 
+<div id="Treatment" class="w3-container w3-display-container mdp">
+  <span onclick="this.parentElement.style.display='none'"
+  class="w3-button w3-large w3-display-topright">&times;</span>
+  <label class="w3-text-black w3-margin-left"><b>Patient Lookup:</b></label>
+  <div class="w3-cell-row" style="width:100%">
+  
+    <div class="w3-container  w3-cell">
+      {{=formTreatment.custom.widget.patientmember}}
+    </div>
+  </div>  
+ 
+  
+<div id="hide" style="display:none" >
+
+ <p id="phide">Click here to hide the patient list after selection</p>
+</div>
+ 
+<div style="position: absolute;" id="suggestions" class="suggestions">
+</div>
+
+
+
+
+<div class="w3-row-padding  ">
+  <div class="w3-half" style='line-height:1.5;'>
+    <label>Dental Procedure</label><br/>
+      {{=formTreatment.custom.widget.vwdentalprocedure}}
+  </div>
+  <div class="w3-half" style='line-height:1.5;'>
+    <label>Treatment Status</label><br/>
+   {{=formTreatment.custom.widget.status}}
+  </div>
+</div>
+
+<div class="w3-row-padding  ">
+  <div class="w3-half" style='line-height:1.5;'>
+    <label>Quadrant</label><br/>
+    {{=formTreatment.custom.widget.quadrant}}
+  </div>
+  <div class="w3-half" style='line-height:1.5;'>
+    <label>Tooth</label><br/>
+   {{=formTreatment.custom.widget.tooth}}
+  </div>
+</div>
+
+<div class="w3-row-padding  ">
+  <div class="w3-half" style='line-height:1.5;'>
+    <label>Start Date</label><br/>
+    {{=formTreatment.custom.widget.startdate}}
+  </div>
+
+</div>
+
+
+
+<div class="w3-row-padding  ">
+<div class="w3-container w3-full">
+  <label>Notes</label><br/>
+   {{=formTreatment.custom.widget.description}}
+</div>    
+</div>
+     
+
+<div class="w3-container w3-hide">
+     {{=formTreatment.custom.submit}}
+     {{=formTreatment.custom.widget.dentalprocedure}}
+     {{=formTreatment.custom.widget.treatmentplan}}
+     {{=formTreatment.custom.widget.treatment}}
+      {{=formTreatment.custom.widget.xmemberid}}
+     
+     {{=formTreatment.custom.widget.inspay}}
+      {{=formTreatment.custom.widget.copay}}
+       {{=formTreatment.custom.widget.treatmentcost}}
+       {{=formTreatment.custom.widget.enddate}}
+  </div>
+     <input type="text" style="display:none;" name="proccode" id = "proccode" readonly>  
+     <input type="text" style="display:none;"  name="procdesc" id = "procdesc" readonly>
+</div>
+
+
+
+
+<div class="w3-container w3-padding-0 w3-hide">
+{{=formTreatment.custom.widget.xfullname}}
+{{=formTreatment.custom.widget.xpatientmember}}
+{{=formTreatment.custom.submit}}
+</div>
+
+
+ 
+ 
+ <br/>
+
+<div class="w3-container w3-padding-4">
+<div class="w3-bar">
+  <a href="{{=returnurl}}" class="w3-button w3-left  w3-green" style="height:40px;width:20%">Cancel</a>
+  
+  <button class="w3-button w3-right w3-black" style="height:40px;width:20%"><i class="fa fa-save w3-margin-right"></i>Click to Save</button> 
+</div>
+</div>
+
+ 
+ </div>
+ 
+ 
+{{=formTreatment.custom.end}} 
+
+
+
+
+
+<script>
+function openTreatment(evt, mdpEvent) {
+  var i, x, tablinks;
+  x = document.getElementsByClassName("mdp");
+  for (i = 0; i < x.length; i++) {
+      x[i].style.display = "none";
+  }
+  tablinks = document.getElementsByClassName("tablink");
+  for (i = 0; i < x.length; i++) {
+      tablinks[i].className = tablinks[i].className.replace(" w3-green", "");
+  }
+  document.getElementById(mdpEvent).style.display = "block";
+  evt.currentTarget.className += " w3-green";
+};
+
+jQuery("#no_table_patientmember").keyup(function(){
+
+       $("#suggestions").show();
+       var x = $('#no_table_patientmember').val();
+       
+       $("#no_table_xpatientmember").val(x);  
+       
+       
+      ajax('{{=URL('treatment', 'treatmentpatient_selector')}}', ['patientmember','xmemberid'], 'suggestions')});
+
+$(document).ready(function(){
+   
+    $("#hide").hide();
+    $("#phide").click(function(){
+       ajax('{{=URL('treatment', 'treatment_hide')}}',  ['patientmember','xmemberid'], 'suggestions')
+        $("#hide").hide();
+    });   
+   
+    $("#suggestions").show();
+    
+    $("#suggestions") .click(function(){
+      
+	x= $("#no_table_patientmember").val();
+
+	
+	$("#no_table_xpatientmember").val(x);
+	
+	var strarr = x.split(":")
+	$("#no_table_patientmember").val(strarr[0])
+
+	$("#suggestions").hide();
+	
+    
+    });
+    
+    $("#vwdentalprocedure").change(function(){
+       var x = $('#vwdentalprocedure').val();
+       var y = $('#vwdentalprocedure :selected').text();
+       var z = $('#vwdentalprocedure :selected').index();
+       var procs=x.split("|")
+       alert('x = ' + x)
+       
+       $("#no_table_dentalprocedure").val(procs[0]);
+       $("#no_table_treatmentcost").val(procs[3]);
+       $("#no_table_copay").val(procs[5]);
+       
+       $("#proccode").val(procs[1]);
+       $("#procdesc").val(procs[2]); 
+       $("#ucrfee").val(procs[4]); 
+      
+    });
+});
+
+
+
+
+
+
+
+
+
+</script>
+

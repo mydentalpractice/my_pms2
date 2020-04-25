@@ -1,0 +1,351 @@
+{{extend 'pms2_layoutw3.html'}}
+
+<script type="text/javascript" src="../static/wspaint/lib/jquery.1.10.2.min.js"></script>
+<!-- jQuery UI -->
+<script type="text/javascript" src="../static/wspaint/lib/jquery.ui.core.1.10.3.min.js"></script>
+<script type="text/javascript" src="../static/wspaint/lib/jquery.ui.widget.1.10.3.min.js"></script>
+<script type="text/javascript" src="../static/wspaint/lib/jquery.ui.mouse.1.10.3.min.js"></script>
+<script type="text/javascript" src="../static/wspaint/lib/jquery.ui.draggable.1.10.3.min.js"></script>
+
+<!-- wColorPicker -->
+<link rel="Stylesheet" type="text/css" href="../static/wspaint/lib/wColorPicker.min.css" />
+<script type="text/javascript" src="../static/wspaint/lib/wColorPicker.min.js"></script>
+
+<!-- wPaint -->
+<link rel="Stylesheet" type="text/css" href="../static/wspaint/wPaint.min.css" />
+<script type="text/javascript" src="../static/wspaint/wPaint.min.js"></script>
+<script type="text/javascript" src="../static/wspaint/plugins/main/wPaint.menu.main.min.js"></script>
+<script type="text/javascript" src="../static/wspaint/plugins/text/wPaint.menu.text.min.js"></script>
+<script type="text/javascript" src="../static/wspaint/plugins/shapes/wPaint.menu.main.shapes.min.js"></script>
+<script type="text/javascript" src="../static/wspaint/plugins/file/wPaint.menu.main.file.min.js"></script>
+
+
+
+<header class="w3-container w3-blue-grey">
+    <h5>Dental Chart for  {{=patientname}}&nbsp;&nbsp;&nbsp;&nbsp;Members: {{=membername}}</h5>
+</header>
+
+	    
+
+<div class="w3-row-padding  w3-medium content-box" >
+   <div id="Dentalchert" class="w3-half">
+   <div class="w3-row-padding  w3-medium w3-center w3-hide">
+      <img   id="chart" src={{=charturl}} class="w3-image" style="width:50%"><br/><br/>
+   </div>
+
+   <div class="w3-hide">
+    <input id="chartfile" value={{=chartfile}}></input>
+    <input id="destchartfile" value={{=destchartfile}}></input>
+   </div>	
+   <div id="wPaint" style="position:relative; width:800px; height:600px;  background-color:#ffffff; margin:70px auto 20px auto;">
+ 
+    </div>
+    <div id="wPaint-img" ></div>
+     
+    <a class="w3-button w3-left  w3-green" id="chartClear"   href="{{URL('dentalchart','dentalchart',vars=dict(page=1,treatmentid=treatmentid))}}"  style="height:40px;width:20%">Clear</a>
+    
+   </div>
+   
+   <div class="w3-half">
+   
+    <div class="w3-row-padding  ">
+        <div class="w3-half" >
+          <label class="w3-text-blue">T1</label>
+           <input class="w3-input" id="t1" style="width:100%;height:35px;"></input>
+        </div>
+        <div class="w3-half" style='line-height:1.5;'>
+          <label class="w3-text-blue">T2</label>
+           <input class="w3-input" id="t2" style="width:100%;height:35px;"></input>
+        </div>
+      </div>  
+        
+   
+      <div class="w3-row-padding  ">
+        <div class="w3-half" style='line-height:1.5;'>
+          <label class="w3-text-blue">T3</label>
+           <input class="w3-input" id="t3" style="width:100%;height:35px;"></input>
+        </div>
+        <div class="w3-half" style='line-height:1.5;'>
+          <label class="w3-text-blue">T4</label>
+           <input class="w3-input" id="t4" style="width:100%;height:35px;"></input>
+        </div>
+      </div>  
+    <div class="w3-row-padding  ">
+        <div class="w3-half" >
+          <label class="w3-text-blue">T5</label>
+           <input class="w3-input" id="t5" style="width:100%;height:35px;"></input>
+        </div>
+        <div class="w3-half" style='line-height:1.5;'>
+          <label class="w3-text-blue">T6</label>
+           <input class="w3-input" id="t6" style="width:100%;height:35px;"></input>
+        </div>
+      </div>  
+        
+   
+      <div class="w3-row-padding  ">
+        <div class="w3-half" style='line-height:1.5;'>
+          <label class="w3-text-blue">T7</label>
+           <input class="w3-input" id="t7" style="width:100%;height:35px;"></input>
+        </div>
+        <div class="w3-half" style='line-height:1.5;'>
+          <label class="w3-text-blue">T8</label>
+           <input class="w3-input" id="t8" style="width:100%;height:35px;"></input>
+        </div>
+      </div>  
+   
+ 
+   <div class="w3-row-padding  ">
+        <div class="w3-half" >
+          <label class="w3-text-blue">T9</label>
+           <input class="w3-input" id="t9" style="width:100%;height:35px;"></input>
+        </div>
+        <div class="w3-half" style='line-height:1.5;'>
+          <label class="w3-text-blue">T10</label>
+           <input class="w3-input" id="t10" style="width:100%;height:35px;"></input>
+        </div>
+      </div>  
+        
+   
+      <div class="w3-row-padding  ">
+        <div class="w3-half" style='line-height:1.5;'>
+          <label class="w3-text-blue">T11</label>
+           <input class="w3-input" id="t11" style="width:100%;height:35px;"></input>
+        </div>
+        <div class="w3-half" style='line-height:1.5;'>
+          <label class="w3-text-blue">T12</label>
+           <input class="w3-input" id="t12" style="width:100%;height:35px;"></input>
+        </div>
+      </div>  
+    <div class="w3-row-padding  ">
+        <div class="w3-half" >
+          <label class="w3-text-blue">T13</label>
+           <input class="w3-input" id="t13" style="width:100%;height:35px;"></input>
+        </div>
+        <div class="w3-half" style='line-height:1.5;'>
+          <label class="w3-text-blue">T14</label>
+           <input class="w3-input" id="t14" style="width:100%;height:35px;"></input>
+        </div>
+      </div>  
+        
+   
+      <div class="w3-row-padding  ">
+        <div class="w3-half" style='line-height:1.5;'>
+          <label class="w3-text-blue">T15</label>
+           <input class="w3-input" id="t15" style="width:100%;height:35px;"></input>
+        </div>
+        <div class="w3-half" style='line-height:1.5;'>
+          <label class="w3-text-blue">T16</label>
+           <input class="w3-input" id="t16" style="width:100%;height:35px;"></input>
+        </div>
+      </div>  
+      <!---XXXX-->
+      <div class="w3-row-padding  ">
+        <div class="w3-half" >
+          <label class="w3-text-blue">T17</label>
+           <input class="w3-input" id="t17" style="width:100%;height:35px;"></input>
+        </div>
+        <div class="w3-half" style='line-height:1.5;'>
+          <label class="w3-text-blue">T18</label>
+           <input class="w3-input" id="t18" style="width:100%;height:35px;"></input>
+        </div>
+      </div>  
+        
+   
+      <div class="w3-row-padding  ">
+        <div class="w3-half" style='line-height:1.5;'>
+          <label class="w3-text-blue">T19</label>
+           <input class="w3-input" id="t19" style="width:100%;height:35px;"></input>
+        </div>
+        <div class="w3-half" style='line-height:1.5;'>
+          <label class="w3-text-blue">T20</label>
+           <input class="w3-input" id="t20" style="width:100%;height:35px;"></input>
+        </div>
+      </div>  
+    <div class="w3-row-padding  ">
+        <div class="w3-half" >
+          <label class="w3-text-blue">T21</label>
+           <input class="w3-input" id="t21" style="width:100%;height:35px;"></input>
+        </div>
+        <div class="w3-half" style='line-height:1.5;'>
+          <label class="w3-text-blue">T22</label>
+           <input class="w3-input" id="t22" style="width:100%;height:35px;"></input>
+        </div>
+      </div>  
+        
+   
+      <div class="w3-row-padding  ">
+        <div class="w3-half" style='line-height:1.5;'>
+          <label class="w3-text-blue">T23</label>
+           <input class="w3-input" id="t23" style="width:100%;height:35px;"></input>
+        </div>
+        <div class="w3-half" style='line-height:1.5;'>
+          <label class="w3-text-blue">T24</label>
+           <input class="w3-input" id="t24" style="width:100%;height:35px;"></input>
+        </div>
+      </div>  
+   
+ 
+   <div class="w3-row-padding  ">
+        <div class="w3-half" >
+          <label class="w3-text-blue">T25</label>
+           <input class="w3-input" id="t25" style="width:100%;height:35px;"></input>
+        </div>
+        <div class="w3-half" style='line-height:1.5;'>
+          <label class="w3-text-blue">T26</label>
+           <input class="w3-input" id="t26" style="width:100%;height:35px;"></input>
+        </div>
+      </div>  
+        
+   
+      <div class="w3-row-padding  ">
+        <div class="w3-half" style='line-height:1.5;'>
+          <label class="w3-text-blue">T27</label>
+           <input class="w3-input" id="t27" style="width:100%;height:35px;"></input>
+        </div>
+        <div class="w3-half" style='line-height:1.5;'>
+          <label class="w3-text-blue">T28</label>
+           <input class="w3-input" id="t28" style="width:100%;height:35px;"></input>
+        </div>
+      </div>  
+    <div class="w3-row-padding  ">
+        <div class="w3-half" >
+          <label class="w3-text-blue">T29</label>
+           <input class="w3-input" id="t29" style="width:100%;height:35px;"></input>
+        </div>
+        <div class="w3-half" style='line-height:1.5;'>
+          <label class="w3-text-blue">T30</label>
+           <input class="w3-input" id="t30" style="width:100%;height:35px;"></input>
+        </div>
+      </div>  
+        
+   
+      <div class="w3-row-padding  ">
+        <div class="w3-half" style='line-height:1.5;'>
+          <label class="w3-text-blue">T31</label>
+           <input class="w3-input" id="t31" style="width:100%;height:35px;"></input>
+        </div>
+        <div class="w3-half" style='line-height:1.5;'>
+          <label class="w3-text-blue">T32</label>
+           <input class="w3-input" id="t32" style="width:100%;height:35px;"></input>
+        </div>
+      </div>  
+   </div>
+</div>
+ 
+<script type="text/javascript">
+
+ var images = [
+          '..static/wspaint/test/uploads/test1.png',
+        ];
+
+        function saveImg(image) {
+          var _this = this;
+          var myCanvas = this.canvas;          
+          var ximage = myCanvas.toDataURL('image/png');
+          document.getElementById('chart').src = ximage;
+          ximage = ximage.replace('data:image/png;base64,', '');
+          var chartfile = document.getElementById('chartfile').value
+          var destchartfile = document.getElementById('destchartfile').value
+          var t1 = document.getElementById("t1").value 
+          var t2 = document.getElementById("t2").value
+          $.ajax({
+            type: 'POST',
+            url: '/my_pms2/dentalchart/saveImage',
+            data: {image: ximage,chartfile:chartfile,destchartfile:destchartfile,t1:t1,t2:t2},
+            success: function (resp) {
+
+              // internal function for displaying status messages in the canvas
+              _this._displayStatus('Image saved successfully');
+
+              // doesn't have to be json, can be anything
+              // returned from server after upload as long
+              // as it contains the path to the image url
+              // or a base64 encoded png, either will work
+              resp = $.parseJSON(resp);
+
+              // update images array / object or whatever
+              // is being used to keep track of the images
+              // can store path or base64 here (but path is better since it's much smaller)
+              images.push(resp.img);
+
+              // do something with the image
+              $('#wPaint-img').attr('src', image);
+            }
+          });
+        }
+
+        function loadImgBg () {
+
+          // internal function for displaying background images modal
+          // where images is an array of images (base64 or url path)
+          // NOTE: that if you can't see the bg image changing it's probably
+          // becasue the foregroud image is not transparent.
+          this._showFileModal('bg', images);
+        }
+
+        function loadImgFg () {
+
+          // internal function for displaying foreground images modal
+          // where images is an array of images (base64 or url path)
+          this._showFileModal('fg', images);
+        }
+
+        // init wPaint
+        $('#wPaint').wPaint({
+          menuOffsetLeft: 5,
+          menuOffsetTop: -50,
+          saveImg: saveImg,
+          loadImgBg: loadImgBg,
+          loadImgFg: loadImgFg,
+          image: document.getElementById('chartfile').value
+          
+    
+        });        
+       
+function chartClear(){
+
+    document.getElementById("t1").value = "";
+    document.getElementById("t2").value = "";
+    document.getElementById("t3").value = "";
+    document.getElementById("t4").value = "";
+    document.getElementById("t5").value = "";
+    document.getElementById("t6").value = "";
+    document.getElementById("t7").value = "";
+    document.getElementById("t8").value = "";
+
+    document.getElementById("t9").value = "";
+    document.getElementById("t10").value = "";
+    document.getElementById("t11").value = "";
+    document.getElementById("t12").value = "";
+    document.getElementById("t13").value = "";
+    document.getElementById("t14").value = "";
+    document.getElementById("t15").value = "";
+    document.getElementById("t16").value = "";
+
+    document.getElementById("t17").value = "";
+    document.getElementById("t18").value = "";
+    document.getElementById("t19").value = "";
+    document.getElementById("t20").value = "";
+    document.getElementById("t21").value = "";
+    document.getElementById("t22").value = "";
+    document.getElementById("t23").value = "";
+    document.getElementById("t24").value = "";
+
+    document.getElementById("t25").value = "";
+    document.getElementById("t26").value = "";
+    document.getElementById("t27").value = "";
+    document.getElementById("t28").value = "";
+    document.getElementById("t29").value = "";
+    document.getElementById("t30").value = "";
+    document.getElementById("t31").value = "";
+    document.getElementById("t32").value = "";
+    
+     ajax('{{=URL("dentalchart", "chartClear", vars=dict(page=page,returnurl=returnurl,tplanid=tplanid,treatmentid=treatmentid,providerid=providerid,providername=providername,membername=membername,\
+    patientname=patientname,charturl=charturl,chartfile=chartfile,destchartfile=destchartfile))}}', ['chartfile', 'destchartfile'] , 'Dentalchart');
+};       
+       
+       
+    </script>  
+    
+    
+

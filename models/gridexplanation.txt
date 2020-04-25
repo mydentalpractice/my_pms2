@@ -1,0 +1,80 @@
+Keith Planer 	
+12/31/13
+def patient_lookup():
+    db.consumer.id.readable=False
+    var = request.args(0)
+    grid = []
+    links=[lambda row: A('Note',_href=URL('default', 'notes',args=[row.id])),
+           lambda row: A('Diagnosis',_href=URL('default', 'diagnosis_lookup',args=[row.id])),
+           lambda row: A('Orders',_href=URL('default', 'phys_order',args=[row.id]))]
+    form = FORM("Last Name: ",INPUT(_name='lname'),INPUT(_type='submit'))
+    if form.accepts(request.vars, session):
+        query=(db.consumer.lname.like(form.vars.lname+'%'))
+        grid=SQLFORM.grid(query, deletable=False,  searchable=False, create=False, csv=False, paginate=5, links=links, user_signature=True, headers={'...'})
+return dict(form=form, grid=grid)
+
+
+
+
+The behavior its showing is that when I hit submit, it'll bring back the first page of records, When I hit the link for another page, the grid will just show the [] that I have on the 4th line. I would get rid of it but the page breaks without it.When I hit the submit button again, the grid will show the page that I wanted to see before. I hit the link for another page and just "[]" again. And so on....
+This post has been edited
+	Kyle Flanagan 	
+12/31/13
+My web2py experience is limited, but it seems you're losing your form.vars.lname variable when you navigate to the next page. You'll need to assign it to a request.vars, session, or some other persistent variable and then use that to build your query instead of form.vars.lname. 
+- show quoted text -
+0
+0
+	Anthony 	
+12/31/13
+Of course. Your function creates and returns a grid only when the form is submitted -- otherwise it never gets through your form.accepts test. You might be better off using the built-in grid search functionality. You can modify the search to only search the lname field. You just have to add some logic to make sure no records are shown on the initial page load (before a keyword is entered in the search box):
+
+    query = db.consumer if request.vars.keywords else db.consumer.id < 0
+    grid = SQLFORM.grid(query, searchable=lambda f, k: db.consumer.lname == k)
+    search_input = grid.element('#w2p_keywords')
+    search_input and search_input.attributes.pop('_onfocus')
+
+db.consumer.id < 0 will return no records, which will happen on the initial page load (before any keywords have been entered). The "searchable" argument to the grid can be a callable that takes a list of fields and a keywords string and returns a query (the above simply checks for records with lname equal to the keywords entered). The last two lines simply disable the Javascript search widget in the grid, so all you get is a plain text box. With the above, you don't need your separate form to enter the lname.
+
+Anthony
+
+
+On Tuesday, December 31, 2013 1:34:06 PM UTC-5, Keith Planer wrote:
+
+    def patient_lookup():
+        db.consumer.id.readable=False
+        var = request.args(0)
+        grid = []
+        links=[lambda row: A('Note',_href=URL('default', 'notes',args=[row.id])),
+               lambda row: A('Diagnosis',_href=URL('default', 'diagnosis_lookup',args=[row.id])),
+               lambda row: A('Orders',_href=URL('default', 'phys_order',args=[row.id]))]
+        form = FORM("Last Name: ",INPUT(_name='lname'),INPUT(_type='submit'))
+        if form.accepts(request.vars, session):
+            query=(db.consumer.lname.like(form.vars.lname+'%'))
+            grid=SQLFORM.grid(query, deletable=False,  searchable=False, create=False, csv=False, paginate=5, links=links, user_signature=True, headers={'...'})
+    return dict(form=form, grid=grid)
+
+
+
+
+    The behavior its showing is that when I hit submit, it'll bring back the first page of records, When I hit the link for another page, the grid will just show the [] that I have on the 4th line. I would get rid of it but the page breaks without it.When I hit the submit button again, the grid will show the page that I wanted to see before. I hit the link for another page and just "[]" again. And so on....
+
+
+
+Haversine
+from math import radians, cos, sin, asin, sqrt
+
+def haversine(lon1, lat1, lon2, lat2):
+    """
+    Calculate the great circle distance between two points 
+    on the earth (specified in decimal degrees)
+    """
+    # convert decimal degrees to radians 
+    lon1, lat1, lon2, lat2 = map(radians, [lon1, lat1, lon2, lat2])
+
+    # haversine formula 
+    dlon = lon2 - lon1 
+    dlat = lat2 - lat1 
+    a = sin(dlat/2)**2 + cos(lat1) * cos(lat2) * sin(dlon/2)**2
+    c = 2 * asin(sqrt(a)) 
+    r = 6371 # Radius of earth in kilometers. Use 3956 for miles
+    return c * r

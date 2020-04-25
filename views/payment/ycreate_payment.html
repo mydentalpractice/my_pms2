@@ -1,0 +1,383 @@
+{{extend 'pms2_layoutw4.html'}}
+
+{{=formA.custom.begin}}
+
+
+<style>
+[type="text"], [type="password"], select{padding: 8px 10px;width: 100%;}
+</style>
+
+                        <div class="row">
+                            <div class="col-md-12">
+                                <!-- BEGIN EXAMPLE TABLE PORTLET-->
+                                <div class="portlet light bordered">
+                                    <div class="portlet-title">
+                                        <div class="caption font-white">
+                                            <i class="fa fa-money" style="color:#fff"></i>
+                                            <span class="caption-subject bold uppercase"> New Payment</span>
+                                        </div>
+                                       
+                                    </div>
+                                    <div class="col-md-12">
+                                    <!-- BEGIN Portlet PORTLET-->
+                                    <div class="col-sm-12 md_r">
+				    
+				    
+                                       
+                                        <div class="portlet-body" style="padding:20px">
+                                            <div class="col-md-12 np">
+					    
+                                                   <div class="col-md-4">
+                                                       <div class="form-group">
+                                                        <label class="m_title">Patient</label><br/>
+							
+                                                              <div class="input-group" style="width:100%">
+								   {{=patient}}
+                                                              </div>
+                                                       </div>
+                                                  </div>
+					    
+                                                  <div class="col-md-4">
+                                                       <div class="form-group">
+                                                        <label class="m_title">Treatment</label>
+                                                              <div class="input-group" style="width:100%">
+							      {{=treatment}}
+							      </div>
+                                                       </div>
+                                                  </div>
+						  
+						  
+					   <div class="col-md-12 np">
+                                                  <div class="col-md-3">
+                                             
+                                                       <div class="mt-repeater-input">
+                                                                    <label class="m_title">Treatment Fee</label>
+                                                                    <br>
+                                                                    {{=treatmentcost}}
+                                                       </div>  
+                                                  
+                                                   </div>
+						    
+						
+                                                  <div class="col-md-3">
+                                             
+                                                       <div class="mt-repeater-input">
+						       {{if(hmopatientmember == True):}}
+                                                                    <label class="m_title">Authorized Payment by Insurance</label>
+                                                                    <br>
+                                                                    {{=inspays}}
+							 {{pass}}
+                                                       </div>  
+                                                  
+                                                   </div>
+						  
+						  
+						  
+                                                  <div class="col-md-3">
+                                             
+                                                       <div class="mt-repeater-input">
+						        
+							{{if(hmopatientmember == True):}}
+                                                                    <label class="m_title">CoPay by Patient</label>
+                                                                    <br>
+                                                                    {{=copay}}
+							{{pass}}	    
+                                                       </div>  
+                                                  
+                                                   </div>
+						   
+						   
+						   <div class="col-md-3 np" >
+						  <h5><strong>Running Payment Total for this treatment</strong></h5>
+                                                  <div class="col-md-3">
+                                             
+                                                       <div class="mt-repeater-input">
+                                                                    <label class="m_title">Total Paid</label>
+                                                                    <br>
+                                                                    {{=totalpaid}}
+                                                       </div>  
+                                                  
+                                                   </div>
+						
+                                                  <div class="col-md-3">
+                                             
+                                                       <div class="mt-repeater-input">
+                                                                    <label class="m_title">Total Due</label>
+                                                                    <br>
+                                                                    {{=totaldue}}
+                                                       </div>  
+                                                  
+                                                   </div>
+						
+                                            </div>
+					   
+                                            </div>                                          
+				     
+												    
+
+				              
+						<div class="col-md-12 np" style="display:none">
+						 
+                                                  <div class="col-md-4">
+								 
+                                                       <div class="mt-repeater-input">
+                                                                    <label class="m_title">Total Fees</label>
+                                                                    <br>
+                                                                    {{=totaltreatmentcost}}
+                                                       </div>  
+                                                  
+                                                   </div>
+
+                                                  <div class="col-md-4">
+                                             
+                                                       <div class="mt-repeater-input">
+                                                                    <label class="m_title">Total Authorized Pay</label>
+                                                                    <br>
+                                                                    {{=totalinspays}}
+                                                       </div>  
+                                                  
+                                                   </div>
+
+                                                  <div class="col-md-4">
+                                             
+                                                       <div class="mt-repeater-input">
+                                                                    <label class="m_title">Total Copay</label>
+                                                                    <br>
+                                                                    {{=totalcopay}}
+                                                       </div>  
+                                                  
+                                                   </div>
+
+				                  </div>
+						  <hr>
+						  
+						                            
+                                     
+					    
+					    
+                                             <div class="col-md-12 np">
+                                           
+						  
+                                                  <div class="col-md-3">
+                                             
+                                                       <div class="mt-repeater-input">
+                                                                    <label class="m_title">Payment Date</label>
+                                                                    <br>
+                                                                    {{=formA.custom.widget.paymentdate}}
+                                                       </div>  
+                                                  
+                                                   </div>
+						   
+                                                       <div class="col-md-3">
+                                                           <div class="mt-repeater-input">
+                                                                        <label class="m_title">Amount</label>
+                                                                        <br/>
+                                                                         {{=formA.custom.widget.amount}}
+                                                           </div>  
+                                                       </div> 
+						       
+                                                       <div class="col-md-3" style="display:none">
+                                                           <div class="mt-repeater-input" >
+                                                                        <label class="m_title">Payment Type</label>
+									<br/>
+                                                                       {{=formA.custom.widget.paymenttype}}
+                                                           </div>  
+                                                       </div>  
+						       
+                                                       <div class="col-md-3" style="display:none">
+                                                           <div class="mt-repeater-input">
+                                                                        <label class="m_title">Payment Mode</label>
+									<br/>
+                                                                      {{=formA.custom.widget.paymentmode}}
+                                                           </div>  
+                                                       </div>
+                                           </div>   
+                                           <div class="col-md-12" style="margin:5px 5px 30px 5px">
+                                                    <label class="m_title">Notes</label>
+                                                    {{=formA.custom.widget.notes}}
+                                            </div> 
+											<div class="col-md-12">
+                                              
+					       <span>
+						   
+						   
+						   
+						   
+					       
+                                              
+                                               <a href="{{=returnurl}}" class="btn green w3-right" style="margin-top: 8px;">Cancel </a>&nbsp;&nbsp;
+											   <button  style="margin: 8px 3px; display:none" type="submit" id="chequePayment" onclick="loader(this.id),makeChequePayment()" class="btn green w3-right">Cheque Payment </button>&nbsp;&nbsp;
+											   <button style="margin: 8px 3px;" type="button" id="CKP1"  class="btn green w3-right" data-toggle="modal" data-target="#myModal">Cheque Payment  </button>
+											   <button id="CP1" style="margin: 8px 3px;"type="submit" onclick="loader(this.id),makeCashPayment()" class="btn green w3-right">Cash Payment <i class="fa fa-spinner fa-spin" id="loaderDIVCP1" style="display:none"></i></button>&nbsp;&nbsp;
+											   <button id="CP0" style="margin: 8px 3px;"type="submit"   onclick="loader(this.id),makeCashlessPayment()" class="btn green w3-right">Cashless Payment <i class="fa fa-spinner fa-spin" id="loaderDIVCP0" style="display:none"></i></button>&nbsp;&nbsp;
+											   <button id="OP" style="margin: 8px 3px;" type="submit"  onclick="loader(this.id),makeOnlinePayment()" class="btn green w3-right">Online Payment <i class="fa fa-spinner fa-spin" id="loaderDIVOP" style="display:none"></i></button>
+					       
+					      </span>
+					       
+					       
+                                            </div>
+
+                                           <div class="col-md-12" style="margin:5px 5px 30px 5px;">
+						{{=formC}}
+                                            </div> 
+                                            <div class="col-md-12" style="margin:5px 5px 30px 5px;">
+						{{=formB}}
+                                            </div> 
+					    
+					                                                              
+                                            <br/>
+					    <h5></h5>
+					    
+					    
+					
+                                        </div>
+                                    </div>
+                                    <!-- END Portlet PORTLET-->
+                                  </div>
+
+                                </div>
+                                <!-- END EXAMPLE TABLE PORTLET-->
+                                
+
+
+
+
+
+
+                            </div>
+                        </div>
+                        
+                 
+<div style="display:none">
+{{=formA.custom.widget.is_active}}
+{{=formA.custom.widget.treatmentplan}}
+{{=formA.custom.widget.patientmember}}
+{{=formA.custom.widget.provider}}
+
+{{=formA.custom.widget.fp_paymentref}}
+{{=formA.custom.widget.fp_paymenttype}}
+{{=formA.custom.widget.fp_paymentdate}}
+{{=formA.custom.widget.fp_paymentdetail}}
+{{=formA.custom.widget.fp_cardtype}}
+{{=formA.custom.widget.fp_merchantid}}
+{{=formA.custom.widget.fp_merchantdisplay}}
+{{=formA.custom.widget.fp_invoice}}
+{{=formA.custom.widget.fp_invoiceamt}}
+{{=formA.custom.widget.fp_amount}}
+{{=formA.custom.widget.fp_fee}}
+{{=formA.custom.widget.fp_error}}
+{{=formA.custom.widget.fp_errormsg}}
+{{=formA.custom.widget.fp_otherinfo}}
+                
+
+</div> 
+                        
+
+{{=formA.custom.end}}
+
+
+
+<script>
+
+
+jQuery(document).ready(function(){
+    
+    changeTreatmentPlan();
+});
+
+
+function changeTreatmentPlan(){
+
+
+var tpopts = document.getElementById("treatmentplans");
+var tp = tpopts.options[tpopts.selectedIndex].value;
+var x = document.getElementById("payment_treatmentplan");
+    x.value = tp;
+
+    ajax('{{=URL('payment','paymentsummary')}}', ['treatmentplan','patientmember','provider'], 'treatmentcost');
+
+
+
+};
+
+function changeMembers(){
+
+
+var ppopts = document.getElementById("patients");
+
+var pp = ppopts.options[ppopts.selectedIndex].value;
+
+var x = document.getElementById("payment_patientmember");
+    x.value = pp;
+    
+ajax('{{=URL('payment','tplans')}}', ['patientmember','provider'], 'tplandiv');
+
+
+   
+};
+
+function makeOnlinePayment(){
+   
+    var x = document.getElementById("payment_paymentmode")
+    x.value = 'Credit'
+}
+
+function makeCashPayment(){
+    var x = document.getElementById("payment_paymentmode")
+    x.value = 'Cash'
+}
+
+function makeCashlessPayment(){
+
+    var x = document.getElementById("payment_paymentmode")
+    x.value = 'Cashless'
+    
+    var y = document.getElementById("payment_amount")
+    y.value = 0
+}
+
+function makeChequePayment(){
+    var x = document.getElementById("payment_paymentmode")
+    x.value = 'Cheque'
+    document.getElementById("chequePayment").click()
+    
+}
+
+
+
+
+</script>
+
+
+<!-- Modal -->
+  <div class="modal fade" id="myModal" role="dialog">
+    <div class="modal-dialog modal-lg">
+    
+      <!-- Modal content-->
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title">Cheque Payment Details</h4>
+        </div>
+        <div class="modal-body">
+          <table class="table table-bordered" style="margin-top:1%; ">
+                      <tbody>
+                        <tr>
+                           <td><strong>Cheque No :</strong>{{=formA.custom.widget.chequeno}} </td>
+                           <td><strong>Bank Name :</strong>{{=formA.custom.widget.bankname}}</td>
+                       </tr>
+                       <tr>
+                           <td><strong>Account Name:</strong>{{=formA.custom.widget.accountname}} </td>
+                           <td><strong>Account No :</strong>{{=formA.custom.widget.accountno}}</td>
+                       </tr>  </tbody>
+                     </table>
+        </div>
+        <div class="modal-footer">
+          <button id="CKP0" type="submit" class="btn btn-default" onclick="loader(this.id),makeChequePayment()" data-dismiss="modal">Submit <i class="fa fa-spinner fa-spin" id="loaderDIVCKP0" style="display:none"></i></button>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+  
+</div>

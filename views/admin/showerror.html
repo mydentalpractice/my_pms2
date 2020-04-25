@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>My PMS2</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<link rel="stylesheet" href="../static/css/w3.css" />  
+<link rel="stylesheet" href="../static/css/font-awesome.css" />  
+<link rel="stylesheet" href="https://www.w3schools.com/lib/w3-theme-white.css">
+
+{{include 'web2py_ajax.html'}}   
+</head>
+
+<body>
+
+
+<div class="w3-container">
+<img src="../static/images/logo-my-dental-plan_color.png">
+</div>
+
+  <header class="w3-container w3-black">
+    <h3>{{=errorheader}}</h3>
+  </header>
+  
+
+   <div class="w3-container">
+   
+   
+ 
+     <h5>{{=errormssg}}</h5>
+    {{=A(T(buttontext),_href=returnURL)}}
+   </div>
+  
+
+
+
+</body>
+
+<footer class="w3-container w3-blue-grey w3-border" style="text-align:right" >
+   <a  href="https://www.mydentalplan.in" target="_blank">© 2015 My Dental Plan. All Rights Reserved.</a><br/><a href={{=URL('default','termsandconditions')}} target="_blank">Terms & Conditions</a>
+</footer>
+</html> 
