@@ -1,0 +1,101 @@
+/* CSS for the Detail Forms */
+td.pms2form_details{
+    width:200px;
+    color:;
+    text-align:left;
+    border-width:0px;
+    border-style:solid;
+    left:25px;
+    top:255px;
+    z-index:10004;
+    overflow:visible;
+
+}
+
+td.pms2form_details_unlimited{
+    width:80%;
+    padding:10px 5px 10px 5px;
+    color:#0086BF;
+    background-color: #BEBEBE;
+    text-align:left;
+    border-width:0px;
+    border-style:solid;
+    left:25px;
+    top:255px;
+    z-index:10004;
+    overflow:visible;
+
+}
+
+th.pms2form_details{
+    color:#0080ff;
+    background-color: #BEBEBE;
+    padding:10px 5px 10px 5px;
+    text-align:left;
+    font-weight:normal;
+    line-height:normal;
+    font-style:normal;
+    font-family:Arial;
+    border-width:0px;
+    border-style:solid;
+    width:150px;
+
+    
+}    
+ 
+.pms2form_details_button{
+    color:white;
+    font-size:10px;
+    background:#3498d8;
+    
+}
+.pms2form_details_button_black{
+    color:white;
+    font-size:10px;
+    background:#000000;
+    
+}
+
+.w3_blue_button{
+    color:white;
+    font-size:10px;
+    background:#0000ff;
+}
+
+.w3_green_button{
+    color:white;
+    font-size:10px;
+    background:#00ff00;
+
+}
+
+.pms2-cancel-btn{
+    color:white;
+    font-size:24px;
+    background:#000000;
+    height:40px;
+    width:20%;
+}
+
+.pms2-save-btn{
+    .w3-xlarge;
+    .w3-text-blue;
+    .w3-green;
+    height:40px;
+    width:20%;
+
+}
+
+
+.item {
+  display: none;
+  }
+
+.item.current {
+  display: block;
+  }
+
+
+
+/****Extracted from Components.css *****/
+
