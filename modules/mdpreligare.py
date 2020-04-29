@@ -2005,7 +2005,7 @@ class ReligareXXX:
 		  if(memcount == 1):
 		    memcount = memcount + 1
 		    member["relationship"] = "Self"
-		    customer_id = getvalue(jsonresp,"customerid",customer_id)
+		    customer_id = getvalue(member,"customerid",customer_id)
 		    primary_customer_id = customer_id
 		  else:
 		    memcount = memcount + 1
@@ -2028,26 +2028,27 @@ class ReligareXXX:
 	      
 	      
 	      #insert/update records in provider_region_plan for this new policy number
-	      rows = db(db.provider_region_plan.policy == "Policy399").select()
-	      for r in rows:
-		
-		patid = db.provider_region_plan.update_or_insert(((db.provider_region_plan.policy==policy_name) &\
-		                                                  (db.provider_region_plan.regioncode==r.regioncode)&\
-		                                                  (db.provider_region_plan.is_active==True)),
-		  providercode = r.providercode,
-		  companycode = r.companycode,
-		  regioncode = r.regioncode,
-		  policy = policy_name,
-		  plancode = r.plancode,
-		  procedurepriceplancode = r.procedurepriceplancode,
-		  is_active = True,
-		  created_on = common.getISTFormatCurrentLocatTime(),
-		  created_by = 1 if(auth.user == None) else auth.user.id,
-		  modified_on = common.getISTFormatCurrentLocatTime(),
-		  modified_by = 1 if(auth.user == None) else auth.user.id    
-		
-		)
-		db.commit()
+	      if(policy_name != "Policy399"):
+		rows = db(db.provider_region_plan.policy == "Policy399").select()
+		for r in rows:
+		  
+		  patid = db.provider_region_plan.update_or_insert(((db.provider_region_plan.policy==policy_name) &\
+		                                                    (db.provider_region_plan.regioncode==r.regioncode)&\
+		                                                    (db.provider_region_plan.is_active==True)),
+		    providercode = r.providercode,
+		    companycode = r.companycode,
+		    regioncode = r.regioncode,
+		    policy = policy_name,
+		    plancode = r.plancode,
+		    procedurepriceplancode = r.procedurepriceplancode,
+		    is_active = True,
+		    created_on = common.getISTFormatCurrentLocatTime(),
+		    created_by = 1 if(auth.user == None) else auth.user.id,
+		    modified_on = common.getISTFormatCurrentLocatTime(),
+		    modified_by = 1 if(auth.user == None) else auth.user.id    
+		  
+		  )
+		  db.commit()
 	      
 	      
 	    else:
@@ -2384,7 +2385,8 @@ class ReligareXXX:
 	      opat = mdppatient.Patient(db, providerid)
 	      patobj = opat.getpatient(memberid, memberid, "")          
 	      #logger.loggerpms2.info("Get Religare Patient F Patiid " + str(patid))
-	      logger.loggerpms2.info("Get Religare Patient F")
+	      #logger.loggerpms2.info("Get Religare Patient F\n")
+	      #logger.loggerpms2.info(json.dumps(patobj))
 	      
 	    else:    
 	      logger.loggerpms2.info("Get Religare Patient G: " + errormessage(db,"MDP102"))
@@ -2434,11 +2436,11 @@ class ReligareXXX:
 	  
 	  if(depid == None):
 	    
-	    logger.loggerpms2.info("Get Religare Patient I depid = None")
+	    #logger.loggerpms2.info("Get Religare Patient I depid = None")
 	    r = db(db.patientmemberdependants.title == getvalue(member,"customerid","")).select(db.patientmemberdependants.id)
 	    if(len(r)==1):
 	      depid = int(common.getid(r[0].id))
-	      logger.loggerpms2.info("Get Religare Patient J DepID = " + str(depid))
+	      #logger.loggerpms2.info("Get Religare Patient J DepID = " + str(depid))
 	    else:    
 	      logger.loggerpms2.info("Get Religare Patient K: " + errormessage(db,"MDP102"))
 	      patobj=json.dumps({"result":"fail","error_message":errormessage(db,"MDP102")})
@@ -2447,7 +2449,10 @@ class ReligareXXX:
 	
       opat = mdppatient.Patient(db, providerid)
       patobj = opat.getpatient(memberid, depid, "") 	  	
-    
+      logger.loggerpms2.info("Get Religare Patient L" + str(memberid) + " " + str(depid) + "\n")
+      logger.loggerpms2.info(json.dumps(patobj))
+      
+      
       
     except Exception as e:
       patobj1 = {}

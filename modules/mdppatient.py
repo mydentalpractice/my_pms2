@@ -537,7 +537,17 @@ class Patient:
             "premenddate":mem[0].patientmember.premenddt.strftime("%d/%m/%Y")
         }
       else:
-        memplan = {}
+        #walkin member
+        memplan = {
+            "company":"WALKIN",
+            "plan":"Premium Walkin",
+            "plancode":"PREMWALKIN",
+            "planid": int(common.getid(mem[0].hmoplan.id)),
+            'procedurepriceplancode':"PREMWALKIN",
+            "enrollment":"",
+            "premenddate":"",
+        }
+        
       
       memobj["plan"] = memplan
       
