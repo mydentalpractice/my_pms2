@@ -154,8 +154,11 @@ def addRlgProcedureToTreatmentXXX(avars):
 	                                    str(avars["tooth"]),\
 	                                    str(avars["quadrant"]),\
 	                                    str(avars["remarks"]),\
-	                                    str(avars["policy_number"]), str(avars["customer_id"]), str(avars["mobile_number"]),
-	                                    str(avars["voucher_code"]), str(avars["policy_name"])
+	                                    str(avars["policy_number"]), 
+	                                    str(avars["customer_id"]), 
+	                                    str(avars["mobile_number"]),
+	                                    str(avars["voucher_code"]), 
+	                                    str(avars["policy_name"])
 	                            )
     except Exception as e:
 	rsp = json.dumps({"result":"fail", "error_message":"Exception Error - " + str(e)})
