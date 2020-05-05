@@ -1835,6 +1835,421 @@ class Religare:
           
     return json.dumps(jsonresp)
   
+#====================  XXX Off-line API =======================================================================================
+class Religare399:
+  def __init__(self,db,providerid):
+    self.db = db
+    self.providerid = providerid
+    self.ackid = ""
+    self.policy_name = ""
+    self.customer_type = ""
+    self.rlgencrypt = RlgEncryption()
+    return 
+      
+  # this API emulates sendOTP & validate OTP APIs of Religare class
+  def validaterlgmember399(self,plan_code,policy,voucher_code,promocode=None):
+    
+    self.policy = policy
+    db = self.db
+
+    
+    providerid = self.providerid
+
+    rlgobj = Religare(db, providerid)
+    
+    if(promocode == None):
+      promocode = "fP8dW8"
+
+    try:
+      ackid = common.generateackid("RLG", 10)
+      
+      db.sessionlog.insert(\
+	        ackid = ackid,
+	        promocode = promocode,
+	        created_on = common.getISTFormatCurrentLocatTime(),
+	        created_by = 1 ,
+	        modified_on = common.getISTFormatCurrentLocatTime(),
+	        modified_by = 1     
+	      )      
+      
+      r = db((db.rlgvoucher.plancode==plan_code) &\
+             (db.rlgvoucher.policy==policy) &\
+             (db.rlgvoucher.vouchercode==voucher_code) &\
+             (db.rlgvoucher.is_active==True)).select()
+      
+      if(len(r) == 1):
+	#success
+	cell = "0000000000" if(common.getstring(r[0].cell) == "") else r[0].cell
+	gender = "F" if(common.getstring(r[0].gender) == "") else r[0].gender
+	x = common.getnulldt(r[0].dob)
+	dob = "1990-01-01" if(x == "") else datetime.datetime.strftime("%Y-%m-%d", r[0].dob)
+	
+	
+	customer_id = "ci_" + voucher_code
+	customer_name = r[0].fname + "" if(common.getstring(r[0].lname) == "") else (" " + common.getstring(r[0].lname))
+	jsonresp = {}
+	
+	
+	jsonresp["result"] = "success"
+	jsonresp["error_message"] = ""
+	jsonresp["ackid"] = ackid
+	jsonresp["plan_code"] = plan_code
+	jsonresp["voucher_code"] = voucher_code
+	jsonresp["policy"] = policy
+	jsonresp["customer_id"] = customer_id
+	jsonresp["mobile_number"] = cell
+	jsonresp["dob"] = dob
+	jsonresp["gender"] = "Female" if gender == "F" else "Male"
+	jsonresp["fname"] = common.getstring(r[0].fname)
+	jsonresp["mname"] = common.getstring(r[0].mname)
+	jsonresp["lname"] = common.getstring(r[0].lname)
+	
+	db.rlgservices.insert(ackid=ackid, service_id = "399")
+	
+      else:
+	#invalid member
+	jsonresp={
+                  "result" : "fail",
+	          "ackid":ackid,
+	          "plan_code":plan_code,
+	          "voucher_code":voucher_code,
+	          "policy":policy,
+                  "error_message":errormessage(db,"MDP102") ,
+                  "response_status":"",
+                  "response_message":"",
+                  "error_code":"MDP102",
+                }
+	
+      
+    
+    except Exception as e:
+      
+      jsonresp = {
+             "result":"fail",
+             "error_message":"Error Validating 399 member API:\n" + errormessage(db,"MDP100")  + "\n(" + str(e) + ")",
+             "ackid":ackid,
+             "plan_code":plan_code,
+             "voucher_code":voucher_code,
+             "policy":policy,
+             "response_status":"",
+             "response_message":"",
+             "error_code":"MDP100",
+           }      
+    
+    return json.dumps(jsonresp)  
+
+
+  
+  def getreligarepatient399(self, avars ):
+    
+    
+    db = self.db
+    providerid = self.providerid
+    rlgobj = Religare(db, providerid)
+    ackid = avars["ackid"] if "ackid" in avars else "ackid_399" 
+    
+    try:
+      r = db(db.sessionlog.ackid == ackid).count()
+      if(r != 1):
+	jsonresp={
+	          "result" : "fail",
+	          "ackid":ackid,
+	          "error_message":errormessage(db,"ERR002") ,
+	          "response_status":"",
+	          "response_message":"",
+	          "error_code":"ERR002",
+	        }
+	return json.dumps(jsonresp)
+      
+      policy = avars["policy"] if "policy" in avars else "policy_399"
+      plancode = avars["plan_code"] if "plan_code" in avars else "399"
+      voucher_code = avars["voucher_code"] if "voucher_code" in avars else "voucher_399"
+      customer_id = avars["customer_id"] if "customer_id" in avars else "ci_" + voucher_code
+      fname = avars["fname"] if "fname" in avars else "FN_399"
+      mname = avars["mname"] if "mname" in avars else "MN_399"
+      lname = avars["lname"] if "lname" in avars else "LN_399"
+      
+      customer_name =  fname 
+      customer_name = customer_name if(lname == "") else customer_name + " " + lname
+      
+      mobile_number = avars["mobile_number"] if "mobile_number" in avars else "0000000000"
+      gender = avars["gender"] if "gender" in avars else "F"
+      dob = avars["dob"] if "dob" in avars else "1990-01-01"
+
+
+       
+      jsonresp = json.loads(rlgobj.getreligarepatient(customer_id, customer_name, mobile_number, dob, gender,policy))
+      jsonresp["ackid"] = ackid
+      
+      
+      
+    except Exception as e:
+      jsonresp = {
+             "result":"fail",
+             "error_message":"Error Getting  399 member API:\n" + errormessage(db,"MDP100")  + "\n(" + str(e) + ")",
+             "ackid":ackid,
+             "response_status":"",
+             "response_message":"",
+             "error_code":"MDP100",
+           }      
+      
+      
+    
+    
+    return json.dumps(jsonresp)
+  
+  def updatereligarepatient399(self, avars ):
+      
+      db = self.db
+      providerid = self.providerid
+      auth = current.auth
+      rlgobj = Religare(db, providerid)
+      
+      ackid = avars["ackid"] if "ackid" in avars else "ackid_399"
+      
+      try:
+	
+	r = db(db.sessionlog.ackid == ackid).count()
+	if(r != 1):
+	  jsonresp={
+	            "result" : "fail",
+	            "ackid":ackid,
+	            "error_message":errormessage(db,"ERR002") ,
+	            "response_status":"",
+	            "response_message":"",
+	            "error_code":"ERR002",
+	          }
+	  return json.dumps(jsonresp)	
+	memberid = int(common.getid(avars["memberid"])) if "memberid" in avars else 0
+	email = avars["email"] if "email" in avars else "mydentalplan.in@gmail.com"
+	addr1 = avars["address1"] if "address1" in avars else "addr1"
+	addr2 = avars["address2"] if "address2" in avars else "addr2"
+	addr3 = avars["address3"] if "address3" in avars else "addr3"
+	city = avars["city"] if "city" in avars else "Bengaluru"
+	st = avars["st"] if "st" in avars else "Karnatak (KA)"
+	pin = avars["pin"] if "pin" in avars else "560092"
+	cell = avars["cell"] if "cell" in avars else "0000000000"
+	dob = avars["dob"] if "dob" in avars else "01/01/1990"
+	gender = avars["gender"] if "gender" in avars else "Female"
+	
+	db(db.patientmember.id == memberid).update(\
+	  email = email,
+	  address1 = addr1,
+	  address2 = addr2,
+	  address3 = addr3,
+	  city =city,
+	  st = st,
+	  pin = pin,
+	  cell=cell,
+	  gender = gender,
+	  dob = datetime.datetime.strptime(dob, "%d/%m/%Y"),
+	  modified_on = common.getISTFormatCurrentLocatTime(),
+	  modified_by = 1 if(auth.user == None) else auth.user.id     
+	  
+	)
+	
+	jsonresp = {"result":"success","error_message":""}	
+
+	jsonresp["ackid"] = ackid
+	
+      
+	
+	
+      except Exception as e:
+	jsonresp = {
+	       "result":"fail",
+	       "error_message":"Error Getting  399 member API:\n" + errormessage(db,"MDP100")  + "\n(" + str(e) + ")",
+	       "ackid":ackid,
+	       "response_status":"",
+	       "response_message":"",
+	       "error_code":"MDP100",
+	     }      
+	
+	
+      
+      
+      return json.dumps(jsonresp)  
+    
+    
+    
+    
+  def getreligareprocedures399(self,avars):
+  
+      logger.loggerpms2.info("Enter Get Religare Procedures \n"  + str(avars))
+    
+      db = self.db
+      providerid = self.providerid
+      rlgobj = Religare(db, providerid)
+      ackid = avars["ackid"] if "ackid" in avars else "ackid_399"      
+      
+      try:
+	r = db(db.sessionlog.ackid == ackid).count()
+	if(r != 1):
+	  jsonresp={
+	            "result" : "fail",
+	            "ackid":ackid,
+	            "error_message":errormessage(db,"ERR002") ,
+	            "response_status":"",
+	            "response_message":"",
+	            "error_code":"ERR002",
+	          }
+	  return json.dumps(jsonresp)
+	
+	procedurepriceplancode = avars["procedurepriceplancode"] if "procedurepriceplancode" in avars else "XXX"
+	
+	searchphrase = avars["searchphrase"] if "searchphrase" in avars else ""
+	page = int(common.getid(avars["page"])) if "page" in avars else 0
+	maxcount = int(common.getid(avars["maxcount"])) if "maxcount" in avars else 0
+
+
+	
+	jsonresp = json.loads(rlgobj.getreligareprocedures(ackid, 
+	                                                  procedurepriceplancode, 
+	                                                  searchphrase, 
+	                                                  page, 
+	                                                  maxcount))
+	
+      except Exception as e:
+	jsonresp = {
+		       "result":"fail",
+		       "error_message":"Error Get Religare   399 Procedures API:\n" + errormessage("MDP100")  + "\n(" + str(e) + ")",
+	               "ackid":ackid,
+		       "response_status":"",
+		       "response_message":"",
+		       "error_code":"MDP100",
+		     }      
+	
+
+          
+      return json.dumps(jsonresp)
+    
+
+    
+  def addRlgProcedureToTreatment399(self,avars):
+    
+    db = self.db
+    providerid = self.providerid
+    auth = current.auth
+    rlgobj = Religare(db, providerid)
+    ackid = avars["ackid"] if "ackid" in avars else "ackid_399"    
+    jsonresp={}
+    
+    try:
+      r = db(db.sessionlog.ackid == ackid).count()
+      if(r != 1):
+	jsonresp={
+                  "result" : "fail",
+                  "ackid":ackid,
+                  "error_message":errormessage("ERR002") ,
+                  "response_status":"",
+                  "response_message":"",
+                  "error_code":"ERR002",
+                }
+	return json.dumps(jsonresp)      
+      
+      treatmentid = int(common.getid(avars["treatmentid"])) if "treatmentid" in avars else 0
+      procedurepriceplancode = avars["plancode"] if "plancode" in avars else "RLG101"
+      procedurecode = avars["procedurecode"] if "procedurecode" in avars else "G0104"
+      procedurename = avars["procedurename"] if "procedurename" in avars else "Dental consultations - Emergency Palliative Treatment of Dental pain and minor procedures- ONLY"
+      procedurefee = float(common.getvalue(avars["procedurefee"])) if "procedurefee" in avars else "0.00"
+      tooth = avars["tooth"] if "tooth" in avars else "1"
+      quadrant = avars["quadrant"] if "quadrant" in avars else "Q1"
+      remarks = avars["remarks"] if "remarks" in avars else "remarks"
+      policy_number = avars["policy_number"] if "policy_number" in avars else "0000000000"
+      customer_id = avars["customer_id"] if "customer_id" in avars else "ci_399"
+      mobile_number = avars["mobile_number"] if "mobile_number" in avars else "0000000000"
+	    
+      
+      procs = db((db.vw_procedurepriceplan_relgr.procedurepriceplancode == procedurepriceplancode) & \
+                 (db.vw_procedurepriceplan_relgr.procedurecode == procedurecode)).select()
+	
+      procedureid = 0
+      ucrfee = 0
+      procedurefee = 0
+      copay = 0
+      companypays = 0
+      relgrproc = False
+      memberid = 0
+      
+      service_id = ""
+      service_name = ""
+      service_category = ""
+      
+      if(len(procs)>0):
+	ucrfee = float(common.getvalue(procs[0].ucrfee))
+	procedurefee = float(common.getvalue(procs[0].relgrprocfee))
+	if(procedurefee == 0):
+	    procedurefee = ucrfee
+	copay = float(common.getvalue(procs[0].relgrcopay))
+	inspays = float(common.getvalue(procs[0].relgrinspays))
+	companypays = float(common.getvalue(procs[0].companypays))
+	procedureid = int(common.getid(procs[0].id))    
+	relgrproc = bool(common.getboolean(procs[0].relgrproc))
+	service_id = int(common.getid(procs[0].service_id))
+	service_name = procs[0].service_name
+	service_category = procs[0].service_category
+  
+        transaction_id = "RLG399_"
+	random.seed(int(time.time()))
+	for j in range(0,7):
+	    transaction_id += str(random.randint(0,9))      
+
+      
+	t = db(db.vw_treatmentlist.id == treatmentid).\
+          select(db.vw_treatmentlist.tplanid,db.vw_treatmentlist.startdate, db.vw_treatmentlist.memberid)
+    
+	procid = db.treatment_procedure.insert(treatmentid = treatmentid, dentalprocedure = procedureid,status="Started",\
+                                             treatmentdate=t[0].startdate if(len(t)>0) else common.getISTFormatCurrentLocatTime(),\
+	                                     ucr = ucrfee, procedurefee=procedurefee, copay=copay,inspays=inspays,companypays=companypays,\
+	                                     tooth=tooth,quadrant=quadrant,remarks=remarks,authorized=False,service_id = service_id,\
+	                                     relgrproc=relgrproc,relgrtransactionid = transaction_id,relgrtransactionamt=inspays) 
+
+		
+	tplanid = int(common.getid(t[0].tplanid)) if(len(t) > 0) else 0
+	memberid = int(common.getid(t[0].memberid)) if(len(t) > 0) else 0
+	#update treatment with new treatment cost
+	account.updatetreatmentcostandcopay(db,auth.user,treatmentid)
+	#update tplan with new treatment cost
+	account.calculatecost(db,tplanid)
+	account.calculatecopay(db, tplanid,memberid)
+	account.calculateinspays(db,tplanid)
+	account.calculatedue(db,tplanid)  
+	jsonresp["treatmentprocid"] = procid
+	jsonresp["result"] =  "success"
+	jsonresp["error_message"] = ""
+	jsonresp["customer_id"] = customer_id
+	jsonresp["policy_number"] = policy_number
+	jsonresp["mobile_number"] = mobile_number      
+	jsonresp["ackid"] = ackid      
+      
+      else:
+	jsonresp={
+          "result" : "fail",
+          "error_message":"Error adding procedure to Religare Treatment 399",
+	  "ackid":ackid,
+          "response_status":"",
+          "response_message":"",
+          "customer_id":customer_id,
+          "policy_number":policy_number,
+          "mobile_number": mobile_number
+        }
+    
+      
+    except Exception as e:
+      jsonresp = {
+	             "result":"fail",
+	             "error_message":"Error addRlgProcedureToTreatment399 API Exception:\n" + errormessage("MDP100")  + "\n(" + str(e) + ")",
+                     "ackid":ackid,
+	             "response_status":"",
+	             "response_message":"",
+	             "error_code":"MDP100",
+	           }      
+      
+	
+    return json.dumps(jsonresp)
+  
+  
+  
   
 
 
