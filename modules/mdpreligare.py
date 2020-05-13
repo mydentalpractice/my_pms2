@@ -1961,8 +1961,8 @@ class Religare399:
 	        }
 	return json.dumps(jsonresp)
       
-      policy = avars["policy"] if "policy" in avars else "policy_399"
-      plancode = avars["plan_code"] if "plan_code" in avars else "399"
+      policy = avars["policy"] if "policy" in avars else "Policy399O"
+      plancode = avars["plan_code"] if "plan_code" in avars else "Policy399O"
       voucher_code = avars["voucher_code"] if "voucher_code" in avars else "voucher_399"
       customer_id = avars["customer_id"] if "customer_id" in avars else "ci_" + voucher_code
       fname = avars["fname"] if "fname" in avars else "FN_399"
@@ -2443,27 +2443,27 @@ class ReligareXXX:
 	      
 	      
 	      #insert/update records in provider_region_plan for this new policy number
-	      if(policy_name != "Policy399"):
-		rows = db(db.provider_region_plan.policy == "Policy399").select()
-		for r in rows:
+	      #if(policy_name != "Policy399"):
+		#rows = db(db.provider_region_plan.policy == "Policy399").select()
+		#for r in rows:
 		  
-		  patid = db.provider_region_plan.update_or_insert(((db.provider_region_plan.policy==policy_name) &\
-		                                                    (db.provider_region_plan.regioncode==r.regioncode)&\
-		                                                    (db.provider_region_plan.is_active==True)),
-		    providercode = r.providercode,
-		    companycode = r.companycode,
-		    regioncode = r.regioncode,
-		    policy = policy_name,
-		    plancode = r.plancode,
-		    procedurepriceplancode = r.procedurepriceplancode,
-		    is_active = True,
-		    created_on = common.getISTFormatCurrentLocatTime(),
-		    created_by = 1 if(auth.user == None) else auth.user.id,
-		    modified_on = common.getISTFormatCurrentLocatTime(),
-		    modified_by = 1 if(auth.user == None) else auth.user.id    
+		  #patid = db.provider_region_plan.update_or_insert(((db.provider_region_plan.policy==policy_name) &\
+		                                                    #(db.provider_region_plan.regioncode==r.regioncode)&\
+		                                                    #(db.provider_region_plan.is_active==True)),
+		    #providercode = r.providercode,
+		    #companycode = r.companycode,
+		    #regioncode = r.regioncode,
+		    #policy = policy_name,
+		    #plancode = r.plancode,
+		    #procedurepriceplancode = r.procedurepriceplancode,
+		    #is_active = True,
+		    #created_on = common.getISTFormatCurrentLocatTime(),
+		    #created_by = 1 if(auth.user == None) else auth.user.id,
+		    #modified_on = common.getISTFormatCurrentLocatTime(),
+		    #modified_by = 1 if(auth.user == None) else auth.user.id    
 		  
-		  )
-		  db.commit()
+		  #)
+		  #db.commit()
 	      
 	      
 	    else:
