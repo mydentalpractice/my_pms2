@@ -8402,9 +8402,9 @@ CREATE TABLE `import_provider_region_plan` (
 
 12/03/2020
 ==========
-0. Added import_provider_region_plan  table
+0. XXXYYYZZZAdded import_provider_region_plan  table
 
-1. YYYYAdded procedurepriceplancode
+1. XXXYYYYAdded procedurepriceplancode
 
 ALTER TABLE `mydp_stg`.`provider_region_plan` 
 ADD COLUMN `procedurepriceplancode` VARCHAR(45) NULL DEFAULT NULL AFTER `plancode`;
@@ -8422,7 +8422,7 @@ group by patientmember.company,patientmember.groupregion, patientmember.hmoplan
 8/04/2020
 ==========
 
-1.  YYZZReligare Properties 
+1.  XXXYYZZReligare Properties 
 CREATE TABLE `rlgproperties` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `policy_name` varchar(256) DEFAULT NULL,
@@ -8432,14 +8432,14 @@ CREATE TABLE `rlgproperties` (
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 
 
-2, YYZZrlgdocument
+2, XXXYYZZrlgdocument
 ALTER TABLE `mydp_prod`.`rlgdocument` 
 ADD COLUMN `policy_name` VARCHAR(45) NULL AFTER `policy_number`,
 ADD COLUMN `voucher_code` VARCHAR(45) NULL AFTER `customer_id`;
 
-3. YYZZmodified import provider_region_plan to Populate provider_region_plan procedurepriceplancode
+3. XXXYYZZmodified import provider_region_plan to Populate provider_region_plan procedurepriceplancode
 
 4. YYZZPopulate procedure fee in procedurepriceplan 
 
-5. YYYZZZALTER TABLE `mydp_prod`.`treatment_procedure` 
+5. XXXYYYZZZALTER TABLE `mydp_prod`.`treatment_procedure` 
 ADD COLUMN `policy_name` VARCHAR(128) NULL DEFAULT NULL AFTER `service_id`;

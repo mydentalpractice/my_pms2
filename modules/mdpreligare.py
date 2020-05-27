@@ -816,7 +816,7 @@ class Religare:
           "customer_id":"ci_" + voucher_code if(customer_id == "") else customer_id,
           "policy_number":policy_number,
           "voucher_code": voucher_code,
-	  "mobile_number":mobile_number
+	  "mobile_number":""
         }
 
     except Exception as e:
@@ -830,7 +830,7 @@ class Religare:
         "customer_id":"ci_" + voucher_code if(customer_id == "") else customer_id,
         "policy_number":policy_number,
         "voucher_code": voucher_code,
-        "mobile_number":mobile_number
+        "mobile_number":""
       }
 
     logger.loggerpms2.info(">>API-1 Send OTP Response\n")
@@ -2255,16 +2255,16 @@ class Religare399:
 
 #====================  XXX API =======================================================================================
 class ReligareXXX:
-  def __init__(self,db,providerid):
+  def __init__(self,db,providerid,policy_name="Policy399"):
     self.db = db
     self.providerid = providerid
 
-    props = db(db.rlgproperties.id >  0).select()
+    props = db(db.rlgproperties.policy_name == policy_name).select()
     
     self.url = "" if(len(props)==0) else props[0].url
     self.apikey = "" if(len(props)==0) else props[0].api_key
     self.ackid = ""
-    self.policy_name = ""
+    self.policy_name = policy_name
     self.customer_type = ""
     self.rlgencrypt = RlgEncryption()
     

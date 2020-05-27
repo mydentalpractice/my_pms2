@@ -3887,7 +3887,8 @@ def add_proceduregrid():
     tplanid = int(common.getid(treatment[0].treatmentplan.id)) if(len(treatment) == 1) else 0
     memberid = int(common.getid(treatment[0].treatmentplan.primarypatient)) if(len(treatment) == 1) else 0
     patientid = int(common.getid(treatment[0].treatmentplan.patient)) if(len(treatment) == 1) else 0
-    procedurepriceplancode = mdputils.getprocedurepriceplancodeformember(db,providerid, memberid, patientid) #IB:15-Mar-2020 treatment[0].vw_memberpatientlist.procedurepriceplancode if(len(treatment) == 1) else "PREMWALKIN"
+    #procedurepriceplancode = treatment[0].vw_memberpatientlist.procedurepriceplancode if(len(treatment) == 1) else "PREMWALKIN"
+    procedurepriceplancode = mdputils.getprocedurepriceplancodeformember(db,providerid, memberid, patientid) 
     status = common.getstring(treatment[0].treatment.status)
     status = status if(status != "") else "Started"    
     
