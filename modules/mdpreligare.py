@@ -3340,11 +3340,14 @@ class ReligareXXX:
       if(len(xid)==1):
 	transaction_id = common.getstring(xid[0].relgrtransactionid)
 	relgrproc = common.getboolean(xid[0].relgrproc)
-	
+      
+      trlist = []
+      trlist.append(transaction_id)      
+
       if(relgrproc == True)  :
 	jsonreqdata = {
                "apikey":apikey,
-               "transaction_id":transaction_id
+               "transaction_id":trlist
         }
 	
 	logger.loggerpms2.info(">>API-7 Void Transaction\n")
