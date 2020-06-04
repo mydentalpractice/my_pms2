@@ -130,7 +130,7 @@ def getdefaultdoctor(db,providerid):
     doctorid = 0
     
     #default attending doctor to owner doctor
-    r = db((db.doctor.providerid == providerid) & (db.doctor.practice_owner == True)).select()
+    r = db((db.doctor.providerid == providerid) & (db.doctor.practice_owner == True) & (db.doctor.is_active == True)).select()
     if(len(r) > 0):
         doctorid = r[0].id
     return doctorid
