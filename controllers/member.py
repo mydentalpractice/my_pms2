@@ -1386,8 +1386,8 @@ def new_nonmember():
     
     
     hmoplanid = 1
-    companyid = 4 #default to MyDP
-    r = db((db.company.company == ' ') & (db.company.is_active == False)).select()
+    companyid = 114 #default to Walkin
+    r = db((db.company.company == "walkin") & (db.company.is_active == False)).select()
     if(len(r) > 0):
         companyid = common.getid(r[0].id)
     

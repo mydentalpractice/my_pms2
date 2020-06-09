@@ -489,17 +489,25 @@ class Treatment:
             
             
             if(len(treatment) == 1):
-                c = db(db.company.id == treatment[0].vw_memberpatientlist.company).select(db.company.authorizationrequired)
+                #logger.loggerpms2.info("Enter Get Treatment API - A")
+                c = db(db.company.id == int(common.getid(treatment[0].vw_memberpatientlist.company))).select(db.company.authorizationrequired)
+                #logger.loggerpms2.info("Enter Get Treatment API - A1 " + str(len(c)))
+                
                 tplanid = int(common.getid(treatment[0].vw_treatmentlist.tplanid))
                 r = self.updatetreatmentcostandcopay(treatmentid, tplanid)
+                #logger.loggerpms2.info("Enter Get Treatment API - A2 ")
+                
                 memberid = int(common.getid(treatment[0].vw_treatmentlist.memberid))
                 patientid = int(common.getid(treatment[0].vw_treatmentlist.patientid))
                 procedurepriceplancode = mdputils.getprocedurepriceplancodeformember(db,providerid,memberid,patientid)
+                #logger.loggerpms2.info("Enter Get Treatment API - B")
+                
                 treatmentobj = {
                     
                     "treatmentid":treatmentid,
                     "tplanid":tplanid,
                     "treatment": common.getstring(treatment[0].vw_treatmentlist.treatment),
+                    
                     "treatmentdate"  : (treatment[0].vw_treatmentlist.startdate).strftime("%d/%m/%Y"),
                     "patientname": common.getstring(treatment[0].vw_treatmentlist.patientname),
                     "chiefcomplaint" : common.getstring(treatment[0].vw_treatmentlist.chiefcomplaint),
@@ -508,7 +516,7 @@ class Treatment:
                     "treatmentcost":float(common.getvalue(treatment[0].vw_treatmentlist.treatmentcost)),
                     "description":common.getstring(treatment[0].treatment.description),
                     "plan":  procedurepriceplancode,   #IB:15-Mar-2020 common.getstring(treatment[0].vw_memberpatientlist.procedurepriceplancode),
-                    "authorization": (len(procs)>0 & common.getboolean(c[0].authorizationrequired)),
+                    "authorization": False if(len(c) <= 0) else (len(procs)>0 & common.getboolean(c[0].authorizationrequired)),
                     "authorized": True if(common.getstring(treatment[0].vw_treatmentlist.status) == "Authorized") else False,
                     "totaltreatmentcost":float(common.getstring(r["totaltreatmentcost"])),
                     "totalcopay":float(common.getstring(r["totalcopay"])),
@@ -518,6 +526,7 @@ class Treatment:
                     
                 }        
                 
+                #logger.loggerpms2.info("Enter Get Treatment API - C")
             
                 proclist = []
                 procobj = {}
@@ -542,7 +551,7 @@ class Treatment:
                     }
                     proclist.append(procobj)   
                 
-                
+                #logger.loggerpms2.info("Enter Get Treatment API - D")
                 treatmentobj["proccount"] = len(procs)
                 treatmentobj["proclist"] = proclist
                 
@@ -551,12 +560,13 @@ class Treatment:
                 
                 pats = db((db.vw_memberpatientlist.primarypatientid == memberid) & (db.vw_memberpatientlist.patientid == patientid)).select(db.vw_memberpatientlist.hmopatientmember)
                 hmopatientmember = False if(len(pats) <= 0) else common.getboolean(pats[0].hmopatientmember)
-        
+                #logger.loggerpms2.info("Enter Get Treatment API - E")
                 #W, R, H, S
                 trtmtnui = {}
                 procui = {}
                 
                 trstatus = common.getstring(treatment[0].vw_treatmentlist.status)
+                #logger.loggerpms2.info("Enter Get Treatment API - F")
                 if(hmopatientmember):
                     if( trstatus == "Started"):
                         trtmntui = {
@@ -680,6 +690,7 @@ class Treatment:
                         
                         }                
                 
+                #logger.loggerpms2.info("Enter Get Treatment API - G")
                 treatmentobj["treatmentui"] = trtmntui
                 treatmentobj["procedureui"] = procui
                 treatmentobj["result"] = "success"
@@ -687,7 +698,7 @@ class Treatment:
             else:
                 treatmentobj["result"] = "fail"
                 treatmentobj["error_message"] = "Invalid Treatment"
-                
+                #logger.loggerpms2.info("Enter Get Treatment API - H")
             
         except Exception as e:
             treatmentobj1 = {}
