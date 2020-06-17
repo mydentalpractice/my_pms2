@@ -1412,12 +1412,17 @@ class Religare:
       
       jsonencodeddata = self.encoderequestdata(jsonreqdata)
       
+      logger.loggerpms2.info(">>API-5 Add Religare Procedure\n")
+      logger.loggerpms2.info("===Req_data=\n" + json.dumps(jsonreqdata) + "\n")            
+
       #resp = requests.post(url,json=jsonencodeddata)
       resp = requests.post(url,data=jsonencodeddata)      
       jsonresp = {}
       if((resp.status_code == 200)|(resp.status_code == 201)|(resp.status_code == 202)|(resp.status_code == 203)):
             respstr =   resp.text
             jsonresp = self.decoderesponsedata(respstr)
+	    logger.loggerpms2.info("API-5 Resp Data ==\n " + json.dumps(jsonresp))
+	    
             
             if(jsonresp["response_status"] == True):
               if(common.getstring(jsonresp["transaction_status"])=='SUCCESS' ):
@@ -1461,9 +1466,10 @@ class Religare:
             jsonresp["mobile_number"] = mobile_number      
             
       else:
+	mssg = "Do OPD Transaction API-5:\n" + errormessage(db,"MDP099")  + "\n(" + str(resp.status_code) + ")"
         jsonresp={
           "result" : "fail",
-          "error_message":"Do OPD Transaction API-5:\n" + errormessage(db,"MDP099")  + "\n(" + str(resp.status_code) + ")",
+          "error_message":mssg,
           "response_status":"",
           "response_message":"",
           "error_code":"MDP099",
@@ -1472,7 +1478,7 @@ class Religare:
           "policy_number":policy_number,
           "mobile_number": mobile_number
         }
-    
+        logger.loggerpms2.info(mssg)
       
 
     except Exception as e:
@@ -1489,6 +1495,7 @@ class Religare:
         "policy_number":policy_number,
         "mobile_number": mobile_number
       }
+      
 
     return json.dumps(jsonresp)
   
@@ -3145,7 +3152,8 @@ class ReligareXXX:
            "ackid":ackid,
            "otp":otp
          }    
-      
+      logger.loggerpms2.info(">>API-5 Add Religare Procedure\n")
+      logger.loggerpms2.info("===Req_data=\n" + json.dumps(jsonreqdata) + "\n")            
       jsonencodeddata = self.rlgencrypt.encoderequestdata(jsonreqdata)
       
       #resp = requests.post(url,json=jsonencodeddata)
@@ -3154,7 +3162,7 @@ class ReligareXXX:
       if((resp.status_code == 200)|(resp.status_code == 201)|(resp.status_code == 202)|(resp.status_code == 203)):
 	    respstr =   resp.text
 	    jsonresp = self.rlgencrypt.decoderesponsedata(respstr)
-	    
+	    logger.loggerpms2.info("===Resp_data=\n" + json.dumps(jsonresp) + "\n")  
 	    if(jsonresp["response_status"] == True):
 	      if(common.getstring(jsonresp["transaction_status"])=='SUCCESS' ):
 		inspays = float(common.getvalue(jsonresp["transaction_amount"]))
@@ -3266,13 +3274,13 @@ class ReligareXXX:
       logger.loggerpms2.info(">>API-6 Settle Transaction\n")
       logger.loggerpms2.info("===Req_data=\n" + json.dumps(jsonreqdata) + "\n")        
       
-      jsonencodeddata = self.encoderequestdata(jsonreqdata)
+      jsonencodeddata = self.rlgencrypt.encoderequestdata(jsonreqdata)
       
       resp = requests.post(url,data=jsonencodeddata)
       jsonresp = {}
       if((resp.status_code == 200)|(resp.status_code == 201)|(resp.status_code == 202)|(resp.status_code == 203)):
 	    respstr =   resp.text
-	    jsonresp = self.decoderesponsedata(respstr)
+	    jsonresp = self.rlgencrypt.decoderesponsedata(respstr)
 	    logger.loggerpms2.info(">>API-6 Settle Transaction Response\n")
 	    logger.loggerpms2.info("===Resp_data=\n" + json.dumps(jsonresp) + "\n")   	    
 	    
@@ -3341,27 +3349,29 @@ class ReligareXXX:
 	transaction_id = common.getstring(xid[0].relgrtransactionid)
 	relgrproc = common.getboolean(xid[0].relgrproc)
       
-      trlist = []
-      trlist.append(transaction_id)      
+      #trlist = []
+      #trlist.append(transaction_id)      
 
       if(relgrproc == True)  :
 	jsonreqdata = {
                "apikey":apikey,
-               "transaction_id":trlist
+               "transaction_id":transaction_id
         }
 	
 	logger.loggerpms2.info(">>API-7 Void Transaction\n")
 	logger.loggerpms2.info("===Req_data=\n" + json.dumps(jsonreqdata) + "\n")        
 	
-	jsonencodeddata = self.encoderequestdata(jsonreqdata)
-      
+	
+        jsonencodeddata = self.rlgencrypt.encoderequestdata(jsonreqdata)
       
 	#resp = requests.post(url,json=jsonencodeddata)
 	resp = requests.post(url,data=jsonencodeddata)      
 	jsonresp = {}
 	if((resp.status_code == 200)|(resp.status_code == 201)|(resp.status_code == 202)|(resp.status_code == 203)):
 	      respstr =   resp.text
-	      jsonresp = self.decoderesponsedata(respstr) 
+	      jsonresp = self.rlgencrypt.decoderesponsedata(respstr) 
+	      logger.loggerpms2.info("===Resp_data=\n" + json.dumps(jsonresp) + "\n")        
+	      
 	      if(jsonresp["response_status"] == True):
 		jsonresp["result"] = "success"
 		jsonresp["error_message"] = ""
