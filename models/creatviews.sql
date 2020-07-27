@@ -8443,3 +8443,11 @@ ADD COLUMN `voucher_code` VARCHAR(45) NULL AFTER `customer_id`;
 
 5. XXXYYYZZZALTER TABLE `mydp_prod`.`treatment_procedure` 
 ADD COLUMN `policy_name` VARCHAR(128) NULL DEFAULT NULL AFTER `service_id`;
+
+24/07/2020
+===========
+1. Copy PHP files from myphp folder into inetpub/wwwroot
+2. modify http://myphp.com/ to http://localhost// in encrypt & decrypt functions
+
+
+

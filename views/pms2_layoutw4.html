@@ -453,6 +453,29 @@ div.flash{    z-index: 30023 !important;}
                                        
                                         </ul>
                                     </li>
+                                     <li class="nav-item  ">
+                                        <a href="javascript:;" class="nav-link nav-toggle">
+                                            <i class="fa fa-file-text-o"></i>
+                                            <span class="title">Pre Registration</span>
+                                            <span class="arrow"></span>
+                                        </a>
+                                        <ul class="sub-menu">
+        
+                                            <li class="nav-item  ">
+                                                <a href="{{=URL('preregister', 'list_preregister',vars=dict(page=1,providerid=providerid,companycode='CISCO'))}}" class="nav-link ">
+                                                  <img  style="height:16px;width:16px" src="/my_pms2/static/img/UHC_menu_icon.png" alt="CISCO">
+                                                    <span class="title">United Healthcare-CISCO</span>
+                                                </a>
+                                            </li>
+                                            <!--<li class="nav-item  ">-->
+                                                <!--<a href="{{=URL('preregister', 'list_preregister',vars=dict(page=1,providerid=providerid,companycode='MEDI'))}}" class="nav-link ">-->
+                                                  <!--<i class="fa fa-road"></i>-->
+                                                    <!--<span class="title">Medi-Assist</span>-->
+                                                <!--</a>-->
+                                            <!--</li>-->
+                                            
+                                        </ul>
+                                    </li>
                                     {{if(session.religare ==True):}}
                                     <li class="nav-item  " style="background:#0f6633">
                                         <a href="javascript:;" class="nav-link nav-toggle">
@@ -485,29 +508,7 @@ div.flash{    z-index: 30023 !important;}
                                     {{pass}}
 
 
-                                    <li class="nav-item  ">
-                                        <a href="javascript:;" class="nav-link nav-toggle">
-                                            <i class="fa fa-file-text-o"></i>
-                                            <span class="title">Pre Registration</span>
-                                            <span class="arrow"></span>
-                                        </a>
-                                        <ul class="sub-menu">
-        
-                                            <li class="nav-item  ">
-                                                <a href="{{=URL('preregister', 'list_preregister',vars=dict(page=1,providerid=providerid,companycode='CISCO'))}}" class="nav-link ">
-                                                  <img  style="height:16px;width:16px" src="/my_pms2/static/img/UHC_menu_icon.png" alt="CISCO">
-                                                    <span class="title">United Healthcare-CISCO</span>
-                                                </a>
-                                            </li>
-                                            <!--<li class="nav-item  ">-->
-                                                <!--<a href="{{=URL('preregister', 'list_preregister',vars=dict(page=1,providerid=providerid,companycode='MEDI'))}}" class="nav-link ">-->
-                                                  <!--<i class="fa fa-road"></i>-->
-                                                    <!--<span class="title">Medi-Assist</span>-->
-                                                <!--</a>-->
-                                            <!--</li>-->
-                                            
-                                        </ul>
-                                    </li>
+                                   
                        
 
                                     <li class="nav-item  ">

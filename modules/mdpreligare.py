@@ -89,7 +89,8 @@ class RlgEncryption:
     
   def encrypts128(self,raw):
 	
-	phpurl = "http://myphp128.com/encrypt.php"
+	#phpurl = "http://myphp128.com/encrypt.php"
+	phpurl = "http://localhost/encrypt128.php"
 	
 	rlgrobj = {"raw":raw}
 	
@@ -108,7 +109,8 @@ class RlgEncryption:
 	return jsonresp["encrypt"]    
  
   def decrypts128(self,encrypt):    
-    phpurl = "http://myphp128.com/decrypt.php"
+    #phpurl = "http://myphp128.com/decrypt.php"
+    phpurl = "http://localhost/decrypt128.php"
     
     rlgrobj = {"encrypt":encrypt}
     
@@ -129,7 +131,8 @@ class RlgEncryption:
   def decrypts(self,encrypt):
     
     
-    phpurl = "http://myphp.com/decrypt.php"
+    #phpurl = "http://myphp.com/decrypt.php"
+    phpurl = "http://localhost/decrypt.php"
     
     rlgrobj = {"encrypt":encrypt}
     
@@ -148,7 +151,8 @@ class RlgEncryption:
 
   def decrypt(self,encrypt):
     
-    phpurl = "http://myphp.com/decrypt.php"
+    #phpurl = "http://myphp.com/decrypt.php"
+    phpurl = "http://localhost/decrypt.php"
     
     rlgrobj = {"encrypt":encrypt}
     
@@ -173,7 +177,8 @@ class RlgEncryption:
   
   def encrypts(self,raw):
       
-      phpurl = "http://myphp.com/encrypt.php"
+      #phpurl = "http://myphp.com/encrypt.php"
+      phpurl = "http://localhost/encrypt.php"
       
       rlgrobj = {"raw":raw}
       
@@ -193,7 +198,8 @@ class RlgEncryption:
 
   def encrypt(self,raw):
     
-    phpurl = "http://myphp.com/encrypt.php"
+    #phpurl = "http://myphp.com/encrypt.php"
+    phpurl = "http://localhost/encrypt.php"
     
     rlgrobj = {"raw":raw}
     
@@ -518,8 +524,9 @@ class Religare:
     
   def encrypts128(self,raw):
         
-        phpurl = "http://myphp128.com/encrypt.php"
-        
+        #phpurl = "http://myphp128.com/encrypt.php"
+        phpurl = "http://localhost/encrypt128.php"
+	
         rlgrobj = {"raw":raw}
         
         resp = requests.post(phpurl,json=rlgrobj)
@@ -537,7 +544,8 @@ class Religare:
         return jsonresp["encrypt"]    
  
   def decrypts128(self,encrypt):    
-    phpurl = "http://myphp128.com/decrypt.php"
+    #phpurl = "http://myphp128.com/decrypt.php"
+    phpurl = "http://localhost/decrypt128.php"
     
     rlgrobj = {"encrypt":encrypt}
     
@@ -558,7 +566,8 @@ class Religare:
   def decrypts(self,encrypt):
     
     
-    phpurl = "http://myphp.com/decrypt.php"
+    #phpurl = "http://myphp.com/decrypt.php"
+    phpurl = "http://localhost/decrypt.php"
     
     rlgrobj = {"encrypt":encrypt}
     
@@ -577,7 +586,8 @@ class Religare:
 
   def decrypt(self,encrypt):
     
-    phpurl = "http://myphp.com/decrypt.php"
+    #phpurl = "http://myphp.com/decrypt.php"
+    phpurl = "http://localhost/decrypt.php"
     
     rlgrobj = {"encrypt":encrypt}
     
@@ -602,7 +612,8 @@ class Religare:
   
   def encrypts(self,raw):
       
-      phpurl = "http://myphp.com/encrypt.php"
+      #phpurl = "http://myphp.com/encrypt.php"
+      phpurl = "http://localhost/encrypt.php"
       
       rlgrobj = {"raw":raw}
       
@@ -622,7 +633,8 @@ class Religare:
 
   def encrypt(self,raw):
     
-    phpurl = "http://myphp.com/encrypt.php"
+    #phpurl = "http://myphp.com/encrypt.php"
+    phpurl = "http://localhost/encrypt.php"
     
     rlgrobj = {"raw":raw}
     
@@ -2303,21 +2315,40 @@ class ReligareXXX:
         "voucher_code":voucher_code
       }
       
+      
+      #jsonreqdata = {
+      
+	              #"apikey": "5cb4907ca9elf",
+      
+	              #"voucher_code": "0000509324",
+      
+	              #"customer_id": "",
+      
+	              #"policy_number": "16637201"
+      
+      #}      
+
       logger.loggerpms2.info(">>XXX:API-1 Send OTP Request")
+      logger.loggerpms2.info("URL-->" + url)
       logger.loggerpms2.info("===XXX:Req_data=\n" + json.dumps(jsonreqdata) + "\n")
       
       jsonencodeddata =  self.rlgencrypt.encoderequestdata(jsonreqdata)	  #self.encoderequestdata(jsonreqdata)
-      
-      #logger.loggerpms2.info("===XXX:Encoded Req_data=\n" + json.dumps(jsonencodeddata) + "\n")      
+      #jsonencodeddata = {
+          #"req_data":"ufIpi30HOZMmPhewjBcK63XHiyrXee/xsnRUmIJ4qla/PqvYwobIksFPfUOFCPaTcB1oCz9P7ZEKgLr2ru7XzpynBBwLgUwP/vfeFoUvIZa/+tioNtH6xcul6mHli0RZUFO8MLYWAs03n6g5pJXp6pa+rdVq19sOHgwV2AXuNiU="
+      #}
+      #jsonencodeddata = "ufIpi30HOZMmPhewjBcK63XHiyrXee/xsnRUmIJ4qla/PqvYwobIksFPfUOFCPaTcB1oCz9P7ZEKgLr2ru7XzpynBBwLgUwP/vfeFoUvIZa/+tioNtH6xcul6mHli0RZUFO8MLYWAs03n6g5pJXp6pa+rdVq19sOHgwV2AXuNiU="
+      #jsonencodeddata = "BcZ/vG7JIJ9zBFIqxY/Pb6PWyWI/fTCRL0XqARTks0Ch87QmXleRUvv4Je3fZfpJ300agxqrIMh+a66xdqzsj4qJ4fFJFBOLIxqdT6vK/cjV5t/4MeWP2VULfn8gf1j6FiLAz6/HHoWpcv9PUnV8hQ=="
+      logger.loggerpms2.info("===XXX:Encoded Req_data=\n" + json.dumps(jsonencodeddata) + "\n")      
       
       #call API-1
       resp = requests.post(url,data=jsonencodeddata)
       jsonresp = {}
       if((resp.status_code == 200)|(resp.status_code == 201)|(resp.status_code == 202)|(resp.status_code == 203)):
 	    respstr =   resp.text
-	    #logger.loggerpms2.info("XXX:===Encoded Resp_data=\n" + json.dumps(respstr) + "\n")      
+	    #respstr = "6TbS+mwdW7xBEWNr9e7YqXoyaPQWIRouDJ4rnufszGfU0AeBslaCwu6mTgcQv1aWR9lJPRnVRzWM8y1RwgwYFRgS8ctNHEdjdP/8t1pywx+ZSi2hOOncK002F5gp8Q6Q"
+	    logger.loggerpms2.info("XXX:===Encoded Resp_data=\n" + json.dumps(respstr) + "\n")      
 	    jsonresp = self.rlgencrypt.decoderesponsedata(respstr)   #self.decoderesponsedata(respstr)
-	    #logger.loggerpms2.info("XXX:===Resp_data=\n" + json.dumps(jsonresp) + "\n")      
+	    logger.loggerpms2.info("XXX:===Resp_data=\n" + json.dumps(jsonresp) + "\n")      
 	    mobile_number = jsonresp.get("mobile_number","0000000000")
 	    if(jsonresp["response_status"]==True):
 	      self.ackid = jsonresp.get("ackid","")
