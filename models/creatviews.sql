@@ -8449,5 +8449,8 @@ ADD COLUMN `policy_name` VARCHAR(128) NULL DEFAULT NULL AFTER `service_id`;
 1. Copy PHP files from myphp folder into inetpub/wwwroot
 2. modify http://myphp.com/ to http://localhost// in encrypt & decrypt functions
 
-
-
+23/8/2020
+==========
+1. XXXZZZZModify vw_relgrtreatmentprocedure  adding GST
+2. XXXZZZCreated RLGDC company
+3. XXXZZZimported RLGDC

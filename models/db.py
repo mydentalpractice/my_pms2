@@ -3312,6 +3312,7 @@ db.define_table('vw_relgrtreatmentprocedure',
         
         Field('procedurefee','double'),
         Field('inspays','double'),
+        Field('inspays_GST','double'),
         Field('copay','double'),
         Field('tooth','string'),
         Field('quadrant','string'),
