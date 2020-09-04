@@ -49,6 +49,7 @@ def testgroupsms():
 def smsservice():
      
      message = "Enter Loop" + " " + (common.getISTFormatCurrentLocatTime()).strftime(datetimefmt)
+     logger.loggerpms2.info(message)
      strdt  = request.vars.activitydate
      groupapptsms = request.vars.groupapptsms
      activitydate = datetime.datetime.strptime(strdt, datefmt)
@@ -66,14 +67,15 @@ def smsservice():
           
           if(groupapptsms == "1"):
                message = "Re-Enter Loop"  + " " + (common.getISTFormatCurrentLocatTime()).strftime(datetimefmt)
-              
+               logger.loggerpms2.info(message)
                o = mdpappointment.Appointment(db, 1)
                r = o.groupsms(request.folder)
                jsonr = json.loads(r)
                if(jsonr["result"] == "fail"):
                     message = message + " " + jsonr["error_message"]
      except Exception as e:
-          message = "SMSService : Exception error - " + e.message
+          message = "SMSService : Exception error - " + str(e)
+          logger.loggerpms2.info(message)
           activitydate = common.getISTFormatCurrentLocatTime()
           formC =  SQLFORM.factory( 
               Field('activitydate', 'date',label='Activity Date',default=activitydate, requires=[IS_NOT_EMPTY(), IS_DATE(format=T('%d/%m/%Y'))])

@@ -89,8 +89,8 @@ class RlgEncryption:
     
   def encrypts128(self,raw):
 	
-	#phpurl = "http://myphp128.com/encrypt.php"
-	phpurl = "http://localhost/encrypt128.php"
+	phpurl = "http://myphp128.com/encrypt.php"
+	#phpurl = "http://localhost/encrypt128.php"
 	
 	rlgrobj = {"raw":raw}
 	
@@ -109,8 +109,8 @@ class RlgEncryption:
 	return jsonresp["encrypt"]    
  
   def decrypts128(self,encrypt):    
-    #phpurl = "http://myphp128.com/decrypt.php"
-    phpurl = "http://localhost/decrypt128.php"
+    phpurl = "http://myphp128.com/decrypt.php"
+    #phpurl = "http://localhost/decrypt128.php"
     
     rlgrobj = {"encrypt":encrypt}
     
@@ -131,8 +131,8 @@ class RlgEncryption:
   def decrypts(self,encrypt):
     
     
-    #phpurl = "http://myphp.com/decrypt.php"
-    phpurl = "http://localhost/decrypt.php"
+    phpurl = "http://myphp.com/decrypt.php"
+    #phpurl = "http://localhost/decrypt.php"
     
     rlgrobj = {"encrypt":encrypt}
     
@@ -151,8 +151,8 @@ class RlgEncryption:
 
   def decrypt(self,encrypt):
     
-    #phpurl = "http://myphp.com/decrypt.php"
-    phpurl = "http://localhost/decrypt.php"
+    phpurl = "http://myphp.com/decrypt.php"
+    #phpurl = "http://localhost/decrypt.php"
     
     rlgrobj = {"encrypt":encrypt}
     
@@ -177,8 +177,8 @@ class RlgEncryption:
   
   def encrypts(self,raw):
       
-      #phpurl = "http://myphp.com/encrypt.php"
-      phpurl = "http://localhost/encrypt.php"
+      phpurl = "http://myphp.com/encrypt.php"
+      #phpurl = "http://localhost/encrypt.php"
       
       rlgrobj = {"raw":raw}
       
@@ -198,8 +198,8 @@ class RlgEncryption:
 
   def encrypt(self,raw):
     
-    #phpurl = "http://myphp.com/encrypt.php"
-    phpurl = "http://localhost/encrypt.php"
+    phpurl = "http://myphp.com/encrypt.php"
+    #phpurl = "http://localhost/encrypt.php"
     
     rlgrobj = {"raw":raw}
     
@@ -524,8 +524,8 @@ class Religare:
     
   def encrypts128(self,raw):
         
-        #phpurl = "http://myphp128.com/encrypt.php"
-        phpurl = "http://localhost/encrypt128.php"
+        phpurl = "http://myphp128.com/encrypt.php"
+        #phpurl = "http://localhost/encrypt128.php"
 	
         rlgrobj = {"raw":raw}
         
@@ -544,8 +544,8 @@ class Religare:
         return jsonresp["encrypt"]    
  
   def decrypts128(self,encrypt):    
-    #phpurl = "http://myphp128.com/decrypt.php"
-    phpurl = "http://localhost/decrypt128.php"
+    phpurl = "http://myphp128.com/decrypt.php"
+    #phpurl = "http://localhost/decrypt128.php"
     
     rlgrobj = {"encrypt":encrypt}
     
@@ -566,8 +566,8 @@ class Religare:
   def decrypts(self,encrypt):
     
     
-    #phpurl = "http://myphp.com/decrypt.php"
-    phpurl = "http://localhost/decrypt.php"
+    phpurl = "http://myphp.com/decrypt.php"
+    #phpurl = "http://localhost/decrypt.php"
     
     rlgrobj = {"encrypt":encrypt}
     
@@ -586,8 +586,8 @@ class Religare:
 
   def decrypt(self,encrypt):
     
-    #phpurl = "http://myphp.com/decrypt.php"
-    phpurl = "http://localhost/decrypt.php"
+    phpurl = "http://myphp.com/decrypt.php"
+    #phpurl = "http://localhost/decrypt.php"
     
     rlgrobj = {"encrypt":encrypt}
     
@@ -612,8 +612,8 @@ class Religare:
   
   def encrypts(self,raw):
       
-      #phpurl = "http://myphp.com/encrypt.php"
-      phpurl = "http://localhost/encrypt.php"
+      phpurl = "http://myphp.com/encrypt.php"
+      #phpurl = "http://localhost/encrypt.php"
       
       rlgrobj = {"raw":raw}
       
@@ -633,8 +633,8 @@ class Religare:
 
   def encrypt(self,raw):
     
-    #phpurl = "http://myphp.com/encrypt.php"
-    phpurl = "http://localhost/encrypt.php"
+    phpurl = "http://myphp.com/encrypt.php"
+    #phpurl = "http://localhost/encrypt.php"
     
     rlgrobj = {"raw":raw}
     
