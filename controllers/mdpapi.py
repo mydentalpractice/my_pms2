@@ -32,6 +32,7 @@ from applications.my_pms2.modules import mdpmediclaim
 from applications.my_pms2.modules import mdplocation
 from applications.my_pms2.modules import mdptask
 from applications.my_pms2.modules import mdpprovider
+from applications.my_pms2.modules import mdpabhicl
 
 from applications.my_pms2.modules import logger
 
@@ -1849,10 +1850,14 @@ def getproviderswithpincode(avars):
 
 ############################# End Location API ##################################################
 
-############################# Religare 399 API ##################################################
+############################# ABHICL API ##################################################
+def abhicl_member_registration(avars):
+    oabhicl = mdpabhicl.ABHICL(current.globalenv['db'])
+    rsp = oabhicl.abhicl_member_registration(avars)   
+    return rsp
 
 
-############################# End Religare 399 API ##################################################
+############################# End ABHICL API ##################################################
 
 def unknown(avars):
     return dict()
@@ -1906,7 +1911,8 @@ mdpapi_switcher = {"listappointments":getappointments,"getappointmentsbymonth":g
                    "getreligareprocedures399":getreligareprocedures399,"addRlgProcedureToTreatment399":addRlgProcedureToTreatment399,\
                    "sendOTPXXX":sendOTPXXX,"validateOTPXXX":validateOTPXXX,"uploadDocumentXXX":uploadDocumentXXX,"getreligarepatientXXX":getreligarepatientXXX,\
                    "updatereligarepatientXXX":updatereligarepatientXXX,"getreligareproceduresXXX":getreligareproceduresXXX,"getTransactionIDXXX":getTransactionIDXXX,\
-                   "addRlgProcedureToTreatmentXXX":addRlgProcedureToTreatmentXXX,"settleTransactionXXX":settleTransactionXXX,"voidTransactionXXX":voidTransactionXXX
+                   "addRlgProcedureToTreatmentXXX":addRlgProcedureToTreatmentXXX,"settleTransactionXXX":settleTransactionXXX,"voidTransactionXXX":voidTransactionXXX,\
+                   "abhicl_member_registration":abhicl_member_registration
                    }
 
 

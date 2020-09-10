@@ -22,6 +22,13 @@ getboolean =   lambda text: True if((text != None)&(text != "")&(text != "None")
 
 fmt = "%Y-%m-%d %H:%M:%S"
 
+
+def getdatefromstring(strdate,fmt):
+        
+        dt = datetime.datetime.strptime(strdate,fmt)
+        returndt
+        
+
 #this returns local current (IST) date and time as datetime object
 def getISTFormatCurrentLocatTime():
         loctime = getISTCurrentLocatTime()
