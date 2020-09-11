@@ -69,21 +69,25 @@ class ABHICL:
       cell = avars["cell"] if "cell" in avars else "0000000000"
       email = avars["email"] if "email" in avars else "mydentalplan.in@gmail.com"
   
-      jsonresp = {"promocode":promocode}
+      avars = {"promocode":promocode,"ABHICLID":abhiclid}
       
       #start session
-      jobj = json.loads(self.startsession(jsonresp))
+      jobj = json.loads(self.startsession(avars))
 
       if(jobj["result"] == "fail"):
-	msg = "member_registration Start Session(A)"
+	
+	msg = self.rlgrobj.xerrormessage("ABHICL101")
 	logger.loggerpms2(msg)
+	jsonresp = {}
+	jsonresp["ABHICLID"] = abhiclid
+	jsonresp["MDPMember"] = ""
 	jsonresp["result"] = "fail"
-	jsonresp["error_code"] = ""
+	jsonresp["error_code"] = "ABHICL101"
 	jsonresp["error_message"] = msg    
 	return json.dumps(jsonresp)
 	
       #create new abhicl patient
-      jsonresp = {
+      avars = {
         
         "ackid":jobj["ackid"],
         "promocode":promocode,
@@ -95,34 +99,43 @@ class ABHICL:
         "policy":policy,
         "providercode":providercode
       }
-      jobj = json.loads(self.newabhiclpatient(jsonresp))
+      jobj = json.loads(self.newabhiclpatient(avars))
       if(jobj["result"] == "fail"):
-	msg = "member_registration New ABHICL Patient(A)"
+	msg = self.rlgrobj.xerrormessage("ABHICL102")
 	logger.loggerpms2(msg)
+	jsonresp = {}
+	jsonresp["ABHICLID"] = abhiclid
+	jsonresp["MDPMember"] = ""
 	jsonresp["result"] = "fail"
-	jsonresp["error_code"] = ""
+	jsonresp["error_code"] = "ABHICL102"
 	jsonresp["error_message"] = msg    
 	return json.dumps(jsonresp)
       
       #send sms/email notification
-      cellno = common.modify_cell(cell)
-      message = "You have been successfully registered with MyDental Health Plan.  They will call you to fix an appointment with a Dentist."
-      retval = mail.sendSMS2Email(cellno,message)
+      #cellno = common.modify_cell(cell)
+      #message = "You have been successfully registered with MyDental Health Plan.  They will call you to fix an appointment with a Dentist."
+      #retval = mail.sendSMS2Email(db,cellno,message)
       
-      ccs = email
-      subject = "Member Registration"
-      message = "You have been successfully registered with MyDental Health Plan.  They will call you to fix an appointment with a Dentist."
-      retval = mail.groupEmail(db, email, email, subject, message)
+      #ccs = email
+      #subject = "Member Registration"
+      #message = "You have been successfully registered with MyDental Health Plan.  They will call you to fix an appointment with a Dentist."
+      #retval = mail.groupEmail(db, email, email, subject, message)
       
+      jsonresp = {}
+      jsonresp["ABHICLID"] = abhiclid
+      jsonresp["MDPMember"] = jobj["MDPMember"]
       jsonresp["result"] = "success"
       jsonresp["error_code"] = ""
-      jsonresp["error_message"] = msg         
+      jsonresp["error_message"] = ""         
 
     except Exception as e:
-	  msg = "member_registration API Excption:\n"  + str(e)
-	  logger.loggerpms2(msg)
+	  msg =  self.rlgrobj.xerrormessage("ABHICL100") + ":New Member Registration"+ "\n" + str(e)
+	  logger.loggerpms2.info(msg)
+	  jsonresp = {}
+	  jsonresp["ABHICLID"] = abhiclid
+	  jsonresp["MDPMember"] = ""	  
 	  jsonresp["result"] = "fail"
-	  jsonresp["error_code"] = ""
+	  jsonresp["error_code"] = "ABHICL100"
 	  jsonresp["error_message"] = msg    
 
     return json.dumps(jsonresp)
@@ -131,6 +144,8 @@ class ABHICL:
     
     db = self.db
     promocode = avars["promocode"] if "promocode" in avars else ""
+    abhiclid = avars["abhiclid"] if "abhiclid" in avars else ""
+    
     jsonresp = {}
     
     try:
@@ -149,6 +164,9 @@ class ABHICL:
 	  modified_by = 1     
 	)
 	db.commit()
+	
+	jsonresp["ABHICLID"] = abhiclid
+	jsonresp["MDPMember"] = ""
         jsonresp["result"] = "success"
         jsonresp["error_code"] = ""
         jsonresp["error_message"] = ""
@@ -156,20 +174,24 @@ class ABHICL:
 	
         
       else:
-        msg = "Start Sessoion API: " + self.rlgrobj.errormessage("ABHICL001")
+        msg = self.rlgrobj.xerrormessage("ABHICL104")
         logger.loggerpms2.info(msg)
         jsonresp = {
           "result":"fail",
-          "error_code":"ABHICL001",
+          "error_code":"ABHICL104",
           "error_message": msg
         }        
-      
+	jsonresp["ABHICLID"] = abhiclid
+	jsonresp["MDPMember"] = ""      
      
     except Exception as e:
-      msg = "Start Session API Excption:\n" + self.rlgrobj.errormessage("ERR004")  + "\n(" + str(e) + ")"
-      logger.loggerpms2(msg)
+      msg = self.rlgrobj.xerrormessage("ABHICL100")  + ":Start Session" + "\n(" + str(e) + ")"
+      logger.loggerpms2.info(msg)
+      jsonresp = {}
+      jsonresp["ABHICLID"] = abhiclid
+      jsonresp["MDPMember"] = ""      
       jsonresp["result"] = "fail"
-      jsonresp["error_code"] = "ERR004"
+      jsonresp["error_code"] = "ABHICL100"
       jsonresp["error_message"] = msg
       
     
@@ -209,18 +231,23 @@ class ABHICL:
     
     patientmember = None
     
+   
+     
     try:
       
       ackid = avars["ackid"] if "ackid" in avars else None
+      abhiclid = avars["abhiclid"] if "abhiclid" in avars else ""
       
       #invalid session as no ackid is specified
       if((ackid == None) | (ackid == "")):
 	
-	msg = "New ABHICL Patient API No ACKID: " + self.rlgrobj.xerrormessage("ERR002")
+	msg = "New ABHICL Patient API Error: Missing ACKID\n" + self.rlgrobj.xerrormessage("ABHICL105")
 	logger.loggerpms2.info(msg)
 	jsonresp = {
+	  "ABHICLID":abhcilcid,
+	  "MDPMember":"",
           "result":"fail",
-          "error_code":"ERR002",
+          "error_code":"ABHICL105",
           "error_message": msg
         }
 	return json.dumps(jsonresp)	
@@ -235,16 +262,18 @@ class ABHICL:
       companypin = r[0].pin if(len(r) == 1) else ""
       companyaddr1 = r[0].address1 if(len(r) == 1) else ""
       companyaddr2 = r[0].address2 if(len(r) == 1) else ""
-      companyaddr3 = r[0].address13if(len(r) == 1) else ""
+      companyaddr3 = r[0].address3 if(len(r) == 1) else ""
       
       companyid = int(common.getid(r[0].id)) if(len(r) == 1) else 0
       
       if((companycode == "") | (companycode==None) | (companyid == 0)):
-	msg = "New ABHICL Patient API No Company: " + self.rlgrobj.xerrormessage("ERR002")
+	msg = "New ABHICL Patient API Error: Missing Company\n" + self.rlgrobj.xerrormessage("ABHICL105")	
 	logger.loggerpms2.info(msg)
 	jsonresp = {
+	  "ABHICLID":abhcilcid,
+	  "MDPMember":"",	  
           "result":"fail",
-          "error_code":"ERR002",
+          "error_code":"ABHICL105",
           "error_message": msg
         }
 	return json.dumps(jsonresp)
@@ -253,13 +282,15 @@ class ABHICL:
       #get policy	
       policy = avars["policy"] if "policy" in avars else None
       if((policy == None) | (policy == "")):
-	msg = "New ABHICL Patient API: No Policy: " + self.rlgrobj.xerrormessage("ERR003")
+	msg = "New ABHICL Patient API Error: Missing Policy\n" + self.rlgrobj.xerrormessage("ABHICL105")	
 	logger.loggerpms2.info(msg)
 	jsonresp = {
+	  "ABHICLID":abhcilcid,
+	  "MDPMember":"",	  
           "result":"fail",
-          "error_code":"ERR003",
+          "error_code":"ABHICL105",
           "error_message": msg
-        }        
+        }
 	return json.dumps(jsonresp)
       
       
@@ -267,25 +298,29 @@ class ABHICL:
       providercode = common.getstring(avars["providercode"]) if "providercode" in avars else None
       
       if((providercode == None) | (providercode == "")):
-	msg = "New ABHICL Patient API: No Provider: " + self.rlgrobj.xerrormessage("ERR005")
+	msg = "New ABHICL Patient API Error: Missing Provider\n" + self.rlgrobj.xerrormessage("ABHICL105")	
 	logger.loggerpms2.info(msg)
 	jsonresp = {
+	  "ABHICLID":abhcilcid,
+	  "MDPMember":"",	  
           "result":"fail",
-          "error_code":"ERR005",
+          "error_code":"ABHICL105",
           "error_message": msg
-        }        
+        }
 	return json.dumps(jsonresp)
 
       provs = db((db.provider.provider == providercode) & (db.provider.is_active == True)).select()
       
       if(len(provs) != 1):
-	msg = "New ABHICL Patient API: No Provider: " + self.rlgrobj.xerrormessage("ERR005")
+	msg = "New ABHICL Patient API Error: Mulltiple Providers\n" + self.rlgrobj.xerrormessage("ABHICL105")	
 	logger.loggerpms2.info(msg)
 	jsonresp = {
+	  "ABHICLID":abhcilcid,
+	  "MDPMember":"",	  
           "result":"fail",
-          "error_code":"ERR005",
+          "error_code":"ABHICL105",
           "error_message": msg
-        }        
+        }
 	return json.dumps(jsonresp)
 
       providerid = int(common.getid(provs[0].id))
@@ -314,13 +349,15 @@ class ABHICL:
       planid = int(common.getid(p[0].id)) if(len(p) == 1) else 0
       
       if(planid == 0):
-	msg = "New ABHICL Patient API: No Plan: " + self.rlgrobj.xerrormessage("ERR006")
+	msg = "New ABHICL Patient API Error: No Plan\n" + self.rlgrobj.xerrormessage("ABHICL105")	
 	logger.loggerpms2.info(msg)
 	jsonresp = {
+	  "ABHICLID":abhcilcid,
+	  "MDPMember":"",	  
           "result":"fail",
-          "error_code":"ERR006",
+          "error_code":"ABHICL105",
           "error_message": msg
-        }        
+        }
 	return json.dumps(jsonresp)
 
       #patientmember
@@ -330,14 +367,17 @@ class ABHICL:
       xrows = db(db.membercount.company == companyid).select()
       membercount = int(common.getid(xrows[0].membercount)) if(len(xrows) == 1) else -1
       if(membercount < 0):
-	msg = "New ABHICL Patient API: Patient Member Count: " + self.rlgrobj.xerrormessage("ERR007")
+	msg = "New ABHICL Patient API Error: Generating MDP MemberID\n" + self.rlgrobj.xerrormessage("ABHICL105")	
 	logger.loggerpms2.info(msg)
 	jsonresp = {
+	  "ABHICLID":abhcilcid,
+	  "MDPMember":"",	  
           "result":"fail",
-          "error_code":"ERR007",
+          "error_code":"ABHICL105",
           "error_message": msg
-        }        
+        }
 	return json.dumps(jsonresp)
+      
       patientmember = plancode + str(membercount)    
 
       #create or update new patient
@@ -410,18 +450,29 @@ class ABHICL:
           "error_message":"",
           "error_code":"",
           "ackid":ackid,
-          "ABHICLID":groupref
+          "ABHICLID":groupref,
+	  "MDPMember":patientmember
         }
       else:
-	jsonresp={"result":"fail","error_message":"New ABHICL Patient API:Patient Object Error\n"+self.rlgrobj.xerrormessage("ERR007"), "error_code":"ERR007"}
-	  
-          
+	msg = "New ABHICL Patient API Error: Patient Object\n" + self.rlgrobj.xerrormessage("ABHICL105")	
+	logger.loggerpms2.info(msg)
+	jsonresp = {
+          "ABHICLID":abhcilcid,
+          "MDPMember":"",	  
+          "result":"fail",
+          "error_code":"ABHICL105",
+          "error_message": msg
+	  }
     except Exception as e:
-      msg = "New ABHICL Patient API Exception:\n" + self.rlgrobj.xerrormessage("ERR004")  + "\n(" + str(e) + ")"
-      logger.loggerpms2(msg)
+      msg = self.rlgrobj.xerrormessage("ABHICL100")  + ":New ABHICL Patient" + "\n(" + str(e) + ")"
+      logger.loggerpms2.info(msg)
+      jsonresp = {}
+      jsonresp["ABHICLID"] = abhiclid
+      jsonresp["MDPMember"] = ""      
       jsonresp["result"] = "fail"
-      jsonresp["error_code"] = "ERR004"
+      jsonresp["error_code"] = "ABHICL100"
       jsonresp["error_message"] = msg
+
     
     return json.dumps(jsonresp)
   
