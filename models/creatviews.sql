@@ -8454,3 +8454,7 @@ ADD COLUMN `policy_name` VARCHAR(128) NULL DEFAULT NULL AFTER `service_id`;
 1. XXXZZZZModify vw_relgrtreatmentprocedure  adding GST
 2. XXXZZZCreated RLGDC company
 3. XXXZZZimported RLGDC
+
+11/9/2020
+==========
+1. ZZZZAdd ABHICL errorr messages in rlgerrormessage table
