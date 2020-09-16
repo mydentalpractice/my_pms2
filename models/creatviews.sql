@@ -8457,4 +8457,10 @@ ADD COLUMN `policy_name` VARCHAR(128) NULL DEFAULT NULL AFTER `service_id`;
 
 11/9/2020
 ==========
-1. ZZZZAdd ABHICL errorr messages in rlgerrormessage table
+1. YYYYZZZZAdd ABHICL errorr messages in rlgerrormessage table
+2. YYYZZZAdd ABHICL Company
+3. ZZZAdd ABHILC Plan
+4. Import ProcedurePricePlan for ABHICL
+5. Import provider_regions_plan for ABHIC
+6. ZZZZmodify vw_treatmentlist - added companyid, groupref, patientmember, enddate
+7. ZZZZmodify vw_appointments - added "companyid" & "groupref", "membercode"

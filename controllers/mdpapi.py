@@ -1851,10 +1851,21 @@ def getproviderswithpincode(avars):
 ############################# End Location API ##################################################
 
 ############################# ABHICL API ##################################################
-def abhicl_member_registration(avars):
+def dental_service_request(avars):
     oabhicl = mdpabhicl.ABHICL(current.globalenv['db'])
-    rsp = oabhicl.abhicl_member_registration(avars)   
+    rsp = oabhicl.dental_service_request(avars)   
     return rsp
+
+def get_appointments(avars):
+    oabhicl = mdpabhicl.ABHICL(current.globalenv['db'])
+    rsp = oabhicl.get_appointments(avars)   
+    return rsp
+
+def get_treatments(avars):
+    oabhicl = mdpabhicl.ABHICL(current.globalenv['db'])
+    rsp = oabhicl.get_treatments(avars)   
+    return rsp
+
 
 
 ############################# End ABHICL API ##################################################
@@ -1912,15 +1923,17 @@ mdpapi_switcher = {"listappointments":getappointments,"getappointmentsbymonth":g
                    "sendOTPXXX":sendOTPXXX,"validateOTPXXX":validateOTPXXX,"uploadDocumentXXX":uploadDocumentXXX,"getreligarepatientXXX":getreligarepatientXXX,\
                    "updatereligarepatientXXX":updatereligarepatientXXX,"getreligareproceduresXXX":getreligareproceduresXXX,"getTransactionIDXXX":getTransactionIDXXX,\
                    "addRlgProcedureToTreatmentXXX":addRlgProcedureToTreatmentXXX,"settleTransactionXXX":settleTransactionXXX,"voidTransactionXXX":voidTransactionXXX,\
-                   "abhicl_member_registration":abhicl_member_registration
+                   "dental_service_request":dental_service_request,"get_appointments":get_appointments,"get_treatments":get_treatments
                    }
 
 
 @request.restful()
 def mdpapi():
 
+   
     response.view = 'generic' + request.extension
     def GET(*args, **vars):
+	
         return
 
     def POST(*args, **vars):

@@ -39,13 +39,12 @@ class ABHICL:
   #This API is called from ABHICL site with the following information
   #unique ABHICL Member ID
   #member firstname, lastname, cell, email, dob, gender
-  #This API will create or update the member information in MDP and sent an email/SMS to the member informing for 
-  #appointment creation with MDP
+  #This API will create or update the member information in MDP 
   #The provider will be defaulted to P0001
   #The company will be ABHICL
-  #The promocode will be ABHICL promocode
+  #The promocode will be ABHICL40 promocode
   
-  def abhicl_member_registration(self,avars):
+  def dental_service_request(self,avars):
     
     db = self.db
     
@@ -53,15 +52,18 @@ class ABHICL:
     
     try:
 
+      logger.loggerpms2.info("Enter dental_service_request")
       providercode = 'P0001'
       policy = "ABHICL40"
       
       promocode = avars["promocode"] if "promocode" in avars else "ABHICL40"
       
+      abhiclid = avars["ABHICLID"] if "ABHICLID" in avars else common.generateackid("AB",10)
+      
       r = db(db.company.groupkey == promocode).select(db.company.company)
       companycode = r[0].company if len(r) == 1 else 'ABHICL'
     
-      abhiclid = avars["ABHICLID"] if "ABHICLID" in avars else common.generateackid("AB",10)
+      
       
       
       fname = avars["firstname"] if "firstname" in avars else abhiclid + "_FN"
@@ -77,7 +79,7 @@ class ABHICL:
       if(jobj["result"] == "fail"):
 	
 	msg = self.rlgrobj.xerrormessage("ABHICL101")
-	logger.loggerpms2(msg)
+	logger.loggerpms2.info(msg)
 	jsonresp = {}
 	jsonresp["ABHICLID"] = abhiclid
 	jsonresp["MDPMember"] = ""
@@ -102,7 +104,7 @@ class ABHICL:
       jobj = json.loads(self.newabhiclpatient(avars))
       if(jobj["result"] == "fail"):
 	msg = self.rlgrobj.xerrormessage("ABHICL102")
-	logger.loggerpms2(msg)
+	logger.loggerpms2.info(msg)
 	jsonresp = {}
 	jsonresp["ABHICLID"] = abhiclid
 	jsonresp["MDPMember"] = ""
@@ -244,7 +246,7 @@ class ABHICL:
 	msg = "New ABHICL Patient API Error: Missing ACKID\n" + self.rlgrobj.xerrormessage("ABHICL105")
 	logger.loggerpms2.info(msg)
 	jsonresp = {
-	  "ABHICLID":abhcilcid,
+	  "ABHICLID":abhiclid,
 	  "MDPMember":"",
           "result":"fail",
           "error_code":"ABHICL105",
@@ -270,7 +272,7 @@ class ABHICL:
 	msg = "New ABHICL Patient API Error: Missing Company\n" + self.rlgrobj.xerrormessage("ABHICL105")	
 	logger.loggerpms2.info(msg)
 	jsonresp = {
-	  "ABHICLID":abhcilcid,
+	  "ABHICLID":abhiclid,
 	  "MDPMember":"",	  
           "result":"fail",
           "error_code":"ABHICL105",
@@ -285,7 +287,7 @@ class ABHICL:
 	msg = "New ABHICL Patient API Error: Missing Policy\n" + self.rlgrobj.xerrormessage("ABHICL105")	
 	logger.loggerpms2.info(msg)
 	jsonresp = {
-	  "ABHICLID":abhcilcid,
+	  "ABHICLID":abhiclid,
 	  "MDPMember":"",	  
           "result":"fail",
           "error_code":"ABHICL105",
@@ -301,7 +303,7 @@ class ABHICL:
 	msg = "New ABHICL Patient API Error: Missing Provider\n" + self.rlgrobj.xerrormessage("ABHICL105")	
 	logger.loggerpms2.info(msg)
 	jsonresp = {
-	  "ABHICLID":abhcilcid,
+	  "ABHICLID":abhiclid,
 	  "MDPMember":"",	  
           "result":"fail",
           "error_code":"ABHICL105",
@@ -315,7 +317,7 @@ class ABHICL:
 	msg = "New ABHICL Patient API Error: Mulltiple Providers\n" + self.rlgrobj.xerrormessage("ABHICL105")	
 	logger.loggerpms2.info(msg)
 	jsonresp = {
-	  "ABHICLID":abhcilcid,
+	  "ABHICLID":abhiclid,
 	  "MDPMember":"",	  
           "result":"fail",
           "error_code":"ABHICL105",
@@ -352,7 +354,7 @@ class ABHICL:
 	msg = "New ABHICL Patient API Error: No Plan\n" + self.rlgrobj.xerrormessage("ABHICL105")	
 	logger.loggerpms2.info(msg)
 	jsonresp = {
-	  "ABHICLID":abhcilcid,
+	  "ABHICLID":abhiclid,
 	  "MDPMember":"",	  
           "result":"fail",
           "error_code":"ABHICL105",
@@ -370,7 +372,7 @@ class ABHICL:
 	msg = "New ABHICL Patient API Error: Generating MDP MemberID\n" + self.rlgrobj.xerrormessage("ABHICL105")	
 	logger.loggerpms2.info(msg)
 	jsonresp = {
-	  "ABHICLID":abhcilcid,
+	  "ABHICLID":abhiclid,
 	  "MDPMember":"",	  
           "result":"fail",
           "error_code":"ABHICL105",
@@ -457,7 +459,7 @@ class ABHICL:
 	msg = "New ABHICL Patient API Error: Patient Object\n" + self.rlgrobj.xerrormessage("ABHICL105")	
 	logger.loggerpms2.info(msg)
 	jsonresp = {
-          "ABHICLID":abhcilcid,
+          "ABHICLID":abhiclid,
           "MDPMember":"",	  
           "result":"fail",
           "error_code":"ABHICL105",
@@ -497,7 +499,7 @@ class ABHICL:
       
       if((providercode == None) | (providercode == "")):
 	
-	msg = "New Appointment API: No Provider: " + self.rlgrobj.errormessage("ERR005")
+	msg = "New Appointment API: No Provider: " + self.rlgrobj.xerrormessage("ERR005")
 	logger.loggerpms2.info(msg)
 	jsonresp = {
           "result":"fail",
@@ -511,7 +513,7 @@ class ABHICL:
       p = db(db.patientmember.groupref == abhiclid).select()
       
       if(len(p) != 1):
-	msg = "New Appointment API: No Patient: " + self.rlgrobj.errormessage("ERR008")
+	msg = "New Appointment API: No Patient: " + self.rlgrobj.xerrormessage("ERR008")
 	logger.loggerpms2.info(msg)
 	jsonresp = {
           "result":"fail",
@@ -536,7 +538,7 @@ class ABHICL:
       v = db(db.vw_memberpatientlist.primarypatientid == memberid).select(db.vw_memberpatientlist.patientid)
       patientid = int(common.getid(v[0].patientid)) if(len(v) == 1) else 0
       if(patientid == 0):
-	msg = "New Appointment API: No Patient: " + self.rlgrobj.errormessage("ERR008")
+	msg = "New Appointment API: No Patient: " + self.rlgrobj.xerrormessage("ERR008")
 	logger.loggerpms2.info(msg)
 	jsonresp = {
           "result":"fail",
@@ -564,8 +566,8 @@ class ABHICL:
 	  "apptref":a[0].f_uniqueid,
 	}
       else:
-	msg = "New Appointment API: No Appointment " + self.rlgrobj.errormessage("ERR009")
-	logger.loggerpms2(msg)
+	msg = "New Appointment API: No Appointment " + self.rlgrobj.xerrormessage("ERR009")
+	logger.loggerpms2.info(msg)
 	jsonresp["result"] = "fail"
 	jsonresp["error_code"] = "ERR009"
 	jsonresp["error_message"] = msg
@@ -573,10 +575,193 @@ class ABHICL:
       
     
     except Exception as e:
-	msg = "New Appointment API Exception:\n" + self.rlgrobj.errormessage("ERR004")  + "\n(" + str(e) + ")"
-	logger.loggerpms2(msg)
+	msg = "New Appointment API Exception:\n" + self.rlgrobj.xerrormessage("ERR004")  + "\n(" + str(e) + ")"
+	logger.loggerpms2.info(msg)
 	jsonresp["result"] = "fail"
 	jsonresp["error_code"] = "ERR004"
 	jsonresp["error_message"] = msg
     
     return json.dumps(jsonresp)
+  
+
+
+  def get_treatments(self,avars):
+    
+    logger.loggerpms2.info("Enter get treatments")
+    db = self.db
+
+    jsonresp = {}
+    try:
+    
+      
+      companycode = avars["company"] if "company" in avars else "ABHICL"
+      r = db(db.company.company == companycode).select(db.company.id)
+      companyid = r[0].id if len(r) == 1 else 0 
+      
+      
+      today = datetime.datetime.now()
+	   
+      t1 = str(today.day) + "/" + str(today.month) + "/" + str(today.year) 
+      t2 = str(today.day) + "/" + str(today.month) + "/" + str(today.year) 
+      
+      sfrom_date = avars["from_date"]  if "from_date" in avars else ""
+      from_date = datetime.datetime.strptime(t1 if sfrom_date == "" else sfrom_date, "%d/%m/%Y")
+
+      sto_date = avars["to_date"]  if "to_date" in avars else ""
+      to_date = datetime.datetime.strptime(t2 if sto_date == "" else sto_date, "%d/%m/%Y")      
+
+      
+      status = avars["status"] if "status" in avars else "" 
+      
+      
+      query = ""
+      query = (db.vw_treatmentlist.companyid == companyid) if(companyid > 0) else (1==1)
+      query = query & ((db.vw_treatmentlist.startdate >= from_date) & (db.vw_treatmentlist.startdate <= to_date))
+      
+      
+      if(status == ""):
+	query = query & (db.vw_treatmentlist.is_active == True) & ((db.vw_treatmentlist.status == "Started") | (db.vw_treatmentlist.status == "Completed"))
+      elif (status == "ALL"):
+	query = query & ((db.vw_treatmentlist.status == "Started") | (db.vw_treatmentlist.status == "Completed") | (db.vw_treatmentlist.status == "Cancelled"))
+      elif ((status == 'Started') | (status == "Completed")):
+	query = query & ((db.vw_treatmentlist.status == status) & (db.vw_treatmentlist.is_active == True))
+      else:
+	query = query & (db.vw_treatmentlist.status == status)
+	
+      logger.loggerpms2.info("get treatments->\n" + str(query))
+      
+      treatments = db(query).select(db.vw_treatmentlist.id,db.vw_treatmentlist.tplanid,db.vw_treatmentlist.treatment,db.vw_treatmentlist.startdate, db.vw_treatmentlist.enddate,db.vw_treatmentlist.patientname,\
+                                    db.vw_treatmentlist.status,db.vw_treatmentlist.treatmentcost,db.vw_treatment_procedure_group.shortdescription,\
+                                    db.vw_treatmentlist.groupref,db.vw_treatmentlist.patientmember,\
+                                    left=db.vw_treatment_procedure_group.on(db.vw_treatment_procedure_group.treatmentid==db.vw_treatmentlist.id),\
+                                    orderby=~db.vw_treatmentlist.id)     
+    
+      
+      
+      treatmentlist = []
+  
+      for treatment in treatments:
+
+	treatmentobj = {
+	  "status": "Started" if(common.getstring(treatment.vw_treatmentlist.status) == "") else common.getstring(treatment.vw_treatmentlist.status),
+	  
+	  "ABHICLID":treatment.vw_treatmentlist.groupref,
+	  "MDPMember":treatment.vw_treatmentlist.patientmember,
+	  "patientname" : common.getstring(treatment.vw_treatmentlist.patientname),
+	  
+          "treatment": common.getstring(treatment.vw_treatmentlist.treatment),
+          "treatment_start_date"  : (treatment.vw_treatmentlist.startdate).strftime("%d/%m/%Y"),
+	  "treatment_end_date"  : (treatment.vw_treatmentlist.enddate).strftime("%d/%m/%Y"),
+	  
+          "procedures":common.getstring(treatment.vw_treatment_procedure_group.shortdescription),
+        }
+	treatmentlist.append(treatmentobj)        	
+      
+     
+      
+      jsonresp = {
+        
+        "result":"success",
+        "error_code":"",
+        "error_message":"",
+        "treatmentlist":treatmentlist
+      }
+      
+    except Exception as e:
+      msg =  self.rlgrobj.xerrormessage("ABHICL100") + ":Get ABHICL Treatments"+ "\n" + str(e)
+      logger.loggerpms2.info(msg)
+      jsonresp = {}
+      jsonresp["result"] = "fail"
+      jsonresp["error_code"] = "ABHICL100"
+      jsonresp["error_message"] = msg    
+    
+    return json.dumps(jsonresp)
+  
+  
+  def get_appointments(self,avars):
+     
+    logger.loggerpms2.info("Enter get_appointments")
+    db = self.db
+
+    jsonresp = {}
+    try:
+    
+      
+      companycode = avars["company"] if "company" in avars else "ABHICL"
+      r = db(db.company.company == companycode).select(db.company.id)
+      companyid = r[0].id if len(r) == 1 else 0      
+      
+      today = datetime.datetime.now()
+      
+      t1 = str(today.day) + "/" + str(today.month) + "/" + str(today.year) + " 00:00"
+      t2 = str(today.day) + "/" + str(today.month) + "/" + str(today.year) + " 23:59"
+      
+      sfrom_date = avars["from_date"]  if "from_date" in avars else ""
+      from_date = datetime.datetime.strptime(t1 if sfrom_date == "" else sfrom_date + " 00:00", "%d/%m/%Y %H:%M")
+
+      sto_date = avars["to_date"]  if "to_date" in avars else ""
+      to_date = datetime.datetime.strptime(t2 if sto_date == "" else sto_date + " 23:59", "%d/%m/%Y %H:%M")
+
+      
+      #from_date = datetime.datetime.strptime(avars["from_date"] + " 00:00" if "from_date" in avars else t1, "%d/%m/%Y %H:%M" )
+      #to_date = datetime.datetime.strptime(avars["to_date"] + " 23:59" if "to_date" in avars else t2, "%d/%m/%Y %H:%M" )
+
+      
+      status = avars["status"] if "status" in avars else "" 
+      
+     
+      
+      query = ""
+      query = (db.vw_appointments.companyid == companyid) if(companyid > 0) else (1==1)
+      query = query & ((db.vw_appointments.f_start_time >= from_date) & (db.vw_appointments.f_start_time <= to_date))
+      
+      
+      if(status == ""):
+	query = query & (db.vw_appointments.is_active == True) & ((db.vw_appointments.f_status == "Open") | (db.vw_appointments.f_status == "Checked-in"))
+      elif (status == "ALL"):
+	query = query & ((db.vw_appointments.f_status == "Open") | (db.vw_appointments.f_status == "Checked") | (db.vw_appointments.f_status == "Cancelled"))
+      elif ((status == 'Open') | (status == "Checked-in")):
+	query = query & ((db.vw_appointments.f_status == status) & (db.vw_appointments.is_active == True))
+      else:
+	query = query & (db.vw_appointments.f_status == status)
+	
+      logger.loggerpms2.info("get_appointments->\n" + str(query))
+      
+      appts = db(query).select()
+      
+      apptlist = []
+           
+  
+  
+  
+      for appt in appts:
+
+	apptobj = {
+	  
+	  "ABHICLID":appt.groupref,
+	  "MDPMember":appt.membercode,
+          "status": "Open" if(appt.f_status == "") else appt.f_status,
+          "patientname" : appt.f_patientname,
+          "apptdatetime":(appt.f_start_time).strftime("%d/%m/%Y %H:%M")
+        }
+	apptlist.append(apptobj)        	
+      
+     
+      
+      jsonresp = {
+        
+        "result":"success",
+        "error_code":"",
+        "error_message":"",
+        "appointment_list":apptlist
+      }
+      
+    except Exception as e:
+      msg =  self.rlgrobj.xerrormessage("ABHICL100") + ":Get ABHICL Appointments"+ "\n" + str(e)
+      logger.loggerpms2.info(msg)
+      jsonresp = {}
+      jsonresp["result"] = "fail"
+      jsonresp["error_code"] = "ABHICL100"
+      jsonresp["error_message"] = msg    
+    
+    return json.dumps(jsonresp)  

@@ -2560,7 +2560,7 @@ def update_treatment():
            Field('tooth','string', label='Tooth/Teeth', default='',writable=writablflag),
            Field('startdate', 'date', label='From Date',default=treatments[0].startdate, requires=IS_EMPTY_OR(IS_DATE(format=('%d/%m/%Y'))),writable=writablflag),
            Field('enddate', 'date', label='To Date',default=enddate, requires=IS_EMPTY_OR(IS_DATE(format=('%d/%m/%Y'))),writable=writablflag),
-           Field('status', 'string', widget = lambda field, value:SQLFORM.widgets.options.widget(field, value, _style="width:100%;height:35px",_class='w3-input w3-border ',_onchange='onstatuschange()'),label='Status',default=defsts, requires = IS_IN_SET(status.TREATMENTSTATUS),writable=False,readable=True),  
+           Field('status', 'string', widget = lambda field, value:SQLFORM.widgets.options.widget(field, value, _style="width:100%;height:35px",_class='w3-input w3-border ',_onchange='onstatuschange()'),label='Status',default=defsts, requires = IS_IN_SET(status.TREATMENTSTATUS),writable=True,readable=True),  
            Field('ucrfee', 'double', label='Total UCR',default=totalactualtreatmentcost,writable=False),  
            Field('treatmentcost', 'double', label='Total Treament Cost',default=totaltreatmentcost,writable=False),  
            Field('copay', 'double', label='Total Copay',default=treatments[0].copay, writable = False),  
@@ -2650,15 +2650,16 @@ def update_treatment():
             if(defsts == 'Authorized'):
                 authorized = True
             else:
-                authorized = False
+                authorized = False  
             
+           
             db(db.treatment.id == treatmentid).update(\
                 treatment = formTreatment.vars.treatment,
                 chiefcomplaint = formTreatment.vars.chiefcomplaint,
                 description  = formTreatment.vars.description,
                 startdate = formTreatment.vars.startdate,
                 enddate = formTreatment.vars.enddate,
-                status = defsts,
+                status = formTreatment.vars.status,       #status = defsts  before 16.9.2020
                 authorized = authorized,
                 actualtreatmentcost = 0,
                 treatmentcost = treatmentcost,

@@ -587,6 +587,12 @@ class Appointment:
         
         
         try:
+            #location of the Provider's practice
+            location = ""
+            provs = db(db.provider.id == providerid).select()
+            if(len(provs) == 1):
+                location = provs[0].pa_practicename + ", " + provs[0].pa_practiceaddress
+            
             # find out day of the appt.
             startapptdt    = common.getdt(datetime.datetime.strptime(startdt,"%d/%m/%Y %H:%M"))
             endapptdt = startapptdt + timedelta(minutes=duration)
@@ -603,7 +609,7 @@ class Appointment:
                 apptid  = db.t_appointment.insert(f_start_time=startapptdt, f_end_time = endapptdt, f_duration = duration, f_status = "Open", \
                                                   cell = cell,f_title = complaint,f_treatmentid = 0,\
                                                   f_patientname = common.getstring(pat[0].fullname),
-                                                  description = providernotes,f_location = "", sendsms = True, smsaction = 'create',sendrem = True,
+                                                  description = providernotes,f_location = location, sendsms = True, smsaction = 'create',sendrem = True,
                                                   doctor = doctorid, provider=providerid, patient=patientid,patientmember=memberid, is_active=True,
                                                   created_on=common.getISTFormatCurrentLocatTime(),modified_on=common.getISTFormatCurrentLocatTime(),
                                                   created_by = 1 if(auth.user == None) else auth.user.id, \
