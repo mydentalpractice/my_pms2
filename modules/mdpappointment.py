@@ -280,6 +280,7 @@ class Appointment:
         
         db = self.db
         providerid = self.providerid
+             
         
         start = str(year) + "-" + str(month).zfill(2) + "-01 00:00:00"
         end   = str(year) + "-" + str(month).zfill(2) + "-31 23:59:00"  #no need to take 30 or 31 days - just default to 31 days
@@ -526,6 +527,8 @@ class Appointment:
         
         db = self.db
         providerid = self.providerid
+        prov = db(db.provider.id == providerid).select(db.provider.pa_locationurl)
+        locationurl = prov[0].pa_locationurl if len(prov) == 1 else ""
         apptobj = {}
         
         try:
@@ -539,6 +542,7 @@ class Appointment:
                     "complaint":common.getstring(appt[0].f_title),
                     "notes":common.getstring(appt[0].description),
                     "location":common.getstring(appt[0].f_location),
+                    "locationurl":locationurl,
                     "status":common.getstring(appt[0].f_status) if(common.getstring(appt[0].f_status) != "") else "Open",
                     "memberid":int(common.getid(appt[0].patientmember)),
                     "patientid":int(common.getid(appt[0].patient)),
