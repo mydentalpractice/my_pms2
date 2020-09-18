@@ -1669,8 +1669,9 @@ def groupEmail(db,emails,ccs, subject,message):
         subject =  subject
         message = message
         
-        
+        logger.loggerpms2.info("GropuEmail:Before Send Email " + message)
         retVal = mail.send(to,subject,message,cc=[ccs])
+        logger.loggerpms2.info("GropuEmail:After Send Email " + message)
         
 
     else:
