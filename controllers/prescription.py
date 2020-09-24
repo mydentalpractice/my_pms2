@@ -1054,6 +1054,12 @@ def prescriptions():
     doctorid1 = int(common.getid(request.post_vars.doctorid1)) if(doctorid1 == 0) else doctorid1
     doctorid1 = int(common.getdefaultdoctor(db,providerid)) if(doctorid1==0) else doctorid1    
     
+    treatmentid1 = int(common.getid(request.get_vars.treatmentid1))
+    treatmentid1 = int(common.getid(request.post_vars.treatmentid1)) if(treatmentid1 == 0) else treatmentid1
+    
+    tplanid1= int(common.getid(request.get_vars.tplanid1))
+    tplanid1 = int(common.getid(request.post_vars.tplanid1)) if(tplanid1 == 0) else tplanid1    
+
         
 
 

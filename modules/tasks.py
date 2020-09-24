@@ -58,11 +58,14 @@ def senddoctornewaptgroupsms(db,appPath,ccs,doctorid,smsdate,providerid=0):
             groupemail = common.getboolean(appts[0].groupemail)
             
         for appt in appts:
+            providerid = int(common.getid(appt.provider))
+            prov = db(db.provider.id == providerid).select(db.provider.pa_locationurl)
+            locationurl = prov[0].pa_locationurl if len(prov) == 1 else ""            
             patientid = int(common.getid(appt.patient))
             fname   = common.getstring(appt.f_patientname)  if((appt.f_patientname != "") & (appt.f_patientname != None))  else "Patient"
             patcell = common.modify_cell(common.getstring(appt.cell))
             appttime = (appt.f_start_time).strftime('%d/%m/%Y %I:%M %p')
-            location = common.getstring(appt.f_location)
+            location = common.getstring(appt.f_location) + "\n" + locationurl
             provcell = common.modify_cell(common.getstring(appt.provcell))
             provtel = common.getstring(appt.provtel)
            

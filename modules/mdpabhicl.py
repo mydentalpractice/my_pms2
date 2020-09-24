@@ -631,8 +631,9 @@ class ABHICL:
       logger.loggerpms2.info("get treatments->\n" + str(query))
       
       treatments = db(query).select(db.vw_treatmentlist.id,db.vw_treatmentlist.tplanid,db.vw_treatmentlist.treatment,db.vw_treatmentlist.startdate, db.vw_treatmentlist.enddate,db.vw_treatmentlist.patientname,\
-                                    db.vw_treatmentlist.status,db.vw_treatmentlist.treatmentcost,db.vw_treatment_procedure_group.shortdescription,\
-                                    db.vw_treatmentlist.groupref,db.vw_treatmentlist.patientmember,\
+                                    db.vw_treatmentlist.status,db.vw_treatmentlist.treatmentcost,db.vw_treatment_procedure_group.shortdescription,db.vw_treatmentlist.notes,\
+                                    db.vw_treatmentlist.groupref,db.vw_treatmentlist.patientmember,db.vw_treatmentlist.doctorname,db.vw_treatmentlist.chiefcomplaint,\
+                                    db.vw_treatmentlist.tooth,db.vw_treatmentlist.quadrant,\
                                     left=db.vw_treatment_procedure_group.on(db.vw_treatment_procedure_group.treatmentid==db.vw_treatmentlist.id),\
                                     orderby=~db.vw_treatmentlist.id)     
     
@@ -642,19 +643,46 @@ class ABHICL:
   
       for treatment in treatments:
 
+	proclist = []
+	procobj = {}
+        procs = db(db.vw_treatmentprocedure.treatmentid == treatment.vw_treatmentlist.id).select()
+	for proc in procs:
+	  procobj = {
+	    "code"  : proc.procedurecode,
+	    "procedure":proc.altshortdescription
+	  }
+	  proclist.append(procobj)
+	
+	prescrlist = []
+	prescrobj = {}
+	prescriptions = db(db.vw_patientprescription.treatmentid == treatment.vw_treatmentlist.id).select()
+	for prescr in prescriptions:
+	  prescrobj = {
+	    "date": (prescr.prescriptiondate).strftime("%d/%m/%Y"),
+	    "medicine":prescr.medicine,
+	    "dosage":prescr.strength,
+	    "dosageuom":prescr.strengthuom
+	  }
+	  prescrlist.append(prescrobj)
+	
 	treatmentobj = {
 	  "status": "Started" if(common.getstring(treatment.vw_treatmentlist.status) == "") else common.getstring(treatment.vw_treatmentlist.status),
 	  
 	  "ABHICLID":treatment.vw_treatmentlist.groupref,
 	  "MDPMember":treatment.vw_treatmentlist.patientmember,
 	  "patientname" : common.getstring(treatment.vw_treatmentlist.patientname),
-	  
           "treatment": common.getstring(treatment.vw_treatmentlist.treatment),
           "treatment_start_date"  : (treatment.vw_treatmentlist.startdate).strftime("%d/%m/%Y"),
 	  "treatment_end_date"  : (treatment.vw_treatmentlist.enddate).strftime("%d/%m/%Y"),
+	  "doctorname":treatment.vw_treatmentlist.doctorname,
+	  "tooth":treatment.vw_treatmentlist.tooth,
+	  "quadrant":treatment.vw_treatmentlist.quadrant,
+	  "notes":treatment.vw_treatmentlist.notes,
 	  
-          "procedures":common.getstring(treatment.vw_treatment_procedure_group.shortdescription),
+          "procedures":proclist,
+	  "medicines":prescrlist
         }
+	
 	treatmentlist.append(treatmentobj)        	
       
      

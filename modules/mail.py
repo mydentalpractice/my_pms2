@@ -1576,9 +1576,9 @@ def sendSMS2Email(db, cellnos, message):
         email.settings.tls = tls
         
         #retval  = True
-        logger.loggerpms2.info("SendSMS2Email:Before Send Email " + smsemail)
+        #logger.loggerpms2.info("SendSMS2Email:Before Send Email " + body)
         retVal = email.send(smsemail,subject,body)
-        logger.loggerpms2.info("SendSMS2Email:After Send Email " + str(retVal))
+        #logger.loggerpms2.info("SendSMS2Email:After Send Email " + str(retVal))
         
         
         #if((mailcc==None)|(mailcc=='')):
