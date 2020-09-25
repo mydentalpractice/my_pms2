@@ -121,6 +121,181 @@ class Procedure:
         
         return json.dumps(procobj)
     
+
+    def getnoncompanyprocedures(self,procedurepriceplancode,searchphrase="",page=0,maxcount=0):
+
+        logger.loggerpms2.info("XXX:Enter Get NonCompany Procedures \n"  + procedurepriceplancode + " " + searchphrase + " " + str(page) + " " + str(maxcount))    
+
+        db = self.db
+        providerid = self.providerid
+
+
+        page = page -1
+        urlprops = db(db.urlproperties.id >0 ).select(db.urlproperties.pagination)
+        items_per_page = 10 if(len(urlprops) <= 0) else int(common.getvalue(urlprops[0].pagination))
+        limitby = ((page)*items_per_page,(page+1)*items_per_page)      
+        proclist = []
+        procobj = {}
+        result = "success"
+        error_message = ""
+        query = ""
+        try:
+            if((searchphrase == "") | (searchphrase == None)):
+                query = (db.vw_procedurepriceplan_relgr.procedurepriceplancode == procedurepriceplancode)&\
+                    (db.vw_procedurepriceplan_relgr.is_active == True) & (db.vw_procedurepriceplan_relgr.relgrproc ==False)        
+            else:
+                query = (db.vw_procedurepriceplan_relgr.procedurepriceplancode == procedurepriceplancode)&\
+                    (db.vw_procedurepriceplan_relgr.shortdescription.like('%' + searchphrase + '%'))&\
+                    (db.vw_procedurepriceplan_relgr.is_active == True) & (db.vw_procedurepriceplan_relgr.relgrproc ==False)        
+
+            #logger.loggerpms2.info("Get Non Company Procedures " + str(query))
+
+            if(page >=0 ): 
+                procs = db(query).select(\
+                    db.vw_procedurepriceplan_relgr.ALL, \
+                    orderby=db.vw_procedurepriceplan_relgr.procedurecode,\
+                    limitby=limitby\
+                )
+                #logger.loggerpms2.info("Get Non Compamy Procs" +str(len(procs)))
+                if(maxcount == 0):
+
+                    procs1 = db(query).select(\
+                        db.vw_procedurepriceplan_relgr.ALL
+                    )    
+                    maxcount = len(procs1)
+            else:
+                procs = db(query).select(\
+                    db.vw_procedurepriceplan_relgr.ALL,\
+                    orderby=db.vw_procedurepriceplan_relgr.procedurecode
+                )
+                if(maxcount == 0):
+                    maxcount = len(procs)
+
+            #logger.loggerpms2.info("Get Non Company Procs A" + str(len(procs)))
+
+            for proc in procs:
+                procobj = {
+                    "plan":procedurepriceplancode,
+                    "procedurecode":proc.vw_procedurepriceplan_relgr.procedurecode,
+                    "altshortdescription":common.getstring(proc.vw_procedurepriceplan_relgr.altshortdescription),
+                    "procedurefee":float(common.getvalue(proc.vw_procedurepriceplan_relgr.procedurefee)),
+                    "inspays":float(common.getvalue(proc.vw_procedurepriceplan_relgr.inspays)),
+                    "copay":float(common.getvalue(proc.vw_procedurepriceplan_relgr.copay))
+                }        
+                proclist.append(procobj) 
+                result = 'success'
+                error_message = ""
+
+        except Exception as e:
+            result = "fail"
+            error_message = "Get Non Company Procedure API:\n" + errormessage(db,"MDP100")  + "\n(" + str(e) + ")",
+            logger.loggerpms2.info(error_message)
+
+        xcount = ((page+1) * items_per_page) - (items_per_page - len(procs)) 
+
+        bnext = True
+        bprev = True
+
+        #first page
+        if((page+1) == 1):
+            bnext = True
+            bprev = False
+
+        #last page
+        if(len(procs) < items_per_page):
+            bnext = False
+            bprev = True  
+
+        return json.dumps({"result":result,"error_message":error_message,"count":len(procs),"page":page+1,"proclist":proclist,"runningcount":xcount, "maxcount":maxcount, "next":bnext, "prev":bprev})
+    
+    def getcompanyprocedures(self,procedurepriceplancode,searchphrase="",page=0,maxcount=0):
+
+        logger.loggerpms2.info("XXX:Enter Get Company Procedures \n"  + procedurepriceplancode + " " + searchphrase + " " + str(page) + " " + str(maxcount))    
+
+        db = self.db
+        providerid = self.providerid
+
+
+        page = page -1
+        urlprops = db(db.urlproperties.id >0 ).select(db.urlproperties.pagination)
+        items_per_page = 10 if(len(urlprops) <= 0) else int(common.getvalue(urlprops[0].pagination))
+        limitby = ((page)*items_per_page,(page+1)*items_per_page)      
+        proclist = []
+        procobj = {}
+        result = "success"
+        error_message = ""
+        query = ""
+        try:
+            if((searchphrase == "") | (searchphrase == None)):
+                query = (db.vw_procedurepriceplan_relgr.procedurepriceplancode == procedurepriceplancode)&\
+                    (db.vw_procedurepriceplan_relgr.is_active == True) & (db.vw_procedurepriceplan_relgr.relgrproc ==True)        
+            else:
+                query = (db.vw_procedurepriceplan_relgr.procedurepriceplancode == procedurepriceplancode)&\
+                    (db.vw_procedurepriceplan_relgr.shortdescription.like('%' + searchphrase + '%'))&\
+                    (db.vw_procedurepriceplan_relgr.is_active == True) & (db.vw_procedurepriceplan_relgr.relgrproc ==True)        
+
+            #logger.loggerpms2.info("Get Company Procedures " + str(query))
+
+            if(page >=0 ): 
+                procs = db(query).select(\
+                    db.vw_procedurepriceplan_relgr.ALL, \
+                    orderby=db.vw_procedurepriceplan_relgr.procedurecode,\
+                    limitby=limitby\
+                )
+                #logger.loggerpms2.info("Get Compamy Procs" +str(len(procs)))
+                if(maxcount == 0):
+
+                    procs1 = db(query).select(\
+                        db.vw_procedurepriceplan_relgr.ALL
+                    )    
+                    maxcount = len(procs1)
+            else:
+                procs = db(query).select(\
+                    db.vw_procedurepriceplan_relgr.ALL,\
+                    orderby=db.vw_procedurepriceplan_relgr.procedurecode
+                )
+                if(maxcount == 0):
+                    maxcount = len(procs)
+
+            #logger.loggerpms2.info("Get Company Procs A" + str(len(procs)))
+
+            for proc in procs:
+                procobj = {
+                    "plan":procedurepriceplancode,
+                    "procedurecode":proc.vw_procedurepriceplan_relgr.procedurecode,
+                    "altshortdescription":common.getstring(proc.vw_procedurepriceplan_relgr.altshortdescription),
+                    "procedurefee":float(common.getvalue(proc.vw_procedurepriceplan_relgr.relgrprocfee)),
+                    "inspays":float(common.getvalue(proc.vw_procedurepriceplan_relgr.relgrinspays)),
+                    "copay":float(common.getvalue(proc.vw_procedurepriceplan_relgr.relgrcopay))
+                }        
+                proclist.append(procobj) 
+                result = 'success'
+                error_message = ""
+
+        except Exception as e:
+            result = "fail"
+            error_message = "Get Company Procedure API:\n" + errormessage(db,"MDP100")  + "\n(" + str(e) + ")",
+            logger.loggerpms2.info(error_message)
+
+        xcount = ((page+1) * items_per_page) - (items_per_page - len(procs)) 
+
+        bnext = True
+        bprev = True
+
+        #first page
+        if((page+1) == 1):
+            bnext = True
+            bprev = False
+
+        #last page
+        if(len(procs) < items_per_page):
+            bnext = False
+            bprev = True  
+
+        return json.dumps({"result":result,"error_message":error_message,"count":len(procs),"page":page+1,"proclist":proclist,"runningcount":xcount, "maxcount":maxcount, "next":bnext, "prev":bprev})
+    
+    
+    
     
     #returns a list of dental procedures matching the searchphrase for a specific plan
     #search phrase can be 'procedure code', 'keywords', 'short description'

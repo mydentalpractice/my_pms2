@@ -123,6 +123,32 @@ def getreligareproceduresXXX(avars):
 	
     return rsp
 
+def getcompanyprocedures(avars):
+    rsp = {}
+    try:
+	orlgr = mdpprocedure.Procedure(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+	rsp = orlgr.getcompanyprocedures(str(avars["procedurepriceplancode"]),\
+	                                  str(avars["phrase"]) if "phrase" in avars else "",\
+	                                  int(common.getid(str(avars["page"]))) if "page" in avars else 0,\
+	                                  int(common.getid(str(avars["maxcount"]))) if "maxcount" in avars else 0)
+    except Exception as e:
+	rsp = json.dumps({"result":"fail", "error_message":"Exception Error - " + str(e)})
+	
+    return rsp
+
+def getnoncompanyprocedures(avars):
+    rsp = {}
+    try:
+	orlgr = mdpprocedure.Procedure(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+	rsp = orlgr.getnoncompanyprocedures(str(avars["procedurepriceplancode"]),\
+	                                  str(avars["phrase"]) if "phrase" in avars else "",\
+	                                  int(common.getid(str(avars["page"]))) if "page" in avars else 0,\
+	                                  int(common.getid(str(avars["maxcount"]))) if "maxcount" in avars else 0)
+    except Exception as e:
+	rsp = json.dumps({"result":"fail", "error_message":"Exception Error - " + str(e)})
+	
+    return rsp
+
 #API-4
 def getTransactionIDXXX(avars):
     rsp = {}
@@ -1923,7 +1949,8 @@ mdpapi_switcher = {"listappointments":getappointments,"getappointmentsbymonth":g
                    "sendOTPXXX":sendOTPXXX,"validateOTPXXX":validateOTPXXX,"uploadDocumentXXX":uploadDocumentXXX,"getreligarepatientXXX":getreligarepatientXXX,\
                    "updatereligarepatientXXX":updatereligarepatientXXX,"getreligareproceduresXXX":getreligareproceduresXXX,"getTransactionIDXXX":getTransactionIDXXX,\
                    "addRlgProcedureToTreatmentXXX":addRlgProcedureToTreatmentXXX,"settleTransactionXXX":settleTransactionXXX,"voidTransactionXXX":voidTransactionXXX,\
-                   "dental_service_request":dental_service_request,"get_appointments":get_appointments,"get_treatments":get_treatments
+                   "dental_service_request":dental_service_request,"get_appointments":get_appointments,"get_treatments":get_treatments,\
+                   "getcompanyprocedures":getcompanyprocedures,"getnoncompanyprocedures":getnoncompanyprocedures,
                    }
 
 
