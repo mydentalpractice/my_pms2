@@ -28,6 +28,21 @@ from mdpreligare import Religare
 
 from applications.my_pms2.modules import logger
 
+def errormessage(db,errorcode,response_message=""):
+
+
+  errormssgs = db((db.rlgerrormessage.code == errorcode) & (db.rlgerrormessage.is_active == True)).select()
+
+  #if error_code not in the Error table, then add it, commit, and reload
+  if(len(errormssgs)==0):
+    db.rlgerrormessage.insert(code=errorcode,internalmessage=response_message,externalmessage=response_message + " Please contact MDP Customer Support")
+    db.commit()
+    errormssgs = db((db.rlgerrormessage.code == errorcode) & (db.rlgerrormessage.is_active == True)).select()
+
+  errormssg = errorcode + ":" + response_message  if(len(errormssgs) == 0) else errorcode + ":\n" + response_message + "\n" + common.getstring(errormssgs[0].externalmessage)
+
+  return errormssg
+
 
 class ABHICL:
   def __init__(self,db,providerid=0):
@@ -792,4 +807,131 @@ class ABHICL:
       jsonresp["error_code"] = "ABHICL100"
       jsonresp["error_message"] = msg    
     
+    return json.dumps(jsonresp)  
+  
+  
+  #Returns member details for abhiclic
+  def getabhiclmember(self,abhiclid):
+
+    logger.loggerpms2.info("Enter Get ABHICL Member ")
+
+    db = self.db
+    providerid = self.providerid
+    auth = current.auth
+
+    try:
+
+      r = db((db.patientmember.groupref == abhiclid) & (db.patientmember.is_active == True)).select()
+      
+      if(len(r) != 1):
+	mssg = "Get ABHICL Member  API:\n" + errormessage(db,"MDP101") + ")"
+	patobj1["result"] = "fail"
+	patobj1["error_code"] = "MDP101"
+	patobj1["error_message"] = mssg
+	logger.loggerpms2.info(mssg)
+	return json.dumps(patobj1)      
+      
+      memberid = int(common.getid(r[0].id))
+      
+      
+      opat = mdppatient.Patient(db, providerid)
+      patobj = opat.getpatient(memberid, memberid, "")
+
+
+    except Exception as e:
+      patobj1 = {}
+      mssg = "Get ABHICL Patient API exception:\n" + errormessage(db,"MDP100")  + "\n(" + str(e) + ")"
+      patobj1["result"] = "fail"
+      patobj1["error_code"] = "MDP100"
+      patobj1["error_message"] = mssg
+      return json.dumps(patobj1) 
+
+    return patobj      
+  
+  #this APi adds a new procedure to the treatment
+  def addABHICLProcedureToTreatment(self,treatmentid,procedurepriceplancode, procedurecode, procedurename,procedurefee,
+                                 tooth, quadrant,remarks,abhiclid,abhiclpolicy):
+    
+    
+    logger.loggerpms2.info(">>Add ABHICL Procedure\n")
+    
+    db = self.db
+    providerid = self.providerid
+    auth = current.auth
+    jsonresp = {}
+    
+    try:
+      procs = db((db.vw_procedurepriceplan_relgr.procedurepriceplancode == procedurepriceplancode) & \
+                 (db.vw_procedurepriceplan_relgr.procedurecode == procedurecode)).select()
+      
+      procedureid = 0
+      ucrfee = 0
+      procedurefee = 0
+      copay = 0
+      companypays = 0
+      relgrproc = False
+      memberid = 0
+      
+      service_id = ""
+      service_name = ""
+      service_category = ""
+      
+      if(len(procs)>0):
+	      ucrfee = float(common.getvalue(procs[0].ucrfee))
+	      procedurefee = float(common.getvalue(procs[0].relgrprocfee))
+	      if(procedurefee == 0):
+		  procedurefee = ucrfee
+	      copay = float(common.getvalue(procs[0].relgrcopay))
+	      inspays = float(common.getvalue(procs[0].relgrinspays))
+	      companypays = float(common.getvalue(procs[0].companypays))
+	      procedureid = int(common.getid(procs[0].id))    
+	      relgrproc = bool(common.getboolean(procs[0].relgrproc))
+	      service_id = int(common.getid(procs[0].service_id))
+	      service_name = procs[0].service_name
+	      service_category = procs[0].service_category
+	      
+		
+      sub_service_id = ""
+      treatment_code = ""
+      treatment_name = ""
+      procedurecode = ""
+		
+      t = db(db.vw_treatmentlist.id == treatmentid).\
+        select(db.vw_treatmentlist.tplanid,db.vw_treatmentlist.startdate, db.vw_treatmentlist.memberid)
+	  
+      procid = db.treatment_procedure.insert(treatmentid = treatmentid, dentalprocedure = procedureid,status="Started",\
+                                             treatmentdate=t[0].startdate if(len(t)>0) else common.getISTFormatCurrentLocatTime(),\
+                                           ucr = ucrfee, procedurefee=procedurefee, copay=copay,inspays=inspays,companypays=companypays,\
+                                           tooth=tooth,quadrant=quadrant,remarks=remarks,authorized=False,service_id = service_id,\
+                                           relgrproc=relgrproc,relgrtransactionid = 0,relgrtransactionamt=inspays) 
+    
+	    
+      tplanid = int(common.getid(t[0].tplanid)) if(len(t) > 0) else 0
+      memberid = int(common.getid(t[0].memberid)) if(len(t) > 0) else 0
+      #update treatment with new treatment cost
+      account.updatetreatmentcostandcopay(db,auth.user,treatmentid)
+      #update tplan with new treatment cost
+      account.calculatecost(db,tplanid)
+      account.calculatecopay(db, tplanid,memberid)
+      account.calculateinspays(db,tplanid)
+      account.calculatedue(db,tplanid)  
+      jsonresp["treatmentprocid"] = procid
+      jsonresp["result"] =  "success"
+      jsonresp["error_message"] = ""
+      jsonresp["abhiclid"] = abhiclid
+      jsonresp["abhiclpolicy"] = abhiclpolicy
+      
+
+    except Exception as e:
+      mssg = "addABHICLProcedureToTreatment Exception error:\n" + errormessage(db,"MDP100")  + "\n(" + str(e) + ")"
+      logger.loggerpms2.info(mssg)
+      jsonresp = {
+        "result":"fail",
+        "error_message":mssg,
+        "response_status":"",
+        "response_message":"",
+        "error_code":"MDP100",
+      }
+      
+
     return json.dumps(jsonresp)  

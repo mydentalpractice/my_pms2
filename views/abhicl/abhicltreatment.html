@@ -1,0 +1,765 @@
+{{extend 'pms2_layoutw4_relgr.html'}}
+  <style>
+
+#suggestions { position: relative;}
+.suggestions { background: white;z-index: 500 !important;z-index:500 !important;}
+.suggestions DIV {background: white; padding: 2px 4px 2px 4px; }
+#dentalsuggestions { position: relative; z-index:500000;height: 200px;overflow-y: auto;border-bottom:1px solid #eeeeee;}
+.dentalsuggestions { background: white; border: solid 1px #55A6C8; }
+.dentalsuggestions DIV { padding: 2px 4px 2px 4px; border-left:1px solid #eeeeee;}
+#xdentalsuggestions { position: relative; z-index:500000;}
+.xdentalsuggestions { background: white; border: solid 1px #55A6C8}
+.xdentalsuggestions DIV { padding: 2px 4px 2px 4px; }
+.tabbable-line>.tab-content{padding:1px 0px;}
+.md_r{margin: 1px 0px 20px 0px;}
+.form-group {margin-bottom: 4px;}
+.borbt{border-bottom: 1px solid #e6e6e6;margin-bottom: 15px;padding-bottom: 15px;}
+</style>
+        
+        
+                        <div class="row">
+                            <div class="col-md-12">
+                                <!-- BEGIN EXAMPLE TABLE PORTLET-->
+                                <div class="portlet light bordered">
+                                    <div class="portlet-title tabbable-line">
+                                        
+                                        <div class="portlet-title" style="padding:0px 20px  !important">
+                                        <div class="caption font-white" style="    width: 100%;">
+                                            <i class="fa fa-user" style="color:#fff"></i>
+                                            <span class="caption-subject bold uppercase">Treatment for {{=patientname}} ({{=patientmember}}) <small>(Enrolled Member: {{=membername}})</small></span>
+                                            <span style="text-align:right;float:right">{{=doctorname}}</span>
+                                        </div>
+                                    </div>
+                                    
+                                     
+                                    </div>
+                                    <div class="portlet-body" style="margin: 8px 20px 35px 20px;">
+                                        
+                                        <div class="tabbable-line">
+                                            <ul class="nav nav-tabs">
+                                                <li class="" style="display:none">
+                                                    <a href="{{=URL('casereport','casereport',vars=dict(page=1,treatmentid=treatmentid,providerid=providerid,patientid=patientid, memberid=memberid,source='treatment'))}}"   aria-expanded="false">Patient Notes</a>
+                                                </li>
+                                            
+                                                <li class="" style="display:none">
+                                                    <a href="{{=URL('consentform','consentform',vars=dict(memberpage=memberpage,imagepage=page,page=1,providerid=providerid,memberref=patientmember,memberid=memberid,patientid=patientid,treatmentid=treatmentid,doctorid=doctorid,source='treatment'))}}"  aria-expanded="false"> Consent Form </a>
+                                                </li>
+                                            
+                                                <li class="active">
+                                                    <a href="#tab_15_1" data-toggle="tab" aria-expanded="true">Treatment </a>
+                                                </li>
+                                                <li class="" style="display:none">
+                                                    <a href="#tab_15_2" data-toggle="tab" aria-expanded="false"> Medical History </a>
+                                                </li>
+                                                <li style="display:none"> 
+                                                    <a href="{{=URL('prescription','prescriptions',vars=dict(page=1,providerid=providerid,memberid1=memberid,patientid1=patientid,tplanid1=tplanid,treatmentid1=treatmentid,doctorid1=doctorid,returnurl=returnurl))}}" aria-expanded="false"> Prescriptions </a>
+                                                </li>
+                                                <li style="display:none">
+                                                    <a href="#tab_15_4" data-toggle="tab" aria-expanded="false"> Medical Test </a>
+                                                </li>
+                                                <li style="display:none">
+                                                    <a href="#tab_15_5" data-toggle="tab" aria-expanded="false"> Dental Images </a>
+                                                    
+                                                </li>
+                                                <li style="display:none">
+                                                    <a href="#tab_15_6" data-toggle="tab" aria-expanded="false"> Dental Chart</a>
+                                                </li>
+                                                 <li style="display:none">
+                                                    <a href="{{=URL("payment","create_payment",vars=dict(page=page,tplanid=tplanid,treatmentid=treatmentid,providerid=providerid,providername=providername,memberid=memberid,patientid=patientid))}}" aria-expanded="false"> Payment </a>						    
+                                                </li>
+                                            </ul>
+                                            
+                                            
+                                            <div class="tab-content">
+                                            
+                                                <!--- BEGIN CASE REPORT TAB-->
+                                                <div class="tab-pane" id="tab_15_7">
+                                                <div class="col-sm-12">  
+                                                 <a  style="color:#fff;" class="btn bold green pull-left" onclick="location.href='{{=URL('casereport','casereport',vars=dict(page=1,treatmentid=treatmentid,providerid=providerid,patientid=patientid,source='treatment'))}}'" target="_blank"><i class="fa fa-folder"></i>&nbsp;&nbsp;Provider Notes Log</a>  
+                                                 </div>  
+                                                 <br/>
+                                                </div>
+                                                <!--- END CASE REPORT TAB-->
+                                            
+                                                <!--- BEGIN CONSENT FORM TAB-->
+                                                <div class="tab-pane " id="tab_15_0">
+                                                <div class="col-sm-12">  
+                                                 <a  style="color:#fff;" class="btn bold green pull-left" onclick="location.href='{{=URL('consentform','consentform',vars=dict(memberpage=memberpage,imagepage=page,page=1,providerid=providerid,memberref=patientmember,memberid=memberid,patientid=patientid,treatmentid=treatmentid,doctorid=doctorid,source='treatment'))}}'" target="_blank"><i class="fa fa-folder"></i>&nbsp;&nbspConsent Form</a>  
+                                                 </div>  
+                                                 <br/>
+                                                </div>
+                                                <!--- END CONSENT FORM TAB-->
+                                            
+                                                
+                                                <!--- BEGIN TREATMENT TAB-->
+                                                
+                                                <div class="tab-pane active" id="tab_15_1">
+                                                    {{=formTreatment.custom.begin}} 
+                                        
+                                                    <div style="display:none">{{=formTreatment.custom.widget.patientmember}}</div>
+                                                    <form enctype="multipart/form-data" action="" method="post">
+                                                    {{=formTreatment.hidden_fields()}}
+                                                    <div class="portlet-title mem_details">
+                                                            <div class="caption"><i class="fa fa-user"></i>&nbsp;Treatment for <strong>{{=patientname}} ({{=patientmember}})</strong></div>
+                                                    </div>
+                            <div class="col-sm-12 md_r">
+                                       <div class="col-sm-12 np borbt">
+                                                        <div class="col-sm-12">							
+                                                            <div class="col-md-4" style="margin-bottom:10px;"> <label class="m_title">Chief Complaint</label><br/>
+                                                                                 {{=formTreatment.custom.widget.chiefcomplaint}}
+                                                            </div>
+                                                            <div class="col-md-4">
+                                                                <label class="m_title">Treatment No.</label>
+                                                                                                        <br/>{{=formTreatment.custom.widget.treatment}}
+                                                                    </div>
+                                                                                                <div class="col-md-4">
+                                                                                                        <label class="m_title">Attending Doctor</label><br/> {{=formTreatment.custom.widget.doctor}}
+                                                                    </div>
+                                                            </div>
+                                                                                <div class="col-sm-12">							
+                                                             <div class="col-md-4" >
+                                                                 <label class="m_title">Treatment Date</label><br/>
+                                                                     {{=formTreatment.custom.widget.startdate}}    
+                                                                                      
+                                                             </div> 
+                                                                                         <div class="col-md-4">
+                                                                 <label class="m_title">Treatment Status</label><br/>
+                                                                       {{=formTreatment.custom.widget.status}}    
+                                                             </div> 						       
+                                                                                         <div class="col-md-4">
+                                                                  <label class="m_title">Treatment End Date</label><br/>
+                                                                         {{=formTreatment.custom.widget.enddate}}    
+                                                                                      
+                                                             </div> 						       
+                                                         </div>
+                                                                                     <div class="col-sm-12">	
+                                                                                                                <div class="col-md-4" style="display:none">
+                                                                                                                    <label class="m_title">Total UCR Fee</label>
+                                                                                                                    <p><strong>{{=formTreatment.custom.widget.ucrfee}}</strong></p>
+                                                                                                                </div>
+                                                                                                                <div class="col-md-4">
+                                                                                                                    <label class="m_title">Total Treatment Cost</label><br/>
+                                                                                                                    {{=formTreatment.custom.widget.treatmentcost}}
+                                                                                                                </div>
+                                                                                                                {{if(hmopatientmember == True):}}
+                                                                                                                <div class="col-md-4">
+                                                                                                                    <label class="m_title">Total Co-pay</label><br/>
+                                                                                                                    {{=formTreatment.custom.widget.copay}}
+                                                                                                                </div>
+                                                                                                                <div class="col-md-4">
+                                                                                                                    <label class="m_title">Total Authorized Pay</label><br/>
+                                                                                                                    {{=formTreatment.custom.widget.inspay}}
+                                                                                                                </div>
+                                                                                                                {{else:}}
+                                                                                                                <div class="col-md-4" style="display:none">
+                                                                                                                    <label class="m_title">Total Co-pay</label><br/>
+                                                                                                                    {{=formTreatment.custom.widget.copay}}
+                                                                                                                </div>
+                                                                                                                <div class="col-md-4" style="display:none">
+                                                                                                                    <label class="m_title">Total Authorized Pay</label><br/>
+                                                                                                                    {{=formTreatment.custom.widget.inspay}}
+                                                                                                                </div>
+                                                                                                                {{pass}}
+                                                                                      </div>
+                                          </div>
+
+
+                         <div class="col-sm-12 np borbt">
+
+                                                  <div style="display:none">
+                                                  {{=formTreatment.custom.widget.xaction}}
+                                                  </div>
+                                                  <div>
+                                                     {{if(medicalalerts == True):}}
+                                                     <p style="color:red"><strong>Patient is allergic to some medicine and may be suffering from either High BP or Diabetes or Heart Problem. Please consult patient's Medical History for more details</strong></p>
+                                                     {{pass}}
+                                                  </div>
+                                            {{if((preauthorized==False)& (authorized==False)):}}
+                                            <div class="col-sm-12"> 
+                                            
+                                            <div class="col-md-6">
+                                                   <div class="form-group">
+                                                         <label class="m_title">Dental Procedure</label>
+                                                          <div class="input-group">
+                                                                <span class="input-group-addon">
+                                                                    <i class="fa fa-plus-square"></i>
+                                                                </span>
+                                                               {{=formTreatment.custom.widget.vwdentalprocedure}}
+                                                          </div>
+                                                         <label id="pleasewait" class="m_title" style="color:red;display:none">Please wait...</label>
+                                                   </div>
+                                                   <div id="dphide" style="z-index:50000; ">
+                                                        <p id="dpphide">Click <strong>X</strong> to close the Procedure List</p>
+                                                    </div>
+    
+                                                   <div style="position: absolute;z-index:500000" id="dentalsuggestions" class="suggestions"  >
+                                                   </div>
+                                           </div>
+                                            <div class="col-md-2">
+                                                   <div class="form-group">
+                                                         <label class="m_title">Tooth</label>
+                                                          <div class="input-group">
+                                                               {{=formTreatment.custom.widget.tooth}}
+                                                          </div>
+                                                   </div>
+
+                                           </div>
+                                            <div class="col-md-2">
+                                                   <div class="form-group">
+                                                         <label class="m_title">Quadrant</label>
+                                                          <div class="input-group">
+                                                               {{=formTreatment.custom.widget.quadrant}}
+                                                          </div>
+                                                   </div>
+
+                                           </div>
+                                            <div class="col-md-2" id="newaddprocedure">
+                                             <div class="form-group">
+                                                         <label class="m_title">&nbsp;&nbsp;</label>
+                                                         <div class="input-group">
+                                                <a  id="AP" class="btn sbold green" onClick="loader(this.id),new_add_proceduregrid()" >Add Procedure <i class="fa fa-spinner fa-spin" id="loaderDIVAP" style="display:none"></i></a>
+                                                </div>
+                                            </div>
+                                          
+                                            </div>
+                                            <div class="col-md-0" style="display:none" >
+                                                   <div class="form-group">
+                                                         <label class="m_title">Dental Procedure Code</label>
+                                                          <div class="input-group">
+                                                                <span class="input-group-addon">
+                                                                    <i class="fa fa-plus-square"></i>
+                                                                </span>
+                                                                {{=formTreatment.custom.widget.vwdentalprocedurecode}}
+                                                          </div>
+                                                        
+                                                   </div>
+                                                   <div style="position: absolute;z-index:500000" id="xdentalsuggestions" class="suggestions"  >
+                                                   </div>
+                                           </div>
+                                                
+                        
+                
+
+
+                                          
+                                                                   
+                                           
+                                    </div>
+                                            {{pass}}
+                                                    <div class="btn-group">
+                                                        <span > 
+                                                        {{if((preauthorized == False)&(authorized == False)):}}
+                                                        
+                                                       
+                                                        <div id="addprocedure">
+                                                        <a  id="AP1" class="btn sbold green" onClick="loader(this.id),new_add_proceduregrid()" >Add Procedure <i class="fa fa-spinner fa-spin" id="loaderDIVAP1" style="display:none"></i></a>
+                                                        
+                                                        <!--<a style="color:#fff;margin-left: 30px;"  class="btn sbold green" onClick="add_proceduregrid()" >-->
+                                                       <!--<i class="fa fa-square-o"></i>&nbsp;&nbsp;Add Procedure-->
+                                                       <!--</a>-->
+                                                       </div>
+                                                       {{pass}}
+                                                       {{if((authorization==True)&(preauthorized == False)&(authorized==False)):}}
+                                                        <a style="color:#fff;margin-left: 30px;"  id="PA"  class="btn sbold green" onClick="loader(this.id),sendforauthorization()" >
+                                                        Send For Pre-Authorization&nbsp;&nbsp;<i class="fa fa-spinner fa-spin" id="loaderDIVPA" style="display:none"></i>
+                                                       </a>
+                                                       {{pass}}
+                                                       
+                                                       {{if((authorization==True)&((preauthorized == True))&(authorized==False) & (webadmin == True)):}}
+                                                        <a style="color:#fff;margin-left: 30px;"  id="AUTH"  class="btn sbold green" onClick="loader(this.id),authorizetreatment()"  >
+                                                       <i class="fa fa-check-square-o"></i>&nbsp;&nbsp;Authorize Treatment&nbsp;&nbsp;<i class="fa fa-spinner fa-spin" id="loaderDIVAUTH" style="display:none"></i>
+                                                       </a>
+                                                        <p style="color:blue;margin-left: 30px;"><strong>Enter authorized amount for each procedure and then click this button to Authorize the Treatment Plan</strong></p>
+
+                                                       {{pass}}
+                                                       
+                                                       
+                                                       </span>
+                                                    </div>
+
+                       </div>
+
+                                                                                
+                                                        <div class="col-md-12" style="margin-bottom:30px">
+                                                                <div class="col-md-12" style="display:none">
+                                                                <label class="m_title">Provider Notes</label><br/>
+                                                                {{=formTreatment.custom.widget.description}}
+                                                                </div>
+                                                        </div>
+                                                        <div class="col-md-12" style="margin-bottom:30px">
+                                                                <div class="col-md-12">
+                                                                <!--if(writablflag):}}-->
+                                                                <!--<button type="submit" id="ST"  onclick="loader(this.id)"  class="btn green">Save <i class="fa fa-spinner fa-spin" id="loaderDIVST" style="display:none"></i></button>-->
+                                                                <!--pass}}-->
+                                                                
+                                                                <a id="STC" onclick="loader(this.id)"  class="btn green" href="{{=returnurl}}">Cancel<i class="fa fa-spinner fa-spin" id="loaderDIVSTC" style="display:none"></a>
+                                                                </div>
+                                                        </div>
+
+                                                    <div>
+                                                        {{if((authorization == True)&(preauthorized == False)&(preauthorizeerror == False)&(authorized==False)):}}
+                                                       <p style="color:blue"><strong>Please send this treatment for Pre-Authorization</strong></p>
+                                                       {{pass}}
+                                                       {{if((authorization == True)&(preauthorizeerror == True)&(authorized==False)):}}
+                                                       <p style="color:red"><strong>There was an error during Pre-Authorization. Please try again!</strong></p>
+                                                       {{pass}}
+                                                       
+                                                       {{if((authorization == True)&(preauthorizeerror == False)&(preauthorized==True)&(authorized==False)):}}
+                                                       <p style="color:blue"><strong>Treatment successfully sent for Pre-authorization!</strong></p>
+                                                       {{pass}}
+                                                       
+                                                       {{if((authorization == True)&(authorizeerror == True)&(authorized==False)):}}
+                                                       <p style="color:red"><strong>There was an error during Authorization. Please try again!</strong></p>
+                                                       {{pass}}
+                                                       
+
+                                                       {{if((authorization == True)&(authorizeerror == False)&(authorized==True)):}}
+                                                       <p style="color:blue"><strong>This treatment is Authorized to pay!</strong></p>
+                                                       {{pass}}
+                                                    </div>
+                                                                          
+                                                    <!--</div>-->
+                                                   </div><!---col-sm-12 md_r-->
+                                                                                           
+                                                    </form >  
+                                                    
+                                                    <div class="form-group" style="display:none">
+                                                        <input type="text"  style="display:none" name="proccode" id = "proccode" readonly>  
+                                                        <input type="text"  style="display:none" value={{=procedureid}} name="procid" id = "procid" readonly>  
+                                                        <input type="text" style="display:none"  name="procucr" id = "procucr" readonly>  
+                                                        <input type="text"  style="display:none"  name="procdesc" id = "procdesc" readonly>	
+                                                        <!--=formTreatment.custom.widget.vwdentalprocedure}}  -->
+                                                        <!--=formTreatment.custom.widget.quadrant}}-->
+                                                        <!--=formTreatment.custom.widget.tooth}}-->
+                                                          <!--=formTreatment.custom.widget.enddate}}    -->
+                                                        <!--=formTreatment.custom.widget.status}}-->
+                                                         {{=formTreatment.custom.submit}}
+                                                        
+                                                         {{=formTreatment.custom.widget.treatmentplan}}
+                                                         {{=formTreatment.custom.widget.inspay}}
+                                                         {{=formTreatment.custom.widget.copay}}
+                                                         {{=formTreatment.custom.widget.xmemberid}}
+                                                         {{=formTreatment.custom.widget.patientid}}
+                                                    </div>
+                                                    
+                                                     {{=formTreatment.custom.end}} 
+                                                </div>  <!-- tab_15_``-->
+                                                                                                
+                                                <!-- END OF TREATMENT TAB-->
+                                                
+                                                
+                                                <!-- BEGIN MEDICAL HISTORY TAB-->
+                                                <div class="tab-pane " id="tab_15_2">
+                                                <div class="col-sm-12">  
+                                                 <a  style="color:#fff;" class="btn bold green pull-left" onclick="location.href='{{=URL('casereport','medicalhistory',vars=dict(providerid=providerid,memberid1=memberid,patientid1=patientid,tplanid1=tplanid,treatmentid1=treatmentid,doctorid1=doctorid,returnurl=returnurl))}}'" target="_blank"><i class="fa fa-folder"></i>&nbsp;&nbsp;Medical History</a>  
+                                                 </div>  
+                                                 <br/>
+                                                </div>
+                                                                                                              
+                                                <!-- END OF MEDICAL HISTORY TAB-->
+                                                
+                                                
+                                                <!--- BEGIN PRESCRIPTION FORM TAB-->
+                                                <div class="tab-pane " id="tab_15_3">
+                                                <div class="col-sm-12">  
+                                                 <a  style="color:#fff;" class="btn bold green pull-left" onclick="location.href='{{=URL('prescription','prescriptions',vars=dict(page=1,providerid=providerid,memberid1=memberid,patientid1=patientid,tplanid1=tplanid,treatmentid1=treatmentid,doctorid1=doctorid,returnurl=returnurl))}}'" target="_blank"><i class="fa fa-folder"></i>&nbsp;&nbsp;Prescription Form</a>  
+                                                 </div>  
+                                                 <br/>
+                                                </div>
+                                                <!--- END PRESCRIPTION FORM TAB-->
+                                                
+                                                
+                                                <!-- START OF PRESCRIPTION TAB-->
+                                                <!-- END OF PRESCRIPTION TAB-->
+                                                
+                                                <!-- START OF MEDICAL TEST-->
+                                                <div class="tab-pane " id="tab_15_4">
+                                                <div class="col-sm-12">  
+                                                 <a  style="color:#fff;" class="btn bold green pull-left" onclick="location.href='{{=URL('casereport','medicaltest',vars=dict(page=1,providerid=providerid,memberid1=memberid,patientid1=patientid,tplanid1=tplanid,treatmentid1=treatmentid,returnurl=returnurl))}}'" target="_blank"><i class="fa fa-folder"></i>&nbsp;&nbsp;Medical Test</a>  
+                                                 </div>  
+                                                 <br/>
+                                                </div>
+                                                                                                              
+                                                
+                                           
+                                                <!-- END OF MEDICAL TEST-->
+                                                
+                                                <!-- START OF DENTAL IMAGES-->
+                                                
+                                                
+                                                <div class="tab-pane" id="tab_15_5">
+                                                
+                                                <div class="col-sm-12">  
+                                                 <a  style="color:#fff;" class="btn bold green pull-left" onclick="location.href='{{=URL('dentalimage','list_dentalimages',vars=dict(page=1,providerid=providerid,memberid=memberid,patientid=patientid,source='treatment'))}}'" target="_blank"><i class="fa fa-folder"></i>&nbsp;&nbsp;Images</a>  
+
+                                                 </div>  
+                                                 <br/>
+                                                 
+                                                </div>
+                                                <!-- END OF DENTAL IMAGES-->                                                
+                                                
+                                                <!-- START OF DENTAL CHART-->
+                                                <div class="tab-pane" id="tab_15_6">
+                                                <div class="col-sm-12">  
+                                                 <a  style="color:#fff;" class="btn bold green pull-left" onclick="location.href='{{=URL('dentalchart','dentalchart',vars=dict(page=1,providerid=providerid,memberid=memberid,patientid=patientid,treatmentid=treatmentid,doctorid=doctorid,source='treatment'))}}'" target="_blank"><i class="fa fa-folder"></i>&nbsp;&nbsp;Dental Chart</a>  
+
+                                                 </div>  
+                                                 <br/>
+                                                </div>
+
+
+
+
+
+                                                <!-- START OF PAYMENT-->
+                                                 <div class="tab-pane" id="tab_15_7">
+                                                <div class="col-sm-12">  
+                                                 <a  style="color:#fff;" class="btn bold green pull-left" onclick="location.href='{{=URL('dentalchart','dentalchart',vars=dict(page=1,providerid=providerid,memberid=memberid,patientid=patientid,treatmentid=treatmentid,doctorid=doctorid,source='treatment'))}}'" target="_blank"><i class="fa fa-folder"></i>&nbsp;&nbsp;Dental Chart</a>  
+
+                                                 </div>  
+                                                 <br/>
+                                                </div>
+                                                <!-- END OF PAYMENT -->
+                                        </div><!--- XXXX-->
+                                       
+                                    </div>
+                                </div>
+                 
+
+
+ <!-- Modal -->
+  
+  <form enctype="multipart/form-data" method="post" id="image_form" action="{{=URL('treatment','image_update')}}">
+    <div class="modal fade" id="myModal" role="dialog">
+      <div class="modal-dialog modal-md">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <label class="m_title">Title </label>
+          <input type="text" class="form-control" id="form_title" name="form_title" placeholder="Title" required=""> 
+        </div>
+         
+        <div class="modal-body" style="display: grid;">
+            <div class="col-md-12" style="margin-top:20px">
+                <div class="col-md-12"><img id="img01"  style="width:100%;"></div>
+              
+            </div>
+             <div class="col-md-12">
+
+                <div class="col-md-12">
+                   <div class="form-group">
+                    <label class="m_title">Patient </label>
+                    <input type="text" class="form-control" placeholder="Patient" id="form_patientname" name="form_patientname" value="" required=""> 
+                    <p><strong></strong></p>
+                 </div>
+               </div>
+               
+                <div class="col-md-4">
+                   <div class="form-group">
+                    <label class="m_title">Date </label>
+                    <input class="input-group form-control form-control-inline date date-picker" id="form_imagedate" name="form_imagedate" size="16" type="text" value="" data-date-format="dd/mm/yyyy">
+                </div>
+
+                </div>
+                <div class="col-md-4">
+                   <div class="form-group">
+                    <label class="m_title">Tooth </label>
+                    <input type="text" class="form-control" placeholder="Tooth" id="form_tooth" name="form_tooth"  > 
+                    <p><strong></strong></p>
+                </div>
+               </div>
+                <div class="col-md-4">
+                   <div class="form-group">
+                    <label class="m_title">Quadrant </label>
+                    <input type="text" class="form-control" placeholder="Quadrant" id="form_quadrant" name="form_quadrant" value="" > 
+                    <p><strong></strong></p>
+                   </div>
+
+                </div>
+                
+            </div>
+
+
+            <div class="col-md-12">
+                <div class="col-md-12">
+                   <div class="form-group">
+                    <label class="m_title">Intra Oral X-ray/Image Details</label>
+                    <textarea class="form-control" rows="3" id="form_description" name="form_description" placeholder="" style="width:100%"></textarea>
+                   </div>
+
+                </div>
+                <div class="col-md-4">
+                   <label class="mt-checkbox">
+                        <input type="checkbox" id="form_delete" name="form_delete" > Delete
+                        <span></span>
+                    </label>
+               </div>
+                
+                
+            </div>
+
+    
+          <div class="col-md-12" style="margin-bottom:30px">
+            <button class="btn blue uppercase bold" id="IMGS" onclick="loader(this.id)" name="submit" form="image_form" type="submit">Save <i class="fa fa-spinner fa-spin" id="loaderDIVIMGS" style="display:none"></i></button>
+          </div>
+
+</div>
+    
+      </div>
+    </div>
+    
+    <div style="display:none">
+         
+         <input class="form-control" type="text" name="xproviderid" id="xproviderid" value="{{=providerid}}">
+         <input class="form-control" type="text" name="xpage" id="xpage" value="{{=page}}">
+         <input class="form-control" type="text" name="xmemberpage" id="xmemberpage" value="{{=memberpage}}">
+         <input class="form-control" type="text" name="ximagepage" id="ximagepage" value="{{=imagepage}}">
+        
+         <input class="form-control" type="text" id="xpatientid" name="xpatientid" value="{{=patientid}}">
+        
+         <input class="form-control" type="text" id="xpatient" name="xpatient" value="{{=patientname}}">
+         <input class="form-control" type="text" id="xtreatmentid" name="xtreatmentid" value="{{=treatmentid}}">
+          
+         <input type="text" class="form-control" id="form_imageid" name="form_imageid" placeholder="Image ID" required=""> 
+         
+         <!--<input type="text" class="form-control" id="xprescriptiondate" name="xprescriptiondate" required=""> -->
+        
+    </div>
+
+
+  </div>
+</form>
+  <!-- Modal -->
+
+                 
+       
+       
+<script>
+
+function submitform(){
+
+   
+    document.image_form.submit();
+}
+function form_submit() {
+
+
+   title = document.getElementById("form_title").value
+   tooth = document.getElementById("form_tooth").value
+   quad = document.getElementById("form_quadrant").value
+   imgdate = document.getElementById("form_image").value
+   desc = document.getElementById("form_description").value
+   
+   
+   }  
+
+ function onClick(element) {
+  
+  
+  document.getElementById("img01").src = element.src;
+  document.getElementById("myModal").style.display = "block";
+
+ 
+
+  document.getElementById("form_title").value = document.getElementById("title" +  element.id).value
+  document.getElementById("form_patientname").value = document.getElementById("patientname" +  element.id).value
+  document.getElementById("form_tooth").value = document.getElementById("tooth" +  element.id).value
+  document.getElementById("form_quadrant").value = document.getElementById("quadrant" +  element.id).value
+  document.getElementById("form_imageid").value = document.getElementById("imageid"  +  element.id).value
+  document.getElementById("form_imagedate").value = document.getElementById("imagedate"   +  element.id).value
+  document.getElementById("form_description").value = document.getElementById("description"   +  element.id).value
+  if(document.getElementById("is_active"   +  element.id).checked == false)
+  {
+    document.getElementById("form_delete").checked = true
+  }
+
+}  
+
+
+ 
+ 
+ 
+
+
+
+
+ 
+ jQuery("#no_table_vwdentalprocedure").keyup(function(){
+
+       $("#dentalsuggestions").show();
+    
+       var len = $("#no_table_vwdentalprocedure").val().length;
+       
+       if(len <= 2){
+           
+           $("#dentalsuggestions").hide();
+           
+       }
+       
+        
+    
+       
+       if(len >= 3){
+          
+            var x = $('#no_table_vwdentalprocedure').val();
+           
+            ajax('{{=URL('abhicl', 'vwdentalprocedure_selector',vars=dict(patientid = patientid, memberid=memberid,freetreatment=freetreatment,newmember=newmember))}}' + "&vwdentalprocedure=" + x, [x], 'dentalsuggestions')
+             $("#dphide").show()
+           
+             
+       }
+      
+      });
+      
+ $(document).ready(function(){
+   
+     $("#no_table_vwdentalprocedure").focus();
+   
+      $("form").attr('autocomplete', 'off'); // Switching form autocomplete attribute to off
+   
+        $("#dphide").hide()
+        $("#dpphide").click(function(){
+            $("#dphide").hide();
+            $("#dentalsuggestions").hide();
+            $("#no_table_vwdentalprocedure").val("")
+        });      
+        
+      $("#addprocedure").hide();
+    
+     $("#dentalsuggestions") .click(function(){
+       var x = $('#no_table_vwdentalprocedure').val();
+       var procs = x.split(':')  
+
+  
+    
+       $("#no_table_vwdentalprocedure").val(procs[1].trim())
+       $("#no_table_vwdentalprocedurecode").val(procs[2].trim())
+       $("#dentalsuggestions").hide();
+       <!--$("#no_table_vwdentalprocedure").val("")-->
+       <!--$('#no_table_vwdentalprocedure').hide();-->
+       <!--$("#pleasewait").show()-->
+       $("#dphide").hide()
+       <!--add_proceduregrid();-->
+    });
+    
+    $("#xdentalsuggestions") .click(function(){
+    
+ 
+       var x = $('#no_table_vwdentalprocedurecode').val();
+       var procs = x.split(':')  
+
+       $("#no_table_vwdentalprocedurecode").val(procs[0])
+       $("#no_table_vwdentalprocedure").val(procs[1])
+       
+        $("#xdentalsuggestions").hide();
+        
+        add_proceduregrid();
+    });
+    
+    
+});
+
+
+
+$("#no_table_medicine").change(function(){
+    
+
+       var x = $('#no_table_medicine').val();
+       var y = $('#no_table_medicine :selected').text();
+       var z = $('#no_table_medicine :selected').index();
+
+      
+      var meds = y.split(":")
+      
+       $('#no_table_strength').val(meds[1]);
+       
+       $('#no_table_strengthuom').val(meds[2]);
+      
+      
+      
+       
+    });
+    
+
+
+jQuery("#no_table_vwdentalprocedurecode").keyup(function(){
+
+       $("#xdentalsuggestions").show();
+       var x = $('#no_table_vwdentalprocedurecode').val();
+       ajax('{{=URL('admin', 'vwdentalprocedurecode_selector', vars=dict(patientid = patientid, memberid=memberid,freetreatment=freetreatment,newmember=newmember))}}', ['vwdentalprocedurecode'], 'xdentalsuggestions')
+});
+
+    
+
+ 
+function onstatuschange(){
+
+
+var statusopt = document.getElementById("no_table_status");
+var statusval = statusopt.options[statusopt.selectedIndex].value;
+
+
+}
+
+function addProcedure(){
+
+var xaction = document.getElementById("no_table_xaction")
+xaction.value = "AddProcedure"
+}
+
+function sendforauthorization(){
+
+
+    ajax('{{=URL("treatment", "preauthorization", vars=dict(page=page,imagepage=imagepage,treatmentid=treatmentid,providerid=providerid,authorization=authorization,preauthorized=preauthorized,authorized=authorized,webadmin=webadmin,hmopatientmember=hmopatientmember))}}', ['authorization', 'preauthorized','authorized',  'webadmin'], 'tab_15_1');
+
+    
+}
+
+function authorizetreatment(){
+
+
+    ajax('{{=URL("treatment", "authorizetreatment", vars=dict(page=page,imagepage=imagepage,treatmentid=treatmentid,providerid=providerid,authorization=authorization,preauthorized=preauthorized,authorized=authorized,webadmin=webadmin,hmopatientmember=hmopatientmember))}}', ['authorization', 'preauthorized','authorized',  'webadmin'], 'tab_15_1');
+
+    
+}
+
+
+function new_add_proceduregrid(){
+
+    $("#no_table_vwdentalprocedure").val("")
+    $('#no_table_vwdentalprocedure').hide();
+    $("#pleasewait").show()
+    
+    var x = $('#no_table_vwdentalprocedurecode').val(); 
+    var t = $('#no_table_tooth').val(); 
+    var q = $('#no_table_quadrant').val(); 
+    var c = $('#no_table_chiefcomplaint').val(); 
+    window.location.href = "{{=URL('abhicl', 'addabhiclprocedure', vars=dict(page=page,imagepage=1,providerid=providerid,treatmentid=treatmentid,memberid=memberid,patientid=patientid,abhiclid=abhiclid,abhiclpolicy=abhiclpolicy))}}" + "&vwdentalprocedurecode=" + x + "&tooth=" + t + "&quadrant=" + q + "&chiefcomplaint=" + c;
+    
+}
+
+
+function add_proceduregrid(){
+    $("#no_table_vwdentalprocedure").val("")
+    $('#no_table_vwdentalprocedure').hide();
+    $("#pleasewait").show()
+
+    var x = $('#no_table_vwdentalprocedurecode').val(); 
+    var t = $('#no_table_tooth').val(); 
+    var q = $('#no_table_quadrant').val(); 
+    window.location.href = "{{=URL('treatment', 'add_proceduregrid', vars=dict(page=page,imagepage=1,providerid=providerid,treatmentid=treatmentid))}}" + "&vwdentalprocedurecode=" + x + "&tooth=" + t + "&quadrant=" + q;
+    
+}
+
+function xadd_proceduregrid(){
+
+    
+    
+
+    ajax('{{=URL("treatment", "add_proceduregrid", vars=dict(page=page,imagepage=imagepage,treatmentid=treatmentid,providerid=providerid,authorization=authorization,preauthorized=preauthorized,authorized=authorized,webadmin=webadmin,hmopatientmember=hmopatientmember))}}', ['vwdentalprocedure', 'vwdentalprocedurecode'], 'tab_15_1');
+    
+   
+  
+    
+}
+ </script>
