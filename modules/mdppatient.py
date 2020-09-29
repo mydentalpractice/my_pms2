@@ -320,7 +320,8 @@ class Patient:
   # ]
   
   
-  def searchpatient(self,page,patientsearch,maxcount,patientmembersearch,hmopatientmember):
+  
+  def searchpatient(self,page,patientsearch,maxcount,patientmembersearch,hmopatientmember, company=""):
     
     
     result = False
@@ -337,8 +338,9 @@ class Patient:
     limitby = None if page < 0 else ((page)*items_per_page,(page+1)*items_per_page)      
     
     
-   
     
+    c = db(db.company.company == company).select(db.company.id)
+    companyid = 0 if(len(c) != 1) else int(common.getid(c[0].id))
     
     #if(page >= -1):
     if(hmopatientmember == True):
@@ -347,6 +349,9 @@ class Patient:
       qry = (db.vw_memberpatientlist.hmopatientmember == False)
     else:
       qry = (db.vw_memberpatientlist.hmopatientmember == False) | (  (db.vw_memberpatientlist.hmopatientmember == True) &  (datetime.date.today().strftime('%Y-%m-%d') <= db.vw_memberpatientlist.premenddt) )
+    
+    if(companyid >0):
+      qry = (qry) & (db.vw_memberpatientlist.company == companyid)
     
     #is it numeric only, then search on cell numbero
     if(patientsearch.replace("+",'').replace(' ','').isdigit()):
@@ -448,8 +453,142 @@ class Patient:
       bprev = True
     
     return json.dumps({"patientcount":len(pats),"page":page+1,"patientlist":patlist, "runningcount":xcount, "maxcount":maxcount, "next":bnext, "prev":bprev,\
-                       "patientsearch":patientsearch,"patientmembersearch":patientmembersearch,"member":hmopatientmember} )
+                       "patientsearch":patientsearch,"patientmembersearch":patientmembersearch,"member":hmopatientmember,"company":company} )
   
+  
+  def getcompanypatients(self,page,company,patientsearch,maxcount,patientmembersearch,hmopatientmember):
+      
+      
+      result = False
+      patlist = []
+      db = self.db
+      providerid = self.providerid
+      pats=None
+      
+      urlprops = db(db.urlproperties.id >0 ).select(db.urlproperties.pagination)
+      
+      page = page -1
+      urlprops = db(db.urlproperties.id >0 ).select(db.urlproperties.pagination)
+      items_per_page = 10 if(len(urlprops) <= 0) else int(common.getvalue(urlprops[0].pagination))
+      limitby = None if page < 0 else ((page)*items_per_page,(page+1)*items_per_page)      
+      
+      
+      #get company
+      
+      
+     
+      
+      
+      #if(page >= -1):
+      if(hmopatientmember == True):
+        qry = ((db.vw_memberpatientlist.hmopatientmember == True) &  (datetime.date.today().strftime('%Y-%m-%d') <= db.vw_memberpatientlist.premenddt))
+      elif(hmopatientmember==False):
+        qry = (db.vw_memberpatientlist.hmopatientmember == False)
+      else:
+        qry = (db.vw_memberpatientlist.hmopatientmember == False) | (  (db.vw_memberpatientlist.hmopatientmember == True) &  (datetime.date.today().strftime('%Y-%m-%d') <= db.vw_memberpatientlist.premenddt) )
+      
+      #is it numeric only, then search on cell numbero
+      if(patientsearch.replace("+",'').replace(' ','').isdigit()):
+        pats=db((db.vw_memberpatientlist.cell.like("%" + patientsearch + "%")) & (db.vw_memberpatientlist.providerid == providerid) & \
+                (qry) & \
+                (db.vw_memberpatientlist.is_active == True)).select(db.vw_memberpatientlist.hmopatientmember,\
+                                                                    db.vw_memberpatientlist.patientmember,\
+                                                                    db.vw_memberpatientlist.fname,\
+                                                                    db.vw_memberpatientlist.lname,\
+                                                                    db.vw_memberpatientlist.primarypatientid,\
+                                                                    db.vw_memberpatientlist.patientid,\
+                                                                    db.vw_memberpatientlist.patienttype,\
+                                                                    db.vw_memberpatientlist.relation,\
+                                                                    db.vw_memberpatientlist.cell,\
+                                                                    db.vw_memberpatientlist.email,\
+                                                                    limitby=limitby)
+        if(maxcount == 0):
+          maxcount = db((db.vw_memberpatientlist.cell.like("%" + patientsearch + "%")) & (db.vw_memberpatientlist.providerid == providerid) & \
+                        (qry) & \
+                        (db.vw_memberpatientlist.is_active == True)).count()
+        
+      
+      #is it email only
+      elif(patientsearch.find("@") >= 0):
+        pats=db((db.vw_memberpatientlist.email.like("%"+patientsearch+"%")) & (db.vw_memberpatientlist.providerid == providerid) & \
+                (qry) & \
+                (db.vw_memberpatientlist.is_active == True)).select(db.vw_memberpatientlist.hmopatientmember,\
+                                                                    db.vw_memberpatientlist.patientmember,\
+                                                                    db.vw_memberpatientlist.fname,\
+                                                                    db.vw_memberpatientlist.lname,\
+                                                                    db.vw_memberpatientlist.primarypatientid,\
+                                                                    db.vw_memberpatientlist.patientid,\
+                                                                    db.vw_memberpatientlist.patienttype,\
+                                                                    db.vw_memberpatientlist.relation,\
+                                                                    db.vw_memberpatientlist.cell,\
+                                                                    db.vw_memberpatientlist.email,\
+                                                                    limitby=limitby)
+        
+        if(maxcount == 0):
+          maxcount = db((db.vw_memberpatientlist.email.like("%"+patientsearch+"%")) & (db.vw_memberpatientlist.providerid == providerid) & \
+                        (qry) & \
+                        (db.vw_memberpatientlist.is_active == True)).count()
+        
+      #if pats is empty, then search for phrase in patient (fname lname:membercode)
+      else:
+        pats = db((db.vw_memberpatientlist.patient.like("%" + patientsearch + "%")) & (db.vw_memberpatientlist.patientmember.like("%" + patientmembersearch + "%")) & (db.vw_memberpatientlist.providerid == providerid) & \
+                  (qry) & \
+                  (db.vw_memberpatientlist.is_active == True)).select(db.vw_memberpatientlist.hmopatientmember,\
+                                                                    db.vw_memberpatientlist.patientmember,\
+                                                                    db.vw_memberpatientlist.fname,\
+                                                                    db.vw_memberpatientlist.lname,\
+                                                                    db.vw_memberpatientlist.primarypatientid,\
+                                                                    db.vw_memberpatientlist.patientid,\
+                                                                    db.vw_memberpatientlist.patienttype,\
+                                                                    db.vw_memberpatientlist.relation,\
+                                                                    db.vw_memberpatientlist.cell,\
+                                                                    db.vw_memberpatientlist.email,\
+                                                                    limitby=limitby)
+        if(maxcount == 0):
+          maxcount = db((db.vw_memberpatientlist.patient.like("%" + patientsearch + "%")) & (db.vw_memberpatientlist.patientmember.like("%" + patientmembersearch + "%")) &(db.vw_memberpatientlist.providerid == providerid) & \
+                        (qry) & \
+                        (db.vw_memberpatientlist.is_active == True)).count()
+          
+  
+    
+      
+      
+      
+      for pat in pats:
+        
+        patobj = {
+          "member":common.getboolean(pat.hmopatientmember),  #False for walk in patient
+          "patientmember" : pat.patientmember,
+          "fname":pat.fname,
+          "lname":pat.lname,
+          "memberid":int(common.getid(pat.primarypatientid)),
+          "patientid":int(common.getid(pat.patientid)),
+          "primary":True if(pat.patienttype == "P") else False,   #True if "P" False if "D"
+          "relation":pat.relation,
+          "cell":pat.cell,
+          "email":pat.email
+          
+        }
+        patlist.append(patobj)   
+      
+      xcount = ((page+1) * items_per_page) - (items_per_page - len(pats)) 
+      
+      bnext = True
+      bprev = True
+      
+      #first page
+      if((page+1) == 1):
+        bnext = True
+        bprev = False
+      
+      #last page
+      if(len(pats) < items_per_page):
+        bnext = False
+        bprev = True
+      
+      return json.dumps({"patientcount":len(pats),"page":page+1,"patientlist":patlist, "runningcount":xcount, "maxcount":maxcount, "next":bnext, "prev":bprev,\
+                         "patientsearch":patientsearch,"patientmembersearch":patientmembersearch,"member":hmopatientmember} )
+
   
   #this method retrieves member/patient information
   #{

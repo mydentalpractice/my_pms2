@@ -8462,6 +8462,6 @@ ADD COLUMN `policy_name` VARCHAR(128) NULL DEFAULT NULL AFTER `service_id`;
 3. YYYZZZAdd ABHILC Plan
 4. Import ProcedurePricePlan for ABHICL
 5. Import provider_regions_plan for ABHIC
-6. ZZZZmodify vw_treatmentlist - added companyid, groupref, patientmember, enddate,description/notes,tooth,quadrant,
+6. YYYYZZZZmodify vw_treatmentlist - added companyid, groupref, patientmember, enddate,description/notes,tooth,quadrant,
 7. YYYYZZZZmodify vw_appointments - added "companyid" & "groupref", "membercode"
 8.

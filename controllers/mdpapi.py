@@ -780,12 +780,16 @@ def getpatient(avars):
 
 def searchpatient(avars):
     opat = mdppatient.Patient(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
-  
+    
+    company = avars["company"] if "company" in avars else ""
+    company = "" if (company == None) | (company == "") else company
+    
     member = avars.get('member',None)
     rsp = opat.searchpatient(int(common.getid(str(avars["page"]))) if "page" in avars else 1,str(avars["searchphrase"]),
                             int(common.getid(str(avars["maxcount"]))) if "maxcount" in avars else 0,
                             str(avars["patientmembersearch"]) if "patientmembersearch" in avars else "",
-                            None if ((member == "") | (member == None)) else common.getboolean(avars["member"])
+                            None if ((member == "") | (member == None)) else common.getboolean(avars["member"]),
+                            company
                              )
     return rsp
 
@@ -1892,6 +1896,30 @@ def get_treatments(avars):
     rsp = oabhicl.get_treatments(avars)   
     return rsp
 
+def addABHICLProcedureToTreatment(avars):
+    oabhicl = mdpabhicl.ABHICL(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
+    
+    treatmentid = int(common.getid(str(avars["treatmentid"]))) if "treatmentid" in avars else 0    
+    procedurepriceplancode = avars["procedurepriceplancode"] if "procedurepriceplancode" in avars else "ABHICL40"    
+    procedurecode = avars["procedurecode"] if "procedurecode" in avars else ""    
+   
+       
+  
+    tooth = avars["tooth"] if "tooth" in avars else ""    
+    quadrant = avars["quadrant"] if "quadrant" in avars else ""    
+    remarks = avars["remarks"] if "remarks" in avars else ""    
+    abhiclid = avars["abhiclid"] if "abhiclid" in avars else "" 
+    abhiclpolicy = avars["abhiclpolicy"] if "abhiclpolicy" in avars else ""
+    
+    rsp = oabhicl.addABHICLProcedureToTreatment(treatmentid, 
+                                               procedurepriceplancode, 
+                                               procedurecode, 
+                                               tooth, 
+                                               quadrant, 
+                                               remarks, 
+                                               abhiclid, 
+                                               abhiclpolicy)
+    return rsp
 
 
 ############################# End ABHICL API ##################################################
@@ -1950,7 +1978,10 @@ mdpapi_switcher = {"listappointments":getappointments,"getappointmentsbymonth":g
                    "updatereligarepatientXXX":updatereligarepatientXXX,"getreligareproceduresXXX":getreligareproceduresXXX,"getTransactionIDXXX":getTransactionIDXXX,\
                    "addRlgProcedureToTreatmentXXX":addRlgProcedureToTreatmentXXX,"settleTransactionXXX":settleTransactionXXX,"voidTransactionXXX":voidTransactionXXX,\
                    "dental_service_request":dental_service_request,"get_appointments":get_appointments,"get_treatments":get_treatments,\
-                   "getcompanyprocedures":getcompanyprocedures,"getnoncompanyprocedures":getnoncompanyprocedures,
+                   "getcompanyprocedures":getcompanyprocedures,"getnoncompanyprocedures":getnoncompanyprocedures,\
+                   "addABHICLProcedureToTreatment":addABHICLProcedureToTreatment
+                   
+                   
                    }
 
 
