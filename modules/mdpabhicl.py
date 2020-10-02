@@ -59,7 +59,7 @@ class ABHICL:
   #This API will create or update the member information in MDP 
   #The provider will be defaulted to P0001
   #The company will be ABHICL
-  #The promocode will be ABHICL40 promocode
+  #The promocode will be ABHIC promocode
   
   def dental_service_request(self,avars):
     
@@ -71,14 +71,14 @@ class ABHICL:
 
       logger.loggerpms2.info("Enter dental_service_request")
       providercode = 'P0001'
-      policy = "ABHICL40"
+      policy = "ABHI"
       
-      promocode = avars["promocode"] if "promocode" in avars else "ABHICL40"
+      promocode = avars["promocode"] if "promocode" in avars else "ABHI"
       
       abhiclid = avars["ABHICLID"] if "ABHICLID" in avars else common.generateackid("AB",10)
       
       r = db(db.company.groupkey == promocode).select(db.company.company)
-      companycode = r[0].company if len(r) == 1 else 'ABHICL'
+      companycode = r[0].company if len(r) == 1 else 'ABHI'
     
       
       
@@ -255,7 +255,7 @@ class ABHICL:
     try:
       
       ackid = avars["ackid"] if "ackid" in avars else None
-      abhiclid = avars["abhiclid"] if "abhiclid" in avars else ""
+      abhiclid = avars["ABHICLID"] if "ABHICLID" in avars else ""
       
       #invalid session as no ackid is specified
       if((ackid == None) | (ackid == "")):

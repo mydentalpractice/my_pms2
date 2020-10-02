@@ -255,7 +255,7 @@ def abhicl():
     
     abhiclid = request.vars.abhiclid
     abhiclpolicy = request.vars.abhiclpolicy 
-    abhiclpolicy = "ABHICL40" if ((abhiclpolicy == "") | (abhiclpolicy == None)) else abhiclpolicy
+    abhiclpolicy = "ABHI" if ((abhiclpolicy == "") | (abhiclpolicy == None)) else abhiclpolicy
     
     form = SQLFORM.factory(
         Field('abhiclid', 'string',  label='ABHICL ID',requires=IS_NOT_EMPTY(),default=abhiclid),
@@ -1067,8 +1067,7 @@ def addabhiclprocedure():
     rsp = oabhicl.addABHICLProcedureToTreatment(treatmentid, 
                                                procedurepriceplancode, 
                                                procedurecode, 
-                                               procedurename, 
-                                               procedurefee, 
+                                               
                                                tooth, 
                                                quadrant, 
                                                remarks, 

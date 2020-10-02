@@ -126,7 +126,7 @@ def getreligareproceduresXXX(avars):
 def getcompanyprocedures(avars):
     rsp = {}
     try:
-	orlgr = mdpprocedure.Procedure(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+	orlgr = mdpprocedure.Procedure(current.globalenv['db'],0)
 	rsp = orlgr.getcompanyprocedures(str(avars["procedurepriceplancode"]),\
 	                                  str(avars["phrase"]) if "phrase" in avars else "",\
 	                                  int(common.getid(str(avars["page"]))) if "page" in avars else 0,\
@@ -1900,7 +1900,7 @@ def addABHICLProcedureToTreatment(avars):
     oabhicl = mdpabhicl.ABHICL(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
     
     treatmentid = int(common.getid(str(avars["treatmentid"]))) if "treatmentid" in avars else 0    
-    procedurepriceplancode = avars["procedurepriceplancode"] if "procedurepriceplancode" in avars else "ABHICL40"    
+    procedurepriceplancode = avars["procedurepriceplancode"] if "procedurepriceplancode" in avars else "ABHICSX"    
     procedurecode = avars["procedurecode"] if "procedurecode" in avars else ""    
    
        

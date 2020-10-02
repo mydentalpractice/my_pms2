@@ -262,11 +262,11 @@ class Procedure:
             for proc in procs:
                 procobj = {
                     "plan":procedurepriceplancode,
-                    "procedurecode":proc.vw_procedurepriceplan_relgr.procedurecode,
-                    "altshortdescription":common.getstring(proc.vw_procedurepriceplan_relgr.altshortdescription),
-                    "procedurefee":float(common.getvalue(proc.vw_procedurepriceplan_relgr.relgrprocfee)),
-                    "inspays":float(common.getvalue(proc.vw_procedurepriceplan_relgr.relgrinspays)),
-                    "copay":float(common.getvalue(proc.vw_procedurepriceplan_relgr.relgrcopay))
+                    "procedurecode":proc.procedurecode,
+                    "altshortdescription":common.getstring(proc.altshortdescription),
+                    "procedurefee":float(common.getvalue(proc.relgrprocfee)),
+                    "inspays":float(common.getvalue(proc.relgrinspays)),
+                    "copay":float(common.getvalue(proc.relgrcopay))
                 }        
                 proclist.append(procobj) 
                 result = 'success'
