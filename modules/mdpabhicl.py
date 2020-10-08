@@ -74,12 +74,14 @@ class ABHICL:
       policy = "ABHI"
       
       promocode = avars["promocode"] if "promocode" in avars else "ABHI"
+      companycode = avars["companycode"] if "companycode" in avars else "ABHI"
       
       abhiclid = avars["ABHICLID"] if "ABHICLID" in avars else common.generateackid("AB",10)
       
-      r = db(db.company.groupkey == promocode).select(db.company.company)
-      companycode = r[0].company if len(r) == 1 else 'ABHI'
-    
+      #r = db(db.company.groupkey == promocode).select(db.company.company)
+      #companycode = r[0].company if len(r) == 1 else 'ABHI'
+      
+     
       
       
       
@@ -88,7 +90,7 @@ class ABHICL:
       cell = avars["cell"] if "cell" in avars else "0000000000"
       email = avars["email"] if "email" in avars else "mydentalplan.in@gmail.com"
   
-      avars = {"promocode":promocode,"ABHICLID":abhiclid}
+      avars = {"promocode":promocode,"companycode":companycode,"ABHICLID":abhiclid}
       
       #start session
       jobj = json.loads(self.startsession(avars))
@@ -110,6 +112,7 @@ class ABHICL:
         
         "ackid":jobj["ackid"],
         "promocode":promocode,
+        "companycode":companycode,
         "ABHICLID":abhiclid,
         "firstname":fname,
         "lastname":lname,
@@ -256,6 +259,7 @@ class ABHICL:
       
       ackid = avars["ackid"] if "ackid" in avars else None
       abhiclid = avars["ABHICLID"] if "ABHICLID" in avars else ""
+      companycode = avars["companycode"] if "companycode" in avars else "ABHI"
       
       #invalid session as no ackid is specified
       if((ackid == None) | (ackid == "")):
@@ -272,9 +276,13 @@ class ABHICL:
 	return json.dumps(jsonresp)	
 
       #get company
-      r = db(db.sessionlog.ackid == ackid).select(db.company.company,db.company.id,db.company.city,db.company.st,db.company.pin,\
-                                                  db.company.address1,db.company.address2,db.company.address3,\
-                                                  left=[db.company.on(db.company.groupkey == db.sessionlog.promocode)])
+      
+      r = db(db.company.company == companycode).select()
+      
+      #r = db(db.sessionlog.ackid == ackid).select(db.company.company,db.company.id,db.company.city,db.company.st,db.company.pin,\
+                                                  #db.company.address1,db.company.address2,db.company.address3,\
+                                                  #left=[db.company.on(db.company.groupkey == db.sessionlog.promocode)])
+						  
       companycode = r[0].company if(len(r) == 1) else None
       companycity = r[0].city if(len(r) == 1) else ""
       companyst = r[0].st if(len(r) == 1) else ""
@@ -380,24 +388,30 @@ class ABHICL:
 	return json.dumps(jsonresp)
 
       #patientmember
-      sql = "UPDATE membercount SET membercount = membercount + 1 WHERE company = " + str(companyid) + ";"
-      db.executesql(sql)
-      db.commit()    
-      xrows = db(db.membercount.company == companyid).select()
-      membercount = int(common.getid(xrows[0].membercount)) if(len(xrows) == 1) else -1
-      if(membercount < 0):
-	msg = "New ABHICL Patient API Error: Generating MDP MemberID\n" + self.rlgrobj.xerrormessage("ABHICL105")	
-	logger.loggerpms2.info(msg)
-	jsonresp = {
-	  "ABHICLID":abhiclid,
-	  "MDPMember":"",	  
-          "result":"fail",
-          "error_code":"ABHICL105",
-          "error_message": msg
-        }
-	return json.dumps(jsonresp)
+      patientmember = None
+      r = db(db.patientmember.groupref == abhiclid).select(db.patientmember.patientmember)
+      if(len(r)==1):
+	patientmember = r[0].patientmember
+      else:
       
-      patientmember = plancode + str(membercount)    
+	sql = "UPDATE membercount SET membercount = membercount + 1 WHERE company = " + str(companyid) + ";"
+	db.executesql(sql)
+	db.commit()    
+	xrows = db(db.membercount.company == companyid).select()
+	membercount = int(common.getid(xrows[0].membercount)) if(len(xrows) == 1) else -1
+	if(membercount < 0):
+	  msg = "New ABHICL Patient API Error: Generating MDP MemberID\n" + self.rlgrobj.xerrormessage("ABHICL105")	
+	  logger.loggerpms2.info(msg)
+	  jsonresp = {
+	    "ABHICLID":abhiclid,
+	    "MDPMember":"",	  
+	    "result":"fail",
+	    "error_code":"ABHICL105",
+	    "error_message": msg
+	  }
+	  return json.dumps(jsonresp)
+	
+	patientmember = plancode + str(membercount)    
 
       #create or update new patient
       groupref = avars["ABHICLID"] if "ABHICLID" in avars else None
