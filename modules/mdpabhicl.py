@@ -625,7 +625,7 @@ class ABHICL:
     try:
     
       
-      companycode = avars["company"] if "company" in avars else "ABHICL"
+      companycode = avars["company"] if "company" in avars else "ABHI"
       r = db(db.company.company == companycode).select(db.company.id)
       companyid = r[0].id if len(r) == 1 else 0 
       
@@ -746,7 +746,7 @@ class ABHICL:
     try:
     
       
-      companycode = avars["company"] if "company" in avars else "ABHICL"
+      companycode = avars["company"] if "company" in avars else "ABHI"
       r = db(db.company.company == companycode).select(db.company.id)
       companyid = r[0].id if len(r) == 1 else 0      
       
