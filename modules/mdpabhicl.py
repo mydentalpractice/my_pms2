@@ -30,6 +30,17 @@ from mdpreligare import Religare
 
 from applications.my_pms2.modules import logger
 
+def getvalue(jobj, key1, defval):
+
+  keys = jobj.keys()
+
+  for key in keys:
+    if(key.lower() == key1.lower()):
+      return jobj.get(key,"defval")
+
+
+  return defval
+
 def errormessage(db,errorcode,response_message=""):
 
 
@@ -73,10 +84,13 @@ class ABHICL:
       providercode = 'P0001'
       policy = "ABHI"
       
-      promocode = avars["promocode"] if "promocode" in avars else "ABHI"
-      companycode = avars["companycode"] if "companycode" in avars else "ABHI"
+      promocode = getvalue(avars,"promocode","ABHI") #avars["promocode"] if "promocode" in avars else "ABHI"
+      companycode = getvalue(avars,"companycode","ABHI") #avars["companycode"] if "companycode" in avars else "ABHI"
       
-      abhiclid = avars["ABHICLID"] if "ABHICLID" in avars else common.generateackid("AB",10)
+      defval = common.generateackid("AB",10)
+      abhiclid = getvalue(avars,"ABHICLID",defval)
+      
+      #abhiclid = avars["ABHICLID"] if "ABHICLID" in avars else common.generateackid("AB",10)
       
       #r = db(db.company.groupkey == promocode).select(db.company.company)
       #companycode = r[0].company if len(r) == 1 else 'ABHI'
@@ -85,10 +99,10 @@ class ABHICL:
       
       
       
-      fname = avars["firstname"] if "firstname" in avars else abhiclid + "_FN"
-      lname = avars["lastname"] if "lastname" in avars else abhiclid + "_LN"
-      cell = avars["cell"] if "cell" in avars else "0000000000"
-      email = avars["email"] if "email" in avars else "mydentalplan.in@gmail.com"
+      fname = getvalue(avars,"firstname",abhiclid + "_FN") #avars["firstname"] if "firstname" in avars else abhiclid + "_FN"
+      lname = getvalue(avars,"lastname",abhiclid + "_LN") #avars["lastname"] if "lastname" in avars else abhiclid + "_LN"
+      cell = getvalue(avars,"cell","0000000000") #avars["cell"] if "cell" in avars else "0000000000"
+      email = getvalue(avars,"email","mydentalplan.in@gmail.com") #avars["email"] if "email" in avars else "mydentalplan.in@gmail.com"
   
       avars = {"promocode":promocode,"companycode":companycode,"ABHICLID":abhiclid}
       
@@ -165,8 +179,8 @@ class ABHICL:
   def startsession(self,avars):
     
     db = self.db
-    promocode = avars["promocode"] if "promocode" in avars else ""
-    abhiclid = avars["abhiclid"] if "abhiclid" in avars else ""
+    promocode = getvalue(avars,"promocode","") #avars["promocode"] if "promocode" in avars else ""
+    abhiclid = getvalue(avars,"abhiclid","ABHI") #avars["abhiclid"] if "abhiclid" in avars else ""
     
     jsonresp = {}
     
@@ -257,9 +271,9 @@ class ABHICL:
      
     try:
       
-      ackid = avars["ackid"] if "ackid" in avars else None
-      abhiclid = avars["ABHICLID"] if "ABHICLID" in avars else ""
-      companycode = avars["companycode"] if "companycode" in avars else "ABHI"
+      ackid = getvalue(avars,"ackid",None) #avars["ackid"] if "ackid" in avars else None
+      abhiclid = getvalue(avars,"ABHICLID",None) #avars["ABHICLID"] if "ABHICLID" in avars else ""
+      companycode = getvalue(avars,"companycode","ABHI") #avars["companycode"] if "companycode" in avars else "ABHI"
       
       #invalid session as no ackid is specified
       if((ackid == None) | (ackid == "")):
@@ -307,7 +321,7 @@ class ABHICL:
 
 
       #get policy	
-      policy = avars["policy"] if "policy" in avars else None
+      policy = getvalue(avars,"policy", None) #avars["policy"] if "policy" in avars else None
       if((policy == None) | (policy == "")):
 	msg = "New ABHICL Patient API Error: Missing Policy\n" + self.rlgrobj.xerrormessage("ABHICL105")	
 	logger.loggerpms2.info(msg)
@@ -523,10 +537,10 @@ class ABHICL:
 
     try:
       #get ABHICL appointment ID
-      abhilcapptid = common.getstring(avars["ABHICLAPPTID"]) if "ABHICLAPPTID" in avars else None
+      abhilcapptid = getvalue(avars,"ABHICLAPPTI",None) #avars["ABHICLAPPTID"] if "ABHICLAPPTID" in avars else None
       
       #get selected provider & region
-      providercode = common.getstring(avars["providercode"]) if "providercode" in avars else None
+      providercode = getvalue(avars,"providercode",None) #avars["providercode"] if "providercode" in avars else None
       
       if((providercode == None) | (providercode == "")):
 	
@@ -540,7 +554,7 @@ class ABHICL:
 	return json.dumps(jsonresp)
       
       #get member and patientid
-      abhiclid = common.getstring(avars["abhiclid"]) if "abhiclid" in avars else None
+      abhiclid = getvalue(avars,"ABHICLID",None) #avars["abhiclid"] if "abhiclid" in avars else None
       p = db(db.patientmember.groupref == abhiclid).select()
       
       if(len(p) != 1):
@@ -624,29 +638,44 @@ class ABHICL:
     jsonresp = {}
     try:
     
+      #get memberid
+      abhiclid = getvalue(avars,"ABHICLID","")
       
-      companycode = avars["company"] if "company" in avars else "ABHI"
+     
+
+      patientid = 0
+      memberid = 0
+      
+      if(abhiclid != ""):
+	r = db(db.patientmember.groupref == abhiclid).select(db.patientmember.id)
+	if(len(r) == 1):
+	  memberid = int(common.getid(r[0].id)) 
+	  patientid = memberid
+
+      #get company code 
+      companycode = getvalue(avars,"company","ABHI")
       r = db(db.company.company == companycode).select(db.company.id)
       companyid = r[0].id if len(r) == 1 else 0 
       
-      
+      #get from/to dates
       today = datetime.datetime.now()
 	   
       t1 = str(today.day) + "/" + str(today.month) + "/" + str(today.year) 
       t2 = str(today.day) + "/" + str(today.month) + "/" + str(today.year) 
       
-      sfrom_date = avars["from_date"]  if "from_date" in avars else ""
+      sfrom_date = getvalue(avars,"from_date","") #avars["from_date"]  if "from_date" in avars else ""
       from_date = datetime.datetime.strptime(t1 if sfrom_date == "" else sfrom_date, "%d/%m/%Y")
 
-      sto_date = avars["to_date"]  if "to_date" in avars else ""
+      sto_date = getvalue(avars,"to_date","")  #avars["to_date"]  if "to_date" in avars else ""
       to_date = datetime.datetime.strptime(t2 if sto_date == "" else sto_date, "%d/%m/%Y")      
 
-      
-      status = avars["status"] if "status" in avars else "" 
+      #get status
+      status = getvalue(avars,"status","")  #avars["status"] if "status" in avars else "" 
       
       
       query = ""
       query = (db.vw_treatmentlist.companyid == companyid) if(companyid > 0) else (1==1)
+      query = query & ((db.vw_treatmentlist.memberid == memberid)&(db.vw_treatmentlist.patientid == patientid)) if(abhiclid != "") else (1==1)
       query = query & ((db.vw_treatmentlist.startdate >= from_date) & (db.vw_treatmentlist.startdate <= to_date))
       
       
@@ -745,8 +774,19 @@ class ABHICL:
     jsonresp = {}
     try:
     
+      #get memberid
+      abhiclid = getvalue(avars,"ABHICLID","")  #avars["ABHICLID"] if "ABHICLID" in avars else ""
+
+      patientid = 0
+      memberid = 0
       
-      companycode = avars["company"] if "company" in avars else "ABHI"
+      if(abhiclid != ""):
+	r = db(db.patientmember.groupref == abhiclid).select(db.patientmember.id)
+	if(len(r) == 1):
+	  memberid = int(common.getid(r[0].id))    
+	  patientid = memberid
+      
+      companycode = getvalue(avars,"company","ABHI") #avars["company"] if "company" in avars else "ABHI"
       r = db(db.company.company == companycode).select(db.company.id)
       companyid = r[0].id if len(r) == 1 else 0      
       
@@ -755,10 +795,10 @@ class ABHICL:
       t1 = str(today.day) + "/" + str(today.month) + "/" + str(today.year) + " 00:00"
       t2 = str(today.day) + "/" + str(today.month) + "/" + str(today.year) + " 23:59"
       
-      sfrom_date = avars["from_date"]  if "from_date" in avars else ""
+      sfrom_date = getvalue(avars,"from_date","") #avars["from_date"]  if "from_date" in avars else ""
       from_date = datetime.datetime.strptime(t1 if sfrom_date == "" else sfrom_date + " 00:00", "%d/%m/%Y %H:%M")
 
-      sto_date = avars["to_date"]  if "to_date" in avars else ""
+      sto_date = getvalue(avars,"to_date","") #avars["to_date"]  if "to_date" in avars else ""
       to_date = datetime.datetime.strptime(t2 if sto_date == "" else sto_date + " 23:59", "%d/%m/%Y %H:%M")
 
       
@@ -766,20 +806,21 @@ class ABHICL:
       #to_date = datetime.datetime.strptime(avars["to_date"] + " 23:59" if "to_date" in avars else t2, "%d/%m/%Y %H:%M" )
 
       
-      status = avars["status"] if "status" in avars else "" 
+      status = getvalue(avars,"status","") #avars["status"] if "status" in avars else "" 
       
      
       
       query = ""
       query = (db.vw_appointments.companyid == companyid) if(companyid > 0) else (1==1)
+      query = query & ((db.vw_appointments.patientmember == memberid)&(db.vw_appointments.patient == patientid)) if(abhiclid != "") else (1==1)
       query = query & ((db.vw_appointments.f_start_time >= from_date) & (db.vw_appointments.f_start_time <= to_date))
       
       
       if(status == ""):
-	query = query & (db.vw_appointments.is_active == True) & ((db.vw_appointments.f_status == "Open") | (db.vw_appointments.f_status == "Checked-in"))
+	query = query & (db.vw_appointments.is_active == True) & ((db.vw_appointments.f_status == "Open") | (db.vw_appointments.f_status == "Checked-In"))
       elif (status == "ALL"):
-	query = query & ((db.vw_appointments.f_status == "Open") | (db.vw_appointments.f_status == "Checked") | (db.vw_appointments.f_status == "Cancelled"))
-      elif ((status == 'Open') | (status == "Checked-in")):
+	query = query & ((db.vw_appointments.f_status == "Open") | (db.vw_appointments.f_status == "Checked-In") | (db.vw_appointments.f_status == "Cancelled"))
+      elif ((status == 'Open') | (status == "Checked-in") | (status == "Checked-In")):
 	query = query & ((db.vw_appointments.f_status == status) & (db.vw_appointments.is_active == True))
       else:
 	query = query & (db.vw_appointments.f_status == status)
