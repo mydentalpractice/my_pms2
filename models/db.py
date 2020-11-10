@@ -139,6 +139,12 @@ use_janrain(auth, filename='private/janrain.key')
 ## >>> for row in rows: print row.id, row.myfield
 #########################################################################
 
+db.define_table('loginblock',
+                Field('ip_address','string'),
+                Field('username','string'),
+                Field('attempts','integer'),
+                Field('lastlogin','datetime', default=request.now, requires=IS_DATETIME(format=T('%d/%m/%Y %H:%M:%S'))),
+                auth.signature)
 
 db.define_table('sessionlog',
                 Field('ackid','string'),

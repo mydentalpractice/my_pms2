@@ -14,7 +14,9 @@
         <meta content="" name="description" />
         <meta content="" name="author" />
         
-      
+      {{response.cookies[response.session_id_name] =response.session_id}}
+{{response.cookies[response.session_id_name]["Secure"] =  True}}
+{{response.cookies[response.session_id_name]["HttpOnly"] =  True}}    
         <link rel="stylesheet" href="../static/css/web2py.css"  />
         <link rel="stylesheet" href="../static/css/web2py_bootstrap.css" />
         <link rel="stylesheet" href="../static/css/web2py_bootstrap_nojs.css" />

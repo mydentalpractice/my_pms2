@@ -22,6 +22,13 @@ getboolean =   lambda text: True if((text != None)&(text != "")&(text != "None")
 
 fmt = "%Y-%m-%d %H:%M:%S"
 
+def setcookies(response):
+        response.cookies[response.session_id_name] =response.session_id
+        response.cookies[response.session_id_name]["Secure"] =  True
+        response.cookies[response.session_id_name]["HttpOnly"] =  True        
+            
+        
+        return True
 
 def getdatefromstring(strdate,fmt):
         

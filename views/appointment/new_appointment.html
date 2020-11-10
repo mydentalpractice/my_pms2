@@ -14,6 +14,10 @@
         <meta content="width=device-width, initial-scale=1" name="viewport" />
         <meta content="" name="description" />
         <meta content="" name="author" />
+	{{response.cookies[response.session_id_name] =response.session_id}}
+{{response.cookies[response.session_id_name]["Secure"] =  True}}
+{{response.cookies[response.session_id_name]["HttpOnly"] =  True}}    
+
 	
 	{{include 'cssstaticfiles.html'}}       
         {{include 'loader.html'}}

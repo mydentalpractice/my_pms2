@@ -80,7 +80,7 @@ class ABHICL:
     
     try:
 
-      logger.loggerpms2.info("Enter dental_service_request")
+      logger.loggerpms2.info("Enter dental_service_request\n" + str(avars))
       providercode = 'P0001'
       policy = "ABHI"
       
@@ -632,7 +632,7 @@ class ABHICL:
 
   def get_treatments(self,avars):
     
-    logger.loggerpms2.info("Enter get treatments")
+    logger.loggerpms2.info("Enter get treatments\n" + str(avars))
     db = self.db
 
     jsonresp = {}

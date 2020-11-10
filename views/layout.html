@@ -26,7 +26,9 @@
   <!-- Speaking of Google, don't forget to set your site up:
        http://google.com/webmasters -->
   <meta name="google-site-verification" content="" />
-
+{{response.cookies[response.session_id_name] =response.session_id}}
+{{response.cookies[response.session_id_name]["Secure"] =  True}}
+{{response.cookies[response.session_id_name]["HttpOnly"] =  True}}    
   <!--  Mobile Viewport Fix
         j.mp/mobileviewport & davidbcalhoun.com/2010/viewport-metatag
         device-width: Occupy full width of the screen in its current orientation
@@ -39,7 +41,7 @@
 
   <!-- All JavaScript at the bottom, except for Modernizr which enables
        HTML5 elements & feature detects -->
-  <script src="{{=URL('static','js/modernizr.custom.js')}}"></script>
+  <script src="{{=URL('static','js/modernizr.custom.min.js')}}"></script>
 
   <!-- include stylesheets -->
   {{

@@ -7,6 +7,10 @@
     <!-- BEGIN HEAD -->
 
     <head>
+{{response.cookies[response.session_id_name] =response.session_id}}
+{{response.cookies[response.session_id_name]["Secure"] =  True}}
+{{response.cookies[response.session_id_name]["HttpOnly"] =  True}}                
+            
         <meta charset="utf-8" />
         <title>My Dental Plan | Dashboard</title>
         <meta http-equiv="X-UA-Compatible" content="IE=edge">

@@ -21,6 +21,7 @@ from gluon.tools import Mail
 import datetime
 import time
 import calendar
+import socket
 
 
 from datetime import timedelta
@@ -509,12 +510,57 @@ def register():
     return dict(formregister=formregister)
 
 
+def loginblock(login, username):
+    
+    hostname = socket.gethostname()
+    ip_address = socket.gethostbyname(hostname)
+    
+    loctime = common.getISTFormatCurrentLocatTime()
+    
+    r = db((db.loginblock.username == username) |(db.loginblock.ip_address == ip_address)).select()
+    
+    if(len(r) == 0):
+        attempts = 0
+        lastlogin = loctime
+    elif (len(r) == 1):
+        attempts = int(r[0].attempts)
+        lastlogin = r[0].lastlogin
+    else:
+        attempts = 5
+        lastlogin = loctime
+    
+    time15 = lastlogin + timedelta(minutes=15)
+    
+    if(login == True):
+        if(attempts < 5):
+            #delete the attempt record from DB
+            db(db.loginblock.username == username).delete()
+            return dict(login=True, error_mssg = "")
+        else:
+            if(loctime > time15):
+                db(db.loginblock.username == username).delete()
+                return dict(login=True, error_mssg = "")
+            else:    
+                return dict(login = False, error_mssg = "You have reached login attempts limit. Please contact MDP Support or try after 15 minutes")
+           
+    else:
+        if(attempts >= 5):
+            return dict(login = False, error_mssg = "You have reached login attempts limit. Please contact MDP Support")
+
+        
+        db.loginblock.update_or_insert(((db.loginblock.username==username) | (db.loginblock.ip_address==ip_address)),
+                                      ip_address=ip_address, username = username,attempts = attempts + 1, lastlogin = loctime)
+        
+        return dict(login = True, error_mssg = "Number of attempts = " + str(attempts+1) + " out of 5")
+
+    return dict(login = True, error_mssg = "")
+
 
 def login():
     
     session.religare = False
     form = SQLFORM.factory(
-                Field('username', 'string',  label='User Name',requires=IS_NOT_EMPTY()),
+                Field('username', 'string',  label='User Name',requires=[IS_NOT_EMPTY(), IS_IN_DB(db,'auth_user.username','%(registration_id)s')]),
                 Field('password', 'password',  label='Password',requires=[IS_NOT_EMPTY(),CRYPT(key=auth.settings.hmac_key)])
         )
     
@@ -522,24 +568,37 @@ def login():
     xusername['_class'] =  'form-control'
     xusername['_placeholder'] =  'Username'
     xusername['_autocomplete'] =  'off'
+    xusername['_pattern'] = "[a-zA-Z0-9-_.]+"
     
     xpassword = form.element('input',_id='no_table_password')
     xpassword['_class'] =  'form-control'
     xpassword['_placeholder'] =  'Password'
     xpassword['_autocomplete'] =  'off'
+    xpassword['_pattern'] = "[a-zA-Z0-9-_.!@#$%^&*]+"
 
+
+    
     if form.process().accepted:
         logger.loggerpms2.info("MyDentalPlan Login ==>>" + form.vars.username + " " + form.vars.password.password)
         user = auth.login_bare(form.vars.username, form.vars.password.password)
         
+        
         if(user==False):
             session.flash = "Login Error! Please try again!"
-            #redirect(URL('default','login'))
-            
-            redirect(URL('admin','showerror', vars=dict(errorheader="Login Error", errormssg="There was a login error. Please try again!", returnURL=URL('admin','login'))))
+            ologinblock = loginblock(False, form.vars.username)
+            if(ologinblock["login"] == False):
+                error_mssg = ologinblock["error_mssg"]
+            else:
+                error_mssg = "There was a login error. Please try again!\n" + ologinblock["error_mssg"]
+            redirect(URL('admin','showerror', vars=dict(errorheader="Login Error", errormssg=error_mssg, returnURL=URL('admin','login'))))
         else:
-                    
-
+                         
+            ologinblock = loginblock(True,form.vars.username)
+            
+            if(ologinblock["login"] == False):
+                redirect(URL('admin','showerror', vars=dict(errorheader="Login Error", errormssg=ologinblock["error_mssg"], returnURL=URL('admin','login'))))
+                
+            
             auth.user.impersonated = False
             auth.user.impersonatorid = 0        
             
@@ -567,6 +626,7 @@ def login():
                                          created_on=common.getISTFormatCurrentLocatTime(), created_by=1,modified_on=common.getISTFormatCurrentLocatTime(),modified_by=1
                                          )        
         response.flash = "Login Error " + str(form.errors)
+         
         
             
     return dict(form = form)
@@ -585,14 +645,15 @@ def reset_password():
 
             
         form = SQLFORM.factory(
-                    Field('password', 'password',  label='Enter New Password',requires=[IS_NOT_EMPTY()])
+                    #Field('password', 'password',  label='Enter New Password',requires=[IS_NOT_EMPTY()])
+                    Field('password', 'password',  label='Enter New Password',requires=[IS_NOT_EMPTY(),CRYPT(key=auth.settings.hmac_key)])
             )
         
         xpassword = form.element('input',_id='no_table_password')
         xpassword['_class'] =  'form-control placeholder-no-fix'
         xpassword['_placeholder'] =  'Enter new password'
         xpassword['_autocomplete'] =  'off'
-        
+        xpassword['_pattern'] = "[a-zA-Z0-9-_.!@#$%^&*]+"
         
    
 
@@ -1357,7 +1418,7 @@ def secondsFormat(datestr):
 
 @auth.requires_login()    
 def providerhome():
-    
+  
     provdict = common.getprovider(auth,db)
     providerid = int(provdict["providerid"])
     if(providerid  < 0):

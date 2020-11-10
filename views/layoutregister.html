@@ -22,7 +22,9 @@
 
   <!-- http://dev.w3.org/html5/markup/meta.name.html -->
   <meta name="application-name" content="{{=request.application}}" />
-
+{{response.cookies[response.session_id_name] =response.session_id}}
+{{response.cookies[response.session_id_name]["Secure"] =  True}}
+{{response.cookies[response.session_id_name]["HttpOnly"] =  True}}    
   <!-- Speaking of Google, don't forget to set your site up:
        http://google.com/webmasters -->
   <meta name="google-site-verification" content="" />
@@ -39,7 +41,7 @@
 
   <!-- All JavaScript at the bottom, except for Modernizr which enables
        HTML5 elements & feature detects -->
-  <script src="{{=URL('static','js/modernizr.custom.js')}}"></script>
+  <script src="{{=URL('static','js/modernizr.custom.min.js')}}"></script>
 
   <!-- include stylesheets -->
   {{

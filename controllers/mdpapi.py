@@ -1882,8 +1882,10 @@ def getproviderswithpincode(avars):
 
 ############################# ABHICL API ##################################################
 def dental_service_request(avars):
+    logger.loggerpms2.info("Enter Dental Service Request(MDP)-Request\n" + str(avars) )
     oabhicl = mdpabhicl.ABHICL(current.globalenv['db'])
     rsp = oabhicl.dental_service_request(avars)   
+    logger.loggerpms2.info("Enter Dental Service Request(MDP)-Response\n" + rsp)
     return rsp
 
 def get_appointments(avars):
@@ -1892,8 +1894,11 @@ def get_appointments(avars):
     return rsp
 
 def get_treatments(avars):
+    logger.loggerpms2.info("Enter Get Treatments(MDP)-Request\n" + str(avars) )
     oabhicl = mdpabhicl.ABHICL(current.globalenv['db'])
     rsp = oabhicl.get_treatments(avars)   
+    logger.loggerpms2.info("Enter Get Treatments(MDP)-Response\n" + rsp )
+   
     return rsp
 
 def addABHICLProcedureToTreatment(avars):
@@ -2029,6 +2034,7 @@ def mdpapi():
 	    
 	    #return json.dumps({"action":action})
             rsp = mdpapi_switcher.get(action,unknown)(vars)
+	    common.setcookies(response)
 	    if(encryption):
 		return json.dumps({"resp_data":orlgr.encrypts(rsp)})
 	    else:

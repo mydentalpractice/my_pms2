@@ -33,13 +33,15 @@
         initial-scale = 1.0 retains dimensions instead of zooming out if page height > device height
         user-scalable = yes allows the user to zoom in -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
+{{response.cookies[response.session_id_name] =response.session_id}}
+{{response.cookies[response.session_id_name]["Secure"] =  True}}
+{{response.cookies[response.session_id_name]["HttpOnly"] =  True}}    
   <!--<link rel="shortcut icon" href="('static','images/favicon.ico')}}" type="image/x-icon">-->
   <!--<link rel="apple-touch-icon" href="('static','images/favicon.png')}}">-->
 
   <!-- All JavaScript at the bottom, except for Modernizr which enables
        HTML5 elements & feature detects -->
-  <script src="{{=URL('static','js/modernizr.custom.js')}}"></script>
+  <script src="{{=URL('static','js/modernizr.custom.min.js')}}"></script>
 
   <!-- include stylesheets -->
   {{

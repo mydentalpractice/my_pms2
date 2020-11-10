@@ -5,6 +5,9 @@
     <!-- BEGIN HEAD -->
 
     <head>
+{{response.cookies[response.session_id_name] =response.session_id}}
+
+{{response.cookies[response.session_id_name]["HttpOnly"] =  True}}              
         <meta charset="utf-8" />
         <!--<meta http-equiv="Refresh" content="0;URL=http://127.0.0.1:8001/my_pms2/default/sitehasmoved">-->
         <title>My Dental Plan | Login </title>
@@ -122,7 +125,7 @@
                 <div class="form-group">
                     <div class="input-icon">
                         <i class="fa fa-envelope"></i>
-                        <input class="form-control placeholder-no-fix" type="text" autocomplete="off" placeholder="Enter username" name="username" /> </div>
+                        <input class="form-control placeholder-no-fix" type="text" pattern = "[a-zA-Z0-9-_.!@#$%^&*]+" autocomplete="off" placeholder="Enter username" name="username" /> </div>
                 </div>
                 <div class="form-actions">
                     <button type="button" id="hide-forget-password" class="btn grey-salsa btn-outline"> Close </button>
@@ -138,7 +141,7 @@
                 <div class="form-group">
                     <div class="input-icon">
                         <i class="fa fa-envelope"></i>
-                        <input class="form-control placeholder-no-fix" type="text" autocomplete="off" placeholder="Regisered Email" name="usernameemail" /> </div>
+                        <input class="form-control placeholder-no-fix" type="email" autocomplete="off" placeholder="Regisered Email" name="usernameemail" /> </div>
                 </div>
                 <div class="form-actions">
               

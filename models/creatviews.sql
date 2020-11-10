@@ -8465,3 +8465,17 @@ ADD COLUMN `policy_name` VARCHAR(128) NULL DEFAULT NULL AFTER `service_id`;
 6. YYYYZZZZmodify vw_treatmentlist - added companyid, groupref, patientmember, enddate,description/notes,tooth,quadrant,
 7. YYYYZZZZmodify vw_appointments - added "companyid" & "groupref", "membercode"
 8.
+
+
+4/11/2020
+==========
+1.XXXYYYZZZZcreate ratelimint table
+CREATE TABLE `mydp_prod`.`ratelimit` (
+  `id` INT(11) NOT NULL AUTO_INCREMENT,
+  `username` VARCHAR(45) NULL,
+  `lastlogin` DATETIME NULL,
+  `created_by` INT(11) NULL,
+  `created_on` DATETIME NULL,
+  `modified_by` INT(11) NULL,
+  `modified_on` DATETIME NULL,
+  PRIMARY KEY (`id`));

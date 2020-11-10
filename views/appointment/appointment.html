@@ -14,7 +14,9 @@
         <meta content="width=device-width, initial-scale=1" name="viewport" />
         <meta content="" name="description" />
         <meta content="" name="author" />
-	
+	{{response.cookies[response.session_id_name] =response.session_id}}
+	{{response.cookies[response.session_id_name]["HttpOnly"] =  True}}
+	{{response.cookies[response.session_id_name]["Secure"] =  True}}
 	<!-- BEGIN WEB2PY STYLES -->
    <script type="text/javascript"><!--
     // These variables are used by the web2py_ajax_init function in web2py_ajax.js (which is loaded below).
