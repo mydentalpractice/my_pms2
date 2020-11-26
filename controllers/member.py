@@ -11,6 +11,8 @@ from applications.my_pms2.modules import status
 from applications.my_pms2.modules import states
 from applications.my_pms2.modules import gender
 
+from applications.my_pms2.modules import logger
+
 #from gluon.contrib import common
 #from gluon.contrib import status
 #from gluon.contrib import states
@@ -111,6 +113,10 @@ def getmembergrid(page,providerid, providername, memberid, patientid,patientmemb
     #query = (((db.vw_memberpatientlist.patient == patientmemberphrase) | (db.vw_memberpatientlist.patient.like('%' + patientmemberphrase + '%'))) &\
                #(db.vw_memberpatientlist.hmopatientmember == True) & (db.vw_memberpatientlist.providerid == providerid) & (db.vw_memberpatientlist.is_active == True))    
     
+    #logger.loggerpms2.info("getmembergriid" + " " + str(query))
+    
+    #r = db(query).select()
+    #logger.loggerpms2.info("getmembergrid size = " + str(len(r)))
     
     fields=(db.vw_memberpatientlist.fullname,db.vw_memberpatientlist.patient,db.vw_memberpatientlist.patientmember, db.vw_memberpatientlist.cell, db.vw_memberpatientlist.email,\
             db.vw_memberpatientlist.premstartdt,db.vw_memberpatientlist.premenddt, db.vw_memberpatientlist.hmoplanname,\
@@ -445,6 +451,7 @@ def list_patients():
     xpatientmember['_autocomplete'] = 'off'     
     
     formA = None
+    
     formA = getmembergrid(page,providerid, providername, memberid, patientid,patientmember1,newmember)
     
     if form.accepts(request,session,keepvalues=True):

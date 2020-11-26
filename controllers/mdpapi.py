@@ -1883,7 +1883,8 @@ def getproviderswithpincode(avars):
 ############################# ABHICL API ##################################################
 def dental_service_request(avars):
     logger.loggerpms2.info("Enter Dental Service Request(MDP)-Request\n" + str(avars) )
-    oabhicl = mdpabhicl.ABHICL(current.globalenv['db'])
+    appPath = current.globalenv["request"].folder
+    oabhicl = mdpabhicl.ABHICL(current.globalenv['db'],appPath)
     rsp = oabhicl.dental_service_request(avars)   
     logger.loggerpms2.info("Enter Dental Service Request(MDP)-Response\n" + rsp)
     return rsp

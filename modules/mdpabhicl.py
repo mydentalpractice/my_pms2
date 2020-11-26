@@ -1,6 +1,6 @@
 from gluon import current
 
-
+import os;
 
 
 import json
@@ -15,6 +15,7 @@ import hashlib
 
 import random
 
+from string import Template
 
 
 from applications.my_pms2.modules import common
@@ -58,11 +59,11 @@ def errormessage(db,errorcode,response_message=""):
 
 
 class ABHICL:
-  def __init__(self,db,providerid=0):
+  def __init__(self,db,appPath,providerid=0):
     self.db = db
     self.providerid = providerid
     self.rlgrobj = Religare(db, providerid)
- 
+    self.appPath = appPath
  
   #This API is called from ABHICL site with the following information
   #unique ABHICL Member ID
@@ -90,6 +91,13 @@ class ABHICL:
       defval = common.generateackid("AB",10)
       abhiclid = getvalue(avars,"ABHICLID",defval)
       
+      #if the patient is already created, then get the assigned provider
+      pat = db(db.patientmember.groupref == abhiclid).select(db.patientmember.provider,db.provider.provider,
+                                                             left=db.provider.on(db.provider.id == db.patientmember.provider))
+      if(len(pat) == 1):
+	providercode = pat[0].provider.provider
+      
+	
       #abhiclid = avars["ABHICLID"] if "ABHICLID" in avars else common.generateackid("AB",10)
       
       #r = db(db.company.groupkey == promocode).select(db.company.company)
@@ -147,16 +155,36 @@ class ABHICL:
 	jsonresp["error_message"] = msg    
 	return json.dumps(jsonresp)
       
-      #send sms/email notification
+      #send sms notification to member
       #cellno = common.modify_cell(cell)
-      #message = "You have been successfully registered with MyDental Health Plan.  They will call you to fix an appointment with a Dentist."
+      #message = "You have been successfully registered with MyDental Health Plan.\n"
+      #message = message + "MDP Customer Support will call you to fix an appointment with a Dentist."
+      #message = message + "MDP Customer Support Toll Free Number : 1-800-102-7526"
       #retval = mail.sendSMS2Email(db,cellno,message)
       
-      #ccs = email
+      #send email to member
       #subject = "Member Registration"
-      #message = "You have been successfully registered with MyDental Health Plan.  They will call you to fix an appointment with a Dentist."
       #retval = mail.groupEmail(db, email, email, subject, message)
       
+      #send email to MDP Customer Support
+      cellno = common.modify_cell(cell)
+      emails = "appointments@mydentalplan.in"
+      ccs =  "deepak@mydentalplan.in"
+      subject = "ABHICL Dental Service Request"
+      appPath = self.appPath
+      abhiclfile  = os.path.join(appPath,'templates/emails','abhicl.txt') 
+      f = open(abhiclfile,'rb')
+      temp = Template(f.read())
+      f.close()        
+      abhiclmessage = temp.template
+      abhiclmessage = abhiclmessage.replace("$fname", fname)
+      abhiclmessage = abhiclmessage.replace("$lname", lname)
+      abhiclmessage = abhiclmessage.replace("$cell", cellno)
+      abhiclmessage = abhiclmessage.replace("$email", email)
+      abhiclmessage = abhiclmessage.replace("$groupref", abhiclid)
+      retval = mail.groupEmail(db, emails, ccs, subject, abhiclmessage)
+      
+	
       jsonresp = {}
       jsonresp["ABHICLID"] = abhiclid
       jsonresp["MDPMember"] = jobj["MDPMember"]
