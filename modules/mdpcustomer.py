@@ -128,6 +128,9 @@ class Customer:
                 
                 jsonresp = json.loads(pat.newpatientfromcustomer(cobj))
                 
+                pat.addpatientnotes(jsonresp["primarypatientid"], jsonresp["patientid"], c[0].notes)
+                
+                
             
             elif(count == 1):
                 #patient member is already enrolled
