@@ -22,6 +22,20 @@ getboolean =   lambda text: True if((text != None)&(text != "")&(text != "None")
 
 fmt = "%Y-%m-%d %H:%M:%S"
 
+
+def getkeyvalue(jobj, key1, defval):
+        
+
+        keys = jobj.keys()
+
+        for key in keys:
+                if(key.lower() == key1.lower()):
+                        return jobj.get(key,"defval")
+
+
+        return defval
+
+
 def setcookies(response):
         response.cookies[response.session_id_name] =response.session_id
         response.cookies[response.session_id_name]["Secure"] =  True

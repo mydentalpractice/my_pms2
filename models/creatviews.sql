@@ -8479,3 +8479,9 @@ CREATE TABLE `mydp_prod`.`ratelimit` (
   `modified_by` INT(11) NULL,
   `modified_on` DATETIME NULL,
   PRIMARY KEY (`id`));
+
+
+11/29/2020
+==========
+1. ZZCreate Customer table
+2. ZZCreate vw_customer

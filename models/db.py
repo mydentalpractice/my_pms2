@@ -3609,7 +3609,68 @@ db.define_table('mediclaim_charts',
 db.mediclaim_charts._singular = "mediclaim_charts"
 db.mediclaim_charts._plural = "mediclaim_charts"
 
+db.define_table('customer',
+               Field('customer', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'), default='', label='Member ID',length=50),
+               Field('customer_ref', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'), default='', label='Employee ID',length=50),
+               Field('fname', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'), default='', label='First',length=50),
+               Field('mname', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'), default='', label='Middle',length=50),
+               Field('lname', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'), default='', label='Last',length=50),
+               Field('address1', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'),label='Address 1', length=50),
+               Field('address2', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'), default='',label='Address 2',length=50),
+               Field('address3', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'), default='',label='Address 3',length=50),
+               Field('city', 'string',represent=lambda v, r: '' if v is None else v, default='None',label='City',length=50,requires = IS_IN_SET(CITIES)),
+               Field('st', 'string',represent=lambda v, r: '' if v is None else v, default='None',label='State',length=50,requires = IS_IN_SET(STATES)),
+               Field('pin', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'),label='Pin',length=20),
+               Field('gender','string',represent=lambda v, r: '' if v is None else v, default='Male',label='Gender',length=10,requires = IS_IN_SET(GENDER)),
+               Field('telephone', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'), default='',label='Telephone',length=20),
+               Field('cell', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'), default='',label='Cell',length=20),
+               Field('email', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'), default='',label='Email',length=50),
+               Field('dob',
+'date',widget = lambda field, value:SQLFORM.widgets.date.widget(field, value, _style='height:30px'), label='Birth Date',default=request.now,  requires=IS_DATE(format=T('%d/%m/%Y'),error_message='must be d/m/Y!'),length=20),
+               Field('status', 'string',represent=lambda v, r: '' if v is None else v, label='Status',default='No_Attempt',requires = IS_IN_SET(STATUS)),
+               Field('enrolldate',
+'date',widget = lambda field, value:SQLFORM.widgets.date.widget(field, value, _style='height:30px'), label='Web Enroll Date',default=request.now,requires=IS_DATE(format=T('%d/%m/%Y'),error_message='must be d/m/Y!'),length=20),
+               Field('companyid','reference company'),
+               Field('providerid','reference provider'),
+               Field('regionid','reference groupregion'),
+               Field('planid','reference hmoplan'),
+               Field('pin1', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'),label='Pin',length=20),
+               Field('pin2', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'),label='Pin',length=20),
+               Field('pin3', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'),label='Pin',length=20),
+               Field('appointment_id','string'),
+               Field('appointment_datetime','datetime', default=request.now, requires=IS_DATETIME(format=T('%d/%m/%Y %H:%M:%S'))),
+               Field('notes','text'),
+               
+               auth.signature,
+                 format='%(customer)s'
+               )
+db.customer._singular = "Customer"
+db.customer._plural   = "Customer"
 
+db.define_table('vw_customer',
+               Field('id','integer'),
+               Field('customerid', 'integer'),
+               Field('customer_ref', 'string'),
+               Field('customername', 'string'),
+               Field('address', 'string'),
+               Field('cell', 'string'),
+               Field('email', 'string'),
+               
+               Field('company', 'string'),
+               Field('groupregion', 'string'),
+               Field('provider', 'string'),
+               Field('hmoplancode', 'string'),
+               
+               Field('appointment_id', 'string'),
+               Field('appointment_datetime', 'datetime'),
+               Field('notes', 'text'),
+               Field('status', 'string'),
+               Field('is_active', 'boolean'),
+               
+               
+               )
+db.vw_customer._singular = "vw_customer"
+db.vw_customer._plural   = "vw_customer"
 
 
 def geocode2(form):
