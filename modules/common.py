@@ -13,6 +13,7 @@ getnulldt = lambda dt:dt if(dt != None) else ""
 getid    = lambda xid :xid if((xid != None)&(xid != "")&(xid != "None")) else 0
 getnegid = lambda xid :xid if((xid != None)&(xid != "")&(xid != "None")) else -1
 getpage  = lambda page:page if((page != None)&(page != "")&(page != "0")) else 0
+getpage1  = lambda page:page if((page != None)&(page != "")&(page != "0")) else 1
 getvalue = lambda amount: amount if((amount != None)&(amount != "")&(amount != "None")) else 0
 getstring = lambda text: text if((text != None)&(text != "")&(text != "None")) else ""
 getbool =   lambda text: text if((text != None)&(text != "")&(text != "None")) else False
