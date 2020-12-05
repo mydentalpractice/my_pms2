@@ -1027,6 +1027,7 @@ db.treatmentnotes._plural = "TreatmentNotes"
 db.define_table('dentalimage',
                 Field('title', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'),default='',label='Title'),
                 Field('image','upload',length=255),
+                Field('uploadfolder','string'),
                 Field('tooth', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'),default='',label='Tooth',length=20),
                 Field('quadrant', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'),default='',label='Quadrant',length=20),
                 Field('imagedate', 'date',widget = lambda field, value:SQLFORM.widgets.date.widget(field, value, _style='height:30px'),default=request.now,requires = IS_DATE(format=T('%d/%m/%Y'),error_message='must be d/m/Y!'),length=20),

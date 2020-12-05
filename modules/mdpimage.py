@@ -4,7 +4,7 @@ import json
 import os
 import tempfile
 
-
+import base64
 from base64 import decodestring
 
 
@@ -62,12 +62,19 @@ class Image:
        }       
     
     return json.dumps(imageobj)
+
   
-  def uploadimage(self,imagedata,memberid,patientid,treatmentid,title,tooth,quadrant,imagedate,description,appath):
+  def upload_imagefile(self,filename,memberid,patientid,treatmentid,title,tooth,quadrant,imagedate,description,appath):
     
     db = self.db
     providerid = self.providerid
     auth = current.auth
+    
+    p = db(db.provider.id == providerid).select(db.provider.provider)
+    provcode = p[0].provider if(len(p) == 1) else "MDP_PROV"
+    
+    pat = db(db.patientmember.id == memberid).select(db.patientmember.patientmember)
+    patmember = pat[0].patientmember if(len(pat) == 1) else "MDP_MEMBER"
     
     r = db((db.vw_memberpatientlist.providerid == providerid) & (db.vw_memberpatientlist.primarypatientid == memberid) & (db.vw_memberpatientlist.patientid == patientid) & \
            (db.vw_memberpatientlist.is_active == True)).select(db.vw_memberpatientlist.fullname,db.vw_memberpatientlist.patientmember)
@@ -75,11 +82,118 @@ class Image:
     patientname = r[0].fullname if(len(r) == 1) else ""
     patientmember = r[0].patientmember if(len(r) == 1) else ""
     
+  
+
+    ##logger.loggerpms2.info("Image Uploaded to " + tempimgfile.name)
+    
+    
+    ##upload the image to the server
+    dirpath = os.path.join(appath , "images")
+    if(not os.path.exists(dirpath)):
+      os.makedirs(dirpath,0777)    
+
+    
+    dirpath = os.path.join(dirpath, provcode)
+    if(not os.path.exists(dirpath)):
+      os.makedirs(dirpath,0777)    
+    
+    dirpath = os.path.join(dirpath, patmember)  
+    if(not os.path.exists(dirpath)):
+      os.makedirs(dirpath,0777)    
+    
+    
+    uploadfolder=dirpath
+
+    imgstream = open(filename,'rb')
+   
+    db.dentalimage.image.uploadfolder = uploadfolder
+    
+    
+    imageid = db.dentalimage.insert(\
+      title = title,
+      image = imgstream,
+      
+      tooth = tooth,
+      quadrant = quadrant,
+      imagedate = common.getdt(datetime.datetime.strptime(imagedate,"%d/%m/%Y")),
+      description = description,
+      is_active = True,
+      provider = providerid,
+      patientmember = memberid,
+      patient = patientid,
+      patientname = patientname,
+      treatmentplan = 0,
+      treatment = treatmentid,
+      created_on=common.getISTFormatCurrentLocatTime(),
+      modified_on=common.getISTFormatCurrentLocatTime(),
+      created_by = 1 if(auth.user == None) else auth.user.id,
+      modified_by= 1 if(auth.user == None) else auth.user.id
+    )
+
+    
+    i = db
+    #delete temporary file
+    #tempimgfile.close()
+    #os.remove(tempimgfile.name)
+  
+    #return image object
+    img = db(db.dentalimage.id == imageid).select(db.dentalimage.image)
+    imageobj = {
+      'imageid': imageid,
+      'uploadfolder':uploadfolder,
+      'images_subfolder':'images',
+      'provcode_subfolder':provcode,
+      'patmember_subfolder':patmember,
+      'filename':img[0].image
+      
+      
+    }
+    
+    return json.dumps(imageobj)
+
+  
+  
+  def uploadimage(self,imagedata,memberid,patientid,treatmentid,title,tooth,quadrant,imagedate,description,appath):
+    
+    db = self.db
+    providerid = self.providerid
+    auth = current.auth
+    
+    p = db(db.provider.id == providerid).select(db.provider.provider)
+    provcode = p[0].provider if(len(p) == 1) else "MDP_PROV"
+
+    
+    r = db((db.vw_memberpatientlist.providerid == providerid) & (db.vw_memberpatientlist.primarypatientid == memberid) & (db.vw_memberpatientlist.patientid == patientid) & \
+           (db.vw_memberpatientlist.is_active == True)).select(db.vw_memberpatientlist.fullname,db.vw_memberpatientlist.patientmember)
+    
+    patientname = r[0].fullname if(len(r) == 1) else ""
+    patientmember = r[0].patientmember if(len(r) == 1) else ""
+    patmember = r[0].patientmember if(len(r) == 1) else "MDP_MEMBER"
+    
+    ##upload the image to the server
+    dirpath = os.path.join(appath , "images")
+    if(not os.path.exists(dirpath)):
+      os.makedirs(dirpath,0777)    
+
+    
+    dirpath = os.path.join(dirpath, provcode)
+    if(not os.path.exists(dirpath)):
+      os.makedirs(dirpath,0777)    
+    
+    dirpath = os.path.join(dirpath, patmember)  
+    if(not os.path.exists(dirpath)):
+      os.makedirs(dirpath,0777)    
+    
+    
+    uploadfolder=dirpath    
+    
+    
     #save image data in a temporary file
     #logger.loggerpms2.info("Enter Upload Image")
 
+
+
     dirpath = os.path.join(appath, 'temp')
-    
     if(not os.path.exists(dirpath)):
       os.makedirs(dirpath,0777)
     
@@ -95,6 +209,8 @@ class Image:
     
     #upload the image to the server
     imgstream = open(tempimgfile.name,'rb')
+    db.dentalimage.image.uploadfolder = uploadfolder
+   
     imageid = db.dentalimage.insert(\
       title = title,
       image = imgstream,
@@ -120,8 +236,14 @@ class Image:
     #os.remove(tempimgfile.name)
   
     #return image object
+    img = db(db.dentalimage.id == imageid).select(db.dentalimage.image)
     imageobj = {
-      'imageid': imageid
+      'imageid': imageid,
+      'uploadfolder':uploadfolder,
+       'images_subfolder':'images',
+       'provcode_subfolder':provcode,
+       'patmember_subfolder':patmember,
+       'filename':img[0].image      
     }
     
     return json.dumps(imageobj)

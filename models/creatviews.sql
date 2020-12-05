@@ -8482,6 +8482,10 @@ CREATE TABLE `mydp_prod`.`ratelimit` (
 
 
 11/29/2020
-==========
-1. ZZCreate Customer table
-2. ZZCreate vw_customer
+===XX=======
+1. XXXZZCreate Customer table
+2. XXZZCreate vw_customer
+
+12/3/2020
+=========
+1. Modified dentalimage table. Added uploadfolder
