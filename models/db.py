@@ -3674,6 +3674,33 @@ db.vw_customer._singular = "vw_customer"
 db.vw_customer._plural   = "vw_customer"
 
 
+db.define_table('media',
+                Field('title', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'),default='',label='Title'),
+                Field('media','upload',length=255),
+                Field('uploadfolder','string'),
+                Field('tooth', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'),default='',label='Tooth',length=20),
+                Field('quadrant', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'),default='',label='Quadrant',length=20),
+                Field('mediadate', 'date',widget = lambda field, value:SQLFORM.widgets.date.widget(field, value, _style='height:30px'),default=request.now,requires = IS_DATE(format=T('%d/%m/%Y'),error_message='must be d/m/Y!'),length=20),
+                Field('description', 'text', default='',label='Description',length=128),
+                Field('treatmentplan', 'integer',represent=lambda v, r: 0 if v is None else v,widget = lambda field, value:SQLFORM.widgets.integer.widget(field, value, _class='form_details')),
+                Field('treatment', 'integer',represent=lambda v, r: 0 if v is None else v,widget = lambda field, value:SQLFORM.widgets.integer.widget(field, value, _class='form_details')),
+                Field('patientmember', 'integer',represent=lambda v, r: 0 if v is None else v,widget = lambda field, value:SQLFORM.widgets.integer.widget(field, value, _class='form_details')),
+                Field('patient', 'integer',represent=lambda v, r: 0 if v is None else v,widget = lambda field, value:SQLFORM.widgets.integer.widget(field, value, _class='form_details')),
+                Field('provider', 'integer',represent=lambda v, r: 0 if v is None else v,widget = lambda field, value:SQLFORM.widgets.integer.widget(field, value, _class='form_details')),
+                Field('patientname', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details')),
+                Field('patienttype', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details')),
+                Field('provider', 'integer',represent=lambda v, r: 0 if v is None else v,widget = lambda field, value:SQLFORM.widgets.integer.widget(field, value, _class='form_details')),
+                
+                Field('mediafile', 'string',represent=lambda v, r: 0 if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details')),                
+                Field('mediatype', 'string',represent=lambda v, r: 0 if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details')),                
+                Field('mediaformat', 'string',represent=lambda v, r: 0 if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details')),                
+                Field('mediasize', 'double',represent=lambda v, r: 0 if v is None else v,widget = lambda field, value:SQLFORM.widgets.double.widget(field, value, _class='form_details')),                
+                
+                auth.signature,
+                format = '%(title)s')
+db.media._singular = "Media"
+db.media._plural = "Media"
+
 def geocode2(form):
     from gluon.tools import geocode
     lo,la= geocode(form.vars.f_location+' USA')

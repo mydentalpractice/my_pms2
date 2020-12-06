@@ -8489,3 +8489,7 @@ CREATE TABLE `mydp_prod`.`ratelimit` (
 12/3/2020
 =========
 1. Modified dentalimage table. Added uploadfolder
+
+12/6/2020
+=========
+1. Added Media table 'media'
