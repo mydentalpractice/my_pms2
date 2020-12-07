@@ -302,7 +302,7 @@ class User:
     
     patlist = []
     patobj  = {}
-    message = "Success"
+    message = "success"
     
     for pat in pats:
       patobj = {
@@ -339,8 +339,8 @@ class User:
       
       
       )
-    message = "Success" if(len(pats)>0) else "Failure"
-    return json.dumps({"patientcount":len(pats),"patientlist":patlist,"message":message})
+    message = "success" if(len(pats)>0) else "failure"
+    return json.dumps({"patientcount":len(pats),"patientlist":patlist,"message":message,"result":message})
   
   
   def getallconstants(self):
