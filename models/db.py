@@ -3023,6 +3023,9 @@ db.vw_payments._singular = "vw_payments"
 db.vw_payments._plural   = "vw_payments"
 
 
+
+
+
 db.define_table('activitytracker',
     Field('id','integer'),
     Field('memberid', 'integer',represent=lambda v, r: 0 if v is None else v),
@@ -3058,6 +3061,18 @@ db.define_table('activitytracker',
     Field('totaldue', 'double',represent=lambda v, r: 0 if v is None else v),
     
     Field('is_active', 'boolean',represent=lambda v, r: 0 if v is None else v),
+    
+    Field('customerid', 'integer',represent=lambda v, r: 0 if v is None else v),
+    Field('customer_ref', 'string',represent=lambda v, r: '' if v is None else v),
+    Field('customer_name', 'string',represent=lambda v, r: '' if v is None else v),
+    Field('company', 'string',represent=lambda v, r: '' if v is None else v),
+    Field('hmoplan', 'string',represent=lambda v, r: '' if v is None else v),
+    Field('region', 'string',represent=lambda v, r: '' if v is None else v),
+    Field('provider', 'string',represent=lambda v, r: '' if v is None else v),
+    Field('enrolledon', 'date',represent=lambda v, r: '' if v is None else v,requires=IS_DATE(format=T('%d/%m/%Y' ))),
+    Field('appointmenton', 'datetime',represent=lambda v, r: '' if v is None else v,requires=IS_DATETIME(format=T('%d/%m/%Y %I:%M %p'))),    
+  
+
     auth.signature
     )
 

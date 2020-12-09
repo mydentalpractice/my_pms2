@@ -8493,3 +8493,4 @@ CREATE TABLE `mydp_prod`.`ratelimit` (
 12/6/2020
 =========
 1. Added Media table 'media'
+2. XXZZZmodified activity tracker table

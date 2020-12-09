@@ -89,8 +89,8 @@ def activitytracker():
 
 
 
-    strdt  = request.vars.activitydate
-    groupapptsms = request.vars.groupapptsms
+    strdt  = request.vars.activitydate if((request.vars.activitydate != None)&(request.vars.activitydate != "")) else (datetime.date.today()).strftime("%d/%m/%Y")
+    groupapptsms = request.vars.groupapptsms if((request.vars.groupapptsms != None)&(request.vars.groupapptsms != ""))  else True
     
     activitydate = datetime.datetime.strptime(strdt, datefmt)
     
@@ -106,11 +106,35 @@ def activitytracker():
     formAppts = None
     formTrtmnts = None
     formPayments = None
+    formCustomers = None
     
     #timeinterval
     r = db(db.urlproperties.id >0).select(db.urlproperties.timeinterval)
     timeinterval = int(common.getvalue(r[0].timeinterval))
     
+    
+    #get all customers for the activity date
+    customers = db((db.customer.enrolldate >= str1) & (db.customer.enrolldate <= str2) &(db.customer.is_active == True)).\
+        select(db.customer.ALL, db.provider.providername, db.company.company,db.hmoplan.hmoplancode,db.groupregion.groupregion,
+               left=[db.provider.on(db.provider.id == db.customer.providerid), db.hmoplan.on(db.hmoplan.id==db.customer.planid),\
+                     db.company.on(db.company.id == db.customer.companyid), db.groupregion.on(db.groupregion.id == db.customer.regionid)])
+    
+    for customer in customers:
+         db.activitytracker.update_or_insert(db.activitytracker.customerid == customer.customer.id,\
+                                             customerid = customer.customer.id,
+                                             customer_ref = customer.customer.customer_ref,
+                                             customer_name = customer.customer.fname +  " " + customer.customer.lname,
+                                             company = customer.company.company,
+                                             hmoplan = customer.hmoplan.hmoplancode,
+                                             region = customer.groupregion.groupregion,
+                                             provider = customer.provider.providername,
+                                             enrolledon = customer.customer.enrolldate,
+                                             appointmenton = customer.customer.appointment_datetime,
+                                             created_on = common.getISTFormatCurrentLocatTime(),\
+                                             created_by = 1,\
+                                             modified_on = common.getISTFormatCurrentLocatTime(),\
+                                             modified_by = 1                                             
+                                             )
     #get all the appts for activitydate
     appts = db((((db.t_appointment.f_start_time >= str1) & (db.t_appointment.f_start_time <= str2)) | ((db.t_appointment.modified_on >= str1) & (db.t_appointment.modified_on <= str2)))&(db.t_appointment.is_active == True)).\
         select(db.t_appointment.ALL, db.provider.providername, db.doctor.name, left=[db.provider.on(db.provider.id == db.t_appointment.provider), db.doctor.on(db.doctor.id==db.t_appointment.doctor)]
@@ -320,6 +344,41 @@ def activitytracker():
                            
     
     
+    #display customers
+    query = ((db.activitytracker.customerid >0)&(db.activitytracker.enrolledon >= str1)&(db.activitytracker.enrolledon <= str2)&(db.activitytracker.is_active == True))    
+    fields = (db.activitytracker.customer_ref, db.activitytracker.customer_name, db.activitytracker.appointmenton, \
+              db.activitytracker.provider,db.activitytracker.company, db.activitytracker.hmoplan,db.activitytracker.region)
+              
+    headers = {
+       
+            'activitytracker.customer_ref':'Customer Ref',
+            'activitytracker.customer_name':'Customer',
+            'activitytracker.appointmenton':'Appointment',
+            'activitytracker.provider':'Provider',
+            'activitytracker.company':'Company',
+            'activitytracker.hmoplan':'Plan',
+            'activitytracker.region':'Region'
+            
+       }    
+    maxtextlengths = {'activitytracker.customer_name':100}
+    orderby = db.activitytracker.company | db.activitytracker.customer_name
+    exportlist = dict( csv_with_hidden_cols=False, html=False,tsv_with_hidden_cols=False, tsv=False, json=False, csv=False, xml=False)
+    formCustomers = SQLFORM.grid(query=query,
+                            headers=headers,
+                            fields=fields,
+                            paginate=10,
+                            orderby=orderby,
+                            maxtextlengths=maxtextlengths,
+                            exportclasses=exportlist,
+                            links_in_grid=False,
+                            searchable=False,
+                            create=False,
+                            deletable=False,
+                            editable=False,
+                            details=False,
+                            user_signature=True
+                           )          
+    
     formC =  SQLFORM.factory( 
         
         Field('activitydate', 'date',label='Activity Date',default=activitydate, requires=[IS_NOT_EMPTY(), IS_DATE(format=T('%d/%m/%Y'))])
@@ -349,7 +408,9 @@ def activitytracker():
                            )           
 
     
-    return dict(formC=formC,formAppts=formAppts,formPayments=formPayments,formTrtmnts=formTrtmnts,formSMS=formSMS,timeinterval=timeinterval,stractdt=stractdt)
+    return dict(formC=formC,formCustomers=formCustomers,\
+                formAppts=formAppts,formPayments=formPayments,formTrtmnts=formTrtmnts,formSMS=formSMS,\
+                timeinterval=timeinterval,stractdt=stractdt)
 
 def getpresgrid(memberid, patientid,providerid):
     
