@@ -1,5 +1,6 @@
 from gluon import current
 import datetime
+
 import json
 import os
 import tempfile
@@ -54,12 +55,18 @@ class Media:
         
         return json.dumps(mediaobj) 
 
-    def updatemedia(self,mediaid,title,tooth,quadrant,description):
+    def updatemedia(self,avars):
 
 
         db = self.db
         providerid = self.providerid
         auth  = current.auth
+        
+        mediaid = int(common.getid(avars["mediaid"])) if "mediaid" in avars else 0
+        title = avars["title"] if "title" in avars else ""        
+        tooth = avars["tooth"] if "tooth" in avars else ""        
+        quadrant = avars["quadrant"] if "quadrant" in avars else ""        
+        description = avars["description"] if "description" in avars else ""        
         
         try:
             db(db.media.id == mediaid).update(
@@ -92,11 +99,24 @@ class Media:
 
 
     #this method uploads audio/video files to Application Server
-    def upload_mediafile(self,filename,memberid,patientid,treatmentid,title,tooth,quadrant,mediadate,description,appath):
+    def upload_mediafile(self,avars):
 
         db = self.db
         providerid = self.providerid
         auth = current.auth
+
+        filename = avars["filename"] if "filename" in avars else ""
+        memberid = int(common.getid(avars["memberid"])) if "memberid" in avars else 0
+        patientid = int(common.getid(avars["patientid"])) if "patientid" in avars else 0
+        treatmentid = int(common.getid(avars["treatmentid"])) if "treatmentid" in avars else 0
+        title = avars["title"] if "title" in avars else ""
+        tooth = avars["tooth"] if "tooth" in avars else ""
+        quadrant = avars["quadrant"] if "quadrant" in avars else ""
+        mediadate = avars["mediadate"] if "mediadate" in avars else common.getstringfromdate(datetime.date.today(),"%d/%m/%Y")
+                                                                                           
+        description = avars["description"] if "description" in avars else ""
+        appath = avars["appath"] if "appath" in avars else ""
+
 
         try:
             p = db(db.provider.id == providerid).select(db.provider.provider)
@@ -117,6 +137,12 @@ class Media:
     
     
             ##upload the media  to the server
+            x = appath.split('\\') 
+            appath = os.path.join(x[0],"\\")
+            appath = os.path.join(appath,x[1])
+            appath = os.path.join(appath,x[2])            
+            appath = os.path.join(appath,x[3]) if len(x) == 4 else appath
+            
             dirpath = os.path.join(appath , "media")
             if(not os.path.exists(dirpath)):
                 os.makedirs(dirpath,0777)    
@@ -143,7 +169,7 @@ class Media:
             
             db.media.media.uploadfolder = uploadfolder
     
-    
+           
                 
     
             mediaid = db.media.insert(\
@@ -153,7 +179,7 @@ class Media:
     
                 tooth = tooth,
                 quadrant = quadrant,
-                mediadate = common.getdt(datetime.datetime.strptime(mediadate,"%d/%m/%Y")),
+                mediadate = common.getdatefromstring(mediadate,"%d/%m/%Y"),
                 description = description,
                 
                 provider = providerid,
@@ -169,8 +195,8 @@ class Media:
                 mediasize = mediasize,
                 
                 is_active = True,
-                created_on=common.getISTFormatCurrentLocatTime(),
-                modified_on=common.getISTFormatCurrentLocatTime(),
+                #created_on=common.getISTFormatCurrentLocatTime(),
+                #modified_on=common.getISTFormatCurrentLocatTime(),
                 created_by = 1 if(auth.user == None) else auth.user.id,
                 modified_by= 1 if(auth.user == None) else auth.user.id
             )
@@ -207,12 +233,24 @@ class Media:
 
 
 
-    def upload_media(self,mediadata,memberid,patientid,treatmentid,title,tooth,quadrant,mediadate,description,appath):
+    def upload_media(self,avars):
 
         db = self.db
         providerid = self.providerid
         auth = current.auth
-
+ 
+        mediadata = avars["mediadata"] if "mediadata" in avars else ""
+        memberid = int(common.getid(avars["memberid"])) if "memberid" in avars else 0
+        patientid = int(common.getid(avars["patientid"])) if "patientid" in avars else 0
+        treatmentid = int(common.getid(avars["treatmentid"])) if "treatmentid" in avars else 0
+        title = avars["title"] if "title" in avars else ""
+        tooth = avars["tooth"] if "tooth" in avars else ""
+        quadrant = avars["quadrant"] if "quadrant" in avars else ""
+        mediadate = avars["mediadate"] if "mediadate" in avars else common.getstringfromdate(datetime.date.today(),"%d/%m/%Y")
+                                                                                           
+        description = avars["description"] if "description" in avars else ""
+        appath = avars["appath"] if "appath" in avars else ""
+        
         try:
             p = db(db.provider.id == providerid).select(db.provider.provider)
             provcode = p[0].provider if(len(p) == 1) else "MDP_PROV"
@@ -225,13 +263,22 @@ class Media:
             patientmember = r[0].patientmember if(len(r) == 1) else ""
             patmember = r[0].patientmember if(len(r) == 1) else "MDP_MEMBER"
     
+            
             ##upload the image to the server
+            #appath = "d:\\web2py\\applications"
+            x = appath.split('\\') 
+           
+            appath = os.path.join(x[0],"\\")
+            appath = os.path.join(appath,x[1])
+            appath = os.path.join(appath,x[2])
+            appath = os.path.join(appath,x[3])  if len(x) == 4 else appath
+            
             dirpath = os.path.join(appath , "media")
             if(not os.path.exists(dirpath)):
                 os.makedirs(dirpath,0777)    
     
             dirpath = os.path.join(dirpath , self.mtype)
-            media_subfolder = os.path.join("media" , self.mtype)
+            media_subfolder = dirpath
             if(not os.path.exists(dirpath)):
                 os.makedirs(dirpath,0777)    
     
@@ -452,7 +499,7 @@ class Media:
             excpobj["error_message"] = "Get Media List Exception Exception Error - " + str(e)
             return json.dumps(excpobj)        
     
-        return json.dumps({"result":"success","error_code":"","error_message":"","mediacount":len(medias), "imagelist":medialist})
+        return json.dumps({"result":"success","error_code":"","error_message":"","mediacount":len(medias), "medialist":medialist})
 
 
 

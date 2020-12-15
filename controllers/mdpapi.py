@@ -33,6 +33,7 @@ from applications.my_pms2.modules import mdplocation
 from applications.my_pms2.modules import mdptask
 from applications.my_pms2.modules import mdpprovider
 from applications.my_pms2.modules import mdpabhicl
+from applications.my_pms2.modules import mdpmedia
 
 from applications.my_pms2.modules import logger
 
@@ -905,13 +906,14 @@ def getdoctor(avars):
 #getappointments 
 #providerid, month, year
 #returns list of appointments : apptid, doctorid, patientname, apptdatetime, color
+#X
 def getappointments(avars):
     
     oappts = mdpappointment.Appointment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
     rsp = oappts.appointments(int(common.getid(str(avars["month"]))),int(common.getid(str(avars["year"]))))
     return rsp
 
-
+#X
 def getpatappointmentcountbymonth(avars):
     
     oappts = mdpappointment.Appointment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
@@ -919,7 +921,7 @@ def getpatappointmentcountbymonth(avars):
                                           int(common.getid(str(avars["memberid"]))),int(common.getid(str(avars["patientid"]))))
     return rsp
 
-
+#X
 def getappointmentsbypatient(avars):
     
     oappts = mdpappointment.Appointment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
@@ -929,7 +931,7 @@ def getappointmentsbypatient(avars):
                                           int(common.getid(str(avars["patientid"]))))
     return rsp
 
-
+#X
 def getappointmentsbymonth(avars):
     
     oappts = mdpappointment.Appointment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
@@ -937,6 +939,7 @@ def getappointmentsbymonth(avars):
     return rsp
 
 #this method returns all appointments for a specific day (dd/mm/yyyy) for a provider/patient
+#X
 def getpatappointmentsbyday(avars):
     oappts = mdpappointment.Appointment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
     rsp = oappts.getpatappointmentsbyday(int(common.getid(str(avars["day"]))),int(common.getid(str(avars["month"]))),int(common.getid(str(avars["year"]))),\
@@ -947,7 +950,7 @@ def getpatappointmentsbyday(avars):
 
     
 
-#this method returns all appointments for a specific day (dd/mm/yyyy)
+#X this method returns all appointments for a specific day (dd/mm/yyyy)
 def getappointmentsbyday(avars):
     oappts = mdpappointment.Appointment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
     rsp = oappts.getappointmentsbyday(int(common.getid(str(avars["day"]))),\
@@ -956,11 +959,12 @@ def getappointmentsbyday(avars):
     return rsp
 
 #this method returns all number of appointments for each day of a month
+#X
 def getappointmentcountbymonth(avars):
     oappts = mdpappointment.Appointment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
     rsp = oappts.getappointmentcountbymonth(int(common.getid(str(avars["month"]))),int(common.getid(str(avars["year"]))))
     return rsp
-
+#X
 def getdocappointmentcountbymonth(avars):
     oappts = mdpappointment.Appointment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
     rsp = oappts.getdocappointmentcountbymonth(int(common.getid(str(avars["month"]))),int(common.getid(str(avars["year"]))))
@@ -970,18 +974,19 @@ def getdocappointmentcountbymonth(avars):
 #getappointment 
 #providerid, apptid
 #returns appointment details
+#X
 def getappointment(avars):
     
     oappts = mdpappointment.Appointment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
     rsp = oappts.appointment(int(common.getid(str(avars["appointmentid"]))))
     return rsp
-
+#X
 def checkinappointment(avars):
     
     oappts = mdpappointment.Appointment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
     rsp = oappts.checkinappointment(int(common.getid(str(avars["appointmentid"]))))
     return rsp
-
+#X
 def newappointment(avars):
     
     oappts = mdpappointment.Appointment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
@@ -991,7 +996,7 @@ def newappointment(avars):
                                 str(avars["providernotes"]),str(avars["cell"]),\
                                 current.globalenv["request"].folder)
     return rsp
-
+#X
 def updateappointment(avars):
     
     oappts = mdpappointment.Appointment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
@@ -1012,7 +1017,7 @@ def updateappointment(avars):
 
 
     return rsp
-
+#X
 def cancelappointment(avars):
     
     oappts = mdpappointment.Appointment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
@@ -1028,7 +1033,7 @@ def cancelappointment(avars):
 
 
     return rsp
-
+#X
 def appointmentstatus(avars):
     #logger.loggerpms2.info("Enter New Treatment")    
     oappts = mdpappointment.Appointment(current.globalenv['db'],0)
@@ -1930,6 +1935,124 @@ def addABHICLProcedureToTreatment(avars):
 
 ############################# End ABHICL API ##################################################
 
+############################# Media API ######################################################
+def upload_media(avars):
+    logger.loggerpms2.info("Enter Upload Media-Request\n" + str(avars) )
+
+    
+    omedia = mdpmedia.Media(current.globalenv['db'],\
+                            int(avars["providerid"]) if "providerid" in avars else 0,\
+                            avars["mediatype"] if "mediatype" in avars else "image",\
+                            avars["mediaformat"] if "mediaformat" in avars else "jpg"
+                            )
+    
+    rsp = omedia.upload_media(avars)
+    
+   
+    logger.loggerpms2.info("Exit Upload Media-Response\n" + rsp )
+
+    return rsp
+
+def upload_mediafile(avars):
+    logger.loggerpms2.info("Enter Upload Media File Request\n" + str(avars) )
+
+    
+    omedia = mdpmedia.Media(current.globalenv['db'],\
+                            int(avars["providerid"]) if "providerid" in avars else 0,\
+                            avars["mediatype"] if "mediatype" in avars else "image",\
+                            avars["mediaformat"] if "mediaformat" in avars else "jpg"
+                            )
+    
+    rsp = omedia.upload_mediafile(avars)
+    
+   
+    logger.loggerpms2.info("Exit Upload Media File Response\n" + rsp )
+
+    return rsp
+
+def downloadmedia(avars):
+    
+    logger.loggerpms2.info("Enter Upload Media File Request\n" + str(avars) )
+   
+       
+    omedia = mdpmedia.Media(current.globalenv['db'],\
+                            int(avars["providerid"]) if "providerid" in avars else 0,\
+                            avars["mediatype"] if "mediatype" in avars else "image",\
+                            avars["mediaformat"] if "mediaformat" in avars else "jpg"
+                            )
+    
+    rsp = omedia.downloadmedia(int(avars["mediaid"]) if "mediaid" in avars else 0)
+    
+   
+    logger.loggerpms2.info("Exit Upload Media File Response\n" + rsp )
+
+    return rsp
+
+def updatemedia(avars):
+     
+    logger.loggerpms2.info("Enter Upload Media File Request\n" + str(avars) )
+   
+       
+    omedia = mdpmedia.Media(current.globalenv['db'],\
+                            int(avars["providerid"]) if "providerid" in avars else 0,\
+                            avars["mediatype"] if "mediatype" in avars else "image",\
+                            avars["mediaformat"] if "mediaformat" in avars else "jpg"
+                            )
+    
+    rsp = omedia.updatemedia(avars)
+    
+   
+    logger.loggerpms2.info("Exit Upload Media File Response\n" + rsp )
+    
+    return rsp
+
+def deletemedia(avars):
+    
+    logger.loggerpms2.info("Enter Upload Media File Request\n" + str(avars) )
+   
+       
+    omedia = mdpmedia.Media(current.globalenv['db'],\
+                            int(avars["providerid"]) if "providerid" in avars else 0,\
+                            avars["mediatype"] if "mediatype" in avars else "image",\
+                            avars["mediaformat"] if "mediaformat" in avars else "jpg"
+                            )
+    
+    rsp = omedia.deletemedia(int(avars["mediaid"]) if "mediaid" in avars else 0)
+    
+   
+    logger.loggerpms2.info("Exit Upload Media File Response\n" + rsp )
+
+    return rsp
+
+
+def getmedia_list(avars):
+    
+    
+    logger.loggerpms2.info("Get Media List Request\n" + str(avars) )
+   
+       
+    omedia = mdpmedia.Media(current.globalenv['db'],\
+                            int(avars["providerid"]) if "providerid" in avars else 0,\
+                            avars["mediatype"] if "mediatype" in avars else "image",\
+                            avars["mediaformat"] if "mediaformat" in avars else "jpg"
+                            )
+    
+    rsp = omedia.getmedia_list(0, int(avars["memberid"]) if "memberid" in avars else 0, \
+                               int(avars["patientid"]) if "patientid" in avars else 0,\
+                                avars["mediatype"] if "mediatype" in avars else "image")
+    
+    
+  
+    
+   
+    logger.loggerpms2.info("Exit Get Nedia List Response\n" + rsp )
+
+    
+    return rsp
+
+
+############################# End Media API ##################################################
+
 def unknown(avars):
     return dict()
 
@@ -1985,7 +2108,9 @@ mdpapi_switcher = {"listappointments":getappointments,"getappointmentsbymonth":g
                    "addRlgProcedureToTreatmentXXX":addRlgProcedureToTreatmentXXX,"settleTransactionXXX":settleTransactionXXX,"voidTransactionXXX":voidTransactionXXX,\
                    "dental_service_request":dental_service_request,"get_appointments":get_appointments,"get_treatments":get_treatments,\
                    "getcompanyprocedures":getcompanyprocedures,"getnoncompanyprocedures":getnoncompanyprocedures,\
-                   "addABHICLProcedureToTreatment":addABHICLProcedureToTreatment
+                   "addABHICLProcedureToTreatment":addABHICLProcedureToTreatment,\
+                   "upload_mediafile":upload_mediafile,"upload_media":upload_media,"downloadmedia":downloadmedia,\
+                   "getmedia_list":getmedia_list,"updatemedia":updatemedia,"deletemedia":deletemedia
                    
                    
                    }

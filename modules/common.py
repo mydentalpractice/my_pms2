@@ -1,6 +1,7 @@
 import datetime 
 from datetime import timedelta
 
+
 import time
 
 import random
@@ -45,10 +46,16 @@ def setcookies(response):
         
         return True
 
+def getstringfromdate(dateobj,fmt):
+        
+        dtstr = dateobj.strftime(fmt)
+        
+        return dtstr
+
 def getdatefromstring(strdate,fmt):
         
         dt = datetime.datetime.strptime(strdate,fmt)
-        returndt
+        return dt
         
 
 #this returns local current (IST) date and time as datetime object
