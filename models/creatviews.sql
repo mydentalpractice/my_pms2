@@ -8483,14 +8483,56 @@ CREATE TABLE `mydp_prod`.`ratelimit` (
 
 11/29/2020
 ===XX=======
-1. XXXZZCreate Customer table
-2. XXZZCreate vw_customer
+1. XXXYYYZZCreate Customer table
+2. XXYYYZZCreate vw_customer
 
 12/3/2020
 =========
-1. Modified dentalimage table. Added uploadfolder
+1. XXXYYYZZZModified dentalimage table. Added uploadfolder
 
 12/6/2020
 =========
-1. Added Media table 'media'
-2. XXZZZmodified activity tracker table
+1. YYYZZZAdded Media table 'media'
+2. XXYYYZZZmodified activity tracker table
+
+12/15/2020
+==========
+1. XXXYYZZZadded vw_customertopcount
+2. XXXYYYZZZadded vw_customerdetailcount
+
+12/17/2020
+==========
+1. YYYZZZModified media with dicom fields
+ALTER TABLE `mydp_prod`.`media` 
+ADD COLUMN `dicomUserUuid` VARCHAR(128) NULL DEFAULT NULL AFTER `modified_by`,
+ADD COLUMN `dicomAcctUuid` VARCHAR(128) NULL DEFAULT NULL AFTER `dicomUserUuid`,
+ADD COLUMN `dicomInstUuid` VARCHAR(128) NULL DEFAULT NULL AFTER `dicomAcctUuid`,
+ADD COLUMN `dicomPatName` VARCHAR(128) NULL DEFAULT NULL AFTER `dicomInstUuid`,
+ADD COLUMN `dicomPatUuid` VARCHAR(128) NULL DEFAULT NULL AFTER `dicomPatName`,
+ADD COLUMN `dicomPatid` VARCHAR(128) NULL DEFAULT NULL AFTER `dicomPatUuid`,
+ADD COLUMN `dicomPatOrderUuid` VARCHAR(128) NULL DEFAULT NULL AFTER `dicomPatid`,
+ADD COLUMN `dicomProcDesc` VARCHAR(128) NULL DEFAULT NULL AFTER `dicomPatOrderUuid`,
+ADD COLUMN `dicomPerformedDate` VARCHAR(128) NULL DEFAULT NULL AFTER `dicomProcDesc`,
+ADD COLUMN `dicomURL` VARCHAR(255) NULL DEFAULT NULL AFTER `dicomPerformedDate`,
+ADD COLUMN `mediacol` VARCHAR(45) NULL AFTER `dicomURL`;
+
+2. YYZZTransfer dentalimage -> Media
+   copy all files from uploads folder to media\image\MDP_PROV\MDP_Member
+3. YYZZrun this SQL script by changing the uploadfolder
+   insert into media (title,media,uploadfolder,tooth,quadrant,
+mediadate,description,treatmentplan,treatment,
+patientmember,patient,patienttype,patientname,provider,
+mediatype,mediaformat,
+dicomUserUuid, dicomAcctUuid, dicomInstUuid,
+dicomPatName,dicomPatUuid,dicomPatid, dicomPatOrderUuid,
+dicomProcDesc, dicomPerformedDate,dicomURL,
+is_active,created_on,created_by,modified_on,modified_by)
+SELECT title,image,"c:\\inetpub\\wwwroot\\media\\image\\MDP_PROV\\MDP_MEMBER",
+tooth,quadrant,imagedate,
+description,treatmentplan,treatment,patientmember,patient,
+patienttype,patientname,provider,'Image','jpg',
+dicomUserUuid, dicomAcctUuid, dicomInstUuid,
+dicomPatName,dicomPatUuid,dicomPatid, dicomPatOrderUuid,
+dicomProcDesc, dicomPerformedDate,dicomURL,
+is_active,created_on,created_by,modified_on,modified_by
+from dentalimage

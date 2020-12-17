@@ -3688,6 +3688,24 @@ db.define_table('vw_customer',
 db.vw_customer._singular = "vw_customer"
 db.vw_customer._plural   = "vw_customer"
 
+db.define_table('vw_customertopcount',
+               Field('id','integer'),
+               Field('companyid', 'integer'),
+               Field('company', 'string'),
+               Field('customer_count','integer')
+               )
+db.vw_customertopcount._singular = "vw_customertopcount"
+db.vw_customertopcount._plural   = "vw_customertopcount"
+
+db.define_table('vw_customerdetailcount',
+               Field('id','integer'),
+            
+               Field('company', 'string'),
+               Field('enrolldate', 'date'),
+               Field('customer_count','integer')
+               )
+db.vw_customertopcount._singular = "vw_customertopcount"
+db.vw_customertopcount._plural   = "vw_customertopcount"
 
 db.define_table('media',
                 Field('title', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'),default='',label='Title'),
@@ -3710,6 +3728,17 @@ db.define_table('media',
                 Field('mediatype', 'string',represent=lambda v, r: 0 if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details')),                
                 Field('mediaformat', 'string',represent=lambda v, r: 0 if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details')),                
                 Field('mediasize', 'double',represent=lambda v, r: 0 if v is None else v,widget = lambda field, value:SQLFORM.widgets.double.widget(field, value, _class='form_details')),                
+                
+                Field('dicomUserUuid', 'string',default=''),
+                Field('dicomAcctUuid', 'string',default=''),
+                Field('dicomInstUuid', 'string',default=''),
+                Field('dicomPatName', 'string',default=''),
+                Field('dicomPatUuid', 'string',default=''),
+                Field('dicomPatid', 'string',default=''),
+                Field('dicomPatOrderUuid', 'string',default=''),
+                Field('dicomProcDesc', 'string',default=''),
+                Field('dicomPerformedDate', 'string',default=''),
+                Field('dicomURL', 'string',default=''),
                 
                 auth.signature,
                 format = '%(title)s')

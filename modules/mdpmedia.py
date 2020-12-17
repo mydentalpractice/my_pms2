@@ -22,6 +22,8 @@ class Media:
         self.providerid = providerid
         self.mtype = mediatype
         self.mformat = mediaformat 
+        
+        
         return 
 
 
@@ -195,8 +197,8 @@ class Media:
                 mediasize = mediasize,
                 
                 is_active = True,
-                #created_on=common.getISTFormatCurrentLocatTime(),
-                #modified_on=common.getISTFormatCurrentLocatTime(),
+                created_on=common.getISTFormatCurrentLocatTime(),
+                modified_on=common.getISTFormatCurrentLocatTime(),
                 created_by = 1 if(auth.user == None) else auth.user.id,
                 modified_by= 1 if(auth.user == None) else auth.user.id
             )
@@ -207,11 +209,10 @@ class Media:
             media = db(db.media.id == mediaid).select(db.media.media)
             mediaobj = {
                 'mediaid': mediaid,
+                'media':media[0].media,
                 'uploadfolder':uploadfolder,
-                'media_subfolder':media_subfolder,
-                'provcode_subfolder':provcode,
-                'patmember_subfolder':patmember,
-                'uploadfilename':media[0].media,
+                
+               
                 'mediafilename':filename,
                 "result":"success",
                 "error_code":"",
@@ -359,12 +360,11 @@ class Media:
             media = db(db.media.id == mediaid).select(db.media.media)
             mediaobj = {
                 'mediaid': mediaid,
+                'media':media[0].media,
                 'uploadfolder':uploadfolder,
-                'media_subfolder':media_subfolder,
-                'provcode_subfolder':provcode,
-                'patmember_subfolder':patmember,
-                'uploadfilename':media[0].media,
                 'mediafilename':"",
+               
+                
                 "result":"success",
                 "error_code":"",
                 "error_message":""
@@ -392,17 +392,22 @@ class Media:
 
         db = self.db
         providerid = self.providerid
-
+        
         try:
+            urlprops = db(db.urlproperties.id > 0).select(db.urlproperties.mydp_ipaddress)
+            
             media = db(db.media.id == mediaid).select()
     
             mediaobj = {}
             if(len(media) == 1):
                 mediaobj = {
-                    "mediaurl" : "",
-                    "mediaid":mediaid,
-                    "title"  : common.getstring(media[0].title),
+                    "mediaid":int(common.getid(media.id)),
+
+                    "mediaurl" : urlprops[0].mydp_ipaddress + URL('my_detnalplan','media','media_download' , args=[mediaid]),
                     "media"  : common.getstring(media[0].media),
+                    "uploadfolder":media[0].uploadfolder,
+                    "title"  : common.getstring(media[0].title),
+                    
                     "tooth"  : common.getstring(media[0].tooth),
                     "quadrant"  : common.getstring(media[0].quadrant),
                     "description"  : common.getstring(media[0].description),
@@ -411,6 +416,16 @@ class Media:
                     "mediaformat":common.getstring(media[0].mediaformat),
                     "mediasize":common.getvalue(media[0].mediasize),
                     "mediafile":common.getstring(media[0].mediafile),
+                    "treatmentplan":media[0].treatmentplan,
+                    "treatment":media[0].treatment,
+
+                    "patientmember":media[0].patientmember,
+                    "patient":media[0].patient,
+                    "patienttype":media[0].patienttype,
+                    "patientname":media[0].patientname,
+                    "provider":media[0].provider,
+
+                    
                     "result":"success",
                     "error_code":"",
                     "error_message":""
@@ -468,29 +483,11 @@ class Media:
     
                 mediaobj = {
                     "mediaid":int(common.getid(media.id)),
-                    "media":media.media,
-                    "title":media.title,
-                    "uploadfolder":media.uploadfolder,
-                    "tooth":media.tooth,
-                    "quadrant":media.quadrant,
-                    "imagedate":(media.imagedate).strftime("%d/%m/%Y"),
-                    "description":media.description,
-                    "treatmentplan":media.treatmentplan,
-                    "treatment":media.treatment,
-                    "patientmember":media.patientmember,
-                    "patient":media.patient,
-                    "patienttype":media.patienttype,
-                    "patientname":media.patientname,
-                    "provider":media.provider,
-                    "mediafile":media.mediafile,
-                    "mediatype":media.mediatype,
-                    "mediaformat":media.mediaformat,
-                    "mediasize":media.mediasize
-                    
-                    
-                    
+                    "title"  : common.getstring(media.title),
+                    "mediadate":(media.mediadate).strftime("%d/%m/%Y"),
                 }
                 medialist.append(mediaobj)
+                
         except Exception as e:
             logger.loggerpms2.info("Get Media List Exception:\n" + str(e))      
             excpobj = {}
