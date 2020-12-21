@@ -3,9 +3,15 @@ db = current.globalenv['db']
 
 from gluon.tools import Crud
 crud = Crud(db)
+import os
+import json
 
+import datetime
 
-from datetime import datetime
+from applications.my_pms2.modules  import common
+
+from applications.my_pms2.modules  import mdpmedia
+
 
 
 #import sys
@@ -321,6 +327,9 @@ def getimagemembers(db,providerid, memberid, member,fname,lname,cell,email,fromd
         
     return dsimages
 
+
+
+
 @auth.requires(auth.has_membership('provider') or auth.has_membership('webadmin')) 
 @auth.requires_login()
 def getimages(db,providerid, patientid,limitby,is_active):
@@ -421,6 +430,8 @@ def list_memberpatientimages():
     
     return dict(form = form, memberpage=memberpage, returnurl=returnurl,page=page,providerid=providerid,providername=providername)
     
+
+
 
 
 @auth.requires(auth.has_membership('provider') or auth.has_membership('webadmin')) 
@@ -526,7 +537,6 @@ def list_dentalimages():
     
     
     return dict(form=form, images=images, returnurl=returnurl, page=page, items_per_page=items_per_page, limitby=limitby, rangemssg=rangemssg,memberpage=memberpage, memberid=memberid, patientid=patientid, memberref=memberref,fullname=fullname,providerid=providerid, providername=providername,patient=patient)
-
 
 
 
@@ -737,12 +747,303 @@ def dentalimage_add():
     
     return dict(form = form, returnurl=returnurl,page=page,providerid=providerid,providername=providername)
         
+@auth.requires(auth.has_membership('provider') or auth.has_membership('webadmin')) 
+@auth.requires_login()
+def dentalimage_new():
+    
+    if(len(request.vars) == 0):
+        raise HTTP(403,"Error in create_image -  request arguments " )
+    
+    source = common.getstring(request.vars.source)
+    page     = 0 
+    imagepage = common.getpage(request.vars.imagepage)
+    memberpage = common.getpage(request.vars.memberpage)
+    providerid  = int(common.getid(request.vars.providerid))
+    patientid   = int(common.getid(request.vars.patientid))
+    
+   
+    memberid    = int(common.getid(request.vars.memberid))    
+    memberref   = common.getstring(request.vars.memberref)
+    
+    members = db(db.patientmember.id == memberid).select()
+    memberref = common.getstring(members[0].patientmember)
+    
+    providerdict = common.getproviderfromid(db, providerid)
+    providername = providerdict["providername"]
+    treatmentid = int(common.getid(request.vars.treatmentid))
+    tplanid = 0
+    tplan = "Treatment Plan"
+     
+    
+    
+    rows = db((db.patientmember.id == memberid)&(db.patientmember.is_active == True)).select()
+    membername = rows[0].fname + ' ' + rows[0].mname + ' ' + rows[0].lname    
+
+    if(memberid == patientid):
+        patienttype = 'P'
+        patientname = membername
+    else:
+        patienttype = 'D'
+        rows = db((db.patientmemberdependants.id == patientid)&(db.patientmemberdependants.is_active == True)).select()    
+        if(len(rows) > 0):
+            patientname = rows[0].fname + ' ' + rows[0].mname + ' ' + rows[0].lname    
+            
+        
+    db.dentalimage.treatmentplan.default = tplanid
+    db.dentalimage.treatmentplan.writable = False
+    db.dentalimage.treatment.default = treatmentid
+    db.dentalimage.treatment.writable = False    
+    db.dentalimage.patientmember.default = memberid
+    db.dentalimage.patientmember.writable = False
+    db.dentalimage.patient.default = patientid
+    db.dentalimage.patient.writable = False
+    db.dentalimage.patienttype.default = patienttype
+    db.dentalimage.patienttype.writable = False
+    db.dentalimage.patientname.default = patientname
+    db.dentalimage.patientname.writable = False
+    
+    db.dentalimage.provider.default = providerid
+    db.dentalimage.provider.writable = False
+
+   
+    
+    db.dentalimage.title.widget = lambda field, value:SQLFORM.widgets.string.widget(field, value,_class='w3-input w3-border w3-small')
+    db.dentalimage.tooth.widget = lambda field, value:SQLFORM.widgets.string.widget(field, value,_class='w3-input w3-border w3-small')
+    db.dentalimage.quadrant.widget = lambda field, value:SQLFORM.widgets.string.widget(field, value,_class='w3-input w3-border w3-small')
+    db.dentalimage.imagedate.widget = lambda field, value:SQLFORM.widgets.string.widget(field, value,_class='w3-input w3-border w3-small date')
+    db.dentalimage.patient.widget = lambda field, value:SQLFORM.widgets.options.widget(field, value,_style="width:100%;height:35px",_class='w3-input w3-border w3-small')
+    
+
+    rows = db((db.provider.id == providerid)).select()
+    provider = rows[0].provider
+
+    strSQL = "select 0, '' AS patienttype, '-Select-' as fname, '' as lname"    
+    strSQL = strSQL + " UNION "
+    strSQL = strSQL + " select id , 'P' AS patienttype,fname,lname from patientmember where id = " + str(memberid)
+    strSQL = strSQL + " UNION "
+    strSQL = strSQL + " select id,'D' AS patienttype, patientmemberdependants.fname,patientmemberdependants.lname from patientmemberdependants where  patientmemberdependants.patientmember = " + str(memberid)
+    dspatients = db.executesql(strSQL)    
+   
+    
+    if(source == "treatment"):
+        returnurl = URL('treatment', 'update_treatment', vars=dict(page=page,imagepage=0,providerid=providerid,treatmentid=treatmentid))
+    else:
+        returnurl = URL('dentalimage', 'list_dentalimages', vars=dict(providerid = providerid,memberid=memberid,patientid=patientid,page=page,memberref=memberref,imagepage=imagepage,memberpage=memberpage))
+    
+   
+        #Table: media
+        #Columns:
+       
+        # varchar(255) 
+        # varchar(1024) 
+        # varchar(20) 
+        # varchar(20) 
+        # date 
+        # longtext 
+        # int(11) 
+        # int(11) 
+        # int(11) 
+        # int(11) 
+        # varchar(45) 
+        # varchar(45) 
+        # int(11) 
+        # varchar(1024) 
+        # varchar(45) 
+        # varchar(45) 
+        # double 
+        #is_active char(1) 
+        #created_on datetime 
+        #created_by int(11) 
+        #modified_on datetime 
+        #modified_by int(11) 
+        #dicomUserUuid varchar(128) 
+        #dicomAcctUuid varchar(128) 
+        #dicomInstUuid varchar(128) 
+        #dicomPatName varchar(128) 
+        #dicomPatUuid varchar(128) 
+        #dicomPatid varchar(128) 
+        #dicomPatOrderUuid varchar(128) 
+        #dicomProcDesc varchar(128) 
+        #dicomPerformedDate varchar(128) 
+        #dicomURL varchar(255)    
+
+    formA = SQLFORM.factory(
+        Field('title','string'),
+        Field('media','string'),
+        Field('uploadfolder','string'),
+        Field('tooth','string'),
+        Field('quadrant','string'),
+        Field('description','text'),
+        Field('patienttype','string'),
+        Field('patientname','string'),
+        Field('mediafile','string'),
+        Field('mediatype','string'),
+        Field('mediaformat','string'),
+
+
+        Field('mediadate','date', default=request.now,requires = IS_DATE(format=T('%d/%m/%Y'))),
+
+        Field('treatmentplan','integer'),
+        Field('treatment','integer'),
+        Field('patientmember','integer'),
+        Field('patient','integer'),  
+        Field('provider','integer'),
+   
+        Field('dicomUserUuid','string'),
+        Field('dicomAcctUuid','string'),
+        Field('dicomInstUuid','string'),
+        Field('dicomPatName','string'),
+        Field('dicomPatUuid','string'),
+        Field('dicomPatid','string'),
+        Field('dicomPatOrderUuid','string'),
+        Field('dicomProcDesc','string'),
+        Field('dicomPerformedDate','string'),
+        Field('dicomURL','string'),
+
+
+
+
+        Field('mediasize','double'),
+
+        Field('imagedata','text',label='Image Data')
+        
+    
+    )
+    
+    
+    
+    
+    formA.element('textarea[name=description]')['_style'] = 'height:50px;line-height:1.0;'
+    formA.element('textarea[name=description]')['_rows'] = 5   
+    formA.element('textarea[name=description]')['_cols'] = 50
+    formA.element('textarea[name=description]')['_class'] = 'form-control'
+    
+    
+    xtitle = formA.element('#no_table_title')
+    xtitle['_class'] = 'form-control'
+    xtitle['_placeholder'] = 'Title'
+    xtitle['_autocomplete'] = 'off'   
+    
+    xtooth = formA.element('#no_table_tooth')
+    xtooth['_class'] = 'form-control'
+    xtooth['_placeholder'] = 'Tooth'
+    xtooth['_autocomplete'] = 'off'   
+    
+    xquad = formA.element('#no_table_quadrant')
+    xquad['_class'] = 'form-control'
+    xquad['_placeholder'] = 'Quadrant'
+    xquad['_autocomplete'] = 'off'   
+    
+    xdate = formA.element('#no_table_mediadate')
+    xdate['_class'] = 'input-group form-control form-control-inline date-picker'
+    xdate['_placeholder'] = 'Date'
+    xdate['_autocomplete'] = 'off'   
+    
+    dicomUserUuid = formA.element('#no_table_dicomUserUuid')
+    dicomUserUuid['_class'] = 'form-control'
+    dicomUserUuid['_readonly'] = True
+
+
+
+    dicomAcctUuid = formA.element('#no_table_dicomAcctUuid')
+    dicomAcctUuid['_class'] = 'form-control'
+    dicomAcctUuid['_readonly'] = True
+
+    dicomInstUuid = formA.element('#no_table_dicomInstUuid')
+    dicomInstUuid['_class'] = 'form-control'
+    dicomInstUuid['_readonly'] = True
+
+
+    dicomPatName = formA.element('#no_table_dicomPatName')
+    dicomPatName['_class'] = 'form-control'
+    dicomPatName['_readonly'] = True
+
+    dicomPatUuid = formA.element('#no_table_dicomPatUuid')
+    dicomPatUuid['_class'] = 'form-control'
+    dicomPatUuid['_readonly'] = True
+
+    dicomPatid = formA.element('#no_table_dicomPatid')
+    dicomPatid['_class'] = 'form-control'
+    dicomPatid['_readonly'] = True
+
+    dicomPatOrderUuid = formA.element('#no_table_dicomPatOrderUuid')
+    dicomPatOrderUuid['_class'] = 'form-control'
+    dicomPatOrderUuid['_readonly'] = True
+
+    dicomProcDesc = formA.element('#no_table_dicomProcDesc')
+    dicomProcDesc['_class'] = 'form-control'
+    dicomProcDesc['_readonly'] = True
+
+    dicomPerformedDate = formA.element('#no_table_dicomPerformedDate')
+    dicomPerformedDate['_class'] = 'form-control'
+    dicomPerformedDate['_readonly'] = True
+
+
+    dicomURL = formA.element('#no_table_dicomURL')
+    dicomURL['_class'] = 'form-control'    
+    dicomURL['_readonly'] = True
+        
+    error = ""
+    count = 0
+    mediaurl = ""
+    mediafile = ""
+    mediaid = 0
+
+    if formA.accepts(request,session,keepvalues=True):
+        
+        try:
+            
+            #upload image
+            if(len(request.vars.imagedata)>0):
+                file_content = None
+                file_content = request.vars.imagedata
+                o = mdpmedia.Media(db, providerid, 'image', 'jpg')
+                j = {
+                    "mediadata":file_content,
+                    "memberid":str(memberid),
+                    "patientid":str(patientid),
+                    "treatmentid":str(treatmentid),
+                    "title":request.vars.title,
+                    "tooth":request.vars.tooth,
+                    "quadrant":request.vars.quadrant,
+                    "mediadate":common.getstringfromdate(datetime.datetime.today(),"%d/%m/%Y"),
+                    "description":request.vars.description,
+                    "appath":request.folder
+                }
+    
+                x= json.loads(o.upload_media(j)) 
+    
+                mediaid = common.getkeyvalue(x,'mediaid',0)
+                mediaurl = URL('my_dentalplan','media','media_download',\
+                               args=[mediaid])  
+                
+            #save DICOM values
+            db(db.dentalimage.id == mediaid).update(
+                dicomUserUuid = formA.vars.dicomUserUuid,
+                dicomAcctUuid = formA.vars.dicomAcctUuid,
+                dicomInstUuid = formA.vars.dicomInstUuid,
+                dicomPatName = formA.vars.dicomPatName,
+                dicomPatUuid = formA.vars.dicomPatUuid,
+                dicomPatid = formA.vars.dicomPatid,
+                dicomPatOrderUuid = formA.vars.dicomPatOrderUuid,
+                dicomProcDesc = formA.vars.dicomProcDesc,
+                dicomPerformedDate = formA.vars.dicomPerformedDate,
+                dicomURL = formA.vars.dicomURL
+            )
+        except Exception as e:
+            error = "Upload Audio Exception Error - " + str(e)             
+    elif formA.errors:
+        x = str(formA.errors)
+    else:
+        i = 0
+        
+    return dict(formA=formA, returnurl=returnurl, providername=providername,memberid=memberid, memberref=memberref, providerid=providerid,membername=membername,patientname=patientname,dspatients=dspatients,treatmentid=treatmentid, tplanid=tplanid, tplan=tplan,page=page,patientid=patientid,memberpage=memberpage,imagepage=imagepage,source=source,error=error,count=count,mediafile=mediafile,mediaurl=mediaurl)   
 
 
 
 @auth.requires(auth.has_membership('provider') or auth.has_membership('webadmin')) 
 @auth.requires_login()
-def dentalimage_new():
+def xdentalimage_new():
     
     if(len(request.vars) == 0):
         raise HTTP(403,"Error in create_image -  request arguments " )
@@ -906,9 +1207,54 @@ def dentalimage_new():
     dicomURL['_class'] = 'form-control'    
     dicomURL['_readonly'] = True
 
+    if formA.accepts(request,session,keepvalues=True):
+        i = 0
+       
     
+    formB = SQLFORM.factory(
+        #Field('csvfile','string',label='CSV File'),
+        Field('imagedata','text',label='Image Data')
+    )    
+    submit = formB.element('input',_type='submit')
+    submit['_value'] = 'Import'    
     
-    return dict(formA=formA,  returnurl=returnurl, providername=providername,memberid=memberid, memberref=memberref, providerid=providerid,membername=membername,patientname=patientname,dspatients=dspatients,treatmentid=treatmentid, tplanid=tplanid, tplan=tplan,page=page,patientid=patientid,memberpage=memberpage,imagepage=imagepage,source=source)   
+    error = ""
+    count = 0
+    mediaurl = ""
+    mediafile = ""
+    if formB.accepts(request,session,keepvalues=True):
+        try:
+            file_content = None
+            file_content = request.vars.imagedata
+            o = mdpmedia.Media(db, 523, 'image', 'jpg')
+            j = {
+                "mediadata":file_content,
+                "memberid":str(1469),
+                "patientid":str(1469),
+                "treatmentid":str(24),
+                "title":"test",
+                "tooth":"1",
+                "quadrant":"1",
+                "mediadate":common.getstringfromdate(datetime.datetime.today(),"%d/%m/%Y"),
+                "description":"XXX",
+                "appath":request.folder
+            }
+
+            x= json.loads(o.upload_media(j)) 
+
+            mediaid = common.getkeyvalue(x,'mediaid',0)
+            mediaurl = URL('my_dentalplan','media','media_download',\
+                           args=[mediaid])
+
+
+        except Exception as e:
+            error = "Upload Audio Exception Error - " + str(e)             
+    elif formB.errors:
+        str1 = str(formB.errors)
+        response.flash = 'form has errors'
+        i = 0
+        
+    return dict(formA=formA, formB=formB, returnurl=returnurl, providername=providername,memberid=memberid, memberref=memberref, providerid=providerid,membername=membername,patientname=patientname,dspatients=dspatients,treatmentid=treatmentid, tplanid=tplanid, tplan=tplan,page=page,patientid=patientid,memberpage=memberpage,imagepage=imagepage,source=source,error=error,count=count,mediafile=mediafile,mediaurl=mediaurl)   
 
 
 @auth.requires(auth.has_membership('provider')) 

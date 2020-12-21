@@ -33,7 +33,7 @@ class Media:
         providerid = self.providerid
         auth  = current.auth
         try:
-            db(db.media.id == mediaid).update(
+            db(db.dentalimage.id == mediaid).update(
                 is_active = False,
                 modified_on=common.getISTFormatCurrentLocatTime(),
                 modified_by= 1 if(auth.user == None) else auth.user.id
@@ -71,7 +71,7 @@ class Media:
         description = avars["description"] if "description" in avars else ""        
         
         try:
-            db(db.media.id == mediaid).update(
+            db(db.dentalimage.id == mediaid).update(
                 title = title,
                 tooth = tooth,
                 quadrant = quadrant,
@@ -169,19 +169,19 @@ class Media:
     
             medstream = open(filename,'rb')
             
-            db.media.media.uploadfolder = uploadfolder
+            db.dentalimage.image.uploadfolder = uploadfolder
     
            
                 
     
-            mediaid = db.media.insert(\
+            mediaid = db.dentalimage.insert(\
                 title = title,
-                media = medstream,
+                image = medstream,
                 uploadfolder = uploadfolder,
     
                 tooth = tooth,
                 quadrant = quadrant,
-                mediadate = common.getdatefromstring(mediadate,"%d/%m/%Y"),
+                imagedate = common.getdatefromstring(mediadate,"%d/%m/%Y"),
                 description = description,
                 
                 provider = providerid,
@@ -206,10 +206,10 @@ class Media:
     
             
             #return image object
-            media = db(db.media.id == mediaid).select(db.media.media)
+            media = db(db.dentalimage.id == mediaid).select(db.dentalimage.image)
             mediaobj = {
                 'mediaid': mediaid,
-                'media':media[0].media,
+                'media':media[0].image,
                 'uploadfolder':uploadfolder,
                 
                
@@ -318,17 +318,17 @@ class Media:
     
             #upload the image to the server
             medstream = open(tempmediafile.name,'rb')
-            db.media.media.uploadfolder = uploadfolder
+            db.dentalimage.image.uploadfolder = uploadfolder
     
            
-            mediaid = db.media.insert(\
+            mediaid = db.dentalimage.insert(\
                 title = title,
-                media = medstream,
+                image = medstream,
                 uploadfolder = uploadfolder,
     
                 tooth = tooth,
                 quadrant = quadrant,
-                mediadate = common.getdt(datetime.datetime.strptime(mediadate,"%d/%m/%Y")),
+                imagedate = common.getdt(datetime.datetime.strptime(mediadate,"%d/%m/%Y")),
                 description = description,
                 
                 provider = providerid,
@@ -357,10 +357,10 @@ class Media:
             #os.remove(tempimgfile.name)
     
             #return image object
-            media = db(db.media.id == mediaid).select(db.media.media)
+            media = db(db.dentalimage.id == mediaid).select(db.dentalimage.image)
             mediaobj = {
                 'mediaid': mediaid,
-                'media':media[0].media,
+                'media':media[0].image,
                 'uploadfolder':uploadfolder,
                 'mediafilename':"",
                
@@ -396,7 +396,7 @@ class Media:
         try:
             urlprops = db(db.urlproperties.id > 0).select(db.urlproperties.mydp_ipaddress)
             
-            media = db(db.media.id == mediaid).select()
+            media = db(db.dentalimage.id == mediaid).select()
     
             mediaobj = {}
             if(len(media) == 1):
@@ -404,14 +404,14 @@ class Media:
                     "mediaid":int(common.getid(media.id)),
 
                     "mediaurl" : urlprops[0].mydp_ipaddress + URL('my_detnalplan','media','media_download' , args=[mediaid]),
-                    "media"  : common.getstring(media[0].media),
+                    "media"  : common.getstring(media[0].image),
                     "uploadfolder":media[0].uploadfolder,
                     "title"  : common.getstring(media[0].title),
                     
                     "tooth"  : common.getstring(media[0].tooth),
                     "quadrant"  : common.getstring(media[0].quadrant),
                     "description"  : common.getstring(media[0].description),
-                    "mediadate":(media[0].mediadate).strftime("%d/%m/%Y"),
+                    "mediadate":(media[0].imagedate).strftime("%d/%m/%Y"),
                     "mediatype":common.getstring(media[0].mediatype),
                     "mediaformat":common.getstring(media[0].mediaformat),
                     "mediasize":common.getvalue(media[0].mediasize),
@@ -469,14 +469,14 @@ class Media:
             mediaobj  = {}
     
     
-            query = (db.media.is_active == True)
-            query = ((query) & (db.media.provider == providerid)) if(providerid > 0) else (query)
-            query = ((query) & (db.media.mediatype == mediatype)) if(mediatype != "") else (query)
+            query = (db.dentalimage.is_active == True)
+            query = ((query) & (db.dentalimage.provider == providerid)) if(providerid > 0) else (query)
+            query = ((query) & (db.dentalimage.mediatype == mediatype)) if(mediatype != "") else (query)
             limitby = None if(page<0) else limitby
     
     
-            medias = db((query)&(db.media.patientmember == memberid)&\
-                        (db.media.patient == patientid)).select(db.media.ALL, limitby=limitby)
+            medias = db((query)&(db.dentalimage.patientmember == memberid)&\
+                        (db.dentalimage.patient == patientid)).select(db.dentalimage.ALL, limitby=limitby)
     
     
             for media in medias:
@@ -484,7 +484,7 @@ class Media:
                 mediaobj = {
                     "mediaid":int(common.getid(media.id)),
                     "title"  : common.getstring(media.title),
-                    "mediadate":(media.mediadate).strftime("%d/%m/%Y"),
+                    "mediadate":(media.imagedate).strftime("%d/%m/%Y"),
                 }
                 medialist.append(mediaobj)
                 

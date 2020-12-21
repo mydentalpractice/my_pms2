@@ -24,78 +24,60 @@
 </style>
 {{=formA.custom.begin}}
 
-                        <div class="row">
-                            <div class="col-md-12">
-                                <!-- BEGIN EXAMPLE TABLE PORTLET-->
-                                <div class="portlet light bordered">
-                                    <div class="portlet-title">
-                                        <div class="caption font-white">
-                                            <i class="fa fa-image" style="color:#fff"></i>
-                                            <span class="caption-subject bold uppercase"> New Dental Image: {{=patientname}} &nbsp;|&nbsp;Member ID: {{=memberref}}</span>
-                                        </div>
-                                       
-                                    </div>
+<table>
+<tr>
+<td style="width:50%">
+<div class="row">
+			    <div class="col-md-12">
+				<!-- BEGIN EXAMPLE TABLE PORTLET-->
+				<div class="portlet light bordered">
+				    <div class="portlet-title">
+					<div class="caption font-white">
+					    <i class="fa fa-image" style="color:#fff"></i>
+					    <span class="caption-subject bold uppercase"> New Dental Image: {{=patientname}} &nbsp;|&nbsp;Member ID: {{=memberref}}</span>
+					</div>
+				       
+				    </div>
 				    <br/>
 				    
 					
-                                    <div class="col-md-12">
-				    <!--<div class="col-md-12">-->
-                                   <!--<p>Please select Image Type:-->
-					<!--<input id="IMG" type="radio" name="imagetype" value="male" onchange="imageType()">JPG, PNG, BMP Images&nbsp;&nbsp;-->
-					<!--<input id="DICOM" type="radio" name="imagetype" value="female" onchange="imageType()">DICOM Images-->
-				    <!--</p>-->
-				    <!--</div>-->
-                                        <!--row1-->
-                                            <div class="col-md-4">
-                                                <div class="form-group">
-                                                  
-                                                    <div class="input-group">
-                                                        <span class="input-group-addon"><i class="fa fa-user"></i></span>
-                                                         {{=formA.custom.widget.title}}
-                                                        
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-4">
-                                                 <div class="mt-repeater-input">
-                                                        {{=formA.custom.widget.imagedate}}                                                            
-                                                            
-                                               </div>
-                                            </div>
+				    <div class="col-md-12">
+				   
+					<!--row1-->
 					    <div class="col-md-4">
-                                                 <div class="form-group">
-                                                  
-                                                    <div class="input-group">
-                                                       <h4 class="m_title">Member</h4>
-                                                         {{=membername}}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-4">
-                                                 <div class="form-group">
-                                                  
-                                                    <div class="input-group">
-                                                        <span class="input-group-addon"><i class="fa fa-user"></i></span>
-                                                        {{=formA.custom.widget.tooth}} 
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-4">
-                                                 <div class="form-group">
-                                                  
-                                                    <div class="input-group">
-                                                        <span class="input-group-addon"><i class="fa fa-user"></i></span>
-                                                        {{=formA.custom.widget.quadrant}} 
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            
+						<div class="form-group">
+						  
+						    <div class="input-group">
+							<span class="input-group-addon"><i class="fa fa-user"></i></span>
+							 {{=formA.custom.widget.title}}
+							
+						    </div>
+						</div>
+					    </div>
 					    <div class="col-md-4">
-                                                 <div class="form-group">
-                                                  
-                                                    <div class="input-group">
-                                                        <span class="input-group-addon"><i class="fa fa-user"></i></span>
-                                                       <select id="patients" class='form-control'>
+						 <div class="mt-repeater-input">
+							{{=formA.custom.widget.mediadate}}                                                            
+							    
+					       </div>
+					    </div>
+					    <div class="col-md-4">
+						 <div class="form-group">
+						  
+						    <div class="input-group">
+						       <h4 class="m_title">Member</h4>
+							 {{=membername}}
+						    </div>
+						</div>
+					    </div>
+				    </div>
+				    <!---end row1-->
+					    <div class="col-md-12">
+					    <div class="col-md-12">
+						 <div class="form-group">
+						  
+						    <div class="input-group">
+							<span class="input-group-addon"><i class="fa fa-user"></i></span>
+						       <select id="patients" class='form-control'>
 							{{ for i in xrange(0, len(dspatients)): }}
 							     {{if(dspatients[i][0] == patientid):}}
 								   <option   selected value={{=dspatients[i][0]}}> {{=dspatients[i][1]}}:{{=dspatients[i][2]}}</option>
@@ -104,199 +86,246 @@
 							     {{pass}}
 							 {{pass}}
 						      </select>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-8">
-                                                 <div class="form-group">
-                                                  
-                                                    <div class="input-group">
-                                                         <h4 class="m_title">Intra-Oral X-Ray/Image Description</h4>
-                                                        {{=formA.custom.widget.description}}
-                                                    </div>
-                                                </div>
-                                            </div>
+						    </div>
+						</div>
+					    </div>
+					    </div>
+				    
+				    <div class="col-md-12">
+					    <div class="col-md-6">
+						 <div class="form-group">
+						  
+						    <div class="input-group">
+							<span class="input-group-addon"><i class="fa fa-user"></i></span>
+							{{=formA.custom.widget.tooth}} 
+						    </div>
+						</div>
+					    </div>
+					    <div class="col-md-6">
+				    
+						 <div class="form-group">
+						  
+						    <div class="input-group">
+							<span class="input-group-addon"><i class="fa fa-user"></i></span>
+							{{=formA.custom.widget.quadrant}} 
+						    </div>
+						</div>
+					    </div>
+				    </div>
+                                     <div class="col-md-12">
+					    <div class="col-md-12">
+						 <div class="form-group">
+						  
+						    <div class="input-group">
+							 <h4 class="m_title">Intra-Oral X-Ray/Image Description</h4>
+							{{=formA.custom.widget.description}}
+						    </div>
+						</div>
+					    </div>
+				    </div>					    
 					    
-					    <div class="col-md-4">
-					    <p>Please select Image Type:
-					<input id="IMG" type="radio" name="imagetype" value="male" onchange="imageType()">JPG, PNG, BMP Images&nbsp;&nbsp;
-					<input id="DICOM" type="radio" name="imagetype" value="female" onchange="imageType()">DICOM Images
-					</p>
-					</div>
-					    <div id="IMG1" class="col-md-4" style="display:none">
-                                                 <div class="form-group">
-                                                    <div class="input-group">
-                                                         Choose non-DICOM Image File (jpg,jpeg,png,bmp,tiff):
-                                                        {{=formA.custom.widget.image}}
-                                                    </div>
-                                                </div>
-                                            </div>
-				    <div id="DICOM1" class="col-md-4" style="display:none">   
-					<div class="btn-group" style="margin: 0px 15px 20px 0px;">
-					<input id="upload_file_input" name="upload_file_input" type="file" onchange="loader(this.id),SelectFiles(event,1)" multiple style="display:none; width:50%; color: #002825; cursor: pointer; font-size: 14px; float: left; outline: none;" />
-					<label id="folder_upload_class_cursor1" class="folder_upload_class" for="upload_file_input">Choose DICOM File to Upload (.dcm)<i class="fa fa-spinner fa-spin" id="loaderDIVupload_file_input" style="display:none"></i></label>&nbsp;&nbsp;<span id="upload_file_name"></span>
-					</div>
-				    </div>  				     
+     <br/>
+    <div class="col-md-12">
+      <div class="col-md-12">
+	<div class="form-group">
+	  <div class="input-group">    
+	     <input type="file">     
+	  </div>
+	</div>
+       </div>
+    </div>					    
+<br/>
+    <div class="col-md-12"  style="display:none">
+      <div class="col-md-12">
+	<div class="form-group">
+	  <div  class="input-group">    
+             {{=formA.custom.widget.imagedata}}     
+	  </div>
+	</div>
+       </div>
+    </div>					    
+					
+ <br/>
+    <div class="col-md-12">
+      <div class="col-md-12">
+	<div class="form-group">
+	  <div id="imgDiv" class="input-group">    
+	     {{=error}} 
+	     <label id='imgsize'></label>
+	  </div>
+	</div>
+       </div>
+    </div>   	
+    
+    <br/>
+    <div class="col-md-12">
+      <div class="col-md-12">
+	<div class="form-group">
+	  <div id="uploadImg" class="input-group">    
+	    {{if (mediaurl != ""):  }}
+		<img src="{{=mediaurl}}" class="img_responsive center-block" />
+	    {{pass}}	       
+ 	  </div>
+	</div>
+       </div>
+    </div>   
+    <br/>
+    <div class="col-md-12">
+      <div class="col-md-12">
+	<div class="form-group">
+	  <div id="importImg" class="input-group">    
+	   
+		{{=formA.custom.submit}}
+		<input  type="button" class="form_details_button" onclick="window.location='{{=returnurl}}';return false" value="Cancel">
+	  
+ 	  </div>
+	</div>
+       </div>
+    </div> 
+				    <br/>
+				    
+				    <!---  DICOM -->
+
 					    
-					    
-					    <div class="col-md-4"  style="display:none">
-                                                 <div class="form-group">
-                                                  
-                                                    <div class="input-group">
-                                                        
-                                                         DICOM Image:
-							<div class="btn-group" style="margin: 0px 15px 20px 0px;">
-							<a href="{{=URL('dentalimage','uploadDICOMImage',vars=dict(providername=providername,providerid=providerid,patientid=patientid,memberid=memberid,treatmentid=treatmentid,returnurl=returnurl,page=page,memberpage=memberpage,imagepage=imagepage,source=source))}}" target="_blank">Upload DICOM Image</a>
-						       </div>  
-                                                    </div>
-                                                </div>
-                                            </div>
-					    
-                                    </div>				    
+				    </div>				    
 				    <br/>
 					<div class="col-md-12">
-                                            <div class="col-md-4">
-                                                <div class="form-group">
+					    <div class="col-md-4">
+						<div class="form-group">
 						 <label class="m_title">DICOM User Uuid</label>
 						  
-                                                    <div class="input-group">
-                                                        <span class="input-group-addon"><i class="fa fa-user"></i></span>
-                                                         {{=formA.custom.widget.dicomUserUuid}}
-                                                    </div>
-                                                </div>
-                                            </div>
+						    <div class="input-group">
+							<span class="input-group-addon"><i class="fa fa-user"></i></span>
+							 {{=formA.custom.widget.dicomUserUuid}}
+						    </div>
+						</div>
+					    </div>
 					    
-                                            <div class="col-md-4">
-                                                <div class="form-group">
+					    <div class="col-md-4">
+						<div class="form-group">
 						 <label class="m_title">DICOM Account Uuid</label>
 						
-                                                    <div class="input-group">
-                                                        <span class="input-group-addon"><i class="fa fa-user"></i></span>
-                                                         {{=formA.custom.widget.dicomAcctUuid}}
-                                                    </div>
-                                                </div>
-                                            </div>
+						    <div class="input-group">
+							<span class="input-group-addon"><i class="fa fa-user"></i></span>
+							 {{=formA.custom.widget.dicomAcctUuid}}
+						    </div>
+						</div>
+					    </div>
 					    
-                                            <div class="col-md-4">
-                                                 <div class="form-group">
+					    <div class="col-md-4">
+						 <div class="form-group">
 						 
 						 <label class="m_title">DICOM Institution ID</label>
-                                                    <div class="input-group">
-                                                        <span class="input-group-addon"><i class="fa fa-user"></i></span>
-                                                        {{=formA.custom.widget.dicomInstUuid}} 
-                                                    </div>
-                                                </div>
-                                            </div>
+						    <div class="input-group">
+							<span class="input-group-addon"><i class="fa fa-user"></i></span>
+							{{=formA.custom.widget.dicomInstUuid}} 
+						    </div>
+						</div>
+					    </div>
 				    </div>
-                                    <div class="col-md-12">
-                                            <div class="col-md-4">
-                                                <div class="form-group">
+				    <div class="col-md-12">
+					    <div class="col-md-4">
+						<div class="form-group">
 						   <label class="m_title">DICOM Patient Name</label>
 						 
-                                                    <div class="input-group">
-                                                        <span class="input-group-addon"><i class="fa fa-user"></i></span>
-                                                         {{=formA.custom.widget.dicomPatName}}
-                                                    </div>
-                                                </div>
-                                            </div>
+						    <div class="input-group">
+							<span class="input-group-addon"><i class="fa fa-user"></i></span>
+							 {{=formA.custom.widget.dicomPatName}}
+						    </div>
+						</div>
+					    </div>
 					    
-                                            <div class="col-md-4">
-                                                <div class="form-group">
+					    <div class="col-md-4">
+						<div class="form-group">
 						   <label class="m_title">DICOM Patient Uuid</label>
 						
 						
-                                                    <div class="input-group">
-                                                        <span class="input-group-addon"><i class="fa fa-user"></i></span>
-                                                         {{=formA.custom.widget.dicomPatUuid}}
-                                                    </div>
-                                                </div>
-                                            </div>
+						    <div class="input-group">
+							<span class="input-group-addon"><i class="fa fa-user"></i></span>
+							 {{=formA.custom.widget.dicomPatUuid}}
+						    </div>
+						</div>
+					    </div>
 					    
-                                            <div class="col-md-4">
-                                                 <div class="form-group">
+					    <div class="col-md-4">
+						 <div class="form-group">
 						   <label class="m_title">DICOM Patient ID</label>
 						 
 						 
-                                                    <div class="input-group">
-                                                        <span class="input-group-addon"><i class="fa fa-user"></i></span>
-                                                        {{=formA.custom.widget.dicomPatid}} 
-                                                    </div>
-                                                </div>
-                                            </div>
+						    <div class="input-group">
+							<span class="input-group-addon"><i class="fa fa-user"></i></span>
+							{{=formA.custom.widget.dicomPatid}} 
+						    </div>
+						</div>
+					    </div>
 				    </div>					    
 				
 				<div class="col-md-12">
 				    
 				    <div class="col-md-4">
-                                                 <div class="form-group">
+						 <div class="form-group">
 						   <label class="m_title">Performed Date</label>
 						
 						 
-                                                    <div class="input-group">
-                                                        <span class="input-group-addon"><i class="fa fa-user"></i></span>
-                                                        {{=formA.custom.widget.dicomPerformedDate}} 
-                                                    </div>
-                                                </div>
+						    <div class="input-group">
+							<span class="input-group-addon"><i class="fa fa-user"></i></span>
+							{{=formA.custom.widget.dicomPerformedDate}} 
+						    </div>
+						</div>
 						
-                                     </div>    
+				     </div>    
 				    <div class="col-md-4">
-                                                 <div class="form-group">
+						 <div class="form-group">
 						   <label class="m_title">DICOM Patient Order Uuid</label>
 						 
 						 
-                                                    <div class="input-group">
-                                                        <span class="input-group-addon"><i class="fa fa-user"></i></span>
-                                                        {{=formA.custom.widget.dicomPatOrderUuid}} 
-                                                    </div>
-                                                </div>
+						    <div class="input-group">
+							<span class="input-group-addon"><i class="fa fa-user"></i></span>
+							{{=formA.custom.widget.dicomPatOrderUuid}} 
+						    </div>
+						</div>
 						
-                                     </div>    
+				     </div>    
 				     <div class="col-md-4">
-                                                 <div class="form-group">
+						 <div class="form-group">
 						   <label class="m_title">DICOM Procedure Description</label>
 						 
 						 
-                                                    <div class="input-group">
-                                                        <span class="input-group-addon"><i class="fa fa-user"></i></span>
-                                                        {{=formA.custom.widget.dicomProcDesc}} 
-                                                    </div>
-                                                </div>
+						    <div class="input-group">
+							<span class="input-group-addon"><i class="fa fa-user"></i></span>
+							{{=formA.custom.widget.dicomProcDesc}} 
+						    </div>
+						</div>
 						
-                                     </div>    
+				     </div>    
 				     
 				     </div>
 				    <div class="col-md-12">
 				    <div class="col-md-12">
-                                                 <div class="form-group">
+						 <div class="form-group">
 						   <label class="m_title">DICOM Image Url</label>
 						
 						 
-                                                    <div class="input-group">
-                                                        <span class="input-group-addon"><i class="fa fa-user"></i></span>
-                                                        {{=formA.custom.widget.dicomURL}} 
-                                                    </div>
-                                                </div>
-                                     </div>    
-                                     </div>   
-				    <!--<div class="col-md-12">   -->
-				    <!--<div class="col-md-12">   -->
-					<!--<div class="btn-group" style="margin: 0px 15px 20px 0px;">-->
-					<!--<input id="upload_file_input" name="upload_file_input" type="file" onchange="loader(this.id),SelectFiles(event,1)" multiple style="display:none; width:50%; color: #002825; cursor: pointer; font-size: 14px; float: left; outline: none;" />-->
-					<!--<label id="folder_upload_class_cursor1" class="folder_upload_class" for="upload_file_input">Choose DICOM File to Upload<i class="fa fa-spinner fa-spin" id="loaderDIVupload_file_input" style="display:none"></i></label>&nbsp;&nbsp;<span id="upload_file_name"></span>-->
-					<!--</div>-->
-				    <!--</div>  -->
-				    <!--</div>  				     -->
-					  <div class="col-md-12">   
-                                          <div class="col-md-12">   
-                                              <div class="btn-group" style="margin: 0px 15px 20px 0px;">
-					      <button id="sample_editable_1_new" class="btn sbold" style="background: #0080ff; color: #fff;"><i class="fa fa-refresh"></i>&nbsp; Save image</button>
-                                             </div>  
-                                          </div> 
-					  </div>
-                                        </div>
-                            </div>
-                        </div>
-                        
+						    <div class="input-group">
+							<span class="input-group-addon"><i class="fa fa-user"></i></span>
+							{{=formA.custom.widget.dicomURL}} 
+						    </div>
+						</div>
+				     </div>    
+				     </div>  
+				     
+				     <div id="DICOM1" class="col-md-4" >   
+					<div class="btn-group" style="margin: 0px 15px 20px 0px;">
+					<input id="upload_file_input" name="upload_file_input" type="file" onchange="loader(this.id),SelectFiles(event,1)" multiple style="display:none; width:50%; color: #002825; cursor: pointer; font-size: 14px; float: left; outline: none;" />
+					<label id="folder_upload_class_cursor1" class="folder_upload_class" for="upload_file_input">Choose DICOM File to Upload (.dcm)<i class="fa fa-spinner fa-spin" id="loaderDIVupload_file_input" style="display:none"></i></label>&nbsp;&nbsp;<span id="upload_file_name"></span>
+					</div>
+				    </div>  				     
+					   
+		   
+					
+			</div>
+			</div>
+			</div>
 			
 
 <div  style="display:none">
@@ -308,6 +337,12 @@
 
 </div>    
 
+</td>
+
+</tr>
+</table>
+
+                        
 {{=formA.custom.end}}
 <br/>
 <script>
@@ -337,7 +372,69 @@ $(document).ready(function(){
 
 
 </script>
+<script>
 
+
+const input = document.querySelector('input[type="file"]')
+input.addEventListener('change',function(e){
+ console.log(input.files)
+ if(input.files[0].size > 30000){
+    alert('${input.files[0].name} is too big! Max allowed is 30K') 
+ }
+ const reader = new FileReader()
+ reader.onload = function() {
+    <!--x = reader.result-->
+    <!--console.log(x)-->
+    
+    <!--y = document.getElementById("inp1")-->
+    
+    <!--alert("y=" + y)-->
+    <!--y.value = x-->
+    
+    <!--const img  = new Image()-->
+    <!--img.src  = reader.result-->
+    
+    <!--console.log(img.src)-->
+    <!--y = document.getElementById("inp1")-->
+    <!--y.value = img.src-->
+    
+    const img = new Image()
+    img.onload = function(){
+      console.log(img.width, img.height)
+      const canvas = document.createElement('canvas',img.width,img.height)    
+      const context = canvas.getContext('2d')
+      context.drawImage(img,0,0)
+      
+      const imageData = context.getImageData(0,0,img.width,img.height)
+      <!--console.log(imageData)-->
+      
+    
+    }
+    img.src = reader.result
+    <!--document.body.appendChild(img)-->
+
+    
+    document.getElementById("imgDiv").appendChild(img)
+    <!--console.log(img.src)-->
+    
+    x = img.src.split(',')
+    <!--console.log(x[0])-->
+    <!--console.log(x[1])-->
+    
+    <!--z = document.getElementById('inp1')-->
+    <!--z.value = x[1]-->
+    
+    w = document.getElementById('no_table_imagedata')
+    w.value = x[1]
+    
+ }
+
+ //reader.readAsText(input.files[0])
+ reader.readAsDataURL(input.files[0])
+ a = document.getElementById('imgsize').innerHTML = "Image Size = " + input.files[0].size
+ 
+},false)
+</script>
 <script>
 var userUuid;
 var accountUuid;
@@ -369,7 +466,7 @@ var createFolderFlag;
 
 
 function SelectFiles(event, type) {
-    <!--alert('Select Files Complete')-->
+    alert('Select Files Complete')
     selectedFilesList = event.target.files
     
     var x = document.getElementById("upload_file_input")
@@ -580,7 +677,7 @@ myApi.Initialize(initialize_CB);
 
 function uploadDICOMFile(){
 
-    
+    alert('Enter uploadDICOMFile')
     <!--- Create MyDentalPlan folder if it does not exists-->
     myApi.GetFolderList(userUuid, "", "", true, getFolderList_CB); 
     <!--if(mdpFolder == false){-->

@@ -1040,6 +1040,12 @@ db.define_table('dentalimage',
                 Field('patientname', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details')),
                 Field('patienttype', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details')),
                 Field('provider', 'integer',represent=lambda v, r: 0 if v is None else v,widget = lambda field, value:SQLFORM.widgets.integer.widget(field, value, _class='form_details')),
+
+                Field('mediafile', 'string',represent=lambda v, r: 0 if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details')),                
+                Field('mediatype', 'string',represent=lambda v, r: 0 if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details')),                
+                Field('mediaformat', 'string',represent=lambda v, r: 0 if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details')),                
+                Field('mediasize', 'double',represent=lambda v, r: 0 if v is None else v,widget = lambda field, value:SQLFORM.widgets.double.widget(field, value, _class='form_details')),                
+                
                 
                 Field('dicomUserUuid', 'string',default=''),
                 Field('dicomAcctUuid', 'string',default=''),
