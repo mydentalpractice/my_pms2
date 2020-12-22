@@ -342,6 +342,10 @@ def getproviderfromid(db,aproviderid):
     latitude = ""
     longitude = ""
     locationurl = ""
+    
+    city = ""
+    st = ""
+    pin = ""
 
 
     if(providerid > 0):

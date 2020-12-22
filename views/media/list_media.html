@@ -1,0 +1,15 @@
+{{extend 'pms2_layoutw4.html'}}
+
+<div class="w3-container w3-padding-16">
+<header class="w3-container w3-dark-grey ">
+ 
+</header>
+<tr>
+<td>
+<button class="form_details_button" onclick="window.location='{{=URL('media','new_media',vars=dict(page=page,providerid=providerid,patientid=patientid,memberid=memberid,mediatype='audio',mediaformat='mp3'))}}';return false">Add Audio</button> 
+<button class="form_details_button" onclick="window.location='{{=URL('media','new_media',vars=dict(page=page,providerid=providerid,patientid=patientid,memberid=memberid,mediatype='video',mediaformat='mp4'))}}';return false">Add Video</button> 
+</td>
+</tr>
+{{=formB}}
+</div>
+ <input  type="button" class="form_details_button" onclick="window.location='{{=returnurl}}';return false" value="Return">

@@ -34,6 +34,7 @@ from applications.my_pms2.modules import mdptask
 from applications.my_pms2.modules import mdpprovider
 from applications.my_pms2.modules import mdpabhicl
 from applications.my_pms2.modules import mdpmedia
+from applications.my_pms2.modules import mdpcustomer
 
 from applications.my_pms2.modules import logger
 
@@ -2055,6 +2056,79 @@ def getmedia_list(avars):
 
 ############################# End Media API ##################################################
 
+############################# VAPI API #######################################################
+def enroll_vapi_customer(avars):
+    logger.loggerpms2.info("Enter Enroll VAPU Customer-Request\n" + str(avars) )
+    
+    
+    p = db(db.provider.provider == 'P0001').select(db.provider.id)
+    
+    #providerid, regioinid = provider's region 
+    provcode = common.getkeyvalue(avars,"providercode","P001")
+    p = db(db.provider.provider == provcode).select(db.provider.id)
+    providerid = p[0].id if(len(p)==1) else 1
+    regionid = p[0].groupregion if(len(p)==1) else 1
+    
+    #company
+    compcode = common.getkeyvalue(avars,"companycode","VITAL(Z)")
+    c = db(db.compnay.company == compcode).select(db.company.id)
+    companyid = c[0].id if(len(c)==1) else 1
+    defplancode = c[0].hmoplan if(len(c) == 1) else 1
+    
+    #planid
+    plancode = common.getkeyvalue(avars,"plancode",defplancode)
+    h = db(db.hmoplan.hmoplancode == plancode).select(db.company.id)
+    planid = h[0].id if(len(h)==1) else 1
+    
+    avars["providerid"] = providerid
+    avars["companyid"] = companyid
+    avars["regionid"] = regionid
+    avars["planid"] = planid
+    
+    #address
+    avars["address1"] =  avars["address1"] if "address1" in avars else common.getkeyvalue(avars,"address1",c[0].address1)
+    avars["address2"] = avars["address2"] if "address2" in avars else common.getkeyvalue(avars,"address2",c[0].address2)
+    avars["address3"] = avars["address3"] if "address3" in avars else common.getkeyvalue(avars,"address3",c[0].address3)
+    avars["city"] = avars["city"] if "city" in avars else common.getkeyvalue(avars,"city",c[0].city)
+    avars["st"] = avars["st"] if "st" in avars else common.getkeyvalue(avars,"st",c[0].st)
+    avars["pin"] = avars["pin"] if "pin" in avars else common.getkeyvalue(avars,"pin",c[0].pin)
+    avars["pin1"] = avars["pin1"] if "pin1" in avars else common.getkeyvalue(avars,"pin1",c[0].pin)
+    avars["pin2"] = avars["pin2"] if "pin2" in avars else common.getkeyvalue(avars,"pin2",c[0].pin)
+    avars["pin3"] = avars["pin3"] if "pin3" in avars else common.getkeyvalue(avars,"pin3",c[0].pin)
+    
+    avars["telephone"] = avars["telephone"] if "telephone" in avars else common.getkeyvalue(avars,"telephone",c[0].telephone)
+    avars["cell"] = avars["cell"] if "cell" in avars else common.getkeyvalue(avars,"cell",c[0].cell)
+    avars["email"] = avars["email"] if "email" in avars else common.getkeyvalue(avars,"email",c[0].email)
+    
+    
+    
+    ovapi  = mdpcustomer.Customer(current.globalenv['db'],providerid)
+    rsp = ovapi.customer(avars)
+    
+    jsonrsp = json.loads(rsp)
+    if(common.getkeyvalue(jsonrsp,"result","fail") == "success"):
+	rsp = ovapi.enroll_customer(jsonrsp)
+    
+    logger.loggerpms2.info("Exit Enroll VAPI Customer -Response\n" + rsp)
+    return rsp
+
+def cancel_vapi_customer(avars):
+    logger.loggerpms2.info("Enter Cancel VAPU Customer-Request\n" + str(avars) )
+    
+    providerid = int(common.getkeyvalue(avars,"providerid","0"))
+    customer_id = int(common.getkeyvalue(avars, "customer_id", "0"))
+    
+    ovapi  = mdpcustomer.Customer(current.globalenv['db'],providerid)
+    rsp = ovapi.delete_customer(customer_id)
+    
+    
+    logger.loggerpms2.info("Exit Cancel VAPI Customer -Response\n" + rsp)
+    return rsp
+
+
+
+############################# END VAPI API ###################################################
+
 def unknown(avars):
     return dict()
 
@@ -2112,8 +2186,8 @@ mdpapi_switcher = {"listappointments":getappointments,"getappointmentsbymonth":g
                    "getcompanyprocedures":getcompanyprocedures,"getnoncompanyprocedures":getnoncompanyprocedures,\
                    "addABHICLProcedureToTreatment":addABHICLProcedureToTreatment,\
                    "upload_mediafile":upload_mediafile,"upload_media":upload_media,"downloadmedia":downloadmedia,\
-                   "getmedia_list":getmedia_list,"updatemedia":updatemedia,"deletemedia":deletemedia
-                   
+                   "getmedia_list":getmedia_list,"updatemedia":updatemedia,"deletemedia":deletemedia,\
+                   "enroll_vapi_customer":enroll_vapi_customer,"cancel_vapi_customer":cancel_vapi_customer
                    
                    }
 

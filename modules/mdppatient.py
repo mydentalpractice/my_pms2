@@ -1544,7 +1544,7 @@ class Patient:
       
       patid = db.patientmember.insert(\
         patientmember = patientmember,
-        groupref = common.getkeyvalue(avars,"groupref",""),
+        groupref = common.getkeyvalue(avars,"customer_ref",""),
         fname = common.getkeyvalue(avars,"fname",""),
         mname = common.getkeyvalue(avars,"mname",""),
         lname = common.getkeyvalue(avars,"lname",""),

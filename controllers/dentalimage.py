@@ -905,7 +905,7 @@ def dentalimage_new():
 
         Field('mediasize','double'),
 
-        Field('imagedata','text',label='Image Data')
+        Field('imagedata','text', length=50e+6, label='Image Data')
         
     
     )
@@ -1351,3 +1351,5 @@ def dentalimage_show():
     return dict(formA=formA, returnurl=returnurl, providername=providername, membername=membername, patientname=patientname, imageid=imageid, memberid=memberid, memberref=memberref, providerid=providerid, imagefile = imagefile,dspatients=dspatients,patient=patientid,patienttype=patienttype,page=page)   
     
 
+
+   

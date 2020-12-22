@@ -63,6 +63,303 @@ class Customer:
     def __init__(self,db,providerid=0):
         self.db = db
         self.providerid = providerid
+        auth = current.auth
+    
+       
+    def customer(self,avars):
+        
+        customer_ref = common.getkeyvalue(avars, "customer_ref", "")
+        jsonresp={}
+        if(customer_ref != ""):
+            c = db((db.customer.customer_ref == customer_ref) & (db.customer.is_active == True)).select(db.customer.id, db.customer.customer_ref)
+            if(len(c) == 0):
+                #new custoemr
+                jsonresp = json.loads(self.new_customer(avars))
+            else:
+                #update customer
+                jsonresp = json.loads(self.update_customer(avars))
+            
+        else:
+            error_code = "CUST_001"
+            mssg = error_code + ":" + "Customer not created! No Customer_Ref:\n"
+            logger.loggerpms2.info(mssg)
+            jsonresp = {
+                "result":"fail",
+                "error_message":mssg,
+                "error_code":error_code
+            } 
+            
+        return json.dumps(jsonresp)
+    
+    def new_customer(self,avars):
+        db = self.db        
+        auth = current.auth
+        jsonresp = {}
+        customer_id = 0
+        
+        try:
+            i=0
+            customer_ref = common.getkeyvalue(avars, "customer_ref", "")
+            
+            if(customer_ref != "" ):
+                customer_id = db.customer.insert(
+                    customer_ref = common.getkeyvalue(avars,"customer_ref", "MDP_REF"),
+                    fname = common.getkeyvalue(avars,"fname", customer_ref + "_First"),
+                    mname = common.getkeyvalue(avars,"mname", customer_ref + "_Middle"),
+                    lname = common.getkeyvalue(avars,"lname", customer_ref + "_Last"),
+
+                    address1 = common.getkeyvalue(avars,"address1", "331-332 Ganpati Plaza"),
+                    address2 = common.getkeyvalue(avars,"address2", "MI Road"),
+                    address3 = common.getkeyvalue(avars,"address3", ""),
+                    city = common.getkeyvalue(avars,"city", "Jaipur"),
+                    st = common.getkeyvalue(avars,"st", "Rajasthan (RJ)"),
+                    pin = common.getkeyvalue(avars,"pin", "302001"),
+                    pin1 = common.getkeyvalue(avars,"pin1", "302001"),
+                    pin2 = common.getkeyvalue(avars,"pin2", "302001"),
+                    pin3 = common.getkeyvalue(avars,"pin3", "302001"),
+
+                    gender = common.getkeyvalue(avars,"gender", "Male"),
+                    dob = common.getkeyvalue(avars,"dob", datetime.date.today()),
+                    
+                    telephone = common.getkeyvalue(avars,"telephone", ""),
+                    cell = common.getkeyvalue(avars,"cell", "8001027526 "),
+                    email = common.getkeyvalue(avars,"email", "info@mydentalplan.in"),
+                    
+                    status = common.getkeyvalue(avars,"status", "No_Attempt"),
+                    
+                    providerid = int(common.getkeyvalue(avars,"providerid", "1")),
+                    companyid = int(common.getkeyvalue(avars,"companyid", "1")),
+                    planid = int(common.getkeyvalue(avars,"planid", "1")),
+                    regionid = int(common.getkeyvalue(avars,"regionid", "1")),
+                   
+                    enrolldate = common.getdatefromstring(
+                        common.getvalue(avars, "enrolldate",common.getstringfromdate(common.getISTFormatCurrentLocatTime(),"%d/%m/%Y")),"%d/%m/%Y"),
+                    
+                    appointment_id = common.getkeyvalue(avars,"appointment_id",common.getstringfromdate(common.getISTFormatCurrentLocatTime(),"%d/%m/%Y %H:%M")),
+                    appointment_datetime = common.getdatefromstring(
+                        common.getvalue(avars, "appointment_datetime",common.getstringfromdate(common.getISTFormatCurrentLocatTime(),"%d/%m/%Y %H:%M")),"%d/%m/%Y %H:%M"),
+                    
+                    notes = common.getkeyvalue(avars,"notes",""),
+                    
+                    is_active = True,
+                    
+                    created_on = common.getISTFormatCurrentLocatTime(),
+                    created_by = 1 if(auth.user == None) else auth.user.id,
+                    modified_on = common.getISTFormatCurrentLocatTime(),
+                    modified_by =1 if(auth.user == None) else auth.usr.id                
+                )
+                
+            else:
+                error_code = "NEW_CUST_002"
+                mssg = error_code + ":" + "New Customer not created! No unique Customer_Ref:\n"
+                logger.loggerpms2.info(mssg)
+                jsonresp = {
+                    "result":"fail",
+                    "error_message":mssg,
+                    "error_code":error_code
+                }            
+            
+        except Exception as e:
+            error_code = "NEW_CUST_001"
+            mssg = error_code + ":" + "Exception New Customer:\n" + "(" + str(e) + ")"
+            logger.loggerpms2.info(mssg)
+            jsonresp = {
+                "result":"fail",
+                "error_message":mssg,
+                "error_code":error_code
+            }            
+      
+        return json.dumps(jsonresp)
+    
+    def update_customer(self,avars):
+        db = self.db        
+        auth = current.auth        
+        jsonresp = {}
+        try:
+            i=0
+            customer_ref = common.getkeyvalue(avars, "customer_ref", "")
+            
+            if(customer_ref != "" ):
+                c = db((db.customer.customer_ref == customer_ref)& (db.customer.is_active == True)).select()
+                
+                db((db.customer.customer_ref == customer_ref) & (db.customer.is_active == True)).update(
+                    customer_ref = common.getkeyvalue(avars,"customer_ref", c[0].customer_ref),
+                    fname = common.getkeyvalue(avars,"fname", c[0].fname),
+                    mname = common.getkeyvalue(avars,"mname", c[0].mname),
+                    lname = common.getkeyvalue(avars,"lname", c[0].lname),
+
+                    address1 = common.getkeyvalue(avars,"address1", c[0].address1),
+                    address2 = common.getkeyvalue(avars,"address2", c[0].address2),
+                    address3 = common.getkeyvalue(avars,"address3", c[0].address3),
+                    city = common.getkeyvalue(avars,"city", c[0].city),
+                    st = common.getkeyvalue(avars,"st", c[0].st),
+                    pin = common.getkeyvalue(avars,"pin", c[0].pin),
+                    pin1 = common.getkeyvalue(avars,"pin1", c[0].pin1),
+                    pin2 = common.getkeyvalue(avars,"pin2", c[0].pin2),
+                    pin3 = common.getkeyvalue(avars,"pin3", c[0].pin3),
+
+                    gender = common.getkeyvalue(avars,"gender", c[0].gender),
+                    dob = common.getkeyvalue(avars,"dob",  c[0].do),
+                    
+                    telephone = common.getkeyvalue(avars,"telephone",  c[0].telephone),
+                    cell = common.getkeyvalue(avars,"cell",  c[0].cell),
+                    email = common.getkeyvalue(avars,"email",  c[0].email),
+                    
+                    status = common.getkeyvalue(avars,"status", "No_Attempt"),
+                    
+                    providerid = int(common.getkeyvalue(avars,"providerid", c[0].providerid)),
+                    companyid = int(common.getkeyvalue(avars,"companyid",  c[0].companyid)),
+                    planid = int(common.getkeyvalue(avars,"planid",  c[0].planid)),
+                    regionid = int(common.getkeyvalue(avars,"regionid",  c[0].regionid)),
+
+                    enrolldate = common.getdatefromstring(
+                        common.getvalue(avars, "enrolldate",common.getstringfromdate(c[0].enrolldate,"%d/%m/%Y")),"%d/%m/%Y"),
+
+                    appointment_datetime = common.getdatefromstring(
+                        common.getvalue(avars, "appointment_datetime",common.getstringfromdate(c[0].appointment_datetime,"%d/%m/%Y %H:%M")),"%d/%m/%Y %H:%M"),
+
+                    notes = common.getkeyvalue(avars,"notes",c[0].notes),
+                    
+                    is_active =  c[0].is_active,
+                    
+                    modified_on = common.getISTFormatCurrentLocatTime(),
+                    modified_by =1 if(auth.user == None) else auth.usr.id                       
+                )
+                
+            else:
+                error_code = "UPDATE_CUST_002"
+                mssg = error_code + ":" + "Update Customer not created! No unique Customer_Ref:\n"
+                logger.loggerpms2.info(mssg)
+                jsonresp = {
+                    "result":"fail",
+                    "error_message":mssg,
+                    "error_code":error_code
+                }            
+            
+        except Exception as e:
+            error_code = "UPDATECUST_001"
+            mssg = error_code + ":" + "Exception Updatee Customer:\n" + "(" + str(e) + ")"
+            logger.loggerpms2.info(mssg)
+            jsonresp = {
+                "result":"fail",
+                "error_message":mssg,
+                "error_code":error_code
+            }            
+      
+        return json.dumps(jsonresp)
+
+
+   
+
+    def get_customer(self,customerid):
+        db = self.db        
+        auth = current.auth
+        jsonresp = {}
+        try:
+            
+            c = db((db.customer.id == customerid) & (db.customer.is_active == True)).select()
+            jsonresp={
+                "result":"success",
+                "error_message":"",
+                "error_code":"",
+            
+                "customer_id":c[0].id,
+              
+                "customer":c[0].customer,
+                
+                "customer_ref":c[0].customer_ref,
+
+                "fname":c[0].fname,                
+                "mname":c[0].mname,
+                "lname":c[0].lname,
+                
+                "address1":c[0].address1,
+                "address2":c[0].address2,
+                "address3":c[0].address3,
+                "city":c[0].city,
+                "st":c[0].st,
+                "pin":c[0].pin,
+                "pin1":c[0].pin1,
+                "pin2":c[0].pin2,
+                "pin3":c[0].pin3,
+                
+                "gender":c[0].gender,
+                "dob":common.getstringfromdate(c[0].dob, "%d/%m/%Y"),
+                "status":c[0].status,
+                
+                "telephone":c[0].telephone,
+                "cell":c[0].cell,
+                "email":c[0].email,
+                
+                "providerid":self.providerid,
+                "companyid":c[0].companyid,
+                "planid":c[0].planid,
+                "regionid":c[0].regionid,
+                
+                "enrolldate":common.getstringfromdate(c[0].enrolldate,"%d/%m/%Y"),
+                
+                "appointment_id":c[0].appointment_id,
+                "appointment_datetime":common.getstringfromdate(c[0].appointment_datetime,"%d/%m/%Y %H:%M"),
+                
+                "notes":c[0].notes,
+                
+                "is_active":str(c[0].is_active),
+                
+                "created_on":c[0].common.getstringfromdate(c[0].created_on,"%d/%m/%Y %H:%M"),
+                "created_by":c[0].created_by,
+                "modified_on":c[0].common.getstringfromdate(c[0].modified_on,"%d/%m/%Y %H:%M"),
+                "modified_by":c[0].modified_by,
+            
+            }
+            
+                
+        except Exception as e:
+            error_code = "GET_CUST_001"
+            mssg = error_code + ":" + "Exception GET Customer:\n" + "(" + str(e) + ")"
+            logger.loggerpms2.info(mssg)
+            jsonresp = {
+                "result":"fail",
+                "error_message":mssg,
+                "error_code":error_code
+            }            
+      
+        return json.dumps(jsonresp)
+    
+    def delete_customer(self,customer_id):
+        
+        db = self.db        
+        auth = current.auth
+        jsonresp = {}        
+
+        
+        try:
+            db(db.customer.id == customer_id).update(
+                is_active = False,
+                modified_on = common.getISTFormatCurrentLocatTime(),
+                modified_by =1 if(auth.user == None) else auth.usr.id                               
+            )
+            
+            c = db(db.customer.id == customer_id).select(db.customer.customer_ref)
+            if(len(c)==1):
+                db((db.patientmember.groupref == c[0].customer_ref) & (db.patientmember.is_active == True)).update(
+                    is_active = False,
+                    modified_on = common.getISTFormatCurrentLocatTime(),
+                    modified_by =1 if(auth.user == None) else auth.usr.id                               
+                )
+                
+                
+
+        except Exception as e:
+            error_code = "DELETE_CUST_001"
+            mssg = error_code + ":" + "Exception DELETE Customer:\n" + "(" + str(e) + ")"
+            logger.loggerpms2.info(mssg)
+            jsonresp = {
+                "result":"fail",
+                "error_message":mssg,
+                "error_code":error_code
+            }            
+        
+        return dict()
     
     def enroll_customer(self,avars):
         db = self.db
@@ -86,7 +383,6 @@ class Customer:
                 
             if(count == 0):
                 #new enrollment
-                            
                 c = db(db.customer.id == customerid).select()
                 cobj = {}
                 cobj["customerid"] = customerid

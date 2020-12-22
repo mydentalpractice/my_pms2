@@ -383,7 +383,7 @@ class Media:
         return json.dumps(mediaobj)
 
 
-
+   
 
   
 
@@ -394,16 +394,16 @@ class Media:
         providerid = self.providerid
         
         try:
-            urlprops = db(db.urlproperties.id > 0).select(db.urlproperties.mydp_ipaddress)
+            props = db(db.urlproperties.id > 0).select(db.urlproperties.mydp_ipaddress,db.urlproperties.mydp_port)
             
             media = db(db.dentalimage.id == mediaid).select()
-    
+            
             mediaobj = {}
             if(len(media) == 1):
                 mediaobj = {
-                    "mediaid":int(common.getid(media.id)),
+                    "mediaid":int(common.getid(media[0].id)),
 
-                    "mediaurl" : urlprops[0].mydp_ipaddress + URL('my_detnalplan','media','media_download' , args=[mediaid]),
+                    "mediaurl" : props[0].mydp_ipaddress + ":" + props[0].mydp_port +"/my_dentalplan/media/media_download/" + str(mediaid),
                     "media"  : common.getstring(media[0].image),
                     "uploadfolder":media[0].uploadfolder,
                     "title"  : common.getstring(media[0].title),
@@ -437,7 +437,7 @@ class Media:
                 excpobj["error_message"] = "Download Media Error"
                 excpobj["error_code"] = "MDP100"
                 
-                return excpobj                     
+                return json.dumps(excpobj                     )
                 
         except Exception as e:
                 logger.loggerpms2.info("Download Media Exception:\n" + str(e))      
@@ -445,9 +445,9 @@ class Media:
                 excpobj["result"] = "fail"
                 excpobj["error_code"] = "MDP100"
                 excpobj["error_message"] = "Download Media  Exception Error - " + str(e)
-                return excpobj            
+                return json.dumps(excpobj)
 
-        return mediaobj
+        return json.dumps(mediaobj)
 
 
     def getmedia_list(self,page,memberid,patientid,mediatype):
