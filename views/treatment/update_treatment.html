@@ -422,8 +422,9 @@
                                                 <div class="tab-pane" id="tab_15_5">
 						
 						<div class="col-sm-12">  
-						 <a  style="color:#fff;" class="btn bold green pull-left" onclick="location.href='{{=URL('dentalimage','list_dentalimages',vars=dict(page=0,providerid=providerid,memberid=memberid,patientid=patientid,source='treatment'))}}'" target="_blank"><i class="fa fa-folder"></i>&nbsp;&nbsp;Images</a>  
-
+						 <a  style="color:#fff;" class="btn bold green pull-left" onclick="location.href='{{=URL('dentalimage','list_dentalimages',vars=dict(page=0,providerid=providerid,memberid=memberid,patientid=patientid,treatmentid=treatmentid,source='treatment'))}}'" target="_blank"><i class="fa fa-folder"></i>&nbsp;&nbsp;Images</a>  
+						 <a  style="color:#fff;" class="btn bold green pull-left" onclick="location.href='{{=URL('media','list_media',vars=dict(page=1,providerid=providerid,memberid=memberid,patientid=patientid,treatmentid=treatmentid,source='treatment'))}}'" target="_blank"><i class="fa fa-folder"></i>&nbsp;&nbsp;Media</a>  
+						 
 						 </div>  
 						 <br/>
 						 

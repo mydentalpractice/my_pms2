@@ -3669,14 +3669,36 @@ db.define_table('customer',
 db.customer._singular = "Customer"
 db.customer._plural   = "Customer"
 
+
+db.define_table('customerdependants',
+               Field('dependant', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'), default='', label='Dependant',length=50),
+               Field('dependant_ref', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'), default='', label='Employee ID',length=50),
+               Field('customer_id','reference customer'),
+               Field('fname', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'), default='', label='First',length=50),
+               Field('mname', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'), default='', label='Middle',length=50),
+               Field('lname', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'), default='', label='Last',length=50),
+               Field('depdob',
+'date',widget = lambda field, value:SQLFORM.widgets.date.widget(field, value, _style='height:30px'), label='Birth Date',default=request.now,  requires=IS_DATE(format=T('%d/%m/%Y'),error_message='must be d/m/Y!'),length=20),
+               Field('gender','string',represent=lambda v, r: '' if v is None else v, default='Male',label='Gender',length=10,requires = IS_IN_SET(GENDER)),
+               Field('relation','string',represent=lambda v, r: '' if v is None else v, default='Male',label='Gender',length=10,requires = IS_IN_SET(GENDER)),
+               auth.signature,
+                format='%(dependant)s'
+               )
+db.customerdependants._singular = "customerdependants"
+db.customerdependants._plural   = "customerdependants"
+
+
 db.define_table('vw_customer',
                Field('id','integer'),
                Field('customerid', 'integer'),
+               Field('customer', 'string'),
                Field('customer_ref', 'string'),
                Field('customername', 'string'),
                Field('address', 'string'),
                Field('cell', 'string'),
                Field('email', 'string'),
+               Field('gender', 'string'),
+               Field('dob', 'date'),
                
                Field('company', 'string'),
                Field('groupregion', 'string'),
@@ -3687,12 +3709,37 @@ db.define_table('vw_customer',
                Field('appointment_datetime', 'datetime'),
                Field('notes', 'text'),
                Field('status', 'string'),
-               Field('is_active', 'boolean'),
-               
+               Field('is_active', 'boolean')
+                     
+              
                
                )
 db.vw_customer._singular = "vw_customer"
 db.vw_customer._plural   = "vw_customer"
+
+
+db.define_table('vw_customer_dependants',
+               Field('id','integer'),
+               Field('dependant_id', 'integer'),
+               Field('dependant', 'string'),
+               Field('dependant_ref', 'string'),
+               Field('dependant_name', 'string'),
+              
+               Field('dependant_gender', 'string'),
+               Field('dependant_dob', 'date'),
+               
+               Field('dependant_relation', 'string'),
+               Field('dependant_is_active', 'boolean'),
+               
+               Field('customer', 'string'),
+               Field('customer_ref', 'string'),
+               Field('customer_id', 'integer')
+               
+              
+               
+               )
+db.vw_customer_dependants._singular = "vw_customer_dependants"
+db.vw_customer_dependants._plural   = "vw_customer_dependants"
 
 db.define_table('vw_customertopcount',
                Field('id','integer'),

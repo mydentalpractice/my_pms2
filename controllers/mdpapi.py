@@ -2056,28 +2056,33 @@ def getmedia_list(avars):
 
 ############################# End Media API ##################################################
 
-############################# VAPI API #######################################################
-def enroll_vapi_customer(avars):
-    logger.loggerpms2.info("Enter Enroll VAPU Customer-Request\n" + str(avars) )
+############################# VITAL API #######################################################
+def register_vital_member(avars):
+    logger.loggerpms2.info("Enter Subscribe Vital Member-Request\n" + str(avars) )
     
-    
-    p = db(db.provider.provider == 'P0001').select(db.provider.id)
+    policy = common.getkeyvalue(avars,"policy","ViTAL_Z")
     
     #providerid, regioinid = provider's region 
     provcode = common.getkeyvalue(avars,"providercode","P001")
-    p = db(db.provider.provider == provcode).select(db.provider.id)
+    p = db(db.provider.provider == provcode).select(db.provider.id,db.provider.groupregion)
     providerid = p[0].id if(len(p)==1) else 1
+    
+    #region (from provider's region)
     regionid = p[0].groupregion if(len(p)==1) else 1
+    r = db(db.groupregion.id == regionid).select(db.groupregion.groupregion)
+    regioncode = r[0].groupregion if(len(r)==1) else "ALL"
     
     #company
-    compcode = common.getkeyvalue(avars,"companycode","VITAL(Z)")
-    c = db(db.compnay.company == compcode).select(db.company.id)
+    companycode = common.getkeyvalue(avars,"companycode","VITAL")
+    c = db((db.company.company == companycode) & (db.company.is_active == True)).select()
     companyid = c[0].id if(len(c)==1) else 1
-    defplancode = c[0].hmoplan if(len(c) == 1) else 1
     
+    #prp
+    prp = db((db.provider_region_plan.regioncode == regioncode) & (db.provider_region_plan.policy == policy) & (db.provider_region_plan.is_active == True)).select()
+    plancode = prp[0].plancode if(len(prp)==1) else "VITALZ"
+
     #planid
-    plancode = common.getkeyvalue(avars,"plancode",defplancode)
-    h = db(db.hmoplan.hmoplancode == plancode).select(db.company.id)
+    h = db((db.hmoplan.hmoplancode == plancode) & (db.hmoplan.groupregion == regionid)).select(db.hmoplan.id)
     planid = h[0].id if(len(h)==1) else 1
     
     avars["providerid"] = providerid
@@ -2085,6 +2090,7 @@ def enroll_vapi_customer(avars):
     avars["regionid"] = regionid
     avars["planid"] = planid
     
+
     #address
     avars["address1"] =  avars["address1"] if "address1" in avars else common.getkeyvalue(avars,"address1",c[0].address1)
     avars["address2"] = avars["address2"] if "address2" in avars else common.getkeyvalue(avars,"address2",c[0].address2)
@@ -2101,33 +2107,62 @@ def enroll_vapi_customer(avars):
     avars["email"] = avars["email"] if "email" in avars else common.getkeyvalue(avars,"email",c[0].email)
     
     
-    
+    #create VITAL Customer
     ovapi  = mdpcustomer.Customer(current.globalenv['db'],providerid)
     rsp = ovapi.customer(avars)
     
-    jsonrsp = json.loads(rsp)
-    if(common.getkeyvalue(jsonrsp,"result","fail") == "success"):
-	rsp = ovapi.enroll_customer(jsonrsp)
-    
-    logger.loggerpms2.info("Exit Enroll VAPI Customer -Response\n" + rsp)
+    logger.loggerpms2.info("Exit Subcribe Vital Member -Response\n" + rsp)
     return rsp
 
-def cancel_vapi_customer(avars):
-    logger.loggerpms2.info("Enter Cancel VAPU Customer-Request\n" + str(avars) )
+def set_appointment_vital_member(avars):
+    logger.loggerpms2.info("Enter set_appointment_vital_member VITAL Member-Request\n" + str(avars) )
     
-    providerid = int(common.getkeyvalue(avars,"providerid","0"))
-    customer_id = int(common.getkeyvalue(avars, "customer_id", "0"))
+    #providerid, regioinid = provider's region 
+    provcode = common.getkeyvalue(avars,"providercode","P001")
+    p = db(db.provider.provider == provcode).select(db.provider.id,db.provider.groupregion)
+    providerid = p[0].id if(len(p)==1) else 1
+    
     
     ovapi  = mdpcustomer.Customer(current.globalenv['db'],providerid)
-    rsp = ovapi.delete_customer(customer_id)
+    rsp = ovapi.set_appointment(avars)
     
     
-    logger.loggerpms2.info("Exit Cancel VAPI Customer -Response\n" + rsp)
+    logger.loggerpms2.info("Exit set_appointment_vital_member VIATL Member -Response\n" + rsp)
+    
+    return rsp
+
+def enroll_vital_member(avars):
+    logger.loggerpms2.info("Enter Enroll VITAL Member-Request\n" + str(avars) )
+    
+    #providerid, regioinid = provider's region 
+    provcode = common.getkeyvalue(avars,"providercode","P001")
+    p = db(db.provider.provider == provcode).select(db.provider.id,db.provider.groupregion)
+    providerid = p[0].id if(len(p)==1) else 1
+    
+    
+    ovapi  = mdpcustomer.Customer(current.globalenv['db'],providerid)
+    rsp = ovapi.enroll_customer(avars)
+    
+    
+    logger.loggerpms2.info("Exit Enroll VIATL Member -Response\n" + rsp)
+    
+    return rsp
+
+def cancel_vital_member(avars):
+    logger.loggerpms2.info("Enter Cancel VITAL Member-Request\n" + str(avars) )
+    
+    providerid = int(common.getkeyvalue(avars,"providerid","0"))
+    
+    ovapi  = mdpcustomer.Customer(current.globalenv['db'],providerid)
+    rsp = ovapi.delete_customer(avars)
+    
+    
+    logger.loggerpms2.info("Exit Cancel VIATL Member -Response\n" + rsp)
     return rsp
 
 
 
-############################# END VAPI API ###################################################
+############################# END VITAL API ###################################################
 
 def unknown(avars):
     return dict()
@@ -2187,7 +2222,8 @@ mdpapi_switcher = {"listappointments":getappointments,"getappointmentsbymonth":g
                    "addABHICLProcedureToTreatment":addABHICLProcedureToTreatment,\
                    "upload_mediafile":upload_mediafile,"upload_media":upload_media,"downloadmedia":downloadmedia,\
                    "getmedia_list":getmedia_list,"updatemedia":updatemedia,"deletemedia":deletemedia,\
-                   "enroll_vapi_customer":enroll_vapi_customer,"cancel_vapi_customer":cancel_vapi_customer
+                   "register_vital_member":register_vital_member,"cancel_vital_member":cancel_vital_member,"enroll_vital_member":enroll_vital_member,\
+                   "set_appointment_vital_member":set_appointment_vital_member
                    
                    }
 

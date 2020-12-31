@@ -32,6 +32,7 @@
 						     <button id="SRCH" class="btn ivory bl" style="margin:0px 3px;" onClick="loader(this.id)" type="submit" ><span style="float: left;" class="ic">Images</span><i class="fa fa-spinner fa-spin" id="loaderDIVSRCH" style="display:none"></i></button>
 						     {{if(patientid > 0):}}
 					             <a class="btn ivory bl"  style="margin:0px 3px;" onclick="location.href='{{=URL('dentalimage','dentalimage_new',vars=dict(memberpage=memberpage,imagepage=page,page=1,providerid=providerid,memberref=memberref,memberid=memberid,patientid=patientid))}}'" target="_blank"><i class="fa fa-plus"></i> New Image</a>
+					             <a class="btn ivory bl"  style="margin:0px 3px;" onclick="location.href='{{=URL('media','list_media',vars=dict(page=1,providerid=providerid,memberid=memberid,patientid=patientid))}}'" target="_blank"><i class="fa fa-plus"></i> Media</a>
 						    {{pass}}
 						 </span>
 					     </td>

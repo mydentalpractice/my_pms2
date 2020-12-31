@@ -170,6 +170,9 @@
                     {{if(mediatype == "video"):}}
                         <video controls src="{{=mediaurl}}" type="video/mp4" class="img_responsive center-block" style="width:90%" />
                     {{pass}}
+                    {{if(mediatype == "image"):}}
+                        <img  src="{{=mediaurl}}" type="jpg" class="img_responsive center-block" style="width:90%" />
+                    {{pass}}
                     
             {{pass}}	       
           </div>

@@ -1347,7 +1347,6 @@ def processNewPayment(providerid, xphrase):
         response.flash = "Error: Invalid Patient"
     return
    
- 
 def processNewImage(providerid, xphrase):
     xphrase1 = xphrase.strip()  #remove all leading trailing blanks
     patientid = 0
@@ -1370,6 +1369,30 @@ def processNewImage(providerid, xphrase):
         
         redirect(URL('dentalimage','dentalimage_new',vars=dict(memberpage=1,imagepage=1,page=1,memberref=patientmember,patientid=patientid,\
                                                                patient=patient,memberid=memberid,providerid=providerid)))
+
+ 
+def processNewMedia(providerid, xphrase):
+    xphrase1 = xphrase.strip()  #remove all leading trailing blanks
+    patientid = 0
+    memberid = 0
+    
+    patientmember = ""
+    patient = ""
+    
+    r = db((db.vw_memberpatientlist.patient.like("%" + xphrase1 + "%")) & \
+           (db.vw_memberpatientlist.providerid == providerid) & \
+           (db.vw_memberpatientlist.is_active == True)).select()
+    
+    if(len(r)==1):  #exact patietn match
+        memberid = int(common.getid(r[0].primarypatientid))
+        patientid = int(common.getid(r[0].patientid))
+        fullname = common.getstring(r[0].fullname)
+        patientmember = common.getstring(r[0].patientmember)
+        patient = common.getstring(r[0].patient)
+        
+        
+        redirect(URL('media','list_media',vars=dict(page=1,patientid=patientid,\
+                                                               memberid=memberid,providerid=providerid)))
         
     else: # no exact match = Prompt Error
        
@@ -1779,6 +1802,8 @@ def providerhome():
             processNewPayment(providerid, xphrase1)
         elif(xaction == "newImage"):
             processNewImage(providerid,xphrase1)
+        elif(xaction == "newMedia"):
+            processNewMedia(providerid,xphrase1)
         elif(xaction == "newReport"):
             processNewReport(providerid, xphrase1)
             

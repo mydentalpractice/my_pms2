@@ -8546,3 +8546,7 @@ ADD COLUMN `mediatype` VARCHAR(45) NULL DEFAULT 'audio' AFTER `mediafile`,
 ADD COLUMN `mediaformat` VARCHAR(45) NULL DEFAULT 'mp3' AFTER `mediatype`,
 ADD COLUMN `mediasize` DOUBLE NULL DEFAULT '0' AFTER `mediaformat`;
 
+12/28/2020
+===========
+1. ZZZAdd CustomerDependants
+2. 

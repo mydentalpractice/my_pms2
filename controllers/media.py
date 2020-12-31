@@ -16,7 +16,7 @@ from applications.my_pms2.modules  import mdpmedia
 
 
 from applications.my_pms2.modules import common
-
+from applications.my_pms2.modules import logger
 
 
 def update_media():
@@ -102,7 +102,7 @@ def update_media():
     if(source == "treatment"):
         returnurl = URL('treatment', 'update_treatment', vars=dict(page=page,imagepage=0,providerid=providerid,treatmentid=treatmentid))
     else:
-        returnurl = URL('media', 'list_media', vars=dict(providerid = providerid,memberid=memberid,patientid=patientid,page=page,memberref=memberref))
+        returnurl = URL('media', 'list_media', vars=dict(providerid = providerid,memberid=memberid,patientid=patientid,page=page,memberref=memberref,mediatype=mediatype))
 
 
     formA = SQLFORM.factory(
@@ -209,6 +209,7 @@ def update_media():
 
 def new_media():
     
+    #logger.loggerpms2.info("Enter New Media")
     if(len(request.vars) == 0):
         raise HTTP(403,"Error in create_media -  request arguments " )
 
@@ -222,6 +223,8 @@ def new_media():
     patientid   = int(common.getid(request.vars.patientid))
     memberid    = int(common.getid(request.vars.memberid))    
 
+    logger.loggerpms2.info("Get all Members " + str(memberid))
+
     members = db(db.patientmember.id == memberid).select()
     memberref = common.getstring(members[0].patientmember)
 
@@ -234,6 +237,7 @@ def new_media():
     tplan = "Treatment Plan"
 
 
+    #logger.loggerpms2.info("Get all Members1 " + str(memberid))
 
     rows = db((db.patientmember.id == memberid)&(db.patientmember.is_active == True)).select()
     membername = rows[0].fname + ' ' + rows[0].mname + ' ' + rows[0].lname    
@@ -246,7 +250,7 @@ def new_media():
         rows = db((db.patientmemberdependants.id == patientid)&(db.patientmemberdependants.is_active == True)).select()    
         if(len(rows) > 0):
             patientname = rows[0].fname + ' ' + rows[0].mname + ' ' + rows[0].lname    
-
+    #logger.loggerpms2.info("Log a") 
 
     db.dentalimage.treatmentplan.default = tplanid
     db.dentalimage.treatmentplan.writable = False
@@ -272,6 +276,7 @@ def new_media():
     db.dentalimage.imagedate.widget = lambda field, value:SQLFORM.widgets.string.widget(field, value,_class='w3-input w3-border w3-small date')
     db.dentalimage.patient.widget = lambda field, value:SQLFORM.widgets.options.widget(field, value,_style="width:100%;height:35px",_class='w3-input w3-border w3-small')
 
+    #logger.loggerpms2.info("Provider id " + str(providerid)) 
 
     rows = db((db.provider.id == providerid)).select()
     provider = rows[0].provider
@@ -283,11 +288,12 @@ def new_media():
     strSQL = strSQL + " select id,'D' AS patienttype, patientmemberdependants.fname,patientmemberdependants.lname from patientmemberdependants where  patientmemberdependants.patientmember = " + str(memberid)
     dspatients = db.executesql(strSQL)    
 
+    #logger.loggerpms2.info("dspatients " + len(dspatients)) 
 
     if(source == "treatment"):
         returnurl = URL('treatment', 'update_treatment', vars=dict(page=page,imagepage=0,providerid=providerid,treatmentid=treatmentid))
     else:
-        returnurl = URL('media', 'list_media', vars=dict(providerid = providerid,memberid=memberid,patientid=patientid,page=page,memberref=memberref))
+        returnurl = URL('media', 'list_media', vars=dict(providerid = providerid,memberid=memberid,patientid=patientid,page=page,memberref=memberref,mediatype=mediatype))
 
 
     formA = SQLFORM.factory(
@@ -412,7 +418,10 @@ def list_media():
     username = "Admin" 
 
     page = common.getpage1(request.vars.page)
-    returnurl = URL('admin', 'providerhome')
+    
+    source = request.vars.source
+    treatmentid = int(common.getid(request.vars.treatmentid))
+   
     
     providerid   = int(common.getnegid(request.vars.providerid))
     provdict     = common.getproviderfromid(db, request.vars.providerid)
@@ -423,6 +432,48 @@ def list_media():
         
     patient = common.getstring(request.vars.patient)
     fullname = common.getstring(request.vars.fullname)    
+    
+    mediatype = common.getstring(request.vars.mediatype)
+   
+    if(source == "treatment"):
+        returnurl = URL('treatment', 'update_treatment', vars=dict(page=page,imagepage=0,providerid=providerid,treatmentid=treatmentid,mediatype=mediatype))
+    else:
+        returnurl = URL('admin', 'providerhome', vars=dict(providerid=providerid))
+
+
+      
+       
+    db.dentalimage.image.readable = False
+    db.dentalimage.uploadfolder.readable = False
+    db.dentalimage.tooth.readable = False
+    db.dentalimage.quadrant.readable = False
+    db.dentalimage.description.readable = False
+    db.dentalimage.treatmentplan.readable = False
+    db.dentalimage.treatment.readable = False
+    db.dentalimage.patientmember.readable = False
+    db.dentalimage.patient.readable = False
+    db.dentalimage.patienttype.readable = False
+    db.dentalimage.patientname.readable = False
+    db.dentalimage.provider.readable = False
+    db.dentalimage.mediafile.readable = False
+    db.dentalimage.mediaformat.readable = False
+    db.dentalimage.mediasize.readable = False
+    db.dentalimage.is_active.readable = False
+    db.dentalimage.created_on.readable = False
+    db.dentalimage.created_by.readable = False
+    db.dentalimage.modified_on.readable = False
+    db.dentalimage.modified_by.readable = False
+    db.dentalimage.dicomUserUuid.readable = False
+    db.dentalimage.dicomAcctUuid.readable = False
+    db.dentalimage.dicomInstUuid.readable = False
+    db.dentalimage.dicomPatName.readable = False
+    db.dentalimage.dicomPatUuid.readable = False
+    db.dentalimage.dicomPatid.readable = False
+    db.dentalimage.dicomPatOrderUuid.readable = False
+    db.dentalimage.dicomProcDesc.readable = False
+    db.dentalimage.dicomPerformedDate.readable = False
+    db.dentalimage.dicomURL.readable = False
+  
     
     fields=(
 
@@ -454,12 +505,14 @@ def list_media():
 
 
 
-    links = [lambda row: A('Play/Update',_href=URL("media","update_media",vars=dict(page=page,mediaid=row.id))),
+    links = [lambda row: A('View/Play/Update',_href=URL("media","update_media",vars=dict(page=page,mediaid=row.id))),
              lambda row: A('Delete',_href=URL("media","delete_media",vars=dict(page=page,mediaid=row.id)))
              ]
     
-    query = ((db.dentalimage.id > 0) & ((db.dentalimage.mediatype == 'audio') | (db.dentalimage.mediatype == 'video')) & (db.dentalimage.is_active == True))
-
+    if(mediatype == ''):
+        query = ((db.dentalimage.id > 0) & ((db.dentalimage.mediatype == 'image') |(db.dentalimage.mediatype == 'audio') | (db.dentalimage.mediatype == 'video')) & (db.dentalimage.is_active == True))
+    else:
+        query = ((db.dentalimage.id > 0) & (db.dentalimage.mediatype == mediatype) & (db.dentalimage.is_active == True))
     maxtextlength = 40
     maxtextlengths = {'dentalimage.description':100}
 

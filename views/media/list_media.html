@@ -6,6 +6,7 @@
 </header>
 <tr>
 <td>
+<button class="form_details_button" onclick="window.location='{{=URL('media','new_media',vars=dict(page=page,providerid=providerid,patientid=patientid,memberid=memberid,mediatype='image',mediaformat='jpg'))}}';return false">Add Image</button> 
 <button class="form_details_button" onclick="window.location='{{=URL('media','new_media',vars=dict(page=page,providerid=providerid,patientid=patientid,memberid=memberid,mediatype='audio',mediaformat='mp3'))}}';return false">Add Audio</button> 
 <button class="form_details_button" onclick="window.location='{{=URL('media','new_media',vars=dict(page=page,providerid=providerid,patientid=patientid,memberid=memberid,mediatype='video',mediaformat='mp4'))}}';return false">Add Video</button> 
 </td>

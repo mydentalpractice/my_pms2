@@ -168,7 +168,7 @@ def getmembergrid(page,providerid, providername, memberid, patientid,patientmemb
              dict(header=CENTER('Treatment'),body=lambda row: CENTER(A(IMG(_src="/my_pms2/static/img/treatments.png",_width=30, _height=30),_href=URL("treatment","list_treatments",vars=dict(page=page,memberid=row.primarypatientid,patientid=row.patientid, providerid=providerid,providername=providername,status='Open'))))),\
              dict(header=CENTER('Payment'), body=lambda row: CENTER(A(IMG(_src="/my_pms2/static/img/payments.png",_width=30, _height=30),_href=URL("payment","list_payment",vars=dict(page=page,memberid=row.primarypatientid,patientid=row.patientid, fullname=row.fullname, patient=row.patient,providerid=providerid,providername=providername))))),\
              dict(header=CENTER('Image'),body=lambda row:CENTER(A(IMG(_src="/my_pms2/static/img/x-rays.png",_width=30, _height=30),_href=URL("dentalimage","list_dentalimages",vars=dict(memberpage=page,page=0,memberid=row.primarypatientid,patientid=row.patientid, providerid=providerid,providername=providername))))),\
-             dict(header=CENTER('Reports'),body=lambda row: CENTER(A(IMG(_src="/my_pms2/static/img/reports.png",_width=30, _height=30),_href=URL("reports","membertreatmentplansreport",vars=dict(page=page,memberid=row.primarypatientid,patientid=row.patientid, providerid=providerid,providername=providername)))))
+             dict(header=CENTER('Media'),body=lambda row:CENTER(A(IMG(_src="/my_pms2/static/img/x-rays.png",_width=30, _height=30),_href=URL("media","list_media",vars=dict(page=page,memberid=row.primarypatientid,patientid=row.patientid, providerid=providerid,providername=providername)))))
              ]
 
     

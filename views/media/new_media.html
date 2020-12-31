@@ -161,17 +161,16 @@
     <div class="col-md-12">
       <div class="col-md-12">
         <div class="form-group">
-          <div id="uploadImg" class="input-group">    
+          <div id="uploadImg" class="input-group" >    
             {{if (mediaurl != ""):  }}
                    <div>{{=mediafile}}</div>
                     {{if(mediatype == "audio"):}}
-                        <audio controls src="{{=mediaurl}}" type="audio/mpg" class="img_responsive center-block" style="width:90%" />
+                        <audio controls src="{{=mediaurl}}" type="audio/mpg" alt="No Image" class="img_responsive center-block" style="width:90%" />
                     {{pass}}
                     {{if(mediatype == "video"):}}
                         <video controls src="{{=mediaurl}}" type="video/mp4" class="img_responsive center-block" style="width:90%" />
                     {{pass}}
-                    
-            {{pass}}	       
+            {{pass}}
           </div>
         </div>
        </div>

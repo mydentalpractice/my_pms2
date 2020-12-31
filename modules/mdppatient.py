@@ -1536,11 +1536,6 @@ class Patient:
         year            = timedelta(days=365)
     
       premenddt = (premstartdt + year) - day  
-
-     
-  
-  
-     
       
       patid = db.patientmember.insert(\
         patientmember = patientmember,
@@ -1580,8 +1575,29 @@ class Patient:
         modified_by = 1     
       
       )
+
       
-     
+      deps = common.getkeyvalue(avars,"dependants",None)
+      if(deps != None):
+        for dep in deps:
+          db.patientmemberdependants.insert(
+            
+            title = "",
+            fname = dep.fname,
+            mname = dep.mname,
+            lname = dep.lname,
+            depdob = common.getdatefromstring(dep.depdob,"%d/%m/%Y"),
+            gender = dep.gender,
+            relation = dep.relation,
+            patientmember = patid,
+            newmember = True,
+            
+            created_on = common.getISTFormatCurrentLocatTime(),
+            created_by = 1,
+            modified_on = common.getISTFormatCurrentLocatTime(),
+            modified_by = 1                 
+          
+          )
      
       
       pat = db((db.vw_memberpatientlist.primarypatientid == patid) & \
@@ -1627,7 +1643,26 @@ class Patient:
         "result":"success",
         "error_message":""
       }    
+           
       
+      deplist = []
+      depobj = {}
+      deps = db((db.patientmemberdependants.patientmember == patid) & (db.patientmemberdependants.is_active == True)).select()
+      for dep in deps:
+        depobj = {
+         "fname":dep.fname,
+         "mname":dep.mname,
+         "lname":dep.lname,
+         "depdob":common.getstringfromdate(dep.depdob,"%d/%m/%Y"),
+         "gender":dep.gender,
+         "relation":dep.relation,
+         "patientmember":dep.patientmember
+        }
+        deplist.append(depobj)
+      
+      patobj["dependants"] = deplist
+        
+        
     except Exception as e:
       logger.loggerpms2.info("New Patient API  Exception:\n" + str(e))      
       excpobj = {}
