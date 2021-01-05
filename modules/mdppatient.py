@@ -1575,20 +1575,19 @@ class Patient:
         modified_by = 1     
       
       )
-
-      
+     
       deps = common.getkeyvalue(avars,"dependants",None)
       if(deps != None):
         for dep in deps:
           db.patientmemberdependants.insert(
             
             title = "",
-            fname = dep.fname,
-            mname = dep.mname,
-            lname = dep.lname,
-            depdob = common.getdatefromstring(dep.depdob,"%d/%m/%Y"),
-            gender = dep.gender,
-            relation = dep.relation,
+            fname = dep["fname"],
+            mname = dep["mname"],
+            lname = dep["lname"],
+            depdob = common.getdatefromstring(dep["depdob"],"%d/%m/%Y"),
+            gender = dep["gender"],
+            relation = dep["relation"],
             patientmember = patid,
             newmember = True,
             
@@ -1650,13 +1649,13 @@ class Patient:
       deps = db((db.patientmemberdependants.patientmember == patid) & (db.patientmemberdependants.is_active == True)).select()
       for dep in deps:
         depobj = {
-         "fname":dep.fname,
-         "mname":dep.mname,
-         "lname":dep.lname,
-         "depdob":common.getstringfromdate(dep.depdob,"%d/%m/%Y"),
-         "gender":dep.gender,
-         "relation":dep.relation,
-         "patientmember":dep.patientmember
+         "fname":dep["fname"],
+         "mname":dep["mname"],
+         "lname":dep["lname"],
+         "depdob":common.getstringfromdate(dep["depdob"],"%d/%m/%Y"),
+         "gender":dep["gender"],
+         "relation":dep["relation"],
+         "patientmember":dep["patientmember"] 
         }
         deplist.append(depobj)
       

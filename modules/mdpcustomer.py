@@ -160,17 +160,18 @@ class Customer:
                 dependantscount = 0 if deps == None else len(deps)
                 
                 for dep in deps:
+                    
                     depid=db.customerdependants.insert(
                         
-                        fname=dep.fname,
-                        mname=dep.mname,
-                        lname=dep.lname,
-                        depdob=common.getdatefromstring(dep.depdob, "%d/%m/%Y"),
-                        gender=dep.gender,
-                        relation=dep.relation,
+                        fname=dep["fname"],
+                        mname=dep["mname"] if "mname" in dep else "",
+                        lname=dep["lname"],
+                        depdob=common.getdatefromstring(dep["depdob"], "%d/%m/%Y"),
+                        gender=dep["gender"],
+                        relation=dep["relation"],
                         customer_id=customer_id,
                         
-                        dependant_ref = customer_ref + "_" + relation,
+                        dependant_ref = customer_ref + "_" + dep["relation"],
                         is_active = True,
                         created_on = common.getISTFormatCurrentLocatTime(),
                         created_by = 1 if(auth.user == None) else auth.user.id,
@@ -185,6 +186,7 @@ class Customer:
                     "result":"success",
                     "error_message":"",
                     "error_code":"",
+                    "mdp_customer_id":customer_id,
                     "customer_ref":customer_ref,
                     "dependantscount":str(dependantscount)
                 }
@@ -266,25 +268,27 @@ class Customer:
                 )
                 
                          
-                
-                customer_id = c[0].id if(len(c) == 1) else 0
-                d = db((db.customerdependants.customer_id == customer_id) & (db.customerdependants.is_active == True)).select()
-                if(len(d) == 1):
-                    db(db.customerdependants.id == d[0].id).update(
-                        dependant = common.getkeyvalue(avars,"dependant", d[0].dependant),
-                        dependant_ref = common.getkeyvalue(avars,"dependant_ref", d[0].dependant_ref),
-                        fname = common.getkeyvalue(avars,"fname", d[0].fname),
-                        mname = common.getkeyvalue(avars,"mname", d[0].mname),
-                        lname = common.getkeyvalue(avars,"lname", d[0].lname),
-                        gender = common.getkeyvalue(avars,"gender", d[0].gender),
-                        relation = common.getkeyvalue(avars,"relation", d[0].relation),
-                        depdob = common.getdatefromstring(common.getkeyvalue(avars,"depdob", common.getstringfromdate(d[0].depdob,"%d/%m/%Y")),"%d/%m/%Y"),
+                deps = common.getkeyvalue(avars,"dependants",None)
+                for dep in deps:
+                    depid = int(dep["dependant"])
+                    db(db.customerdependants.id == depid).update(
+                        dependant = dep["dependant"],
+                        dependant_ref = dep["dependant_ref"],
+                        fname = dep["fname"],
+                        mname = dep["mname"],
+                        lname = dep["lname"],
+                        gender = dep["gender"],
+                        relation = dep["relation"],
+                        depdob = common.getdatefromstring(dep["depdob"], "%d/%m/%Y"),
                         
                         modified_on = common.getISTFormatCurrentLocatTime(),
                         modified_by =1 if(auth.user == None) else auth.usr.id                            
                         
                     
                     )
+                    
+                    
+               
                 
             else:
                 error_code = "UPDATE_CUST_002"
@@ -384,15 +388,15 @@ class Customer:
             for dep in deps:
                 depobj= {
                     
-                    "dependant_id" : dep.id,
-                    "dependant":dep.dependant,
-                    "dependant_ref" :dep.dependant_ref,
-                    "fname":dep.fname,
-                    "mname":dep.mname,
-                    "mname":dep.mname,
-                    "gender":dep.gender,
-                    "relation":dep.relation,
-                    "depdob":common.getstringfromdate(dep.depdob,"%d/%m/%Y"),
+                    "dependant_id" : dep["id"],
+                    "dependant":dep["dependant"],
+                    "dependant_ref" :dep["dependant_ref"],
+                    "fname":dep["fname"],
+                    "mname":dep["mname"] if "mname" in dep else "",
+                    "lname":dep["lname"],
+                    "gender":dep["gender"],
+                    "relation":dep["relation"],
+                    "depdob":common.getstringfromdate(dep["depdob"],"%d/%m/%Y"),
                 
                 
                 }
@@ -424,7 +428,21 @@ class Customer:
         
         try:
             c = db((db.customer.customer_ref == customer_ref) & (db.customer.is_active == True)).select(db.customer.id)
-            customer_id = c[0].id if(len(c) == 1) else customer_id            
+            customer_id = c[0].id if(len(c) == 1) else customer_id 
+            
+            if(customer_id == 0):
+                jsonresp = {
+                    "result":"fail",
+                    "error_message":"No Customer to Cancel",
+                    "error_code":"",
+                    
+                    "customer_id":customer_id,
+                    "customer_ref":customer_ref
+                    
+                }                     
+                
+                return jason.dumps(jsonresp)
+            
             
             db(db.customer.id == customer_id).update(
                 is_active = False,
@@ -439,13 +457,24 @@ class Customer:
             )
             
             c = db(db.customer.id == customer_id).select(db.customer.customer_ref)
+            patid = 0
             if(len(c)==1):
                 db((db.patientmember.groupref == c[0].customer_ref) & (db.patientmember.is_active == True)).update(
                     is_active = False,
                     modified_on = common.getISTFormatCurrentLocatTime(),
                     modified_by =1 if(auth.user == None) else auth.usr.id                               
                 )
-                
+            p = db((db.patientmember.groupref == customer_ref)).select(db.patientmember.id)
+            patid = p[0].id if len(p) == 1 else 0
+            
+           
+            d = db((db.patientmemberdependants.patientmember == patid) & (db.patientmemberdependants.is_active == True)).update(
+                is_active = False,
+                modified_on = common.getISTFormatCurrentLocatTime(),
+                modified_by =1 if(auth.user == None) else auth.usr.id              
+            )
+
+            
             jsonresp = {
                             "result":"success",
                             "error_message":"",
@@ -494,13 +523,13 @@ class Customer:
             appointment_id  = common.getkeyvalue(avars,"appointment_id",c[0].appointment_id)
             appointment_datetime = common.getdatefromstring(common.getkeyvalue(avars,"appointment_datetime",todaystr + " 09:00"),"%d/%m/%Y %H:%M")
             
-            p = db(db.vw_memberpatientlist.groupref == customer_ref).select()
+            p = db((db.vw_memberpatientlist.groupref == customer_ref) & (db.vw_memberpatientlist.patienttype == 'P') & (db.vw_memberpatientlist.is_active == True)).select()
             patientid = p[0].patientid if(len(p)==1) else 0
             memberid = p[0].primarypatientid if(len(p)==1) else 0
             member = p[0].fullname if(len(p)==1) else ""
             
             appPath = current.globalenv["request"].folder
-            mdpappt = mdpappointment.Appointment(db, providerid)
+           
             docs = db((db.doctor.providerid == providerid) & 
                       (db.doctor.practice_owner == True) & 
                       (db.doctor.is_active == True)).select()
@@ -511,15 +540,21 @@ class Customer:
             else:  
                 doctorid = 0
             
+            mdpappt = mdpappointment.Appointment(db, providerid)
             apptobj = json.loads(mdpappt.newappointment(memberid, patientid, doctorid, 
                                                         "", 
                                                         appointment_datetime.strftime("%d/%m/%Y %H:%M"),
                                                         30, 
                                                         "Auto-Appointment created\nAppointment_ID: " + appointment_id + "\n" + c[0].notes, 
                                                         c[0].cell, 
-                                                        appPath
+                                                        appPath,
+                                                        appointment_id
                                                         )
                                      )   
+            
+            #update appointment unique id with customer appointment id
+            db(db.t_appointment.id == int(apptobj["appointmentid"])).update(f_uniqueid == appointment_id)
+            
             
             #email Welcome Kit
             ret = mail.emailWelcomeKit(db,current.globalenv["request"],memberid,providerid)
@@ -530,6 +565,7 @@ class Customer:
                             "error_message":"",
                             "error_code":"",
                             "message":message,
+                            "appointment_id":appointment_id,
                             "customer_id":customer_id,
                             "customer_ref":customer_ref
                             
@@ -610,6 +646,29 @@ class Customer:
                 
                 cobj["notes"] = c[0].notes
                 
+                
+                deps = db((db.customerdependants.customer_id == customerid) & (db.customerdependants.is_active == True)).select()
+                deplist = []
+                depobj = {}
+                
+                
+                     
+
+                for dep in deps:
+                    depobj = {
+                        "dependant":dep["dependant"],
+                        "dependant_ref":dep["dependant_ref"],
+                        "customer_id":dep["customer_id"],
+                        "fname":dep["fname"],
+                        "mname":dep["mname"]  if "mname" in dep else "",
+                        "lname":dep["lname"],
+                        "depdob":common.getstringfromdate(dep["depdob"],"%d/%m/%Y"),
+                        "gender":dep["gender"],
+                        "relation":dep["relation"],
+                    }
+                    deplist.append(depobj)
+                
+                cobj["dependants"] = deplist
                 pat = mdppatient.Patient(db, c[0].providerid)
                 
                 jsonresp = json.loads(pat.newpatientfromcustomer(cobj))
@@ -620,7 +679,7 @@ class Customer:
                     
                     status = 'Enrolled',
                     modified_on = common.getISTFormatCurrentLocatTime(),
-                    modified_by =1 if(auth.user == None) else auth.usr.id                               
+                    modified_by =1 if(auth.user == None) else auth.user.id                               
                          
                 
                 )

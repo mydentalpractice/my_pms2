@@ -581,7 +581,7 @@ class Appointment:
     # provider notes
     # app status
     #}
-    def newappointment(self,memberid,patientid,doctorid,complaint,startdt,duration,providernotes,cell,appPath):
+    def newappointment(self,memberid,patientid,doctorid,complaint,startdt,duration,providernotes,cell,appPath,appointment_ref = None):
         
         db = self.db
         providerid = self.providerid
@@ -619,7 +619,8 @@ class Appointment:
                                                   created_by = 1 if(auth.user == None) else auth.user.id, \
                                                   modified_by= 1 if(auth.user == None) else auth.user.id)  
                 
-                db(db.t_appointment.id == apptid).update(f_uniqueid = apptid)
+                appointment_ref = apptid if(appointment_ref == None) else appointment_ref
+                db(db.t_appointment.id == apptid).update(f_uniqueid = appointment_ref)
                 
                 #save in case report
                 common.logapptnotes(db,complaint,providernotes,apptid)
@@ -627,10 +628,10 @@ class Appointment:
                 # Send Confirmation SMS
                 #self.sms_confirmation(appPath,apptid,"create")
                 
-                newapptobj= {"result":"success","error_message":"","appointmentid":apptid,"message":"success"}
+                newapptobj= {"result":"success","error_message":"","appointment_ref":appointment_ref,"appointmentid":apptid,"message":"success"}
              
             else:
-                newapptobj = {"result":"success","error_message":"","appointmentid":0,"message":"Invalid Appointment Date and Time"}
+                newapptobj = {"result":"success","error_message":"","appointment_ref":appointment_ref, "appointmentid":0,"message":"Invalid Appointment Date and Time"}
         except Exception as e:
             excpobj = {}
             excpobj["result"] = "fail"

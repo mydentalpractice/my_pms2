@@ -2325,3 +2325,520 @@ def delete_block():
         redirect(returnurl)
 
     return dict(form=form,returnurl=returnurl,providerid=providerid,page=1, source="home",title=title,startdate=startdate,enddate=enddate)
+
+
+def customer_appointment_update():
+
+
+        apptid = int(common.getid(request.vars.apptid))
+        appt = db(db.t_appointment.id == apptid).select()    
+
+        
+
+        source = common.getstring(request.vars.source)
+        page = common.getpage(request.vars.page)   
+        memberpage = common.getpage(request.vars.memberpage)
+
+        providerid = int(request.vars.providerid)
+        
+        provdict = common.getproviderfromid(db, providerid)
+        providername = provdict["providername"]
+       
+
+
+        flag = common.getboolean(appt[0].blockappt)
+        if(flag == True):
+                redirect(URL('appointment', 'appointment_blockupdate', vars=dict(apptid=apptid,providerid=providerid,source=source)))
+
+
+        title = common.getstring(appt[0].f_title)
+        location = common.getstring(appt[0].f_location)
+        cell = common.getstring(appt[0].cell)
+        patientname = common.getstring(appt[0].f_patientname) 
+        duration = int(common.getid(appt[0].f_duration))
+        description = common.getstring(appt[0].description)
+
+        patientid = int(common.getid(appt[0].patient))
+        memberid  = int(common.getid(appt[0].patientmember))
+        doctorid = int(common.getid(appt[0].doctor))
+        treatmentid = int(common.getid(appt[0].f_treatmentid))
+
+
+        #patient = <fname lanme>:<memberref>
+        #xpatientmember = <fname lanme>:<memberref>
+        patientmember = ""
+        patient=""
+        membername = ""
+        fullname = ""
+        status = ""
+
+        rows = db((db.vw_memberpatientlist.providerid == providerid) & (db.vw_memberpatientlist.primarypatientid == memberid) & (db.vw_memberpatientlist.patientid == patientid)).select()
+        if(len(rows) > 0):
+                patientmember = common.getstring(rows[0].patientmember) #Patient/Member ID
+                patient = common.getstring(rows[0].patient)  # fname + lname + : + patientmember
+        else:
+                fullname = patientname
+
+
+
+        curraptdt = appt[0].f_start_time
+        str2 = curraptdt.strftime('%d %B %Y - %H:%M')
+        str3 = appt[0].f_end_time
+        str4 = str3.strftime('%d %B %Y - %H:%M') 
+
+        status = appt[0].f_status
+
+
+        if(patientid > 0):
+
+                form2 = SQLFORM.factory(
+                        Field('patientmember', 'string',  label='Patient',default=patientname,requires=[IS_NOT_EMPTY()],writable=False),
+                        Field('cell', 'string',  label='Cell',default=cell),
+                        Field('treatment', widget = lambda field, value:SQLFORM.widgets.options.widget(field, value, _class='form_details'), default=treatmentid,label='Treatment List',\
+                              requires=IS_EMPTY_OR(IS_IN_DB(db((db.vw_treatmentlist.providerid==providerid)&(db.vw_treatmentlist.patientid == patientid)&(db.vw_treatmentlist.is_active==True)), \
+                                                            'vw_treatmentlist.id', '%(treatment)s : %(startdate)s'))),
+                        Field('chiefcomplaint', 'text', default=title),
+                        Field('doctor', widget = lambda field, value:SQLFORM.widgets.options.widget(field, value, _class='form_details'), default=doctorid, label='Doctor',requires=IS_IN_DB(db((db.doctor.providerid==providerid)&(db.doctor.is_active==True)&(db.doctor.stafftype=='Doctor')), 'doctor.id', '%(name)s')),
+                        Field('title', 'text',  label='Patient',default=title),
+                        Field('location', 'string',  label='Clinic Location',default=location),
+                        Field('status', 'string',  label='Status',default=status,requires = IS_IN_SET(APPTSTATUS)),            
+                        Field('xpatientmember', 'string',  label='Patient',default=patient),
+                        Field('xfullname', 'string',  label='Patient', default=fullname),
+                        Field('xmemberid', 'string',  label='Patient',default=memberid),
+                        Field('start_date', 'datetime',label='Start Date & Time',default=str2,requires=[IS_NOT_EMPTY()]),
+                        Field('duration', widget = lambda field, value:SQLFORM.widgets.options.widget(field, value, _class='form_details'), default=duration, label='Doctor',requires=IS_IN_SET(['30','45','60'])),
+                        Field('end_date', 'datetime',label='End Date & Time', default=str4,requires=[IS_NOT_EMPTY()]),
+                        Field('description','text', label='Description', default=description)
+
+                )
+        else:
+                form2 = SQLFORM.factory(
+                        Field('patientmember', 'string',  label='Patient',default=patientname,requires=[IS_NOT_EMPTY()],writable=False),
+                        Field('cell', 'string',  label='Cell',default=cell),
+                        Field('treatment', widget = lambda field, value:SQLFORM.widgets.options.widget(field, value, _class='form_details'), default=treatmentid,label='Treatment List',\
+                              requires=IS_EMPTY_OR(IS_IN_DB(db((db.vw_treatmentlist.providerid==providerid)&(db.vw_treatmentlist.patientid == patientid)&(db.vw_treatmentlist.is_active==True)), \
+                                                            'vw_treatmentlist.id', '%(treatment)s : %(startdate)s'))),            Field('chiefcomplaint', 'text', default=title),
+                        Field('doctor', widget = lambda field, value:SQLFORM.widgets.options.widget(field, value, _class='form_details'), default=doctorid, label='Doctor',requires=IS_IN_DB(db((db.doctor.providerid==providerid)&(db.doctor.is_active==True)), 'doctor.id', '%(name)s')),
+                        Field('title', 'text',  label='Patient',default=title),
+                        Field('location', 'string',  label='Clinic Location',default=location),
+                        Field('status', 'string',  label='Status',default=status,requires = IS_IN_SET(APPTSTATUS)),
+                        Field('xpatientmember', 'string',  label='Patient',default=patient),
+                        Field('xfullname', 'string',  label='Patient', default=fullname),
+                        Field('xmemberid', 'string',  label='Patient',default=memberid),
+                        Field('start_date', 'datetime',label='Start Date & Time',default=str2,requires=[IS_NOT_EMPTY()]),
+                        Field('duration', widget = lambda field, value:SQLFORM.widgets.options.widget(field, value, _class='form_details'), default=duration, label='Doctor',requires=IS_IN_SET(['15','30','45','60'])),
+                        Field('end_date', 'datetime',label='End Date & Time', default=str4,requires=[IS_NOT_EMPTY()]),
+                        Field('description','text', label='Description', default=description)
+
+                )
+
+
+        form2.element('textarea[name=description]')['_class'] = 'form-control'
+        form2.element('textarea[name=description]')['_style'] = 'height:100px;line-height:1.0;'
+        form2.element('textarea[name=description]')['_rows'] = 5
+
+        form2.element('textarea[name=title]')['_class'] = 'form-control'
+        form2.element('textarea[name=title]')['_style'] = 'height:100px;line-height:1.0;'
+        form2.element('textarea[name=title]')['_rows'] = 5    
+        form2.element('textarea[name=title]')['_placeholder'] = "Enter Title"
+
+        form2.element('textarea[name=chiefcomplaint]')['_class'] = 'form-control'
+        form2.element('textarea[name=chiefcomplaint]')['_style'] = 'height:100px;line-height:1.0;'
+        form2.element('textarea[name=chiefcomplaint]')['_rows'] = 5    
+        form2.element('textarea[name=chiefcomplaint]')['_placeholder'] = "Enter Complaint"
+
+        #patientmember = form2.element('#no_table_patientmember')
+        #patientmember['_class'] = 'form-control'
+        #patientmember['_style'] = 'width:100%'
+        #patientmember['_placeholder'] = 'Enter Patient Name or New Patient'   
+        #patientmember['_autocomplete'] = 'off'   
+        xcell = form2.element('#no_table_cell')
+        xcell['_class'] = 'form-control'
+        xcell['_style'] = 'width:100%'
+        xcell['_placeholder'] = 'Enter Cell Number'   
+        xcell['_autocomplete'] = 'off'   
+
+        trmnt = form2.element('#no_table_treatment')
+        trmnt['_class'] = 'form-control'
+        trmnt['_style'] = 'width:100%'  
+
+
+        loc = form2.element('#no_table_location')
+        loc['_class'] = 'form-control'
+        loc['_style'] = 'width:100%'
+        loc['_placeholder'] = 'Enter clinic'   
+        loc['_autocomplete'] = 'off'   
+
+        dur = form2.element('#no_table_duration')
+        dur['_class'] = 'form-control'
+        dur['_style'] = 'width:100%'
+
+
+        doc = form2.element('#no_table_doctor')
+        doc['_class'] = 'form-control'
+        doc['_style'] = 'width:100%'
+
+        sts = form2.element('#no_table_status')
+        sts['_class'] = 'form-control'
+        sts['_style'] = 'width:100%'    
+
+
+
+        xnew_start = form2.element('input',_id='no_table_start_date')
+        xnew_start['_class'] =  'form-control form_datetime bs-datetime'
+
+
+        xnew_end = form2.element('input',_id='no_table_end_date')
+        xnew_end['_class'] =  'form-control form_datetime bs-datetime'
+
+
+        returnurl = URL('appointment','customer_appointment',vars=dict(providerid=providerid,page=page))
+
+
+
+        if form2.process(formname='form_two',keepvalues=True).accepted:
+
+
+                page = common.getpage(request.vars.page)
+                memberpage = common.getpage(request.vars.memberpage)
+
+                apptid = int(common.getid(request.vars.apptid))
+
+                newdescription = common.getstring(request.vars.description)
+                cell = common.getstring(request.vars.cell)
+                treatmentid = int(common.getid(request.vars.treatment))
+                chiefcomplaint = common.getstring(request.vars.chiefcomplaint)  # this is stored in f_title field
+
+
+                duration = int(common.getid(request.vars.duration))
+                start_date = common.getnulldt(request.vars.start_date)
+                apptdt = datetime.datetime.strptime(start_date, '%d %B %Y - %H:%M')
+                endapptdt = apptdt + timedelta(minutes=duration)
+
+
+                providerid = int(common.getid(request.vars.providerid))
+                memberid = int(common.getid(request.vars.xmemberid))
+                doctorid = int(common.getid(request.vars.doctor))
+
+                #patient = <fname lanme>:<membercode>
+                #xpatientmember = <fname lanme>:<membercode>
+                rows = db(db.vw_memberpatientlist.patient == form2.vars.xpatientmember).select()
+
+                if(len(rows) > 0):
+                        memberid = int(common.getid(rows[0].primarypatientid))
+                        patientid = int(common.getid(rows[0].patientid))
+                else:
+                        memberid = 0
+                        patientid = 0
+
+
+
+
+                db(db.t_appointment.id == apptid).update(f_title = chiefcomplaint, f_start_time = apptdt, f_end_time =  endapptdt, f_duration=duration,\
+                                                         f_status=common.getstring(form2.vars.status),\
+                                                         description = newdescription, cell = cell,  doctor=doctorid,f_treatmentid=treatmentid,\
+                                                         modified_by = auth.user_id, modified_on=common.getISTFormatCurrentLocatTime())
+
+
+                #save in case report
+
+                if((patientid > 0) & ((title.strip().upper() != chiefcomplaint.strip().upper()) | (description.strip().upper() != newdescription.strip().upper() ))):
+
+                        common.logapptnotes(db,chiefcomplaint,newdescription,apptid)
+                        #csrdate = (request.now).strftime('%d/%m/%Y %H:%M:%S')
+                        #csr = "Appointment CR:"  + csrdate + "\r\n" + form2.vars.title + "\r\n" + form2.vars.description 
+                        #csrid = db.casereport.insert(appointmentid=apptid,memberid=memberid,patientid = patientid, providerid=providerid, doctorid=doctorid, casereport = csr, is_active=True,\
+                                                                                #created_on = request.now, created_by = providerid, modified_on = request.now, modified_by = providerid)        
+
+                # Send Confirmation SMS only when appt start date is changed
+                # The confirmation sms will be sent from Superadmin Activity Tracker Group Message module
+                # At this point we will send 
+                retval=False
+                if(apptdt != curraptdt):
+                        db(db.t_appointment.id == apptid).update(sendsms = True, sendrem = True,smsaction="update")
+                        session.flash = "Appointment updated! SMS confirmation will be sent to the patient and the doctor!"
+
+                #return HTML(BODY(SCRIPT('window.close()'))).xml()        
+                redirect(returnurl)
+
+        elif form2.errors:
+                session.flash = "Error updating appointment "  + str(form2.errors)
+                redirect(returnurl)
+                #return HTML(BODY(SCRIPT('window.close()'))).xml()        
+
+        return dict(form2=form2,apptid = apptid, providerid=providerid, memberid=memberid, patientid=patientid, providername=providername,\
+                    returnurl=returnurl,page=page,memberpage=memberpage,membername=patient,patientname=fullname,source=source)
+
+
+def customer_prevnextappt():
+
+        providerid = int(request.vars.providerid)
+        provdict = common.getproviderfromid(db,providerid)
+        prov = db(db.provider.id == providerid).select(db.provider.pa_practicename,db.provider.pa_practiceaddress)
+
+        x = (datetime.datetime.today()).strftime("%d/%m/%Y %H:%M")
+        xdt = datetime.datetime.strptime(x, "%d/%m/%Y %H:%M")
+
+        if(request.vars.moment != None):
+                y = (request.vars.moment).split("T")
+                if(y[1] == "00:00:00 00:00"):
+                        currdate = datetime.datetime.strptime(request.vars.moment, "%Y-%m-%dT%H:%M:%S 00:00")            
+                else:
+                        currdate = datetime.datetime.strptime(request.vars.moment, "%Y-%m-%dT%H:%M:%S")            
+        else:
+                currdate = xdt
+
+        if(request.vars.defdate == None):
+                defdate = (currdate).strftime('%Y-%m-%d %H:%M')
+        else:
+                if(secondsFormat(request.vars.defdate)):
+                        currdate = datetime.datetime.strptime(request.vars.defdate, "%Y-%m-%d %H:%M:%S")        
+                else:
+                        currdate = datetime.datetime.strptime(request.vars.defdate, "%Y-%m-%d %H:%M")
+
+                defdate = (currdate).strftime('%Y-%m-%d %H:%M')    
+
+        defyear =(currdate).strftime('%Y')  #YYYY
+        defmonth = (currdate).strftime('%m')  #mm
+
+        defstart = datetime.datetime.strptime("01/" + str(defmonth)+"/"+str(defyear) + " 00:00:00", '%d/%m/%Y %H:%M:%S')   #start of def month
+        defend   = datetime.date(defstart.year, defstart.month, calendar.monthrange(defstart.year, defstart.month)[-1])
+        defend   = datetime.datetime.strptime( defend.strftime("%d") + "/" + str(defmonth)+"/"+str(defyear) + " 23:59:59", '%d/%m/%Y %H:%M:%S')   #end of def month (assuming 31 for all months)    
+
+
+        start = "2100-01-01 00:00"
+        end   = "2100-01-01 00:00"  
+
+        #get all appointments for this provider and default month
+        rows=db((db.t_appointment.provider==providerid) & (db.t_appointment.f_start_time>=defstart) &(db.t_appointment.f_start_time<=defend) &(db.t_appointment.is_active==True) ).\
+                select(db.t_appointment.id,db.t_appointment.f_title,db.t_appointment.f_start_time,db.t_appointment.f_end_time,db.t_appointment.f_patientname,db.t_appointment.is_active, \
+                       db.doctor.color, left=db.doctor.on(db.doctor.id == db.t_appointment.doctor))  
+
+        dailyappts  = db((db.vw_appointment_today.providerid == providerid) & (db.vw_appointment_today.is_active == True)).select(orderby=db.vw_appointment_today.f_start_time)
+        weeklyappts = db((db.vw_appointment_weekly.providerid == providerid) & (db.vw_appointment_weekly.is_active == True)).select(orderby=db.vw_appointment_weekly.f_start_time)
+        monthlyappts = db((db.vw_appointment_monthly.providerid == providerid) & (db.vw_appointment_monthly.is_active == True)).select(orderby=db.vw_appointment_monthly.f_start_time)
+
+
+
+        common.dashboard(db,session,providerid)
+        memberid = 0
+        patientid = 0   
+
+
+
+        sqlquery = db((db.vw_memberpatientlist.providerid == providerid) & (db.vw_memberpatientlist.is_active == True))
+
+        form = SQLFORM.factory(
+                Field('patientmember1', 'string',    label='Patient ID',requires=IS_NOT_EMPTY()),
+                Field('xpatientmember1', 'string',   label='Member ID', default = ""),
+                Field('xaction','string', label='', default='X')
+
+        )
+
+        xpatientmember = form.element('#no_table_patientmember1')
+        #xpatientmember['_class'] = 'w3-input w3-border'
+        xpatientmember['_class'] = 'form-control'
+        xpatientmember['_placeholder'] = 'Enter Patient Information (first, Last, Cell, Email)' 
+        xpatientmember['_autocomplete'] = 'off' 
+
+        xpatientmember1 = form.element('#no_table_xpatientmember1')
+        #xpatientmember['_class'] = 'w3-input w3-border'
+        xpatientmember1['_class'] = 'form-control'
+
+        xpatientmember1['_autocomplete'] = 'off' 
+
+
+        doctorid = int(common.getdefaultdoctor(db, providerid))
+        returnurl = URL('admin', 'providerhome')
+        r = db(db.urlproperties.id >0).select()
+        exturl = None
+        if(len(r)>0):
+                exturl = common.getstring(r[0].externalurl)
+
+
+
+
+
+        if form.process().accepted:  
+                xaction = form.vars.xaction
+                xphrase1 = form.vars.xpatientmember1.strip()
+
+                if(xaction == "searchPatient"):
+                        processPatientLookup(providerid, xphrase1)
+                elif(xaction == "newPatient"):
+                        redirect(URL('member','new_nonmember',vars=dict(page=0,providerid=providerid,returnurl=URL('admin','providerhome'))))
+                elif(xaction == "newTreatment"):
+                        processNewTreatment(providerid, xphrase1)
+                elif(xaction == "newPayment"):
+                        processNewPayment(providerid, xphrase1)
+                elif(xaction == "newImage"):
+                        processNewImage(providerid,xphrase1)
+                elif(xaction == "newReport"):
+                        processNewReport(providerid, xphrase1)
+
+        elif form.errors:
+                #xpatientmember1 is empty
+                xaction = form.vars.xaction
+                if(xaction == "newPatient"):
+                        redirect(URL('member','new_nonmember',vars=dict(page=0,providerid=providerid,returnurl=URL('admin','providerhome'))))        
+
+
+
+
+        sql = "select doctor.name, doctor.color, IFNULL(appts.appointments,0) AS appointments,doctor.providerid,doctor.id as docid  from doctor left join "
+        sql = sql + "(select vw_appointment_count.doctorid, vw_appointment_count.name, color, sum(appointments) as appointments, starttime from " 
+        sql = sql + "vw_appointment_count where is_active = 'T' and providerid =" +  str(providerid)  + " and starttime >= '" + defstart.strftime('%Y-%m-%d') + "'  and starttime <= '" + defend.strftime('%Y-%m-%d') + "' group by name ) appts "
+        sql = sql + " on doctor.id = appts.doctorid where doctor.stafftype <> 'Staff' and doctor.is_active = 'T' and doctor.providerid = " + str(providerid) + " ORDER BY appointments DESC" 
+
+        docs = db.executesql(sql)   
+
+
+        return dict(form=form,docs=docs,defdate=defdate,start=start,end=end,rows=rows,memberpage=1,page=1,\
+                    dailyappts=dailyappts,monthlyappts=monthlyappts,weeklyappts=weeklyappts,providerid=providerid, providername= provdict["providername"] + " " + provdict["provider"],returnurl=returnurl,source='home',externalurl=exturl)
+
+
+def customer_appointment():
+
+
+
+        providerid = int(request.vars.providerid)
+        provdict = common.getproviderfromid(db,providerid)
+        if(providerid  < 0):
+                raise HTTP(400,"PMS-Error: There is no valid logged-in Provider: providerhome()")    
+
+        prov = db(db.provider.id == providerid).select(db.provider.pa_practicename,db.provider.pa_practiceaddress)
+
+
+        if(request.vars.moment != None):
+                y = (request.vars.moment).split("T")
+                if(y[1] == "00:00:00 00:00"):
+                        currdate = datetime.datetime.strptime(request.vars.moment, "%Y-%m-%dT%H:%M:%S 00:00")            
+                else:
+                        currdate = datetime.datetime.strptime(request.vars.moment, "%Y-%m-%dT%H:%M:%S")            
+        else:
+                currdate = datetime.datetime.strptime((datetime.datetime.today()).strftime("%d/%m/%Y %H:%M"), "%d/%m/%Y %H:%M")   
+
+
+        if(request.vars.defdate == None):
+                defdate = (currdate).strftime('%Y-%m-%d %H:%M')
+        else:
+                if(secondsFormat(request.vars.defdate)):
+                        currdate = datetime.datetime.strptime(request.vars.defdate, "%Y-%m-%d %H:%M:%S")        
+                else:
+                        currdate = datetime.datetime.strptime(request.vars.defdate, "%Y-%m-%d %H:%M")        
+                defdate = (currdate).strftime('%Y-%m-%d %H:%M')
+
+        defyear =(currdate).strftime('%Y')  #YYYY
+        defmonth = (currdate).strftime('%m')  #mm
+
+        defstart = datetime.datetime.strptime("01/" + str(defmonth)+"/"+str(defyear) + " 00:00:00", '%d/%m/%Y %H:%M:%S')   #start of def month
+        defend   = datetime.date(defstart.year, defstart.month, calendar.monthrange(defstart.year, defstart.month)[-1])
+        defend   = datetime.datetime.strptime( defend.strftime("%d") + "/" + str(defmonth)+"/"+str(defyear) + " 23:59:59", '%d/%m/%Y %H:%M:%S')   #end of def month (assuming 31 for all months)    
+
+
+
+        start = "2100-01-01 00:00"
+        end   = "2100-01-01 00:00"  
+
+        #get all appointments for this provider and default month
+        rows=db((db.t_appointment.provider==providerid) & (db.t_appointment.f_start_time>=defstart) &(db.t_appointment.f_start_time<=defend) &(db.t_appointment.is_active==True) ).\
+                select(db.t_appointment.id,db.t_appointment.f_title,db.t_appointment.f_start_time,db.t_appointment.f_end_time,db.t_appointment.f_patientname,db.t_appointment.blockappt,db.t_appointment.is_active, \
+                       db.doctor.color, left=db.doctor.on(db.doctor.id == db.t_appointment.doctor))  
+
+
+
+        dailyappts  = db((db.vw_appointment_today.providerid == providerid) & (db.vw_appointment_today.is_active == True)).select(orderby=db.vw_appointment_today.f_start_time)
+        weeklyappts = db((db.vw_appointment_weekly.providerid == providerid) & (db.vw_appointment_weekly.is_active == True)).select(orderby=db.vw_appointment_weekly.f_start_time)
+        monthlyappts = db((db.vw_appointment_monthly.providerid == providerid) & (db.vw_appointment_monthly.is_active == True)).select(orderby=db.vw_appointment_monthly.f_start_time)
+
+
+
+        common.dashboard(db,session,providerid)
+        memberid = 0
+        patientid = 0   
+
+
+
+        sqlquery = db((db.vw_memberpatientlist.providerid == providerid) & (db.vw_memberpatientlist.is_active == True))
+
+
+        form = SQLFORM.factory(
+                Field('patientmember1', 'string',    label='Patient ID',requires=IS_NOT_EMPTY()),
+                Field('xpatientmember1', 'string',   label='Member ID', default = ""),
+                Field('xaction','string', label='', default='X')
+
+        )
+
+        xpatientmember = form.element('#no_table_patientmember1')
+        #xpatientmember['_class'] = 'w3-input w3-border'
+        xpatientmember['_class'] = 'form-control'
+        xpatientmember['_placeholder'] = 'Enter Patient Information (memberid, first, Last, Cell, Email)' 
+        xpatientmember['_autocomplete'] = 'off' 
+
+        xpatientmember1 = form.element('#no_table_xpatientmember1')
+        #xpatientmember['_class'] = 'w3-input w3-border'
+        xpatientmember1['_class'] = 'form-control'
+
+        xpatientmember1['_autocomplete'] = 'off' 
+
+
+        doctorid = int(common.getdefaultdoctor(db, providerid))
+
+
+
+
+        returnurl = URL('admin', 'customer_appointment')
+
+
+        r = db(db.urlproperties.id >0).select()
+        exturl = None
+        if(len(r)>0):
+                exturl = common.getstring(r[0].externalurl)
+
+
+
+
+
+
+
+        if form.process().accepted:  
+                xaction = form.vars.xaction
+                xphrase1 = form.vars.xpatientmember1.strip()
+
+                if(xaction == "searchPatient"):
+                        processPatientLookup(providerid, xphrase1)
+                elif(xaction == "newPatient"):
+                        redirect(URL('member','new_nonmember',vars=dict(page=0,providerid=providerid,returnurl=URL('admin','cutomer_appointment'))))
+                elif(xaction == "newTreatment"):
+                        processNewTreatment(providerid, xphrase1)
+                elif(xaction == "newPayment"):
+                        processNewPayment(providerid, xphrase1)
+                elif(xaction == "newImage"):
+                        processNewImage(providerid,xphrase1)
+                elif(xaction == "newMedia"):
+                        processNewMedia(providerid,xphrase1)
+                elif(xaction == "newReport"):
+                        processNewReport(providerid, xphrase1)
+
+        elif form.errors:
+                #xpatientmember1 is empty
+                xaction = form.vars.xaction
+                if(xaction == "newPatient"):
+                        redirect(URL('member','new_nonmember',vars=dict(page=0,providerid=providerid,returnurl=URL('admin','providerhome'))))        
+
+
+
+
+        start1 = defstart.strftime('%Y-%m-%d')
+        end1 = defend.strftime('%Y-%m-%d')
+
+        sql = "select doctor.name, doctor.color, IFNULL(appts.appointments,0) AS appointments,doctor.providerid,doctor.id as docid  from doctor left join "
+        sql = sql + "(select vw_appointment_count.doctorid, vw_appointment_count.name, color, sum(appointments) as appointments, starttime from " 
+        sql = sql + "vw_appointment_count where is_active = 'T' and providerid =" +  str(providerid)  + " and starttime >= '" + start1 + "'  and starttime <= '" + end1 + "' group by name ) appts "
+        sql = sql + " on doctor.id = appts.doctorid where doctor.stafftype <> 'Staff' and doctor.is_active = 'T' and doctor.providerid = " + str(providerid) + " ORDER BY appointments DESC" 
+
+        docs = db.executesql(sql)
+
+
+        return dict(form=form,docs=docs,defdate=defdate,start=start,end=end,rows=rows,memberpage=1,page=1,\
+                    dailyappts=dailyappts,monthlyappts=monthlyappts,weeklyappts=weeklyappts,providerid=provdict["providerid"], providername= provdict["providername"] + " " + provdict["provider"],returnurl=returnurl,source='home',externalurl=exturl)
