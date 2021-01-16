@@ -236,6 +236,7 @@ class Media:
 
     def upload_media(self,avars):
 
+        logger.loggerpms2.info("Enter upload_media")
         db = self.db
         providerid = self.providerid
         auth = current.auth
@@ -297,7 +298,7 @@ class Media:
     
     
             #save image data in a temporary file
-            #logger.loggerpms2.info("Enter Upload Image")
+            logger.loggerpms2.info("Enter Upload Image " + uploadfolder)
     
     
     
@@ -313,7 +314,7 @@ class Media:
                 f.write(mediadata.decode('base64'))     
     
             
-            #logger.loggerpms2.info("Image Uploaded to " + tempimgfile.name)
+            logger.loggerpms2.info("Image Uploaded to " + tempmediafile.name)
     
     
             #upload the image to the server

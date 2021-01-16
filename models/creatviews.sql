@@ -8548,5 +8548,5 @@ ADD COLUMN `mediasize` DOUBLE NULL DEFAULT '0' AFTER `mediaformat`;
 
 12/28/2020
 ===========
-1. ZZZAdd CustomerDependants
-2. 
+1. YYYZZZAdd CustomerDependants
+2. YYZZZAdd view Customer Dependants

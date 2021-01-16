@@ -38,6 +38,97 @@ from applications.my_pms2.modules import mdpcustomer
 
 from applications.my_pms2.modules import logger
 
+
+
+######################################################## Religare Cashless APIS  ##################################
+#API-1
+def sendOTPCashless(avars):
+    rsp = {}
+    orlgr = None
+    
+    
+    policy_name = avars.get("policy_name", "RLGCashless")
+    props = db(db.rlgproperties.policy_name == policy_name).select()
+    url = "" if(len(props)==0) else props[0].url
+    apikey = "" if(len(props)==0) else props[0].api_key
+    
+    try:
+	orlgr = mdpreligare.ReligareCashless(current.globalenv['db'],int(common.getid(str(avars["providerid"]))),apikey,url)
+	rsp = orlgr.sendOTP(str(avars["mobile_number"]),str(avars["policy_number"]), str(avars["customer_id"]))
+
+    except Exception as e:
+	rsp = json.dumps({"result":"fail", "error_message":"Exception Error - " + str(e)})
+    
+  
+    return rsp
+
+#API-2
+def validateOTPCashless(avars):
+
+    policy_name = avars.get("policy_name", "RLGCashless")
+    props = db(db.rlgproperties.policy_name == policy_name).select()
+    url = "" if(len(props)==0) else props[0].url
+    apikey = "" if(len(props)==0) else props[0].api_key
+
+    
+    rsp={}
+    try:
+	orlgr = mdpreligare.ReligareCashless(current.globalenv['db'],int(common.getid(str(avars["providerid"]))),apikey,url)
+	rsp = orlgr.validateOTP(str(avars["ackid"]), str(avars["otp"]), str(avars["policy_number"]),\
+	                        str(avars["customer_id"]), str(avars["mobile_number"]),str(avars["policy_name"]))
+	
+    except Exception as e:
+	rsp = json.dumps({"result":"fail", "error_message":"Exception Error - " + str(e)})
+    return rsp
+
+#API-3
+def getOPDServicesCashless(avars):
+    
+    policy_name = avars.get("policy_name", "RLGCashless")
+    props = db(db.rlgproperties.policy_name == policy_name).select()
+    url = "" if(len(props)==0) else props[0].url
+    apikey = "" if(len(props)==0) else props[0].api_key    
+
+    rsp = {}
+    try:
+	file_data = avars['document']
+	x = uuid.uuid1()
+	filename = x.hex + ".jpg"
+	orlgr = mdpreligare.ReligareCashless(current.globalenv['db'],int(common.getid(str(avars["providerid"]))),apikey,url)
+	rsp = orlgr.getOPDServices(str(avars["ackid"]), str(avars["policy_number"]), 
+	                           str(avars["primary_customer_id"]),str(avars["customer_id"]),\
+	                           str(avars["mobile_number"]),str(avars["policy_name"]))
+    except Exception as e:
+	rsp = json.dumps({"result":"fail", "error_message":"Exception Error - " + str(e)})
+    
+    
+    return rsp
+
+#API-4
+def getTransactionIDCashless(avars):
+    
+    policy_name = avars.get("policy_name", "RLGCashless")
+    props = db(db.rlgproperties.policy_name == policy_name).select()
+    url = "" if(len(props)==0) else props[0].url
+    apikey = "" if(len(props)==0) else props[0].api_key    
+
+    rsp = {}
+    try:
+	orlgr = mdpreligare.ReligareCashless(current.globalenv['db'],int(common.getid(str(avars["providerid"]))),apikey,url)
+	rsp = orlgr.geTransactionID(str(avars["ackid"]), str(avars["service_id"]),\
+	                            str(avars["procedurecode"]),str(avars["procedurename"]),\
+	                            str(avars["procedurefee"]),
+	                            str(avars["procedurepiceplancode"]),
+	                            str(avars["policy_number"]), str(avars["customer_id"]), str(avars["mobile_number"]),\
+	                            str(avars["policy_name"])
+	                            )
+    except Exception as e:
+	rsp = json.dumps({"result":"fail", "error_message":"Exception Error - " + str(e)})
+    
+    return rsp
+
+
+
 ######################################################## Religare XXX APIS  ##################################
 #API-1
 def sendOTPXXX(avars):
@@ -2223,7 +2314,9 @@ mdpapi_switcher = {"listappointments":getappointments,"getappointmentsbymonth":g
                    "upload_mediafile":upload_mediafile,"upload_media":upload_media,"downloadmedia":downloadmedia,\
                    "getmedia_list":getmedia_list,"updatemedia":updatemedia,"deletemedia":deletemedia,\
                    "register_vital_member":register_vital_member,"cancel_vital_member":cancel_vital_member,"enroll_vital_member":enroll_vital_member,\
-                   "set_appointment_vital_member":set_appointment_vital_member
+                   "set_appointment_vital_member":set_appointment_vital_member,\
+                   "sendOTPCashless":sendOTPCashless,"validateOTPCashless":validateOTPCashless,\
+                   "getOPDServicesCashless":getOPDServicesCashless,"getTransactionIDCashless":getTransactionIDCashless
                    
                    }
 

@@ -11,7 +11,7 @@ import datetime
 from applications.my_pms2.modules  import common
 
 from applications.my_pms2.modules  import mdpmedia
-
+from applications.my_pms2.modules import logger
 
 
 #import sys
@@ -905,7 +905,7 @@ def dentalimage_new():
 
         Field('mediasize','double'),
 
-        Field('imagedata','text', length=50e+6, label='Image Data')
+        Field('imagedata','text', length=50e+7, label='Image Data')
         
     
     )
@@ -992,9 +992,10 @@ def dentalimage_new():
     if formA.accepts(request,session,keepvalues=True):
         
         try:
-            
+            logger.loggerpms2.info("file content \n" + str(len(request.vars.imagedata)))
             #upload image
             if(len(request.vars.imagedata)>0):
+                
                 file_content = None
                 file_content = request.vars.imagedata
                 o = mdpmedia.Media(db, providerid, 'image', 'jpg')
@@ -1010,9 +1011,9 @@ def dentalimage_new():
                     "description":request.vars.description,
                     "appath":request.folder
                 }
-    
+                 
                 x= json.loads(o.upload_media(j)) 
-    
+                     
                 mediaid = common.getkeyvalue(x,'mediaid',0)
                 mediaurl = URL('my_dentalplan','media','media_download',\
                                args=[mediaid])  
@@ -1033,7 +1034,7 @@ def dentalimage_new():
         except Exception as e:
             error = "Upload Audio Exception Error - " + str(e)             
     elif formA.errors:
-        x = str(formA.errors)
+        error = str(formA.errors)
     else:
         i = 0
         

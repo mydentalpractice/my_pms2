@@ -687,7 +687,14 @@ class Customer:
             
             elif(count == 1):
                 #patient member is already enrolled
-                i =0
+                error_code = "ENROLL_CUST_003"
+                mssg = error_code + ":" + "Customer Ref Number is not unique"
+                logger.loggerpms2.info(mssg)
+                jsonresp = {
+                    "result":"fail",
+                    "error_message":mssg,
+                    "error_code":error_code
+                }                            
             else:
                 #error
                 error_code = "ENROLL_CUST_002"

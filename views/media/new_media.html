@@ -253,7 +253,7 @@ const input = document.querySelector('input[type="file"]')
 input.addEventListener('change',function(e){
  console.log(input.files)
  if(input.files[0].size > 50000000){
-    alert('${input.files[0].name} is too big! Max allowed is 5MB') 
+    alert('${input.files[0].name} is too big! Max allowed is 50MB') 
  }
  const reader = new FileReader()
  reader.onload = function() {

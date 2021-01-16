@@ -12,6 +12,9 @@
 {{response.cookies[response.session_id_name]["HttpOnly"] =  True}}                
             
         <meta charset="utf-8" />
+        <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+        <meta content="utf-8" http-equiv="encoding">
+
         <title>My Dental Plan | Dashboard</title>
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta content="width=device-width, initial-scale=1" name="viewport" />
@@ -524,6 +527,13 @@ div.flash{    z-index: 30023 !important;}
                                                     <span class="title">Religare Plan</span>
                                                 </a>
                                             </li>
+                                            <li class="nav-item  ">
+                                                <a href="{{=URL('religare', 'religareCashless', vars=dict(policy_name='RLGCashless'))}}" class="nav-link ">
+                                                  <img  style="height:16px;width:16px" src="/my_pms2/static/assets/global/img/religare_menu_icon.png" alt="Religare 399">
+                                                    <span class="title">Religare Cashless</span>
+                                                </a>
+                                            </li>
+                                            
                                         </ul>
                                     </li>
                                     

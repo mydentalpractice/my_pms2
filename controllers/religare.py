@@ -340,6 +340,8 @@ def religare():
     return dict(form=form,providername=providername,providerid=providerid,returnurl=returnurl,sendotp=sendotp, validateotp=validateotp,mobile_number=form.vars.mobile_number,voucher_code=form.vars.voucher_code,\
                 ackid=form.vars.ackid,customer_id=form.vars.customer_id,message=message )    
 
+
+
 #XXXAPI-1 & API-2
 def religareXXX():
     
@@ -2792,5 +2794,141 @@ def religareerror():
     
     return dict(errorheader=errorheader,providerid=providerid, providername=providername,errormssg=errormssg,returnurl=returnurl)
     
+#Cashless API-1 & API-2
+def religareCashless():
+    message = ""
+    providerdict = common.getprovider(auth, db)
+    providerid = int(common.getid(providerdict["providerid"]))
+    providername = providerdict["providername"]
+    returnurl = URL('admin','providerhome')  
+    
+    
+    sendotp = True
+    validateotp = False
+    mobile_number = request.vars.mobile_number
+    ackid = request.vars.ackid
+    customer_id = request.vars.customer_id
+    policy_number = request.vars.policy_number
+    policy_name = request.vars.policy_name
+    
+    #for development.
+    #policy_number = "10406362"
+    #voucher_code = "0002456781"
+    
+    form = SQLFORM.factory(
+               
+                Field('mobile_number', 'string',  label='Mobile Number',default=mobile_number),
+                Field('policy_number', 'string',  label='Policy Number',default=policy_number),
+                Field('customer_id', 'string',  label='Customer ID',default=customer_id),
+                Field('ackid', 'string',  label='Ackid ID',default=ackid),
+                Field('otp', 'string',  label='OTP'),
+                Field('xaction','string',default='sendotp')
+        )
+
+  
+
+    
+    xpn = form.element('input',_id='no_table_policy_number')
+    xpn['_class'] =  'form-control placeholder-no-fix'
+    xpn['_placeholder'] =  "Enter Policy Number"
+    xpn['_autocomplete'] =  'off'
+
+    xci = form.element('input',_id='no_table_customer_id')
+    xci['_class'] =  'form-control placeholder-no-fix'
+    xci['_placeholder'] =  "Enter Customer ID"
+    xci['_autocomplete'] =  'off'
+    
+    xcell = form.element('input',_id='no_table_mobile_number')
+    xcell['_class'] =  'form-control placeholder-no-fix'
+    xcell['_placeholder'] =  "Enter Mobile Number"
+    xcell['_autocomplete'] =  'off'
+    
+    xotp = form.element('input',_id='no_table_otp')
+    xotp['_class'] =  'form-control placeholder-no-fix'
+    xotp['_placeholder'] =  'Enter OTP'
+    xotp['_autocomplete'] =  'off'
+
+    db.vw_memberpatientlist.id.readable = False
+    
+    if form.process().accepted:
+	if(form.vars.xaction == "sendOTP"):
+	
+
+	    props = db(db.rlgproperties.policy_name == policy_name).select()
+	    url = "" if(len(props)==0) else props[0].url
+	    apikey = "" if(len(props)==0) else props[0].api_key          
+	    
+	    sendotp = False
+	    validateotp = True	
+	    
+	    #POST API-I Send OTP
+	    oreligare = mdpreligare.ReligareCashless(db, providerid, policy_name, apikey, url)
+	    jsonrsp = oreligare.sendOTP(form.vars.mobile_number,form.vars.policy_number, form.vars.customer_id)
+	    jsonrsp = json.loads(jsonrsp)
+	    if(jsonrsp["result"] == "success"):
+		sendotp = False
+		validateotp = True 
+		ackid = jsonrsp["ackid"]
+	      
+		
+		customer_id = jsonrsp["customer_id"]
+		
+		xackid = form.element('input',_id='no_table_ackid')
+		xackid['_default']  = ackid
+		xackid['_value']  = ackid
+		
+		xcustid = form.element('input',_id='no_table_customer_id')
+		xcustid['_default']  = customer_id
+		xcustid['_value']  = customer_id
+		
+		message_otp = "Enter OTP sent to customer's / patient's registered mobile phone"
+	    else:
+		sendotp = True
+		validateotp = False 
+		message = jsonrsp["error_message"]
+       
+	    
+		
+	if(form.vars.xaction == "validateOTP"):
+	    #POST XXXAPI-2 Validate OTP
+	  
+	    props = db(db.rlgproperties.policy_name == policy_name).select()
+	    url = "" if(len(props)==0) else props[0].url
+	    apikey = "" if(len(props)==0) else props[0].api_key          
+	    
+	    sendotp = False
+	    validateotp = True	
+	    
+	    #POST API-2 Validate OTP
+	    oreligare = mdpreligare.ReligareCashless(db, providerid, policy_name, apikey, url)
+	      
+	    jsonrsp = json.loads(oreligare.validateOTP(form.vars.ackid, form.vars.otp, form.vars.policy_number, form.vars.customer_id,form.vars.mobile_number))
+	   
+	    
+	      
+	    
+	    session.religarevalidmember = json.dumps(jsonrsp)
+	    
+	    if(jsonrsp["result"] == "success"):
+		sendotp = False
+		validateotp = False 
+		message = "Authentication successful!"
+		
+		#call API-3 getOPDServices
+		redirect(URL('religare','getOPDServicesCashless'))
+	    else:
+		sendotp = True
+		validateotp = False 
+		message = jsonrsp["error_message"]
+	    
+	
+	response.flash = ""
+    elif form.errors:
+	message = "OTP Form Error " + str(form.errors)
+        
+	    
+    return dict(form=form,providername=providername,providerid=providerid,returnurl=returnurl,sendotp=sendotp, validateotp=validateotp,mobile_number=form.vars.mobile_number,voucher_code=form.vars.voucher_code,\
+                ackid=form.vars.ackid,customer_id=form.vars.customer_id,policy_name = policy_name, message=message )    
+
 
 

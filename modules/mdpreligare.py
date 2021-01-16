@@ -2267,8 +2267,437 @@ class Religare399:
 	
     return json.dumps(jsonresp)
   
+
+#====================  Cashless API =======================================================================================
+class ReligareCashless:
+  def __init__(self,db,providerid,policy_name,apikey,url):
+    self.db = db
+    self.providerid = providerid
+
+   
+    
+    self.url = url
+    self.apikey = apikey
+    self.ackid = ""
+    self.policy_name = policy_name
+    self.customer_type = ""
+    self.rlgencrypt = RlgEncryption()
+    
+    
+
+    return 
   
   
+  #API-1
+  def sendOTP(self,mobile_number, policy_number,customer_id):
+    
+    self.policy = policy_number
+    db = self.db
+    providerid = self.providerid
+    url = self.url + "getCustomerInfoForOpdMDP.php"
+    apikey = self.apikey
+    policy_name = self.policy_name
+    
+    jsonresp = {}
+    
+    
+    try:
+      jsonreqdata = {
+        "apikey":apikey,
+        "policy_number":policy_number,
+        "customer_id":customer_id,
+        "mobile_number":mobile_number
+      }
+
+      logger.loggerpms2.info(">>Cashless:API-1 Send OTP Request\n" + json.dumps(jsonreqdata) + "\n" )
+      logger.loggerpms2.info("URL-->" + url)
+
+      jsonencodeddata =  self.rlgencrypt.encoderequestdata(jsonreqdata)	  
+      #logger.loggerpms2.info("===Cashless:API-1 Encoded Req_data=\n" + json.dumps(jsonencodeddata) + "\n")      
+      
+      #call API-1
+      resp = requests.post(url,data=jsonencodeddata)
+      jsonresp = {}
+      if((resp.status_code == 200)|(resp.status_code == 201)|(resp.status_code == 202)|(resp.status_code == 203)):
+	    respstr =   resp.text
+	    #logger.loggerpms2.info("Cashless:API-1 ===Encoded Resp_data=\n" + json.dumps(respstr) + "\n")      
+	    
+	    jsonresp = self.rlgencrypt.decoderesponsedata(respstr)   
+	    logger.loggerpms2.info("Cashless:API-1 ===Resp_data=\n" + json.dumps(jsonresp) + "\n") 
+	    
+	   
+	    if(jsonresp["response_status"]==True):
+	      self.ackid = jsonresp.get("ackid","")
+	      
+	      jsonresp["result"] = "success"
+	      jsonresp["error_message"] = ""
+	      
+	      jsonresp["customer_id"] = "ci_" +  (uuid.uuid1()).hex if(customer_id == "") else customer_id
+	      jsonresp["policy_number"] = policy_number
+	      jsonresp["mobile_number"] = mobile_number
+	      jsonresp["policy_name"] = policy_name
+	      
+	      
+	      
+	    else:
+	      
+	      self.ackid = ''
+	      jsonresp["result"] = "fail"
+	      jsonresp["error_message"] = errormessage(db,jsonresp.get("error_code",""),jsonresp.get('response_message',"")) 
+	      jsonresp["customer_id"] = customer_id
+	      jsonresp["policy_number"] = policy_number
+	      jsonresp["mobile_number"] = mobile_number
+	      jsonresp["policy_name"] = policy_name
+	    
+      else:
+	jsonresp={
+          "result" : "fail",
+          "error_message":"Send OTP Cashless API-1:\n" + errormessage(db,"MDP099")  + "\n(" + str(resp.status_code) + ")",
+          "response_status":"",
+          "response_message":"",
+          "error_code":"MDP099",
+          "ackid":"",
+          "customer_id":customer_id,
+          "policy_number":policy_number,
+    
+          "mobile_number":mobile_number,
+	  "policy_name": policy_name
+        }
+
+    except Exception as e:
+      jsonresp = {
+        "result":"fail",
+        "error_message":"Send OTPXXX API-1:\n" + errormessage(db,"MDP100")  + "\n(" + str(e) + ")",
+        "response_status":"",
+        "response_message":"",
+        "error_code":"MDP100",
+        "ackid":"",
+        "customer_id":  customer_id,
+        "policy_number":policy_number,
+        "mobile_number":mobile_number,
+        "policy_name": policy_name
+        
+      }
+
+    logger.loggerpms2.info(">>XXX:API-1 Send OTP Response")
+    logger.loggerpms2.info("===XXX:Resp_data=\n" + json.dumps(jsonresp) + "\n") 
+    
+    return json.dumps(jsonresp)  
+  
+  #API-2
+  def validateOTP(self,ackid,otp,policy_number,customer_id,mobile_number):
+     
+    db = self.db
+    providerid = self.providerid
+    policy_name = self.policy_name
+    url = self.url + "validateOtpForOpdMDP.php"
+    apikey = self.apikey
+    customer_type = self.customer_type
+    auth = current.auth
+    primary_customer_id = customer_id
+    
+    try:
+      
+      jsonreqdata = {
+        "apikey":apikey,
+        "ackid":ackid,
+        "otp":otp
+       
+      
+      }
+
+      logger.loggerpms2.info("Cashless:API-2 Validate OTP Request")
+      logger.loggerpms2.info("Cashless:API-2 Req_data=\n" + json.dumps(jsonreqdata) + "\n")      
+
+      jsonencodeddata = self.rlgencrypt.encoderequestdata(jsonreqdata)  #self.encoderequestdata(jsonreqdata)
+   
+       
+      
+      #call API-2
+      resp = requests.post(url,data=jsonencodeddata)
+      jsonresp = {}
+      if((resp.status_code == 200)|(resp.status_code == 201)|(resp.status_code == 202)|(resp.status_code == 203)):
+	    respstr =   resp.text
+	    #logger.loggerpms2.info("Cashless:===Encoded Resp_data=\n" + json.dumps(respstr) + "\n")      
+	    jsonresp = self.rlgencrypt.decoderesponsedata(respstr)  #self.decoderesponsedata(respstr)
+	    logger.loggerpms2.info("Cashless:API-2===Resp_data=\n" + json.dumps(jsonresp) + "\n")    
+	    if(jsonresp["response_status"] == True):
+	      #add relationship field in members
+	      memcount = 1
+	      member_details = getvalue(jsonresp,"member_detials",None)  #quirk detials instead of details
+	      if(member_details != None):
+		for member in member_details:
+		  if(memcount == 1):
+		    memcount = memcount + 1
+		    member["relationship"] = "Self"
+		    customer_id = getvalue(member,"customerid",customer_id)
+		    primary_customer_id = customer_id
+		    jsonresp["customer_id"] = customer_id
+		    jsonresp["primary_customer_id"] = primary_customer_id
+		    
+		  else:
+		    memcount = memcount + 1
+		    member["relationship"] = "Dependant"	      
+		    jsonresp["customer_id"] = customer_id
+		    jsonresp["primary_customer_id"] = ""
+		
+	      jsonresp["ackid"] = ackid
+	      jsonresp["policy_number"] = policy_number
+	      jsonresp["mobile_number"] = mobile_number
+	      policy_name = getvalue(jsonresp, "Product Name", policy_name)
+	      policy_name = "PolicyCashless" if((policy_name == None) | (policy_name == "")) else policy_name
+	      
+	      jsonresp["policy_name"] = policy_name
+	      
+	      
+	      jsonresp["result"] = "success"
+	      jsonresp["error_message"] = ""
+	    else:
+	      jsonresp["result"] = "fail"
+	      jsonresp["ackid"] = ackid
+	      jsonresp["error_message"] = errormessage(db,jsonresp.get("error_code"),jsonresp.get('response_message',"")) 
+	      jsonresp["customer_id"] = customer_id
+	      jsonresp["primary_customer_id"] = primary_customer_id
+	      jsonresp["policy_number"] = policy_number
+	      jsonresp["mobile_number"] = mobile_number
+	      jsonresp["policy_name"] = policy_name
+	      
+      else:
+	jsonresp={
+          "result" : "fail",
+          "error_message":"Validate OTP API-2:\n" + errormessage(db,"MDP099")  + "\n(" + str(resp.status_code) + ")",
+          "response_status":"",
+          "response_message":"",
+          "error_code":"MDP099",
+          "ackid":"",
+          "customer_id":customer_id,
+          "primary_customer_id":primary_customer_id,
+         
+          "policy_number":policy_number,
+          "mobile_number": mobile_number,
+          "policy_name":policy_name
+        }
+    
+    except Exception as e:
+      jsonresp = {
+        "result":"fail",
+        "error_message":"Validate OTP API-2:\n" + errormessage(db,"MDP100")  + "\n(" + str(e) + ")",
+        "response_status":"",
+        "response_message":"",
+        "error_code":"MDP100",
+        "ackid":"",
+        "customer_id":customer_id,
+        "primary_customer_id":primary_customer_id,
+       
+        "policy_number":policy_number,
+        "mobile_number": mobile_number,
+        "policy_name":policy_name
+        
+      }
+  
+    logger.loggerpms2.info(">>Cashless:API-2 Validate OTP Response")
+    logger.loggerpms2.info("===Cashless:API-2Resp_data=\n" + json.dumps(jsonresp) + "\n")      
+    return json.dumps(jsonresp)
+     
+     
+  #API-3
+  def getOPDServices(self,ackid,policy_number,primary_customer_id,customer_id,mobile_number,policy_name=""):
+    
+    db = self.db
+    providerid = self.providerid
+    apikey = self.apikey
+    url = self.url + "getAllServicesForOpd.php"
+
+    ackservices =[]
+    jsonresp = {}
+    
+    try:
+      jsonreqdata = {
+           "apikey":apikey,
+           "ackid":ackid
+         }  
+      
+      
+      logger.loggerpms2.info("Cashless:API-3 Get All Services for Opd")
+      logger.loggerpms2.info("Cahsless:API-3 Req_data=\n" + json.dumps(xjsonreqdata) + "\n")      
+      jsonencodeddata = self.rlgencrypt.encoderequestdata(jsonreqdata)  
+      
+      resp = requests.post(url,data=jsonencodeddata)
+      jsonresp = {}
+      if((resp.status_code == 200)|(resp.status_code == 201)|(resp.status_code == 202)|(resp.status_code == 203)):
+	    respstr =   resp.text
+	    #logger.loggerpms2.info("===Encoded Resp_data=\n" + json.dumps(respstr) + "\n")      
+	    jsonresp = self.rlgencrypt.decoderesponsedata(respstr) #self.decoderesponsedata(respstr)
+	    logger.loggerpms2.info("Cashless:API-3 ===Resp_data=\n" + json.dumps(jsonresp) + "\n")      
+	    if(jsonresp["response_status"] == True):
+	      jsonresp["customer_id"] = customer_id
+	      jsonresp["primary_customer_id"] = primary_customer_id
+	    
+	      jsonresp["policy_number"] = policy_number
+	      jsonresp["mobile_number"] = mobile_number 
+	      jsonresp["policy_name"] = policy_name 
+	      jsonresp["result"] = "success"       
+	      jsonresp["error_message"] = ""       
+	      #jsonresp["opd_service_details"] = []
+	      #populate religare acknowledged services
+	      if(len(jsonresp["opd_service_details"])==0):
+		jsonresp["result"] = "fail"
+		jsonresp["error_code"] = "MDP103"
+		jsonresp["error_message"] = "Error:Get OPD Services API-3:\n" + errormessage(db,"MDP103") 
+		jsonresp["customer_id"] = customer_id
+		jsonresp["primary_customer_id"] = primary_customer_id
+		jsonresp["policy_number"] = policy_number
+		jsonresp["mobile_number"] = mobile_number  
+		jsonresp["policy_name"] = policy_name 
+		
+		
+		logger.loggerpms2.info("Cashless:API-3\n" + errormessage(db,"MDP103") )
+		logger.loggerpms2.info("Cashless:API-3 ==> Resp_data=\n" + json.dumps(jsonresp))                
+	      else:
+		ackservices = jsonresp["opd_service_details"]
+		for ackservice in ackservices:
+		  db.rlgservices.update_or_insert(((db.rlgservices.ackid==ackid) & (db.rlgservices.service_id == ackservice["service_id"])),
+		                                   ackid=ackid, 
+		                                   service_id = ackservice["service_id"]
+		                                   )
+	
+	    else:
+	
+
+	      jsonresp["result"] = "fail"
+	      jsonresp["error_message"] = errormessage(db,jsonresp["error_code"],jsonresp.get('response_message',"")) 
+	      jsonresp["customer_id"] = customer_id
+	      jsonresp["primary_customer_id"] = primary_customer_id
+	      jsonresp["policy_number"] = policy_number
+	      jsonresp["mobile_number"] = mobile_number
+	      jsonresp["policy_name"] = policy_name 
+	
+	      
+	      
+      else:
+	jsonresp={
+        
+          "result" : "fail",
+          "error_message":"Cashless:API-3:GetOPDServices\n" + errormessage(db,"MDP099")  + "\n(" + str(resp.status_code) + ")",
+          "response_status":"",
+          "response_message":"",
+          "error_code":"MDP099",
+          "ackid":"",
+          "customer_id":customer_id,
+          "primary_customer_id":primary_customer_id,
+         
+          "policy_number":policy_number,
+          "mobile_number": mobile_number,
+          "policy_name": policy_name
+        }
+    
+    except Exception as e:
+      jsonresp = {
+        "result":"fail",
+        "error_message":"Cashelss:API-3:GetOPDServices\n" + errormessage(db,"MDP100")  + "\n(" + str(e) + ")",
+        "response_status":"",
+        "response_message":"",
+        "error_code":"MDP100",
+        "ackid":"",
+        "customer_id":customer_id,
+        "primary_customer_id":primary_customer_id,
+
+        "policy_number":policy_number,
+        "mobile_number": mobile_number,
+        "policy_name": policy_name
+        
+      }
+      
+    logger.loggerpms2.info("Cashless:API-3:GetOPDServices Response\n" + json.dumps(jsonresp) + "\n")
+    
+    return json.dumps(jsonresp) 
+  
+  
+  #API-4
+  def geTransactionID(self,ackid,service_id,procedurecode, procedurename,procedurefee,\
+                      procedurepiceplancode,policy_number,customer_id,mobile_number,policy_name):
+    
+    logger.loggerpms2.info("Cashless:API-4:Get Transaction ID \n")
+    db = self.db
+    providerid = self.providerid
+    auth = current.auth
+    apikey = self.apikey
+  
+    url = self.url + "getTransactionIdForOpd.php"  
+    try:
+      jsonreqdata = {
+           "apikey":apikey,
+           "ackid":ackid,
+           "sub_service_id":service_id,
+          
+           "swipe_value":str(procedurefee)
+         }    
+      
+      jsonencodeddata = self.rlgencrypt.encoderequestdata(jsonreqdata)
+      
+    
+      resp = requests.post(url,data=jsonencodeddata)      
+      jsonresp = {}
+      if((resp.status_code == 200)|(resp.status_code == 201)|(resp.status_code == 202)|(resp.status_code == 203)):
+	    respstr =   resp.text
+	    jsonresp = self.rlgencrypt.decoderesponsedata(respstr)
+	    if(jsonresp["response_status"] == True):   
+	      jsonresp["procedurecode"] = procedurecode
+	      jsonresp["procedurename"] = procedurename
+	      jsonresp["procedurefee"] = procedurefee
+	      jsonresp["procedurepiceplancode"] = procedurepiceplancode
+	      jsonresp["result"] = "success"
+	      jsonresp["error_message"] = ""              
+	      jsonresp["customer_id"] = customer_id
+	      jsonresp["policy_number"] = policy_number
+	      jsonresp["policy_name"] = policy_name  
+	      
+	      jsonresp["mobile_number"] = mobile_number  
+	      
+	    else:
+	      jsonresp["result"] = "fail"
+	      jsonresp["error_message"] = errormessage(db,jsonresp.get("error_code",""),jsonresp.get('response_message',"")) 
+	      jsonresp["customer_id"] = customer_id
+	      jsonresp["policy_number"] = policy_number
+	      jsonresp["mobile_number"] = mobile_number
+	      jsonresp["policy_name"] = policy_name  
+	     
+	      
+	      
+      else:
+	jsonresp={
+          "result" : "fail",
+          "error_message":"Cashless:API-4 : Get Transaction ID API-4:\n" + errormessage(db,"MDP099")  + "\n(" + str(resp.status_code) + ")",
+          "response_status":"",
+          "response_message":"",
+          "error_code":"MDP099",
+          "ackid":"",
+          "customer_id":customer_id,
+          "policy_number":policy_number,
+          "policy_name":policy_name,
+         
+          "mobile_number": mobile_number
+        }
+    
+	
+    except Exception as e:
+      jsonresp = {
+        "result":"fail",
+        "error_message":"Get Transaction ID API-4:\n" + errormessage(db,"MDP100")  + "\n(" + str(e) + ")",
+        "response_status":"",
+        "response_message":"",
+        "error_code":"MDP100",
+        "ackid":"",
+        "customer_id":customer_id,
+        "policy_number":policy_number,
+        "policy_name":policy_name,
+      
+        "mobile_number": mobile_number
+      }
+    
+    return json.dumps(jsonresp)   
+  
+#====================  End Cashless API =======================================================================================
   
 
 
