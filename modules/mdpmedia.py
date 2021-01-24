@@ -65,7 +65,7 @@ class Media:
         auth  = current.auth
         
         mediaid = int(common.getid(avars["mediaid"])) if "mediaid" in avars else 0
-        title = avars["title"] if "title" in avars else ""        
+        title = avars["title"] if "title" in avars else ""      
         tooth = avars["tooth"] if "tooth" in avars else ""        
         quadrant = avars["quadrant"] if "quadrant" in avars else ""        
         description = avars["description"] if "description" in avars else ""        
@@ -249,21 +249,23 @@ class Media:
         tooth = avars["tooth"] if "tooth" in avars else ""
         quadrant = avars["quadrant"] if "quadrant" in avars else ""
         mediadate = avars["mediadate"] if "mediadate" in avars else common.getstringfromdate(datetime.date.today(),"%d/%m/%Y")
+        
+        ref_code = avars["ref_code"] if "ref_code" in avars else "RST"
+        ref_id = int(common.getid(avars["ref_id"])) if "ref_id" in avars else 0
                                                                                            
         description = avars["description"] if "description" in avars else ""
         appath = avars["appath"] if "appath" in avars else ""
         
         try:
-            p = db(db.provider.id == providerid).select(db.provider.provider)
-            provcode = p[0].provider if(len(p) == 1) else "MDP_PROV"
+
     
     
             r = db((db.vw_memberpatientlist.providerid == providerid) & (db.vw_memberpatientlist.primarypatientid == memberid) & (db.vw_memberpatientlist.patientid == patientid) & \
-                   (db.vw_memberpatientlist.is_active == True)).select(db.vw_memberpatientlist.fullname,db.vw_memberpatientlist.patientmember)
+                   (db.vw_memberpatientlist.is_active == True)).select(db.vw_memberpatientlist.fullname)
     
             patientname = r[0].fullname if(len(r) == 1) else ""
-            patientmember = r[0].patientmember if(len(r) == 1) else ""
-            patmember = r[0].patientmember if(len(r) == 1) else "MDP_MEMBER"
+            
+           
     
             
             ##upload the image to the server
@@ -279,22 +281,28 @@ class Media:
             if(not os.path.exists(dirpath)):
                 os.makedirs(dirpath,0777)    
     
+            strdate = common.getstringfromdate(datetime.date.today(),"%m-%Y")    
+            dirpath = os.path.join(dirpath , strdate)
+            media_subfolder = dirpath
+            if(not os.path.exists(dirpath)):
+                os.makedirs(dirpath,0777)    
+    
             dirpath = os.path.join(dirpath , self.mtype)
             media_subfolder = dirpath
             if(not os.path.exists(dirpath)):
                 os.makedirs(dirpath,0777)    
     
     
-            dirpath = os.path.join(dirpath, provcode)
-            if(not os.path.exists(dirpath)):
-                os.makedirs(dirpath,0777)    
+            #dirpath = os.path.join(dirpath, provcode)
+            #if(not os.path.exists(dirpath)):
+                #os.makedirs(dirpath,0777)    
     
-            dirpath = os.path.join(dirpath, patmember)  
-            if(not os.path.exists(dirpath)):
-                os.makedirs(dirpath,0777)    
+            #dirpath = os.path.join(dirpath, patmember)  
+            #if(not os.path.exists(dirpath)):
+                #os.makedirs(dirpath,0777)    
     
     
-            uploadfolder=dirpath    
+            uploadfolder=dirpath    #appications\media\<mm-Y>\<media-type>
     
     
             #save image data in a temporary file
@@ -320,8 +328,7 @@ class Media:
             #upload the image to the server
             medstream = open(tempmediafile.name,'rb')
             db.dentalimage.image.uploadfolder = uploadfolder
-    
-           
+
             mediaid = db.dentalimage.insert(\
                 title = title,
                 image = medstream,
@@ -351,7 +358,12 @@ class Media:
                 modified_by= 1 if(auth.user == None) else auth.user.id
             )
     
-    
+            #CLN if the media is for CLINIC, DOC if the media is for DOCTOR,PRV if the media is for Provider
+            #MEM for Memeber, TRT for Treatment, USR for User, CUS for Customer, EMP for MDP Employee,
+            #GUS for Guest, CSP for Customer Support, MKT for Marketing, SLS for Sales, GEN for General, RST for all others  
+            #BNK for Bank
+            #update cross-reference tables
+            db.dentalimage_ref.insert(media_id = mediaid, ref_code = ref_code,ref_id = ref_id)
     
             #delete temporary file
             tempmediafile.close()
@@ -364,7 +376,7 @@ class Media:
                 'media':media[0].image,
                 'uploadfolder':uploadfolder,
                 'mediafilename':"",
-               
+                
                 
                 "result":"success",
                 "error_code":"",
@@ -451,7 +463,7 @@ class Media:
         return json.dumps(mediaobj)
 
 
-    def getmedia_list(self,page,memberid,patientid,mediatype):
+    def getmedia_list(self,page,memberid,patientid,mediatype,ref_code,ref_id):
 
 
         db = self.db
@@ -465,6 +477,7 @@ class Media:
             items_per_page = 10 if(len(urlprops) <= 0) else int(common.getvalue(urlprops[0].pagination))
             limitby = ((page)*items_per_page,(page+1)*items_per_page)         
     
+            
     
             medialist = []
             mediaobj  = {}
@@ -474,18 +487,95 @@ class Media:
             query = ((query) & (db.dentalimage.provider == providerid)) if(providerid > 0) else (query)
             query = ((query) & (db.dentalimage.mediatype == mediatype)) if(mediatype != "") else (query)
             limitby = None if(page<0) else limitby
-    
-    
-            medias = db((query)&(db.dentalimage.patientmember == memberid)&\
-                        (db.dentalimage.patient == patientid)).select(db.dentalimage.ALL, limitby=limitby)
-    
+            
+            medias = None
+            if(memberid != 0):  
+                medias = db((query)&(db.dentalimage.patientmember == memberid)&\
+                            (db.dentalimage.patient == patientid)).select(db.dentalimage.ALL, limitby=limitby)
+                
+            else:
+                if(ref_id == 0):
+                    if(mediatype == ""):
+                        if(ref_code == ""):
+                            medias = db((db.dentalimage.is_active == True)).select(db.dentalimage.ALL,db.dentalimage_ref.ALL,\
+                                                                                left=db.dentalimage.on((db.dentalimage.id == db.dentalimage_ref.media_id)),limitby=limitby)
+                        else:
+                            medias = db((db.dentalimage_ref.ref_code==ref_code) & (db.dentalimage.is_active == True)).select(db.dentalimage.ALL,db.dentalimage_ref.ALL,\
+                                                                                left=db.dentalimage.on((db.dentalimage.id == db.dentalimage_ref.media_id)),limitby=limitby)
+                            
+                    else:
+                        if(ref_code==""):
+                            medias = db((db.dentalimage.mediatype == mediatype) & (db.dentalimage.is_active == True)).select(db.dentalimage.ALL,db.dentalimage_ref.ALL,\
+                                                                                left=db.dentalimage.on((db.dentalimage.id == db.dentalimage_ref.media_id)),limitby=limitby)
+                        else:
+                            medias = db((db.dentalimage_ref.ref_code==ref_code) & (db.dentalimage.mediatype == mediatype) & (db.dentalimage.is_active == True)).select(db.dentalimage.ALL,\
+                                                                                left=db.dentalimage.on((db.dentalimage.id == db.dentalimage_ref.media_id)),limitby=limitby)
+                                                                                                               
+                else:
+                    if(mediatype == ""):
+                        if(ref_code == ""):
+                            medias = db((db.dentalimage_ref.ref_id == ref_id)  & (db.dentalimage.is_active == True)).select(db.dentalimage.ALL,db.dentalimage_ref.ALL,\
+                                                                                    left=db.dentalimage.on((db.dentalimage.id == db.dentalimage_ref.media_id)),limitby=limitby)
+                        else:
+                            medias = db((db.dentalimage_ref.ref_code==ref_code)&(db.dentalimage_ref.ref_id == ref_id)  & (db.dentalimage.is_active == True)).select(db.dentalimage.ALL,db.dentalimage_ref.ALL,\
+                                                                                    left=db.dentalimage.on((db.dentalimage.id == db.dentalimage_ref.media_id)),limitby=limitby)
+                            
+                    else:
+                        if(ref_code == ""):
+                            medias = db((db.dentalimage_ref.ref_id == ref_id) & (db.dentalimage.mediatype == mediatype) & (db.dentalimage.is_active == True)).select(db.dentalimage.ALL,db.dentalimage_ref.ALL,\
+                                                                                    left=db.dentalimage.on((db.dentalimage.id == db.dentalimage_ref.media_id)),limitby=limitby)
+                        else:
+                            medias = db((db.dentalimage_ref.ref_code==ref_code)&(db.dentalimage_ref.ref_id == ref_id) & (db.dentalimage.mediatype == mediatype) & (db.dentalimage.is_active == True)).select(db.dentalimage.ALL,db.dentalimage_ref.ALL,\
+                                                                                    left=db.dentalimage.on((db.dentalimage.id == db.dentalimage_ref.media_id)),limitby=limitby)
+                        
+                    
+
+            
+            #if(providerid != 0):  
+                #medias = db(db.provider_media.provider_id == providerid).select(db.dentalimage.ALL,\
+                                                                         #left=db.dentalimage.on((db.dentalimage.id == db.provider_media.media_id)&\
+                                                                                               #(db.dentalimage.mediatype == mediatype)&\
+                                                                                               #(db.dentalimage.is_active == True)),limitby=limitby)
+ 
+ 
+            #if(doctorid != 0):  
+                #medias = db(db.doctor_media.doctor_id == doctorid).select(db.dentalimage.ALL,\
+                                                                         #left=db.dentalimage.on((db.dentalimage.id == db.doctor_media.media_id)&\
+                                                                                               #(db.dentalimage.mediatype == mediatype)&\
+                                                                                               #(db.dentalimage.is_active == True)),limitby=limitby)
+            #if(clinicid != 0):  
+                #medias = db(db.clinic_media.clinic_id == clinicid).select(db.dentalimage.ALL,\
+                                                                         #left=db.dentalimage.on((db.dentalimage.id == db.clinic_media.media_id)&\
+                                                                                               #(db.dentalimage.mediatype == mediatype)&\
+                                                                                               #(db.dentalimage.is_active == True)),limitby=limitby)
+
+            #if(treatmentid != 0):  
+                #medias = db(db.treatment_media.treatment_id == treatmentid).select(db.dentalimage.ALL,\
+                                                                         #left=db.dentalimage.on((db.dentalimage.id == db.treatment_media.media_id)&\
+                                                                                               #(db.dentalimage.mediatype == mediatype)&\
+                                                                                               #(db.dentalimage.is_active == True)),limitby=limitby)
+              
+            #if(customer != 0):  
+                #medias = db(db.customer_media.customer_id == customerid).select(db.dentalimage.ALL,\
+                                                                         #left=db.dentalimage.on((db.dentalimage.id == db.customer_media.media_id)&\
+                                                                                               #(db.dentalimage.mediatype == mediatype)&\
+                                                                                               #(db.dentalimage.is_active == True)),limitby=limitby)
+                
+            #if(userid != 0):  
+                #medias = db(db.auth_user_media.user_id == userid).select(db.dentalimage.ALL,\
+                                                                         #left=db.dentalimage.on((db.dentalimage.id == db.auth_user_media.media_id)&\
+                                                                                               #(db.dentalimage.mediatype == mediatype)&\
+                                                                                               #(db.dentalimage.is_active == True)),limitby=limitby)
     
             for media in medias:
     
                 mediaobj = {
-                    "mediaid":int(common.getid(media.id)),
-                    "title"  : common.getstring(media.title),
-                    "mediadate":(media.imagedate).strftime("%d/%m/%Y"),
+                    "ref_code":media.dentalimage_ref.ref_code,
+                    "ref_id":media.dentalimage_ref.ref_id,
+                    "mediaid":int(common.getid(media.dentalimage.id)),
+                    "title"  : common.getstring(media.dentalimage.title),
+                    "mediadate":(media.dentalimage.imagedate).strftime("%d/%m/%Y"),
+                    "mediatype":common.getstring(media.dentalimage.mediatype)
                 }
                 medialist.append(mediaobj)
                 

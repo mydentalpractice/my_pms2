@@ -10,6 +10,7 @@ import time
 
 from applications.my_pms2.modules import common
 from applications.my_pms2.modules import mail
+from applications.my_pms2.modules import datasecurity
 
 from applications.my_pms2.modules import mdpuser
 from applications.my_pms2.modules import mdpdoctor
@@ -35,6 +36,8 @@ from applications.my_pms2.modules import mdpprovider
 from applications.my_pms2.modules import mdpabhicl
 from applications.my_pms2.modules import mdpmedia
 from applications.my_pms2.modules import mdpcustomer
+from applications.my_pms2.modules import mdptimings
+from applications.my_pms2.modules import mdpbank
 
 from applications.my_pms2.modules import logger
 
@@ -2132,8 +2135,22 @@ def getmedia_list(avars):
                             )
     
     rsp = omedia.getmedia_list(0, int(avars["memberid"]) if "memberid" in avars else 0, \
-                               int(avars["patientid"]) if "patientid" in avars else 0,\
-                                avars["mediatype"] if "mediatype" in avars else "image")
+                                  int(avars["patientid"]) if "patientid" in avars else 0,\
+	                          avars["mediatype"] if "mediatype" in avars else "",\
+                                  avars["ref_code"] if "ref_code" in avars else "",\
+                                  avars["ref_id"] if "ref_id" in avars else 0
+                                  )
+	
+
+    
+    #rsp = omedia.getmedia_list(0, int(avars["memberid"]) if "memberid" in avars else 0, \
+                               #int(avars["patientid"]) if "patientid" in avars else 0,\
+                               #int(avars["doctorid"]) if "doctorid" in avars else 0,\
+                               #int(avars["clinicid"]) if "clinicid" in avars else 0,\
+                               #int(avars["treatmentid"]) if "treatmentid" in avars else 0,\
+                               #int(avars["userid"]) if "userid" in avars else 0,\
+                               #int(avars["customerid"]) if "customerid" in avars else 0,\
+                                #avars["mediatype"] if "mediatype" in avars else "image")
     
     
   
@@ -2255,8 +2272,89 @@ def cancel_vital_member(avars):
 
 ############################# END VITAL API ###################################################
 
+############################# START OPS TIMING API #################################################
+def get_ops_timing(avars):
+    logger.loggerpms2.info("Enter Get OPS Timing Request\n" + str(avars) )
+    ops = mdptimings.OPS_Timing(current.globalenv['db'])
+    rsp = ops.get_ops_timing(avars)
+    
+    return rsp
+
+def update_ops_timing(avars):
+    logger.loggerpms2.info("Enter Update OPS Timing Request\n" + str(avars) )
+    ops = mdptimings.OPS_Timing(current.globalenv['db'])
+    rsp = ops.update_ops_timing(avars)
+    return rsp
+
+def delete_ops_timng(avars):
+    logger.loggerpms2.info("Enter Delee OPS Timing Request\n" + str(avars) )
+    ops = mdptimings.OPS_Timing(current.globalenv['db'])
+    rsp = ops.delete_ops_timng(avars)
+    return rsp
+
+def list_ops_timing(avars):
+    logger.loggerpms2.info("Enter List OPS Timing Request\n" + str(avars) )
+    ops = mdptimings.OPS_Timing(current.globalenv['db'])
+    rsp = ops.list_ops_timing(avars)
+    return rsp
+
+def new_ops_timing(avars):
+    logger.loggerpms2.info("Enter New OPS Timing Request\n" + str(avars) )
+    ops = mdptimings.OPS_Timing(current.globalenv['db'])
+    rsp = ops.new_ops_timing(avars)
+    return rsp
+    
+############################# END OPS TIMING API ###################################################
+
+############################# START Bank Detail Account API #################################################
+def get_account(avars):
+    logger.loggerpms2.info("Enter Get Account Request\n" + str(avars) )
+    acct = mdpbank.Bank(current.globalenv['db'])
+    rsp = acct.get_account(avars)
+    
+    return rsp
+
+def update_account(avars):
+    logger.loggerpms2.info("Enter Update Account Request\n" + str(avars) )
+    acct = mdpbank.Bank(current.globalenv['db'])
+    rsp = acct.update_account(avars)
+    return rsp
+
+def delete_account(avars):
+    logger.loggerpms2.info("Enter Delete Account Request\n" + str(avars) )
+    acct = mdpbank.Bank(current.globalenv['db'])
+    rsp = acct.delete_account(avars)
+    return rsp
+
+def new_account(avars):
+    logger.loggerpms2.info("Enter New Account Request\n" + str(avars) )
+    acct = mdpbank.Bank(current.globalenv['db'])
+    rsp = acct.new_account(avars)
+    return rsp
+    
+############################# ENDBank Detail Account API ###################################################
+
+
 def unknown(avars):
     return dict()
+
+mediaAPI_switcher = {
+    
+    "upload_mediafile":upload_mediafile,"upload_media":upload_media,"downloadmedia":downloadmedia,\
+    "getmedia_list":getmedia_list,"updatemedia":updatemedia,"deletemedia":deletemedia
+}
+
+opsTimingAPI_switcher = {
+    
+    "get_ops_timing":get_ops_timing,"update_ops_timing":update_ops_timing,"delete_ops_timng":delete_ops_timng,\
+    "list_ops_timing":list_ops_timing,"new_ops_timing":new_ops_timing
+}
+
+accountAPI_switcher = {
+    
+    "get_account":get_account,"update_account":update_account,"delete_account":delete_account,\
+    "new_account":new_account
+}
 
 mdpapi_switcher = {"listappointments":getappointments,"getappointmentsbymonth":getappointmentsbymonth,"getappointmentsbyday":getappointmentsbyday,"getappointment":getappointment,\
                    "getappointmentcountbymonth":getappointmentcountbymonth,"getdocappointmentcountbymonth":getdocappointmentcountbymonth,"getappointmentsbypatient":getappointmentsbypatient,\
@@ -2311,8 +2409,7 @@ mdpapi_switcher = {"listappointments":getappointments,"getappointmentsbymonth":g
                    "dental_service_request":dental_service_request,"get_appointments":get_appointments,"get_treatments":get_treatments,\
                    "getcompanyprocedures":getcompanyprocedures,"getnoncompanyprocedures":getnoncompanyprocedures,\
                    "addABHICLProcedureToTreatment":addABHICLProcedureToTreatment,\
-                   "upload_mediafile":upload_mediafile,"upload_media":upload_media,"downloadmedia":downloadmedia,\
-                   "getmedia_list":getmedia_list,"updatemedia":updatemedia,"deletemedia":deletemedia,\
+                  
                    "register_vital_member":register_vital_member,"cancel_vital_member":cancel_vital_member,"enroll_vital_member":enroll_vital_member,\
                    "set_appointment_vital_member":set_appointment_vital_member,\
                    "sendOTPCashless":sendOTPCashless,"validateOTPCashless":validateOTPCashless,\
@@ -2381,5 +2478,147 @@ def mdpapi():
 
     def DELETE(*args, **vars):
         return dict()
+
+    return locals()
+
+
+
+@request.restful()
+def mediaAPI():
+    response.view = 'generic' + request.extension
+    def GET(*args, **vars):
+	
+	return
+
+    def POST(*args, **vars):
+	i = 0
+	try:
+	    #logger.loggerpms2.info(">>Enter MEDIA API==>>")
+	    dsobj = datasecurity.DataSecurity()
+	    
+	    
+	    encryption = vars.has_key("req_data")
+	    if(encryption):
+		#logger.loggerpms2.info(">>MEIDA API with Encryption")
+		encrypt_req = vars["req_data"]
+		vars = json.loads(dsobj.decrypts(encrypt_req))
+	    
+	    #decrypted request date
+	    action = str(vars["action"])
+	    #logger.loggerpms2.info(">>MEDIA API ACTION==>>" + action)
+	    
+	    
+	    #return json.dumps({"action":action})
+	    rsp = mediaAPI_switcher.get(action,unknown)(vars)
+	    common.setcookies(response)
+	    if(encryption):
+		return json.dumps({"resp_data":dsobj.encrypts(rsp)})
+	    else:
+		return rsp
+	    
+	except Exception as e:
+	    mssg = "MEDIA API Exception Error =>>\n" + str(e)
+	    #logger.loggerpms2.info(mssg)
+	    raise HTTP(500)   
+
+    def PUT(*args, **vars):
+	return dict()
+
+    def DELETE(*args, **vars):
+	return dict()
+
+    return locals()
+
+
+@request.restful()
+def opsTimingAPI():
+    response.view = 'generic' + request.extension
+    def GET(*args, **vars):
+	
+	return
+
+    def POST(*args, **vars):
+	i = 0
+	try:
+	    #logger.loggerpms2.info(">>Enter OPS Timing API==>>")
+	    dsobj = datasecurity.DataSecurity()
+	    
+	    
+	    encryption = vars.has_key("req_data")
+	    if(encryption):
+		#logger.loggerpms2.info(">>OPS Timing with Encryption")
+		encrypt_req = vars["req_data"]
+		vars = json.loads(dsobj.decrypts(encrypt_req))
+	    
+	    #decrypted request date
+	    action = str(vars["action"])
+	    #logger.loggerpms2.info(">>OPS Timing ACTION==>>" + action)
+	    
+	    
+	    #return json.dumps({"action":action})
+	    rsp = opsTimingAPI_switcher.get(action,unknown)(vars)
+	    common.setcookies(response)
+	    if(encryption):
+		return json.dumps({"resp_data":dsobj.encrypts(rsp)})
+	    else:
+		return rsp
+	    
+	except Exception as e:
+	    mssg = "OPS Timing Exception Error =>>\n" + str(e)
+	    #logger.loggerpms2.info(mssg)
+	    raise HTTP(500)   
+
+    def PUT(*args, **vars):
+	return dict()
+
+    def DELETE(*args, **vars):
+	return dict()
+
+    return locals()
+
+
+@request.restful()
+def accountAPI():
+    response.view = 'generic' + request.extension
+    def GET(*args, **vars):
+	
+	return
+
+    def POST(*args, **vars):
+	i = 0
+	try:
+	    #logger.loggerpms2.info(">>Enter Account API==>>")
+	    dsobj = datasecurity.DataSecurity()
+	    
+	    
+	    encryption = vars.has_key("req_data")
+	    if(encryption):
+		#logger.loggerpms2.info(">>Account with Encryption")
+		encrypt_req = vars["req_data"]
+		vars = json.loads(dsobj.decrypts(encrypt_req))
+	    
+	    #decrypted request date
+	    action = str(vars["action"])
+	    #logger.loggerpms2.info(">>Account ACTION==>>" + action)
+	    
+	    
+	    #return json.dumps({"action":action})
+	    rsp = accountAPI_switcher.get(action,unknown)(vars)
+	    common.setcookies(response)
+	    if(encryption):
+		return json.dumps({"resp_data":dsobj.encrypts(rsp)})
+	    else:
+		return rsp
+	    
+	except Exception as e:
+	    mssg = "OPS Timing Exception Error =>>\n" + str(e)
+	    #logger.loggerpms2.info(mssg)
+	    raise HTTP(500)   
+
+    def PUT(*args, **vars):
+	return dict()
+
+    def DELETE(*args, **vars):
+	return dict()
 
     return locals()

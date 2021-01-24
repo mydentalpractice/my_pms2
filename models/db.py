@@ -139,6 +139,49 @@ use_janrain(auth, filename='private/janrain.key')
 ## >>> for row in rows: print row.id, row.myfield
 #########################################################################
 
+
+db.define.table('bank_details',
+                Field('bankname','string'),
+                Field('bankbranch','string'),
+                Field('bankaccountno','string'),
+                Field('bankaccounttype','string'),
+                Field('bankmicrno','string'),
+                Field('bankifsccode','string'),
+                Field('address1','string'),
+                Field('address2','string'),
+                Field('address3','string'),
+                Field('city', 'string',default='None',label='City',length=50,requires = IS_IN_SET(CITIES)),
+                Field('st', 'string',default='',label='State',length=50,requires = IS_IN_SET(STATES)),
+                Field('pin','string'),
+                auth.signature
+                )
+db.bank_details._singular = "bank_details"
+db.bank_details._plural   = "bank_details"
+
+db.define.table('ops_timing',
+                Field('calendar_date','date'),
+                Field('day_of_week','string'),
+                Field('open_time','datetime'),
+                Field('close_time','datetime'),
+                Field('is_lunch','boolean',default=False),
+                Field('is_holiday','boolean',default=False),
+                Field('is_saturday','boolean',default=False),
+                Field('is_sunday','boolean',default=False),
+                auth.signature
+                )
+
+db.ops_timing._singular = "ops_timing"
+db.ops_timing._plural   = "ops_timing"
+
+db.define_table('ops_timing_ref',
+                Field('ref_code', 'string',default='RST'),
+                Field('ref_id', 'integer'),
+                Field('ops_timing_id', 'integer')
+                )
+db.ops_timing_ref._singular = "ops_timing_ref"
+db.ops_timing_ref._plural = "ops_timing_ref"
+
+
 db.define_table('loginblock',
                 Field('ip_address','string'),
                 Field('username','string'),
@@ -1063,6 +1106,16 @@ db.define_table('dentalimage',
 db.dentalimage._singular = "DentalImage"
 db.dentalimage._plural = "DentalImage"
 
+db.define_table('dentalimage_ref',
+                Field('ref_code', 'string',default='RST'),
+                Field('ref_id', 'integer'),
+                Field('media_id', 'integer')
+                )
+db.dentalimage_ref._singular = "DentalImageRef"
+db.dentalimage_ref._plural = "DentalImageRef"
+
+                
+                
 
 db.define_table('t_appointment',
     Field('id','id',
