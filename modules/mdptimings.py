@@ -72,20 +72,30 @@ class OPS_Timing:
         try:
             rspobj = {}
             ops_timing_id = int(common.getid(avars["ops_timing_id"])) if "ops_timing_id" in avars else 0 
+            ds = db((db.ops_timing.id == ops_timing_id) & (db.ops_timing.is_active == True)).select()
+            if(len(ds) != 1):
+                rspobj={
+                    "ops_timing_id":str(ops_timing_id),
+                    "result":"fail",
+                    "error_message":"Error Updating OPS Timing - no or duplicate record",
+                    "error_code":""
+                }
+                return json.dumps(rspobj)
             
-            calendar_date = common.getdatefromstring(common.getkeyvalue(avars, "calendar_date", common.getstringfromdate(datetime.date.today(), "%d/%m/%Y")), "%d/%m/%Y")
-            day_of_week = common.getkeyvalue(avars,"day_of_week","mon")
             
-            strtime = common.getkeyvalue(avars,"open_time","09:00 AM")
+            calendar_date = common.getdatefromstring(common.getkeyvalue(avars, "calendar_date", common.getstringfromdate(ds[0].calendar.date, "%d/%m/%Y")), "%d/%m/%Y")
+            day_of_week = common.getkeyvalue(avars,"day_of_week",ds[0].day_of_week)
+            
+            strtime = common.getkeyvalue(avars,"open_time",common.getstringfromtime(ds[0].open_time,"%I:%M %p"))
             open_time = common.gettimefromstring(strtime, "%I:%M %p")
             
-            strtime = common.getkeyvalue(avars,"close_time","06:00 PM")
+            strtime = common.getkeyvalue(avars,"close_time",common.getstringfromtime(ds[0].close_time,"%I:%M %p"))
             close_time = common.gettimefromstring(strtime, "%I:%M %p")
                                                                                                                       
-            is_lunch = common.getboolean(common.getkeyvalue(avars,"is_lunch","True"))
-            is_holiday = common.getboolean(common.getkeyvalue(avars,"is_holiday","True"))
-            is_saturday = common.getboolean(common.getkeyvalue(avars,"is_saturday","True"))
-            is_sunday = common.getboolean(common.getkeyvalue(avars,"is_sunday","True"))            
+            is_lunch = common.getboolean(common.getkeyvalue(avars,"is_lunch",common.getstring(ds[0].is_lunch)))
+            is_holiday = common.getboolean(common.getkeyvalue(avars,"is_lunch",common.getstring(ds[0].is_holiday)))
+            is_saturday = common.getboolean(common.getkeyvalue(avars,"is_lunch",common.getstring(ds[0].is_saturday)))
+            is_sunday = common.getboolean(common.getkeyvalue(avars,"is_lunch",common.getstring(ds[0].is_sunday)))
  
             db(db.ops_timing.id == ops_timing_id).update(\
                 calendar_date = calendar_date,

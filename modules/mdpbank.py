@@ -51,20 +51,31 @@ class Bank:
         db = self.db
         try:
             bankid = int(common.getkeyvalue(avars,"bankid",0)),
+            ds = db((db.bank_details.id == bankid)&(db.bank_details.is_active == True)).select()
+            bankobj = {}
+            if(len(ds) != 1):
+                bankobj = {
+                            "bankid":str(bankid),
+                            "result":"fail",
+                            "error_message":"Error Updating Bank Details - no or duplicate record",
+                            "error_code":""
+                          }                
+                return json.dumps(bankobj)
             
-            bankname = common.getkeyvalue(avars,"bankname","")
-            bankbranch = common.getkeyvalue(avars,"bankbranch","")
-            bankaccountname = common.getkeyvalue(avars,"bankaccountname","")
-            bankaccountno = common.getkeyvalue(avars,"bankaccountno","")
-            bankaccounttype = common.getkeyvalue(avars,"bankaccounttype","")
-            bankmicrno = common.getkeyvalue(avars,"bankmicrno","")
-            bankifsccode = common.getkeyvalue(avars,"bankifsccode","")
-            address1 = common.getkeyvalue(avars,"address1","")
-            address2 = common.getkeyvalue(avars,"address2","")
-            address3 = common.getkeyvalue(avars,"address3","")
-            city = common.getkeyvalue(avars,"city","")
-            st = common.getkeyvalue(avars,"st","")
-            pin = common.getkeyvalue(avars,"pin","")
+            
+            bankname = common.getkeyvalue(avars,"bankname",ds[0].bankname)
+            bankbranch = common.getkeyvalue(avars,"bankbranch",ds[0].bankbranch)
+            bankaccountname = common.getkeyvalue(avars,"bankaccountname",ds[0].bankaccountname)
+            bankaccountno = common.getkeyvalue(avars,"bankaccountno",ds[0].bankaccountno)
+            bankaccounttype = common.getkeyvalue(avars,"bankaccounttype",ds[0].bankaccounttype)
+            bankmicrno = common.getkeyvalue(avars,"bankmicrno",ds[0].bankmicrno)
+            bankifsccode = common.getkeyvalue(avars,"bankifsccode",ds[0].bankifsccode)
+            address1 = common.getkeyvalue(avars,"address1",ds[0].address1)
+            address2 = common.getkeyvalue(avars,"address2",ds[0].address2)
+            address3 = common.getkeyvalue(avars,"address3",ds[0].address3)
+            city = common.getkeyvalue(avars,"city",ds[0].city)
+            st = common.getkeyvalue(avars,"st",ds[0].st)
+            pin = common.getkeyvalue(avars,"pin",ds[0].pin)
             
             db(db.bank_details.id == bankid).update(\
                 bankname = bankname,
@@ -81,9 +92,7 @@ class Bank:
                 st = bankaccountname,
                 pin = bankaccountname,
                 is_active = True,
-                created_on=common.getISTFormatCurrentLocatTime(),
                 modified_on=common.getISTFormatCurrentLocatTime(),
-                created_by = 1 if(auth.user == None) else auth.user.id,
                 modified_by= 1 if(auth.user == None) else auth.user.id
                 )
             

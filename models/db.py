@@ -140,7 +140,79 @@ use_janrain(auth, filename='private/janrain.key')
 #########################################################################
 
 
-db.define.table('bank_details',
+
+db.define_table('clinic',
+                
+                Field('clinic_ref','string'),
+                
+                Field('name','string'),
+                Field('address1','string'),
+                Field('address2','string'),
+                Field('address3','string'),
+                Field('city', 'string',default='None',label='City',length=50,requires = IS_IN_SET(CITIES)),
+                Field('st', 'string',default='',label='State',length=50,requires = IS_IN_SET(STATES)),
+                Field('pin','string'),
+                
+                Field('cell','string'),
+                Field('telephone','string'),
+                Field('email','string'),
+
+                Field('website','string'),
+                Field('location','string'),
+                Field('whatsapp','string'),
+                Field('facebook','string'),
+                Field('twitter','string'),
+
+                Field('status','string'),
+                Field('primary','boolean'),
+                
+                Field('mdp_registration','string'),
+                Field('dentalchairs','string'),
+                Field('auto_clave','string'),
+                Field('implantology','string'),
+                Field('instrument_sterilization','string'),
+                Field('waste_displosal','string'),
+                Field('suction_machine','string'),
+                Field('laser','string'),
+                Field('RVG_OPG','string'),
+                
+                Field('radiation_protection','string'),                
+                Field('computers','string'),                
+                Field('network','string'),                
+                Field('internet','string'),                
+                Field('air_conditioned','string'),                
+                Field('waiting_area','string'),                
+                Field('backup_power','string'),                
+                Field('toilet','string'),                
+                Field('water_filter','string'),                
+                Field('parking_facility','string'),                
+                Field('receptionist','string'),                
+                Field('credit_card','string'),                
+                Field('certifcates','string'),                
+                Field('emergency_drugs','string'),                
+                Field('infection_control','string'),                
+                Field('daily_autoclaved','string'),                
+                Field('patient_records','string'),                
+                Field('patient_consent','string'),                
+                Field('patient_traffic','string'),                
+                Field('nabh_iso_certifcation','string'),     
+                Field('intra_oral_camera','string'),     
+                Field('rotary_endodontics','string'),     
+                Field('bank_id','integer'),     
+                auth.signature                
+                )
+
+db.clinic._singular = "clinic"
+db.clinic._plural   = "clinic"
+db.define_table('clinic_ref',
+                Field('ref_code', 'string',default='PRV'),
+                Field('ref_id', 'integer'),
+                Field('clinic_id', 'integer')
+                )
+db.clinic_ref._singular = "clinic_ref"
+db.clinic_ref._plural = "clinic_ref"
+
+db.define_table('bank_details',
                 Field('bankname','string'),
                 Field('bankbranch','string'),
                 Field('bankaccountno','string'),
@@ -158,7 +230,7 @@ db.define.table('bank_details',
 db.bank_details._singular = "bank_details"
 db.bank_details._plural   = "bank_details"
 
-db.define.table('ops_timing',
+db.define_table('ops_timing',
                 Field('calendar_date','date'),
                 Field('day_of_week','string'),
                 Field('open_time','datetime'),
