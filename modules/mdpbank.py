@@ -17,7 +17,7 @@ class Bank:
 
         try:
 
-            bankid = int(common.getkeyvalue(avars,"bankid",0)),
+            bankid = int(common.getkeyvalue(avars,"bankid",0))
 
             db(db.bank_details.id == bankid).update(\
                 is_active = False,
@@ -27,7 +27,7 @@ class Bank:
             )
 
             rspobj = {
-                'bankid': bankid,
+                'bankid': str(bankid),
                 'result' : 'success',
                 "error_code":"",
                 "error_message":""
@@ -50,7 +50,7 @@ class Bank:
         auth  = current.auth
         db = self.db
         try:
-            bankid = int(common.getkeyvalue(avars,"bankid",0)),
+            bankid = int(common.getkeyvalue(avars,"bankid",0))
             ds = db((db.bank_details.id == bankid)&(db.bank_details.is_active == True)).select()
             bankobj = {}
             if(len(ds) != 1):
@@ -123,7 +123,7 @@ class Bank:
         try:
             bankid = int(common.getkeyvalue(avars,"bankid",0))
             
-            ds = db(db.bank_details.id == bankid) & (db.bank_details.is_active == True)).select()
+            ds = db((db.bank_details.id == bankid) & (db.bank_details.is_active == True)).select()
             
             bankobj = {}
             for d in ds:
@@ -190,9 +190,9 @@ class Bank:
                 address1 = address1,
                 address2 = address2,
                 address3 = address3,
-                city = bankaccountname,
-                st = bankaccountname,
-                pin = bankaccountname,
+                city = city,
+                st = st,
+                pin = pin,
                 is_active = True,
                 created_on=common.getISTFormatCurrentLocatTime(),
                 modified_on=common.getISTFormatCurrentLocatTime(),

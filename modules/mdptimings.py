@@ -31,22 +31,32 @@ class OPS_Timing:
         
         try:
             opsobj = {}
-            ops_timing_id = int(common.getid(avars["ops_timing_id"])) if "ops_timing_id" in avars else 0 
+            timingid = int(common.getid(avars["timingid"])) if "timingid" in avars else 0 
     
-            ops = db((db.ops_timing.id == ops_timing_id) & (db.ops_timing.is_active == True)).select()
+            ops = db((db.ops_timing.id == timingid) & (db.ops_timing.is_active == True)).select()
+            ref = db(db.ops_timing_ref.ops_timing_id == timingid).select()
             
+            if(len(ops) != 1):
+                rspobj = {
+                    "timingid":str(timingid),
+                    "result":"fail",
+                    "error_message":"Error Getting  Clinic Timing - no or duplicate clinic record",
+                    "error_code":""
+                }                
+                return json.dumps(rspobj)
+                
             for op in ops:
                 opsobj = {
-                    "ref_code":op.ops_timing_ref.ref_code,
-                    "ref_id":op.ops_timing_ref.ref_id,
-                    "calendar_date":common.getstringfromdate(op.ps_timing.calendar_date, "%d/%m/%Y"),
-                    "open_time":common.getstringfromtime(op.ops_timing.open_time, "%I:%M %p"),
-                    "close_time":common.getstringfromtime(op.ops_timing.close_time, "%I:%M %p"),
-                    "day_of_week":op.ops_timing.day_of_week,
-                    "is_lunch":"True" if op.ops_timing.is_lunch == True else "False",
-                    "is_holiday":"True" if op.ops_timing.is_holiday == True else "False",
-                    "is_saturday":"True" if op.ops_timing.is_saturday == True else "False",
-                    "is_sunday":"True" if op.ops_timing.is_sunday == True else "False",
+                    "ref_code":ref[0].ref_code if len(ref) == 1 else "",
+                    "ref_id":ref[0].ref_id if len(ref) == 1 else 0,
+                    "calendar_date":common.getstringfromdate(op.calendar_date, "%d/%m/%Y"),
+                    "open_time":common.getstringfromtime(op.open_time, "%I:%M %p"),
+                    "close_time":common.getstringfromtime(op.close_time, "%I:%M %p"),
+                    "day_of_week":op.day_of_week,
+                    "is_lunch":"True" if op.is_lunch == True else "False",
+                    "is_holiday":"True" if op.is_holiday == True else "False",
+                    "is_saturday":"True" if op.is_saturday == True else "False",
+                    "is_sunday":"True" if op.is_sunday == True else "False",
                 }            
             
             opsobj["result"] = "success"
@@ -54,7 +64,7 @@ class OPS_Timing:
             opsobj["error_code"] = ""
             
         except Exception as e:
-            mssg = "Delete OPS Timing Exception:\n" + str(e)
+            mssg = "Get OPS Timing Exception:\n" + str(e)
             logger.loggerpms2.info(mssg)      
             excpobj = {}
             excpobj["result"] = "fail"
@@ -71,11 +81,11 @@ class OPS_Timing:
         
         try:
             rspobj = {}
-            ops_timing_id = int(common.getid(avars["ops_timing_id"])) if "ops_timing_id" in avars else 0 
-            ds = db((db.ops_timing.id == ops_timing_id) & (db.ops_timing.is_active == True)).select()
+            timingid = int(common.getid(avars["timingid"])) if "timingid" in avars else 0 
+            ds = db((db.ops_timing.id == timingid) & (db.ops_timing.is_active == True)).select()
             if(len(ds) != 1):
                 rspobj={
-                    "ops_timing_id":str(ops_timing_id),
+                    "timingid":str(timingid),
                     "result":"fail",
                     "error_message":"Error Updating OPS Timing - no or duplicate record",
                     "error_code":""
@@ -83,7 +93,7 @@ class OPS_Timing:
                 return json.dumps(rspobj)
             
             
-            calendar_date = common.getdatefromstring(common.getkeyvalue(avars, "calendar_date", common.getstringfromdate(ds[0].calendar.date, "%d/%m/%Y")), "%d/%m/%Y")
+            calendar_date = common.getdatefromstring(common.getkeyvalue(avars, "calendar_date", common.getstringfromdate(ds[0].calendar_date, "%d/%m/%Y")), "%d/%m/%Y")
             day_of_week = common.getkeyvalue(avars,"day_of_week",ds[0].day_of_week)
             
             strtime = common.getkeyvalue(avars,"open_time",common.getstringfromtime(ds[0].open_time,"%I:%M %p"))
@@ -97,7 +107,7 @@ class OPS_Timing:
             is_saturday = common.getboolean(common.getkeyvalue(avars,"is_lunch",common.getstring(ds[0].is_saturday)))
             is_sunday = common.getboolean(common.getkeyvalue(avars,"is_lunch",common.getstring(ds[0].is_sunday)))
  
-            db(db.ops_timing.id == ops_timing_id).update(\
+            db(db.ops_timing.id == timingid).update(\
                 calendar_date = calendar_date,
                 day_of_week =day_of_week,
                 open_time = open_time,
@@ -112,14 +122,14 @@ class OPS_Timing:
             
             rspobj = {
                 
-                'ops_timing_id': ops_timing_id,
+                'timingid': timingid,
                 'result' : 'success',
                 "error_code":"",
                 "error_message":""
                        }                  
             
         except Exception as e:
-            mssg = "Delete OPS Timing Exception:\n" + str(e)
+            mssg = "Update OPS Timing Exception:\n" + str(e)
             logger.loggerpms2.info(mssg)      
             excpobj = {}
             excpobj["result"] = "fail"
@@ -135,9 +145,9 @@ class OPS_Timing:
         
         try:
            
-            ops_timing_id = int(common.getid(avars["ops_timing_id"])) if "ops_timing_id" in avars else 0 
+            timingid = int(common.getid(avars["timingid"])) if "timingid" in avars else 0 
             
-            db(db.ops_timing.id == ops_timing_id).update(
+            db(db.ops_timing.id == timingid).update(
                 is_active = False,
                 modified_on=common.getISTFormatCurrentLocatTime(),
                 modified_by= 1 if(auth.user == None) else auth.user.id
@@ -145,7 +155,7 @@ class OPS_Timing:
             )
         
             rspobj = {
-                'ops_timing_id': ops_timing_id,
+                'timingid': timingid,
                 'result' : 'success',
                 "error_code":"",
                 "error_message":""
@@ -181,26 +191,27 @@ class OPS_Timing:
             if(ref_code == ""):
                 if(ref_id == 0):
                     ops = db((db.ops_timing.is_active == True)).select(db.ops_timing.ALL,db.ops_timing_ref.ALL,\
-                                                                                        left=db.ops_timing.on((db.ops_timing.id == db.ops_timing_ref.ref_id)),limitby=limitby)
+                                                                                        left=db.ops_timing.on((db.ops_timing.id == db.ops_timing_ref.ref_id)))
                 else:
                     ops = db((db.ops_timing_ref.ref_id == ref_id) &  (db.ops_timing.is_active == True)).select(db.ops_timing.ALL,db.ops_timing_ref.ALL,\
-                                                                                        left=db.ops_timing.on((db.ops_timing.id == db.ops_timing_ref.ref_id)),limitby=limitby)
+                                                                                        left=db.ops_timing.on((db.ops_timing.id == db.ops_timing_ref.ref_id)))
                     
             else:
                 if(ref_id == 0):
                     ops = db((db.ops_timing_ref.ref_code==ref_code)&  (db.ops_timing.is_active == True)).select(db.ops_timing.ALL,db.ops_timing_ref.ALL,\
-                                                                                        left=db.ops_timing.on((db.ops_timing.id == db.ops_timing_ref.ref_id)),limitby=limitby)
+                                                                                        left=db.ops_timing.on((db.ops_timing.id == db.ops_timing_ref.ref_id)))
                 else:
                     ops = db((db.ops_timing_ref.ref_code==ref_code)&(db.ops_timing_ref.ref_id == ref_id) &  (db.ops_timing.is_active == True)).select(db.ops_timing.ALL,db.ops_timing_ref.ALL,\
-                                                                                        left=db.ops_timing.on((db.ops_timing.id == db.ops_timing_ref.ref_id)),limitby=limitby)
+                                                                                        left=db.ops_timing.on((db.ops_timing.id == db.ops_timing_ref.ref_id)))
                 
             
            
             for op in ops:
+               
                 opsobj = {
                     "ref_code":op.ops_timing_ref.ref_code,
                     "ref_id":op.ops_timing_ref.ref_id,
-                    "calendar_date":common.getstringfromdate(op.ps_timing.calendar_date, "%d/%m/%Y"),
+                    "calendar_date":common.getstringfromdate(op.ops_timing.calendar_date, "%d/%m/%Y"),
                     "open_time":common.getstringfromtime(op.ops_timing.open_time, "%I:%M %p"),
                     "close_time":common.getstringfromtime(op.ops_timing.close_time, "%I:%M %p"),
                     "day_of_week":op.ops_timing.day_of_week,
@@ -236,18 +247,28 @@ class OPS_Timing:
             calendar_date = common.getdatefromstring(common.getkeyvalue(avars, "calendar_date", common.getstringfromdate(datetime.date.today(), "%d/%m/%Y")), "%d/%m/%Y")
             day_of_week = common.getkeyvalue(avars,"day_of_week","mon")
             
-            strtime = common.getkeyvalue(avars,"open_time","09:00 AM")
-            open_time = common.gettimefromstring(strtime, "%I:%M %p")
-            
-            strtime = common.getkeyvalue(avars,"close_time","06:00 PM")
-            close_time = common.gettimefromstring(strtime, "%I:%M %p")
                                                                                                                       
             is_lunch = common.getboolean(common.getkeyvalue(avars,"is_lunch","True"))
             is_holiday = common.getboolean(common.getkeyvalue(avars,"is_holiday","True"))
             is_saturday = common.getboolean(common.getkeyvalue(avars,"is_saturday","True"))
             is_sunday = common.getboolean(common.getkeyvalue(avars,"is_sunday","True"))
 
-            timeid = db.ops_timings.insert(\
+            
+            if((is_holiday == True)|(is_saturday == True)|(is_sunday==True)):     
+                strtime = common.getkeyvalue(avars,"open_time","12:00 AM")
+            else:
+                strtime = common.getkeyvalue(avars,"open_time","09:00 AM")
+            open_time = datetime.datetime(*(common.gettimefromstring(strtime, "%I:%M %p"))[:6])
+            
+            
+            if((is_holiday == True)|(is_saturday == True)|(is_sunday==True)):     
+                strtime = common.getkeyvalue(avars,"close_time","11:59 PM")
+            else:
+                strtime = common.getkeyvalue(avars,"close_time","06:00 PM")
+            close_time = datetime.datetime(*(common.gettimefromstring(strtime, "%I:%M %p"))[:6])
+
+
+            timeid = db.ops_timing.insert(\
                 calendar_date = calendar_date,
                 day_of_week =day_of_week,
                 open_time = open_time,

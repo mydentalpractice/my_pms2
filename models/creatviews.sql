@@ -8557,7 +8557,7 @@ ADD COLUMN `mediasize` DOUBLE NULL DEFAULT '0' AFTER `mediaformat`;
 1. Remove Media, xMedia, DentalImage_1
 2. New dentlaimage_ref
 
-1. New - Clinic,clinic_ref
+1. New - Clinic,clinic_ref   (need to add owner flag in Clinic)
 
 3. New - ops_timing,ops_timing_ref
 

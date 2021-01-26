@@ -58,11 +58,13 @@ def getdatefromstring(strdate,fmt):
         return dt
         
 def gettimefromstring(strtime,fmt):
-        t = time.strptime(strtime, format)
+        t = time.strptime(strtime, fmt)
         return t
 
 def getstringfromtime(timeobj, fmt):
-        strtime = time.strftime(fmt,timeobj)
+        strtime = timeobj.strftime(fmt)
+        
+       
         return strtime
         
 #this returns local current (IST) date and time as datetime object

@@ -38,6 +38,7 @@ from applications.my_pms2.modules import mdpmedia
 from applications.my_pms2.modules import mdpcustomer
 from applications.my_pms2.modules import mdptimings
 from applications.my_pms2.modules import mdpbank
+from applications.my_pms2.modules import mdpclinic
 
 from applications.my_pms2.modules import logger
 
@@ -2272,6 +2273,60 @@ def cancel_vital_member(avars):
 
 ############################# END VITAL API ###################################################
 
+
+############################# START CLINIC API #################################################
+def get_clinic(avars):
+    logger.loggerpms2.info("Enter Get Clinic Request\n" + str(avars) )
+    ops = mdpclinic.Clinic(current.globalenv['db'])
+    rsp = ops.get_clinic(avars)
+    
+    return rsp
+
+def update_clinic(avars):
+    logger.loggerpms2.info("Enter Update Clinic Request\n" + str(avars) )
+    ops = mdpclinic.Clinic(current.globalenv['db'])
+    rsp = ops.update_clinic(avars)
+    return rsp
+
+def delete_clinic(avars):
+    logger.loggerpms2.info("Enter Delee Clinic Request\n" + str(avars) )
+    ops = mdpclinic.Clinic(current.globalenv['db'])
+    rsp = ops.delete_clinic(avars)
+    return rsp
+
+def list_clinic(avars):
+    logger.loggerpms2.info("Enter List Clinic Request\n" + str(avars) )
+    ops = mdpclinic.Clinic(current.globalenv['db'])
+    rsp = ops.list_clinic(avars)
+    return rsp
+
+def new_clinic(avars):
+    logger.loggerpms2.info("Enter New Clinic Request\n" + str(avars) )
+    ops = mdpclinic.Clinic(current.globalenv['db'])
+    rsp = ops.new_clinic(avars)
+    return rsp
+
+def add_doc_clinic(avars):
+    logger.loggerpms2.info("Enter Add DOC Clinic Request\n" + str(avars) )
+    ops = mdpclinic.Clinic(current.globalenv['db'])
+    rsp = ops.add_doc_clinic(avars)
+    return rsp
+
+def list_doc_clinic(avars):
+    logger.loggerpms2.info("Enter List Doc Clinic Request\n" + str(avars) )
+    ops = mdpclinic.Clinic(current.globalenv['db'])
+    rsp = ops.list_doc_clinic(avars)
+    return rsp
+
+def remove_doc_clinic(avars):
+    logger.loggerpms2.info("Enter Remove DOC Clinic Request\n" + str(avars) )
+    ops = mdpclinic.Clinic(current.globalenv['db'])
+    rsp = ops.remove_doc_clinic(avars)
+    return rsp
+
+    
+############################# END CLINIC API ###################################################
+
 ############################# START OPS TIMING API #################################################
 def get_ops_timing(avars):
     logger.loggerpms2.info("Enter Get OPS Timing Request\n" + str(avars) )
@@ -2331,6 +2386,7 @@ def new_account(avars):
     acct = mdpbank.Bank(current.globalenv['db'])
     rsp = acct.new_account(avars)
     return rsp
+
     
 ############################# ENDBank Detail Account API ###################################################
 
@@ -2352,9 +2408,15 @@ opsTimingAPI_switcher = {
 
 accountAPI_switcher = {
     
-    "get_account":get_account,"update_account":update_account,"delete_account":delete_account,\
-    "new_account":new_account
+    "get_account":get_account,"update_account":update_account,"delete_account":delete_account,"new_account":new_account
 }
+
+clinicAPI_switcher = {
+    
+    "get_clinic":get_clinic,"update_clinic":update_clinic,"delete_clinic":delete_clinic,\
+    "new_clinic":new_clinic,"list_clinic":list_clinic,"add_doc_clinic":add_doc_clinic,"list_doc_clinic":list_doc_clinic,"remove_doc_clinic":remove_doc_clinic
+}
+
 
 mdpapi_switcher = {"listappointments":getappointments,"getappointmentsbymonth":getappointmentsbymonth,"getappointmentsbyday":getappointmentsbyday,"getappointment":getappointment,\
                    "getappointmentcountbymonth":getappointmentcountbymonth,"getdocappointmentcountbymonth":getdocappointmentcountbymonth,"getappointmentsbypatient":getappointmentsbypatient,\
@@ -2612,6 +2674,48 @@ def accountAPI():
 	    
 	except Exception as e:
 	    mssg = "OPS Timing Exception Error =>>\n" + str(e)
+	    #logger.loggerpms2.info(mssg)
+	    raise HTTP(500)   
+
+    def PUT(*args, **vars):
+	return dict()
+
+    def DELETE(*args, **vars):
+	return dict()
+
+    return locals()
+
+@request.restful()
+def clinicAPI():
+    response.view = 'generic' + request.extension
+    def GET(*args, **vars):
+	return
+
+    def POST(*args, **vars):
+	i = 0
+	try:
+	    #logger.loggerpms2.info(">>Enter Account API==>>")
+	    dsobj = datasecurity.DataSecurity()
+	    encryption = vars.has_key("req_data")
+	    if(encryption):
+		#logger.loggerpms2.info(">>Account with Encryption")
+		encrypt_req = vars["req_data"]
+		vars = json.loads(dsobj.decrypts(encrypt_req))
+	    
+	    #decrypted request date
+	    action = str(vars["action"])
+	    #logger.loggerpms2.info(">>Account ACTION==>>" + action)
+	    
+	    #return json.dumps({"action":action})
+	    rsp = clinicAPI_switcher.get(action,unknown)(vars)
+	    common.setcookies(response)
+	    if(encryption):
+		return json.dumps({"resp_data":dsobj.encrypts(rsp)})
+	    else:
+		return rsp
+	    
+	except Exception as e:
+	    mssg = "Clinic API Exception Error =>>\n" + str(e)
 	    #logger.loggerpms2.info(mssg)
 	    raise HTTP(500)   
 

@@ -158,13 +158,13 @@ db.define_table('clinic',
                 Field('email','string'),
 
                 Field('website','string'),
-                Field('location','string'),
+                Field('gps_location','string'),
                 Field('whatsapp','string'),
                 Field('facebook','string'),
                 Field('twitter','string'),
 
                 Field('status','string'),
-                Field('primary','boolean'),
+                Field('primary_clinic','boolean'),
                 
                 Field('mdp_registration','string'),
                 Field('dentalchairs','string'),
@@ -198,7 +198,7 @@ db.define_table('clinic',
                 Field('nabh_iso_certifcation','string'),     
                 Field('intra_oral_camera','string'),     
                 Field('rotary_endodontics','string'),     
-                Field('bank_id','integer'),     
+                Field('bank_id','integer'),   
                 auth.signature                
                 )
 
@@ -215,6 +215,7 @@ db.clinic_ref._plural = "clinic_ref"
 db.define_table('bank_details',
                 Field('bankname','string'),
                 Field('bankbranch','string'),
+                Field('bankaccountname','string'),
                 Field('bankaccountno','string'),
                 Field('bankaccounttype','string'),
                 Field('bankmicrno','string'),
@@ -233,8 +234,8 @@ db.bank_details._plural   = "bank_details"
 db.define_table('ops_timing',
                 Field('calendar_date','date'),
                 Field('day_of_week','string'),
-                Field('open_time','datetime'),
-                Field('close_time','datetime'),
+                Field('open_time','time'),
+                Field('close_time','time'),
                 Field('is_lunch','boolean',default=False),
                 Field('is_holiday','boolean',default=False),
                 Field('is_saturday','boolean',default=False),
