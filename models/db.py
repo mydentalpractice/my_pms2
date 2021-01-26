@@ -198,7 +198,8 @@ db.define_table('clinic',
                 Field('nabh_iso_certifcation','string'),     
                 Field('intra_oral_camera','string'),     
                 Field('rotary_endodontics','string'),     
-                Field('bank_id','integer'),   
+                Field('bank_id','integer'), 
+                
                 auth.signature                
                 )
 
@@ -2445,6 +2446,37 @@ db.speciality_default._singular = "speciality_default"
 db.speciality_default._plural   = "speciality_default"
 
 
+
+#Columns:
+#id int(11) AI PK 
+# varchar(45) 
+# varchar(128) 
+# int(11) 
+# int(11) 
+# int(11) 
+# char(1) 
+# varchar(128) 
+# varchar(45) 
+# varchar(45) 
+# varchar(45) 
+# varchar(45) 
+# varchar(45) 
+# varchar(45) 
+# varchar(45) 
+# varchar(45) 
+#approval_date date 
+#doctorcol varchar(45) 
+# text 
+# char(1) 
+# char(1) 
+# char(1) 
+# char(1) 
+# char(1) 
+# int(11) 
+# datetime 
+# int(11) 
+# datetim
+
 db.define_table('doctor',
                 Field('title','string',represent=lambda v, r: '' if v is None else v,default=' ',label='Title',length=10,requires = IS_EMPTY_OR(IS_IN_SET(DOCTITLE))),
                 Field('name','string',represent=lambda v, r: '' if v is None else v,requires=IS_NOT_EMPTY(),length=64),  
@@ -2457,17 +2489,37 @@ db.define_table('doctor',
                 Field('registration','string',represent=lambda v, r: '' if v is None else v,requires=IS_NOT_EMPTY(),length=64),  
                 Field('color','string',represent=lambda v, r: '' if v is None else v,requires=IS_NOT_EMPTY(),length=32),  
                 Field('stafftype','string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.options.widget(field, value, _style="width:100%;height:35px",_class='form-control'),default='Doctor',label='Type',length=10,requires = IS_IN_SET(OFFICESTAFF)),
+
+                Field('state_registration','string'),
+                Field('pan','string'),
+                Field('adhaar','string'),
+                Field('status','string'),
+                
+
+
                 Field('notes','text',represent=lambda v, r: '' if v is None else v),  
                 Field('docsms','boolean', default = True),
                 Field('docemail','boolean', default = True),
                 Field('groupsms','boolean', default = False),
                 Field('groupemail','boolean', default = False),
+                Field('practice_owner','boolean', default = False),
+                
+                Field('approval_date','datetime'),
+                
                 Field('is_active','boolean', default = True),
+                
                 auth.signature
                 )
 db.doctor._singular = "doctor"
 db.doctor._plural   = "doctor"
 
+db.define_table('doctor_ref',
+                Field('ref_code', 'string',default='PRV'),
+                Field('ref_id', 'integer'),
+                Field('doctor_id', 'integer')
+                )
+db.doctor_ref._singular = "doctor_ref"
+db.doctor_ref._plural = "doctor_ref"
 
 db.define_table('doctortiming',
                 Field('mon_day_chk','boolean', default = False),

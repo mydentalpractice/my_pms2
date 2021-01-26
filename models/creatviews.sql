@@ -8562,10 +8562,10 @@ ADD COLUMN `mediasize` DOUBLE NULL DEFAULT '0' AFTER `mediaformat`;
 3. New - ops_timing,ops_timing_ref
 
 
-5. New - doctor_doctor
+5. New - doctor, doctor_ref
 
 7. New - bank_details
-8. New - prov_clinic
+8  
 
-11. New - bank_details
+
 

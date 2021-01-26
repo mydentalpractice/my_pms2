@@ -2390,6 +2390,38 @@ def new_account(avars):
     
 ############################# ENDBank Detail Account API ###################################################
 
+############################# START  DOCTOR API #################################################
+def new_doctor(avars):
+    logger.loggerpms2.info("Enter New Doctor Request\n" + str(avars) )
+    doc = mdpdoctor.Doctor(current.globalenv['db'], common.getkeyvalue(avars,"providerid","0"))
+    rsp = doc.new_doctor(avars)
+    return rsp
+
+def list_doctor(avars):
+    logger.loggerpms2.info("Enter List Doctor Request\n" + str(avars) )
+    doc = mdpdoctor.Doctor(current.globalenv['db'], common.getkeyvalue(avars,"providerid","0"))
+    rsp = doc.list_doctor(avars)
+    return rsp
+
+def get_doctor(avars):
+    logger.loggerpms2.info("Enter Get Doctor Request\n" + str(avars) )
+    doc = mdpdoctor.Doctor(current.globalenv['db'], common.getkeyvalue(avars,"providerid","0"))
+    rsp = doc.get_doctor(avars)
+    return rsp
+
+def update_doctor(avars):
+    logger.loggerpms2.info("Enter Get Doctor Request\n" + str(avars) )
+    doc = mdpdoctor.Doctor(current.globalenv['db'], common.getkeyvalue(avars,"providerid","0"))
+    rsp = doc.update_doctor(avars)
+    return rsp
+
+def delete_doctor(avars):
+    logger.loggerpms2.info("Enter Delete Doctor Request\n" + str(avars) )
+    doc = mdpdoctor.Doctor(current.globalenv['db'], common.getkeyvalue(avars,"providerid","0"))
+    rsp = doc.delete_doctor(avars)
+    return rsp
+
+############################# END DOCTOR API  ###################################################
 
 def unknown(avars):
     return dict()
@@ -2415,6 +2447,10 @@ clinicAPI_switcher = {
     
     "get_clinic":get_clinic,"update_clinic":update_clinic,"delete_clinic":delete_clinic,\
     "new_clinic":new_clinic,"list_clinic":list_clinic,"add_doc_clinic":add_doc_clinic,"list_doc_clinic":list_doc_clinic,"remove_doc_clinic":remove_doc_clinic
+}
+
+doctorAPI_switcher = {
+    "new_doctor":new_doctor,"list_doctor":list_doctor,"get_doctor":get_doctor,"update_doctor":update_doctor,"delete_doctor":delete_doctor
 }
 
 
@@ -2708,6 +2744,48 @@ def clinicAPI():
 	    
 	    #return json.dumps({"action":action})
 	    rsp = clinicAPI_switcher.get(action,unknown)(vars)
+	    common.setcookies(response)
+	    if(encryption):
+		return json.dumps({"resp_data":dsobj.encrypts(rsp)})
+	    else:
+		return rsp
+	    
+	except Exception as e:
+	    mssg = "Clinic API Exception Error =>>\n" + str(e)
+	    #logger.loggerpms2.info(mssg)
+	    raise HTTP(500)   
+
+    def PUT(*args, **vars):
+	return dict()
+
+    def DELETE(*args, **vars):
+	return dict()
+
+    return locals()
+
+@request.restful()
+def doctorAPI():
+    response.view = 'generic' + request.extension
+    def GET(*args, **vars):
+	return
+
+    def POST(*args, **vars):
+	i = 0
+	try:
+	    #logger.loggerpms2.info(">>Enter Doctor API==>>")
+	    dsobj = datasecurity.DataSecurity()
+	    encryption = vars.has_key("req_data")
+	    if(encryption):
+		#logger.loggerpms2.info(">>Doctor with Encryption")
+		encrypt_req = vars["req_data"]
+		vars = json.loads(dsobj.decrypts(encrypt_req))
+	    
+	    #decrypted request date
+	    action = str(vars["action"])
+	    #logger.loggerpms2.info(">>Doctor ACTION==>>" + action)
+	    
+	    #return json.dumps({"action":action})
+	    rsp = doctorAPI_switcher.get(action,unknown)(vars)
 	    common.setcookies(response)
 	    if(encryption):
 		return json.dumps({"resp_data":dsobj.encrypts(rsp)})
