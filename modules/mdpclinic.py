@@ -10,7 +10,7 @@ from applications.my_pms2.modules import logger
 class Clinic:
     def __init__(self,db):
         self.db = db
-    
+        
     
     def remove_doc_clinic(self,avars)    :
         auth  = current.auth

@@ -361,7 +361,7 @@ class Media:
             #CLN if the media is for CLINIC, DOC if the media is for DOCTOR,PRV if the media is for Provider
             #MEM for Memeber, TRT for Treatment, USR for User, CUS for Customer, EMP for MDP Employee,
             #GUS for Guest, CSP for Customer Support, MKT for Marketing, SLS for Sales, GEN for General, RST for all others  
-            #BNK for Bank
+            #BNK for Bank, CSF for Customer Support
             #update cross-reference tables
             db.dentalimage_ref.insert(media_id = mediaid, ref_code = ref_code,ref_id = ref_id)
     

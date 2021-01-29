@@ -8565,7 +8565,12 @@ ADD COLUMN `mediasize` DOUBLE NULL DEFAULT '0' AFTER `mediaformat`;
 5. New - doctor, doctor_ref
 
 7. New - bank_details
-8  
 
+8  Modify Provider to add Provider status   varchar(45)
 
+9.  New - provider_prospect, prospect_ref
+
+10. New activity_log, activity_log_ref
+
+11. New travel_log, travel_log_ref
 

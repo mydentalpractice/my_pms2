@@ -39,6 +39,7 @@ from applications.my_pms2.modules import mdpcustomer
 from applications.my_pms2.modules import mdptimings
 from applications.my_pms2.modules import mdpbank
 from applications.my_pms2.modules import mdpclinic
+from applications.my_pms2.modules import mdpprospect
 
 from applications.my_pms2.modules import logger
 
@@ -2423,6 +2424,42 @@ def delete_doctor(avars):
 
 ############################# END DOCTOR API  ###################################################
 
+
+############################# START  PROSPECT API #################################################
+def new_prospect(avars):
+    logger.loggerpms2.info("Enter New Prospect Request\n" + str(avars) )
+    prs = mdpprospect.Prospect(current.globalenv['db'])
+  
+    rsp = prs.new_prospect(avars)
+    return rsp
+
+def list_prospect(avars):
+    logger.loggerpms2.info("Enter List Prospect Request\n" + str(avars) )
+    prs = mdpprospect.Prospect(current.globalenv['db'])
+    rsp = prs.list_prospect(avars)
+    return rsp
+
+def get_prospect(avars):
+    logger.loggerpms2.info("Enter Get Prospect Request\n" + str(avars) )
+    prs = mdpprospect.Prospect(current.globalenv['db'])
+    rsp = prs.get_prospect(avars)
+    return rsp
+
+def update_prospect(avars):
+    logger.loggerpms2.info("Enter Get Prospect Request\n" + str(avars) )
+    prs = mdpprospect.Prospect(current.globalenv['db'])
+    rsp = prs.update_prospect(avars)
+    return rsp
+
+def delete_propsect(avars):
+    logger.loggerpms2.info("Enter Delete Prospect Request\n" + str(avars) )
+    prs = mdpprospect.Prospect(current.globalenv['db'])
+    rsp = prs.delete_prospect(avars)
+    return rsp
+
+############################# END DPROSPECT API  ###################################################
+
+
 def unknown(avars):
     return dict()
 
@@ -2453,6 +2490,9 @@ doctorAPI_switcher = {
     "new_doctor":new_doctor,"list_doctor":list_doctor,"get_doctor":get_doctor,"update_doctor":update_doctor,"delete_doctor":delete_doctor
 }
 
+prospectAPI_switcher = {
+    "new_prospect":new_prospect,"list_prospect":list_prospect,"get_prospect":get_prospect,"update_prospect":update_prospect,"delete_propsect":delete_propsect
+}
 
 mdpapi_switcher = {"listappointments":getappointments,"getappointmentsbymonth":getappointmentsbymonth,"getappointmentsbyday":getappointmentsbyday,"getappointment":getappointment,\
                    "getappointmentcountbymonth":getappointmentcountbymonth,"getdocappointmentcountbymonth":getdocappointmentcountbymonth,"getappointmentsbypatient":getappointmentsbypatient,\
@@ -2786,6 +2826,48 @@ def doctorAPI():
 	    
 	    #return json.dumps({"action":action})
 	    rsp = doctorAPI_switcher.get(action,unknown)(vars)
+	    common.setcookies(response)
+	    if(encryption):
+		return json.dumps({"resp_data":dsobj.encrypts(rsp)})
+	    else:
+		return rsp
+	    
+	except Exception as e:
+	    mssg = "Clinic API Exception Error =>>\n" + str(e)
+	    #logger.loggerpms2.info(mssg)
+	    raise HTTP(500)   
+
+    def PUT(*args, **vars):
+	return dict()
+
+    def DELETE(*args, **vars):
+	return dict()
+
+    return locals()
+
+@request.restful()
+def prospectAPI():
+    response.view = 'generic' + request.extension
+    def GET(*args, **vars):
+	return
+
+    def POST(*args, **vars):
+	i = 0
+	try:
+	    #logger.loggerpms2.info(">>Enter Prospect API==>>")
+	    dsobj = datasecurity.DataSecurity()
+	    encryption = vars.has_key("req_data")
+	    if(encryption):
+		#logger.loggerpms2.info(">>Prospedct with Encryption")
+		encrypt_req = vars["req_data"]
+		vars = json.loads(dsobj.decrypts(encrypt_req))
+	    
+	    #decrypted request date
+	    action = str(vars["action"])
+	    #logger.loggerpms2.info(">>Prospect ACTION==>>" + action)
+	    
+	    #return json.dumps({"action":action})
+	    rsp = prospectAPI_switcher.get(action,unknown)(vars)
 	    common.setcookies(response)
 	    if(encryption):
 		return json.dumps({"resp_data":dsobj.encrypts(rsp)})
