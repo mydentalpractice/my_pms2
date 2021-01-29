@@ -320,6 +320,59 @@ def emailPALink(db,request,key,providerid,email):
     
     return retVal
 
+
+def emailProspectAgreementink(db,request,key,prospectid,email):
+
+    retVal = True
+    loginlink = None
+
+
+    # get mail details
+    tls = True
+    props = db(db.urlproperties.id>0).select()
+
+    if(len(props)>0):
+        server = props[0].mailserver + ":"  + props[0].mailserverport
+        sender = props[0].mailsender
+        login  = props[0].mailusername + ":" + props[0].mailpassword
+        port = int(props[0].mailserverport)
+        if((port != 25) & (port != 26)):
+            tls = True
+        else:
+            tls = False
+
+        if((props[0].mailusername == 'None')):
+            login = None
+
+        palink = props[0].mydp_ipaddress + "/my_dentalplan/prospect/prospectagreement?key=" + key + "&prospectid=" + str(prospectid)
+
+        mail = Mail()
+        mail.settings.server = server
+        mail.settings.sender = sender
+        mail.settings.login =  login
+        mail.settings.tls = tls
+
+        to      =  email
+        subject = "Prospect Agreement"
+
+        appPath = request.folder
+        htmlfile = os.path.join(appPath, 'templates','provideragreementemail.html')
+
+        f = open(htmlfile,'rb')
+        html = Template(f.read())
+        f.close()
+        result  = html.safe_substitute(palink=palink)
+        retVal = mail.send(to,subject,result,encoding='utf-8')
+
+    else:
+        retVal = False
+        raise HTTP(400,"Mail attributes not found")
+
+    
+    
+    return retVal
+
+
 def emailResetPasswordLink(db,request,username,reset_password_key):
 
     mssg = ""

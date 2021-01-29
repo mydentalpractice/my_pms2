@@ -292,7 +292,7 @@ class Prospect:
                 status = common.getkeyvalue(avars,'status',ds[0].status),
                 groupsms=common.getkeyvalue(avars,'groupsms',ds[0].groupsms),
                 groupemail=common.getkeyvalue(avars,'groupemail',ds[0].groupemail),
-                bankid=common.getkeyvalue(avars,'groupemail',ds[0].bankid),
+                bankid=common.getkeyvalue(avars,'bankid',ds[0].bankid),
                 
                 modified_on=common.getISTFormatCurrentLocatTime(),
                 modified_by= 1 if(auth.user == None) else auth.user.id
@@ -326,8 +326,9 @@ class Prospect:
         try:
             ref_code = common.getkeyvalue(avars,"ref_code","")     #Prospect is added by Agent
             ref_id = int(common.getkeyvalue(avars,"ref_id",0))            
-
-            propsectid = db.prospect.insert(\
+            prospect = common.getkeyvalue(avars,'provider',"")
+            
+            prospectid = db.prospect.insert(\
                 
                 
                 provider=common.getkeyvalue(avars,'provider',""),
@@ -394,14 +395,19 @@ class Prospect:
                 modified_by= 1 if(auth.user == None) else auth.user.id
                 
             )
+            
+            if(prospect == ""):
+                prospect = "PR" + str(prospectid).zfill(4)
+                db(db.prospect.id == prospectid).update(provider = prospect)
+                
             #refcode = "AGN""
-            db.prospect_ref.insert(prospect_id = propsectid, ref_code = ref_code,ref_id = ref_id)
+            db.prospect_ref.insert(prospect_id = prospectid, ref_code = ref_code,ref_id = ref_id)
                 
             rspobj = {
                 "ref_code":ref_code,
                 "ref_id":ref_id,
                 
-                "prospectid":str(propsectid),
+                "prospectid":str(prospectid),
                 
                 "result":"success",
                 "error_message":"",
