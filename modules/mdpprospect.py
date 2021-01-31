@@ -6,6 +6,8 @@ import json
 from applications.my_pms2.modules import common
 from applications.my_pms2.modules import logger
 
+from applications.my_pms2.modules import mdpprovider
+
 
 class Prospect:
     def __init__(self,db):
@@ -106,60 +108,60 @@ class Prospect:
             
             rspobj = {
                 "prospectid":str(prospectid),
-                "provider'":ds[0].provider,
-                "title'":ds[0].title,
-                "providername'":ds[0].providername,
-                "practicename'":ds[0].practicename,
-                "address1'":ds[0].address1,
-                "address2'":ds[0].address2,
-                "address3'":ds[0].address3,
-                "city'":ds[0].city,
-                "st'":ds[0].st,
-                "pin'":ds[0].pin,
-                "p_address1'":ds[0].p_address1,
-                "p_address2'":ds[0].p_address2,
-                "p_address3'":ds[0].p_address3,
-                "p_city'":ds[0].p_city,
-                "p_st'":ds[0].p_st,
-                "p_pin'":ds[0].p_pin,
-                "telephone'":ds[0].telephone,
-                "cell'":ds[0].cell,
-                "fax'":ds[0].fax,
-                "email'":ds[0].email,
-                "taxid'":ds[0].taxid,
-                "enrolleddate'":common.getstringfromdate(ds[0].enrolleddate,"%Y-%m-%d"),
-                "assignedpatientmembers'":str(ds[0].assignedpatientmembers),
-                "languagesspoken'":ds[0].languagesspoken,
-                "speciality'":str(ds[0].speciality),
-                "specialization'":ds[0].specialization,
-                "sitekey'":ds[0].sitekey,
-                "groupregion'":str(ds[0].groupregion),
-                "registration'":ds[0].registration,
-                "registered'":ds[0].registered,
-                "pa_providername'":ds[0].pa_providername,
-                "pa_practicename'":ds[0].pa_practicename,
-                "pa_practiceaddress'":ds[0].pa_practiceaddress,
-                "pa_dob'":common.getstringfromdate(ds[0].pa_dob,"%Y-%m-%d"),
-                "pa_parent'":ds[0].pa_parent,
-                "pa_address'":ds[0].pa_address,
-                "pa_pan'":ds[0].pa_pan,
-                "pa_regno'":ds[0].pa_regno,
-                "pa_date'":common.getstringfromdate(ds[0].pa_date,"%Y-%m-%d"),
-                "pa_accepted'":ds[0].pa_accepted,
-                "pa_approved'":ds[0].pa_approved,
-                "pa_approvedby'":ds[0].pa_approvedby,
-                "pa_approvedon'":common.getstringfromdate(ds[0].pa_approvedon, "%Y-%m-%d"),
-                "pa_day'":ds[0].pa_day,
-                "pa_month'":ds[0].pa_month,
-                "pa_location'":ds[0].pa_location,
-                "pa_practicepin'":ds[0].pa_practicepin,
-                "pa_hours'":ds[0].pa_hours,
-                "pa_longitude'":ds[0].pa_longitude,
-                "pa_latitude'":ds[0].pa_latitude,
-                "pa_locationurl'":ds[0].pa_locationurl,
-                "groupsms'":ds[0].groupsms,
-                "groupemail'":ds[0].groupemail,
-                "bankid'":ds[0].bankid,
+                "provider":ds[0].provider,
+                "title":ds[0].title,
+                "providername":ds[0].providername,
+                "practicename":ds[0].practicename,
+                "address1":ds[0].address1,
+                "address2":ds[0].address2,
+                "address3":ds[0].address3,
+                "city":ds[0].city,
+                "st":ds[0].st,
+                "pin":ds[0].pin,
+                "p_address1":ds[0].p_address1,
+                "p_address2":ds[0].p_address2,
+                "p_address3":ds[0].p_address3,
+                "p_city":ds[0].p_city,
+                "p_st":ds[0].p_st,
+                "p_pin":ds[0].p_pin,
+                "telephone":ds[0].telephone,
+                "cell":ds[0].cell,
+                "fax":ds[0].fax,
+                "email":ds[0].email,
+                "taxid":ds[0].taxid,
+                "enrolleddate":common.getstringfromdate(ds[0].enrolleddate,"%d/%m/%Y"),
+                "assignedpatientmembers":str(ds[0].assignedpatientmembers),
+                "languagesspoken":ds[0].languagesspoken,
+                "speciality":str(ds[0].speciality),
+                "specialization":ds[0].specialization,
+                "sitekey":ds[0].sitekey,
+                "groupregion":str(ds[0].groupregion),
+                "registration":ds[0].registration,
+                "registered":ds[0].registered,
+                "pa_providername":ds[0].pa_providername,
+                "pa_practicename":ds[0].pa_practicename,
+                "pa_practiceaddress":ds[0].pa_practiceaddress,
+                "pa_dob":common.getstringfromdate(ds[0].pa_dob,"%d/%m/%Y"),
+                "pa_parent":ds[0].pa_parent,
+                "pa_address":ds[0].pa_address,
+                "pa_pan":ds[0].pa_pan,
+                "pa_regno":ds[0].pa_regno,
+                "pa_date":common.getstringfromdate(ds[0].pa_date,"%d/%m/%Y"),
+                "pa_accepted":ds[0].pa_accepted,
+                "pa_approved":ds[0].pa_approved,
+                "pa_approvedby":ds[0].pa_approvedby,
+                "pa_approvedon":common.getstringfromdate(ds[0].pa_approvedon, "%d/%m/%Y"),
+                "pa_day":ds[0].pa_day,
+                "pa_month":ds[0].pa_month,
+                "pa_location":ds[0].pa_location,
+                "pa_practicepin":ds[0].pa_practicepin,
+                "pa_hours":ds[0].pa_hours,
+                "pa_longitude":ds[0].pa_longitude,
+                "pa_latitude":ds[0].pa_latitude,
+                "pa_locationurl":ds[0].pa_locationurl,
+                "groupsms":ds[0].groupsms,
+                "groupemail":ds[0].groupemail,
+                "bankid":ds[0].bankid,
                 
                 "result":"success",
                 "error_message":"",
@@ -426,4 +428,123 @@ class Prospect:
     
         return json.dumps(rspobj)             
     
-         
+
+    def approve_prospect(self,avars):
+        auth  = current.auth
+        db = self.db
+    
+        try:
+            prospectid = common.getkeyvalue(avars,"prospectid","0")
+            #change prospect status to 'Enrolled'
+            db((db.prospect.id == prospectid) & (db.prospect.is_active == True)).update(\
+                pa_approved = True,
+                pa_approvedon = common.getISTFormatCurrentLocatTime(),
+                pa_approvedby = 1 if(auth.user == None) else auth.user.id,
+                pa_accepted = True,
+                status = "Approved",
+                
+                modified_on=common.getISTFormatCurrentLocatTime(),
+                modified_by= 1 if(auth.user == None) else auth.user.id
+                
+            )
+            
+            rspobj = {
+                'prospectid': prospectid,
+                'result' : 'success',
+                "error_code":"",
+                "error_message":""
+            }               
+    
+    
+        except Exception as e:
+            mssg = "Prospect Approval Exception:\n" + str(e)
+            logger.loggerpms2.info(mssg)      
+            excpobj = {}
+            excpobj["result"] = "fail"
+            excpobj["error_code"] = "MDP100"
+            excpobj["error_message"] = mssg
+            return json.dumps(excpobj)
+    
+        return json.dumps(rspobj)    
+    
+    def enroll_prospect(self,avars):
+        auth  = current.auth
+        db = self.db
+    
+        try:
+    
+            #create provider for this prospect
+            prospectid = common.getkeyvalue(avars,"prospectid","0")
+            pptobj = json.loads(self.get_prospect(avars))
+            
+            prv = mdpprovider.Provider(db, 0)
+            prvobj = json.loads(prv.new_provider(avars))
+            providerid = common.getkeyvalue(avars,"providerid","0")
+            
+            #create prospect to provider image_ref records for this provider corresponding to the 'Prospect' images
+            ds = db((db.dentalimage_ref.ref_code == "PPT") & (db.dentalimage_ref.ref_id == prospectid)).select()
+            for d in ds:
+                xid = db.dentalimage_ref.insert(\
+                    ref_code = "PRV",
+                    ref_id = providerid,
+                    media_id = d.media_id
+                )
+            
+            
+            #copy prospect to provider clinic_ref records
+            ds = db((db.clinic_ref.ref_code == "PPT") & (db.clinic_ref.ref_id == prospectid)).select()
+            for d in ds:
+                xid = db.clinic_ref.insert(\
+                    ref_code = "PRV",
+                    ref_id = providerid,
+                    clinic_id = d.clinic_id
+                )
+            
+            
+            #copy propsect doctors to provider
+            ds = db((db.doctor_ref.ref_code == "PPT") & (db.doctor_ref.ref_id == prospectid)).select()
+            for d in ds:
+                xid = db.doctor_ref.insert(\
+                    ref_code = "PRV",
+                    ref_id = providerid,
+                    doctor_id = d.doctor_id
+                )
+            
+            #change prospect status to 'Enrolled'
+            db((db.prospect.id == prospectid) & (db.prospect.is_active == True)).update(
+                status = "Enrolled",
+                modified_on=common.getISTFormatCurrentLocatTime(),
+                modified_by= 1 if(auth.user == None) else auth.user.id
+            )
+                
+                
+            db((db.provider.id == providerid) & (db.provider.is_active == True)).update(
+                pa_approved = True,
+                pa_approvedon = common.getISTFormatCurrentLocatTime(),
+                pa_approvedby = 1 if(auth.user == None) else auth.user.id,
+                pa_accepted = True,
+                status = "Enrolled"                
+            )
+                
+                                                    
+            
+    
+            rspobj = {
+                'prospectid': prospectid,
+                'providerid':providerid,
+                'result' : 'success',
+                "error_code":"",
+                "error_message":""
+            }               
+    
+    
+        except Exception as e:
+            mssg = "Enroll Prospect Exception:\n" + str(e)
+            logger.loggerpms2.info(mssg)      
+            excpobj = {}
+            excpobj["result"] = "fail"
+            excpobj["error_code"] = "MDP100"
+            excpobj["error_message"] = mssg
+            return json.dumps(excpobj)
+    
+        return json.dumps(rspobj)    

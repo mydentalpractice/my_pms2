@@ -2457,6 +2457,18 @@ def delete_propsect(avars):
     rsp = prs.delete_prospect(avars)
     return rsp
 
+def approve_propsect(avars):
+    logger.loggerpms2.info("Enter Approve Prospect Request\n" + str(avars) )
+    prs = mdpprospect.Prospect(current.globalenv['db'])
+    rsp = prs.approve_prospect(avars)
+    return rsp
+
+def enroll_propsect(avars):
+    logger.loggerpms2.info("Enter Approve Prospect Request\n" + str(avars) )
+    prs = mdpprospect.Prospect(current.globalenv['db'])
+    rsp = prs.enroll_prospect(avars)
+    return rsp
+
 ############################# END DPROSPECT API  ###################################################
 
 
@@ -2491,7 +2503,8 @@ doctorAPI_switcher = {
 }
 
 prospectAPI_switcher = {
-    "new_prospect":new_prospect,"list_prospect":list_prospect,"get_prospect":get_prospect,"update_prospect":update_prospect,"delete_propsect":delete_propsect
+    "new_prospect":new_prospect,"list_prospect":list_prospect,"get_prospect":get_prospect,"update_prospect":update_prospect,"delete_propsect":delete_propsect,
+    "approve_prospect":approve_prospect, "enroll_prospect":enroll_prospect
 }
 
 mdpapi_switcher = {"listappointments":getappointments,"getappointmentsbymonth":getappointmentsbymonth,"getappointmentsbyday":getappointmentsbyday,"getappointment":getappointment,\

@@ -16,6 +16,142 @@ class Provider:
     self.providerid = providerid
     return 
 
+  def getProviderCode(self):
+    db = self.db
+    sql = "UPDATE providercount SET providercount = providercount + 1;"
+    db.executesql(sql)
+    db.commit()
+  
+    xrows = db(db.providercount.id >0).select()
+    providercount = int(xrows[0].providercount)    
+  
+    providercode = "P" + str(providercount).zfill(5)
+    
+    return ({"providercode":providercode, "result":"success","error_message":"","error_code":""})
+ 
+
+  def new_provider(self,avars):
+    db = self.db
+    auth  = current.auth
+    rspobj = {}
+  
+    logger.loggerpms2.info("Enter new Provider ")
+  
+    try:
+      prospectid = int(common.getkeyvalue(avars,"prospectid","0"))
+      obj = self.getProviderCode()
+      provider = obj["providercode"]
+      
+      x = common.getstringfromdate(datetime.datetime.today(),"%d/%m/%Y")
+      pa_dob=common.getdatefromstring(common.getkeyvalue(avars,'pa_dob',x),"%d/%m/%Y"),
+      
+      providerid = db.provider.insert(\
+  
+  
+        provider=common.getkeyvalue(avars,"providerCode",provider),
+        title=common.getkeyvalue(avars,'title',""),
+        providername=common.getkeyvalue(avars,'providername',""),
+        practicename=common.getkeyvalue(avars,'practicename',""),
+        address1=common.getkeyvalue(avars,'address1',""),
+        address2=common.getkeyvalue(avars,'address2',""),
+        address3=common.getkeyvalue(avars,'address3',""),
+        city=common.getkeyvalue(avars,'city',""),
+        st=common.getkeyvalue(avars,'st',""),
+        pin=common.getkeyvalue(avars,'pin',""),
+        
+        p_address1=common.getkeyvalue(avars,'p_address1',""),
+        p_address2=common.getkeyvalue(avars,'p_address2',""),
+        p_address3=common.getkeyvalue(avars,'p_address3',""),
+        p_city=common.getkeyvalue(avars,'p_city',""),
+        p_st=common.getkeyvalue(avars,'p_st',""),
+        p_pin=common.getkeyvalue(avars,'p_pin',""),
+        
+        telephone=common.getkeyvalue(avars,'telephone',""),
+        cell=common.getkeyvalue(avars,'cell',""),
+        email=common.getkeyvalue(avars,'email',""),
+        
+        taxid=common.getkeyvalue(avars,'taxid',""),
+        speciality=int(common.getkeyvalue(avars,'speciality',"1")),
+        specialization=common.getkeyvalue(avars,'specialization',""),
+        sitekey=common.getkeyvalue(avars,'sitekey',""),
+        groupregion=int(common.getkeyvalue(avars,'groupregion',"1")),
+        
+        registration=common.getkeyvalue(avars,'registration',""),
+        registered=common.getboolean(common.getkeyvalue(avars,'registered',"True")),
+        
+        pa_providername=common.getkeyvalue(avars,'pa_providername',""),
+        pa_practicename=common.getkeyvalue(avars,'pa_practicename',""),
+        pa_practiceaddress=common.getkeyvalue(avars,'pa_practiceaddress',""),
+        pa_dob=common.getdatefromstring(common.getkeyvalue(avars,'pa_dob',common.getstringfromdate(datetime.datetime.today(),"%d/%m/%Y")),"%d/%m/%Y"),
+        pa_parent=common.getkeyvalue(avars,'pa_parent',""),
+        pa_address=common.getkeyvalue(avars,'pa_address',""),
+        pa_pan=common.getkeyvalue(avars,'pa_pan',""),
+        pa_regno=common.getkeyvalue(avars,'pa_regno',""),
+        pa_date=common.getdatefromstring(common.getkeyvalue(avars,'pa_date',common.getstringfromdate(datetime.datetime.today(),"%d/%m/%Y")),"%d/%m/%Y"),
+  
+        pa_accepted=common.getboolean(common.getkeyvalue(avars,'pa_accepted',"False")),
+        pa_approved=common.getboolean(common.getkeyvalue(avars,'pa_approved',"False")),
+        pa_approvedby=int(common.getkeyvalue(avars,'pa_approvedby',"1")),
+        pa_approvedon=common.getdatefromstring(common.getkeyvalue(avars,'pa_approvedon',common.getstringfromdate(datetime.datetime.today(),"%d/%m/%Y")),"%d/%m/%Y"),
+        pa_day=common.getkeyvalue(avars,'pa_day',""),
+        pa_month=common.getkeyvalue(avars,'pa_month',""),
+        pa_location=common.getkeyvalue(avars,'pa_location',""),
+        pa_practicepin=common.getkeyvalue(avars,'pa_practicepin',""),
+        pa_hours=common.getkeyvalue(avars,'pa_hours',""),
+        pa_longitude=common.getkeyvalue(avars,'pa_longitude',""),
+        pa_latitude=common.getkeyvalue(avars,'pa_latitude',""),
+        pa_locationurl=common.getkeyvalue(avars,'pa_locationurl',""),
+        
+        groupsms=common.getboolean(common.getkeyvalue(avars,'groupsms',"True")),
+        groupemail=common.getboolean(common.getkeyvalue(avars,'groupemail',"True")),
+        
+        status=common.getkeyvalue(avars,'status',"Enrolled"),
+        bankid = int(common.getkeyvalue(avars,'bankid','0')),
+        enrolleddate = common.getISTFormatCurrentLocatTime(),
+        assignedpatientmembers = int(common.getkeyvalue(avars,'assignedpatientmembers','0')),
+        languagesspoken = common.getkeyvalue(avars,'languagesspoken',"English,Hindi"),
+        
+        captguarantee = float(common.getkeyvalue(avars,'captguarantee',"0.0")),
+        schedulecapitation  = float(common.getkeyvalue(avars,'schedulecapitation',"0.0")),
+        capitationytd  = float(common.getkeyvalue(avars,'capitationytd',"0.0")),
+        captiationmtd  = float(common.getkeyvalue(avars,'captiationmtd',"0.0")),        
+
+  
+        is_active = True,
+        created_on=common.getISTFormatCurrentLocatTime(),
+        modified_on=common.getISTFormatCurrentLocatTime(),
+        created_by = 1 if(auth.user == None) else auth.user.id,
+        modified_by= 1 if(auth.user == None) else auth.user.id
+  
+      )
+  
+  
+      #providerid
+      db(db.prospect_ref.prospect_id == prospect).update(providerid = providerid)
+     
+      rspobj = {
+  
+  
+        "providerid":str(provider),
+        "provider" : provider,
+  
+        "result":"success",
+        "error_message":"",
+        "error_code":""
+      }            
+  
+  
+    except Exception as e:
+      mssg = "New Provider Exception:\n" + str(e)
+      logger.loggerpms2.info(mssg)      
+      excpobj = {}
+      excpobj["result"] = "fail"
+      excpobj["error_code"] = "MDP100"
+      excpobj["error_message"] = mssg
+      return json.dumps(excpobj)
+
+    return json.dumps(rspobj)             
+
   def getprovider(self):
     logger.loggerpms2.info(">>Get Provider API\n")
         

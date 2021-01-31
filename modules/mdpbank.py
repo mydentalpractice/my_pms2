@@ -88,9 +88,9 @@ class Bank:
                 address1 = address1,
                 address2 = address2,
                 address3 = address3,
-                city = bankaccountname,
-                st = bankaccountname,
-                pin = bankaccountname,
+                city = city,
+                st = st,
+                pin = pin,
                 is_active = True,
                 modified_on=common.getISTFormatCurrentLocatTime(),
                 modified_by= 1 if(auth.user == None) else auth.user.id
