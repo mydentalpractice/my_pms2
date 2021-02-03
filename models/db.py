@@ -957,7 +957,8 @@ db.prospect._plural = "prospect"
 db.define_table('prospect_ref',
                 Field('ref_code', 'string',default='AGN'),
                 Field('ref_id', 'integer'),
-                Field('prospect_id', 'integer')
+                Field('prospect_id', 'integer'),
+                Field('provider_id', 'integer')
                 )
 db.prospect_ref._singular = "prospect_ref"
 db.prospect_ref._plural = "prospect_ref"

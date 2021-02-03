@@ -353,7 +353,7 @@ def emailProspectAgreementink(db,request,key,prospectid,email):
         mail.settings.tls = tls
 
         to      =  email
-        subject = "Prospect Agreement"
+        subject = "Provider Agreement"
 
         appPath = request.folder
         htmlfile = os.path.join(appPath, 'templates','provideragreementemail.html')

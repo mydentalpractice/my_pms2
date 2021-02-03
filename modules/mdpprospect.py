@@ -149,7 +149,7 @@ class Prospect:
                 "pa_date":common.getstringfromdate(ds[0].pa_date,"%d/%m/%Y"),
                 "pa_accepted":ds[0].pa_accepted,
                 "pa_approved":ds[0].pa_approved,
-                "pa_approvedby":ds[0].pa_approvedby,
+                "pa_approvedby":str(ds[0].pa_approvedby),
                 "pa_approvedon":common.getstringfromdate(ds[0].pa_approvedon, "%d/%m/%Y"),
                 "pa_day":ds[0].pa_day,
                 "pa_month":ds[0].pa_month,
@@ -161,7 +161,7 @@ class Prospect:
                 "pa_locationurl":ds[0].pa_locationurl,
                 "groupsms":ds[0].groupsms,
                 "groupemail":ds[0].groupemail,
-                "bankid":ds[0].bankid,
+                "bankid":str(ds[0].bankid),
                 
                 "result":"success",
                 "error_message":"",
@@ -318,6 +318,9 @@ class Prospect:
     
         return json.dumps(rspobj)            
 
+
+
+
     def new_prospect(self,avars):
         db = self.db
         auth  = current.auth
@@ -352,18 +355,21 @@ class Prospect:
                 telephone=common.getkeyvalue(avars,'telephone',""),
                 cell=common.getkeyvalue(avars,'cell',""),
                 email=common.getkeyvalue(avars,'email',""),
+                fax=common.getkeyvalue(avars,'fax',""),
                 
                 
                 
                 taxid=common.getkeyvalue(avars,'taxid',""),
 
-               
+                
+                assignedpatientmembers=int(common.getkeyvalue(avars,'assignedpatientmembers',"0")),
                 speciality=int(common.getkeyvalue(avars,'speciality',"1")),
                 specialization=common.getkeyvalue(avars,'specialization',""),
                 sitekey=common.getkeyvalue(avars,'sitekey',""),
                 groupregion=int(common.getkeyvalue(avars,'groupregion',"1")),
                 registration=common.getkeyvalue(avars,'registration',""),
                 registered=common.getboolean(common.getkeyvalue(avars,'registered',"True")),
+                languagesspoken=common.getkeyvalue(avars,'languagesspoken',""),
                 pa_providername=common.getkeyvalue(avars,'pa_providername',""),
                 pa_practicename=common.getkeyvalue(avars,'pa_practicename',""),
                 pa_practiceaddress=common.getkeyvalue(avars,'pa_practiceaddress',""),
@@ -389,6 +395,11 @@ class Prospect:
                 groupsms=common.getboolean(common.getkeyvalue(avars,'groupsms',"True")),
                 groupemail=common.getboolean(common.getkeyvalue(avars,'groupemail',"True")),
                 status=common.getkeyvalue(avars,'status',"New"),
+                bankid = 0,
+                captguarantee = 0 ,
+                schedulecapitation = 0,
+                capitationytd  = 0,
+                captiationmtd  = 0,
 
                 is_active = True,
                 created_on=common.getISTFormatCurrentLocatTime(),
@@ -475,11 +486,12 @@ class Prospect:
     
             #create provider for this prospect
             prospectid = common.getkeyvalue(avars,"prospectid","0")
-            pptobj = json.loads(self.get_prospect(avars))
+            
             
             prv = mdpprovider.Provider(db, 0)
             prvobj = json.loads(prv.new_provider(avars))
-            providerid = common.getkeyvalue(avars,"providerid","0")
+            providerid = common.getkeyvalue(prvobj,"providerid","0")
+            db(db.prospect_ref.prospect_id == prospectid).update(provider_id = providerid)
             
             #create prospect to provider image_ref records for this provider corresponding to the 'Prospect' images
             ds = db((db.dentalimage_ref.ref_code == "PPT") & (db.dentalimage_ref.ref_id == prospectid)).select()

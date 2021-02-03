@@ -40,6 +40,7 @@ from applications.my_pms2.modules import mdptimings
 from applications.my_pms2.modules import mdpbank
 from applications.my_pms2.modules import mdpclinic
 from applications.my_pms2.modules import mdpprospect
+from applications.my_pms2.modules import mdpagent
 
 from applications.my_pms2.modules import logger
 
@@ -2457,13 +2458,13 @@ def delete_propsect(avars):
     rsp = prs.delete_prospect(avars)
     return rsp
 
-def approve_propsect(avars):
+def approve_prospect(avars):
     logger.loggerpms2.info("Enter Approve Prospect Request\n" + str(avars) )
     prs = mdpprospect.Prospect(current.globalenv['db'])
     rsp = prs.approve_prospect(avars)
     return rsp
 
-def enroll_propsect(avars):
+def enroll_prospect(avars):
     logger.loggerpms2.info("Enter Approve Prospect Request\n" + str(avars) )
     prs = mdpprospect.Prospect(current.globalenv['db'])
     rsp = prs.enroll_prospect(avars)
@@ -2472,8 +2473,25 @@ def enroll_propsect(avars):
 ############################# END DPROSPECT API  ###################################################
 
 
+
+############################# START AGENT API #################################################
+def new_agent(avars):
+    logger.loggerpms2.info("Enter New Agent Prospect Request\n" + str(avars) )
+    obj = mdpagent.Agent(current.globalenv['db'])  
+    rsp = obj.new_agent(avars)
+    return rsp
+
+def new_agent_prospect(avars):
+    logger.loggerpms2.info("Enter New Agent Prospect Request\n" + str(avars) )
+    obj = mdpagent.Agent(current.globalenv['db'])  
+    rsp = obj.new_agent_prospect(avars)
+    return rsp
+############################# END AGENT API  ###################################################
+
 def unknown(avars):
     return dict()
+
+
 
 mediaAPI_switcher = {
     
@@ -2503,9 +2521,16 @@ doctorAPI_switcher = {
 }
 
 prospectAPI_switcher = {
-    "new_prospect":new_prospect,"list_prospect":list_prospect,"get_prospect":get_prospect,"update_prospect":update_prospect,"delete_propsect":delete_propsect,
+    "new_prospect":new_prospect,"list_prospect":list_prospect,"get_prospect":get_prospect,"update_prospect":update_prospect,"delete_propsect":delete_propsect,\
     "approve_prospect":approve_prospect, "enroll_prospect":enroll_prospect
 }
+
+
+agentAPI_switcher = {
+
+    "new_agent":new_agent,"new_agent_prospect":new_agent_prospect
+}
+
 
 mdpapi_switcher = {"listappointments":getappointments,"getappointmentsbymonth":getappointmentsbymonth,"getappointmentsbyday":getappointmentsbyday,"getappointment":getappointment,\
                    "getappointmentcountbymonth":getappointmentcountbymonth,"getdocappointmentcountbymonth":getdocappointmentcountbymonth,"getappointmentsbypatient":getappointmentsbypatient,\
@@ -2888,7 +2913,50 @@ def prospectAPI():
 		return rsp
 	    
 	except Exception as e:
-	    mssg = "Clinic API Exception Error =>>\n" + str(e)
+	    mssg = "Prospect API Exception Error =>>\n" + str(e)
+	    #logger.loggerpms2.info(mssg)
+	    raise HTTP(500)   
+
+    def PUT(*args, **vars):
+	return dict()
+
+    def DELETE(*args, **vars):
+	return dict()
+
+    return locals()
+
+
+@request.restful()
+def agentAPI():
+    response.view = 'generic' + request.extension
+    def GET(*args, **vars):
+	return
+
+    def POST(*args, **vars):
+	i = 0
+	try:
+	    #logger.loggerpms2.info(">>Enter Agent API==>>")
+	    dsobj = datasecurity.DataSecurity()
+	    encryption = vars.has_key("req_data")
+	    if(encryption):
+		#logger.loggerpms2.info(">>Agent with Encryption")
+		encrypt_req = vars["req_data"]
+		vars = json.loads(dsobj.decrypts(encrypt_req))
+	    
+	    #decrypted request date
+	    action = str(vars["action"])
+	    #logger.loggerpms2.info(">>Agent ACTION==>>" + action)
+	    
+	    #return json.dumps({"action":action})
+	    rsp = agentAPI_switcher.get(action,unknown)(vars)
+	    common.setcookies(response)
+	    if(encryption):
+		return json.dumps({"resp_data":dsobj.encrypts(rsp)})
+	    else:
+		return rsp
+	    
+	except Exception as e:
+	    mssg = "AGENT API Exception Error =>>\n" + str(e)
 	    #logger.loggerpms2.info(mssg)
 	    raise HTTP(500)   
 
