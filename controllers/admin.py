@@ -556,6 +556,10 @@ def loginblock(login, username):
     return dict(login = True, error_mssg = "")
 
 
+
+    
+    
+
 def login():
     
     session.religare = False

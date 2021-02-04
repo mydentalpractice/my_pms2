@@ -102,7 +102,41 @@ class User:
     return
 
   
+  #this method is called after OTP Validation:
+  #cell is xxxxxxxxxx  (without leading +<countrycode)
+  #assuming Cell is unique
+  def otp_login(avars):
     
+    auth = self.auth
+    db = self.db
+    rspobj = {}
+    try:
+      usr = db(db.auth_user.cell == cell).select()
+    
+      if(len(usr) != 1):
+        error_message = "OTP Login API Error: No User/Multiple users matching registered " + cell
+        logger.loggerpms2.info(error_message)
+        excpobj = {}
+        excpobj["result"] = "fail"
+        excpobj["error_message"] = error_message
+        return json.dumps(excpobj)    
+      
+      self.username = (usr[0].username).strip()
+      self.password = (usr[0].password).strip()
+      
+      user_data = json.loads(User.login(self))
+      
+    except Exception as e:
+        error_message = "OTP Login Exception Error - " + str(e)
+        logger.loggerpms2.info(error_message)
+        excpobj = {}
+        excpobj["result"] = "fail"
+        excpobj["error_message"] = error_message
+        return json.dumps(excpobj)    
+  
+  
+    return json.dumps(user_data)
+
   
   #Authenticate the user returning JSON data
   #If successful, return authenticate user data, provider data(if user is provider), web admin data (if user is admin), patient data (if user is patient - member or walkin)
