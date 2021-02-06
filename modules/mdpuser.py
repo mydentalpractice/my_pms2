@@ -16,8 +16,10 @@ from applications.my_pms2.modules import cycle
 from applications.my_pms2.modules import gender
 from applications.my_pms2.modules import mail
 
+from applications.my_pms2.modules import mdpprospect
+from applications.my_pms2.modules import mdpprovider
+from applications.my_pms2.modules import mdpagent
 from applications.my_pms2.modules import logger
-
 
 
 class User:
@@ -101,16 +103,77 @@ class User:
     
     return
 
+  def agent_otp_login(self,avars):
+    
+    auth = self.auth
+    db = self.db
+    
+    logger.loggerpms2.info(">>AGENT LOGIN API\n")
+    logger.loggerpms2.info("===Req_data=\n" + self.username + " " + self.password + "\n")
+    
+
+    user_data = {}
+    
+    
+    try:
+      cell = common.getkeyvalue(avars,"cell","")
+      usr = db(db.auth_user.cell == cell).select()
+      
+      if(len(usr) != 1):
+        error_message = "OTP Login API Error: No User/Multiple users matching registered " + cell
+        logger.loggerpms2.info(error_message)
+        excpobj = {}
+        excpobj["result"] = "fail"
+        excpobj["error_message"] = error_message
+        return json.dumps(excpobj)    
+
+      user = auth.login_user(db.auth_user(int(usr[0].id)))
+      cell = auth.user["cell"]
+      r = db(db.agent.cell == cell).select()
+      if(len(r) != 1):
+        error_message = "Agent Login API Error: No Agent/Multiple agent matching registered " + cell
+        logger.loggerpms2.info(error_message)
+        excpobj = {}
+        excpobj["result"] = "fail"
+        excpobj["error_message"] = error_message
+        return json.dumps(excpobj) 
+      
+      
+      user_data = {}
+      user_data={
+        "result":"success",
+        "error_message":"fail",
+        "usertype":"agent", 
+        "agent":r[0].agent,
+        "agentid":common.getid(r[0].id),
+        "name":r[0].name,
+        "cell":r[0].cell,
+        "email":r[0].email
+      }
+      
+    except Exception as e:
+        error_message = "AGENT Login Exception Error - " + str(e)
+        logger.loggerpms2.info(error_message)
+        excpobj = {}
+        excpobj["result"] = "fail"
+        excpobj["error_message"] = error_message
+        return json.dumps(excpobj)    
+  
+  
+    return json.dumps(user_data)
+
   
   #this method is called after OTP Validation:
   #cell is xxxxxxxxxx  (without leading +<countrycode)
   #assuming Cell is unique
-  def otp_login(avars):
+  def otp_login(self,avars):
     
     auth = self.auth
     db = self.db
     rspobj = {}
+    
     try:
+      cell = common.getkeyvalue(avars,"cell","")
       usr = db(db.auth_user.cell == cell).select()
     
       if(len(usr) != 1):
@@ -121,10 +184,28 @@ class User:
         excpobj["error_message"] = error_message
         return json.dumps(excpobj)    
       
-      self.username = (usr[0].username).strip()
-      self.password = (usr[0].password).strip()
-      
-      user_data = json.loads(User.login(self))
+      auth.login_user(db.auth_user(int(usr[0].id)))
+      cell = auth.user["cell"]
+   
+      p = db(db.provider.cell == cell).select()
+      if(len(p) >= 1):
+        #if cell is in provider then otp is for provider
+        obj = mdpprovider.Provider(db,int(p[0].id))
+        user_data = json.loads(obj.getprovider())
+        user_data["usertype"] = "provider"
+      else:
+        p = db((db.prospect.cell == cell) & (db.prospect.status != "Enrolled") & (db.propsect.is_active == True)).select()
+        if(len(p)>=1):
+          obj = mdpprospect.Prospect()
+          user_data = obj.get_prospect({"prospectid":str(obj[0].id)})
+          user_data["usertype"] = "prospect"
+        else:
+          user_data["usertype"] = "prospect"
+          user_data["prospectid"] = "0"
+          user_data["result"] = "success"
+          user_data["error_message"] = "error_message"
+          user_data["error_code"] = "error_code"
+          
       
     except Exception as e:
         error_message = "OTP Login Exception Error - " + str(e)
@@ -148,6 +229,7 @@ class User:
     logger.loggerpms2.info("===Req_data=\n" + self.username + " " + self.password + "\n")
     
     user = auth.login_bare(self.username, self.password)
+    
     user_data = {}
     
     if(user==False):

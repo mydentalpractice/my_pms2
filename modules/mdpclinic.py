@@ -133,7 +133,7 @@ class Clinic:
         return json.dumps(rspobj)
     
     
-    def list_clinic(self,avars):
+        def list_clinic(self,avars):
         auth  = current.auth
         db = self.db
         

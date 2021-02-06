@@ -8583,3 +8583,11 @@ SELECT providerid,bankname,bankbranch,bankaccountno,bankaccounttype,bankmicrno,b
 
 UPDATE provider AS p INNER JOIN bank_details AS b ON p.id = b.providerid SET p.bankid = b.id
 
+
+5/2/2021
+=========
+
+1. ZZZvw_prescription_groupby_treattment
+2. ZZZZvw_procedure_groupby_treatment
+3. ZZZZvw_abhicl_report_group
+4. vw_abhicl_report

@@ -697,6 +697,12 @@ def provider_registration(avars):
     
     return rsp
 
+def agent_otp_login(avars):
+    
+    ouser = mdpuser.User(current.globalenv['db'],current.auth,"","")
+    mdp_user = ouser.agent_otp_login(avars)
+    return mdp_user 
+
 def getmailserverdetails(avars):
     ouser = mdpuser.User(current.globalenv['db'],None,"","")
     rsp = ouser.getmailserverdetails()
@@ -2589,7 +2595,8 @@ mdpapi_switcher = {"listappointments":getappointments,"getappointmentsbymonth":g
                    "register_vital_member":register_vital_member,"cancel_vital_member":cancel_vital_member,"enroll_vital_member":enroll_vital_member,\
                    "set_appointment_vital_member":set_appointment_vital_member,\
                    "sendOTPCashless":sendOTPCashless,"validateOTPCashless":validateOTPCashless,\
-                   "getOPDServicesCashless":getOPDServicesCashless,"getTransactionIDCashless":getTransactionIDCashless
+                   "getOPDServicesCashless":getOPDServicesCashless,"getTransactionIDCashless":getTransactionIDCashless,\
+                   "agent_otp_login":agent_otp_login
                    
                    }
 

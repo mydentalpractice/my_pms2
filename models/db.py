@@ -4112,6 +4112,80 @@ db.define_table('media',
                 format = '%(title)s')
 db.media._singular = "Media"
 db.media._plural = "Media"
+  
+
+
+db.define_table('vw_abhicl_report',
+                Field('id','integer'),
+                Field('treatmentid','integer'),
+                Field('treatment','string'),
+                Field('startdate','date'),
+                Field('enddate','date'),
+                Field('status','string'),
+                Field('chiefcomplaint','string'),
+                Field('Attending_Doctor','string'),
+                Field('tooth','string'),
+                Field('quadrant','string'),
+                #Field('dentalprocedure','string'),
+                #Field('procedure_name','string'),
+                Field('doctor_notes','text'),
+                #Field('prescription','string'),
+                Field('providerid','integer'),
+                #Field('providercode','string'),
+                #Field('memberid','integer'),
+                #Field('companyid','integer'),
+                #Field('company','string')
+                Field('is_active','boolean')
+            
+                
+                )
+
+
+db.define_table('vw_abhicl_report_group',
+                Field('id','integer'),
+                Field('treatmentid','integer'),
+                Field('treatment','string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.integer.widget(field, value, _class='form_details')),
+                Field('startdate','date'),
+                Field('enddate','date'),
+                Field('status','string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.integer.widget(field, value, _class='form_details')),
+                Field('chiefcomplaint','string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.integer.widget(field, value, _class='form_details')),
+                Field('Attending_Doctor','string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.integer.widget(field, value, _class='form_details')),
+                Field('procedure_code','string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.integer.widget(field, value, _class='form_details')),
+                Field('procedure_name','string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.integer.widget(field, value, _class='form_details')),               
+                Field('tooth','string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.integer.widget(field, value, _class='form_details')),
+                Field('quadrant','string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.integer.widget(field, value, _class='form_details')),
+                Field('doctor_notes','text',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.integer.widget(field, value, _class='form_details')),
+                Field('prescription','string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.integer.widget(field, value, _class='form_details')),
+                Field('providerid','integer'),
+                Field('providercode','string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.integer.widget(field, value, _class='form_details')),
+                Field('is_active','boolean'),
+                Field('memberid','integer'),
+                Field('companyid','integer'),
+                Field('company','string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.integer.widget(field, value, _class='form_details')),
+                
+                
+                )
+
+
+
+db.define_table('vw_procedure_groupby_treatment',
+                Field('treatmentid','integer'),
+                Field('treatment','string'),
+                
+                Field('procedure_code','string'),
+                Field('tooth','string'),
+                Field('quadrant','string'),
+                Field('procedure_name','string')
+               
+                )
+
+db.define_table('vw_prescription_groupby_treatment',
+                Field('prescriptiondate','date'),
+                Field('Prescription','string'),
+                
+                Field('treatmentid','integer')
+               
+                )
 
 def geocode2(form):
     from gluon.tools import geocode
