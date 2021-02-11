@@ -10,7 +10,7 @@ from applications.my_pms2.modules import status
 from applications.my_pms2.modules import relations
 from applications.my_pms2.modules import logger
 
-from applications.my_pms2.modules import mdpuser
+
 
 class Provider:
   def __init__(self,db,providerid):

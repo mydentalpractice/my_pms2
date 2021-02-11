@@ -123,7 +123,11 @@ class Doctor:
     db = self.db
     providerid = self.providerid    
     
-    sps = db((db.speciality.providerid == providerid) & (db.speciality.is_active == True)).select()
+    
+    if(providerid == 0):
+      sps = db((db.speciality_default.is_active == True)).select()
+    else:
+      sps = db((db.speciality.providerid == providerid) & (db.speciality.is_active == True)).select()
     
     
     splist = []

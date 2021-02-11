@@ -8553,28 +8553,28 @@ ADD COLUMN `mediasize` DOUBLE NULL DEFAULT '0' AFTER `mediaformat`;
 
 1/16/2021
 =========
-0. Renamed old Media to xmedia
-1. Remove Media, xMedia, DentalImage_1
-2. New dentlaimage_ref
+0. YZRenamed old Media to xmedia
+1. YZRemove Media, xMedia, DentalImage_1
+2. YZNew dentlaimage_ref
 
-1. New - Clinic,clinic_ref   (need to add owner flag in Clinic)
+1. YZNew - Clinic,clinic_ref   (need to add owner flag in Clinic)
 
-3. New - ops_timing,ops_timing_ref
+3. YZNew - ops_timing,ops_timing_ref
 
 
-5. New - doctor, doctor_ref
+5. YZNew - doctor, doctor_ref
 
-7. New - bank_details
+7. YZNew - bank_details
 
-8  Modify Provider to add Provider status   varchar(45),, modify foreign key constraint of providerbank
+8  YZModify Provider to add Provider status   varchar(45),, modify foreign key constraint of providerbank
 
-9.  New -  prospect_ref,
+9.  YZNew -  prospect_ref,
 
-10. New activity_log, activity_log_ref
+10. YZNew activity_log, activity_log_ref
 
-11. New travel_log, travel_log_ref
+11. YZNew travel_log, travel_log_ref
 
-12. migrate providerbank to bank_details;
+12. YZmigrate providerbank to bank_details;
 
 truncate bank_details;
 
@@ -8587,7 +8587,14 @@ UPDATE provider AS p INNER JOIN bank_details AS b ON p.id = b.providerid SET p.b
 5/2/2021
 =========
 
-1. ZZZvw_prescription_groupby_treattment
-2. ZZZZvw_procedure_groupby_treatment
-3. ZZZZvw_abhicl_report_group
-4. vw_abhicl_report
+1. XXXXYYYZZZvw_prescription_groupby_treattment
+2. XYZZZZvw_procedure_groupby_treatment
+3. XYZZZZvw_abhicl_report_group
+4. XYZZZvw_abhicl_report
+
+
+07/2/2021
+==========
+
+1. Modified t_appointment : added 'clinicid' field, set default value of blockappt = True, delete foreign keys provider and patient
+2. Modified vw_appointments : added clinicid, clinic_ref and clinic_name fields

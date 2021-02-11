@@ -134,8 +134,8 @@ class Clinic:
     
     
         def list_clinic(self,avars):
-        auth  = current.auth
-        db = self.db
+            auth  = current.auth
+            db = self.db
         
         try:
             

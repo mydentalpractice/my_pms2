@@ -4,7 +4,7 @@ TREATMENTPLANSTATUS=('Open', 'Sent for Authorization','Authorized','Completed','
 TREATMENTSTATUS=('Started', 'Sent for Authorization', 'Authorized', 'Completed','Cancelled')
 PRIORITY=('Emergency','High','Medium','Low')
 OFFICESTAFF=('Doctor','Staff')
-APPTSTATUS=('Open','Confirmed','Checked-In', 'Cancelled')
+APPTSTATUS=('Open','Confirmed','Checked-In', 'Checked-Out', 'Cancelled')
 
 
 

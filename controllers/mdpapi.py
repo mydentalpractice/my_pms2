@@ -1007,6 +1007,90 @@ def getdoctor(avars):
     return doctor
 ############################ APPOINTMENT API ##################################################
 
+    
+
+def new_appointment(avars):
+    oappts = mdpappointment.Appointment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+    rsp = oappts.new_appointment(avars)
+    return rsp    
+    
+def get_appointment(avars):
+    oappts = mdpappointment.Appointment(current.globalenv['db'],common.getkeyvalue(avars,"poviderid",0))
+    rsp = oappts.get_appointment(avars)
+    return rsp    
+
+def list_appointment(avars):
+    oappts = mdpappointment.Appointment(current.globalenv['db'],common.getkeyvalue(avars,"poviderid",0))
+    rsp = oappts.list_appointment(avars)
+    return rsp    
+
+def update_appointment(avars):
+    oappts = mdpappointment.Appointment(current.globalenv['db'],common.getkeyvalue(avars,"poviderid",0))
+    rsp = oappts.update_appointment(avars)
+    return rsp    
+    
+def cancel_appointment(avars):
+    oappts = mdpappointment.Appointment(current.globalenv['db'],common.getkeyvalue(avars,"poviderid",0))
+    rsp = oappts.cancel_appointment(avars)
+    return rsp    
+
+def add_block_datetime(avars):
+    oappts = mdpappointment.Appointment(current.globalenv['db'],common.getkeyvalue(avars,"poviderid",0))
+    rsp = oappts.add_block_datetime(avars)
+    return rsp
+
+def remove_block_datetime(avars):
+    oappts = mdpappointment.Appointment(current.globalenv['db'],common.getkeyvalue(avars,"poviderid",0))
+    rsp = oappts.remove_block_datetime(avars)
+    return rsp
+
+def list_block_datetime(avars):
+    oappts = mdpappointment.Appointment(current.globalenv['db'],common.getkeyvalue(avars,"poviderid",0))
+    rsp = oappts.list_block_datetime(avars)
+    return rsp
+
+def get_block_datetime(avars):
+    oappts = mdpappointment.Appointment(current.globalenv['db'],common.getkeyvalue(avars,"poviderid",0))
+    rsp = oappts.get_block_datetime(avars)
+    return rsp
+    
+def list_day_appointment_count(avars):
+    oappts = mdpappointment.Appointment(current.globalenv['db'],common.getkeyvalue(avars,"poviderid",0))
+    rsp = oappts.list_day_appointment_count(avars)
+    return rsp
+
+def list_appointments_byday(avars):
+    oappts = mdpappointment.Appointment(current.globalenv['db'],common.getkeyvalue(avars,"poviderid",0))
+    rsp = oappts.list_appointments_byday(avars)
+    return rsp
+
+def checkIn(avars):
+  
+    oappts = mdpappointment.Appointment(current.globalenv['db'],common.getkeyvalue(avars,"poviderid",0))
+    rsp = oappts.checkIn(avars)
+    return rsp
+
+def checkOut(avars):
+  
+    oappts = mdpappointment.Appointment(current.globalenv['db'],common.getkeyvalue(avars,"poviderid",0))
+    rsp = oappts.checkOut(avars)
+    return rsp
+
+
+
+
+def confirm(avars):
+    oappts = mdpappointment.Appointment(current.globalenv['db'],common.getkeyvalue(avars,"poviderid",0))
+    rsp = oappts.confirm(avars)
+    return rsp
+
+def reSchedule(avars):
+    oappts = mdpappointment.Appointment(current.globalenv['db'],common.getkeyvalue(avars,"poviderid",0))
+    rsp = oappts.reSchedule(avars)
+    return rsp
+    
+
+
 #getappointments 
 #providerid, month, year
 #returns list of appointments : apptid, doctorid, patientname, apptdatetime, color
@@ -2531,6 +2615,12 @@ prospectAPI_switcher = {
     "approve_prospect":approve_prospect, "enroll_prospect":enroll_prospect
 }
 
+appointmentAPI_switcher = {
+    "new_appointment":new_appointment,"get_appointment":get_appointment,"list_appointment":list_appointment,"update_appointment":update_appointment,
+    "cancel_appointment":cancel_appointment,"add_block":add_block_datetime,"remove_block":remove_block_datetime,"list_block":list_block_datetime,
+    "get_block":get_block_datetime,"list_day_appointment_count":list_day_appointment_count,"checkIn_appointment":checkIn,"checkOut_appointment":checkOut,"confirm_appointment":confirm,
+    "reSchedule_appointment":reSchedule,"list_appointments_byday":list_appointments_byday,"list_appointmentstatus":appointmentstatus,"list_appointmentduration":appointmentduration
+}
 
 agentAPI_switcher = {
 
@@ -2974,3 +3064,47 @@ def agentAPI():
 	return dict()
 
     return locals()
+
+
+@request.restful()
+def appointmentAPI():
+    response.view = 'generic' + request.extension
+    def GET(*args, **vars):
+	return
+
+    def POST(*args, **vars):
+	i = 0
+	try:
+	    #logger.loggerpms2.info(">>Enter Appointment API==>>")
+	    dsobj = datasecurity.DataSecurity()
+	    encryption = vars.has_key("req_data")
+	    if(encryption):
+		#logger.loggerpms2.info(">>Appointment with Encryption")
+		encrypt_req = vars["req_data"]
+		vars = json.loads(dsobj.decrypts(encrypt_req))
+	    
+	    #decrypted request date
+	    action = str(vars["action"])
+	    #logger.loggerpms2.info(">>Appointment ACTION==>>" + action)
+	    
+	    #return json.dumps({"action":action})
+	    rsp = appointmentAPI_switcher.get(action,unknown)(vars)
+	    common.setcookies(response)
+	    if(encryption):
+		return json.dumps({"resp_data":dsobj.encrypts(rsp)})
+	    else:
+		return rsp
+	    
+	except Exception as e:
+	    mssg = "AGENT API Exception Error =>>\n" + str(e)
+	    #logger.loggerpms2.info(mssg)
+	    raise HTTP(500)   
+
+    def PUT(*args, **vars):
+	return dict()
+
+    def DELETE(*args, **vars):
+	return dict()
+
+    return locals()
+
