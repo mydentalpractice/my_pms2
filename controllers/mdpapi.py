@@ -703,6 +703,13 @@ def agent_otp_login(avars):
     mdp_user = ouser.agent_otp_login(avars)
     return mdp_user 
 
+def otp_login(avars):
+    
+    ouser = mdpuser.User(current.globalenv['db'],current.auth,"","")
+    mdp_user = ouser.otp_login(avars)
+    return mdp_user 
+
+
 def getmailserverdetails(avars):
     ouser = mdpuser.User(current.globalenv['db'],None,"","")
     rsp = ouser.getmailserverdetails()
@@ -2133,7 +2140,7 @@ def upload_media(avars):
                             avars["mediatype"] if "mediatype" in avars else "image",\
                             avars["mediaformat"] if "mediaformat" in avars else "jpg"
                             )
-    
+    avars["appath"] = current.globalenv["request"].folder
     rsp = omedia.upload_media(avars)
     
    
@@ -2520,7 +2527,6 @@ def delete_doctor(avars):
 def new_prospect(avars):
     logger.loggerpms2.info("Enter New Prospect Request\n" + str(avars) )
     prs = mdpprospect.Prospect(current.globalenv['db'])
-  
     rsp = prs.new_prospect(avars)
     return rsp
 
@@ -2627,6 +2633,11 @@ agentAPI_switcher = {
     "new_agent":new_agent,"new_agent_prospect":new_agent_prospect
 }
 
+userAPI_switcher = {
+    
+    "otp_login":otp_login, "agent_otp_login":agent_otp_login
+
+}
 
 mdpapi_switcher = {"listappointments":getappointments,"getappointmentsbymonth":getappointmentsbymonth,"getappointmentsbyday":getappointmentsbyday,"getappointment":getappointment,\
                    "getappointmentcountbymonth":getappointmentcountbymonth,"getdocappointmentcountbymonth":getdocappointmentcountbymonth,"getappointmentsbypatient":getappointmentsbypatient,\
@@ -2686,7 +2697,7 @@ mdpapi_switcher = {"listappointments":getappointments,"getappointmentsbymonth":g
                    "set_appointment_vital_member":set_appointment_vital_member,\
                    "sendOTPCashless":sendOTPCashless,"validateOTPCashless":validateOTPCashless,\
                    "getOPDServicesCashless":getOPDServicesCashless,"getTransactionIDCashless":getTransactionIDCashless,\
-                   "agent_otp_login":agent_otp_login
+                   "agent_otp_login":agent_otp_login,"otp_login":otp_login
                    
                    }
 
@@ -3107,4 +3118,47 @@ def appointmentAPI():
 	return dict()
 
     return locals()
+
+@request.restful()
+def userAPI():
+    response.view = 'generic' + request.extension
+    def GET(*args, **vars):
+	return
+
+    def POST(*args, **vars):
+	i = 0
+	try:
+	    #logger.loggerpms2.info(">>Enter Agent API==>>")
+	    dsobj = datasecurity.DataSecurity()
+	    encryption = vars.has_key("req_data")
+	    if(encryption):
+		#logger.loggerpms2.info(">>Agent with Encryption")
+		encrypt_req = vars["req_data"]
+		vars = json.loads(dsobj.decrypts(encrypt_req))
+	    
+	    #decrypted request date
+	    action = str(vars["action"])
+	    #logger.loggerpms2.info(">>Agent ACTION==>>" + action)
+	    
+	    #return json.dumps({"action":action})
+	    rsp = userAPI_switcher.get(action,unknown)(vars)
+	    common.setcookies(response)
+	    if(encryption):
+		return json.dumps({"resp_data":dsobj.encrypts(rsp)})
+	    else:
+		return rsp
+	    
+	except Exception as e:
+	    mssg = "AGENT API Exception Error =>>\n" + str(e)
+	    #logger.loggerpms2.info(mssg)
+	    raise HTTP(500)   
+
+    def PUT(*args, **vars):
+	return dict()
+
+    def DELETE(*args, **vars):
+	return dict()
+
+    return locals()
+
 

@@ -257,9 +257,6 @@ class Media:
         appath = avars["appath"] if "appath" in avars else ""
         
         try:
-
-    
-    
             r = db((db.vw_memberpatientlist.providerid == providerid) & (db.vw_memberpatientlist.primarypatientid == memberid) & (db.vw_memberpatientlist.patientid == patientid) & \
                    (db.vw_memberpatientlist.is_active == True)).select(db.vw_memberpatientlist.fullname)
     
@@ -269,13 +266,15 @@ class Media:
     
             
             ##upload the image to the server
+            #C:\\inetpub\\wwwroot\\applications
+            #C:\\inetpub\\wwwroot\\applications\\MY_PMS2\\
             #appath = "d:\\web2py\\applications"
             x = appath.split('\\') 
            
-            appath = os.path.join(x[0],"\\")
-            appath = os.path.join(appath,x[1])
-            appath = os.path.join(appath,x[2])
-            appath = os.path.join(appath,x[3])  if len(x) == 4 else appath
+            appath = os.path.join(x[0],"\\")    #C:
+            appath = os.path.join(appath,x[1])  #intepub
+            appath = os.path.join(appath,x[2])  #wwwroot
+            appath = os.path.join(appath,x[3])  if len(x) == 4 else appath #applicationns
             
             dirpath = os.path.join(appath , "media")
             if(not os.path.exists(dirpath)):
@@ -531,41 +530,7 @@ class Media:
                     
 
             
-            #if(providerid != 0):  
-                #medias = db(db.provider_media.provider_id == providerid).select(db.dentalimage.ALL,\
-                                                                         #left=db.dentalimage.on((db.dentalimage.id == db.provider_media.media_id)&\
-                                                                                               #(db.dentalimage.mediatype == mediatype)&\
-                                                                                               #(db.dentalimage.is_active == True)),limitby=limitby)
  
- 
-            #if(doctorid != 0):  
-                #medias = db(db.doctor_media.doctor_id == doctorid).select(db.dentalimage.ALL,\
-                                                                         #left=db.dentalimage.on((db.dentalimage.id == db.doctor_media.media_id)&\
-                                                                                               #(db.dentalimage.mediatype == mediatype)&\
-                                                                                               #(db.dentalimage.is_active == True)),limitby=limitby)
-            #if(clinicid != 0):  
-                #medias = db(db.clinic_media.clinic_id == clinicid).select(db.dentalimage.ALL,\
-                                                                         #left=db.dentalimage.on((db.dentalimage.id == db.clinic_media.media_id)&\
-                                                                                               #(db.dentalimage.mediatype == mediatype)&\
-                                                                                               #(db.dentalimage.is_active == True)),limitby=limitby)
-
-            #if(treatmentid != 0):  
-                #medias = db(db.treatment_media.treatment_id == treatmentid).select(db.dentalimage.ALL,\
-                                                                         #left=db.dentalimage.on((db.dentalimage.id == db.treatment_media.media_id)&\
-                                                                                               #(db.dentalimage.mediatype == mediatype)&\
-                                                                                               #(db.dentalimage.is_active == True)),limitby=limitby)
-              
-            #if(customer != 0):  
-                #medias = db(db.customer_media.customer_id == customerid).select(db.dentalimage.ALL,\
-                                                                         #left=db.dentalimage.on((db.dentalimage.id == db.customer_media.media_id)&\
-                                                                                               #(db.dentalimage.mediatype == mediatype)&\
-                                                                                               #(db.dentalimage.is_active == True)),limitby=limitby)
-                
-            #if(userid != 0):  
-                #medias = db(db.auth_user_media.user_id == userid).select(db.dentalimage.ALL,\
-                                                                         #left=db.dentalimage.on((db.dentalimage.id == db.auth_user_media.media_id)&\
-                                                                                               #(db.dentalimage.mediatype == mediatype)&\
-                                                                                               #(db.dentalimage.is_active == True)),limitby=limitby)
     
             for media in medias:
     

@@ -5,6 +5,8 @@ TREATMENTSTATUS=('Started', 'Sent for Authorization', 'Authorized', 'Completed',
 PRIORITY=('Emergency','High','Medium','Low')
 OFFICESTAFF=('Doctor','Staff')
 APPTSTATUS=('Open','Confirmed','Checked-In', 'Checked-Out', 'Cancelled')
+CUSTACTIVITY=('Scheduled','Pending','Enrolled','Cancelled')
+
 
 
 

@@ -59,7 +59,7 @@ class Prospect:
                     "ref_code":d.prospect_ref.ref_code,   #AGN
                     "ref_id":d.prospect_ref.ref_id,       #ID to either AGent Table
                     
-                    
+                    "prospectid":d.prospect.id,
                     "providername":d.prospect.providername,
                     "cell":d.prospect.cell,
                     "email":d.prospect.email,
@@ -325,13 +325,28 @@ class Prospect:
         db = self.db
         auth  = current.auth
         rspobj = {}
-        
+     
         logger.loggerpms2.info("Enter new Propsect ")
         
         try:
             ref_code = common.getkeyvalue(avars,"ref_code","")     #Prospect is added by Agent
             ref_id = int(common.getkeyvalue(avars,"ref_id",0))            
             prospect = common.getkeyvalue(avars,'provider',"")
+
+            address1=common.getkeyvalue(avars,'address1',"")
+            address2=common.getkeyvalue(avars,'address2',"")
+            address3=common.getkeyvalue(avars,'address3',"")
+            city=common.getkeyvalue(avars,'city',"")
+            st=common.getkeyvalue(avars,'st',"")
+            pin=common.getkeyvalue(avars,'pin',"")
+            
+            practiceaddress = ""
+            practiceaddress = practiceaddress + "" if(address1 == "") else address1
+            practiceaddress = practiceaddress + "" if(address2 == "") else practiceaddress + " " + address2
+            practiceaddress = practiceaddress + "" if(address3 == "") else practiceaddress+ " " + address3
+            practiceaddress = practiceaddress + "" if(city == "") else practiceaddress + "," + city
+            practiceaddress = practiceaddress + "" if(st == "") else practiceaddress + "," + st
+            practiceaddress = practiceaddress + "" if(pin == "") else practiceaddress + "," + pin
             
             prospectid = db.prospect.insert(\
                 
@@ -346,12 +361,12 @@ class Prospect:
                 city=common.getkeyvalue(avars,'city',""),
                 st=common.getkeyvalue(avars,'st',""),
                 pin=common.getkeyvalue(avars,'pin',""),
-                p_address1=common.getkeyvalue(avars,'p_address1',""),
-                p_address2=common.getkeyvalue(avars,'p_address2',""),
-                p_address3=common.getkeyvalue(avars,'p_address3',""),
-                p_city=common.getkeyvalue(avars,'p_city',""),
-                p_st=common.getkeyvalue(avars,'p_st',""),
-                p_pin=common.getkeyvalue(avars,'p_pin',""),
+                p_address1=common.getkeyvalue(avars,'p_address1',address1),
+                p_address2=common.getkeyvalue(avars,'p_address2',address2),
+                p_address3=common.getkeyvalue(avars,'p_address3',address3),
+                p_city=common.getkeyvalue(avars,'p_city',city),
+                p_st=common.getkeyvalue(avars,'p_st',st),
+                p_pin=common.getkeyvalue(avars,'p_pin',pin),
                 telephone=common.getkeyvalue(avars,'telephone',""),
                 cell=common.getkeyvalue(avars,'cell',""),
                 email=common.getkeyvalue(avars,'email',""),
@@ -369,13 +384,13 @@ class Prospect:
                 groupregion=int(common.getkeyvalue(avars,'groupregion',"1")),
                 registration=common.getkeyvalue(avars,'registration',""),
                 registered=common.getboolean(common.getkeyvalue(avars,'registered',"True")),
-                languagesspoken=common.getkeyvalue(avars,'languagesspoken',""),
-                pa_providername=common.getkeyvalue(avars,'pa_providername',""),
-                pa_practicename=common.getkeyvalue(avars,'pa_practicename',""),
-                pa_practiceaddress=common.getkeyvalue(avars,'pa_practiceaddress',""),
+                languagesspoken=common.getkeyvalue(avars,'languagesspoken',"English"),
+                pa_providername=common.getkeyvalue(avars,'pa_providername',common.getkeyvalue(avars,'providername',"")),
+                pa_practicename=common.getkeyvalue(avars,'pa_practicename',common.getkeyvalue(avars,'practicename',"")),
+                pa_practiceaddress=common.getkeyvalue(avars,'pa_practiceaddress',practiceaddress),
                 pa_dob=common.getdatefromstring(common.getkeyvalue(avars,'pa_dob',common.getstringfromdate(datetime.datetime.today(),"%d/%m/%Y")),"%d/%m/%Y"),
                 pa_parent=common.getkeyvalue(avars,'pa_parent',""),
-                pa_address=common.getkeyvalue(avars,'pa_address',""),
+                pa_address=common.getkeyvalue(avars,'pa_address',practiceaddress),
                 pa_pan=common.getkeyvalue(avars,'pa_pan',""),
                 pa_regno=common.getkeyvalue(avars,'pa_regno',""),
                 pa_date=common.getdatefromstring(common.getkeyvalue(avars,'pa_date',common.getstringfromdate(datetime.datetime.today(),"%d/%m/%Y")),"%d/%m/%Y"),

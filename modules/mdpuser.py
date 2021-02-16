@@ -19,7 +19,9 @@ from applications.my_pms2.modules import mail
 from applications.my_pms2.modules import mdpprospect
 from applications.my_pms2.modules import mdpprovider
 from applications.my_pms2.modules import mdpagent
+from applications.my_pms2.modules import mdppatient
 from applications.my_pms2.modules import logger
+
 
 
 class User:
@@ -142,7 +144,7 @@ class User:
       user_data = {}
       user_data={
         "result":"success",
-        "error_message":"fail",
+        "error_message":"",
         "usertype":"agent", 
         "agent":r[0].agent,
         "agentid":common.getid(r[0].id),
@@ -167,9 +169,10 @@ class User:
   #cell is xxxxxxxxxx  (without leading +<countrycode)
   #assuming Cell is unique
   def otp_login(self,avars):
-    
     auth = self.auth
     db = self.db
+   
+    
     rspobj = {}
     
     try:
@@ -187,24 +190,53 @@ class User:
       auth.login_user(db.auth_user(int(usr[0].id)))
       cell = auth.user["cell"]
    
-      p = db(db.provider.cell == cell).select()
+      #IF THE user cell is in provider then the user is a provider
+      p = db((db.provider.cell == cell) & (db.provider.is_active == True)).select()
       if(len(p) >= 1):
         #if cell is in provider then otp is for provider
         obj = mdpprovider.Provider(db,int(p[0].id))
         user_data = json.loads(obj.getprovider())
         user_data["usertype"] = "provider"
+        user_data["result"] = "success"
+        user_data["error_message"] = ""
+        user_data["error_code"] = ""
       else:
-        p = db((db.prospect.cell == cell) & (db.prospect.status != "Enrolled") & (db.propsect.is_active == True)).select()
-        if(len(p)>=1):
-          obj = mdpprospect.Prospect()
-          user_data = obj.get_prospect({"prospectid":str(obj[0].id)})
-          user_data["usertype"] = "prospect"
+        #if the user cell is in Patient Member, then return as a patient
+        pat = db((db.vw_memberpatientlist.cell == cell) & (db.vw_memberpatientlist.is_active == True)).select()
+        
+        if(len(pat)!=0):
+          if(len(pat) == 1):
+            #user is a patientmemebr
+            patobj = mdppatient.Patient(db, 0)
+            user_data = patobj.getpatient(int(common.getid(pat[0].primarypatientid)), int(common.getid(pat[0].patientid)), "imageurl")
+            user_data["usertype"] = "member"
+          else:
+            #multiple users with the same cell
+            error_message = "OTP Login API Error: No User/Multiple Patient/Members matching registered " + cell
+            logger.loggerpms2.info(error_message)
+            excpobj = {}
+            excpobj["result"] = "fail"
+            excpobj["error_message"] = error_message
+            return json.dumps(excpobj)    
+            
         else:
-          user_data["usertype"] = "prospect"
-          user_data["prospectid"] = "0"
-          user_data["result"] = "success"
-          user_data["error_message"] = "error_message"
-          user_data["error_code"] = "error_code"
+          #check for new Signup (prospect)
+          #if the user cell is in prospect table, then returning prospect
+          p = db((db.prospect.cell == cell) & (db.prospect.status != "Enrolled") & (db.prospect.is_active == True)).select()
+          if(len(p)>=1):   #returning signup
+            obj = mdpprospect.Prospect()
+            user_data = obj.get_prospect({"prospectid":str(obj[0].id)})
+            user_data["usertype"] = "prospect"
+            user_data["result"] = "success"
+            user_data["error_message"] = ""
+            user_data["error_code"] = ""
+          else:
+            user_data["usertype"] = "prospect"
+            user_data["prospectid"] = "0"
+            user_data["result"] = "success"
+            user_data["error_message"] = ""
+            user_data["error_code"] = ""
+          
           
       
     except Exception as e:
