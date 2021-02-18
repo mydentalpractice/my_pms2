@@ -54,7 +54,7 @@ class Prospect:
             
             for d in ds:
                
-             
+                clinic_count = db((db.clinic_ref.ref_code == 'PST') & (db.clinic_ref.ref_id == d.prospect.id)).count()
                 obj = {
                     "ref_code":d.prospect_ref.ref_code,   #AGN
                     "ref_id":d.prospect_ref.ref_id,       #ID to either AGent Table
@@ -63,7 +63,8 @@ class Prospect:
                     "providername":d.prospect.providername,
                     "cell":d.prospect.cell,
                     "email":d.prospect.email,
-                    "status":d.prospect.status
+                    "status":d.prospect.status,
+                    "clinic_count":str(clinic_count)
                 }
                 lst.append(obj)   
              
@@ -105,6 +106,9 @@ class Prospect:
                 }                
                 return json.dumps(rspobj)
             
+            
+            
+            clinic_count = db((db.clinic_ref.ref_code == 'PST') & (db.clinic_ref.ref_id == prospectid)).count()
             
             rspobj = {
                 "prospectid":str(prospectid),
@@ -163,6 +167,7 @@ class Prospect:
                 "groupemail":ds[0].groupemail,
                 "bankid":str(ds[0].bankid),
                 
+                "clinic_count":str(clinic_count),    
                 "result":"success",
                 "error_message":"",
                 "error_code":""
@@ -415,6 +420,8 @@ class Prospect:
                 schedulecapitation = 0,
                 capitationytd  = 0,
                 captiationmtd  = 0,
+                
+               
 
                 is_active = True,
                 created_on=common.getISTFormatCurrentLocatTime(),
@@ -436,7 +443,7 @@ class Prospect:
                 "ref_id":ref_id,
                 
                 "prospectid":str(prospectid),
-                
+                "clinic_count":"0",
                 "result":"success",
                 "error_message":"",
                 "error_code":""

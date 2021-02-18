@@ -169,6 +169,8 @@ class User:
   #cell is xxxxxxxxxx  (without leading +<countrycode)
   #assuming Cell is unique
   def otp_login(self,avars):
+    
+    logger.loggerpms2.info("Enter otp_login", json.dumps(avars))
     auth = self.auth
     db = self.db
    
@@ -189,7 +191,7 @@ class User:
       
       auth.login_user(db.auth_user(int(usr[0].id)))
       cell = auth.user["cell"]
-   
+      user_data = {}
       #IF THE user cell is in provider then the user is a provider
       p = db((db.provider.cell == cell) & (db.provider.is_active == True)).select()
       if(len(p) >= 1):

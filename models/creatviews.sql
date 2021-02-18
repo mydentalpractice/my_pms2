@@ -8596,10 +8596,10 @@ UPDATE provider AS p INNER JOIN bank_details AS b ON p.id = b.providerid SET p.b
 07/2/2021
 ==========
 
-1. Modified t_appointment : added 'clinicid' field, set default value of blockappt = True, delete foreign keys provider and patient
-2. Modified vw_appointments : added clinicid, clinic_ref and clinic_name fields
-3. Modified clinic table : added state_dental_regisration, registration_certificate
+1. YYZZModified t_appointment : added 'clinicid' field, set default value of blockappt = False, delete foreign keys provider and patient
+2. YYZZModified vw_appointments : added clinicid, clinic_ref and clinic_name fields
+3. YYZZModified clinic table : added state_dental_regisration, registration_certificate
 
 15/2/2021
 =========
-1. Added CustomerActivity table
+1. XXYYZZAdded CustomerActivity table
