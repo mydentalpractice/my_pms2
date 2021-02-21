@@ -148,7 +148,7 @@ class Customer:
                     created_on = common.getISTFormatCurrentLocatTime(),
                     created_by = 1 if(auth.user == None) else auth.user.id,
                     modified_on = common.getISTFormatCurrentLocatTime(),
-                    modified_by =1 if(auth.user == None) else auth.usr.id                
+                    modified_by =1 if(auth.user == None) else auth.user.id                
                 )
                 db(db.customer.id == customer_id).update(customer = customer_id)
                 
@@ -176,7 +176,7 @@ class Customer:
                         created_on = common.getISTFormatCurrentLocatTime(),
                         created_by = 1 if(auth.user == None) else auth.user.id,
                         modified_on = common.getISTFormatCurrentLocatTime(),
-                        modified_by =1 if(auth.user == None) else auth.usr.id                
+                        modified_by =1 if(auth.user == None) else auth.user.id                
                     )
                     
                     db(db.customerdependants.id == depid).update(dependant = str(depid))
@@ -264,7 +264,7 @@ class Customer:
                     is_active =  c[0].is_active,
                     
                     modified_on = common.getISTFormatCurrentLocatTime(),
-                    modified_by =1 if(auth.user == None) else auth.usr.id                       
+                    modified_by =1 if(auth.user == None) else auth.user.id                       
                 )
                 
                          
@@ -282,7 +282,7 @@ class Customer:
                         depdob = common.getdatefromstring(dep["depdob"], "%d/%m/%Y"),
                         
                         modified_on = common.getISTFormatCurrentLocatTime(),
-                        modified_by =1 if(auth.user == None) else auth.usr.id                            
+                        modified_by =1 if(auth.user == None) else auth.user.id                            
                         
                     
                     )
@@ -447,13 +447,13 @@ class Customer:
             db(db.customer.id == customer_id).update(
                 is_active = False,
                 modified_on = common.getISTFormatCurrentLocatTime(),
-                modified_by =1 if(auth.user == None) else auth.usr.id                               
+                modified_by =1 if(auth.user == None) else auth.user.id                               
             )
             
             d = db(db.customerdependants.customer_id == customer_id).update(
                 is_active = False,
                 modified_on = common.getISTFormatCurrentLocatTime(),
-                modified_by =1 if(auth.user == None) else auth.usr.id                               
+                modified_by =1 if(auth.user == None) else auth.user.id                               
             )
             
             c = db(db.customer.id == customer_id).select(db.customer.customer_ref)
@@ -462,7 +462,7 @@ class Customer:
                 db((db.patientmember.groupref == c[0].customer_ref) & (db.patientmember.is_active == True)).update(
                     is_active = False,
                     modified_on = common.getISTFormatCurrentLocatTime(),
-                    modified_by =1 if(auth.user == None) else auth.usr.id                               
+                    modified_by =1 if(auth.user == None) else auth.user.id                               
                 )
             p = db((db.patientmember.groupref == customer_ref)).select(db.patientmember.id)
             patid = p[0].id if len(p) == 1 else 0
@@ -471,7 +471,7 @@ class Customer:
             d = db((db.patientmemberdependants.patientmember == patid) & (db.patientmemberdependants.is_active == True)).update(
                 is_active = False,
                 modified_on = common.getISTFormatCurrentLocatTime(),
-                modified_by =1 if(auth.user == None) else auth.usr.id              
+                modified_by =1 if(auth.user == None) else auth.user.id              
             )
 
             
@@ -607,6 +607,7 @@ class Customer:
                 
             if(count == 0):
                 #new enrollment
+                logger.loggerpms2.info("Enroll_Custoemr - Count = 0")
                 c = db((db.customer.customer_ref == customer_ref) & (db.customer.is_active == True)).select()
                 customerid = c[0].id if(len(c) == 1) else customerid
                 
@@ -687,6 +688,8 @@ class Customer:
             
             elif(count == 1):
                 #patient member is already enrolled
+                logger.loggerpms2.info("Enroll_Custoemr - Count = 1")
+                
                 error_code = "ENROLL_CUST_003"
                 mssg = error_code + ":" + "Customer Ref Number is not unique"
                 logger.loggerpms2.info(mssg)
@@ -697,6 +700,8 @@ class Customer:
                 }                            
             else:
                 #error
+                logger.loggerpms2.info("Enroll_Custoemr - Count > 1")
+                
                 error_code = "ENROLL_CUST_002"
                 mssg = error_code + ":" + "Error Enroll Member"
                 logger.loggerpms2.info(mssg)

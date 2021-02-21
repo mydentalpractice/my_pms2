@@ -1465,7 +1465,7 @@ class Patient:
                            created_on = common.getISTFormatCurrentLocatTime(),
                            created_by = 1 if(auth.user == None) else auth.user.id,
                            modified_on = common.getISTFormatCurrentLocatTime(),
-                           modified_by =1 if(auth.user == None) else auth.usr.id
+                           modified_by =1 if(auth.user == None) else auth.user.id
                            )
       noteobj = {
          "result":"success",

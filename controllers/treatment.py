@@ -581,7 +581,14 @@ def gettreatments(db,tplanid, treatment,tplan,member,fromdt,todt,status,limitby)
 def getproceduregrid(providerid,tplanid,treatmentid,memberid,patientid,authorization,authorized,preauthorized,page,hmopatientmember,writablflag,webadmin):
     
     # procedures grid
+    db.vw_treatmentprocedure.relgrtransactionid.readable = False
+    if(session.religare != None):
+        db.vw_treatmentprocedure.relgrprocdesc.readable = session.religare
+    else:
+        db.vw_treatmentprocedure.relgrprocdesc.readable = False
+        
     query = ((db.vw_treatmentprocedure.treatmentid  == treatmentid) & (db.vw_treatmentprocedure.is_active == True))
+    
     if((hmopatientmember == True) | (session.religare == True)):
         fields=(db.vw_treatmentprocedure.procedurecode,db.vw_treatmentprocedure.altshortdescription, db.vw_treatmentprocedure.relgrprocdesc, \
                    db.vw_treatmentprocedure.tooth,db.vw_treatmentprocedure.quadrant,

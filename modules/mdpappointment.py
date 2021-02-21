@@ -5,6 +5,7 @@ import os
 import json
 import datetime
 import time
+import random
 from datetime import timedelta
 
 from string import Template
@@ -561,8 +562,8 @@ class Appointment:
     # provider notes
     # app status
     #}
-    def newappointment(self,memberid,patientid,doctorid,complaint,startdt,duration,providernotes,cell,appPath,appointment_ref = None):
-        
+    def xnewappointment(self,memberid,patientid,doctorid,complaint,startdt,duration,providernotes,cell,appPath,appointment_ref = None):
+        logger.loggerpms2.info("Enter newappointment in mdpappointment" + str(memberid) + " " + startdt)
         db = self.db
         providerid = self.providerid
         auth = current.auth
@@ -589,17 +590,21 @@ class Appointment:
             
             #check for block
             if((self.isBlocked(startapptdt,endapptdt,doctorid)==False)):
-                
-                apptid  = db.t_appointment.insert(f_start_time=startapptdt, f_end_time = endapptdt, f_duration = duration, f_status = "Open", \
-                                                  cell = cell,f_title = complaint,f_treatmentid = 0,\
+                logger.loggerpms2.info("Not Blocked")
+                apptid  = db.t_appointment.insert(f_start_time=startapptdt, f_end_time = endapptdt, f_duration = duration, f_status = "Open", 
+                                                  cell = cell,f_title = complaint,f_treatmentid = 0,
                                                   f_patientname = common.getstring(pat[0].fullname),
                                                   description = providernotes,f_location = location, sendsms = True, smsaction = 'create',sendrem = True,
                                                   doctor = doctorid, provider=providerid, patient=patientid,patientmember=memberid, is_active=True,
                                                   created_on=common.getISTFormatCurrentLocatTime(),modified_on=common.getISTFormatCurrentLocatTime(),
-                                                  created_by = 1 if(auth.user == None) else auth.user.id, \
-                                                  modified_by= 1 if(auth.user == None) else auth.user.id)  
+                                                  created_by = 1,
+                                                  modified_by= 1) 
                 
+                
+                db.commit()
+                logger.loggerpms2.info("New Appointment " + str(apptid))
                 appointment_ref = apptid if(appointment_ref == None) else appointment_ref
+                
                 db(db.t_appointment.id == apptid).update(f_uniqueid = appointment_ref)
                 
                 #save in case report
@@ -611,6 +616,7 @@ class Appointment:
                 newapptobj= {"result":"success","error_message":"","appointment_ref":appointment_ref,"appointmentid":apptid,"message":"success"}
              
             else:
+                logger.loggerpms2.info("Blocked")
                 newapptobj = {"result":"success","error_message":"","appointment_ref":appointment_ref, "appointmentid":0,"message":"Invalid Appointment Date and Time"}
         except Exception as e:
             excpobj = {}
@@ -621,7 +627,117 @@ class Appointment:
 
         
         return json.dumps(newapptobj)
+    def newappointment(self,memberid,patientid,doctorid,complaint,startdt,duration,providernotes,cell,appPath,appointment_ref = None):
+            logger.loggerpms2.info("Enter newappointment in mdpappointment" + str(memberid) + " " + startdt)
+            db = self.db
+            providerid = self.providerid
+            auth = current.auth
+            
+            newapptobj = {}
+            
+            
+            try:
+                #location of the Provider's practice
+                location = ""
+                provs = db(db.provider.id == providerid).select()
+                if(len(provs) == 1):
+                    location = provs[0].pa_practicename + ", " + provs[0].pa_practiceaddress
+                
+                # find out day of the appt.
+                startapptdt    = common.getdt(datetime.datetime.strptime(startdt,"%d/%m/%Y %H:%M"))
+                endapptdt = startapptdt + timedelta(minutes=duration)
+                
+                
+        
+                
+                pat = db((db.vw_memberpatientlist.primarypatientid == memberid) & (db.vw_memberpatientlist.patientid == patientid)).\
+                    select(db.vw_memberpatientlist.fullname)
+                
+                #check for block
+                if((self.isBlocked(startapptdt,endapptdt,doctorid)==False)):
+                    logger.loggerpms2.info("Not Blocked")
+                    
+                    #strSQL = ""
+                    #strstart = common.getstringfromdate(startapptdt, "%Y-%m-%d %H:%M")
+                    #strend = common.getstringfromdate(endapptdt, "%Y-%m-%d %H:%M")
+                    
+                    #uniqueid = random.randint(9999,999999)
+                    #y = db(db.t_appointment.f_uniqueid == uniqueid).count()
+                    #if(y > 0):
+                        #uniqueid = random.randint(9999,999999)
+                    
+                    
+                    
+                    #strSQL = strSQL + "INSERT INTO t_appointment( "
+                    #strSQL = strSQL + "f_uniqueid , f_title, f_patientname, f_start_time, f_end_time, f_duration,f_location,f_treatmentid,f_status, description,provider,doctor,"
+                    #strSQL = strSQL + "patientmember,patient,cell,sendsms,sendrem,smsaction) VALUES ("
+                    #strSQL = strSQL + str(uniqueid) + ","
+                    #strSQL = strSQL + "'" + complaint + "',"
+                    #strSQL = strSQL + "'" + pat[0].fullname + "',"
+                    #strSQL = strSQL + "'" + strstart + "',"
+                    #strSQL = strSQL + "'" + strend + "',"
+                    #strSQL = strSQL + str(duration) + ","
+                    #strSQL = strSQL + "'" + location + "',"
+                    #strSQL = strSQL + "0" + ","
+                    #strSQL = strSQL + "'Open'" + ","
+                    #strSQL = strSQL + "'" + providernotes + "',"
+                    #strSQL = strSQL +  str(providerid) + ","
+                    #strSQL = strSQL +  str(doctorid) + ","
+                    #strSQL = strSQL +  str(memberid) + ","
+                    #strSQL = strSQL + str(patientid) + ","
+                    #strSQL = strSQL + "'" + cell + "',"
+                    #strSQL = strSQL + "'T'" + ","
+                    #strSQL = strSQL + "'T'" + ","
+                    #strSQL = strSQL + "'create'"  + ")"           
+                    ##strSQL = strSQL + "'T'" + ")"
+                    ##strSQL = strSQL + "1",
+                    ##strSQL = strSQL + "'" + common.getstringfromdate(datetime.datetime.today(),"%Y-%m-%d %H:%M") +"',"
+                    ##strSQL = strSQL + "1",
+                    ##strSQL = strSQL + "'" + common.getstringfromdate(datetime.datetime.today(),"%Y-%m-%d %H:%M") + "')"
+                    
+                    
+                    #logger.loggerpms2.info("Insert Appointment SQL ",strSQL)
+                   
+                    
+                    apptid  = db.t_appointment.insert(f_start_time=startapptdt, f_end_time = endapptdt, f_duration = duration, f_status = "Open", 
+                                                      cell = cell,f_title = complaint,f_treatmentid = 0,
+                                                      f_patientname = common.getstring(pat[0].fullname),
+                                                      description = providernotes,f_location = location, sendsms = True, smsaction = 'create',sendrem = True,
+                                                      doctor = doctorid, provider=providerid, patient=patientid,patientmember=memberid, is_active=True,
+                                                      created_on=common.getISTFormatCurrentLocatTime(),modified_on=common.getISTFormatCurrentLocatTime(),
+                                                      created_by = 1,
+                                                      modified_by= 1) 
+                    
+                    #db.executesql(strSQL)
+                    #db.commit()
+                    #ds = db(db.t_appointment.f_uniqueid == uniqueid).select(db.t_appointment.id)
+                    #apptid = int(common.getid(ds[0].id) if (len(ds) == 1) else "0")
+                    
+                    logger.loggerpms2.info("New Appointment " + str(apptid))
+                    appointment_ref = apptid if(appointment_ref == None) else appointment_ref
+                    
+                    db(db.t_appointment.id == apptid).update(f_uniqueid = appointment_ref)
+                    
+                    #save in case report
+                    common.logapptnotes(db,complaint,providernotes,apptid)
+                    
+                    # Send Confirmation SMS
+                    #self.sms_confirmation(appPath,apptid,"create")
+                    
+                    newapptobj= {"result":"success","error_message":"","appointment_ref":appointment_ref,"appointmentid":apptid,"message":"success"}
+                 
+                else:
+                    logger.loggerpms2.info("Blocked")
+                    newapptobj = {"result":"success","error_message":"","appointment_ref":appointment_ref, "appointmentid":0,"message":"Invalid Appointment Date and Time"}
+            except Exception as e:
+                excpobj = {}
+                excpobj["result"] = "fail"
+                excpobj["error_message"] = "New Appointment API Exception Error - " + str(e)
+                return json.dumps(excpobj)       
+                
     
+            
+            return json.dumps(newapptobj)    
     def cancelappointment(self,appointmentid,providernotes,appPath):
         db = self.db
         providerid = self.providerid
@@ -875,17 +991,17 @@ class Appointment:
                 
                 def_start_time_str = common.getstringfromdate(ds[0].f_start_time,"%d/%m/%Y %H:%M")
                 def_end_time_str  = common.getstringfromdate(ds[0].f_end_time,"%d/%m/%Y %H:%M")
-                db(db.appointment.id == appointmentid).update(\
+                db(db.t_appointment.id == appointmentid).update(\
                     
                     f_uniqueid = int(common.getkeyvalue(avars,"f_uniqueid",str(ds[0].f_uniqueid))),
                     f_title = common.getkeyvalue(avars,"f_title",ds[0].f_title),
-                    ptitle = common.getkeyvalue(avars,"ptitle",ds[0].ptitle),
+                   
                     f_patientname = common.getkeyvalue(avars,"f_patientname",ds[0].f_patientname),
                     f_location = common.getkeyvalue(avars,"f_location",ds[0].f_location),
                     f_status = common.getkeyvalue(avars,"f_status",ds[0].f_status),
                     description = common.getkeyvalue(avars,"description",ds[0].description),
                     newpatient = common.getkeyvalue(avars,"newpatient",ds[0].newpatient),
-                    color = common.getkeyvalue(avars,"color",ds[0].color),
+                   
                     cell = common.getkeyvalue(avars,"cell",ds[0].cell),
                     smsaction = common.getkeyvalue(avars,"smsaction",ds[0].smsaction),
                     

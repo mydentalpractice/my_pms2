@@ -884,7 +884,7 @@ class Treatment:
             #update treatment status
             db(db.treatment.id == treatmentid).update(status = sts[1],
                                                       modified_on = common.getISTFormatCurrentLocatTime(),
-                                                      modified_by =1 if(auth.user == None) else auth.usr.id
+                                                      modified_by =1 if(auth.user == None) else auth.user.id
                                                       )
             
             

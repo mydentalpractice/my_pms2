@@ -1183,13 +1183,14 @@ def checkinappointment(avars):
     return rsp
 #X
 def newappointment(avars):
-    
+    logger.loggerpms2.info("Enter newappointment in mdpapi")
     oappts = mdpappointment.Appointment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
     rsp = oappts.newappointment(int(common.getid(str(avars["memberid"]))),int(common.getid(str(avars["patientid"]))),\
                                 int(common.getid(str(avars["doctorid"]))),\
                                 str(avars["complaint"]),str(avars["startdt"]),int(common.getid(str(avars["duration"]))),\
                                 str(avars["providernotes"]),str(avars["cell"]),\
                                 current.globalenv["request"].folder)
+    logger.loggerpms2.info("Exit newappointment in mdpapi " + str(rsp) )
     return rsp
 #X
 def updateappointment(avars):

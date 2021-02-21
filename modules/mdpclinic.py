@@ -43,6 +43,68 @@ class Clinic:
         
         return json.dumps(rspobj)  
         
+   
+   
+    
+   
+   
+    def list_clinic(self,avars):
+        auth  = current.auth
+        db = self.db        
+      
+        
+        cliniclist = []
+        rspobj = {}
+        
+        try:
+            
+            ref_code = common.getkeyvalue(avars,"ref_code","PRV")
+            ref_id = common.getkeyvalue(avars,"ref_id",0)
+            
+            ds = db((db.clinic_ref.ref_id == ref_id) & (db.clinic_ref.ref_code == ref_code)).select()
+            
+            logger.loggerpms2.info("Number of clinics  = " + str(len(ds)) + " " + ref_code + " " + str(ref_id))
+   
+            for d in ds:
+                r = db((db.clinic.id == d.clinic_id) & (db.clinic.is_active == True)).select()
+               
+                dobj = {
+                    
+                    "ref_code":ref_code,
+                    "name":r[0].name if len(r) == 1 else "",
+                    "status":r[0].status if len(r) == 1 else "",
+                    "clinic":r[0].clinic_ref if len(r) == 1 else "",
+                    "clinicid":r[0].id if len(r) == 1 else 0,
+                    "cell":r[0].cell if len(r) == 1 else "",
+                    "email":r[0].email if len(r) == 1 else "",
+                    "primary_clinic":r[0].primary_clinic if len(r) == 1 else False,
+                    
+                }
+                cliniclist.append(dobj)
+            
+          
+            
+            rspobj = {
+                
+                "count":str(len(ds)),
+                "clinic_list":cliniclist,
+                "result":"success",
+                "error_message":"",
+                "error_code":""
+            }
+                    
+        
+        except Exception as e:
+            mssg = "List Clinic Doctor Exception:\n" + str(e)
+            logger.loggerpms2.info(mssg)      
+            excpobj = {}
+            excpobj["result"] = "fail"
+            excpobj["error_code"] = "MDP100"
+            excpobj["error_message"] = mssg
+            return json.dumps(excpobj)  
+        
+        return json.dumps(rspobj)    
+
     def list_doc_clinic(self,avars):
         auth  = current.auth
         db = self.db        
