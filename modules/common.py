@@ -671,7 +671,9 @@ def gettreatmentgrid(db,page, imagepage, providerid, providername, treatment,mem
 
 
 def modify_cell(cell):
-   
+        if((cell == None)|(cell == "")):
+                return "0000000000"
+        
         cellno = cell.lstrip('0')  # remove leading zero  in case cell  = 078901234544
         if(len(cellno) == 10):     # pure number with no Country code
                 cellno = "91" + cellno 

@@ -586,6 +586,7 @@ def login():
         logger.loggerpms2.info("MyDentalPlan Login ==>>" + form.vars.username + " " + form.vars.password.password)
         user = auth.login_bare(form.vars.username, form.vars.password.password)
         
+        logger.loggerpms2.info("Auth User Username + Sitekey = " + auth.user.username + " " + auth.user.sitekey)
         
         if(user==False):
             session.flash = "Login Error! Please try again!"

@@ -238,13 +238,13 @@
                                 </div>
                                
                                   <div  class="btn-group" style="margin: 0px 15px 20px 15px;">
-                                    <button id="sample_editable_1_new" class="btn sbold" style="background: #608ebe; color: #fff;display:none;"> <a id="bt1" type="button" value="Print Div Contents" id="btnPrint">Save to Pdf<a>
+                                    <button id="sample_editable_1_new" class="btn sbold" style="background: #608ebe; color: #fff;display:none;"> <a id="bt1" type="button" value="Print Div Contents" id="btnPrint">xSave to Pdf<a>
                                                             <i class="fa fa-file-pdf-o"></i>
                                                         </button>
                                     <button id="sample_editable_2_new" class="btn sbold" style="background: #608ebe; color: #fff;display:none;"> <a id="bt2" type="button" value="Email Div Contents" id="btnEmail">Email Authorization<a>
                                                             <i class="fa fa-file-pdf-o"></i>
                                                         </button>                                                        
-					 <a href="{{=returnurl}}" >Cancel </a>
+					 <a id="btnCancel" href="{{=returnurl}}" >Cancel </a>
 
    
                                  </div>
@@ -889,6 +889,8 @@
 
 </html>
    <script>  
+
+
     (function () {  
         var  
          form = $('.form'),  
@@ -902,7 +904,7 @@
         //create pdf  
         function createPDF() {  
             document.getElementById('create_pdf').style.visibility='hidden';
-             document.getElementById('bt').style.visibility='hidden';
+             <!--document.getElementById('btnCancel').style.visibility='hidden';-->
 
              
 
@@ -915,7 +917,7 @@
                      format: 'a4'  
                  });  
                 doc.addImage(img, 'JPEG', 20, 20);  
-                doc.save('Bhavdip-html-to-pdf.pdf');  
+                doc.save('Treatment_Report-html-to-pdf.pdf');  
                 form.width(cache_width);  
             });  
         }  

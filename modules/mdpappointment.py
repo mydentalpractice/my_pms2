@@ -993,7 +993,7 @@ class Appointment:
                 def_end_time_str  = common.getstringfromdate(ds[0].f_end_time,"%d/%m/%Y %H:%M")
                 db(db.t_appointment.id == appointmentid).update(\
                     
-                    f_uniqueid = int(common.getkeyvalue(avars,"f_uniqueid",str(ds[0].f_uniqueid))),
+                    f_uniqueid = int(common.getkeyvalue(avars,"f_uniqueid","0" if(ds[0].f_uniqueid == None) else str(ds[0].f_uniqueid))),
                     f_title = common.getkeyvalue(avars,"f_title",ds[0].f_title),
                    
                     f_patientname = common.getkeyvalue(avars,"f_patientname",ds[0].f_patientname),
@@ -1007,14 +1007,14 @@ class Appointment:
                     
                     f_start_time = common.getdatefromstring(common.getkeyvalue(avars,"f_start_time",def_start_time_str),"%d/%m/%Y %H:%M"),
                     f_end_time = common.getdatefromstring(common.getkeyvalue(avars,"f_end_time",def_end_time_str),"%d/%m/%Y %H:%M"),
-                    f_duration = int(common.getkeyvalue(avars,"f_duration",str(ds[0].f_duration))),
+                    f_duration = int(common.getkeyvalue(avars,"f_duration","0" if(ds[0].f_duration == None) else str(ds[0].f_duration))),
 
-                    f_treatmentid = int(common.getkeyvalue(avars,"f_treatmentid",str(ds[0].f_treatmentid))),
-                    provider = int(common.getkeyvalue(avars,"provider",str(ds[0].provider))),
-                    doctor = int(common.getkeyvalue(avars,"doctor",str(ds[0].doctor))),
-                    clinicid = int(common.getkeyvalue(avars,"clinicid",str(ds[0].clinicid))),
-                    patientmember = int(common.getkeyvalue(avars,"memberid",str(ds[0].patientmember))),
-                    patient = int(common.getkeyvalue(avars,"patientid",str(ds[0].patientid))),
+                    f_treatmentid = int(common.getkeyvalue(avars,"f_treatmentid","0" if(ds[0].f_treatmentid == None) else str(ds[0].f_treatmentid))),
+                    provider = int(common.getkeyvalue(avars,"provider","0" if(ds[0].provider == None) else str(ds[0].provider))),
+                    doctor = int(common.getkeyvalue(avars,"doctor", "0" if(ds[0].doctor == None) else str(ds[0].doctor))),
+                    clinicid = int(common.getkeyvalue(avars,"clinicid","0" if(ds[0].clinicid == None) else str(ds[0].clinicid))),
+                    patientmember = int(common.getkeyvalue(avars,"memberid","0" if(ds[0].patientmember == None) else str(ds[0].patientmember))),
+                    patient = int(common.getkeyvalue(avars,"patientid","0" if(ds[0].patient == None) else str(ds[0].patient))),
                     
                     blockappt = common.getboolean(common.getkeyvalue(avars,"blockappt","False")),
                     sendsms = common.getboolean(common.getkeyvalue(avars,"sendsms","False")),
@@ -1025,14 +1025,14 @@ class Appointment:
                     
                     )
                 
-                apptobj= {"result":True, "appointmentid":appointmentid,"message":"Appointment updated successfully"}
+                apptobj= {"result":"success", "appointmentid":appointmentid,"error_message":"","message":"Appointment updated successfully"}
                 
             else:
-                apptobj = {"result":False, "appointmentid":appointmentid,"message":"Error Updateing Appointment"}
+                apptobj = {"result":"fail", "appointmentid":appointmentid,"error_message":"Error Updating Appointment","error_code":""}
                 
         except Exception as e:
             excpobj = {}
-            excpobj["result"] = False
+            excpobj["result"] = "fail"
             excpobj["error_message"] = "Update Appointment API Exception Error - " + str(e)
             return json.dumps(excpobj)       
         
@@ -1051,7 +1051,12 @@ class Appointment:
         try:
             
             appointmentid = int(common.getkeyvalue(avars,"appointmentid","0"))
-            db((db.appointment.id == appointmentid)).update(\
+            appt = db((db.t_appointment.id == appointmentid) & (db.t_appointment.is_active == True)).select(db.t_appointment.description)
+            desc = "" if len(appt) != 1 else appt[0].description
+            notes = common.getkeyvalue(avars,"notes",desc)
+            
+            db((db.t_appointment.id == appointmentid)).update(\
+                description = notes,
                 f_status = "Cancelled"  ,  
                 is_active = False,
                     
@@ -1060,7 +1065,7 @@ class Appointment:
                 
             )
             
-            apptobj= {"result":True, "appointmentid":appointmentid,"message":"Appointment Cancelled successfully"}
+            apptobj= {"result":"success", "appointmentid":appointmentid,"error_message":"", "error_code":"", "message":"Appointment Cancelled successfully"}
             
                 
         except Exception as e:
@@ -1086,8 +1091,33 @@ class Appointment:
             prov = db(db.provider.id == providerid).select(db.provider.pa_locationurl)
             locationurl = prov[0].pa_locationurl if len(prov) == 1 else ""
             apptobj = {}
+
+
                               
             if(len(appt) == 1):
+                x=str(providerid),
+                x=str(appointmentid),
+                x= (appt[0].f_start_time).strftime("%d/%m/%Y %I:%M %p"),
+                x= "30" if(common.getstring(appt[0].f_duration) == "") else int(appt[0].f_duration),
+                x=common.getstring(appt[0].f_title),
+                x=common.getstring(appt[0].description),
+                x=common.getstring(appt[0].f_location),
+                x=locationurl,
+                x=common.getstring(appt[0].f_status) if(common.getstring(appt[0].f_status) != "") else "Open",
+                x=common.getid(appt[0].patientmember),
+                x=common.getid(appt[0].patient),
+                x=common.getstring(appt[0].f_patientname),
+                x=common.modify_cell(appt[0].cell),
+                x=common.getid(appt[0].clinicid),
+                x=common.getid(appt[0].doctor),
+                x=common.getstring(appt[0].docname),
+                x=common.modify_cell(appt[0].doccell),
+                x=common.getstring(appt[0].color) if(common.getstring(appt[0].color) != "") else "#ff0000",
+                x=common.modify_cell(appt[0].provcell),
+                x=common.getstring(appt[0].clinic_ref),
+                x=common.getstring(appt[0].clinic_name),
+                x=common.getboolean(appt[0].blockappt),
+                
                 apptobj= {
                     "providerid":str(providerid),
                     "appointmentid":str(appointmentid),
@@ -1106,7 +1136,7 @@ class Appointment:
                     "doctorid":common.getid(appt[0].doctor),
                     "docname":common.getstring(appt[0].docname),
                     "doccell":common.modify_cell(appt[0].doccell),
-                    "color": appt[0].color if(common.getstring(appt[0].color) != "") else "#ff0000",
+                    "color": common.getstring(appt[0].color) if(common.getstring(appt[0].color) != "") else "#ff0000",
                     "provcell":common.modify_cell(appt[0].provcell),
                     "clinic_ref":common.getstring(appt[0].clinic_ref),
                     "clinic_name":common.getstring(appt[0].clinic_name),
@@ -1331,23 +1361,34 @@ class Appointment:
 
     def checkIn(self,avars):
         avars["f_status"] = "Checked-In" 
-        self.update_appointment(avars)
+        rsp =  json.loads(self.update_appointment(avars))
         return json.dumps(rsp)
 
     def checkOut(self,avars):
         avars["f_status"] = "Checked-Out" 
-        self.update_appointment(avars)
+        rsp= json.loads(self.update_appointment(avars))
         return json.dumps(rsp)
 
     def confirm(self,avars):
         avars["f_status"] = "Confirmed" 
-        self.update_appointment(avars)
+        rsp = json.loads(self.update_appointment(avars))
         return json.dumps(rsp)
     
     
     
     def reSchedule(self,avars):
-        self.update_appointment(avars)
+        duration = common.getkeyvalue(avars,"duration","30")
+        defdtstr = common.getstringfromdate(datetime.datetime.today(), "%d/%m/%Y %H:%M")
+        startdtstr = common.getkeyvalue(avars,"appointment_start",defdtstr)
+        startapptdt = common.getdatefromstring(startdtstr, "%d/%m/%Y %H:%M")
+        endapptdt = startapptdt + timedelta(minutes=duration)
+        
+        avars["f_duration"] = str(duration)
+        avars["f_start_time"] = common.getstringfromdate(startapptdt,"%d/%m/%Y %H:%M")
+        avars["f_end_time"] = common.getstringfromdate(endapptdt,"%d/%m/%Y %H:%M")
+        
+        
+        rsp = json.loads(self.update_appointment(avars))
         return json.dumps(rsp)
     
     
@@ -1356,44 +1397,71 @@ class Appointment:
     def list_day_appointment_count(self,avars):
 
         db = self.db
-        
-        providerid = int(common.getkeyvalue(avars,"providerid","0"))
-        clinicid = int(common.getkeyvalue(avars,"clinicid","0"))
-        doctorid = int(common.getkeyvalue(avars,"doctorid","0"))
-        blockappt = common.getboolean(common.getkeyvalue(avars,"block","False"))
-        blockappt = 'T' if(blockappt == True) else 'F'
-        month = int(common.getkeyvalue(avars,"month",(datetime.date.today()).strftime("%m")))
-        year = int(common.getkeyvalue(avars,"year",(datetime.date.today()).strftime("%Y")))
-
-        start = str(year) + "-" + str(month).zfill(2) + "-01 00:00:00"
-        end   = str(year) + "-" + str(month).zfill(2) + "-31 23:59:00"  #no need to take 30 or 31 days - just default to 31 days
-        
-        strsql = "select DATE(f_start_time) as apptdate, count(*) as apptcount from vw_appointments where provider = " + str(providerid)
-        strsql = strsql + " and f_start_time >= '"  + start +  "'"
-        strsql = strsql + " and f_start_time <= '"  + end +  "'"
-        strsql = strsql + " and blockappt = '" + blockappt +"'"
-        strsql = strsql + " and is_active = 'T' "
-        strsql = strsql + " group by DATE(f_start_time)"
-        
-        ds = db.executesql(strsql)
-        apptobj = {}
-        apptlist = []
-        
-        
-        for i in xrange(0,len(ds)):
-            count = int(common.getid(ds[i][1]))
-            if(count > 0):
-                apptobj = {
-                    "apptday":ds[i][0].strftime("%d"),
-                    "apptmonth":ds[i][0].strftime("%m"),
-                    "apptyear":ds[i][0].strftime("%Y"),
-                    "apptdate": ds[i][0].strftime("%d/%m/%Y"),
-                    "count": int(common.getid(ds[i][1]))
+        try:
+            providerid = 0 if(common.getkeyvalue(avars,"providerid","0") == "") else int(common.getkeyvalue(avars,"providerid","0"))
+            clinicid = 0 if(common.getkeyvalue(avars,"clinicid","0") == "") else int(common.getkeyvalue(avars,"clinicid","0"))
+            doctorid = 0 if(common.getkeyvalue(avars,"doctorid","0") == "") else int(common.getkeyvalue(avars,"doctorid","0")) 
+            blockappt = common.getboolean(common.getkeyvalue(avars,"block","False"))
+            blockappt = 'T' if(blockappt == True) else 'F'
+            month = int(common.getkeyvalue(avars,"month",(datetime.date.today()).strftime("%m")))
+            year = int(common.getkeyvalue(avars,"year",(datetime.date.today()).strftime("%Y")))
+    
+            start = str(year) + "-" + str(month).zfill(2) + "-01 00:00:00"
+            end   = str(year) + "-" + str(month).zfill(2) + "-31 23:59:00"  #no need to take 30 or 31 days - just default to 31 days
+            
+            strsql = "select DATE(f_start_time) as apptdate, count(*) as apptcount from vw_appointments where (1=1) "
+            if(providerid !=0):
+                strsql = strsql + "AND provider = " + str(providerid)
+            if(clinicid !=0):
+                strsql = strsql + " AND clinicid = " + str(clinicid)
+            if(doctorid !=0):
+                strsql = strsql + " AND doctor = " + str(doctorid)
+            strsql = strsql + " and f_start_time >= '"  + start +  "'"
+            strsql = strsql + " and f_start_time <= '"  + end +  "'"
+            strsql = strsql + " and blockappt = '" + blockappt +"'"
+            strsql = strsql + " and is_active = 'T' "
+            strsql = strsql + " group by DATE(f_start_time)"
+            
+            ds = db.executesql(strsql)
+            apptobj = {}
+            apptlist = []
+            #apptobj = {
+                #"apptday":ds[0][0].strftime("%d"),
+                #"apptmonth":ds[0][0].strftime("%m"),
+                #"apptyear":ds[0][0].strftime("%Y"),
+                #"apptdate": ds[0][0].strftime("%d/%m/%Y"),
+                #"count": int(common.getid(ds[0][1]))
+            
+            #}
+            
+            for d in ds:
+                apptobj={
+                    "apptday":d[0].strftime("%d"),
+                    "apptmonth":d[0].strftime("%m"),
+                    "apptyear":d[0].strftime("%Y"),
+                    "apptdate": d[0].strftime("%d/%m/%Y"),
+                    "count": int(common.getid(d[1]))
                 }
                 apptlist.append(apptobj)
                 
+            rspObj = {
+                "result":"success",
+                "error_message":"",
+                "error_code":"",
+                
+                "apptlist":apptlist,
+            
+            }
+            
+        except Exception as e:
+                excpobj = {}
+                excpobj["result"] = "fail"
+                excpobj["error_message"] = "list_day_appointment_count API Exception Error - " + str(e)
+                excpobj["error_code"] = ""
+                return json.dumps(excpobj)               
+
         
-        return json.dumps({"count":len(apptlist),"appointment_count_list":apptlist,"result":"success","error_message":"","error_code":""})
+        return json.dumps(rspObj)
     
     
     #this API gets a list of appointment for a Provider/Clinic/Doctor a day/month/year

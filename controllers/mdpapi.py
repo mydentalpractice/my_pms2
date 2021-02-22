@@ -1061,7 +1061,7 @@ def get_block_datetime(avars):
     rsp = oappts.get_block_datetime(avars)
     return rsp
     
-def list_day_appointment_count(avars):
+def list_appointment_count_byday(avars):
     oappts = mdpappointment.Appointment(current.globalenv['db'],common.getkeyvalue(avars,"poviderid",0))
     rsp = oappts.list_day_appointment_count(avars)
     return rsp
@@ -2625,7 +2625,7 @@ prospectAPI_switcher = {
 appointmentAPI_switcher = {
     "new_appointment":new_appointment,"get_appointment":get_appointment,"list_appointment":list_appointment,"update_appointment":update_appointment,
     "cancel_appointment":cancel_appointment,"add_block":add_block_datetime,"remove_block":remove_block_datetime,"list_block":list_block_datetime,
-    "get_block":get_block_datetime,"list_day_appointment_count":list_day_appointment_count,"checkIn_appointment":checkIn,"checkOut_appointment":checkOut,"confirm_appointment":confirm,
+    "get_block":get_block_datetime,"list_appointment_count_byday":list_appointment_count_byday,"checkIn_appointment":checkIn,"checkOut_appointment":checkOut,"confirm_appointment":confirm,
     "reSchedule_appointment":reSchedule,"list_appointments_byday":list_appointments_byday,"list_appointmentstatus":appointmentstatus,"list_appointmentduration":appointmentduration
 }
 
