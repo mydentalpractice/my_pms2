@@ -1,5 +1,6 @@
 from gluon import current
 import datetime
+import calendar
 
 import json
 import os
@@ -14,6 +15,21 @@ from applications.my_pms2.modules import common
 from applications.my_pms2.modules import logger
 
 
+
+    
+def isLeapYear(year):
+    if (year % 4) == 0:  
+        if (year % 100) == 0:  
+            if (year % 400) == 0:  
+                return True
+            else:  
+                return False
+        else:  
+            return True
+    else:  
+        return False
+    
+    return False
 
 #Field('','date'),
 #ref codes
@@ -191,18 +207,18 @@ class OPS_Timing:
             if(ref_code == ""):
                 if(ref_id == 0):
                     ops = db((db.ops_timing.is_active == True)).select(db.ops_timing.ALL,db.ops_timing_ref.ALL,\
-                                                                                        left=db.ops_timing.on((db.ops_timing.id == db.ops_timing_ref.ref_id)))
+                                                                                        left=db.ops_timing.on((db.ops_timing.id == db.ops_timing_ref.ops_timing_id)))
                 else:
                     ops = db((db.ops_timing_ref.ref_id == ref_id) &  (db.ops_timing.is_active == True)).select(db.ops_timing.ALL,db.ops_timing_ref.ALL,\
-                                                                                        left=db.ops_timing.on((db.ops_timing.id == db.ops_timing_ref.ref_id)))
+                                                                                        left=db.ops_timing.on((db.ops_timing.id == db.ops_timing_ref.ops_timing_id)))
                     
             else:
                 if(ref_id == 0):
                     ops = db((db.ops_timing_ref.ref_code==ref_code)&  (db.ops_timing.is_active == True)).select(db.ops_timing.ALL,db.ops_timing_ref.ALL,\
-                                                                                        left=db.ops_timing.on((db.ops_timing.id == db.ops_timing_ref.ref_id)))
+                                                                                        left=db.ops_timing.on((db.ops_timing.id == db.ops_timing_ref.ops_timing_id)))
                 else:
                     ops = db((db.ops_timing_ref.ref_code==ref_code)&(db.ops_timing_ref.ref_id == ref_id) &  (db.ops_timing.is_active == True)).select(db.ops_timing.ALL,db.ops_timing_ref.ALL,\
-                                                                                        left=db.ops_timing.on((db.ops_timing.id == db.ops_timing_ref.ref_id)))
+                                                                                        left=db.ops_timing.on((db.ops_timing.id == db.ops_timing_ref.ops_timing_id)))
                 
             
            
@@ -307,6 +323,119 @@ class OPS_Timing:
         return json.dumps(rspobj)
 
     
+    def new_all_ops_timing(self,avars):
+        auth  = current.auth
+        db = self.db
+        
+        logger.loggerpms2.info("Enter new_ops_timings")
+        try:
+            ref_code = common.getkeyvalue(avars,"ref_code","")
+            ref_id = int(common.getkeyvalue(avars,"ref_id",0))
+            
+            from_year = int(common.getkeyvalue(avars,"from_year","2021"))
+            to_year = int(common.getkeyvalue(avars,"to_year","2099"))
+            
+            from_month = 1
+            to_month = 12
+            
+            
+            currentdate = None
+            
+            for year in xrange(from_year,to_year):
+                for month in xrange(1,13):
+                    for day in xrange(1,32):
+                        
+                        #dealing for month of Feb & Leap Year
+                        if(isLeapYear(year) & (month == 2) & (day <=29)):
+                            i = 0
+                            
+                        if(isLeapYear(year)& (month == 2) & (day >= 30)):
+                            continue
+                        
+                        if((not isLeapYear(year)) & (month == 2) & (day <= 28)):
+                            i = 0
+                            
+                        if((not isLeapYear(year)) & (month == 2) & (day >= 29)):
+                            continue
+                        
+                        #dealing with months with 31 days
+                        if((day <=31) & ((month == 1) | (month == 3) | (month == 5) | (month == 7) |(month == 8) | (month == 10) | (month == 12))):
+                            #process
+                            i = 0
+
+                        #dealing with months with 31 days
+                        if((day >= 32) & ((month == 1) | (month == 3) | (month == 5) | (month == 7) | (month == 8) | (month == 10) | (month == 12))):
+                            continue
+                        
+                        #dealing with months with 30 days
+                        if((day <=30) & ((month == 2) | (month == 4) | (month == 6) | (month == 9) | (month == 11))):
+                            #process
+                            i = 0
+                            
+                        if((day >= 31) & ((month == 2) | (month == 4) | (month == 6) | (month == 9) | (month == 11))):
+                            continue
+                        
+                            
+                        datestr = str(day).zfill(2) + "/" + str(month).zfill(2) + "/" + str(year).zfill(4)
+                        dt = common.getdatefromstring(datestr, "%d/%m/%Y")
+                        weekday = datetime.datetime.strptime(datestr, "%d/%m/%Y").weekday()
+                        day_name = calendar.day_name[weekday]
+                        day_name = day_name[:3]
+                        
+                        timings = common.getkeyvalue(avars,day_name,None)
+                        if(timings != None):
+                            for timing in timings:
+                                open_time = common.getkeyvalue(timing,"open_time","")
+                                close_time = common.getkeyvalue(timing,"close_time","")
+                                isHoliday = common.getkeyvalue(timing,"isHoliday","False")
+                                isLunch = common.getkeyvalue(timing,"isLunch","False")
+                                isSaturday = common.getkeyvalue(timing,"isSaturday","False")
+                                isSunday = common.getkeyvalue(timing,"isSunday","False")
+                                timingobj = {
+                                        "action":"new_ops_timing",
+                                        "ref_code":ref_code,       
+                                        "ref_id":ref_id,             
+                                        "calendar_date":datestr,
+                                        "day_of_week":day_name,
+                                        "is_lunch":isLunch,           
+                                        "is_holiday":isHoliday,         
+                                        "is_saturday":isSaturday,
+                                        "is_sunday":isSunday
+                                
+                                }
+                                
+                                if( (open_time != "") & (open_time != None)):
+                                    timingobj["open_time"] = open_time
+                                if( (close_time != "") & (close_time != None)):
+                                    timingobj["close_time"] = close_time
+                                    
+                                rsp = json.loads(self.new_ops_timing(timingobj))
+                        
+        
+            
+         
+          
+            
+            rspobj = {
+                "ref_code":ref_code,
+                "ref_id":ref_id,
+               
+                "result":"success",
+                "error_code":"",
+                "error_message":""
+            }            
+            
+        except Exception as e:
+            mssg = "new All OPS Timing Exception:\n" + str(e)
+            logger.loggerpms2.info(mssg)      
+            excpobj = {}
+            excpobj["result"] = "fail"
+            excpobj["error_code"] = "MDP100"
+            excpobj["error_message"] = mssg
+            return json.dumps(excpobj)        
+          
+        return json.dumps(rspobj)
+
     
     
         

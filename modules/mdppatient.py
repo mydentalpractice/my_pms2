@@ -86,7 +86,7 @@ class Patient:
     
     db = self.db
     
-    rgns = db(db.groupregion.is_active == True).select(db.groupregion.groupregion)
+    rgns = db(db.groupregion.is_active == True).select(db.groupregion.groupregion,orderby=db.groupregion.groupregion)
     
     
     rgnlist = []
@@ -94,6 +94,7 @@ class Patient:
     for rgn in rgns:
       rgnlist.append(rgn.groupregion)
     
+    rgnlist[0] = "--Select Region--"
     
     
     

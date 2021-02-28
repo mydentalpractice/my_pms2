@@ -148,11 +148,15 @@ class Doctor:
     db = self.db
     providerid = self.providerid    
     
-    rls = db((db.role.providerid == providerid) & (db.role.is_active == True)).select()
+    
+    if(providerid == 0):
+      rls = db( (db.role_default.is_active == True)).select()
+    else:
+      rls = db((db.role.providerid == providerid) & (db.role.is_active == True)).select()
     
     rllist = []
     for rl in rls:
-      
+      objlr = {}
       objrl = {
         'roleid':int(common.getid(rl.id)),
         'role':common.getstring(rl.role)

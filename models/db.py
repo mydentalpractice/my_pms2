@@ -205,7 +205,7 @@ db.activity_log_ref._plural = "activity_log_ref"
 db.define_table('clinic',
                 
                 Field('clinic_ref','string'),
-                
+                    
                 Field('name','string'),
                 Field('address1','string'),
                 Field('address2','string'),
@@ -267,6 +267,7 @@ db.define_table('clinic',
 
 db.clinic._singular = "clinic"
 db.clinic._plural   = "clinic"
+
 db.define_table('clinic_ref',
                 Field('ref_code', 'string',default='PRV'),
                 Field('ref_id', 'integer'),
@@ -913,6 +914,9 @@ db.define_table('prospect',
                 Field('fax', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'), default='',label='Fax',length=20),
                 Field('email', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'), default='',label='Email',length=50),
                 Field('taxid', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'),default='',label='PAN',readable=False, writable=False,length=20),
+                Field('gender','string',represent=lambda v, r: '' if v is None else v,default='Male',label='Gender',length=10,requires = IS_IN_SET(GENDER)),
+                Field('dob',
+                'date',widget = lambda field, value:SQLFORM.widgets.date.widget(field, value, _style='height:30px'), label='Birth Date',default=request.now,length=20,requires = IS_DATE(format=T('%d/%m/%Y'),error_message='must be d/m/Y!')),                
                 Field('enrolleddate',
 'date',widget = lambda field, value:SQLFORM.widgets.date.widget(field, value, _style='height:30px'),label='Enrolled Date',default=request.now,length=20),
                 Field('assignedpatientmembers', 'integer',represent=lambda v, r: 0 if v is None else v,widget = lambda field, value:SQLFORM.widgets.integer.widget(field, value, _class='form_details'),default=0,label='Assigned Members'),

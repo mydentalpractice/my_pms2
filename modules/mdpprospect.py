@@ -82,6 +82,7 @@ class Prospect:
     
     
     def get_prospect(self,avars):
+        logger.loggerpms2.info("Enter get_prospect " + json.dumps(avars))
         db = self.db
         auth  = current.auth
         rspobj = {}
@@ -132,6 +133,8 @@ class Prospect:
                 "cell":ds[0].cell,
                 "fax":ds[0].fax,
                 "email":ds[0].email,
+                "gender":ds[0].gender,
+                "dob": common.getstringfromdate(ds[0].dob,"%d/%m/%Y"),
                 "taxid":ds[0].taxid,
                 "enrolleddate":common.getstringfromdate(ds[0].enrolleddate,"%d/%m/%Y"),
                 "assignedpatientmembers":str(ds[0].assignedpatientmembers),
@@ -261,6 +264,8 @@ class Prospect:
                 cell=common.getkeyvalue(avars,'cell',ds[0].cell),
                 fax=common.getkeyvalue(avars,'fax',ds[0].fax),
                 email=common.getkeyvalue(avars,'email',ds[0].email),
+                gender = common.getkeyvalue(avars,"gender",ds[0].gender),
+                dob = common.getdatefromstring(common.getkeyvalue(avars,"dob",common.getstringfromdate(ds[0].dob,"%d/%m/%Y")), "%d/%m/%Y"),
                 taxid=common.getkeyvalue(avars,'taxid',ds[0].taxid),
                 enrolleddate=  common.getdatefromstring(common.getkeyvalue(avars,'enrolleddate',common.getstringfromdate(ds[0].enrolleddate,"%d/%m/%Y")),"%d/%m/%Y"),
                 assignedpatientmembers=common.getkeyvalue(avars,'assignedpatientmembers',ds[0].assignedpatientmembers),
@@ -376,8 +381,8 @@ class Prospect:
                 cell=common.getkeyvalue(avars,'cell',""),
                 email=common.getkeyvalue(avars,'email',""),
                 fax=common.getkeyvalue(avars,'fax',""),
-                
-                
+                gender = common.getkeyvalue(avars,'gender',"Male"),
+                dob = common.getdatefromstring(common.getkeyvalue(avars,"dob","01/01/1990"), "%d/%m/%Y"),
                 
                 taxid=common.getkeyvalue(avars,'taxid',""),
 

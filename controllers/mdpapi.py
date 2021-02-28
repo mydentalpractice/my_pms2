@@ -651,12 +651,12 @@ def encrypted_mdplogin(avars):
 #user_data ={"result" : True,"usertype":"provider","providerid":int(provdict["providerid"]),"provider":provdict["provider"],
 #"providername":provdict["providername"],"registration":provdict["registration"]}
 def mdplogin(avars):
-    ouser = mdpuser.User(current.globalenv['db'],current.auth,str(avars["username"]),str(avars["password"]))
+    ouser = mdpuser.User(current.globalenv['db'],current.auth,common.getkeyvalue(avars,"username",""),common.getkeyvalue(avars,"username",""))
     mdp_user = ouser.login()
     return mdp_user
 
 def mdplogout(avars):
-    ouser = mdpuser.User(current.globalenv['db'],current.auth,str(avars["username"]),str(avars["password"]))
+    ouser = mdpuser.User(current.globalenv['db'],current.auth,common.getkeyvalue(avars,"username",""),common.getkeyvalue(avars,"password",""))
     rsp = ouser.logout()
     return rsp
 
@@ -697,6 +697,12 @@ def provider_registration(avars):
     
     return rsp
 
+def user_otp_login(avars):
+    
+    ouser = mdpuser.User(current.globalenv['db'],current.auth,"","")
+    mdp_user = ouser.user_otp_login(avars)
+    return mdp_user 
+
 def agent_otp_login(avars):
     
     ouser = mdpuser.User(current.globalenv['db'],current.auth,"","")
@@ -704,7 +710,7 @@ def agent_otp_login(avars):
     return mdp_user 
 
 def otp_login(avars):
-    
+    logger.loggerpms2.info("Enter otp_login in mdpapi " + json.dumps(avars))
     ouser = mdpuser.User(current.globalenv['db'],current.auth,"","")
     mdp_user = ouser.otp_login(avars)
     return mdp_user 
@@ -994,12 +1000,12 @@ def updateMedicalHistory(avars):
 ############################## DOCTOR API #####################################################
 
 def specialitylist(avars):
-    odr = mdpdoctor.Doctor(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+    odr = mdpdoctor.Doctor(current.globalenv['db'],int(common.getkeyvalue(avars, "providerid", "0")))
     splist = odr.specialitylist()
     return splist
 
 def rolelist(avars):
-    odr = mdpdoctor.Doctor(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+    odr = mdpdoctor.Doctor(current.globalenv['db'],int(common.getkeyvalue(avars, "providerid", "0")))
     rllist = odr.rolelist()
     return rllist
 
@@ -1065,6 +1071,12 @@ def list_appointment_count_byday(avars):
     oappts = mdpappointment.Appointment(current.globalenv['db'],common.getkeyvalue(avars,"poviderid",0))
     rsp = oappts.list_day_appointment_count(avars)
     return rsp
+
+def list_appointment_count_bymonth(avars):
+    oappts = mdpappointment.Appointment(current.globalenv['db'],common.getkeyvalue(avars,"poviderid",0))
+    rsp = oappts.list_appointment_count_bymonth(avars)
+    return rsp
+
 
 def list_appointments_byday(avars):
     oappts = mdpappointment.Appointment(current.globalenv['db'],common.getkeyvalue(avars,"poviderid",0))
@@ -2458,6 +2470,13 @@ def new_ops_timing(avars):
     ops = mdptimings.OPS_Timing(current.globalenv['db'])
     rsp = ops.new_ops_timing(avars)
     return rsp
+
+def new_all_ops_timing(avars):
+    logger.loggerpms2.info("Enter New ALL OPS Timing Request\n" + str(avars) )
+    ops = mdptimings.OPS_Timing(current.globalenv['db'])
+    rsp = ops.new_all_ops_timing(avars)
+    return rsp
+
     
 ############################# END OPS TIMING API ###################################################
 
@@ -2585,10 +2604,18 @@ def new_agent_prospect(avars):
     return rsp
 ############################# END AGENT API  ###################################################
 
+############################# START PLANS API  ###################################################
+############################# END PLANS API  ###################################################
+
+
 def unknown(avars):
     return dict()
 
 
+#plansAPI_switcher = {
+    
+    #"list_plans":list_plans
+#}
 
 mediaAPI_switcher = {
     
@@ -2599,7 +2626,7 @@ mediaAPI_switcher = {
 opsTimingAPI_switcher = {
     
     "get_ops_timing":get_ops_timing,"update_ops_timing":update_ops_timing,"delete_ops_timng":delete_ops_timng,\
-    "list_ops_timing":list_ops_timing,"new_ops_timing":new_ops_timing
+    "list_ops_timing":list_ops_timing,"new_ops_timing":new_ops_timing,"new_all_ops_timing":new_all_ops_timing
 }
 
 accountAPI_switcher = {
@@ -2626,7 +2653,8 @@ appointmentAPI_switcher = {
     "new_appointment":new_appointment,"get_appointment":get_appointment,"list_appointment":list_appointment,"update_appointment":update_appointment,
     "cancel_appointment":cancel_appointment,"add_block":add_block_datetime,"remove_block":remove_block_datetime,"list_block":list_block_datetime,
     "get_block":get_block_datetime,"list_appointment_count_byday":list_appointment_count_byday,"checkIn_appointment":checkIn,"checkOut_appointment":checkOut,"confirm_appointment":confirm,
-    "reSchedule_appointment":reSchedule,"list_appointments_byday":list_appointments_byday,"list_appointmentstatus":appointmentstatus,"list_appointmentduration":appointmentduration
+    "reSchedule_appointment":reSchedule,"list_appointments_byday":list_appointments_byday,"list_appointmentstatus":appointmentstatus,"list_appointmentduration":appointmentduration,
+    "list_appointment_count_bymonth":list_appointment_count_bymonth
 }
 
 agentAPI_switcher = {
@@ -2636,7 +2664,7 @@ agentAPI_switcher = {
 
 userAPI_switcher = {
     
-    "otp_login":otp_login, "agent_otp_login":agent_otp_login
+    "otp_login":user_otp_login, "agent_otp_login":agent_otp_login
 
 }
 

@@ -14,7 +14,9 @@ from applications.my_pms2.modules import common
 from applications.my_pms2.modules import status
 from applications.my_pms2.modules import cycle
 from applications.my_pms2.modules import gender
+from applications.my_pms2.modules import relations
 from applications.my_pms2.modules import mail
+
 
 from applications.my_pms2.modules import mdpprospect
 from applications.my_pms2.modules import mdpprovider
@@ -26,6 +28,7 @@ from applications.my_pms2.modules import logger
 
 class User:
   def __init__(self,db,auth,username,password):
+    logger.loggerpms2.info("Enter User __init__")
     self.db = db
     self.auth = auth
     self.username  = username.strip()
@@ -164,6 +167,105 @@ class User:
   
     return json.dumps(user_data)
 
+  def user_otp_login(self,avars):
+      
+      auth = self.auth
+      db = self.db
+      
+      logger.loggerpms2.info(">>User LOGIN API\n")
+      logger.loggerpms2.info("===Req_data=\n" + self.username + " " + self.password + "\n")
+      
+  
+      user_data = {}
+      
+      
+      try:
+        cell = common.getkeyvalue(avars,"cell","")
+        usr = db(db.auth_user.cell == cell).select()
+        
+        if(len(usr) != 1):
+          error_message = "User OTP Login API Error: No User/Multiple users matching registered " + cell
+          logger.loggerpms2.info(error_message)
+          excpobj = {}
+          excpobj["result"] = "fail"
+          excpobj["error_message"] = error_message
+          return json.dumps(excpobj)    
+  
+        auth.login_user(db.auth_user(int(usr[0].id)))
+        cell = auth.user["cell"]
+        user_data = {}
+        #IF THE user cell is in provider then the user is a provider
+        p = db((db.provider.cell == cell) & (db.provider.is_active == True)).select()
+        if(len(p) >= 1):
+          #if cell is in provider then otp is for provider
+          obj = mdpprovider.Provider(db,int(p[0].id))
+          user_data = json.loads(obj.getprovider())
+          user_data["usertype"] = "provider"
+          user_data["result"] = "success"
+          user_data["error_message"] = ""
+          user_data["error_code"] = ""
+        else:
+          #if the user cell is in Patient Member, then return as a patient
+          pat = db((db.vw_memberpatientlist.cell == cell) & (db.vw_memberpatientlist.is_active == True)).select()
+          
+          if(len(pat)!=0):
+            if(len(pat) == 1):
+              #user is a patientmemebr
+              patobj = mdppatient.Patient(db, 0)
+              user_data = patobj.getpatient(int(common.getid(pat[0].primarypatientid)), int(common.getid(pat[0].patientid)), "imageurl")
+              user_data["usertype"] = "member"
+            else:
+              #multiple users with the same cell
+              error_message = "OTP Login API Error: No User/Multiple Patient/Members matching registered " + cell
+              logger.loggerpms2.info(error_message)
+              excpobj = {}
+              excpobj["result"] = "fail"
+              excpobj["error_message"] = error_message
+              return json.dumps(excpobj)    
+              
+          else:
+            #check for new Signup (prospect)
+            #if the user cell is in prospect table, then returning prospect
+            p = db((db.prospect.cell == cell) & (db.prospect.status != "Enrolled") & (db.prospect.is_active == True)).select()
+            if(len(p)>=1):   #returning signup
+              obj = mdpprospect.Prospect(db)
+              
+              user_data = json.loads(obj.get_prospect({"prospectid":str(p[0].id)}))
+              user_data["usertype"] = "prospect"
+              user_data["result"] = "success"
+              user_data["error_message"] = ""
+              user_data["error_code"] = ""
+            else:
+              user_data["usertype"] = "prospect"
+              user_data["prospectid"] = "0"
+              user_data["result"] = "success"
+              user_data["error_message"] = ""
+              user_data["error_code"] = ""
+              
+        
+        
+        #user_data = {}
+        #user_data={
+          #"result":"success",
+          #"error_message":"",
+          #"usertype":"agent", 
+          #"agent":r[0].agent,
+          #"agentid":common.getid(r[0].id),
+          #"name":r[0].name,
+          #"cell":r[0].cell,
+          #"email":r[0].email
+        #}
+        
+      except Exception as e:
+          error_message = "User Login Exception Error - " + str(e)
+          logger.loggerpms2.info(error_message)
+          excpobj = {}
+          excpobj["result"] = "fail"
+          excpobj["error_message"] = error_message
+          return json.dumps(excpobj)    
+    
+    
+      return json.dumps(user_data)
   
   #this method is called after OTP Validation:
   #cell is xxxxxxxxxx  (without leading +<countrycode)
@@ -366,6 +468,7 @@ class User:
   
   def logout(self):
     auth = self.auth
+    auth.settings.logout_next = None
     auth.logout()
     
     data = {"logout":"Logout Success"}
@@ -492,34 +595,82 @@ class User:
     message = "success" if(len(pats)>0) else "failure"
     return json.dumps({"patientcount":len(pats),"patientlist":patlist,"message":message,"result":message})
   
+  #status.py
+  #xSTATUS=('No_Attempt', 'Attempting','Completed','Enrolled', 'Revoked')
+  #xALLSTATUS=('ALL', 'No_Attempt', 'Attempting','Completed','Enrolled', 'Revoked')
+  #xTREATMENTPLANSTATUS=('Open', 'Sent for Authorization','Authorized','Completed','Cancelled')
+  #xTREATMENTSTATUS=('Started', 'Sent for Authorization', 'Authorized', 'Completed','Cancelled')
+  #xPRIORITY=('Emergency','High','Medium','Low')
+  #xOFFICESTAFF=('Doctor','Staff')
+  #xAPPTSTATUS=('Open','Confirmed','Checked-In', 'Checked-Out', 'Cancelled')
+  #xCUSTACTIVITY=('Scheduled','Pending','Enrolled','Cancelled')  
+
+  #gender.py
+  #xGENDER=('Male','Female')
+  #xPATTITLE = (' ', 'Mr.', 'Mrs.', 'Ms.', 'Miss')
+  #xDOCTITLE = (' ','Dr.','Mr.','Mrs.', 'Ms.', 'Miss')
   
+  #cycle.py
+  #xDURATION=('30','45','60')
+  
+  
+  #relations.py
+  #xRELATIONS=('Self',Spouse', 'Son', 'Daughter', 'Son_in_Law', 'Daughter_in_Law', 'Father', 'Mother', 'Father_in_Law', 'Mother_in_Law','Grandmother','Grandfather','Sibling','Relative','Dependant')
+  #PLANRELATIONS=('Self', 'Spouse', 'Son', 'Daughter', 'Son_in_Law', 'Daughter_in_Law', 'Father', 'Mother', 'Father_in_Law', 'Mother_in_Law','Grandmother','Grandfather','Sibling','Relative')
+  #xPLANRDEPENDANTS=('Self', 'Dependant_1', 'Dependant_2', 'Dependant_3', 'Dependant_4', 'Dependant_5', 'Dependant_6', 'Dependant_7')  
+
   def getallconstants(self):
     
     #get appointment status
     apptsts = status.APPTSTATUS
+    #patient status
+    patsts = status.STATUS
+    #treatment status
+    treatment_status = status.TREATMENTSTATUS
+    tplan_status = status.TREATMENTPLANSTATUS
+    all_status = status.ALLSTATUS
+    office_staff = status.OFFICESTAFF
+    customer_activity = status.CUSTACTIVITY
+    priority = status.PRIORITY
+    
     
     #get appointment duration
     apptdur = cycle.DURATION
     
-    #patient status
-    patsts = status.STATUS
     
     #genders
     gr = gender.GENDER
-    
-     
     #pattitles
     pattitle = gender.PATTITLE
-    
     #doctitle
     doctitle = gender.DOCTITLE
      
+     
+    #relations
+    relationships = relations.RELATIONS
+    dependants = relations.PLANRDEPENDANTS
+    
     #regions
     
     
+    obj = {
+     "gender":gr,
+     "relations":relationships,
+     "dependants":dependants,
+     "durations":apptdur,
+     "patient_titles":pattitle,
+     "doc_titles":doctitle,
+     "appointment_status":apptsts,
+     "patient_status":patsts,
+     "customer_status":customer_activity,
+     "treatment_status":treatment_status,
+     "treatmentplan_status":tplan_status,
     
-    obj = {"gender":gr, "patsts":patsts, "apptsts":apptsts, "apptdur":apptdur, "pattitle":pattitle, "doctitle":doctitle}
-
+     "office_staff":office_staff,
+     "priority":priority
+    }
+    
+    
     return json.dumps(obj)
   
   

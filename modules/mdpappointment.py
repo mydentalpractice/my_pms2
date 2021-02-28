@@ -1498,3 +1498,62 @@ class Appointment:
         return json.dumps(obj)
     
     
+    #this method returns number of appointments/day for all the days in a month
+    def list_appointment_count_bymonth(self,avars):
+
+        db = self.db
+        try:
+           
+            
+            providerid = 0 if(common.getkeyvalue(avars,"providerid","0") == "") else int(common.getkeyvalue(avars,"providerid","0"))
+            clinicid = 0 if(common.getkeyvalue(avars,"clinicid","0") == "") else int(common.getkeyvalue(avars,"clinicid","0"))
+            doctorid = 0 if(common.getkeyvalue(avars,"doctorid","0") == "") else int(common.getkeyvalue(avars,"doctorid","0")) 
+            blockappt = common.getboolean(common.getkeyvalue(avars,"block","False"))
+            blockappt = 'T' if(blockappt == True) else 'F'
+            month = int(common.getkeyvalue(avars,"month",(datetime.date.today()).strftime("%m")))
+            year = int(common.getkeyvalue(avars,"year",(datetime.date.today()).strftime("%Y")))            
+            
+            start = str(year) + "-" + str(month).zfill(2) + "-01 00:00:00"
+            end   = str(year) + "-" + str(month).zfill(2) + "-31 23:59:00"  #no need to take 30 or 31 days - just default to 31 days
+            
+            strsql = "select DATE(f_start_time) as apptdate, count(*) as apptcount from vw_appointments where (1=1) "
+
+            if(providerid != 0):
+                strsql = strsql + " AND provider = " + str(providerid)
+
+            if(clinicid != 0):
+                strsql = strsql + " AND clinicid = " + str(clinicid)
+                
+            if(doctorid != 0):
+                strsql = strsql + " AND doctor = " + str(doctorid)
+            
+            strsql = strsql + " and f_start_time >= '"  + start +  "'"
+            strsql = strsql + " and f_start_time <= '"  + end +  "'"
+            strsql = strsql + " and is_active = 'T' "
+            strsql = strsql + " group by DATE(f_start_time)"
+            
+            ds = db.executesql(strsql)
+            apptobj = {}
+            apptlist = []
+            
+            
+            for i in xrange(0,len(ds)):
+                x = {
+                    "apptdate": ds[i][0].strftime("%d/%m/%Y"),
+                    "count": int(common.getid(ds[i][1]))
+                }
+                apptlist.append(x)
+            
+            apptobj["result"] = "success"
+            apptobj["error_message"] = ""
+            apptobj["error_code"]=""
+            apptobj["apptlist"] = apptlist
+            
+        except Exception as e:
+            excpobj = {}
+            excpobj["result"] = "fail"
+            excpobj["error_message"] = "Get Appointments Count by Month  API Exception Error - " + str(e)
+            excpobj["error_code"] = ""
+            return json.dumps(excpobj)
+        
+        return json.dumps(apptobj)       

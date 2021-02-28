@@ -8603,3 +8603,7 @@ UPDATE provider AS p INNER JOIN bank_details AS b ON p.id = b.providerid SET p.b
 15/2/2021
 =========
 1. XXYYZZAdded CustomerActivity table
+
+26/2/2021
+=========
+1. ZZZAdded gender & dob in Prospect table
