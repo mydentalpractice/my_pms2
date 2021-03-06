@@ -203,21 +203,39 @@ class OPS_Timing:
             
             rspobj = {}
             
+            from_date = None
+            to_date = None
+            
+            
+            
+            fromdtstr = common.getkeyvalue(avars,"from_date","01/01/2000")
+            fromdt = None
+            if(fromdtstr != None):
+                fromdt = common.getdatefromstring(fromdtstr, "%d/%m/%Y") 
+
+            todtstr = common.getkeyvalue(avars,"to_date","31/12/2099")
+            todt = None
+            if(todtstr != None):
+                todt = common.getdatefromstring(todtstr, "%d/%m/%Y")
+
+          
+            
             ops = None
             if(ref_code == ""):
                 if(ref_id == 0):
-                    ops = db((db.ops_timing.is_active == True)).select(db.ops_timing.ALL,db.ops_timing_ref.ALL,\
+                    ops = db((db.ops_timing.is_active == True)& (db.ops_timing.calendar_date >= fromdt)& (db.ops_timing.calendar_date <= todt)).\
+                        select(db.ops_timing.ALL,db.ops_timing_ref.ALL,\
                                                                                         left=db.ops_timing.on((db.ops_timing.id == db.ops_timing_ref.ops_timing_id)))
                 else:
-                    ops = db((db.ops_timing_ref.ref_id == ref_id) &  (db.ops_timing.is_active == True)).select(db.ops_timing.ALL,db.ops_timing_ref.ALL,\
+                    ops = db((db.ops_timing_ref.ref_id == ref_id)& (db.ops_timing.calendar_date >= fromdt)& (db.ops_timing.calendar_date <= todt) &  (db.ops_timing.is_active == True)).select(db.ops_timing.ALL,db.ops_timing_ref.ALL,\
                                                                                         left=db.ops_timing.on((db.ops_timing.id == db.ops_timing_ref.ops_timing_id)))
                     
             else:
                 if(ref_id == 0):
-                    ops = db((db.ops_timing_ref.ref_code==ref_code)&  (db.ops_timing.is_active == True)).select(db.ops_timing.ALL,db.ops_timing_ref.ALL,\
+                    ops = db((db.ops_timing_ref.ref_code==ref_code)& (db.ops_timing.calendar_date >= fromdt)& (db.ops_timing.calendar_date <= todt) &  (db.ops_timing.is_active == True)).select(db.ops_timing.ALL,db.ops_timing_ref.ALL,\
                                                                                         left=db.ops_timing.on((db.ops_timing.id == db.ops_timing_ref.ops_timing_id)))
                 else:
-                    ops = db((db.ops_timing_ref.ref_code==ref_code)&(db.ops_timing_ref.ref_id == ref_id) &  (db.ops_timing.is_active == True)).select(db.ops_timing.ALL,db.ops_timing_ref.ALL,\
+                    ops = db((db.ops_timing_ref.ref_code==ref_code) &(db.ops_timing_ref.ref_id == ref_id)& (db.ops_timing.calendar_date >= fromdt)& (db.ops_timing.calendar_date <= todt) &  (db.ops_timing.is_active == True)).select(db.ops_timing.ALL,db.ops_timing_ref.ALL,\
                                                                                         left=db.ops_timing.on((db.ops_timing.id == db.ops_timing_ref.ops_timing_id)))
                 
             
@@ -341,7 +359,7 @@ class OPS_Timing:
             
             currentdate = None
             
-            for year in xrange(from_year,to_year):
+            for year in xrange(from_year,to_year+1):
                 for month in xrange(1,13):
                     for day in xrange(1,32):
                         

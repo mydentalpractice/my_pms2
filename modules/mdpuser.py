@@ -283,16 +283,16 @@ class User:
       cell = common.getkeyvalue(avars,"cell","")
       usr = db(db.auth_user.cell == cell).select()
     
-      if(len(usr) != 1):
-        error_message = "OTP Login API Error: No User/Multiple users matching registered " + cell
+      if(len(usr) > 1):
+        error_message = "OTP Login API Error: Multiple users matching registered " + cell
         logger.loggerpms2.info(error_message)
         excpobj = {}
         excpobj["result"] = "fail"
         excpobj["error_message"] = error_message
         return json.dumps(excpobj)    
       
-      auth.login_user(db.auth_user(int(usr[0].id)))
-      cell = auth.user["cell"]
+      #auth.login_user(db.auth_user(int(usr[0].id)))
+      #cell = auth.user["cell"]
       user_data = {}
       #IF THE user cell is in provider then the user is a provider
       p = db((db.provider.cell == cell) & (db.provider.is_active == True)).select()
@@ -326,21 +326,53 @@ class User:
         else:
           #check for new Signup (prospect)
           #if the user cell is in prospect table, then returning prospect
+          logger.loggerpms2.info("Enter Prospect Check with cell " + cell)
           p = db((db.prospect.cell == cell) & (db.prospect.status != "Enrolled") & (db.prospect.is_active == True)).select()
           if(len(p)>=1):   #returning signup
-            obj = mdpprospect.Prospect()
-            user_data = obj.get_prospect({"prospectid":str(obj[0].id)})
+            logger.loggerpms2.info("Propsect present with " + cell)            
+            obj = mdpprospect.Prospect(db)
+            if(obj != None):
+              logger.loggerpms2.info("Propsect after Prospect")  
+            else:
+              logger.loggerpms2.info("Propsect None") 
+            
+            user_data = json.loads(obj.get_prospect({"prospectid":str(p[0].id)}))
+            logger.loggerpms2.info("After get_prospect")  
             user_data["usertype"] = "prospect"
             user_data["result"] = "success"
             user_data["error_message"] = ""
             user_data["error_code"] = ""
           else:
-            user_data["usertype"] = "prospect"
-            user_data["prospectid"] = "0"
-            user_data["result"] = "success"
-            user_data["error_message"] = ""
-            user_data["error_code"] = ""
-          
+            
+            # create new user
+            users = db((db.auth_user.cell) == cell).select()
+            if users:
+              my_crypt = CRYPT(key=auth.settings.hmac_key)
+              crypt_pass = my_crypt(cell)[0]  
+              db(db.auth_user.id == users[0].id).update(username=cell,password=crypt_pass)
+              db.commit()
+              user_data["usertype"] = "prospect"
+              user_data["prospectid"] = "0"
+              user_data["result"] = "success"
+              user_data["error_message"] = ""
+              user_data["error_code"] = ""              
+            else:
+              my_crypt = CRYPT(key=auth.settings.hmac_key)
+              crypt_pass = my_crypt(cell)[0]        
+              id_user= db.auth_user.insert(
+                                         cell = cell,
+                                         username = cell,
+                                         password = crypt_pass 
+                                         )
+              db.commit()      
+                        
+      
+              user_data["usertype"] = "prospect"
+              user_data["prospectid"] = "0"
+              user_data["result"] = "success"
+              user_data["error_message"] = ""
+              user_data["error_code"] = ""
+    
           
       
     except Exception as e:

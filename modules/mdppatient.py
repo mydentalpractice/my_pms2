@@ -462,7 +462,7 @@ class Patient:
       bprev = True
     
     return json.dumps({"patientcount":len(pats),"page":page+1,"patientlist":patlist, "runningcount":xcount, "maxcount":maxcount, "next":bnext, "prev":bprev,\
-                       "patientsearch":patientsearch,"patientmembersearch":patientmembersearch,"member":hmopatientmember,"company":company} )
+                       "patientsearch":patientsearch,"patientmembersearch":patientmembersearch,"member":hmopatientmember,"company":company,"result":"success","error_message":"","error_code":""} )
   
   
   def getcompanypatients(self,page,company,patientsearch,maxcount,patientmembersearch,hmopatientmember):

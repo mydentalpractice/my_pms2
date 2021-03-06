@@ -18,7 +18,7 @@ getpage1  = lambda page:page if((page != None)&(page != "")&(page != "0")) else 
 getvalue = lambda amount: amount if((amount != None)&(amount != "")&(amount != "None")) else 0
 getstring = lambda text: text if((text != None)&(text != "")&(text != "None")) else ""
 getbool =   lambda text: text if((text != None)&(text != "")&(text != "None")) else False
-getboolean =   lambda text: True if((text != None)&(text != "")&(text != "None")&((text == "True")|(text==True)|(text=="1"))) else False
+getboolean =   lambda text: True if((text != None)&(text != "")&(text != "None")&((text == "True")|(text == "true")|(text==True)|(text=="1")|(text=="on")|(text=="On"))) else False
 
 #getmode    = lambda mode:mode if(mode != None) else 'None'
 

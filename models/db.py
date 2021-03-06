@@ -210,8 +210,8 @@ db.define_table('clinic',
                 Field('address1','string'),
                 Field('address2','string'),
                 Field('address3','string'),
-                Field('city', 'string',default='None',label='City',length=50,requires = IS_IN_SET(CITIES)),
-                Field('st', 'string',default='',label='State',length=50,requires = IS_IN_SET(STATES)),
+                Field('city', 'string',default='--Select City--',label='City',length=50,requires = IS_IN_SET(CITIES)),
+                Field('st', 'string',default='--Select State--',label='State',length=50,requires = IS_IN_SET(STATES)),
                 Field('pin','string'),
                 
                 Field('cell','string'),
@@ -262,6 +262,8 @@ db.define_table('clinic',
                 Field('bank_id','integer'), 
                 
                 Field('state_dental_registration','string'),
+                
+                Field('notes','text'),
                 auth.signature                
                 )
 

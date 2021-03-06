@@ -65,10 +65,13 @@ class Media:
         auth  = current.auth
         
         mediaid = int(common.getid(avars["mediaid"])) if "mediaid" in avars else 0
-        title = avars["title"] if "title" in avars else ""      
-        tooth = avars["tooth"] if "tooth" in avars else ""        
-        quadrant = avars["quadrant"] if "quadrant" in avars else ""        
-        description = avars["description"] if "description" in avars else ""        
+        img = db((db.dentalimage.id == mediaid)&(db.dentalimage.is_active == True)).select()
+        
+       
+        title = avars["title"] if "title" in avars else img[0].title if(len(img)!=0) else img[0].title
+        tooth = avars["tooth"] if "tooth" in avars else img[0].tooth if(len(img)!=0) else img[0].tooth        
+        quadrant = avars["quadrant"] if "quadrant" in avars else img[0].quadrant if(len(img)!=0) else img[0].quadrant     
+        description = avars["description"] if "description" in avars else img[0].description if(len(img)!=0) else img[0].description        
         
         try:
             db(db.dentalimage.id == mediaid).update(

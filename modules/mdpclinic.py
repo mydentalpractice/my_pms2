@@ -64,14 +64,18 @@ class Clinic:
             ds = db((db.clinic_ref.ref_id == ref_id) & (db.clinic_ref.ref_code == ref_code)).select()
             
             logger.loggerpms2.info("Number of clinics  = " + str(len(ds)) + " " + ref_code + " " + str(ref_id))
-   
+            
             for d in ds:
                 r = db((db.clinic.id == d.clinic_id) & (db.clinic.is_active == True)).select()
-               
+                if(len(r)!=1):
+                    continue
+                
                 dobj = {
                     
                     "ref_code":ref_code,
                     "name":r[0].name if len(r) == 1 else "",
+                    "city":r[0].city if len(r) == 1 else "",
+                    "pin":r[0].pin if len(r) == 1 else "",
                     "status":r[0].status if len(r) == 1 else "",
                     "clinic":r[0].clinic_ref if len(r) == 1 else "",
                     "clinicid":r[0].id if len(r) == 1 else 0,
@@ -86,7 +90,7 @@ class Clinic:
             
             rspobj = {
                 
-                "count":str(len(ds)),
+                "count":str(len(cliniclist)),
                 "clinic_list":cliniclist,
                 "result":"success",
                 "error_message":"",
@@ -122,7 +126,12 @@ class Clinic:
 
             for d in ds:
                 r = db((db.clinic.id == d.clinic_id) & (db.clinic.is_active == True)).select()
+                if(len(r) != 1):
+                    continue
+                
                 x = db((db.doctor.id == d.ref_id) & (db.doctor.is_active == True)).select(db.doctor.id,db.doctor.name)
+                if(len(x) != 1):
+                    continue
                 
                 dobj = {
                     
@@ -346,6 +355,7 @@ class Clinic:
                 "rotary_endodontics":ds[0].rotary_endodontics,            
                 "status":ds[0].status,   
                 "owner":owner,
+                "notes":ds[0].notes,
                 "result":"success",
                 "error_message":"",
                 "error_code":""
@@ -473,7 +483,9 @@ class Clinic:
                 rotary_endodontics = common.getkeyvalue(avars,'rotary_endodontics',ds[0].rotary_endodontics),
                 
                 
-                bank_id = common.getkeyvalue(avars,"bank_id",ds[0].bank_id),
+                bank_id = common.getkeyvalue(avars,"bankid",ds[0].bank_id),
+                
+                notes = common.getkeyvalue(avars,'notes',ds[0].notes),
                 
                 modified_on=common.getISTFormatCurrentLocatTime(),
                 modified_by= 1 if(auth.user == None) else auth.user.id
@@ -564,6 +576,8 @@ class Clinic:
                 rotary_endodontics = common.getkeyvalue(avars,'rotary_endodontics',""),
                 
                 bank_id = common.getkeyvalue(avars,"bank_id",None),
+                
+                notes = common.getkeyvalue(avars,"notes",None),
                 
                 is_active = True,
                 created_on=common.getISTFormatCurrentLocatTime(),

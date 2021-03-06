@@ -8548,18 +8548,18 @@ ADD COLUMN `mediasize` DOUBLE NULL DEFAULT '0' AFTER `mediaformat`;
 
 12/28/2020
 ===========
-1. YYYZZZAdd CustomerDependants
-2. YYZZZAdd view Customer Dependants
+1. XXXYYYZZZAdd CustomerDependants
+2. XXXYYZZZAdd view Customer Dependants
 
 1/16/2021
 =========
-0. YZRenamed old Media to xmedia
-1. YZRemove Media, xMedia, DentalImage_1
+0. XXYZRenamed old Media to xmedia
+1. XXYZRemove Media, xMedia, DentalImage_1
 2. YZNew dentlaimage_ref
 
-1. YZNew - Clinic,clinic_ref   (need to add owner flag in Clinic)
+1. XYZNew - Clinic,clinic_ref   (need to add owner flag in Clinic)
 
-3. YZNew - ops_timing,ops_timing_ref
+3. XYZNew - ops_timing,ops_timing_ref
 
 
 5. YZNew - doctor, doctor_ref
@@ -8607,3 +8607,4 @@ UPDATE provider AS p INNER JOIN bank_details AS b ON p.id = b.providerid SET p.b
 26/2/2021
 =========
 1. ZZZAdded gender & dob in Prospect table
+2. ZZZAdded 'notes' field in Clinic table

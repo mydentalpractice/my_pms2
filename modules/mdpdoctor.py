@@ -270,26 +270,28 @@ class Doctor:
 
       for d in ds:
         
-        p = db(db.provider.id == d.doctor_ref.ref_id).select(db.provider.provider)
-        provider = p[0].provider if len(p) == 1 else 0
-        s = db((db.speciality.specialityid == d.doctor.speciality) & (db.speciality.providerid == ref_id) & (db.speciality.is_active == True)).select()
-        speciality_name = s[0].speciality if len(s) == 1 else ""
-        speciality = s[0].specialityid if len(s) == 1 else 0
-        obj = {
-          "ref_code":d.doctor_ref.ref_code,     #DOC
-          "ref_id":d.doctor_ref.ref_id,       #ID to either doctor table or provider table
-          "provider":provider,
-         
-          "name":d.doctor.name,
-          "cell":d.doctor.cell,
-          "email":d.doctor.email,
-          "practice_owner":str(d.doctor.practice_owner),
-          "status":d.doctor.status,
-          "speciality":str(speciality),
-          "speciality_name":speciality_name
-          
-        }
-        lst.append(obj)
+        p = db((db.provider.id == d.doctor_ref.ref_id)).select(db.provider.provider)
+        
+        if(len(p)==1):
+          provider = p[0].provider if len(p) == 1 else 0
+          s = db((db.speciality.specialityid == d.doctor.speciality) & (db.speciality.providerid == ref_id) & (db.speciality.is_active == True)).select()
+          speciality_name = s[0].speciality if len(s) == 1 else ""
+          speciality = s[0].specialityid if len(s) == 1 else 0
+          obj = {
+            "ref_code":d.doctor_ref.ref_code,     #DOC
+            "ref_id":d.doctor_ref.ref_id,       #ID to either doctor table or provider table
+            "provider":provider,
+           
+            "name":d.doctor.name,
+            "cell":d.doctor.cell,
+            "email":d.doctor.email,
+            "practice_owner":str(d.doctor.practice_owner),
+            "status":d.doctor.status,
+            "speciality":str(speciality),
+            "speciality_name":speciality_name
+            
+          }
+          lst.append(obj)
       
       
       rspobj["result"]="success"

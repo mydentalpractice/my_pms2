@@ -2664,7 +2664,7 @@ agentAPI_switcher = {
 
 userAPI_switcher = {
     
-    "otp_login":user_otp_login, "agent_otp_login":agent_otp_login
+    "otp_login":otp_login, "agent_otp_login":agent_otp_login
 
 }
 
