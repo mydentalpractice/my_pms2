@@ -8606,5 +8606,5 @@ UPDATE provider AS p INNER JOIN bank_details AS b ON p.id = b.providerid SET p.b
 
 26/2/2021
 =========
-1. ZZZAdded gender & dob in Prospect table
-2. ZZZAdded 'notes' field in Clinic table
+1. XXXZZZAdded gender & dob in Prospect table
+2. XXXZZZAdded 'notes' field in Clinic table
