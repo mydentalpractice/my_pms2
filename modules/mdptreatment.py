@@ -237,7 +237,7 @@ class Treatment:
         return json.dumps(trtmntobj)
 
     
-    def gettreatments(self,page,memberid,patientid,searchphrase,maxcount,treatmentyear):
+    def gettreatments(self,page,memberid,patientid,searchphrase,maxcount,treatmentyear,clinicid):
         
         db = self.db
         providerid = self.providerid
@@ -263,6 +263,9 @@ class Treatment:
             query = (query & (db.vw_treatmentlist.patientid == patientid)) if(patientid > 0) else query
             
             query = (query & (db.vw_treatmentlist.providerid == providerid)) if(providerid > 0) else query
+
+            query = (query & (db.vw_treatmentlist.clinicid == clinicid)) if(clinicid > 0) else query
+
             
             query = (query & ((db.vw_treatmentlist.startdate >= startdate) & (db.vw_treatmentlist.startdate <= enddate))) if(treatmentyear != None) else query
             
@@ -277,6 +280,7 @@ class Treatment:
             if(page >= 0):
                 treatments = db(query).select(db.vw_treatmentlist.id,db.vw_treatmentlist.tplanid,db.vw_treatmentlist.treatment,db.vw_treatmentlist.startdate, db.vw_treatmentlist.patientname,\
                                               db.vw_treatmentlist.status,db.vw_treatmentlist.treatmentcost,db.vw_treatment_procedure_group.shortdescription,\
+                                              db.vw_treatmentlist.doctorid,db.vw_treatmentlist.doctorname, db.vw_treatmentlist.clinicid, db.vw_treatmentlist.clinicname,\
                                               left=db.vw_treatment_procedure_group.on(db.vw_treatment_procedure_group.treatmentid==db.vw_treatmentlist.id),\
                                               limitby=limitby, orderby=~db.vw_treatmentlist.id)
                 if(maxcount == 0):
@@ -284,6 +288,7 @@ class Treatment:
             else:
                 treatments = db(query).select(db.vw_treatmentlist.id,db.vw_treatmentlist.tplanid,db.vw_treatmentlist.treatment,db.vw_treatmentlist.startdate, db.vw_treatmentlist.patientname,\
                                               db.vw_treatmentlist.status,db.vw_treatmentlist.treatmentcost,db.vw_treatment_procedure_group.shortdescription,\
+                                              db.vw_treatmentlist.doctorid,db.vw_treatmentlist.doctorname, db.vw_treatmentlist.clinicid, db.vw_treatmentlist.clinicname,\
                                               left=db.vw_treatment_procedure_group.on(db.vw_treatment_procedure_group.treatmentid==db.vw_treatmentlist.id), \
                                               orderby=~db.vw_treatmentlist.id)
                 if(maxcount == 0):
@@ -305,6 +310,10 @@ class Treatment:
                     "treatment": common.getstring(treatment.vw_treatmentlist.treatment),
                     "treatmentdate"  : (treatment.vw_treatmentlist.startdate).strftime("%d/%m/%Y"),
                     "patientname" : common.getstring(treatment.vw_treatmentlist.patientname),
+                    "doctorid":str(treatment.vw_treatmentlist.doctorid),
+                    "doctorname":treatment.vw_treatmentlist.doctorname,
+                    "clinicid":str(treatment.vw_treatmentlist.clinicid),
+                    "clinicname":treatment.vw_treatmentlist.clinicname,
                     "procedures":common.getstring(treatment.vw_treatment_procedure_group.shortdescription),
                     "status": "Started" if(common.getstring(treatment.vw_treatmentlist.status) == "") else common.getstring(treatment.vw_treatmentlist.status),
                     "totaltreatmentcost":float(common.getstring(r["totaltreatmentcost"])),
@@ -331,7 +340,9 @@ class Treatment:
                 bnext = False
                 bprev = True  
                 
-            trtmntobj = {"treatmentcount":len(treatments),"page":page+1, "treatmentyear":treatmentyear,"treatmentlist":treatmentlist,"runningcount":xcount, "maxcount":maxcount, "next":bnext, "prev":bprev}
+            trtmntobj = {"result":"success","error_message":"","error_code":"",\
+                         "treatmentcount":len(treatments),"page":page+1, "treatmentyear":treatmentyear,"treatmentlist":treatmentlist,"runningcount":xcount,\
+                         "maxcount":maxcount, "next":bnext, "prev":bprev}
         except Exception as e:
             excpobj = {}
             excpobj["result"] = "fail"
@@ -467,6 +478,9 @@ class Treatment:
                                                                            db.vw_treatmentlist.chiefcomplaint,\
                                                                            db.vw_treatmentlist.status,\
                                                                            db.vw_treatmentlist.doctorid,\
+                                                                           db.vw_treatmentlist.doctorname,\
+                                                                           db.vw_treatmentlist.clinicid,\
+                                                                           db.vw_treatmentlist.clinicname,\
                                                                            db.vw_treatmentlist.treatmentcost,
                                                                            db.vw_treatmentlist.memberid,
                                                                            db.vw_treatmentlist.patientid,
@@ -513,6 +527,9 @@ class Treatment:
                     "chiefcomplaint" : common.getstring(treatment[0].vw_treatmentlist.chiefcomplaint),
                     "status":"Started" if(common.getstring(treatment[0].vw_treatmentlist.status) == "") else common.getstring(treatment[0].vw_treatmentlist.status),
                     "doctorid":int(common.getid(treatment[0].vw_treatmentlist.doctorid)),
+                    "doctorname":treatment[0].vw_treatmentlist.doctorname,
+                    "clinicid":int(common.getid(treatment[0].vw_treatmentlist.clinicid)),
+                    "clinicname":treatment[0].vw_treatmentlist.clinicname,
                     "treatmentcost":float(common.getvalue(treatment[0].vw_treatmentlist.treatmentcost)),
                     "description":common.getstring(treatment[0].treatment.description),
                     "plan":  procedurepriceplancode,   #IB:15-Mar-2020 common.getstring(treatment[0].vw_memberpatientlist.procedurepriceplancode),
@@ -695,15 +712,18 @@ class Treatment:
                 treatmentobj["procedureui"] = procui
                 treatmentobj["result"] = "success"
                 treatmentobj["error_message"] = ""
+                treatmentobj["error_code"] = ""
+                
             else:
                 treatmentobj["result"] = "fail"
                 treatmentobj["error_message"] = "Invalid Treatment"
-                #logger.loggerpms2.info("Enter Get Treatment API - H")
+                treatmentobj["error_code"] = ""
             
         except Exception as e:
             treatmentobj1 = {}
             treatmentobj1["result"] = "fail"
             treatmentobj1["error_message"] = "GetTreatment API Exception Error " + str(e)
+            treatmentobj["error_code"] = ""
             return json.dumps(treatmentobj1)
             
         
@@ -723,6 +743,15 @@ class Treatment:
             #defatul doctor = provider (clinic owner)
             r = db((db.doctor.providerid == providerid) & (db.doctor.practice_owner == True)  & (db.doctor.is_active == True) ).select()
             doctorid = 0 if(len(r) == 0) else int(common.getid(r[0].id))
+            
+            #default clinicid = provider's primary clinic
+            clinicid = 0
+            clinic_ref_ids = db((db.clinic_ref.ref_code == 'PRV') & (db.clinic_ref.ref_id == providerid)).select()
+            for clinic_ref_id in clinic_ref_ids:
+                clinic = db(db.clinic.id == clinic_ref_id.clinic_id).select()
+                if clinic[0].primary_clinic == True:
+                    clinicid = clinic[0].id
+                    break
             
             
             
@@ -789,6 +818,7 @@ class Treatment:
                 provider = providerid,
                 dentalprocedure = 0,
                 doctor = doctorid,
+                clinicid =clinicid,
                 quadrant = 0,
                 tooth    = 0,
                 treatmentcost = 0,
@@ -823,7 +853,132 @@ class Treatment:
         
         return treatmentobj
     
-    def updatetreatment(self,treatmentid,  treatmentdate, chiefcomplaint, doctorid, notes, status):
+    def newtreatment_clinic(self,memberid,patientid,clinicid,policy_name=""):
+            
+            #logger.loggerpms2.info("Enter New Treatment Clinic API")
+            
+            db = self.db
+            providerid = self.providerid        
+            auth = current.auth
+            treatmentobj = None
+            try:
+                #defatul doctor = provider (clinic owner)
+                r = db((db.doctor.providerid == providerid) & (db.doctor.practice_owner == True)  & (db.doctor.is_active == True) ).select()
+                doctorid = 0 if(len(r) == 0) else int(common.getid(r[0].id))
+                
+                
+                if(clinicid == 0):
+                    #default clinicid = provider's primary clinic
+                    clinic_ref_ids = db((db.clinic_ref.ref_code == 'PRV') & (db.clinic_ref.ref_id == providerid)).select()
+                    for clinic_ref_id in clinic_ref_ids:
+                        
+                        clinic = db(db.clinic.id == clinic_ref_id.clinic_id).select()
+                        if clinic[0].primary_clinic == True:
+                            clinicid = clinic[0].id
+                            break
+
+                    
+                             
+
+                r = db((db.vw_memberpatientlist.providerid == providerid) & (db.vw_memberpatientlist.patientid == patientid) & (db.vw_memberpatientlist.clinicid == clinicid) & \
+                       (db.vw_memberpatientlist.primarypatientid == memberid)  & (db.vw_memberpatientlist.is_active== True)).select()
+                
+                newmember     = False
+                freetreatment = True
+                patienttype = 'P'
+                procedurepriceplancode = 'PREMWALKIN'
+                patientname = ""
+                fullname = ""
+                patientmember = ""
+                title = ""
+                if(len(r) > 0):
+                    patientmember = r[0].patientmember
+                    title = r[0].title
+                    patientname = r[0].patient   #fname lname : patientmember
+                    fullname = r[0].fullname     #fullname
+                    newmember = common.getboolean(r[0].newmember)
+                    freetreatment = common.getboolean(r[0].freetreatment)
+                    patienttype = r[0].patienttype
+                    procedurepriceplancode =  mdputils.getprocedurepriceplancodeformember(db,providerid,memberid,patientid,policy_name) #IB:15-Mar-2020 r[0].procedurepriceplancode        
+                
+                
+                #Create a new TreatmentPlan
+                timestr = datetime.datetime.today().strftime("%d-%m-%Y_%H:%M:%S")
+                tplan = "TP" + str(patientmember)  + "_" + timestr
+                tplanid = db.treatmentplan.insert(
+                            treatmentplan = tplan,
+                            startdate = datetime.date.today(),
+                            provider = providerid,
+                            primarypatient = memberid,
+                            patient = patientid,
+                            pattitle = title,
+                            patienttype = patienttype,
+                            patientname = fullname,
+                            status = 'Started',
+                            totaltreatmentcost = 0,
+                            totalcopay = 0,
+                            totalinspays = 0,
+                            totalpaid = 0,
+                            totaldue = 0,
+                            totalcopaypaid = 0,
+                            totalinspaid  = 0,             
+                            is_active = True,
+                            created_on = common.getISTFormatCurrentLocatTime(),
+                            created_by = 1 if(auth.user == None) else auth.user.id,
+                            modified_on = common.getISTFormatCurrentLocatTime(),
+                            modified_by =1 if(auth.user == None) else auth.user.id
+                    
+                        )
+                
+                
+                #Treatment
+                count = db(db.treatment.provider == providerid).count()
+                treatment = "TR" + str(patientmember) + str(count).zfill(4)      
+                treatmentid = db.treatment.insert(
+                    treatment = treatment,
+                    description = '',
+                    startdate = datetime.date.today(),
+                    status ='Started',
+                    treatmentplan = tplanid,
+                    provider = providerid,
+                    dentalprocedure = 0,
+                    doctor = doctorid,
+                    clinicid =clinicid,
+                    quadrant = 0,
+                    tooth    = 0,
+                    treatmentcost = 0,
+                    actualtreatmentcost = 0,  #UCR cost
+                    copay = 0,
+                    inspay = 0,
+                    companypay = 0,
+                    is_active = True,
+                    created_on =common.getISTFormatCurrentLocatTime(),
+                    created_by = 1 if(auth.user == None) else auth.user.id,
+                    modified_on = common.getISTFormatCurrentLocatTime(),
+                    modified_by =1 if(auth.user == None) else auth.user.id
+                )        
+                db.treatmentplan_patient.insert(treatmentplan = tplanid, patientmember = memberid)
+                
+                #update treatment with new treatment cost
+                account.updatetreatmentcostandcopay(db,auth.user,treatmentid)
+                #update tplan with new treatment cost
+                account.calculatecost(db,tplanid)
+                account.calculatecopay(db, tplanid,memberid)
+                account.calculateinspays(db,tplanid)
+                account.calculatedue(db,tplanid)                
+                
+                treatmentobj = self.gettreatment(treatmentid)
+                
+                
+            except Exception as e:
+                treatmentobj1 = {}
+                treatmentobj1["result"] = "fail"
+                treatmentobj1["error_message"] = "NewTreatment API Error " + str(e)
+                return json.dumps(treatmentobj1)
+            
+            return treatmentobj    
+
+    def updatetreatment(self,treatmentid,  treatmentdate, chiefcomplaint, doctorid, notes, status,clinicid=None):
 
         #logger.loggerpms2.info("Enter Update Treatment API")
                
@@ -837,13 +992,18 @@ class Treatment:
             
             dt    = common.getdt(datetime.datetime.strptime(treatmentdate,"%d/%m/%Y"))
             
-            db((db.treatment.id == treatmentid) & (db.treatment.provider == providerid)).update(chiefcomplaint = chiefcomplaint, status=status,\
-                                                      doctor = doctorid,\
-                                                      startdate = dt,\
-                                                      description = notes,\
-                                                      modified_on = common.getISTFormatCurrentLocatTime(),
-                                                      modified_by =1 if(auth.user == None) else auth.user.id
-                                                      )
+            t = db((db.treatment.id == treatmentid) & (db.treatment.is_active == True)).select()
+            
+            db((db.treatment.id == treatmentid) & (db.treatment.provider == providerid)).update(\
+                chiefcomplaint = chiefcomplaint if (chiefcomplaint != None) else t[0].chiefcomplaint,
+                status=status if (status != None) else t[0].status,\
+                doctor = doctorid if (doctorid != None) else t[0].doctorid,\
+                clinicid=clinicid if (clinicid != None) else t[0].clinicid,\
+                startdate = dt if (startdate != None) else t[0].startdate,\
+                description = notes if (notes != None) else t[0].description,\
+                modified_on = common.getISTFormatCurrentLocatTime(),
+                modified_by =1 if(auth.user == None) else auth.user.id
+                )
             
             
             

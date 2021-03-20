@@ -356,6 +356,8 @@ class Clinic:
                 "status":ds[0].status,   
                 "owner":owner,
                 "notes":ds[0].notes,
+                "registration_certificate":ds[0].registration_certificate,
+                "state_dental_registration":ds[0].state_dental_registration,
                 "result":"success",
                 "error_message":"",
                 "error_code":""
@@ -487,6 +489,10 @@ class Clinic:
                 
                 notes = common.getkeyvalue(avars,'notes',ds[0].notes),
                 
+                state_dental_registration = common.getkeyvalue(avars,"state_dental_registration",ds[0].state_dental_registration),
+                registration_certificate =  common.getkeyvalue(avars,"registration_certificate",ds[0].registration_certificate),                
+
+                
                 modified_on=common.getISTFormatCurrentLocatTime(),
                 modified_by= 1 if(auth.user == None) else auth.user.id
                 )
@@ -525,7 +531,7 @@ class Clinic:
                 
                 name = common.getkeyvalue(avars,'name',""),
                 address1 = common.getkeyvalue(avars,'address1',""),
-                address2 = common.getkeyvalue(avars,'address1',""),
+                address2 = common.getkeyvalue(avars,'address2',""),
                 address3 = common.getkeyvalue(avars,'address3',""),
                 city = common.getkeyvalue(avars,'city',""),
                 st = common.getkeyvalue(avars,'st',""),
@@ -578,6 +584,9 @@ class Clinic:
                 bank_id = common.getkeyvalue(avars,"bank_id",None),
                 
                 notes = common.getkeyvalue(avars,"notes",None),
+                
+                state_dental_registration = common.getkeyvalue(avars,"state_dental_registration",None),
+                registration_certificate =  common.getkeyvalue(avars,"registration_certificate",None),
                 
                 is_active = True,
                 created_on=common.getISTFormatCurrentLocatTime(),

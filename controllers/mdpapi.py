@@ -1307,11 +1307,13 @@ def gettreatments(avars):
     #logger.loggerpms2.info("Enter Get Treatments")
     
     otrtmnt = mdptreatment.Treatment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
-    rsp = otrtmnt.gettreatments(int(common.getid(str(avars["page"]))) if "page" in avars else 1, 
-                                int(common.getid(str(avars["memberid"]))),int(common.getid(str(avars["patientid"]))),
+    rsp = otrtmnt.gettreatments(int(common.getid(str(avars["page"]))) if "page" in avars else 0, 
+                                int(common.getid(str(avars["memberid"]))) if "memberid" in avars else 0,
+                                int(common.getid(str(avars["patientid"]))) if "patientid" in avars else 0,
                                 common.getstring(str(avars["searchphrase"])) if "searchphrase" in avars else "",
                                 int(common.getid(str(avars["maxcount"]))) if "maxcount" in avars else 0,
                                 (None if(avars["treatmentyear"] == "") else avars["treatmentyear"])  if "treatmentyear" in avars else None,
+                                int(common.getid(str(avars["clinicid"]))) if "clinicid" in avars else 0,                             
                                                                                            
                                 )
     return rsp
@@ -1347,8 +1349,8 @@ def getopentreatments(avars):
 def gettreatment(avars):
     #logger.loggerpms2.info("Enter Get Treatment")
     
-    otrtmnt = mdptreatment.Treatment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
-    rsp = otrtmnt.gettreatment(int(common.getid(str(avars["treatmentid"]))))
+    otrtmnt = mdptreatment.Treatment(current.globalenv['db'],int(common.getid(str(avars["providerid"])))  if "providerid" in avars else 0)
+    rsp = otrtmnt.gettreatment(int(common.getid(str(avars["treatmentid"])))  if "treatmentid" in avars else 0)
     return rsp
 
 def sendforauthorization(avars):
@@ -1362,16 +1364,33 @@ def sendforauthorization(avars):
 def newtreatment(avars):
     #logger.loggerpms2.info("Enter New Treatment")    
     otrtmnt = mdptreatment.Treatment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
-    rsp = otrtmnt.newtreatment(int(common.getid(str(avars["memberid"]))),int(common.getid(str(avars["patientid"]))))
+    rsp = otrtmnt.newtreatment(int(common.getid(str(avars["memberid"]))),
+                               int(common.getid(str(avars["patientid"]))))
     
     return rsp
+
+def newtreatment_clinic(avars):
+    #logger.loggerpms2.info("Enter New Treatment")    
+    otrtmnt = mdptreatment.Treatment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+    rsp = otrtmnt.newtreatment(int(common.getid(str(avars["memberid"]))),
+                               int(common.getid(str(avars["patientid"]))),
+                               int(common.getid(str(avars["clinicid"]))) if "clinicid" in avars else 0)
+    
+    return rsp
+
 
 def updatetreatment(avars):
     #logger.loggerpms2.info("Enter Update Treatment")
     
     otrtmnt = mdptreatment.Treatment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
-    rsp = otrtmnt.updatetreatment(int(common.getid(str(avars["treatmentid"]))), str(avars["treatmentdate"]), str(avars["chiefcomplaint"]), \
-                                  int(common.getid(str(avars["doctorid"]))), str(avars["notes"]),str(avars["status"]) if 'status' in avars else 'Started')
+    rsp = otrtmnt.updatetreatment(int(common.getid(str(avars["treatmentid"]))), 
+                                  str(avars["treatmentdate"]) if "treatmentdate" in avars else None, 
+                                  str(avars["chiefcomplaint"]) if 'chiefcomplaint' in avars else None,\
+                                  int(common.getid(str(avars["doctorid"]) if "doctorid" in avars else None)),\
+                                  str(avars["notes"]) if "notes"  in avars else None,\
+                                  str(avars["status"]) if 'status' in avars else None,\
+				  int(common.getid(str(avars["clinicid"]))) if "clinicid" in avars else None)
+    
     
     return rsp
 
@@ -2677,7 +2696,7 @@ mdpapi_switcher = {"listappointments":getappointments,"getappointmentsbymonth":g
                    "doctorlist":doctorlist,"doctor":getdoctor,"rolelist":rolelist,"specialitylist":specialitylist,"newpayment":newpayment,\
                    "listpayments":listpayments,"getpayment":getpayment,"paymentcallback":paymentcallback,"groupsmsmessage":groupsmsmessage,"paymentreceipt":paymentreceipt,\
                    "getpaymentlist":getpaymentlist, "getsignedkey":getsignedkey,"getopentreatments":getopentreatments,\
-                   "gettreatments":gettreatments,"gettreatment":gettreatment, "newtreatment":newtreatment, "updatetreatment":updatetreatment,
+                   "gettreatments":gettreatments,"gettreatment":gettreatment, "newtreatment":newtreatment, "updatetreatment":updatetreatment,"newtreatment_clinic":newtreatment_clinic,\
                    "treatmentstatus":treatmentstatus,"getprocedures":getprocedures,"addproceduretotreatment":addproceduretotreatment,"gettreatmentprocedure":gettreatmentprocedure,\
                    "updatetreatmentprocedure":updatetreatmentprocedure,"completetreatmentprocedure":completetreatmentprocedure,"canceltreatmentprocedure":canceltreatmentprocedure,\
                    "gettreatmentprocedures":gettreatmentprocedures,"sendforauthorization":sendforauthorization,\

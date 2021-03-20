@@ -63,6 +63,7 @@ class OPS_Timing:
                 
             for op in ops:
                 opsobj = {
+                    "ops_timing_id":str(ref[0].id),
                     "ref_code":ref[0].ref_code if len(ref) == 1 else "",
                     "ref_id":ref[0].ref_id if len(ref) == 1 else 0,
                     "calendar_date":common.getstringfromdate(op.calendar_date, "%d/%m/%Y"),
@@ -101,7 +102,7 @@ class OPS_Timing:
             ds = db((db.ops_timing.id == timingid) & (db.ops_timing.is_active == True)).select()
             if(len(ds) != 1):
                 rspobj={
-                    "timingid":str(timingid),
+                    "ops_timing_id":str(timingid),
                     "result":"fail",
                     "error_message":"Error Updating OPS Timing - no or duplicate record",
                     "error_code":""
@@ -243,6 +244,7 @@ class OPS_Timing:
             for op in ops:
                
                 opsobj = {
+                    "ops_timing_id":str(common.getid(op.ops_timing.id)),
                     "ref_code":op.ops_timing_ref.ref_code,
                     "ref_id":op.ops_timing_ref.ref_id,
                     "calendar_date":common.getstringfromdate(op.ops_timing.calendar_date, "%d/%m/%Y"),
@@ -321,6 +323,7 @@ class OPS_Timing:
             db.ops_timing_ref.insert(ops_timing_id = timeid, ref_code = ref_code,ref_id = ref_id)
             
             rspobj = {
+              
                 "ref_code":ref_code,
                 "ref_id":ref_id,
                 "ops_timing_id":str(timeid),
@@ -350,8 +353,10 @@ class OPS_Timing:
             ref_code = common.getkeyvalue(avars,"ref_code","")
             ref_id = int(common.getkeyvalue(avars,"ref_id",0))
             
-            from_year = int(common.getkeyvalue(avars,"from_year","2021"))
-            to_year = int(common.getkeyvalue(avars,"to_year","2099"))
+         
+            
+            from_year = int(common.getkeyvalue(avars,"from_year",str(datetime.datetime.today().year)))
+            to_year = int(common.getkeyvalue(avars,"to_year",str(datetime.datetime.today().year)))
             
             from_month = 1
             to_month = 12

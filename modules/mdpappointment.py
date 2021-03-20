@@ -270,7 +270,7 @@ class Appointment:
         appts = db((db.vw_appointments.provider == providerid) & (db.vw_appointments.f_start_time >= start)  & \
                    (db.vw_appointments.f_start_time <= end) & (db.vw_appointments.is_active == True)).\
             select(db.vw_appointments.f_uniqueid,db.vw_appointments.f_start_time,db.vw_appointments.f_patientname,\
-                   db.vw_appointments.doctor,db.vw_appointments.docname,db.vw_appointments.color,db.vw_appointments.cell, orderby=db.vw_appointments.f_start_time)
+                   db.vw_appointments.doctor,db.vw_appointments.docname,db.vw_appointments.color,db.vw_appointments.cell, orderby=~db.vw_appointments.f_start_time)
         
         apptlist = []
         
@@ -412,6 +412,7 @@ class Appointment:
         start = str(year) + "-" + str(month).zfill(2) + "-01 00:00:00"
         end   = str(year) + "-" + str(month).zfill(2) + "-31 23:59:00"  #no need to take 30 or 31 days - just default to 31 days
         
+        #All unblocked & uncancelled appointments
         strsql = "select DATE(f_start_time) as apptdate, count(*) as apptcount from vw_appointments where provider = " + str(providerid)
         strsql = strsql + " and f_start_time >= '"  + start +  "'"
         strsql = strsql + " and f_start_time <= '"  + end +  "'"
@@ -1141,6 +1142,8 @@ class Appointment:
                     "clinic_ref":common.getstring(appt[0].clinic_ref),
                     "clinic_name":common.getstring(appt[0].clinic_name),
                     "block":common.getboolean(appt[0].blockappt),
+                    "gender":common.getstring(appt[0].gender),
+                    "dob":common.getstringfromdate(appt[0].dob,"%d/%M/%Y"),
                     "result":"success",
                     "error_message":""
                       
@@ -1202,7 +1205,7 @@ class Appointment:
             if(toapptdt != None):
                 query = query & (db.t_appointment.f_start_time <= toapptdt)
         
-            appts = db((query)).select()
+            appts = db((query)).select(db.t_appointment.ALL,orderby=~db.t_appointment.f_start_time)
             
             apptlist = []
                    
@@ -1263,26 +1266,26 @@ class Appointment:
         
         
         try:
-            block_start_str = common.getkeyvalue(avars,"block_start",None)
-            if((block_start_str == None) | (block_start_str == "") ):
-                excpobj = {}
-                excpobj["result"] = "fail"
-                excpobj["error_message"] = "Start Block Date Time not specified"
-                excpobj["error_code"] = ""
-                return json.dumps(excpobj)            
+            #block_start_str = common.getkeyvalue(avars,"block_start",None)
+            #if((block_start_str == None) | (block_start_str == "") ):
+                #excpobj = {}
+                #excpobj["result"] = "fail"
+                #excpobj["error_message"] = "Start Block Date Time not specified"
+                #excpobj["error_code"] = ""
+                #return json.dumps(excpobj)            
     
-            block_start_date = common.getdatefromstring(block_start_str, "%d/%m/%Y %H:%M")
+            #block_start_date = common.getdatefromstring(block_start_str, "%d/%m/%Y %H:%M")
             
             
-            block_end_str = common.getkeyvalue(avars,"block_end",None)
-            if((block_end_str == None) | (block_end_str == "") ):
-                excpobj = {}
-                excpobj["result"] = "fail"
-                excpobj["error_message"] = "End Block Date Time not specified"
-                excpobj["error_code"] = ""
-                return json.dumps(excpobj)            
+            #block_end_str = common.getkeyvalue(avars,"block_end",None)
+            #if((block_end_str == None) | (block_end_str == "") ):
+                #excpobj = {}
+                #excpobj["result"] = "fail"
+                #excpobj["error_message"] = "End Block Date Time not specified"
+                #excpobj["error_code"] = ""
+                #return json.dumps(excpobj)            
     
-            block_end_date   = common.getdatefromstring(block_end_str, "%d/%m/%Y %H:%M")            
+            #block_end_date   = common.getdatefromstring(block_end_str, "%d/%m/%Y %H:%M")            
      
             
             blockid = int(common.getkeyvalue(avars,"blockid","0"))
@@ -1296,7 +1299,7 @@ class Appointment:
             )
             
             
-            r = db((db.t_appointment.blockappt == True) & () & ()).select()
+          
             apptobj= {"result":"success", "error_message":"", "error_code":"","blockid":blockid,"message":"Blocked remvoed successfully"}
             
                 
@@ -1420,6 +1423,8 @@ class Appointment:
             strsql = strsql + " and f_start_time <= '"  + end +  "'"
             strsql = strsql + " and blockappt = '" + blockappt +"'"
             strsql = strsql + " and is_active = 'T' "
+            
+            
             strsql = strsql + " group by DATE(f_start_time)"
             
             ds = db.executesql(strsql)
@@ -1513,6 +1518,8 @@ class Appointment:
             month = int(common.getkeyvalue(avars,"month",(datetime.date.today()).strftime("%m")))
             year = int(common.getkeyvalue(avars,"year",(datetime.date.today()).strftime("%Y")))            
             
+            
+            #count of active / unblocked appointment counts
             start = str(year) + "-" + str(month).zfill(2) + "-01 00:00:00"
             end   = str(year) + "-" + str(month).zfill(2) + "-31 23:59:00"  #no need to take 30 or 31 days - just default to 31 days
             
@@ -1529,13 +1536,19 @@ class Appointment:
             
             strsql = strsql + " and f_start_time >= '"  + start +  "'"
             strsql = strsql + " and f_start_time <= '"  + end +  "'"
+            strsql = strsql + " and blockappt = '" + blockappt +"'"            
             strsql = strsql + " and is_active = 'T' "
+            
+           
+            
             strsql = strsql + " group by DATE(f_start_time)"
+          
             
             ds = db.executesql(strsql)
             apptobj = {}
             apptlist = []
-            
+            blocklist = []
+        
             
             for i in xrange(0,len(ds)):
                 x = {
@@ -1544,10 +1557,17 @@ class Appointment:
                 }
                 apptlist.append(x)
             
+
+           
+                
+
+            
+            
             apptobj["result"] = "success"
             apptobj["error_message"] = ""
             apptobj["error_code"]=""
             apptobj["apptlist"] = apptlist
+          
             
         except Exception as e:
             excpobj = {}

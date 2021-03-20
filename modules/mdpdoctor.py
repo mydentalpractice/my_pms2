@@ -279,15 +279,16 @@ class Doctor:
           speciality = s[0].specialityid if len(s) == 1 else 0
           obj = {
             "ref_code":d.doctor_ref.ref_code,     #DOC
-            "ref_id":d.doctor_ref.ref_id,       #ID to either doctor table or provider table
+            "ref_id":d.doctor_ref.ref_id,         #ID to either doctor table or provider table
             "provider":provider,
            
+            "doctorid":d.doctor.id,
             "name":d.doctor.name,
             "cell":d.doctor.cell,
             "email":d.doctor.email,
             "practice_owner":str(d.doctor.practice_owner),
             "status":d.doctor.status,
-            "speciality":str(speciality),
+            "speciality":speciality,
             "speciality_name":speciality_name
             
           }
