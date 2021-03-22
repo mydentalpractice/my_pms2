@@ -8555,26 +8555,26 @@ ADD COLUMN `mediasize` DOUBLE NULL DEFAULT '0' AFTER `mediaformat`;
 =========
 0. XXYZRenamed old Media to xmedia
 1. XXYZRemove Media, xMedia, DentalImage_1
-2. YZNew dentlaimage_ref
+2. XYZNew dentlaimage_ref
 
 1. XYZNew - Clinic,clinic_ref   (need to add owner flag in Clinic)
 
 3. XYZNew - ops_timing,ops_timing_ref
 
 
-5. YZNew - doctor, doctor_ref
+5. XYZNew - doctor_ref
 
-7. YZNew - bank_details
+7. XYZNew - bank_details
 
-8  YZModify Provider to add Provider status   varchar(45),, modify foreign key constraint of providerbank
+8  XYZModify Provider to add Provider status   varchar(45),, modify foreign key constraint of providerbank
 
-9.  YZNew -  prospect_ref,
+9.  XYZNew -  prospect, prospect_ref,
 
-10. YZNew activity_log, activity_log_ref
+10. XYZNew activity_log, activity_log_ref
 
-11. YZNew travel_log, travel_log_ref
+11. XYZNew travel_log, travel_log_ref
 
-12. YZmigrate providerbank to bank_details;
+12. XYZmigrate providerbank to bank_details;
 
 truncate bank_details;
 
@@ -8596,9 +8596,9 @@ UPDATE provider AS p INNER JOIN bank_details AS b ON p.id = b.providerid SET p.b
 07/2/2021
 ==========
 
-1. YYZZModified t_appointment : added 'clinicid' field, set default value of blockappt = False, delete foreign keys provider and patient
-2. YYZZModified vw_appointments : added clinicid, clinic_ref and clinic_name fields
-3. YYZZModified clinic table : added state_dental_regisration, registration_certificate
+1. XYYZZModified t_appointment : added 'clinicid' field, set default value of blockappt = False, delete foreign keys provider and patient
+2. XXYYZZModified vw_appointments : added clinicid, clinic_ref and clinic_name fields
+3. XXYYZZModified clinic table : added state_dental_regisration, registration_certificate
 
 15/2/2021
 =========
@@ -8611,11 +8611,12 @@ UPDATE provider AS p INNER JOIN bank_details AS b ON p.id = b.providerid SET p.b
 
 8/3/2021
 ========
-1. YYYZZAdded Clinic ID for this treatment
-2. YYZZAdded clinicid, clinicname to vw_treatmentlist
+1. XXXYYYZZAdded Clinic ID for this treatment
+2. XXYYZZAdded clinicid, clinicname to vw_treatmentlist
 2. ZZZCreate and Assign clinic to Provider & Treatments by running assign clinic utility
 
 
 19/3/2021
 =========
-1. YYZZAdded DOB & Gender in vw_appointments
+1. XXXYYZZAdded DOB & Gender in vw_appointments
+2. XXXYYYZZZ New importSPAT table

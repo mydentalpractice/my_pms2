@@ -866,6 +866,84 @@ class User:
   
       return json.dumps(regobj)
       
+  def spat_registration(self, request, spat, spatname,  email, cell, username, password):
+      logger.loggerpms2.info("Enter SPAT registration")
+      db = self.db
+      
+      regobj = {}
+      auth = self.auth
+
+      try:
+     
+        
+        # create new user
+        users = db((db.auth_user.email==email) & (db.auth_user.cell == cell)).select()
+        if users:
+          #logger.loggerpms2.info("before CRYPT_1")
+          my_crypt = CRYPT(key=auth.settings.hmac_key)
+          #logger.loggerpms2.info("after CRYPT_1")
+          crypt_pass = my_crypt(str(password))[0]  
+          #logger.loggerpms2.info("after CRYPT_PASS_1")
+          db(db.auth_user.id == users[0].id).update(agent=spat,first_name=spatname,username=username,password=crypt_pass)
+          db.commit()
+          #logger.loggerpms2.info("after UPDATE_1")      
+          
+       
+         
+         
+          regobj["result"] = "success"
+          regobj["error_message"] = ""
+          regobj["new"] = False
+          regobj["userid"] = str(users[0].id)
+          regobj["email"] = email
+          regobj["cell"] = cell
+          regobj["sitekey"] = sitekey
+             
+          
+        else:
+          #logger.loggerpms2.info("befor CRYPT_2")
+          
+          my_crypt = CRYPT(key=auth.settings.hmac_key)
+          #logger.loggerpms2.info("after CRYPT_2")
+          
+          crypt_pass = my_crypt(str(password))[0]
+          
+          #logger.loggerpms2.info("after CRYPT_PASS_2_" + " " + str(crypt_pass).encode("ASCII"))
+          id_user= db.auth_user.insert(
+                                     email = str(email),
+                                     cell = str(cell),
+                                     sitekey = str(spat),
+                                   
+                                     username = str(username),
+                                    
+                                     password = str(crypt_pass) 
+                                     )
+          db.commit()      
+          #logger.loggerpms2.info("after INSERT_2")      
+              
+  
+       
+         
+          regobj["result"] = "success"
+          regobj["error_message"] = ""
+          regobj["new"] = True
+          regobj["userid"] = str(id_user)
+          regobj["email"] = email
+          regobj["cell"] = cell
+          regobj["sitekey"] = sitekey
+      
+      
+      except Exception as e:
+        excpobj = {}
+        
+        excpobj["result"] = "fail"
+        excpobj["new"] = False
+        excpobj["userid"] = ""
+        excpobj["error_message"] = "SPAT Registration Exception Error - " + str(e)
+        logger.loggerpms2.info("SPAT Registration Exception Error - " + str(e))
+        return json.dumps(excpobj)       
+  
+      return json.dumps(regobj)
     
     
   
