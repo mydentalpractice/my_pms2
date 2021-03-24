@@ -1080,9 +1080,10 @@ class Appointment:
                   
     
     def get_appointment(self,avars):
-        logger.loggerpms2.info("Enter Get_Appointment API ==>")
+        logger.loggerpms2.info("Enter Get_Appointment API ==> " +str(avars))
         auth = current.auth
         db = self.db
+        appointmentid= 0
         try:
             blockappt = common.getboolean(common.getkeyvalue(avars,"block","False"))
             appointmentid = int(common.getkeyvalue(avars,"appointmentid","0"))
@@ -1151,7 +1152,7 @@ class Appointment:
         except Exception as e:
             excpobj = {}
             excpobj["result"] = "fail"
-            excpobj["error_message"] = "Get_Appointment API Exception Error - " + str(e)
+            excpobj["error_message"] = "Get_Appointment API Exception Error - " + str(e) + "apptid = " +str(appointmentid)
             excpobj["error_code"] = ""
             return json.dumps(excpobj)
         

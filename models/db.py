@@ -895,6 +895,7 @@ db.provider_region_plan._plural = "Provider"
 
 
 db.define_table('prospect',
+                Field('speciality',  'integer', widget = lambda field, value:SQLFORM.widgets.options.widget(field, value, _style="width:100%;height:35px",_class='form-control')),
                 Field('provider', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'),label='Provider Code',default='',length=20),
                 Field('title','string',represent=lambda v, r: '' if v is None else v,default=' ',label='Title',length=10,requires = IS_EMPTY_OR(IS_IN_SET(DOCTITLE))),
                 Field('providername', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'), default='', label='Provider Name ',length=512),
@@ -928,7 +929,7 @@ db.define_table('prospect',
                 Field('capitationytd', 'double',represent=lambda v, r: 0.00 if v is None else v,widget = lambda field, value:SQLFORM.widgets.double.widget(field, value, _class='form_details'),default=0.00,label='Capitation YTD'),
                 Field('captiationmtd', 'double',represent=lambda v, r: 0.00 if v is None else v,widget = lambda field, value:SQLFORM.widgets.double.widget(field, value, _class='form_details'),default=0.00,label='Capitation MTD'),
                 Field('languagesspoken', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'),default='',label='Languages Spoken',length=32),
-                Field('speciality',  'reference speciality', widget = lambda field, value:SQLFORM.widgets.options.widget(field, value, _style="width:100%;height:35px",_class='form-control')),
+                
                 Field('specialization', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'),default='',label='Specialization',length=64),
                 Field('sitekey','string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'),label='Web Enrollment Key', default='1234', length=20),
                 Field('registration','string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'),label='Registration', default='', length=128),

@@ -47,7 +47,8 @@ def setcookies(response):
         return True
 
 def getstringfromdate(dateobj,fmt):
-        
+        if(dateobj == None):
+                return None
         dtstr = dateobj.strftime(fmt)
         
         return dtstr
@@ -62,6 +63,8 @@ def gettimefromstring(strtime,fmt):
         return t
 
 def getstringfromtime(timeobj, fmt):
+        if(timeobj == None):
+                return None
         strtime = timeobj.strftime(fmt)
         
        

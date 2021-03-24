@@ -114,10 +114,12 @@ class OPS_Timing:
             day_of_week = common.getkeyvalue(avars,"day_of_week",ds[0].day_of_week)
             
             strtime = common.getkeyvalue(avars,"open_time",common.getstringfromtime(ds[0].open_time,"%I:%M %p"))
-            open_time = common.gettimefromstring(strtime, "%I:%M %p")
+            #open_time = common.gettimefromstring(strtime, "%I:%M %p")
+            open_time = datetime.datetime(*(common.gettimefromstring(strtime, "%I:%M %p"))[:6])
             
             strtime = common.getkeyvalue(avars,"close_time",common.getstringfromtime(ds[0].close_time,"%I:%M %p"))
-            close_time = common.gettimefromstring(strtime, "%I:%M %p")
+            #close_time = common.gettimefromstring(strtime, "%I:%M %p")
+            close_time = datetime.datetime(*(common.gettimefromstring(strtime, "%I:%M %p"))[:6])
                                                                                                                       
             is_lunch = common.getboolean(common.getkeyvalue(avars,"is_lunch",common.getstring(ds[0].is_lunch)))
             is_holiday = common.getboolean(common.getkeyvalue(avars,"is_lunch",common.getstring(ds[0].is_holiday)))

@@ -13,6 +13,8 @@ from applications.my_pms2.modules import mail
 from applications.my_pms2.modules import cycle
 from applications.my_pms2.modules import logger
 
+from applications.my_pms2.modules import mdpuser
+
 #from gluon.contrib import common
 #from gluon.contrib import mail
 from gluon.tools import Mail
@@ -584,6 +586,9 @@ def login():
     
     if form.process().accepted:
         logger.loggerpms2.info("MyDentalPlan Login ==>>" + common.getstring(form.vars.username) + " " + common.getstring(form.vars.password.password))
+        
+           
+
         user = auth.login_bare(form.vars.username, form.vars.password.password)
         
         #logger.loggerpms2.info("Auth User Username + Sitekey = " + common.getstring(auth.user.username) + " " + common.getstring(auth.user.sitekey))

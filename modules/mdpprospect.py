@@ -336,7 +336,7 @@ class Prospect:
         auth  = current.auth
         rspobj = {}
      
-        logger.loggerpms2.info("Enter new Propsect ")
+        logger.loggerpms2.info("Enter new Propsect "  + json.dumps(avars))
         
         try:
             ref_code = common.getkeyvalue(avars,"ref_code","")     #Prospect is added by Agent
@@ -349,6 +349,7 @@ class Prospect:
             city=common.getkeyvalue(avars,'city',"")
             st=common.getkeyvalue(avars,'st',"")
             pin=common.getkeyvalue(avars,'pin',"")
+            cell = common.getkeyvalue(avars,"cell","")
             
             practiceaddress = ""
             practiceaddress = practiceaddress + "" if(address1 == "") else address1
@@ -464,6 +465,7 @@ class Prospect:
             excpobj["error_message"] = mssg
             return json.dumps(excpobj)
     
+        logger.loggerpms2.info("Exit New_Prospect " + json.dumps(rspobj))
         return json.dumps(rspobj)             
     
 

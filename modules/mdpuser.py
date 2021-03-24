@@ -31,8 +31,8 @@ class User:
     logger.loggerpms2.info("Enter User __init__")
     self.db = db
     self.auth = auth
-    self.username  = username.strip()
-    self.password = password.strip()
+    self.username  = username
+    self.password = password
     return 
   
   
@@ -389,114 +389,289 @@ class User:
   
   #Authenticate the user returning JSON data
   #If successful, return authenticate user data, provider data(if user is provider), web admin data (if user is admin), patient data (if user is patient - member or walkin)
-  def login(self):
+  def login(self,username,password):
     auth = self.auth
     db = self.db
     
     logger.loggerpms2.info(">>LOGIN API\n")
-    logger.loggerpms2.info("===Req_data=\n" + self.username + " " + self.password + "\n")
-    
-    user = auth.login_bare(self.username, self.password)
-    
+    logger.loggerpms2.info("===Req_data=\n" + username + " " + password + "\n")
     user_data = {}
-    
-    if(user==False):
-      user_data ={
-        "result" : "fail",
-        "error_message":"Login Failure. Please re-enter correct your username and password"
-      }
-
-    else:
-        auth.user.impersonated = False
-        auth.user.impersonatorid = 0        
-        
-        provdict = common.getprovider(auth, db)
-        
-        if(int(provdict["providerid"]) == 0):
-            
-            #webadmin
-            user_data ={
-              "result" : 'success',
-              "error_message":"",
-              "usertype":"webadmin",
-              "providerid":int(provdict["providerid"]),
-              "providername":provdict["providername"],
-            }
-        
-        elif(int(provdict["providerid"]) < 0):
-          #webmember and/or patientmember
-          webmems = db((db.webmember.webkey == auth.user.sitekey) & (db.webmember.cell == auth.user.cell) &\
-                       (db.webmember.email == auth.user.email)).select()
-          if(len(webmems) == 1):
-            user_data = {
-              "result" : "success",
-              "error_message":"",
-              "usertype":"webmember",
-              "providerid":int(common.getid(webmems[0].provider)),
-              "webmemberid":int(common.getid(webmems[0].id)),
-              "memberid":0,
-              "status":webmems[0].status,
-              "cell":webmems[0].cell,
-              "email":webmems[0].email,
-              "sitekey":webmems[0].webkey,
-            }
-          else:
-            user_data ={
-              "result" : "fail",
-              "error_message":"Login Failure. Invalid Web Member"
-            }
+    try:
+      
+      
+      user = auth.login_bare(str(username), str(password))
+ 
+      #logger.loggerpms2.info(">>After user")
+      
+     
+      
+      if(user==False):
+        user_data ={
+          "result" : "fail",
+          "error_message":"Login Failure. Please re-enter correct your username and password"
+        }
+  
+      else:
+          #logger.loggerpms2.info(">>User is True")
+          auth.user.impersonated = False
+          auth.user.impersonatorid = 0        
           
-          mems = db((db.patientmember.webkey == auth.user.sitekey) & (db.patientmember.cell == auth.user.cell) &\
-                       (db.patientmember.email == auth.user.email)).select()
-          if(len(mems) == 1):
-            user_data = {
-              "result" : "success",
-              "error_message":"",
-              "usertype":"member",
-              "providerid":int(common.getid(mems[0].provider)),
-              "webmemberid":int(common.getid(mems[0].webmember)),
-              "memberid":int(common.getid(mems[0].id)),
-              "status":mems[0].status,
-              "cell":mems[0].cell,
-              "email":mems[0].email,
-              "sitekey":mems[0].webkey,
-            }
-          elif(len(mems) > 1):
-            user_data ={
-              "result" : "fail",
-              "error_message":"Login Failure. Invalid Patient Member"
-            }         
-        else:
+          provdict = common.getprovider(auth, db)
+          #logger.loggerpms2.info(">>After Provider Dict")
+          
+          if(int(provdict["providerid"]) == 0):
+              
+              #webadmin
+              user_data ={
+                "result" : 'success',
+                "error_message":"",
+                "usertype":"webadmin",
+                "providerid":int(provdict["providerid"]),
+                "providername":provdict["providername"],
+              }
+          
+          elif(int(provdict["providerid"]) < 0):
+            #webmember and/or patientmember
+            webmems = db((db.webmember.webkey == auth.user.sitekey) & (db.webmember.cell == auth.user.cell) &\
+                         (db.webmember.email == auth.user.email)).select()
+            if(len(webmems) == 1):
+              user_data = {
+                "result" : "success",
+                "error_message":"",
+                "usertype":"webmember",
+                "providerid":int(common.getid(webmems[0].provider)),
+                "webmemberid":int(common.getid(webmems[0].id)),
+                "memberid":0,
+                "status":webmems[0].status,
+                "cell":webmems[0].cell,
+                "email":webmems[0].email,
+                "sitekey":webmems[0].webkey,
+              }
+            else:
+              user_data ={
+                "result" : "fail",
+                "error_message":"Login Failure. Invalid Web Member"
+              }
             
-            #provider
-            providerid = int(provdict["providerid"])
+            mems = db((db.patientmember.webkey == auth.user.sitekey) & (db.patientmember.cell == auth.user.cell) &\
+                         (db.patientmember.email == auth.user.email)).select()
+            #logger.loggerpms2.info(">>After mems")
             
-            rlgprov = db((db.rlgprovider.providerid == providerid) & (db.rlgprovider.is_active == True)).select()
-            urlprops = db(db.urlproperties.id > 0).select(db.urlproperties.relgrpolicynumber)
-            user_data ={
-              "result" : "success",
-              "error_message":"",
-              "usertype":"provider",
-              "webmemberid":0,
-              "memberid":0,
-              "providerid":providerid,
-              "provider":provdict["provider"],
-              "providername":provdict["providername"],
-              "practicename":provdict["practicename"],
-              "practiceaddress":provdict["practiceaddress"],
-              "cell":provdict["cell"],
-              "email":provdict["email"],
-              "registration":provdict["registration"],
-              "rlgprovider": False if(len(rlgprov) == 0) else True,
-              "rlgrpolicynumber": "" if(len(urlprops) == 0) else common.getstring(urlprops[0].relgrpolicynumber),
-              "regionid": 0 if(len(rlgprov) == 0) else int(rlgprov[0].regionid),
-              "planid": 0 if(len(rlgprov) == 0) else int(rlgprov[0].planid)
-            
-            }
-    logger.loggerpms2.info(">>LOGIN API\n")
-    logger.loggerpms2.info("===Rsp_data=\n" + json.dumps(user_data) + "\n")
-            
+            if(len(mems) == 1):
+              #logger.loggerpms2.info(">>Mems = 1")
+              user_data = {
+                "result" : "success",
+                "error_message":"",
+                "usertype":"member",
+                "providerid":int(common.getid(mems[0].provider)),
+                "webmemberid":int(common.getid(mems[0].webmember)),
+                "memberid":int(common.getid(mems[0].id)),
+                "status":mems[0].status,
+                "cell":mems[0].cell,
+                "email":mems[0].email,
+                "sitekey":mems[0].webkey,
+              }
+            elif(len(mems) > 1):
+              user_data ={
+                "result" : "fail",
+                "error_message":"Login Failure. Invalid Patient Member"
+              }         
+          else:
+              #logger.loggerpms2.info(">>Provider Else")
+              
+              #provider
+              providerid = int(provdict["providerid"])
+              
+              rlgprov = db((db.rlgprovider.providerid == providerid) & (db.rlgprovider.is_active == True)).select()
+              urlprops = db(db.urlproperties.id > 0).select(db.urlproperties.relgrpolicynumber)
+              user_data ={
+                "result" : "success",
+                "error_message":"",
+                "usertype":"provider",
+                "webmemberid":0,
+                "memberid":0,
+                "providerid":providerid,
+                "provider":provdict["provider"],
+                "providername":provdict["providername"],
+                "practicename":provdict["practicename"],
+                "practiceaddress":provdict["practiceaddress"],
+                "cell":provdict["cell"],
+                "email":provdict["email"],
+                "registration":provdict["registration"],
+                "rlgprovider": False if(len(rlgprov) == 0) else True,
+                "rlgrpolicynumber": "" if(len(urlprops) == 0) else common.getstring(urlprops[0].relgrpolicynumber),
+                "regionid": 0 if(len(rlgprov) == 0) else int(rlgprov[0].regionid),
+                "planid": 0 if(len(rlgprov) == 0) else int(rlgprov[0].planid)
+              
+              }
+      logger.loggerpms2.info(">>LOGIN API\n")
+      logger.loggerpms2.info("===Rsp_data=\n" + json.dumps(user_data) + "\n")
+    except Exception as e:
+      error_message = "Login Exception Error - " + str(e)
+      logger.loggerpms2.info(error_message)
+      excpobj = {}
+      excpobj["result"] = "fail"
+      excpobj["error_message"] = error_message
+      return json.dumps(excpobj)                
+    
     return json.dumps(user_data)
+  
+  def ylogin(self,username,password):
+    auth = self.auth
+    db = self.db
+    
+    logger.loggerpms2.info(">>LOGIN API\n")
+    logger.loggerpms2.info("===Req_data=\n" + username + " " + password + "\n")
+    user_data = {}
+    try:
+     
+      my_crypt = CRYPT(key=auth.settings.hmac_key)
+    
+      crypt_pass = my_crypt(password)[0]  
+      crypt_password = crypt_pass.password
+      cell = None
+      if(password == crypt_password):
+        r = db((db.auth_user.username == username)).select()
+        if(len(r)==1):
+          cell = r[0].cell
+    
+      if(cell == None):
+        error_message = "Login API Error: No User "
+        logger.loggerpms2.info(error_message)
+        excpobj = {}
+        excpobj["result"] = "fail"
+        excpobj["error_message"] = error_message
+        return json.dumps(excpobj)
+      
+      
+      usr = db((db.auth_user.username == username) & (db.auth_user.cell == cell)).select()
+      
+      if(len(usr) != 1):
+        error_message = "Login API Error: No User/Multiple users matching registered " + cell
+        logger.loggerpms2.info(error_message)
+        excpobj = {}
+        excpobj["result"] = "fail"
+        excpobj["error_message"] = error_message
+        return json.dumps(excpobj)    
+    
+    
+      user = auth.login_user(db.auth_user(int(usr[0].id)))
+      user = auth.user
+      user = auth.login_bare(str(username), str(password))
+      logger.loggerpms2.info(">>After user")
+      
+     
+      
+      if(user==False):
+        user_data ={
+          "result" : "fail",
+          "error_message":"Login Failure. Please re-enter correct your username and password"
+        }
+    
+      else:
+          logger.loggerpms2.info(">>User is True")
+          auth.user.impersonated = False
+          auth.user.impersonatorid = 0        
+          
+          provdict = common.getprovider(auth, db)
+          logger.loggerpms2.info(">>After Provider Dict")
+          
+          if(int(provdict["providerid"]) == 0):
+              
+              #webadmin
+              user_data ={
+                "result" : 'success',
+                "error_message":"",
+                "usertype":"webadmin",
+                "providerid":int(provdict["providerid"]),
+                "providername":provdict["providername"],
+              }
+          
+          elif(int(provdict["providerid"]) < 0):
+            #webmember and/or patientmember
+            webmems = db((db.webmember.webkey == auth.user.sitekey) & (db.webmember.cell == auth.user.cell) &\
+                         (db.webmember.email == auth.user.email)).select()
+            if(len(webmems) == 1):
+              user_data = {
+                "result" : "success",
+                "error_message":"",
+                "usertype":"webmember",
+                "providerid":int(common.getid(webmems[0].provider)),
+                "webmemberid":int(common.getid(webmems[0].id)),
+                "memberid":0,
+                "status":webmems[0].status,
+                "cell":webmems[0].cell,
+                "email":webmems[0].email,
+                "sitekey":webmems[0].webkey,
+              }
+            else:
+              user_data ={
+                "result" : "fail",
+                "error_message":"Login Failure. Invalid Web Member"
+              }
+            
+            mems = db((db.patientmember.webkey == auth.user.sitekey) & (db.patientmember.cell == auth.user.cell) &\
+                         (db.patientmember.email == auth.user.email)).select()
+            logger.loggerpms2.info(">>After mems")
+            
+            if(len(mems) == 1):
+              logger.loggerpms2.info(">>Mems = 1")
+              user_data = {
+                "result" : "success",
+                "error_message":"",
+                "usertype":"member",
+                "providerid":int(common.getid(mems[0].provider)),
+                "webmemberid":int(common.getid(mems[0].webmember)),
+                "memberid":int(common.getid(mems[0].id)),
+                "status":mems[0].status,
+                "cell":mems[0].cell,
+                "email":mems[0].email,
+                "sitekey":mems[0].webkey,
+              }
+            elif(len(mems) > 1):
+              user_data ={
+                "result" : "fail",
+                "error_message":"Login Failure. Invalid Patient Member"
+              }         
+          else:
+              logger.loggerpms2.info(">>Provider Else")
+              
+              #provider
+              providerid = int(provdict["providerid"])
+              
+              rlgprov = db((db.rlgprovider.providerid == providerid) & (db.rlgprovider.is_active == True)).select()
+              urlprops = db(db.urlproperties.id > 0).select(db.urlproperties.relgrpolicynumber)
+              user_data ={
+                "result" : "success",
+                "error_message":"",
+                "usertype":"provider",
+                "webmemberid":0,
+                "memberid":0,
+                "providerid":providerid,
+                "provider":provdict["provider"],
+                "providername":provdict["providername"],
+                "practicename":provdict["practicename"],
+                "practiceaddress":provdict["practiceaddress"],
+                "cell":provdict["cell"],
+                "email":provdict["email"],
+                "registration":provdict["registration"],
+                "rlgprovider": False if(len(rlgprov) == 0) else True,
+                "rlgrpolicynumber": "" if(len(urlprops) == 0) else common.getstring(urlprops[0].relgrpolicynumber),
+                "regionid": 0 if(len(rlgprov) == 0) else int(rlgprov[0].regionid),
+                "planid": 0 if(len(rlgprov) == 0) else int(rlgprov[0].planid)
+              
+              }
+      logger.loggerpms2.info(">>LOGIN API\n")
+      logger.loggerpms2.info("===Rsp_data=\n" + json.dumps(user_data) + "\n")
+    except Exception as e:
+      error_message = "Login Exception Error - " + str(e)
+      logger.loggerpms2.info(error_message)
+      excpobj = {}
+      excpobj["result"] = "fail"
+      excpobj["error_message"] = error_message
+      return json.dumps(excpobj)                
+    
+    return json.dumps(user_data)  
   
   def logout(self):
     auth = self.auth

@@ -651,8 +651,8 @@ def encrypted_mdplogin(avars):
 #user_data ={"result" : True,"usertype":"provider","providerid":int(provdict["providerid"]),"provider":provdict["provider"],
 #"providername":provdict["providername"],"registration":provdict["registration"]}
 def mdplogin(avars):
-    ouser = mdpuser.User(current.globalenv['db'],current.auth,common.getkeyvalue(avars,"username",""),common.getkeyvalue(avars,"username",""))
-    mdp_user = ouser.login()
+    ouser = mdpuser.User(current.globalenv['db'],current.auth,common.getkeyvalue(avars,"username",""),common.getkeyvalue(avars,"password",""))
+    mdp_user = ouser.login(avars["username"],avars["password"])
     return mdp_user
 
 def mdplogout(avars):

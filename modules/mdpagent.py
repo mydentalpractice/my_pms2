@@ -14,7 +14,7 @@ class Agent:
     
       
     def new_agent_prospect(self,avars):
-        logger.loggerpms2.info("Enter New Agent Prospect API")
+        logger.loggerpms2.info("Enter New Agent Prospect API " + json.dumps(avars))
         auth  = current.auth
         db = self.db
 
@@ -47,10 +47,12 @@ class Agent:
             excpobj["error_message"] = mssg
             return json.dumps(excpobj)                 
 
+        logger.loggerpms2.info("Exit New Agent Prospect API " + json.dumps(rspobj))
         return json.dumps(rspobj)        
         
     def new_agent(self,avars):
-        logger.loggerpms2.info("Enter New Agent API")
+        logger.loggerpms2.info("Enter New Agent  API " + json.dumps(avars))
+        auth  = current.auth
         auth  = current.auth
         db = self.db
 
@@ -113,4 +115,5 @@ class Agent:
             excpobj["error_message"] = mssg
             return json.dumps(excpobj)                 
 
+        logger.loggerpms2.info("Exit New Agent API " + json.dumps(rspobj))
         return json.dumps(rspobj)
