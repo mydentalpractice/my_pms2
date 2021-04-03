@@ -376,6 +376,9 @@ class Patient:
                                                                   db.vw_memberpatientlist.relation,\
                                                                   db.vw_memberpatientlist.cell,\
                                                                   db.vw_memberpatientlist.email,\
+                                                                  db.vw_memberpatientlist.dob,\
+                                                                  db.vw_memberpatientlist.gender,\
+                                                                  db.vw_memberpatientlist.age,\
                                                                   limitby=limitby)
       if(maxcount == 0):
         maxcount = db((db.vw_memberpatientlist.cell.like("%" + patientsearch + "%")) & (db.vw_memberpatientlist.providerid == providerid) & \
@@ -397,6 +400,10 @@ class Patient:
                                                                   db.vw_memberpatientlist.relation,\
                                                                   db.vw_memberpatientlist.cell,\
                                                                   db.vw_memberpatientlist.email,\
+                                                                  db.vw_memberpatientlist.dob,\
+                                                                  db.vw_memberpatientlist.gender,\
+                                                                  db.vw_memberpatientlist.age,\
+                                                                  
                                                                   limitby=limitby)
       
       if(maxcount == 0):
@@ -418,6 +425,10 @@ class Patient:
                                                                   db.vw_memberpatientlist.relation,\
                                                                   db.vw_memberpatientlist.cell,\
                                                                   db.vw_memberpatientlist.email,\
+                                                                  db.vw_memberpatientlist.dob,\
+                                                                  db.vw_memberpatientlist.gender,\
+                                                                  db.vw_memberpatientlist.age,\
+                                                                  
                                                                   limitby=limitby)
       if(maxcount == 0):
         maxcount = db((db.vw_memberpatientlist.patient.like("%" + patientsearch + "%")) & (db.vw_memberpatientlist.patientmember.like("%" + patientmembersearch + "%")) &(db.vw_memberpatientlist.providerid == providerid) & \
@@ -441,7 +452,10 @@ class Patient:
         "primary":True if(pat.patienttype == "P") else False,   #True if "P" False if "D"
         "relation":pat.relation,
         "cell":pat.cell,
-        "email":pat.email
+        "email":pat.email,
+        "age":pat.age,
+        "dob":common.getstringfromdate(pat.dob,"%d/%m/%Y"),
+        "gender":pat.gender
         
       }
       patlist.append(patobj)   
@@ -1217,23 +1231,24 @@ class Patient:
   
       #Create new WALK in patient
       todaydt = datetime.date.today()
-      patid = db.patientmember.insert(\
+      todaystr = common.getstringfromdate(todaydt,"%d/%m/%Y")
+      patid = db.patientmember.insert(
            patientmember = patientmember,
            groupref = 'walkin',
-           title = patobj['title'],
-           fname = patobj["fname"],
-           mname = patobj["mname"],
-           lname = patobj["lname"],
-           dob = datetime.datetime.strptime(patobj["dob"], "%d/%m/%Y"),
-           cell = patobj["cell"],
-           email = patobj["email"],
-           gender = patobj["gender"],
-           address1 = patobj["address1"],
-           address2 = patobj["address2"],
-           address3 = patobj["address3"],
-           city = patobj["city"],
-           st = patobj["st"],
-           pin = patobj["pin"],
+           title = common.getkeyvalue(patobj,"title",""),
+           fname = common.getkeyvalue(patobj,"fname",patientmember + "_FN"),
+           mname = common.getkeyvalue(patobj,"mname",""),
+           lname = common.getkeyvalue(patobj,"lname",patientmember + "_LN"),
+           dob =   common.getdatefromstring(common.getkeyvalue(patobj,"dob",todaystr),"%d/%m/%Y"),
+           cell = common.getkeyvalue(patobj,"cell","18001027526"),
+           email = common.getkeyvalue(patobj,"email","customersupport@mydentalplan.in"),
+           gender = common.getkeyvalue(patobj,"gender","Male"),
+           address1 = common.getkeyvalue(patobj,"address1","331-332 Ganpat Plaza"), 
+           address2 = common.getkeyvalue(patobj,"address2","M.I. Road"),
+           address3 = common.getkeyvalue(patobj,"address3",""),
+           city = common.getkeyvalue(patobj,"city","Jaipur"),
+           st = common.getkeyvalue(patobj,"st","Rajasthan (RA)"),
+           pin = common.getkeyvalue(patobj,"pin","302001"),
            status = 'Enrolled',
            groupregion = regionid,
            provider = providerid,

@@ -605,7 +605,7 @@ def login():
                          
             ologinblock = loginblock(True,form.vars.username)
             
-            if(ologinblock["login"] == False):
+            if(common.getboolean(ologinblock["login"]) == False):
                 redirect(URL('admin','showerror', vars=dict(errorheader="Login Error", errormssg=ologinblock["error_mssg"], returnURL=URL('admin','login'))))
                 
             

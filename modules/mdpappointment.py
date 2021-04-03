@@ -16,6 +16,7 @@ from applications.my_pms2.modules import tasks
 from applications.my_pms2.modules import status
 from applications.my_pms2.modules import cycle
 from applications.my_pms2.modules import logger
+from applications.my_pms2.modules import mdptimings
 
 datefmt = "%d/%m/%Y"
 datetimefmt = "%d/%m/%Y %H:%M:%S"
@@ -42,8 +43,33 @@ class Appointment:
     def appointmentduration(self):
         dur = cycle.DURATION
         return json.dumps(dur)
+    
+    def isAppointmentSlot(self, startdt, enddt,doctorid,clinicid=0):
+            
+            db = self.db
+            
+            retval = False
+            str1 = datetime.datetime.strftime(startdt, "%Y-%m-%d %H:%M:%S")
+            str2 = datetime.datetime.strftime(enddt,  "%Y-%m-%d %H:%M:%S")
         
-        
+            if(clinicid == 0):
+                if(doctorid == 0):
+                    appts = db(( str1 >= db.t_appointment.f_start_time)& (str1 < db.t_appointment.f_end_time) & (db.t_appointment.blockappt == False) & (db.t_appointment.is_active == True)).select(db.t_appointment.id)
+                else:
+                    appts = db((db.t_appointment.doctor == doctorid)&( str1 >= db.t_appointment.f_start_time)& (str1 < db.t_appointment.f_end_time) & (db.t_appointment.blockappt == False) & (db.t_appointment.is_active == True)).select(db.t_appointment.id)                    
+            else:
+                if(doctorid == 0):
+                    appts = db((db.t_appointment.clinicid==clinicid)&( str1 >= db.t_appointment.f_start_time)& (str1 < db.t_appointment.f_end_time) & (db.t_appointment.blockappt == False) & (db.t_appointment.is_active == True)).select(db.t_appointment.id)    
+                else:
+                    appts = db((db.t_appointment.clinicid==clinicid)&(db.t_appointment.doctor == doctorid)&( str1 >= db.t_appointment.f_start_time)& (str1 < db.t_appointment.f_end_time) & (db.t_appointment.blockappt == False) & (db.t_appointment.is_active == True)).select(db.t_appointment.id)                        
+                
+            if(len(appts)>0):
+                return True
+            
+     
+ 
+            
+            return retval        
         
     def isBlocked(self, startdt, enddt,doctorid,clinicid=0):
         
@@ -54,29 +80,35 @@ class Appointment:
         str2 = datetime.datetime.strftime(enddt,  "%Y-%m-%d %H:%M:%S")
     
         if(clinicid == 0):
-            appts = db((db.t_appointment.doctor == doctorid)&( str1 >= db.t_appointment.f_start_time)& (str1 <= db.t_appointment.f_end_time) & (db.t_appointment.blockappt == True) & (db.t_appointment.is_active == True)).select(db.t_appointment.blockappt)
+            if(doctorid == 0):
+                appts = db(( str1 >= db.t_appointment.f_start_time)& (str1 < db.t_appointment.f_end_time) & (db.t_appointment.blockappt == True) & (db.t_appointment.is_active == True)).select()
+            else:
+                appts = db((db.t_appointment.doctor == doctorid)&( str1 >= db.t_appointment.f_start_time)& (str1 < db.t_appointment.f_end_time) & (db.t_appointment.blockappt == True) & (db.t_appointment.is_active == True)).select(db.t_appointment.blockappt)                
         else:
-            appts = db((db.t_appointment.clinicid==clinicid)&(db.t_appointment.doctor == doctorid)&( str1 >= db.t_appointment.f_start_time)& (str1 <= db.t_appointment.f_end_time) & (db.t_appointment.blockappt == True) & (db.t_appointment.is_active == True)).select(db.t_appointment.blockappt)    
+            if(doctorid == 0):
+                appts = db((db.t_appointment.clinicid==clinicid)&( str1 >= db.t_appointment.f_start_time)& (str1 < db.t_appointment.f_end_time) & (db.t_appointment.blockappt == True) & (db.t_appointment.is_active == True)).select(db.t_appointment.blockappt)    
+            else:
+                appts = db((db.t_appointment.clinicid==clinicid)&( str1 >= db.t_appointment.f_start_time)& (str1 < db.t_appointment.f_end_time) & (db.t_appointment.blockappt == True) & (db.t_appointment.is_active == True)).select(db.t_appointment.blockappt)                    
             
         if(len(appts)>0):
             return True
         
-        if(clinicid == 0):
-            appts = db((db.t_appointment.doctor == doctorid)&( str1 >= db.t_appointment.f_end_time)&(db.t_appointment.blockappt == True)&(db.t_appointment.is_active == True)).select(db.t_appointment.blockappt)
-        else:
-            appts = db((db.t_appointment.clinicid==clinicid)&(db.t_appointment.doctor == doctorid)&( str1 >= db.t_appointment.f_end_time)&(db.t_appointment.blockappt == True)&(db.t_appointment.is_active == True)).select(db.t_appointment.blockappt)
+        #if(clinicid == 0):
+            #appts = db((db.t_appointment.doctor == doctorid)&( str1 >= db.t_appointment.f_start_time)&(db.t_appointment.blockappt == True)&(db.t_appointment.is_active == True)).select(db.t_appointment.blockappt)
+        #else:
+            #appts = db((db.t_appointment.clinicid==clinicid)&(db.t_appointment.doctor == doctorid)&( str1 >= db.t_appointment.f_end_time)&(db.t_appointment.blockappt == True)&(db.t_appointment.is_active == True)).select(db.t_appointment.blockappt)
             
         
-        if(len(appts)>0):
-            return False
+        #if(len(appts)>0):
+            #return False
         
-        if(clinicid == 0):
-            appts = db((db.t_appointment.doctor == doctorid)&( str1 <= db.t_appointment.f_start_time)&(str2 <= db.t_appointment.f_start_time)&(db.t_appointment.blockappt == True)&(db.t_appointment.is_active == True)).select(db.t_appointment.blockappt)
-        else:
-            appts = db((db.t_appointment.clinicid==clinicid)&(db.t_appointment.doctor == doctorid)&( str1 <= db.t_appointment.f_start_time)&(str2 <= db.t_appointment.f_start_time)&(db.t_appointment.blockappt == True)&(db.t_appointment.is_active == True)).select(db.t_appointment.blockappt)            
+        #if(clinicid == 0):
+            #appts = db((db.t_appointment.doctor == doctorid)&( str1 <= db.t_appointment.f_start_time)&(str2 <= db.t_appointment.f_start_time)&(db.t_appointment.blockappt == True)&(db.t_appointment.is_active == True)).select(db.t_appointment.blockappt)
+        #else:
+            #appts = db((db.t_appointment.clinicid==clinicid)&(db.t_appointment.doctor == doctorid)&( str1 <= db.t_appointment.f_start_time)&(str2 <= db.t_appointment.f_start_time)&(db.t_appointment.blockappt == True)&(db.t_appointment.is_active == True)).select(db.t_appointment.blockappt)            
             
-        if(len(appts)>0):
-            return False
+        #if(len(appts)>0):
+            #return False
         
         
         return retval    
@@ -212,6 +244,168 @@ class Appointment:
             return retVal1   
         
 
+    def list_open_slots(self,avars):
+        db = self.db
+        logger.loggerpms2.info("Enter list_open_slots " + json.dumps(avars))
+        try:
+            todaystr = common.getstringfromdate(datetime.date.today(),"%d/%m/%Y")
+            appt_dt_str = common.getkeyvalue(avars,"appointment_date", todaystr)
+            from_appt_dt = common.getdatefromstring(appt_dt_str + " 00:00:00", "%d/%m/%Y 00:00:00")
+
+            appt_dt_str1= common.getstringfromdate(from_appt_dt,"%d/%m/%Y")
+            appt_dt_str= common.getstringfromdate(from_appt_dt,"%Y-%m-%d 00:00:00")
+            from_appt_dt = common.getdatefromstring(appt_dt_str, "%Y-%m-%d 00:00:00")
+            
+            appt_dt_str = common.getkeyvalue(avars,"appointment_date", todaystr)
+            to_appt_dt = common.getdatefromstring(appt_dt_str + " 23:59:59", "%d/%m/%Y %H:%M:%S")
+
+            appt_dt_str1= common.getstringfromdate(to_appt_dt,"%d/%m/%Y")
+            appt_dt_str= common.getstringfromdate(to_appt_dt,"%Y-%m-%d 23:59:59")
+            to_appt_dt = common.getdatefromstring(appt_dt_str, "%Y-%m-%d %H:%M:%S")
+            
+            providerid = int(common.getid(common.getkeyvalue(avars,"providerid","0")))
+            clinicid = int(common.getid(common.getkeyvalue(avars,"clinicid","0")))
+            doctorid = int(common.getid(common.getkeyvalue(avars,"doctorid","0")))
+            
+               
+           
+            apptobj={}
+            apptobj["action"] = "list_appointment"
+            apptobj["providerid"] = str(providerid)
+            apptobj["clinicid"] =  str(clinicid)
+            apptobj["doctorid"] = str(doctorid)
+            
+            apptobj["from_date"] = common.getstringfromdate(from_appt_dt,"%d/%m/%Y %H:%M")
+            apptobj["to_date"] =  common.getstringfromdate(to_appt_dt,"%d/%m/%Y %H:%M")
+            apptobj["block"] =  False
+            
+            list_appointments = self.list_appointment(apptobj)
+            
+            apptobj = {}
+            apptobj["action"] = "list_block"
+            apptobj["providerid"] = str(providerid)
+            apptobj["clinicid"] =  str(clinicid)
+            apptobj["doctorid"] = str(doctorid)
+            apptobj["block_start"] = common.getstringfromdate(from_appt_dt,"%d/%m/%Y %H:%M")
+            apptobj["block_end"] =  common.getstringfromdate(to_appt_dt,"%d/%m/%Y %H:%M")
+
+            list_blocks = self.list_block_datetime(apptobj)
+            
+            timingReq = {
+                "action":"list_ops_timing",
+                "ref_code":"CLN",
+                "ref_id":clinicid,
+                "from_date":common.getstringfromdate(from_appt_dt,"%d/%m/%Y"),
+                "to_date":common.getstringfromdate(to_appt_dt,"%d/%m/%Y")
+            }
+        
+            timingObj  = mdptimings.OPS_Timing(db)
+            clinic_timings = json.loads(timingObj.list_ops_timing(timingReq))
+            ops_timing_list = clinic_timings["ops_timing_list"]                    
+       
+            
+          
+            
+            list_open_slots = []
+         
+            if(ops_timing_list == None):
+                
+                list_open_slots1=[
+                    "7:00 AM","7:30 AM","8:00 AM","8:30 AM","9:00 AM","9:30 AM","10:00 AM","10:30 AM","11:00 AM","11:30 AM",
+                    "12:00 PM","12:30 PM","01:00 PM","01:30 PM","02:00 PM","02:30 PM","03:00 PM","03:30 PM","04:00 PM","04:30 PM",
+                    "05:00 PM","05:30 PM","06:00 PM","06:30 PM","07:00 PM","07:30 PM","08:00 PM","08:30 PM","09:00 PM","09:30 PM","10:00 PM","10:30 PM"]            
+                
+                todaystr = common.getstringfromdate(datetime.date.today(),"%d/%m/%Y")
+                appt_dt_str = common.getkeyvalue(avars,"appointment_date", todaystr)                
+
+                for i in xrange(0,len(list_open_slots1)):
+                    open_time_str = appt_dt_str + " " + list_open_slots1[i]
+                    open_dt = common.getdatefromstring(open_time_str, "%d/%m/%Y %I:%M %p")
+                    close_dt = open_dt + datetime.timedelta(minutes=30)
+                    
+                    #check if t is appointment
+                    if(self.isAppointmentSlot(open_dt,close_dt,doctorid,clinicid) == True):
+                        
+                        continue
+                    
+                    #check if t is blocked
+                    if(self.isBlocked(open_dt, close_dt, doctorid,clinicid) == True):
+                       
+                        continue
+                    
+                
+                    #add t time in open_slot list
+                    open_slot = common.getstringfromtime(open_dt,"%I:%M %p")
+                    if not (open_slot in list_open_slots) :
+                        list_open_slots.append(open_slot)                    
+            
+            else:
+
+                for t in ops_timing_list:
+                    i  =0
+                    today_dt_str = common.getstringfromdate(datetime.date.today(),"%d/%m/%Y")
+                    calendar_date_str = common.getkeyvalue(t,"calendar_date",today_dt_str)
+                    
+                    open_time_str = common.getkeyvalue(t,"open_time","07:00 AM")
+                    open_time = common.gettimefromstring(open_time_str,"%I:%M %p")
+                    open_dt_str = calendar_date_str + " " + open_time_str
+                    open_dt = common.getdatefromstring(open_dt_str,"%d/%m/%Y %I:%M %p")
+                    
+    
+                    close_time_str = common.getkeyvalue(t,"close_time","10:30 PM")
+                    close_time = common.gettimefromstring(close_time_str,"%I:%M %p")
+                    close_dt_str = calendar_date_str + " " + close_time_str
+                    close_dt = common.getdatefromstring(close_dt_str,"%d/%m/%Y %I:%M %p")
+                    
+                    
+                    is_holiday = common.getboolean(common.getkeyvalue(t,"is_holiday","false"))
+                    is_saturday = common.getboolean(common.getkeyvalue(t,"is_saturday","false"))
+                    is_sunday = common.getboolean(common.getkeyvalue(t,"is_sunday","false"))
+                    is_lunch = common.getboolean(common.getkeyvalue(t,"is_lunch","false"))
+                    if((is_holiday == True)|(is_saturday == True)|(is_sunday == True)|(is_lunch == True)):
+                        continue
+                    
+                    t=open_dt
+                    while(t < close_dt):
+                        
+                        #check if t is appointment
+                        if((self.isAppointmentSlot(t,close_dt,doctorid,clinicid) == True) | ((self.isBlocked(t,close_dt,doctorid,clinicid) == True))):
+                            t=t+datetime.timedelta(minutes=30)
+                            continue
+                        
+                        
+                    
+                        #add t time in open_slot list
+                        open_slot = common.getstringfromtime(t,"%I:%M %p")
+                        
+                        if not (open_slot in list_open_slots) :
+                            list_open_slots.append(open_slot)
+                        
+                        t=t+datetime.timedelta(minutes=30)
+                   
+                
+                
+            
+            rspobj = {
+                "result":"success",
+                "error_message":"",
+                "error_code":"",
+                "appointment_date":appt_dt_str1,
+                "list_open_slots":list_open_slots
+            
+            }
+            
+          
+          
+            
+        except Exception as e:
+            excpobj = {}
+            excpobj["result"] = "fail"
+            excpobj["error_message"] = "Get Open Slots API Exception Error - " + str(e)
+            return json.dumps(excpobj)  
+        
+        logger.loggerpms2.info("Exit Open_Slots - " + json.dumps(rspobj))
+        return json.dumps(rspobj)
     
     
     #this method gets a list of all apointments for this patient for a particular month and year
@@ -935,7 +1129,7 @@ class Appointment:
             #location of the Clinic Address (by default it is Provider's primary clinic)
             location = ""
             if(clinicid == 0):
-                provs = db((db.provider.id == providerid) & (db.provider.is_active == True)).select(db.pa_practicename,db.pa_practiceaddress)
+                provs = db((db.provider.id == providerid) & (db.provider.is_active == True)).select(db.provider.pa_practicename,db.provider.pa_practiceaddress)
                 location =  provs[0].pa_practicename + ", " + provs[0].pa_practiceaddress   if(len(provs) == 1) else  ""
             else:
                 r = db((db.clinic.id == clinicid) & (db.clinic.is_active == True)).select()

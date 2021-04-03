@@ -880,7 +880,7 @@ class Treatment:
                     
                              
 
-                r = db((db.vw_memberpatientlist.providerid == providerid) & (db.vw_memberpatientlist.patientid == patientid) & (db.vw_memberpatientlist.clinicid == clinicid) & \
+                r = db((db.vw_memberpatientlist.providerid == providerid) & (db.vw_memberpatientlist.patientid == patientid) & \
                        (db.vw_memberpatientlist.primarypatientid == memberid)  & (db.vw_memberpatientlist.is_active== True)).select()
                 
                 newmember     = False
@@ -990,25 +990,37 @@ class Treatment:
         treatmentobj = None
         try:
             
-            dt    = common.getdt(datetime.datetime.strptime(treatmentdate,"%d/%m/%Y"))
+            
+            today = datetime.date.today()
+            today_str = common.getstringfromdate(today,"%d/%m/%Y")
+            
+            dt = None          
+            if(treatmentdate != None):
+                dt = common.getdt(datetime.datetime.strptime(treatmentdate,"%d/%m/%Y"))
+            
             
             t = db((db.treatment.id == treatmentid) & (db.treatment.is_active == True)).select()
             
-            db((db.treatment.id == treatmentid) & (db.treatment.provider == providerid)).update(\
-                chiefcomplaint = chiefcomplaint if (chiefcomplaint != None) else t[0].chiefcomplaint,
-                status=status if (status != None) else t[0].status,\
-                doctor = doctorid if (doctorid != None) else t[0].doctorid,\
-                clinicid=clinicid if (clinicid != None) else t[0].clinicid,\
-                startdate = dt if (startdate != None) else t[0].startdate,\
-                description = notes if (notes != None) else t[0].description,\
-                modified_on = common.getISTFormatCurrentLocatTime(),
-                modified_by =1 if(auth.user == None) else auth.user.id
-                )
-            
-            
-            
-            treatmentobj = self.gettreatment(treatmentid)
-            
+            if(len(t) == 1):
+                db((db.treatment.id == treatmentid) & (db.treatment.provider == providerid)).update(\
+                    chiefcomplaint = chiefcomplaint if (chiefcomplaint != None) else t[0].chiefcomplaint,
+                    status=status if (status != None) else t[0].status,\
+                    doctor = doctorid if (doctorid != None) else t[0].doctorid,\
+                    clinicid=clinicid if (clinicid != None) else t[0].clinicid,\
+                    startdate = dt if (treatmentdate != None) else t[0].startdate,\
+                    description = notes if (notes != None) else t[0].description,\
+                    modified_on = common.getISTFormatCurrentLocatTime(),
+                    modified_by =1 if(auth.user == None) else auth.user.id
+                    )
+                
+                
+                
+                treatmentobj = self.gettreatment(treatmentid)
+            else:
+                treatmentobj = {}
+                treatmentobj["result"] = "fail"
+                treatmentobj["error_message"] = "No Treatment to update " + str(e)
+                return json.dumps(treatmentobj1)
             
         except Exception as e:
             treatmentobj1 = {}

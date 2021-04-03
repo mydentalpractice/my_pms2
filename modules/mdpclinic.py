@@ -448,7 +448,7 @@ class Clinic:
                 whatsapp = common.getkeyvalue(avars,'whatsapp',ds[0].whatsapp),
                 facebook = common.getkeyvalue(avars,'facebook',ds[0].facebook),
                 twitter = common.getkeyvalue(avars,'twitter',ds[0].twitter),
-                primary_clinic = common.getboolean(common.getkeyvalue(avars,'primary_clinic','True')),
+                primary_clinic = common.getboolean(common.getkeyvalue(avars,'primary',ds[0].primary_clinic)),
                 dentalchairs = common.getkeyvalue(avars,'dentalchairs',ds[0].dentalchairs),
                 auto_clave = common.getkeyvalue(avars,'auto_clave',ds[0].auto_clave),
                 implantology = common.getkeyvalue(avars,'implantology',ds[0].implantology),
@@ -519,14 +519,16 @@ class Clinic:
         auth  = current.auth
         rspobj = {}
         
-        logger.loggerpms2.info("Enter new Clinic ")
+        logger.loggerpms2.info("Enter new Clinic " + json.dumps(avars))
         
         try:
             ref_code = common.getkeyvalue(avars,"ref_code","")
             ref_id = int(common.getkeyvalue(avars,"ref_id",0))            
             
-           
-            
+            #check if there is a primary clinic for this ref_code, if so, then default others to non-primary clinic
+            r = db((db.clinic_ref.ref_code == ref_code) & (db.clinic_ref.ref_id == ref_id) & (db.clinic.primary_clinic == True)& (db.clinic.primary_clinic == True)).select(db.clinic.ALL,left=db.clinic.on(db.clinic.id == db.clinic_ref.clinic_id))
+            primary_clinic = False if(len(r)>=1) else True
+
             clinicid = db.clinic.insert(\
                 
                 name = common.getkeyvalue(avars,'name',""),
@@ -545,7 +547,7 @@ class Clinic:
                 whatsapp = common.getkeyvalue(avars,'whatsapp',""),
                 facebook = common.getkeyvalue(avars,'facebook',""),
                 twitter = common.getkeyvalue(avars,'twitter',""),
-                primary_clinic = common.getboolean(common.getkeyvalue(avars,'primary_clinic','True')),
+                primary_clinic = common.getboolean(common.getkeyvalue(avars,'primary',primary_clinic)),
                 dentalchairs = common.getkeyvalue(avars,'dentalchairs',""),
                 auto_clave = common.getkeyvalue(avars,'auto_clave',""),
                 implantology = common.getkeyvalue(avars,'implantology',""),
@@ -600,6 +602,7 @@ class Clinic:
             db(db.clinic.id == clinicid).update(clinic_ref = clinic_ref)
             
             #refcode = "DOC","PROV"
+            
             db.clinic_ref.insert(clinic_id = clinicid, ref_code = ref_code,ref_id = ref_id)
                 
             rspobj = {
@@ -613,7 +616,6 @@ class Clinic:
                 "error_code":""
             }            
         
-        
         except Exception as e:
             mssg = "New Clinic Exception:\n" + str(e)
             logger.loggerpms2.info(mssg)      
@@ -622,7 +624,8 @@ class Clinic:
             excpobj["error_code"] = "MDP100"
             excpobj["error_message"] = mssg
             return json.dumps(excpobj)
-    
+
+        logger.loggerpms2.info("Exit new_clinic " + json.dumps(rspobj))
         return json.dumps(rspobj)             
     
          

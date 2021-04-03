@@ -15,6 +15,7 @@ from applications.my_pms2.modules import logger
 #Image (.PNG, .GIF, .JPG, .JPEG)
 #Audio (.WAV, .OGG, .MP3)
 #Video (.MOV, .MPE, .MP4, .MPG, .MPG2, .MPEG, .MPEG4, .MOVIE)
+#Doc   (.PDF,.DOC)
 
 class Media:
     def __init__(self,db,providerid,mediatype,mediaformat):
@@ -404,7 +405,7 @@ class Media:
 
 
     def downloadmedia(self,mediaid):
-
+        logger.loggerpms2.info("Enter downloadmedia " + str(mediaid))
         db = self.db
         providerid = self.providerid
         
@@ -418,7 +419,7 @@ class Media:
                 mediaobj = {
                     "mediaid":int(common.getid(media[0].id)),
 
-                    "mediaurl" : props[0].mydp_ipaddress + ":" + props[0].mydp_port +"/my_dentalplan/media/media_download/" + str(mediaid),
+                    "mediaurl" : props[0].mydp_ipaddress + "/my_dentalplan/media/media_download/" + str(mediaid),
                     "media"  : common.getstring(media[0].image),
                     "uploadfolder":media[0].uploadfolder,
                     "title"  : common.getstring(media[0].title),
@@ -461,7 +462,7 @@ class Media:
                 excpobj["error_code"] = "MDP100"
                 excpobj["error_message"] = "Download Media  Exception Error - " + str(e)
                 return json.dumps(excpobj)
-
+        logger.loggerpms2.info("Exit downloadmedia " + json.dumps(mediaobj))
         return json.dumps(mediaobj)
 
 

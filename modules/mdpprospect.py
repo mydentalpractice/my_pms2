@@ -2,6 +2,8 @@ from gluon import current
 import datetime
 
 import json
+import random
+import string
 
 from applications.my_pms2.modules import common
 from applications.my_pms2.modules import logger
@@ -359,6 +361,19 @@ class Prospect:
             practiceaddress = practiceaddress + "" if(st == "") else practiceaddress + "," + st
             practiceaddress = practiceaddress + "" if(pin == "") else practiceaddress + "," + pin
             
+            sitekey = common.getkeyvalue(avars,'sitekey',"")
+            if(common.getstring(sitekey) == ""):
+                
+                sitekey = ''
+             
+                for i in range(0,2):
+                    sitekey += random.choice(string.lowercase)
+                    sitekey += random.choice(string.uppercase)
+                    sitekey += random.choice(string.digits)
+                   
+        
+                               
+                
             prospectid = db.prospect.insert(\
                 
                 
@@ -391,7 +406,7 @@ class Prospect:
                 assignedpatientmembers=int(common.getkeyvalue(avars,'assignedpatientmembers',"0")),
                 speciality=int(common.getkeyvalue(avars,'speciality',"1")),
                 specialization=common.getkeyvalue(avars,'specialization',""),
-                sitekey=common.getkeyvalue(avars,'sitekey',""),
+                sitekey=sitekey,
                 groupregion=int(common.getkeyvalue(avars,'groupregion',"1")),
                 registration=common.getkeyvalue(avars,'registration',""),
                 registered=common.getboolean(common.getkeyvalue(avars,'registered',"True")),
@@ -440,6 +455,8 @@ class Prospect:
             if(prospect == ""):
                 prospect = "PR" + str(prospectid).zfill(4)
                 db(db.prospect.id == prospectid).update(provider = prospect)
+            
+            
                 
             #refcode = "AGN""
             db.prospect_ref.insert(prospect_id = prospectid, ref_code = ref_code,ref_id = ref_id)
@@ -517,13 +534,14 @@ class Prospect:
             prospectid = common.getkeyvalue(avars,"prospectid","0")
             
             
+            #create a new provider
             prv = mdpprovider.Provider(db, 0)
             prvobj = json.loads(prv.new_provider(avars))
             providerid = common.getkeyvalue(prvobj,"providerid","0")
             db(db.prospect_ref.prospect_id == prospectid).update(provider_id = providerid)
             
             #create prospect to provider image_ref records for this provider corresponding to the 'Prospect' images
-            ds = db((db.dentalimage_ref.ref_code == "PPT") & (db.dentalimage_ref.ref_id == prospectid)).select()
+            ds = db((db.dentalimage_ref.ref_code == "PST") & (db.dentalimage_ref.ref_id == prospectid)).select()
             for d in ds:
                 xid = db.dentalimage_ref.insert(\
                     ref_code = "PRV",
@@ -533,7 +551,7 @@ class Prospect:
             
             
             #copy prospect to provider clinic_ref records
-            ds = db((db.clinic_ref.ref_code == "PPT") & (db.clinic_ref.ref_id == prospectid)).select()
+            ds = db((db.clinic_ref.ref_code == "PST") & (db.clinic_ref.ref_id == prospectid)).select()
             for d in ds:
                 xid = db.clinic_ref.insert(\
                     ref_code = "PRV",
@@ -543,7 +561,7 @@ class Prospect:
             
             
             #copy propsect doctors to provider
-            ds = db((db.doctor_ref.ref_code == "PPT") & (db.doctor_ref.ref_id == prospectid)).select()
+            ds = db((db.doctor_ref.ref_code == "PST") & (db.doctor_ref.ref_id == prospectid)).select()
             for d in ds:
                 xid = db.doctor_ref.insert(\
                     ref_code = "PRV",

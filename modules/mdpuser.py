@@ -1047,7 +1047,8 @@ class User:
       
       regobj = {}
       auth = self.auth
-
+      sitekey = spat
+      
       try:
      
         
