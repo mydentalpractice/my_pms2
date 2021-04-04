@@ -853,8 +853,15 @@ class Treatment:
         
         return treatmentobj
     
-    def newtreatment_clinic(self,memberid,patientid,clinicid,policy_name=""):
-            
+    
+    #int(common.getid(str(avars["memberid"]))),
+    #int(common.getid(str(avars["patientid"]))),
+
+    #int(common.getid(str(avars["clinicid"]))) if "clinicid" in avars else 0)
+
+    
+    #def newtreatment_clinic(self,memberid,patientid,clinicid,policy_name=""):
+    def newtreatment_clinic(self,avars):            
             #logger.loggerpms2.info("Enter New Treatment Clinic API")
             
             db = self.db
@@ -862,9 +869,17 @@ class Treatment:
             auth = current.auth
             treatmentobj = None
             try:
+                
+                memberid = int(common.getid(common.getkeyvalue(avars,"memberid","0")))
+                patientid = int(common.getid(common.getkeyvalue(avars,"patientid","0")))                
+                clinicid = int(common.getid(common.getkeyvalue(avars,"clinicid","0")))                
+                doctorid = int(common.getid(common.getkeyvalue(avars,"doctorid","0")))                
+                policy_name = common.getkeyvalue(avars,"policy_name","0")
+                
                 #defatul doctor = provider (clinic owner)
-                r = db((db.doctor.providerid == providerid) & (db.doctor.practice_owner == True)  & (db.doctor.is_active == True) ).select()
-                doctorid = 0 if(len(r) == 0) else int(common.getid(r[0].id))
+                if(doctorid == 0):
+                    r = db((db.doctor.providerid == providerid) & (db.doctor.practice_owner == True)  & (db.doctor.is_active == True) ).select()
+                    doctorid = 0 if(len(r) == 0) else int(common.getid(r[0].id))
                 
                 
                 if(clinicid == 0):

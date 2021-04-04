@@ -1376,9 +1376,13 @@ def newtreatment(avars):
 def newtreatment_clinic(avars):
     #logger.loggerpms2.info("Enter New Treatment")    
     otrtmnt = mdptreatment.Treatment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
-    rsp = otrtmnt.newtreatment_clinic(int(common.getid(str(avars["memberid"]))),
-                               int(common.getid(str(avars["patientid"]))),
-                               int(common.getid(str(avars["clinicid"]))) if "clinicid" in avars else 0)
+    rsp = otrtmnt.newtreatment_clinic(avars)
+        
+        
+        #int(common.getid(str(avars["memberid"]))),
+                               #int(common.getid(str(avars["patientid"]))),
+                               
+                               #int(common.getid(str(avars["clinicid"]))) if "clinicid" in avars else 0)
     
     return rsp
 

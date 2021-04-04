@@ -1400,7 +1400,7 @@ class Appointment:
             if(toapptdt != None):
                 query = query & (db.t_appointment.f_start_time <= toapptdt)
         
-            appts = db((query)).select(db.t_appointment.ALL,orderby=~db.t_appointment.f_start_time)
+            appts = db((query)).select(db.t_appointment.ALL,orderby=db.t_appointment.f_start_time)
             
             apptlist = []
                    
