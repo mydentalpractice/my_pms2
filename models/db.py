@@ -4069,9 +4069,9 @@ db.define_table('booking',
                 Field('payment_amount','double'),
                 Field('amount_paid','double'),
                 
-                Field('package_start_date','datetime'),
-                Field('package_end_date','datetime'),
-                Field('payment_date','datetime'),
+                Field('package_start_date','datetime',requires = IS_DATE(format=T('%d/%m/%Y'))),
+                Field('package_end_date','datetime',requires = IS_DATE(format=T('%d/%m/%Y'))),
+                Field('payment_date','datetime',requires = IS_DATE(format=T('%d/%m/%Y'))),
                 
                 Field('status','string'),
                 auth.signature
