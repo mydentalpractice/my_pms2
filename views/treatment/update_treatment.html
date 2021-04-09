@@ -168,16 +168,21 @@
 														</div>
 														{{if(hmopatientmember == True):}}
 														<div class="col-md-4">
-														    <label class="m_title">Total Co-pay</label><br/>
+														    <label class="m_title">Total Patient Pays (Inclusive of Taxes)</label><br/>
 														    {{=formTreatment.custom.widget.copay}}
 														</div>
 														<div class="col-md-4">
 														    <label class="m_title">Total Authorized Pay</label><br/>
 														    {{=formTreatment.custom.widget.inspay}}
 														</div>
+														    {{if(booking == True):}}
+														    <div class="col-md-4" >
+															<label style="color:red" class="m_title">Total Patient Pays includes (Treatment Cost - Booking Amount + Tax) </label><br/>
+														    </div>
+														    {{pass}}
 														{{else:}}
 														<div class="col-md-4" style="display:none">
-														    <label class="m_title">Total Co-pay</label><br/>
+														    <label class="m_title">Total Patient Pays (Taxes Extra)</label><br/>
 														    {{=formTreatment.custom.widget.copay}}
 														</div>
 														<div class="col-md-4" style="display:none">

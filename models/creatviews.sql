@@ -8620,3 +8620,8 @@ UPDATE provider AS p INNER JOIN bank_details AS b ON p.id = b.providerid SET p.b
 =========
 1. XXXYYZZAdded DOB & Gender in vw_appointments
 2. XXXYYYZZZ New importSPAT table
+
+7/4/2021
+========
+1. YYYZZZZNew Booking table
+2. YYYYZZZZCreate & Populate package_region_plan

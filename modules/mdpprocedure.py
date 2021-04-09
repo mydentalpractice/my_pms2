@@ -640,6 +640,83 @@ class Procedure:
     
         return json.dumps(jsonObj)
     
+    #this procedure adds a new procedure to the treatment
+    def addSPLproceduretotreatment(self, procedurecode, treatmentid, plan, tooth, quadrant,remarks):
+        
+        db = self.db
+        providerid = self.providerid
+        auth = current.auth
+        jsonObj = {}
+        try:
+            procs = db((db.vw_procedurepriceplan.procedurepriceplancode == plan) & \
+                       (db.vw_procedurepriceplan.procedurecode == procedurecode)).select()
+            
+            procedureid = 0
+            ucrfee = 0
+            procedurefee = 0
+            copay = 0
+            companypays = 0
+            relgrproc = False
+            memberid = 0
+            
+            if(len(procs)>0):
+                    ucrfee = float(common.getvalue(procs[0].ucrfee))
+                    procedurefee = float(common.getvalue(procs[0].procedurefee))
+                    if(procedurefee == 0):
+                        procedurefee = ucrfee
+                    copay = float(common.getvalue(procs[0].copay))
+                    inspays = float(common.getvalue(procs[0].inspays))
+                    companypays = float(common.getvalue(procs[0].companypays))
+                    procedureid = int(common.getid(procs[0].id))    
+                    relgrproc = bool(common.getboolean(procs[0].relgrproc))
+    
+            #t = db(db.treatment.id == treatmentid).select(db.treatment.startdate,db.treatment.treatmentplan)
+            t = db(db.vw_treatmentlist.id == treatmentid).select(db.vw_treatmentlist.tplanid,db.vw_treatmentlist.startdate, db.vw_treatmentlist.memberid)
+            
+            procid = db.treatment_procedure.insert(treatmentid = treatmentid, dentalprocedure = procedureid,status="Started",\
+                                                   treatmentdate=t[0].startdate if(len(t)>0) else common.getISTFormatCurrentLocatTime(),\
+                                                 ucr = ucrfee, procedurefee=procedurefee, copay=copay,inspays=inspays,companypays=companypays,\
+                                                 tooth=tooth,quadrant=quadrant,remarks=remarks,authorized=False,relgrproc=relgrproc) 
+    
+            db.commit()
+            
+            tplanid = int(common.getid(t[0].tplanid)) if(len(t) > 0) else 0
+            memberid = int(common.getid(t[0].memberid)) if(len(t) > 0) else 0
+            
+            booking_amount = account.get_booking_amount(db, treatmentid)
+            tax = account.get_tax_amount(db, copay)
+            if(booking_amount > 0):
+                #db(db.treatmentplan.id == tplanid).update(totalpaid = booking_amount)
+               
+                db(db.treatment_procedure.id == tpid).update(copay = float(common.getvalue(tax["posttaxamount"])))
+                db.commit()                
+                
+            #update treatment with new treatment cost
+            account.updatetreatmentcostandcopay(db,auth.user,treatmentid)
+            
+            #update tplan with new treatment cost
+            account.calculatecost(db,tplanid)
+            account.calculatecopay(db, tplanid,memberid)
+            account.calculateinspays(db,tplanid)
+            account.calculatedue(db,tplanid)            
+    
+            jsonObj = {\
+                "result" : "success" if(procid > 0) else "fail",
+                "error_message" : "" if(procid > 0) else "Invalid Procedure",
+                "treatmentprocid":procid,
+                "originalcopay":copay+booking_amount,
+                "copay":copay,
+                "booking_amount":booking_amount
+                
+            }
+        
+        except Exception as e:
+            retobj1 = {}
+            retobj1["result"] = "fail"
+            retobj1["error_message"] = "Add Procedure to Treatment API Exception Error " + str(e)
+            json.dumps(retobj1)
+    
+        return json.dumps(jsonObj)
     
 
     #this procedure updates a treatment procedure record

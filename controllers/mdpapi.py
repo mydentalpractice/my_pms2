@@ -1459,6 +1459,10 @@ def addproceduretotreatment(avars):
     rsp = oproc.addproceduretotreatment(str(avars['procedurecode']), str(avars['treatmentid']), str(avars['plan']),str(avars["tooth"]),str(avars["quadrant"]),str(avars["remarks"]))
     return rsp
 
+def addSPLproceduretotreatment(avars):
+    oproc = mdpprocedure.Procedure(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+    rsp = oproc.addSPLproceduretotreatment(str(avars['procedurecode']), str(avars['treatmentid']), str(avars['plan']),str(avars["tooth"]),str(avars["quadrant"]),str(avars["remarks"]))
+    return rsp
 
 ############################ Procedures API #######################################################
 def uploadimage(avars):
@@ -2708,7 +2712,7 @@ mdpapi_switcher = {"listappointments":getappointments,"getappointmentsbymonth":g
                    "treatmentstatus":treatmentstatus,"getprocedures":getprocedures,"addproceduretotreatment":addproceduretotreatment,"gettreatmentprocedure":gettreatmentprocedure,\
                    "updatetreatmentprocedure":updatetreatmentprocedure,"completetreatmentprocedure":completetreatmentprocedure,"canceltreatmentprocedure":canceltreatmentprocedure,\
                    "gettreatmentprocedures":gettreatmentprocedures,"sendforauthorization":sendforauthorization,\
-                   "getpatientnotes":getpatientnotes,"addpatientnotes":addpatientnotes,\
+                   "getpatientnotes":getpatientnotes,"addpatientnotes":addpatientnotes,"addSPLproceduretotreatment":addSPLproceduretotreatment,\
                    "uploadimage":uploadimage,"xuploadimage":xuploadimage,"downloadimage":downloadimage,"getimages":getimages,"deleteimage":deleteimage,"updateimage":updateimage,\
                    "genders":genders,"cities":cities,"states":states,"regions":regions,"regionswithid":regionswithid,"status":status,"otpvalidation":otpvalidation,"appointmentstatus":appointmentstatus,\
                    "appointmentduration":appointmentduration,"pattitles":pattitles,"doctitles":doctitles, "getallconstants":getallconstants,\

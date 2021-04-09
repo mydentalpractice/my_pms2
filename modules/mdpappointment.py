@@ -281,6 +281,7 @@ class Appointment:
             
             list_appointments = self.list_appointment(apptobj)
             
+            
             apptobj = {}
             apptobj["action"] = "list_block"
             apptobj["providerid"] = str(providerid)
@@ -308,7 +309,8 @@ class Appointment:
             
             list_open_slots = []
          
-            if(ops_timing_list == None):
+            if((ops_timing_list == None)|(len(ops_timing_list)==0)):
+                logger.loggerpms2.info("Empty Clinic Timings")
                 
                 list_open_slots1=[
                     "7:00 AM","7:30 AM","8:00 AM","8:30 AM","9:00 AM","9:30 AM","10:00 AM","10:30 AM","11:00 AM","11:30 AM",
@@ -340,7 +342,7 @@ class Appointment:
                         list_open_slots.append(open_slot)                    
             
             else:
-
+                logger.loggerpms2.info("Not Empty Clinic Timings")
                 for t in ops_timing_list:
                     i  =0
                     today_dt_str = common.getstringfromdate(datetime.date.today(),"%d/%m/%Y")

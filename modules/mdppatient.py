@@ -1511,6 +1511,8 @@ class Patient:
       planid = common.getkeyvalue(avars,"planid",0)
       regionid = common.getkeyvalue(avars,"regionid",0)
       
+      premstartdt_str = common.getkeyvalue(avars,"premstartdt",None)
+      premenddt_str = common.getkeyvalue(avars,"premenddt",None)
       
       sql = "UPDATE membercount SET membercount = membercount + 1 WHERE company = " + str(companyid) + ";"
       db.executesql(sql)
@@ -1533,25 +1535,29 @@ class Patient:
       todaydt = datetime.date.today()
       enrolldate = common.getkeyvalue(avars,"enrolldate","")
       
-      
-      premstartdt = todaydt if(enrolldate == "") else (datetime.datetime.strptime(enrolldate,"%d/%m/%Y")).date()
-      
-      day  = timedelta(days = 1)
-      
-      if(calendar.isleap(premstartdt.year + 1)):
-        if(premstartdt > datetime.date(premstartdt.year,02,28)):
-          year            = timedelta(days=366)
-        else:
-          year = timedelta(days=365)
-      elif(calendar.isleap(premstartdt.year)):
-        if(premstartdt <= datetime.date(premstartdt.year,02,29)):
-          year            = timedelta(days=366)
+      if(premstartdt_str != ""):
+        premstartdt = common.getdatefromstring(premstartdt_str, "%d/%m/%Y")
+        premenddt = common.getdatefromstring(premenddt_str, "%d/%m/%Y")
+      else:
+        premstartdt = todaydt if(enrolldate == "") else (datetime.datetime.strptime(enrolldate,"%d/%m/%Y")).date()
+        
+        day  = timedelta(days = 1)
+        
+        if(calendar.isleap(premstartdt.year + 1)):
+          if(premstartdt > datetime.date(premstartdt.year,02,28)):
+            year            = timedelta(days=366)
+          else:
+            year = timedelta(days=365)
+        elif(calendar.isleap(premstartdt.year)):
+          if(premstartdt <= datetime.date(premstartdt.year,02,29)):
+            year            = timedelta(days=366)
+          else:
+            year            = timedelta(days=365)
         else:
           year            = timedelta(days=365)
-      else:
-        year            = timedelta(days=365)
-    
-      premenddt = (premstartdt + year) - day  
+      
+       
+        premenddt = (premstartdt + year) - day  
       
       patid = db.patientmember.insert(\
         patientmember = patientmember,

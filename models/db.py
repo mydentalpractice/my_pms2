@@ -4046,6 +4046,53 @@ db.customeractivity._plural   = "customeractivity"
 
 
 
+
+db.define_table('booking',
+      
+                
+                Field('booking_id','string'),
+                Field('package_name','string'),
+                Field('name','string'),
+                Field('email','string'),
+                Field('contact','string'),
+                Field('cell','string'),
+                Field('city','string'),
+                Field('pincode','string'),
+                Field('tx_id','string'),
+                Field('payment_id','string'),
+                Field('payment_status','string'),
+                Field('notes','text'),
+                
+                Field('package_cost','double'),
+                Field('package_offer_price','double'),
+                Field('package_booking_amount','double'),
+                Field('payment_amount','double'),
+                Field('amount_paid','double'),
+                
+                Field('package_start_date','datetime'),
+                Field('package_end_date','datetime'),
+                Field('payment_date','datetime'),
+                
+                Field('status','string'),
+                auth.signature
+                
+                )
+
+db.booking._singular = "booking"
+db.booking._plural   = "booking"
+
+
+db.define_table('package_region_plan',
+                Field('package_code','string'),
+                Field('package_name','string'),
+                Field('city','string'),
+                Field('region','string'),
+                Field('plancode','string')
+                )
+db.package_region_plan._singular = "package_region_plan"
+db.package_region_plan._plural   = "package_region_plan"
+
+
 db.define_table('vw_customer',
                Field('id','integer'),
                Field('customerid', 'integer'),

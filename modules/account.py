@@ -760,6 +760,34 @@ def calculateinspays(db,tplanid):
     
     return dict()
 
+def get_tax_amount(db,amount):
+    r = db((db.urlproperties.id > 0 ) & (db.urlproperties.is_active == True)).select()
+    servicetax = float(common.getvalue(r[0].servicetax)) if (len(r) ==1) else 0
+    tax = amount * servicetax/100
+    posttaxamount = amount + tax
+    
+    return dict(tax=tax,posttaxamount = posttaxamount)
+
+def get_booking_amount(db,treatmentid):
+    rows = db((db.vw_treatmentprocedure.treatmentid == treatmentid) & (db.vw_treatmentprocedure.is_active == True)).select()
+    
+    if(len(rows) != 1):
+        return 0
+    
+    memberid = rows[0].primarypatient
+    p = db((db.patientmember.id == memberid)& (db.patientmember.is_active == True)).select(db.patientmember.groupref)
+    
+    if(len(p) != 1):
+        return 0
+    
+    b = db((db.booking.booking_id == common.getstring(p[0].groupref)) & (db.booking.is_active == True)).select()
+    
+    booking_amount = 0
+    
+    if(len(b)==1):
+        booking_amount = float(common.getvalue(b[0].package_booking_amount))
+                                                   
+    return booking_amount
 
 def updatetreatmentcostandcopay(db,user,treatmentid):
     totalactualtreatmentcost = 0   #UCR Cost
@@ -775,7 +803,7 @@ def updatetreatmentcostandcopay(db,user,treatmentid):
         totalcopay = totalcopay + float(common.getvalue(r.copay))
         totalinspays = totalinspays + float(common.getvalue(r.inspays)) 
         totalcompanypays = totalcompanypays + float(common.getvalue(r.companypays))     
-    
+       
     
     db(db.treatment.id == treatmentid).update(actualtreatmentcost = totalactualtreatmentcost, treatmentcost=totaltreatmentcost, \
                                               copay=totalcopay, inspay=totalinspays, companypay= totalcompanypays,

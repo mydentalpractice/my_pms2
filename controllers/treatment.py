@@ -604,7 +604,7 @@ def getproceduregrid(providerid,tplanid,treatmentid,memberid,patientid,authoriza
             'vw_treatmentprocedure.quadrant':'Quadrant',
             'vw_treatmentprocedure.procedurefee':'Procedure Cost',
             'vw_treatmentprocedure.inspays':'Insurance Pays',
-            'vw_treatmentprocedure.copay':'Co-Pay',
+            'vw_treatmentprocedure.copay':'Patient Pays',
             'vw_treatmentprocedure.status':'Status',
             'vw_treatmentprocedure.treatmentdate':'Treatment Date'
         }
@@ -2714,9 +2714,10 @@ def update_treatment():
     #==== End of Images
           
        
-   
+    booking_amount = account.get_booking_amount(db, treatmentid)
     showprocgrid = True
-
+    booking = True if(booking_amount > 0) else False
+    
     return dict(formTreatment=formTreatment, formProcedure=formProcedure,  \
                 page=page, memberpage=0, imagepage=imagepage,procedureid=procedureid,\
                 providerid=providerid, providername=providername,doctorid=doctorid,doctorname=docs[0].name,\
@@ -2724,7 +2725,7 @@ def update_treatment():
                 treatment=treatment,treatmentid=treatmentid,tplanid=tplanid,medicalalerts=medicalalerts,\
                 authorization=authorization,authorizationurl=authorizationurl,writablflag=writablflag,
                 preauthorized=preauthorized,preauthorizeerror=preauthorizeerror,authorizeerror=authorizeerror,authorized=authorized,webadmin=webadmin,returnurl=returnurl,\
-                freetreatment=freetreatment,newmember=newmember,showprocgrid = showprocgrid
+                freetreatment=freetreatment,newmember=newmember,showprocgrid = showprocgrid,booking=booking,booking_amount = booking_amount
                 )        
             
 
@@ -3900,6 +3901,7 @@ def add_proceduregrid():
     status = common.getstring(treatment[0].treatment.status)
     status = status if(status != "") else "Started"    
     
+      
  
            
     procs = db((db.vw_procedurepriceplan.procedurepriceplancode == procedurepriceplancode) &\
@@ -3921,7 +3923,7 @@ def add_proceduregrid():
     companypays = 0
     remarks = 0
     procedurepriceplanid = 0
- 
+   
     
     if(len(procs)>0):
         procedurepriceplanid = int(common.getid(procs[0].id))
@@ -3929,7 +3931,7 @@ def add_proceduregrid():
         procedurefee = ucrfee if(float(common.getvalue(procs[0].procedurefee))  == 0) else float(common.getvalue(procs[0].procedurefee))
         inspays = float(common.getvalue(procs[0].inspays))
         copay = float(common.getvalue(procs[0].copay))
-        companypays = float(common.getvalue(procs[0].companypays))
+        companypays = float(common.getvalue(procs[0].companypays)) 
         remarks = common.getstring(procs[0].remarks)
         balance = 0
         trxamount = 0        
@@ -3944,13 +3946,27 @@ def add_proceduregrid():
     
     #x  = datetime.datetime.now()
     #logger.logger.info("===================Start Insert=======================================" + datetime.datetime.strftime(x, "%Y-%m-%d %H:%M:%S:%f"))
-    
-    db.treatment_procedure.insert(treatmentid = treatmentid, dentalprocedure = procedurepriceplanid,status=status,\
+    tpid = db.treatment_procedure.insert(treatmentid = treatmentid, dentalprocedure = procedurepriceplanid,status=status,\
                                     ucr = ucrfee, procedurefee=procedurefee, copay=copay,inspays=inspays,companypays=companypays,\
                                     tooth=tooth,quadrant=quadrant,remarks=remarks) 
     
+    
+    
     db.commit() 
     
+    booking_amount = account.get_booking_amount(db, treatmentid)
+    tax = account.get_tax_amount(db, copay)
+    if(booking_amount > 0):
+        ##db(db.treatment.id == treatmentid).update(companypay = companypays+booking_amount)
+        ##db(db.treatmentplan.id == tplanid).update(totalpaid = booking_amount)
+        db(db.treatment_procedure.id == tpid).update(copay = float(common.getvalue(tax["posttaxamount"])))
+        db.commit()
+    
+    
+   
+  
+  
+   
     #x  = datetime.datetime.now()
     #logger.logger.info("===================Exit1 Insert=======================================" + datetime.datetime.strftime(x, "%Y-%m-%d %H:%M:%S:%f"))    
     

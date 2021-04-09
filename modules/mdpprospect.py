@@ -9,6 +9,7 @@ from applications.my_pms2.modules import common
 from applications.my_pms2.modules import logger
 
 from applications.my_pms2.modules import mdpprovider
+from applications.my_pms2.modules import mdpclinic
 
 
 class Prospect:
@@ -373,7 +374,57 @@ class Prospect:
                    
         
                                
+            #check if prospect is already in the system
+            #if it is there, then return the prospect
+            #else create a new prospect
+            r = db((db.prospect.cell == cell) & (db.prospect.is_active == True)).select()
+            if(len(r)>1):
+                i = 0
+                #return error
+                mssg = "More than 1 Prospect with the same cell number: " + cell
+                logger.loggerpms2.info(mssg)      
+                excpobj = {}
+                excpobj["result"] = "fail"
+                excpobj["error_code"] = "MDP100"
+                excpobj["error_message"] = mssg
+                return json.dumps(excpobj)                
+            
+            if(len(r)==1):
+                i = 0
+                ds = db((db.prospect.id == prospectid) & (db.prospect.is_active == True)).select()   
+                prospectid = int(common.getid(r[0].id))
+                p = db(db.prospect_ref.prospect_id ==prospectid).select()
+                ref_code = p[0].ref_code if len(p) == 1 else ""
+                ref_id = int(p[0].ref_id) if len(p) == 1 else 0
                 
+                reqobj = {
+                    "ref_code":"PST",
+                    "ref_id":str(prospectid)
+                }
+                            
+                clinicobj = mdpclinic.Clinic(db)
+                obj = json.loads(clinicobj.list_clinic(json.dumps(reqobj)))
+                
+                count = 0
+                if(obj["result"] == "success"):
+                    count = int(common.getid(obj["count"]))
+                
+                rspobj = {
+                        "ref_code":ref_code,
+                        "ref_id":ref_id,
+                        
+                        "prospectid":str(prospectid),
+                        "clinic_count":str(count),
+                        "result":"success",
+                        "error_message":"",
+                        "error_code":""
+                    }
+                
+                return json.dumps(rspobj)
+                
+                
+            
+            #create a new prospect
             prospectid = db.prospect.insert(\
                 
                 
