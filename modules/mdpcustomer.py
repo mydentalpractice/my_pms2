@@ -267,6 +267,209 @@ class Customer:
             }                    
             
         return json.dumps(jsonresp)
+
+
+    def enroll_SPL_customers(self,avars):
+        logger.loggerpms2.info("Enter Enroll Special Customer " + json.dumps(avars))
+        db = self.db
+        auth = current.auth        
+        jsonresp={}
+        count = 0
+        
+        try:
+            jsonresp = {}
+            bookingid = int(common.getkeyvalue(avars,"bookingid","0"))
+            #get booking view (bookings * specialpackage joins) of all active non-Booked customers
+            bookings = db((db.booking.id == bookingid) & (db.booking.is_active == True)).select()
+            
+            providerid = 0
+            companyid = 0
+            planid = 0
+            regionid = 0
+            
+            #default provider = 'P0001'
+            p = db((db.provider.provider == 'P0001') & (db.provider.is_active == True)).select(db.provider.id)
+            providerid = p[0].id if(len(p) == 1) else 0
+            
+            #company = package name
+            
+            #for each active booking
+            #check whether this is outside validity period, if yes, go to next
+            #enroll the customer - set premium = booking amount, premstdt = booking date, premendt = Dec 31
+            #assign special custoemer one of the six plans - gsp bsp, pcsp, emsp, rctsp
+            #update booking isBooked = True so next time it is not booked.
+            #assign default provider to this customer
+            #insert payment record in paymenttxlog for the booking amount            
+            splcode = ""
+            for booking in bookings:
+                
+                if(booking.package_name == "Grooms Special Package"):
+                    splcode = "GSP"
+                if(booking.package_name == "Brides Special Package(With Jewellery)"):
+                    splcode = "BSPJ"
+                if(booking.package_name == "Paediatric Care Special Package"):
+                    splcode = "PCSP"
+                if(booking.package_name == "Expecting Mothers Special Package"):
+                    splcode = "EMSP"
+                if(booking.package_name == "RCT Special Package"):
+                    splcode = "RCTSP"
+                if(booking.package_name == "Brides Special Package(Without Jewellery)"):
+                    splcode = "BSPJNA"
+                
+
+                #companyid
+                c = db((db.company.company == splcode) & (db.company.is_active == True)).select(db.company.id)
+                companyid = common.getid(c[0].id) if(len(c)==1) else 0
+                
+                #regionid
+                city = (booking.city).strip()
+                cty = db((db.package_region_plan.package_code == splcode) & (db.package_region_plan.city==city)).select()
+                
+                
+                region = cty[0].region if(len(cty)==1) else ""
+                rg = db((db.groupregion.groupregion == region) & (db.groupregion.is_active == True)).select(db.groupregion.id)
+                regionid = common.getid(rg[0].id) if(len(rg)==1) else 0
+                
+                #planid
+                x = db((db.package_region_plan.region == region) & (db.package_region_plan.package_code == splcode)).select()
+                plancode = x[0].plancode if(len(x)==1) else ""
+                pl = db((db.hmoplan.hmoplancode == plancode) &  (db.hmoplan.groupregion == regionid) & (db.hmoplan.is_active == True)).select(db.hmoplan.id)
+                planid = common.getid(pl[0].id) if(len(pl)==1) else 0
+                
+                #check whether this customer is already enrolled
+                booking_id =  booking.booking_id
+                r = db((db.patientmember.groupref == booking_id) & (db.patientmember.is_active == True)).select()
+                if(len(r) >= 1):
+                    db(db.booking.booking_id== booking_id).update(status = 'Enrolled')
+                    continue
+                
+                #enroll the booking customer
+                logger.loggerpms2.info("Enroll_Booking " + booking_id + " " + splcode + " " + str(companyid) + " " + str(regionid) + " " + str(planid))
+                
+                name = booking.name
+                arr = (booking.name).split()
+                cobj = {}
+                cobj["customerid"] = booking_id
+                cobj["customer_ref"] = booking_id
+                cobj["fname"] = arr[0] if(len(arr) > 0) else ""
+                cobj["mname"] = arr[1] if((len(arr) > 1) & (len(arr)>=3)) else ""
+                cobj["lname"] = arr[1] if(len(arr) == 2) else arr[2] if(len(arr) > 2) else ""
+                cobj["address1"] = booking.contact
+                cobj["address2"] = booking.contact
+                cobj["address3"] = ""
+                cobj["city"] = booking.city
+                cobj["st"] = "None"
+                cobj["pin"] = booking.pincode
+                
+                cobj["gender"] = "Male"
+                cobj["telephone"] = booking.cell
+                cobj["cell"] = booking.cell
+                cobj["email"] = booking.email
+                
+                cobj["dob"] = common.getstringfromdate(datetime.date.today(), "%d/%m/%Y")
+                cobj["status"] = booking.status
+                cobj["pin1"] = ""
+                cobj["pin2"] = ""
+                cobj["pin3"] = ""
+                
+                cobj["providerid"] = providerid
+                cobj["companyid"] = companyid
+                cobj["regionid"] = regionid
+                cobj["planid"] = planid
+                
+                cobj["premstartdt"] = common.getstringfromdate(booking.package_start_date, "%d/%m/%Y")
+                cobj["premenddt"] = common.getstringfromdate(booking.package_end_date, "%d/%m/%Y")
+               
+                
+                cobj["notes"] = booking.contact            
+                
+                pat = mdppatient.Patient(db, providerid)
+                        
+                jsonresp = json.loads(pat.newpatientfromcustomer(cobj))
+                
+                if(jsonresp["result"] != "success"):
+                    error_code = ""
+                    mssg = "Enroll Special Customer Error - New Patient for booking id " + booking_id + " ( " + name + ")"
+                    logger.loggerpms2.info(mssg)
+                    jsonresp = {
+                        "result":"fail",
+                        "error_message":mssg,
+                        "error_code":error_code
+                    }                                        
+                    
+                    return json.dumps(jsonresp)
+
+                    
+                pat.addpatientnotes(jsonresp["primarypatientid"], jsonresp["patientid"], booking.notes)
+                
+               
+                memberid =  int(common.getid(jsonresp["primarypatientid"]))
+                patientid = int(common.getid(jsonresp["patientid"]))
+                
+                #update premium (booking) amount
+                db(db.patientmember.id == memberid).update(
+                    premium = float(common.getvalue(booking.package_booking_amount)),
+                    premstartdt =booking.package_start_date,
+                    premenddt = booking.package_end_date,
+                    
+                    modified_on = common.getISTFormatCurrentLocatTime(),
+                    modified_by =1 if(auth.user == None) else auth.user.id                               
+                )
+                
+                             
+                paymentid = db.paymenttxlog.insert(
+                    
+                    txno = booking_id,
+                    txdatetime = booking.created_on,
+                    txamount = booking.package_booking_amount,
+                    
+                    paymentid = booking.payment_id,
+                    paymentdate = booking.payment_date,
+                    paymentamount = booking.amount_paid,
+                    
+                    patientmember = memberid,
+                    
+                    is_active = True,
+                    
+                    created_on = common.getISTFormatCurrentLocatTime(),
+                    created_by =1 if(auth.user == None) else auth.user.id,                        
+                    modified_on = common.getISTFormatCurrentLocatTime(),
+                    modified_by =1 if(auth.user == None) else auth.user.id                        
+                
+                
+                )
+                db(db.booking.id == booking.id).update(
+            
+                    status = 'Enrolled',
+                    modified_on = common.getISTFormatCurrentLocatTime(),
+                    modified_by =1 if(auth.user == None) else auth.user.id                               
+            
+            
+                )  
+                count = count + 1
+
+           
+            
+
+            jsonresp = {
+                "result":"success",
+                "count":str(count),
+                "error_message":"",
+                "error_code":""
+            }                    
+        
+        except Exception as e:
+            error_code = "ENROLL_SPECIAL_CUSTOMER"
+            mssg = error_code + ":" + "Exception Enroll Special Customer:\n" + "(" + str(e) + ")"
+            logger.loggerpms2.info(mssg)
+            jsonresp = {
+                "result":"fail",
+                "error_message":mssg,
+                "error_code":error_code
+            }                    
+            
+        return json.dumps(jsonresp)
+
     
     def customer(self,avars):
         db = self.db

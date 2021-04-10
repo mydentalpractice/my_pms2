@@ -25,6 +25,13 @@ def serializedatetime(o):
     if isinstance(o, datetime.datetime):
         return o.__str__()    
    
+def calculateAge(dob):
+    
+    today = datetime.date.today()
+    ty = today.year
+    doby = dob.year
+    age = ty-doby
+    return age
 
 class Appointment:
     
@@ -711,7 +718,7 @@ class Appointment:
         
         try:
             #appt = db((db.vw_appointments.f_uniqueid == apptid) & (db.vw_appointments.provider == providerid)  & (db.vw_appointments.is_active == True)).select()
-            appt = db((db.vw_appointments.id == apptid)   & (db.vw_appointments.is_active == True)).select()
+            appt = db((db.vw_appointments.id == apptid) &  (db.vw_appointments.blockappt == False) &  (db.vw_appointments.is_active == True)).select()
             if(len(appt) == 1):
                 apptobj= {
                     "appointmentid":apptid,
@@ -731,6 +738,9 @@ class Appointment:
                     "doccell":common.modify_cell(appt[0].doccell),
                     "color": appt[0].color if(common.getstring(appt[0].color) != "") else "#ff0000",
                     "provcell":common.modify_cell(appt[0].provcell),
+                    "gender":common.getstring(appt[0].gender),
+                    "dob":common.getstringfromdate(appt[0].dob,"%d/%M/%Y"),  
+                    "age":calculateAge(appt[0].dob) if(appt[0].dob != None) else 0,
                     "result":"success",
                     "error_message":""
                       
@@ -1293,28 +1303,28 @@ class Appointment:
 
                               
             if(len(appt) == 1):
-                x=str(providerid),
-                x=str(appointmentid),
-                x= (appt[0].f_start_time).strftime("%d/%m/%Y %I:%M %p"),
-                x= "30" if(common.getstring(appt[0].f_duration) == "") else int(appt[0].f_duration),
-                x=common.getstring(appt[0].f_title),
-                x=common.getstring(appt[0].description),
-                x=common.getstring(appt[0].f_location),
-                x=locationurl,
-                x=common.getstring(appt[0].f_status) if(common.getstring(appt[0].f_status) != "") else "Open",
-                x=common.getid(appt[0].patientmember),
-                x=common.getid(appt[0].patient),
-                x=common.getstring(appt[0].f_patientname),
-                x=common.modify_cell(appt[0].cell),
-                x=common.getid(appt[0].clinicid),
-                x=common.getid(appt[0].doctor),
-                x=common.getstring(appt[0].docname),
-                x=common.modify_cell(appt[0].doccell),
-                x=common.getstring(appt[0].color) if(common.getstring(appt[0].color) != "") else "#ff0000",
-                x=common.modify_cell(appt[0].provcell),
-                x=common.getstring(appt[0].clinic_ref),
-                x=common.getstring(appt[0].clinic_name),
-                x=common.getboolean(appt[0].blockappt),
+                x=str(providerid)
+                x=str(appointmentid)
+                x= (appt[0].f_start_time).strftime("%d/%m/%Y %I:%M %p")
+                x= "30" if(common.getstring(appt[0].f_duration) == "") else int(appt[0].f_duration)
+                x=common.getstring(appt[0].f_title)
+                x=common.getstring(appt[0].description)
+                x=common.getstring(appt[0].f_location)
+                x=locationurl
+                x=common.getstring(appt[0].f_status) if(common.getstring(appt[0].f_status) != "") else "Open"
+                x=common.getid(appt[0].patientmember)
+                x=common.getid(appt[0].patient)
+                x=common.getstring(appt[0].f_patientname)
+                x=common.modify_cell(appt[0].cell)
+                x=common.getid(appt[0].clinicid)
+                x=common.getid(appt[0].doctor)
+                x=common.getstring(appt[0].docname)
+                x=common.modify_cell(appt[0].doccell)
+                x=common.getstring(appt[0].color) if(common.getstring(appt[0].color) != "") else "#ff0000"
+                x=common.modify_cell(appt[0].provcell)
+                x=common.getstring(appt[0].clinic_ref)
+                x=common.getstring(appt[0].clinic_name)
+                x=common.getboolean(appt[0].blockappt)
                 
                 apptobj= {
                     "providerid":str(providerid),
@@ -1341,6 +1351,7 @@ class Appointment:
                     "block":common.getboolean(appt[0].blockappt),
                     "gender":common.getstring(appt[0].gender),
                     "dob":common.getstringfromdate(appt[0].dob,"%d/%M/%Y"),
+                    "age":calculateAge(appt[0].dob) if(appt[0].dob != None) else 0,
                     "result":"success",
                     "error_message":""
                       
