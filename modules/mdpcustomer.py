@@ -101,19 +101,31 @@ class Customer:
             splcode = ""
             for booking in bookings:
                 
-                if(booking.package_name == "Grooms Special Package"):
-                    splcode = "GSP"
-                if(booking.package_name == "Brides Special Package(With Jewellery)"):
-                    splcode = "BSPJ"
-                if(booking.package_name == "Paediatric Care Special Package"):
-                    splcode = "PCSP"
-                if(booking.package_name == "Expecting Mothers Special Package"):
-                    splcode = "EMSP"
-                if(booking.package_name == "RCT Special Package"):
-                    splcode = "RCTSP"
-                if(booking.package_name == "Brides Special Package(Without Jewellery)"):
-                    splcode = "BSPJNA"
+                #if(booking.package_name == "Grooms Special Package"):
+                    #splcode = "GSP"
+                #if(booking.package_name == "Brides Special Package(With Jewellery)"):
+                    #splcode = "BSPJ"
+                #if(booking.package_name == "Paediatric Care Special Package"):
+                    #splcode = "PCSP"
+                #if(booking.package_name == "Expecting Mothers Special Package"):
+                    #splcode = "EMSP"
+                #if(booking.package_name == "RCT Special Package"):
+                    #splcode = "RCTSP"
+                #if(booking.package_name == "Brides Special Package(Without Jewellery)"):
+                    #splcode = "BSPJNA"
                 
+                if(booking.package_name.find("Grooms Special Package") >= 0):
+                    splcode = "GSP"
+                if(booking.package_name.find("Brides Special Package(With Jewellery)")>=0):
+                    splcode = "BSPJ"
+                if(booking.package_name.find("Paediatric Care Special Package") >= 0):
+                    splcode = "PCSP"
+                if(booking.package_name.find("Expecting Mothers Special Package") >= 0):
+                    splcode = "EMSP"
+                if(booking.package_name.find("RCT Special Package")>=0):
+                    splcode = "RCTSP"
+                if(booking.package_name.find("Brides Special Package(Without Jewellery)") >= 0):
+                    splcode = "BSPJNA"
 
                 #companyid
                 c = db((db.company.company == splcode) & (db.company.is_active == True)).select(db.company.id)
