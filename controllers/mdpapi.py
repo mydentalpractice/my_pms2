@@ -1521,8 +1521,10 @@ def downloadimage(avars):
     urlprops = db(db.urlproperties.id > 0).select(db.urlproperties.mydp_ipaddress)
     oimage = mdpimage.Image(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
     imgobj = oimage.downloadimage(str(avars["imageid"]))
-    imgobj["imageurl"] = urlprops[0].mydp_ipaddress + URL('dentalimage',"download", args=imgobj["image"])
+    imgobj["imageurl"] = urlprops[0].mydp_ipaddress + URL('my_dentalplan','media',"media_download", args=avars["imageid"])
     
+    
+    #imgobj["imageurl"] = urlprops[0].mydp_ipaddress + URL('dentalimage',"download", args=imgobj["image"])
     return json.dumps(imgobj)
 
 

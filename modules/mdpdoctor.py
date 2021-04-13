@@ -224,6 +224,7 @@ class Doctor:
         "error_code":""
       }            
       
+      #add speciality in speciality tab;
       
     except Exception as e:
       mssg = "New Doctor Exception:\n" + str(e)
@@ -274,9 +275,20 @@ class Doctor:
         
         if(len(p)==1):
           provider = p[0].provider if len(p) == 1 else 0
-          s = db((db.speciality.specialityid == d.doctor.speciality) & (db.speciality.providerid == ref_id) & (db.speciality.is_active == True)).select()
-          speciality_name = s[0].speciality if len(s) == 1 else ""
-          speciality = s[0].specialityid if len(s) == 1 else 0
+          s = None
+          if(provider > 0):
+            s = db((db.speciality.specialityid == d.doctor.speciality) & (db.speciality.providerid == ref_id) & (db.speciality.is_active == True)).select()
+            speciality_name = s[0].speciality if len(s) == 1 else ""
+            speciality = s[0].specialityid if len(s) == 1 else 0            
+            if(len(s) == 0):
+              s = db((db.speciality_default.id == d.doctor.speciality) & (db.speciality_default.is_active == True)).select()
+              speciality_name = s[0].speciality if len(s) == 1 else ""
+              speciality = s[0].id if len(s) == 1 else 0              
+          else:
+            s = db((db.speciality_default.id == d.doctor.speciality) & (db.speciality_default.is_active == True)).select()
+            speciality_name = s[0].speciality if len(s) == 1 else ""
+            speciality = s[0].id if len(s) == 1 else 0            
+          
           obj = {
             "ref_code":d.doctor_ref.ref_code,     #DOC
             "ref_id":d.doctor_ref.ref_id,         #ID to either doctor table or provider table
