@@ -1000,12 +1000,12 @@ def updateMedicalHistory(avars):
 ############################## DOCTOR API #####################################################
 
 def specialitylist(avars):
-    odr = mdpdoctor.Doctor(current.globalenv['db'],int(common.getkeyvalue(avars, "providerid", "0")))
+    odr = mdpdoctor.Doctor(current.globalenv['db'],0)
     splist = odr.specialitylist()
     return splist
 
 def rolelist(avars):
-    odr = mdpdoctor.Doctor(current.globalenv['db'],int(common.getkeyvalue(avars, "providerid", "0")))
+    odr = mdpdoctor.Doctor(current.globalenv['db'],0)
     rllist = odr.rolelist()
     return rllist
 
@@ -1460,6 +1460,7 @@ def addproceduretotreatment(avars):
     return rsp
 
 def addSPLproceduretotreatment(avars):
+    logger.loggerpms2.info("Enter addSPLproceduretotreatment (avars) " + json.dumps(avars))
     oproc = mdpprocedure.Procedure(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
     rsp = oproc.addSPLproceduretotreatment(str(avars['procedurecode']), str(avars['treatmentid']), str(avars['plan']),str(avars["tooth"]),str(avars["quadrant"]),str(avars["remarks"]))
     return rsp
@@ -2549,16 +2550,37 @@ def new_doctor(avars):
     rsp = doc.new_doctor(avars)
     return rsp
 
+def new_staff(avars):
+    logger.loggerpms2.info("Enter New Staff Request\n" + str(avars) )
+    doc = mdpdoctor.Doctor(current.globalenv['db'], common.getkeyvalue(avars,"providerid","0"))
+    rsp = doc.new_staff(avars)
+    return rsp
+
+
+
 def list_doctor(avars):
     logger.loggerpms2.info("Enter List Doctor Request\n" + str(avars) )
     doc = mdpdoctor.Doctor(current.globalenv['db'], common.getkeyvalue(avars,"providerid","0"))
     rsp = doc.list_doctor(avars)
     return rsp
 
+def list_staff(avars):
+    logger.loggerpms2.info("Enter List Staff Request\n" + str(avars) )
+    doc = mdpdoctor.Doctor(current.globalenv['db'], common.getkeyvalue(avars,"providerid","0"))
+    rsp = doc.list_staff(avars)
+    return rsp
+
+
 def get_doctor(avars):
     logger.loggerpms2.info("Enter Get Doctor Request\n" + str(avars) )
     doc = mdpdoctor.Doctor(current.globalenv['db'], common.getkeyvalue(avars,"providerid","0"))
     rsp = doc.get_doctor(avars)
+    return rsp
+
+def get_staff(avars):
+    logger.loggerpms2.info("Enter Get Staff Request\n" + str(avars) )
+    doc = mdpdoctor.Doctor(current.globalenv['db'], common.getkeyvalue(avars,"providerid","0"))
+    rsp = doc.get_staff(avars)
     return rsp
 
 def update_doctor(avars):
@@ -2567,10 +2589,23 @@ def update_doctor(avars):
     rsp = doc.update_doctor(avars)
     return rsp
 
+def update_staff(avars):
+    logger.loggerpms2.info("Enter Get Staff Request\n" + str(avars) )
+    doc = mdpdoctor.Doctor(current.globalenv['db'], common.getkeyvalue(avars,"providerid","0"))
+    rsp = doc.update_staff(avars)
+    return rsp
+
+
 def delete_doctor(avars):
     logger.loggerpms2.info("Enter Delete Doctor Request\n" + str(avars) )
     doc = mdpdoctor.Doctor(current.globalenv['db'], common.getkeyvalue(avars,"providerid","0"))
     rsp = doc.delete_doctor(avars)
+    return rsp
+
+def delete_staff(avars):
+    logger.loggerpms2.info("Enter Delete Staff Request\n" + str(avars) )
+    doc = mdpdoctor.Doctor(current.globalenv['db'], common.getkeyvalue(avars,"providerid","0"))
+    rsp = doc.delete_staff(avars)
     return rsp
 
 ############################# END DOCTOR API  ###################################################
@@ -2674,7 +2709,8 @@ clinicAPI_switcher = {
 }
 
 doctorAPI_switcher = {
-    "new_doctor":new_doctor,"list_doctor":list_doctor,"get_doctor":get_doctor,"update_doctor":update_doctor,"delete_doctor":delete_doctor
+    "new_doctor":new_doctor,"list_doctor":list_doctor,"get_doctor":get_doctor,"update_doctor":update_doctor,"delete_doctor":delete_doctor,
+    "new_staff":new_staff,"list_staff":list_staff,"get_staff":get_staff,"update_staff":update_staff,"delete_staff":delete_staff,
 }
 
 prospectAPI_switcher = {

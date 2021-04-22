@@ -214,6 +214,7 @@ class Image:
     imageid = db.dentalimage.insert(\
       title = title,
       image = imgstream,
+      uploadfolder = uploadfolder,
       tooth = tooth,
       quadrant = quadrant,
       imagedate = common.getdt(datetime.datetime.strptime(imagedate,"%d/%m/%Y")),

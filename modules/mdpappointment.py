@@ -1169,7 +1169,7 @@ class Appointment:
                 #save in case report
                 common.logapptnotes(db,complaint,notes,apptid)
 
-                newapptobj= {"result":"success","error_message":"","appointment_ref":appointment_ref,"appointmentid":apptid,"message":"success"}    
+                newapptobj= {"result":"success","error_message":"","appointment_ref":appointment_ref,"appointmentid":apptid,"appointment_start":startdtstr,"message":"success"}    
             else:
                 newapptobj = {"result":"blocked","error_message":"","appointment_ref":appointment_ref, "appointmentid":0,"message":"The appointment date and time is blocked"}
 
@@ -1330,7 +1330,9 @@ class Appointment:
                     "providerid":str(providerid),
                     "appointmentid":str(appointmentid),
                     "apptdatetime" : (appt[0].f_start_time).strftime("%d/%m/%Y %I:%M %p"),
-                    "duration": "30" if(common.getstring(appt[0].f_duration) == "") else int(appt[0].f_duration),
+                    "apptenddatetime" : (appt[0].f_end_time).strftime("%d/%m/%Y %I:%M %p"),
+                    "duration": "30" if(common.getstring(appt[0].f_duration) == "") else str(int(appt[0].f_duration)),
+                    "days":"0" if(common.getstring(appt[0].f_duration) == "") else str(int(round((appt[0].f_duration)/1440))),
                     "complaint":common.getstring(appt[0].f_title),
                     "notes":common.getstring(appt[0].description),
                     "location":common.getstring(appt[0].f_location),
@@ -1445,7 +1447,7 @@ class Appointment:
             return json.dumps(excpobj)            
 
         block_start_date = common.getdatefromstring(block_start_str, "%d/%m/%Y %H:%M")
-        
+       
         
         block_end_str = common.getkeyvalue(avars,"block_end",None)
         if((block_end_str == None) | (block_end_str == "") ):
@@ -1460,7 +1462,12 @@ class Appointment:
         duration = ((block_end_date - block_start_date).total_seconds())/60
         avars["duration"] = duration
         avars["appointment_start"] = common.getstringfromdate(block_start_date,"%d/%m/%Y %H:%M")
+        avars["appointment_end"] = common.getstringfromdate(block_end_date,"%d/%m/%Y %H:%M")
+        avars["days"] = int(duration)/1440
         rsp = json.loads(self.new_appointment(avars))
+        rsp["appointment_end"] = common.getstringfromdate(block_end_date,"%d/%m/%Y %H:%M")
+        rsp["days"] = str(int(round(duration/1440)))
+        
         return json.dumps(rsp)
     
     def remove_block_datetime(self,avars):
@@ -1731,7 +1738,7 @@ class Appointment:
             start = str(year) + "-" + str(month).zfill(2) + "-01 00:00:00"
             end   = str(year) + "-" + str(month).zfill(2) + "-31 23:59:00"  #no need to take 30 or 31 days - just default to 31 days
             
-            strsql = "select DATE(f_start_time) as apptdate, count(*) as apptcount from vw_appointments where (1=1) "
+            strsql = "select DATE(f_start_time) as apptdate, count(*) as apptcount,f_duration from vw_appointments where (1=1) "
 
             if(providerid != 0):
                 strsql = strsql + " AND provider = " + str(providerid)
@@ -1761,15 +1768,10 @@ class Appointment:
             for i in xrange(0,len(ds)):
                 x = {
                     "apptdate": ds[i][0].strftime("%d/%m/%Y"),
-                    "count": int(common.getid(ds[i][1]))
+                    "count": int(common.getid(ds[i][1])),
+                    "days":str(round(common.getvalue(ds[i][2])/1440))
                 }
                 apptlist.append(x)
-            
-
-           
-                
-
-            
             
             apptobj["result"] = "success"
             apptobj["error_message"] = ""

@@ -958,7 +958,37 @@ class User:
    
   
   
+  def prospect_de_registration(self, request, cell,email):  
+    logger.loggerpms2.info("Enter Prospect De-Registration")
+    db=self.db
+    regobj = {}
     
+    auth = self.auth
+    
+    
+    try:
+      
+      users = db((db.auth_user.cell==cell)).select()
+    
+      db((db.auth_user.cell==cell)).update(cell = '9999999999')
+      regobj["result"] = "success"
+      regobj["error_message"] = ""
+      regobj["userid"] = str(users[0].id)
+      regobj["email"] = email
+      regobj["cell"] = cell
+
+
+    except Exception as e:
+            excpobj = {}
+            
+            excpobj["result"] = "fail"
+            excpobj["new"] = False
+            excpobj["userid"] = ""
+            excpobj["error_message"] = "Prospect De-Registration Exception Error - " + str(e)
+            logger.loggerpms2.info("Prospect De-Registration Exception Error - " + str(e))
+            return json.dumps(excpobj)       
+            
+    return json.dumps(regobj)
    
   def provider_registration(self, request, providername, sitekey, email, cell, registration_id, username, password,role):
       logger.loggerpms2.info("Enter provider registration")
@@ -1002,6 +1032,7 @@ class User:
           
           crypt_pass = my_crypt(str(password))[0]
           
+          
           #logger.loggerpms2.info("after CRYPT_PASS_2_" + " " + str(crypt_pass).encode("ASCII"))
           id_user= db.auth_user.insert(
                                      email = str(email),
@@ -1018,7 +1049,7 @@ class User:
           group_id = auth.id_group(role=role)
           auth.add_membership(group_id, id_user)       
   
-       
+          
          
           regobj["result"] = "success"
           regobj["error_message"] = ""

@@ -3866,7 +3866,7 @@ def update_procedure():
 
 def add_proceduregrid():
     #x  = datetime.datetime.now()
-    #logger.logger.info("===================Enter Add_procedure=======================================" + datetime.datetime.strftime(x, "%Y-%m-%d %H:%M:%S:%f"))
+    #logger.loggerpms2.info("===================Enter Add_procedure=======================================")
     
     #check whether webadmin login
     impersonated = auth.user.impersonated

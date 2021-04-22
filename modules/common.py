@@ -48,23 +48,28 @@ def setcookies(response):
 
 def getstringfromdate(dateobj,fmt):
         if(dateobj == None):
-                return None
+                return ""
         dtstr = dateobj.strftime(fmt)
         
         return dtstr
 
 def getdatefromstring(strdate,fmt):
+        if(strdate == ""):
+                return datetime.date.today()
         
         dt = datetime.datetime.strptime(strdate,fmt)
         return dt
         
 def gettimefromstring(strtime,fmt):
+        if(strtime == ""):
+                return None
+        
         t = time.strptime(strtime, fmt)
         return t
 
 def getstringfromtime(timeobj, fmt):
         if(timeobj == None):
-                return None
+                return ""
         strtime = timeobj.strftime(fmt)
         
        

@@ -1503,6 +1503,7 @@ class Patient:
     db = self.db
     providerid = self.providerid
     
+    logger.loggerpms2.info("Enter newpatientifromcustomer " + json.dumps(avars))
     patobj = {}
     
     try:
@@ -1511,8 +1512,8 @@ class Patient:
       planid = common.getkeyvalue(avars,"planid",0)
       regionid = common.getkeyvalue(avars,"regionid",0)
       
-      premstartdt_str = common.getkeyvalue(avars,"premstartdt",None)
-      premenddt_str = common.getkeyvalue(avars,"premenddt",None)
+      premstartdt_str = common.getkeyvalue(avars,"premstartdt","")
+      premenddt_str = common.getkeyvalue(avars,"premenddt","")
       
       sql = "UPDATE membercount SET membercount = membercount + 1 WHERE company = " + str(companyid) + ";"
       db.executesql(sql)
@@ -1539,7 +1540,7 @@ class Patient:
         premstartdt = common.getdatefromstring(premstartdt_str, "%d/%m/%Y")
         premenddt = common.getdatefromstring(premenddt_str, "%d/%m/%Y")
       else:
-        premstartdt = todaydt if(enrolldate == "") else (datetime.datetime.strptime(enrolldate,"%d/%m/%Y")).date()
+        premstartdt = todaydt if((enrolldate == None)|(enrolldate == "")) else (datetime.datetime.strptime(enrolldate,"%d/%m/%Y")).date()
         
         day  = timedelta(days = 1)
         
@@ -1643,7 +1644,7 @@ class Patient:
         "patient":common.getstring(pat[0].patient), 
         "cell":common.getstring(pat[0].cell), 
         "email":common.getstring(pat[0].email), 
-        "dob":pat[0].dob.strftime("%d/%m/%Y"),
+        "dob":common.getstringfromdate(pat[0].dob,"%d/%m/%Y"),  #pat[0].dob.strftime("%d/%m/%Y"),
         "gender":common.getstring(pat[0].gender), 
         "relation":common.getstring(pat[0].relation), 
         
@@ -1656,8 +1657,8 @@ class Patient:
         "newmember":common.getboolean(pat[0].newmember), 
         "freetreatment":common.getboolean(pat[0].freetreatment), 
         "age" :int(common.getid(pat[0].age)) ,
-        "premstartdt":pat[0].premstartdt.strftime("%d/%m/%Y %H:%M"), 
-        "premenddt":pat[0].premenddt.strftime("%d/%m/%Y %H:%M"), 
+        "premstartdt":common.getstringfromdate(pat[0].premstartdt,"%d/%m/%Y"),   #pat[0].premstartdt.strftime("%d/%m/%Y"), 
+        "premenddt":common.getstringfromdate(pat[0].premenddt,"%d/%m/%Y"),       #pat[0].premenddt.strftime("%d/%m/%Y"), 
         "hmoplanname":pat[0].hmoplanname,
         "hmoplancode":pat[0].hmoplancode,
       

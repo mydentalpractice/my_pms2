@@ -494,7 +494,8 @@ class Media:
             medias = None
             if(memberid != 0):  
                 medias = db((query)&(db.dentalimage.patientmember == memberid)&\
-                            (db.dentalimage.patient == patientid)).select(db.dentalimage.ALL, limitby=limitby)
+                            (db.dentalimage.patient == patientid)).select(db.dentalimage.ALL, db.dentalimage_ref.ALL,
+                                                                          left=db.dentalimage_ref.on((db.dentalimage.id == db.dentalimage_ref.media_id)),limitby=limitby)
                 
             else:
                 if(ref_id == 0):

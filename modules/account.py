@@ -2,7 +2,7 @@ import datetime
 import hashlib
 import md5
 import common
-
+from applications.my_pms2.modules import logger
 
 def assignedPatients(db,providerid):
 
@@ -769,14 +769,15 @@ def get_tax_amount(db,amount):
     return dict(tax=tax,posttaxamount = posttaxamount)
 
 def get_booking_amount(db,treatmentid):
+    #logger.loggerpms2.info("Enter get_booking_amount " + str(treatmentid))
     rows = db((db.vw_treatmentprocedure.treatmentid == treatmentid) & (db.vw_treatmentprocedure.is_active == True)).select()
-    
+    logger.loggerpms2.info("rows " + str(len(rows)))
     if(len(rows) != 1):
         return 0
     
     memberid = rows[0].primarypatient
     p = db((db.patientmember.id == memberid)& (db.patientmember.is_active == True)).select(db.patientmember.groupref)
-    
+    #logger.loggerpms2.info("patients " + str(len(p)) + " " + str(memberid))
     if(len(p) != 1):
         return 0
     
@@ -784,9 +785,11 @@ def get_booking_amount(db,treatmentid):
     
     booking_amount = 0
     
+    
     if(len(b)==1):
         booking_amount = float(common.getvalue(b[0].package_booking_amount))
-                                                   
+
+    #logger.loggerpms2.info("Exit get_booking_amount " + common.getstring(p[0].groupref) + " " + str(len(b)) + " " + str(booking_amount))                                                   
     return booking_amount
 
 def updatetreatmentcostandcopay(db,user,treatmentid):

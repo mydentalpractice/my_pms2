@@ -42,7 +42,7 @@ class Provider:
     logger.loggerpms2.info("Enter new Provider ")
   
     try:
-      prospectid = int(common.getkeyvalue(avars,"prospectid","0"))
+      prospectid = int(common.getid(common.getkeyvalue(avars,"prospectid","0")))
       obj = self.getProviderCode()
       provider = obj["providercode"]
      
@@ -72,10 +72,10 @@ class Provider:
         email=common.getkeyvalue(avars,'email',""),
         
         taxid=common.getkeyvalue(avars,'taxid',""),
-        speciality=int(common.getkeyvalue(avars,'speciality',"1")),
+        speciality=int(common.getid(common.getkeyvalue(avars,'speciality',"1"))),
         specialization=common.getkeyvalue(avars,'specialization',""),
         sitekey=common.getkeyvalue(avars,'sitekey',""),
-        groupregion=int(common.getkeyvalue(avars,'groupregion',"1")),
+        groupregion=int(common.getid(common.getkeyvalue(avars,'groupregion',"1"))),
         
         registration=common.getkeyvalue(avars,'registration',""),
         registered=common.getboolean(common.getkeyvalue(avars,'registered',"True")),
@@ -92,7 +92,7 @@ class Provider:
   
         pa_accepted=common.getboolean(common.getkeyvalue(avars,'pa_accepted',"False")),
         pa_approved=common.getboolean(common.getkeyvalue(avars,'pa_approved',"False")),
-        pa_approvedby=int(common.getkeyvalue(avars,'pa_approvedby',"1")),
+        pa_approvedby=int(common.getid(common.getkeyvalue(avars,'pa_approvedby',"1"))),
         pa_approvedon=common.getdatefromstring(common.getkeyvalue(avars,'pa_approvedon',common.getstringfromdate(datetime.datetime.today(),"%d/%m/%Y")),"%d/%m/%Y"),
         pa_day=common.getkeyvalue(avars,'pa_day',""),
         pa_month=common.getkeyvalue(avars,'pa_month',""),
@@ -107,15 +107,15 @@ class Provider:
         groupemail=common.getboolean(common.getkeyvalue(avars,'groupemail',"True")),
         
         status=common.getkeyvalue(avars,'status',"Enrolled"),
-        bankid = int(common.getkeyvalue(avars,'bankid','0')),
+        bankid = int(common.getid(common.getkeyvalue(avars,'bankid','0'))),
         enrolleddate = common.getISTFormatCurrentLocatTime(),
-        assignedpatientmembers = int(common.getkeyvalue(avars,'assignedpatientmembers','0')),
+        assignedpatientmembers = int(common.getid(common.getkeyvalue(avars,'assignedpatientmembers','0'))),
         languagesspoken = common.getkeyvalue(avars,'languagesspoken',"English,Hindi"),
         
-        captguarantee = float(common.getkeyvalue(avars,'captguarantee',"0.0")),
-        schedulecapitation  = float(common.getkeyvalue(avars,'schedulecapitation',"0.0")),
-        capitationytd  = float(common.getkeyvalue(avars,'capitationytd',"0.0")),
-        captiationmtd  = float(common.getkeyvalue(avars,'captiationmtd',"0.0")),        
+        captguarantee = float(common.getvalue(common.getkeyvalue(avars,'captguarantee',"0.0"))),
+        schedulecapitation  = float(common.getvalue(common.getkeyvalue(avars,'schedulecapitation',"0.0"))),
+        capitationytd  = float(common.getvalue(common.getkeyvalue(avars,'capitationytd',"0.0"))),
+        captiationmtd  = float(common.getvalue(common.getkeyvalue(avars,'captiationmtd',"0.0"))),        
 
   
         is_active = True,

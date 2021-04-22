@@ -576,6 +576,7 @@ class Prospect:
         return json.dumps(rspobj)    
     
     def enroll_prospect(self,avars):
+        logger.loggerpms2.info("Enter Enroll Prospect - Module")
         auth  = current.auth
         db = self.db
     

@@ -123,11 +123,12 @@ class Doctor:
     db = self.db
     providerid = self.providerid    
     
+    sps = db((db.speciality_default.is_active == True)).select()
     
-    if(providerid == 0):
-      sps = db((db.speciality_default.is_active == True)).select()
-    else:
-      sps = db((db.speciality.providerid == providerid) & (db.speciality.is_active == True)).select()
+    #if(providerid == 0):
+      #sps = db((db.speciality_default.is_active == True)).select()
+    #else:
+      #sps = db((db.speciality.providerid == providerid) & (db.speciality.is_active == True)).select()
     
     
     splist = []
@@ -148,11 +149,11 @@ class Doctor:
     db = self.db
     providerid = self.providerid    
     
-    
-    if(providerid == 0):
-      rls = db( (db.role_default.is_active == True)).select()
-    else:
-      rls = db((db.role.providerid == providerid) & (db.role.is_active == True)).select()
+    rls = db( (db.role_default.is_active == True)).select()
+    #if(providerid == 0):
+      #rls = db( (db.role_default.is_active == True)).select()
+    #else:
+      #rls = db((db.role.providerid == providerid) & (db.role.is_active == True)).select()
     
     rllist = []
     for rl in rls:
@@ -166,6 +167,66 @@ class Doctor:
     json_rllist = {"rolecount":len(rls),"rolelist":rllist}      
     
     return json.dumps(json_rllist)
+
+  def new_staff(self,avars):
+    db = self.db
+    auth  = current.auth
+    rspobj = {}
+    
+    try:
+      
+      ref_code = common.getkeyvalue(avars,"ref_code","")
+      ref_id   = int(common.getkeyvalue(avars,"providerid",0))
+      
+      role = common.getkeyvalue(avars,"role","Receptionist")
+      roles = db((db.role_default.is_active == True) & (db.role_default.role == role)).select()
+      roleid = 4 if(len(roles) == 0) else roles[0].id
+      
+      staffid = db.doctor.insert(\
+        name=common.getkeyvalue(avars,"name",""),
+        providerid=common.getkeyvalue(avars,"providerid","1"),
+        role=str(roleid),
+        
+        email=common.getkeyvalue(avars,"email",""),
+        cell=common.getkeyvalue(avars,"cell",""),
+        stafftype=common.getkeyvalue(avars,"stafftype","Staff"),
+
+        is_active = True,
+        created_on=common.getISTFormatCurrentLocatTime(),
+        modified_on=common.getISTFormatCurrentLocatTime(),
+        created_by = 1 if(auth.user == None) else auth.user.id,
+        modified_by= 1 if(auth.user == None) else auth.user.id        
+        
+      )
+    
+    
+      #refcode = "DOC","PROV"
+      db.doctor_ref.insert(doctor_id = staffid, ref_code = ref_code,ref_id = ref_id)
+    
+      rspobj = {
+        "ref_code":ref_code,
+        "ref_id":ref_id,
+    
+        "staffid":str(staffid),
+       
+        "result":"success",
+        "error_message":"",
+        "error_code":""
+      }            
+      
+     
+      
+    except Exception as e:
+      mssg = "New Staff Exception:\n" + str(e)
+      logger.loggerpms2.info(mssg)      
+      excpobj = {}
+      excpobj["result"] = "fail"
+      excpobj["error_code"] = "MDP100"
+      excpobj["error_message"] = mssg
+      return json.dumps(excpobj)
+      
+    
+    return json.dumps(rspobj)
   
   
   def new_doctor(self,avars):
@@ -255,18 +316,18 @@ class Doctor:
       
       if(ref_code == ""):
         if(ref_id == 0):
-          ds = db((db.doctor.is_active == True)).select(db.doctor.ALL,db.doctor_ref.ALL,\
+          ds = db( (db.doctor.stafftype == 'Doctor') & (db.doctor.is_active == True)).select(db.doctor.ALL,db.doctor_ref.ALL,\
                                                           left=db.doctor.on((db.doctor.id == db.doctor_ref.doctor_id)))
           
         else:
-          ds = db((db.doctor.id == ref_id)&(db.doctor.is_active == True)).select(db.doctor.ALL,db.doctor_ref.ALL,\
+          ds = db((db.doctor.stafftype == 'Doctor') & (db.doctor.id == ref_id)&(db.doctor.is_active == True)).select(db.doctor.ALL,db.doctor_ref.ALL,\
                                                           left=db.doctor.on((db.doctor.id == db.doctor_ref.doctor_id)))
       else:
         if(ref_id == 0):
-          ds = db((db.doctor_ref.ref_code == ref_code)&(db.doctor.is_active == True)).select(db.doctor.ALL,db.doctor_ref.ALL,\
+          ds = db((db.doctor.stafftype == 'Doctor') & (db.doctor_ref.ref_code == ref_code)&(db.doctor.is_active == True)).select(db.doctor.ALL,db.doctor_ref.ALL,\
                                                           left=db.doctor.on((db.doctor.id == db.doctor_ref.doctor_id)))
         else:
-          ds = db((db.doctor_ref.ref_code == ref_code)&(db.doctor_ref.ref_id == ref_id)&(db.doctor.is_active == True)).select(db.doctor.ALL,db.doctor_ref.ALL,\
+          ds = db((db.doctor.stafftype == 'Doctor') & (db.doctor_ref.ref_code == ref_code)&(db.doctor_ref.ref_id == ref_id)&(db.doctor.is_active == True)).select(db.doctor.ALL,db.doctor_ref.ALL,\
                                                             left=db.doctor.on((db.doctor.id == db.doctor_ref.doctor_id)))
 
       for d in ds:
@@ -314,7 +375,7 @@ class Doctor:
       rspobj["list"]=lst
       
     except Exception as e:
-      mssg = "New Doctor Exception:\n" + str(e)
+      mssg = "List Doctor Exception:\n" + str(e)
       logger.loggerpms2.info(mssg)      
       excpobj = {}
       excpobj["result"] = "fail"
@@ -324,7 +385,83 @@ class Doctor:
       
     
     return json.dumps(rspobj)
+
+  def list_staff(self,avars):
       
+      
+      db = self.db
+      auth  = current.auth
+      rspobj = {}
+      
+      try:
+        ref_code = avars["ref_code"] if "ref_code" in avars else ""
+        providerid = int(common.getid(avars["providerid"])) if "providerid" in avars else 0            
+        ref_id = providerid
+         
+        lst = []
+        obj = {}
+        ds = None
+        
+        if(ref_code == ""):
+          if(ref_id == 0):
+            ds = db((db.doctor.stafftype == 'Staff') & (db.doctor.is_active == True)).select(db.doctor.ALL,db.doctor_ref.ALL,\
+                                                            left=db.doctor.on((db.doctor.id == db.doctor_ref.doctor_id)))
+            
+          else:
+            ds = db((db.doctor.stafftype == 'Staff') & (db.doctor.id == ref_id)&(db.doctor.is_active == True)).select(db.doctor.ALL,db.doctor_ref.ALL,\
+                                                            left=db.doctor.on((db.doctor.id == db.doctor_ref.doctor_id)))
+        else:
+          if(ref_id == 0):
+            ds = db((db.doctor.stafftype == 'Staff') & (db.doctor_ref.ref_code == ref_code)&(db.doctor.is_active == True)).select(db.doctor.ALL,db.doctor_ref.ALL,\
+                                                            left=db.doctor.on((db.doctor.id == db.doctor_ref.doctor_id)))
+          else:
+            ds = db((db.doctor.stafftype == 'Staff') & (db.doctor_ref.ref_code == ref_code)&(db.doctor_ref.ref_id == ref_id)&(db.doctor.is_active == True)).select(db.doctor.ALL,db.doctor_ref.ALL,\
+                                                              left=db.doctor.on((db.doctor.id == db.doctor_ref.doctor_id)))
+  
+        for d in ds:
+          
+          p = db((db.provider.id == d.doctor_ref.ref_id)).select(db.provider.provider)
+          
+          if(len(p)==1):
+            provider = p[0].provider if len(p) == 1 else 0
+           
+            roleid = int(common.getid(d.doctor.role))
+            r=db(db.role_default.id == roleid).select()
+            role = "Receptionist" if(len(r) == 0) else r[0].role
+          
+            
+            obj = {
+              "ref_code":d.doctor_ref.ref_code,     #DOC
+              "ref_id":d.doctor_ref.ref_id,         #ID to either doctor table or provider table
+              "provider":provider,
+              "role":role,
+              "roleid":str(roleid),
+              "staffid":d.doctor.id,
+              "name":d.doctor.name,
+              "cell":d.doctor.cell,
+              "email":d.doctor.email,
+            }
+            lst.append(obj)
+        
+        
+        rspobj["result"]="success"
+        rspobj["error_code"]=""
+        rspobj["error_message"]=""
+        rspobj["count"] = len(lst)
+        rspobj["list"]=lst
+        
+      except Exception as e:
+        mssg = "List Staff Exception:\n" + str(e)
+        logger.loggerpms2.info(mssg)      
+        excpobj = {}
+        excpobj["result"] = "fail"
+        excpobj["error_code"] = "MDP100"
+        excpobj["error_message"] = mssg
+        return json.dumps(excpobj)
+        
+      
+      return json.dumps(rspobj)
+              
   def get_doctor(self,avars):
     db = self.db
     auth  = current.auth
@@ -403,7 +540,7 @@ class Doctor:
       }
 
     except Exception as e:
-      mssg = "Delete Get Docto Exception:\n" + str(e)
+      mssg = "Get Doctor Exception:\n" + str(e)
       logger.loggerpms2.info(mssg)      
       excpobj = {}
       excpobj["result"] = "fail"
@@ -412,6 +549,76 @@ class Doctor:
       return json.dumps(excpobj)
 
     return json.dumps(rspobj)
+  
+  def get_staff(self,avars):
+      db = self.db
+      auth  = current.auth
+      rspobj = {}
+      
+  
+      try:
+        staffid = int(common.getkeyvalue(avars,"staffid",0))
+        r = db(db.doctor_ref.doctor_id ==staffid).select()
+        ref_code = r[0].ref_code if len(r) == 1 else ""
+        ref_id = int(r[0].ref_id) if len(r) == 1 else 0
+        
+        ds = db((db.doctor.id == staffid) & (db.doctor.is_active == True)).select()
+        roleid = 0 if (len(ds) == 0) else int(common.getid(ds[0].role))
+        r=db(db.role_default.id == roleid).select()
+        role = "Receptionist" if(len(r) == 0) else r[0].role  
+
+        if(len(ds) != 1):
+          rspobj = {
+  
+            "staffid":str(staffid),
+            "result":"fail",
+            "error_message":"Error Getting Staff Details - no or duplicate record",
+            "error_code":""
+          }                
+          return json.dumps(rspobj)
+  
+        provider = ""
+        providerid = 0
+        if((ref_code == "PRV")):
+          r = db(db.provider.id == ref_id).select(db.provider.provider)
+          provider = r[0].provider if len(r) == 1 else ""
+          providerid = ref_id
+          
+         
+       
+          
+        rspobj = {
+          
+          "ref_code":ref_code,
+          "ref_id":ref_id,
+       
+          "provider":provider,
+          
+          
+          "name":ds[0].name,
+          "providerid":str(ds[0].providerid),
+          "role":role,
+          "roleid":str(roleid),
+          
+          "email":ds[0].email,
+          "cell":ds[0].cell,
+         
+          "result":"success",
+          "error_message":"",
+          "error_code":""          
+          
+        }
+  
+      except Exception as e:
+        mssg = " Get Staff Exception:\n" + str(e)
+        logger.loggerpms2.info(mssg)      
+        excpobj = {}
+        excpobj["result"] = "fail"
+        excpobj["error_code"] = "MDP100"
+        excpobj["error_message"] = mssg
+        return json.dumps(excpobj)
+  
+      return json.dumps(rspobj)
   
   def update_doctor(self,avars):
     db = self.db
@@ -480,7 +687,7 @@ class Doctor:
       }              
                         
     except Exception as e:
-      mssg = "New Clinic Exception:\n" + str(e)
+      mssg = "Update Doctor Exception:\n" + str(e)
       logger.loggerpms2.info(mssg)      
       excpobj = {}
       excpobj["result"] = "fail"
@@ -489,6 +696,65 @@ class Doctor:
       return json.dumps(excpobj)
 
     return json.dumps(rspobj)
+  
+  def update_staff(self,avars):
+      db = self.db
+      auth  = current.auth
+      rspobj = {}
+  
+      logger.loggerpms2.info("Enter Update Stss")
+  
+      try:
+        staffid = int(common.getkeyvalue(avars,'staffid',"0"))
+        ds = db((db.doctor.id == staffid) & (db.doctor.is_active == True)).select()
+        if(len(ds) != 1):
+          rspobj = {
+            "staffid":str(staffid),
+            "result":"fail",
+            "error_message":"Error Updating Staff - no clinic record",
+            "error_code":""
+          }                
+          return json.dumps(rspobj)
+  
+  
+        role = common.getkeyvalue(avars,"role","Receptionist")
+        r=db(db.role_default.role == role).select()
+        roleid = 4 if(len(r) == 0) else int(r[0].id)
+               
+        db(db.doctor.id == staffid).update(\
+  
+          
+          name=common.getkeyvalue(avars,"name",ds[0].name),
+          providerid=int(common.getkeyvalue(avars,"providerid",str(ds[0].providerid))),
+         
+          role=str(roleid),
+          
+          email=common.getkeyvalue(avars,"email",ds[0].email),
+          cell=common.getkeyvalue(avars,"cell",ds[0].cell),
+         
+          stafftype=common.getkeyvalue(avars,"stafftype",ds[0].stafftype),
+          modified_on=common.getISTFormatCurrentLocatTime(),
+          modified_by= 1 if(auth.user == None) else auth.user.id
+        )
+        rspobj = {
+          "staffid":str(staffid),
+          "result":"success",
+          "error_message":"",
+          "error_code":""
+        }              
+                          
+      except Exception as e:
+        mssg = "Update Doctor Exception:\n" + str(e)
+        logger.loggerpms2.info(mssg)      
+        excpobj = {}
+        excpobj["result"] = "fail"
+        excpobj["error_code"] = "MDP100"
+        excpobj["error_message"] = mssg
+        return json.dumps(excpobj)
+  
+      return json.dumps(rspobj)
+      
+  
   
   def delete_doctor(self,avars):
     auth  = current.auth
@@ -522,4 +788,38 @@ class Doctor:
       excpobj["error_message"] = mssg
       return json.dumps(excpobj)
   
-    return json.dumps(rspobj)    
+    return json.dumps(rspobj)  
+  
+  def delete_staff(self,avars):
+    auth  = current.auth
+    db = self.db
+  
+    try:
+  
+      staffid = int(common.getkeyvalue(avars,"staffid",0))
+  
+      db(db.doctor.id == staffid).update(\
+        is_active = False,
+        modified_on=common.getISTFormatCurrentLocatTime(),
+        modified_by= 1 if(auth.user == None) else auth.user.id
+  
+      )
+  
+      rspobj = {
+        'staffid': staffid,
+        'result' : 'success',
+        "error_code":"",
+        "error_message":""
+      }               
+  
+  
+    except Exception as e:
+      mssg = "Delete Staff Exception:\n" + str(e)
+      logger.loggerpms2.info(mssg)      
+      excpobj = {}
+      excpobj["result"] = "fail"
+      excpobj["error_code"] = "MDP100"
+      excpobj["error_message"] = mssg
+      return json.dumps(excpobj)
+  
+    return json.dumps(rspobj)  

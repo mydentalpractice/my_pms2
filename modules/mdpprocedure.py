@@ -642,7 +642,7 @@ class Procedure:
     
     #this procedure adds a new procedure to the treatment
     def addSPLproceduretotreatment(self, procedurecode, treatmentid, plan, tooth, quadrant,remarks):
-        
+        logger.loggerpms2.info("Enter addSPLproceduretotreatment " + procedurecode)
         db = self.db
         providerid = self.providerid
         auth = current.auth
@@ -685,28 +685,30 @@ class Procedure:
             
             booking_amount = account.get_booking_amount(db, treatmentid)
             tax = account.get_tax_amount(db, copay)
+            #logger.loggerpms2.info("Booking & Tax amount = " + str(booking_amount) + " " + json.dumps(tax))
             if(booking_amount > 0):
                 #db(db.treatmentplan.id == tplanid).update(totalpaid = booking_amount)
                
-                db(db.treatment_procedure.id == tpid).update(copay = float(common.getvalue(tax["posttaxamount"])))
+                db(db.treatment_procedure.id == procid).update(copay = float(common.getvalue(tax["posttaxamount"])))
                 db.commit()                
                 
             #update treatment with new treatment cost
             account.updatetreatmentcostandcopay(db,auth.user,treatmentid)
             
             #update tplan with new treatment cost
-            account.calculatecost(db,tplanid)
-            account.calculatecopay(db, tplanid,memberid)
-            account.calculateinspays(db,tplanid)
-            account.calculatedue(db,tplanid)            
+            #account.calculatecost(db,tplanid)
+            #account.calculatecopay(db, tplanid,memberid)
+            #account.calculateinspays(db,tplanid)
+            #account.calculatedue(db,tplanid)            
     
             jsonObj = {\
                 "result" : "success" if(procid > 0) else "fail",
                 "error_message" : "" if(procid > 0) else "Invalid Procedure",
                 "treatmentprocid":procid,
                 "originalcopay":copay+booking_amount,
-                "copay":copay,
-                "booking_amount":booking_amount
+                "copay":common.getvalue(tax["posttaxamount"]),
+                "booking_amount":booking_amount,
+                "tax":common.getvalue(tax["tax"])
                 
             }
         
@@ -714,8 +716,10 @@ class Procedure:
             retobj1 = {}
             retobj1["result"] = "fail"
             retobj1["error_message"] = "Add Procedure to Treatment API Exception Error " + str(e)
+            logger.loggerpms2.info("addSPLproceduretotreatment Exceptionerror " + json.dumps(retobj1))
             json.dumps(retobj1)
     
+        logger.loggerpms2.info("Exit addSPLprocedureToTreatment " + json.dumps(jsonObj))
         return json.dumps(jsonObj)
     
 
