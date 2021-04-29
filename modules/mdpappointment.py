@@ -1198,15 +1198,17 @@ class Appointment:
                 
                 def_start_time_str = common.getstringfromdate(ds[0].f_start_time,"%d/%m/%Y %H:%M")
                 def_end_time_str  = common.getstringfromdate(ds[0].f_end_time,"%d/%m/%Y %H:%M")
+                notes = common.getkeyvalue(avars,"notes",ds[0].description),
+                cc = common.getkeyvalue(avars,"f_title",ds[0].f_title),
                 db(db.t_appointment.id == appointmentid).update(\
                     
                     f_uniqueid = int(common.getkeyvalue(avars,"f_uniqueid","0" if(ds[0].f_uniqueid == None) else str(ds[0].f_uniqueid))),
-                    f_title = common.getkeyvalue(avars,"f_title",ds[0].f_title),
+                    f_title = cc,
                    
                     f_patientname = common.getkeyvalue(avars,"f_patientname",ds[0].f_patientname),
                     f_location = common.getkeyvalue(avars,"f_location",ds[0].f_location),
                     f_status = common.getkeyvalue(avars,"f_status",ds[0].f_status),
-                    description = common.getkeyvalue(avars,"description",ds[0].description),
+                    description = notes,
                     newpatient = common.getkeyvalue(avars,"newpatient",ds[0].newpatient),
                    
                     cell = common.getkeyvalue(avars,"cell",ds[0].cell),
@@ -1232,6 +1234,7 @@ class Appointment:
                     
                     )
                 
+                common.logapptnotes(db, cc, notes, appointmentid)
                 apptobj= {"result":"success", "appointmentid":appointmentid,"error_message":"","message":"Appointment updated successfully"}
                 
             else:
@@ -1261,6 +1264,7 @@ class Appointment:
             appt = db((db.t_appointment.id == appointmentid) & (db.t_appointment.is_active == True)).select(db.t_appointment.description)
             desc = "" if len(appt) != 1 else appt[0].description
             notes = common.getkeyvalue(avars,"notes",desc)
+            cc = "" if len(appt) != 1 else appt[0].f_title
             
             db((db.t_appointment.id == appointmentid)).update(\
                 description = notes,
@@ -1271,7 +1275,7 @@ class Appointment:
                 modified_by= 1 if(auth.user == None) else auth.user.id
                 
             )
-            
+            common.logapptnotes(db,cc,notes,appointmentid)
             apptobj= {"result":"success", "appointmentid":appointmentid,"error_message":"", "error_code":"", "message":"Appointment Cancelled successfully"}
             
                 
@@ -1600,6 +1604,7 @@ class Appointment:
         startdtstr = common.getkeyvalue(avars,"appointment_start",defdtstr)
         startapptdt = common.getdatefromstring(startdtstr, "%d/%m/%Y %H:%M")
         endapptdt = startapptdt + timedelta(minutes=duration)
+       
         
         avars["f_duration"] = str(duration)
         avars["f_start_time"] = common.getstringfromdate(startapptdt,"%d/%m/%Y %H:%M")
@@ -1767,9 +1772,10 @@ class Appointment:
             
             for i in xrange(0,len(ds)):
                 x = {
+                   
                     "apptdate": ds[i][0].strftime("%d/%m/%Y"),
                     "count": int(common.getid(ds[i][1])),
-                    "days":str(round(common.getvalue(ds[i][2])/1440))
+                    "days":str(round(common.getvalue(ds[i][2])/1439))
                 }
                 apptlist.append(x)
             

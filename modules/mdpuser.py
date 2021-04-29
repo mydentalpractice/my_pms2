@@ -973,7 +973,7 @@ class User:
       db((db.auth_user.cell==cell)).update(cell = '9999999999')
       regobj["result"] = "success"
       regobj["error_message"] = ""
-      regobj["userid"] = str(users[0].id)
+      regobj["userid"] = "0" if(len(users) == 0) else str(users[0].id)
       regobj["email"] = email
       regobj["cell"] = cell
 
