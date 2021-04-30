@@ -41,6 +41,7 @@ from applications.my_pms2.modules import mdpbank
 from applications.my_pms2.modules import mdpclinic
 from applications.my_pms2.modules import mdpprospect
 from applications.my_pms2.modules import mdpagent
+from applications.my_pms2.modules import mdpconsentform
 
 from applications.my_pms2.modules import logger
 
@@ -2675,6 +2676,26 @@ def new_agent_prospect(avars):
 ############################# START PLANS API  ###################################################
 ############################# END PLANS API  ###################################################
 
+############################# START CF API  ###################################################
+def new_consentform(avars):
+    logger.loggerpms2.info("Enter New Consent Form Request\n" + str(avars) )
+    obj = mdpconsentform.ConsentForm(current.globalenv['db'])  
+    rsp = obj.new_consentform(avars)
+    return rsp
+
+def get_consentform(avars):
+    logger.loggerpms2.info("Enter Get Consent Form Request\n" + str(avars) )
+    obj = mdpconsentform.ConsentForm(current.globalenv['db'])  
+    rsp = obj.get_consentform(avars)
+    return rsp
+
+def list_consentform(avars):
+    logger.loggerpms2.info("Enter List Consent Form Request\n" + str(avars) )
+    obj = mdpconsentform.ConsentForm(current.globalenv['db'])  
+    rsp = obj.list_consentform(avars)
+    return rsp
+
+############################# END CF API  ###################################################
 
 def unknown(avars):
     return dict()
@@ -2685,6 +2706,13 @@ def unknown(avars):
     #"list_plans":list_plans
 #}
 
+CFAPI_switcher = {
+    "list_consentform":list_consentform,
+    "get_consentform":get_consentform,
+    "new_consentform":new_consentform
+  
+
+}
 mediaAPI_switcher = {
     
     "upload_mediafile":upload_mediafile,"upload_media":upload_media,"downloadmedia":downloadmedia,\
@@ -3240,6 +3268,48 @@ def userAPI():
 	    
 	    #return json.dumps({"action":action})
 	    rsp = userAPI_switcher.get(action,unknown)(vars)
+	    common.setcookies(response)
+	    if(encryption):
+		return json.dumps({"resp_data":dsobj.encrypts(rsp)})
+	    else:
+		return rsp
+	    
+	except Exception as e:
+	    mssg = "AGENT API Exception Error =>>\n" + str(e)
+	    #logger.loggerpms2.info(mssg)
+	    raise HTTP(500)   
+
+    def PUT(*args, **vars):
+	return dict()
+
+    def DELETE(*args, **vars):
+	return dict()
+
+    return locals()
+
+@request.restful()
+def CFAPI():
+    response.view = 'generic' + request.extension
+    def GET(*args, **vars):
+	return
+
+    def POST(*args, **vars):
+	i = 0
+	try:
+	    #logger.loggerpms2.info(">>Enter Agent API==>>")
+	    dsobj = datasecurity.DataSecurity()
+	    encryption = vars.has_key("req_data")
+	    if(encryption):
+		#logger.loggerpms2.info(">>Agent with Encryption")
+		encrypt_req = vars["req_data"]
+		vars = json.loads(dsobj.decrypts(encrypt_req))
+	    
+	    #decrypted request date
+	    action = str(vars["action"])
+	    #logger.loggerpms2.info(">>Agent ACTION==>>" + action)
+	    
+	    #return json.dumps({"action":action})
+	    rsp = CFAPI_switcher.get(action,unknown)(vars)
 	    common.setcookies(response)
 	    if(encryption):
 		return json.dumps({"resp_data":dsobj.encrypts(rsp)})

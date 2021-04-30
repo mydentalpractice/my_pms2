@@ -3258,14 +3258,14 @@ db.define_table('vw_procedurepriceplancode',
 db.vw_procedurepriceplancode._singular = "vw_procedurepriceplancode"
 db.vw_procedurepriceplancode._plural   = "vw_procedurepriceplancode"                
 
-db.define_table('consentform',
-                Field('id', 'integer'),
-                Field('consentform', 'string'),
-                Field('formcontent', 'text'),
-                auth.signature
-                )
-db.consentform._singular = "consentform"
-db.consentform._plural   = "consentform"                
+#db.define_table('consentform',
+                #Field('id', 'integer'),
+                #Field('consentform', 'string'),
+                #Field('formcontent', 'text'),
+                #auth.signature
+                #)
+#db.consentform._singular = "consentform"
+#db.consentform._plural   = "consentform"                
 
 db.define_table('vw_appointments',
                 Field('id','integer'),
@@ -4257,6 +4257,36 @@ db.define_table('vw_abhicl_report_group',
                 )
 
 
+
+
+ 
+
+db.define_table('consentform',
+                
+                Field('providerid','integer'),
+                Field('memberid','integer'),
+                Field('patientid','integer'),
+                Field('clinicid','integer'),
+                Field('doctorid','integer'),
+                Field('consentformid','integer'),
+                Field('consentform_date','date'),
+                Field('consentform_code','string'),
+                Field('consentform_name','string'),
+                Field('procedurecode','string'),
+                Field('procedurename','string'),
+                Field('patientname','string'),
+                Field('membername','string'),
+                
+                Field('status','string'),
+                Field('is_active','boolean'),
+                
+                auth.signature
+                            
+                
+                )
+
+db.consentform._singular = "consentform"
+db.consentform._plural   = "consentform"   
 
 db.define_table('vw_procedure_groupby_treatment',
                 Field('treatmentid','integer'),
