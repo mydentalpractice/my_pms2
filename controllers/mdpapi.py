@@ -735,6 +735,11 @@ def getprovider(avars):
     prov = oprov.getprovider()
     return prov
 
+def addproviderimage(avars):
+    oprov = mdpprovider.Provider(db, int(common.getid(str(avars["providerid"]))))
+    avars["appath"] = current.globalenv["request"].folder
+    prov = oprov.addproviderimage(avars)
+    return prov
 
 ######################################################## PATIENT APIS  ##################################    
 
@@ -843,6 +848,14 @@ def getpatient(avars):
     urlprops = db(db.urlproperties.id > 0).select(db.urlproperties.mydp_ipaddress)
     imageurl =urlprops[0].mydp_ipaddress + URL('dentalimage',"download")    
     pat = opat.getpatient(str(avars['memberid']),str(avars['patientid']),imageurl)
+    
+    
+    return pat 
+
+def addpatientimage(avars):
+    opat = mdppatient.Patient(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+    avars["appath"] = current.globalenv["request"].folder
+    pat = opat.addpatientimage(avars)
     
     
     return pat 
@@ -1412,6 +1425,14 @@ def treatmentstatus(avars):
 
 
 ############################ Procedures API #######################################################
+def getprocedure(avars):
+    #logger.loggerpms2.info("Enter Get Procedures")
+    
+    oproc = mdpprocedure.Procedure(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+    rsp = oproc.getprocedure(avars)
+    return rsp
+
+
 def getprocedures(avars):
     #logger.loggerpms2.info("Enter Get Procedures")
     
@@ -2695,6 +2716,12 @@ def list_consentform(avars):
     rsp = obj.list_consentform(avars)
     return rsp
 
+def consentforms(avars):
+    logger.loggerpms2.info("Enter ConsentForms Request\n" + str(avars) )
+    obj = mdpconsentform.ConsentForm(current.globalenv['db'])  
+    rsp = obj.consentforms(avars)
+    return rsp
+
 ############################# END CF API  ###################################################
 
 def unknown(avars):
@@ -2709,7 +2736,8 @@ def unknown(avars):
 CFAPI_switcher = {
     "list_consentform":list_consentform,
     "get_consentform":get_consentform,
-    "new_consentform":new_consentform
+    "new_consentform":new_consentform,
+    "consentforms":consentforms
   
 
 }
@@ -2775,10 +2803,10 @@ mdpapi_switcher = {"listappointments":getappointments,"getappointmentsbymonth":g
                    "listpayments":listpayments,"getpayment":getpayment,"paymentcallback":paymentcallback,"groupsmsmessage":groupsmsmessage,"paymentreceipt":paymentreceipt,\
                    "getpaymentlist":getpaymentlist, "getsignedkey":getsignedkey,"getopentreatments":getopentreatments,\
                    "gettreatments":gettreatments,"gettreatment":gettreatment, "newtreatment":newtreatment, "updatetreatment":updatetreatment,"newtreatment_clinic":newtreatment_clinic,\
-                   "treatmentstatus":treatmentstatus,"getprocedures":getprocedures,"addproceduretotreatment":addproceduretotreatment,"gettreatmentprocedure":gettreatmentprocedure,\
+                   "treatmentstatus":treatmentstatus,"getprocedure":getprocedure,"getprocedures":getprocedures,"addproceduretotreatment":addproceduretotreatment,"gettreatmentprocedure":gettreatmentprocedure,\
                    "updatetreatmentprocedure":updatetreatmentprocedure,"completetreatmentprocedure":completetreatmentprocedure,"canceltreatmentprocedure":canceltreatmentprocedure,\
                    "gettreatmentprocedures":gettreatmentprocedures,"sendforauthorization":sendforauthorization,\
-                   "getpatientnotes":getpatientnotes,"addpatientnotes":addpatientnotes,"addSPLproceduretotreatment":addSPLproceduretotreatment,\
+                   "getpatientnotes":getpatientnotes,"addpatientnotes":addpatientnotes,"addSPLproceduretotreatment":addSPLproceduretotreatment,"addpatientimage":addpatientimage,\
                    "uploadimage":uploadimage,"xuploadimage":xuploadimage,"downloadimage":downloadimage,"getimages":getimages,"deleteimage":deleteimage,"updateimage":updateimage,\
                    "genders":genders,"cities":cities,"states":states,"regions":regions,"regionswithid":regionswithid,"status":status,"otpvalidation":otpvalidation,"appointmentstatus":appointmentstatus,\
                    "appointmentduration":appointmentduration,"pattitles":pattitles,"doctitles":doctitles, "getallconstants":getallconstants,\
@@ -2809,7 +2837,7 @@ mdpapi_switcher = {"listappointments":getappointments,"getappointmentsbymonth":g
                    "addmediclaimattachment":addmediclaimattachment,"getmediclaimattachments":getmediclaimattachments,"deletemediclaimattachment":deletemediclaimattachment,\
                    "getdistance":getdistance,"getproviderswithinradius":getproviderswithinradius,"getproviderswithpincode":getproviderswithpincode,\
                    "task":task,"createwebmember_razorpay_order":createwebmember_razorpay_order,"capturewebmember_razorpay_payment":capturewebmember_razorpay_payment,\
-                   "printpremium_payment_receipt":printpremium_payment_receipt,"updatememberprovider":updatememberprovider,"getprovider":getprovider,\
+                   "printpremium_payment_receipt":printpremium_payment_receipt,"updatememberprovider":updatememberprovider,"getprovider":getprovider,"addproviderimage":addproviderimage,\
                    "validaterlgmember399":validaterlgmember399,"getreligarepatient399":getreligarepatient399,"updatereligarepatient399":updatereligarepatient399,\
                    "getreligareprocedures399":getreligareprocedures399,"addRlgProcedureToTreatment399":addRlgProcedureToTreatment399,\
                    "sendOTPXXX":sendOTPXXX,"validateOTPXXX":validateOTPXXX,"uploadDocumentXXX":uploadDocumentXXX,"getreligarepatientXXX":getreligarepatientXXX,\
@@ -3254,20 +3282,22 @@ def userAPI():
     def POST(*args, **vars):
 	i = 0
 	try:
-	    #logger.loggerpms2.info(">>Enter Agent API==>>")
+	    logger.loggerpms2.info(">>Enter User API==>> " + json.dumps(vars))
 	    dsobj = datasecurity.DataSecurity()
 	    encryption = vars.has_key("req_data")
 	    if(encryption):
 		#logger.loggerpms2.info(">>Agent with Encryption")
 		encrypt_req = vars["req_data"]
 		vars = json.loads(dsobj.decrypts(encrypt_req))
-	    
+		loggerr.loggerpms2.info("UserAPI-Derypted data -==>" + json.dumps(vars))
+		
 	    #decrypted request date
 	    action = str(vars["action"])
-	    #logger.loggerpms2.info(">>Agent ACTION==>>" + action)
+	    logger.loggerpms2.info(">>Agent ACTION==>>" + action)
 	    
 	    #return json.dumps({"action":action})
 	    rsp = userAPI_switcher.get(action,unknown)(vars)
+	    logger.loggerpms2.info("UserAPI =>Decrypted Response " + json.dumps(rsp))
 	    common.setcookies(response)
 	    if(encryption):
 		return json.dumps({"resp_data":dsobj.encrypts(rsp)})

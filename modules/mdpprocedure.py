@@ -456,6 +456,25 @@ class Procedure:
         
         return json.dumps(retobj)    
     
+    def getprocedure(self, avars):
+        db = self.db
+        providerid = self.providerid
+        
+        procedurecode = common.getkeyvalue(avars,"procedurecode","")
+
+        procs = db((db.dentalprocedure.dentalprocedure==procedurecode)& (db.dentalprocedure.is_active == True)).select()
+        
+        rspobj = {}
+        
+        rspobj["result"] = "success"
+        rspobj["error_message"] = ""
+        rspobj["error_code"] = ""   
+        rspobj["procedureid"] = str(0) if (len(procs) == 0) else procs[0].id
+        rspobj["procedurecode"] = "" if  (len(procs) == 0) else procs[0].dentalprocedure
+        rspobj["procedurename"] = "" if (len(procs) == 0) else procs[0].shortdescription
+        
+        
+        return json.dumps(rspobj)
     
     #returns a list of dental procedures matching the searchphrase for a specific plan
     #search phrase can be 'procedure code', 'keywords', 'short description'

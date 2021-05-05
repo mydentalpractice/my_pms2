@@ -11,7 +11,36 @@ class ConsentForm:
     def __init__(self,db):
         self.db = db
 
-  
+    def consentforms(self,avars):
+        logger.loggerpms2.info("Enter - Consent Form")
+        db = self.db
+        auth  = current.auth        
+        rsp = {}
+        rsp["result"] = "success"
+        rsp["error_message"] = ""
+        rsp["error_code"] = ""
+        
+        lst = [
+            "Apicoectomies Apicalsurgery Consent Form",
+            "Composite Filing Consent Form",
+            "Cosmetic Treatment Consent Form",
+            "Cosmetic Dentistry Consent Form",
+            "Crown Bridge Consent Form",
+            "Endodontics Consent Form",
+            "Extraction Consent Form",
+            "General Consent Form",
+            "Orthodontics Treatment Consent Form",
+            "Pediatric Dentistry Consent Form",
+            "Peridontal Consent Form",
+            "Wisdom Teeth Removal Consent Form",
+            "Implant Surgery Consent Form"
+        ]
+        
+        rsp["consentforms"] = lst
+        
+        return json.dumps(rsp)
+    
+    
     def new_consentform(self,avars):
         logger.loggerpms2.info("Enter New Consent Form")
         

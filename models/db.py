@@ -871,6 +871,7 @@ db.define_table('provider',
                 Field('status', 'string', default='New'),
                 
                 Field('bankid','reference providerbank'),                
+                Field('imageid','integer'),                
                 
                 auth.signature,
                 format='%(providername)s (%(provider)s')
@@ -1016,6 +1017,7 @@ db.define_table('patientmember',
                 Field('webkey', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'), label='Web Key', default='', length=20),
                 Field('hmopatientmember','boolean', default=True),
                 Field('image','upload'),
+                Field('imageid','integer'),
                 Field('paid', 'boolean',default=False,label='Paid'),
                 Field('upgraded', 'boolean',default=False,label='Upgraded'),
                 Field('renewed', 'boolean',default=False,label='Renewed'),

@@ -434,7 +434,7 @@ class Clinic:
                 clinic_ref = common.getkeyvalue(avars,'clinic_ref',ds[0].clinic_ref),
                 name = common.getkeyvalue(avars,'name',ds[0].name),
                 address1 = common.getkeyvalue(avars,'address1',ds[0].address1),
-                address2 = common.getkeyvalue(avars,'address1',ds[0].address2),
+                address2 = common.getkeyvalue(avars,'address2',ds[0].address2),
                 address3 = common.getkeyvalue(avars,'address3',ds[0].address3),
                 city = common.getkeyvalue(avars,'city',ds[0].city),
                 st = common.getkeyvalue(avars,'st',ds[0].st),

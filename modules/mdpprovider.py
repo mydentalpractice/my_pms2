@@ -8,6 +8,9 @@ from applications.my_pms2.modules import gender
 from applications.my_pms2.modules import states
 from applications.my_pms2.modules import status
 from applications.my_pms2.modules import relations
+
+from applications.my_pms2.modules import mdpmedia
+
 from applications.my_pms2.modules import logger
 
 
@@ -17,6 +20,39 @@ class Provider:
     self.db = db
     self.providerid = providerid
     return 
+
+
+  def addproviderimage(self,avars):
+  
+    db = self.db
+    providerid = self.providerid
+  
+    try:
+  
+      avars["action"] = 'upload_media'
+      avars["ref_code"] = "PRV"
+      avars["ref_id"] = str(providerid)
+      avars["mediatype"] = "image"
+      avars["mediaformat"] = "jpg"
+      avars["providerid"] = str(providerid)
+  
+  
+  
+      medobj = mdpmedia.Media(db, providerid, "image", "jpg")
+      rsp = json.loads(medobj.upload_media(avars))
+  
+      if(rsp["result"] == "success"):
+        db(db.provider.id == providerid).update(imageid = common.getkeyvalue(rsp,"mediaid","0"))
+  
+    except Exception as e:
+      logger.loggerpms2.info("Add Provider Image API  Exception:\n" + str(e))      
+      excpobj = {}
+      excpobj["result"] = "fail"
+      excpobj["error_message"] = "Add Provider Image API Exception Error - " + str(e)
+      return json.dumps(excpobj)
+  
+    return json.dumps(rsp)
+
 
   def getProviderCode(self):
     db = self.db

@@ -16,6 +16,7 @@ from applications.my_pms2.modules import gender
 from applications.my_pms2.modules import states
 from applications.my_pms2.modules import status
 from applications.my_pms2.modules import relations
+from applications.my_pms2.modules import mdpmedia
 from applications.my_pms2.modules import logger
 
 class Patient:
@@ -1694,4 +1695,44 @@ class Patient:
       
     return json.dumps(patobj)
    
-  
+ 
+   
+  def addpatientimage(self,avars):
+    
+    db = self.db
+    providerid = self.providerid
+    
+    try:
+      
+      
+      patientid = int(common.getid(common.getkeyvalue(avars,"patientid","0")))
+      memberid = int(common.getid(common.getkeyvalue(avars,"memberid","0")))
+      
+      avars["action"] = 'upload_media'
+      avars["providerid"] = str(providerid)
+      
+      avars["ref_code"] = "MEM"
+      avars["ref_id"] = str(memberid)
+      avars["mediatype"] = "image"
+      avars["mediaformat"] = "jpg"
+      
+      
+      
+      medobj = mdpmedia.Media(db, providerid, "image", "jpg")
+      rsp = json.loads(medobj.upload_media(avars))
+      
+      if(rsp["result"] == "success"):
+        
+        db(db.patientmember.id == memberid).update(imageid = common.getkeyvalue(rsp,"mediaid","0"))
+      
+    except Exception as e:
+        logger.loggerpms2.info("Add Patient Image API  Exception:\n" + str(e))      
+        excpobj = {}
+        excpobj["result"] = "fail"
+        excpobj["error_message"] = "Add Patient Image API Exception Error - " + str(e)
+        return json.dumps(excpobj)
+      
+    return json.dumps(rsp)
+    
+      
+    

@@ -390,9 +390,9 @@ class Prospect:
                 return json.dumps(excpobj)                
             
             if(len(r)==1):
-                i = 0
-                ds = db((db.prospect.id == prospectid) & (db.prospect.is_active == True)).select()   
                 prospectid = int(common.getid(r[0].id))
+               
+               
                 p = db(db.prospect_ref.prospect_id ==prospectid).select()
                 ref_code = p[0].ref_code if len(p) == 1 else ""
                 ref_id = int(p[0].ref_id) if len(p) == 1 else 0
@@ -478,7 +478,7 @@ class Prospect:
                 pa_approvedon=common.getdatefromstring(common.getkeyvalue(avars,'pa_approvedon',common.getstringfromdate(datetime.datetime.today(),"%d/%m/%Y")),"%d/%m/%Y"),
                 pa_day=common.getkeyvalue(avars,'pa_day',""),
                 pa_month=common.getkeyvalue(avars,'pa_month',""),
-                pa_location=common.getkeyvalue(avars,'pa_location',""),
+                pa_location=common.getkeyvalue(avars,'pa_location',common.getkeyvalue(avars,'city',"")),
                 pa_practicepin=common.getkeyvalue(avars,'pa_practicepin',""),
                 pa_hours=common.getkeyvalue(avars,'pa_hours',""),
                 pa_longitude=common.getkeyvalue(avars,'pa_longitude',""),
@@ -605,11 +605,18 @@ class Prospect:
             #copy prospect to provider clinic_ref records
             ds = db((db.clinic_ref.ref_code == "PST") & (db.clinic_ref.ref_id == prospectid)).select()
             for d in ds:
-                xid = db.clinic_ref.insert(\
-                    ref_code = "PRV",
-                    ref_id = providerid,
-                    clinic_id = d.clinic_id
-                )
+                
+                db.clinic_ref.update_or_insert((ref_code == "PRV") & (clinic_id == d.clinic_id),
+                                               ref_code = "PRV",
+                                               ref_id = providerid,
+                                               clinic_id = d.clinic_id
+                                            )
+                        
+                #xid = db.clinic_ref.insert(\
+                    #ref_code = "PRV",
+                    #ref_id = providerid,
+                    #clinic_id = d.clinic_id
+                #)
             
             
             #copy propsect doctors to provider
