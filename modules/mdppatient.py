@@ -365,80 +365,147 @@ class Patient:
     
     #is it numeric only, then search on cell numbero
     if(patientsearch.replace("+",'').replace(' ','').isdigit()):
-      pats=db((db.vw_memberpatientlist.cell.like("%" + patientsearch + "%")) & (db.vw_memberpatientlist.providerid == providerid) & \
-              (qry) & \
-              (db.vw_memberpatientlist.is_active == True)).select(db.vw_memberpatientlist.hmopatientmember,\
-                                                                  db.vw_memberpatientlist.patientmember,\
-                                                                  db.vw_memberpatientlist.fname,\
-                                                                  db.vw_memberpatientlist.lname,\
-                                                                  db.vw_memberpatientlist.primarypatientid,\
-                                                                  db.vw_memberpatientlist.patientid,\
-                                                                  db.vw_memberpatientlist.patienttype,\
-                                                                  db.vw_memberpatientlist.relation,\
-                                                                  db.vw_memberpatientlist.cell,\
-                                                                  db.vw_memberpatientlist.email,\
-                                                                  db.vw_memberpatientlist.dob,\
-                                                                  db.vw_memberpatientlist.gender,\
-                                                                  db.vw_memberpatientlist.age,\
-                                                                  limitby=limitby)
-      if(maxcount == 0):
-        maxcount = db((db.vw_memberpatientlist.cell.like("%" + patientsearch + "%")) & (db.vw_memberpatientlist.providerid == providerid) & \
-                      (qry) & \
-                      (db.vw_memberpatientlist.is_active == True)).count()
-      
+      if(providerid != 0):
+        pats=db((db.vw_memberpatientlist.cell.like("%" + patientsearch + "%")) & (db.vw_memberpatientlist.providerid == providerid) & \
+                (qry) & \
+                (db.vw_memberpatientlist.is_active == True)).select(db.vw_memberpatientlist.hmopatientmember,\
+                                                                    db.vw_memberpatientlist.patientmember,\
+                                                                    db.vw_memberpatientlist.fname,\
+                                                                    db.vw_memberpatientlist.lname,\
+                                                                    db.vw_memberpatientlist.primarypatientid,\
+                                                                    db.vw_memberpatientlist.patientid,\
+                                                                    db.vw_memberpatientlist.patienttype,\
+                                                                    db.vw_memberpatientlist.relation,\
+                                                                    db.vw_memberpatientlist.cell,\
+                                                                    db.vw_memberpatientlist.email,\
+                                                                    db.vw_memberpatientlist.dob,\
+                                                                    db.vw_memberpatientlist.gender,\
+                                                                    db.vw_memberpatientlist.age,\
+                                                                    limitby=limitby)
+        if(maxcount == 0):
+          maxcount = db((db.vw_memberpatientlist.cell.like("%" + patientsearch + "%")) & (db.vw_memberpatientlist.providerid == providerid) & \
+                        (qry) & \
+                        (db.vw_memberpatientlist.is_active == True)).count()
+      else:
+        pats=db((db.vw_memberpatientlist.cell.like("%" + patientsearch + "%")) & \
+                (qry) & \
+                (db.vw_memberpatientlist.is_active == True)).select(db.vw_memberpatientlist.hmopatientmember,\
+                                                                    db.vw_memberpatientlist.patientmember,\
+                                                                    db.vw_memberpatientlist.fname,\
+                                                                    db.vw_memberpatientlist.lname,\
+                                                                    db.vw_memberpatientlist.primarypatientid,\
+                                                                    db.vw_memberpatientlist.patientid,\
+                                                                    db.vw_memberpatientlist.patienttype,\
+                                                                    db.vw_memberpatientlist.relation,\
+                                                                    db.vw_memberpatientlist.cell,\
+                                                                    db.vw_memberpatientlist.email,\
+                                                                    db.vw_memberpatientlist.dob,\
+                                                                    db.vw_memberpatientlist.gender,\
+                                                                    db.vw_memberpatientlist.age,\
+                                                                    limitby=limitby)
+        if(maxcount == 0):
+          maxcount = db((db.vw_memberpatientlist.cell.like("%" + patientsearch + "%"))&\
+                        (qry) & \
+                        (db.vw_memberpatientlist.is_active == True)).count()
+        
+        
     
     #is it email only
     elif(patientsearch.find("@") >= 0):
-      pats=db((db.vw_memberpatientlist.email.like("%"+patientsearch+"%")) & (db.vw_memberpatientlist.providerid == providerid) & \
-              (qry) & \
-              (db.vw_memberpatientlist.is_active == True)).select(db.vw_memberpatientlist.hmopatientmember,\
-                                                                  db.vw_memberpatientlist.patientmember,\
-                                                                  db.vw_memberpatientlist.fname,\
-                                                                  db.vw_memberpatientlist.lname,\
-                                                                  db.vw_memberpatientlist.primarypatientid,\
-                                                                  db.vw_memberpatientlist.patientid,\
-                                                                  db.vw_memberpatientlist.patienttype,\
-                                                                  db.vw_memberpatientlist.relation,\
-                                                                  db.vw_memberpatientlist.cell,\
-                                                                  db.vw_memberpatientlist.email,\
-                                                                  db.vw_memberpatientlist.dob,\
-                                                                  db.vw_memberpatientlist.gender,\
-                                                                  db.vw_memberpatientlist.age,\
-                                                                  
-                                                                  limitby=limitby)
+      if(providerid != 0):
+        pats=db((db.vw_memberpatientlist.email.like("%"+patientsearch+"%")) & (db.vw_memberpatientlist.providerid == providerid) & \
+                (qry) & \
+                (db.vw_memberpatientlist.is_active == True)).select(db.vw_memberpatientlist.hmopatientmember,\
+                                                                    db.vw_memberpatientlist.patientmember,\
+                                                                    db.vw_memberpatientlist.fname,\
+                                                                    db.vw_memberpatientlist.lname,\
+                                                                    db.vw_memberpatientlist.primarypatientid,\
+                                                                    db.vw_memberpatientlist.patientid,\
+                                                                    db.vw_memberpatientlist.patienttype,\
+                                                                    db.vw_memberpatientlist.relation,\
+                                                                    db.vw_memberpatientlist.cell,\
+                                                                    db.vw_memberpatientlist.email,\
+                                                                    db.vw_memberpatientlist.dob,\
+                                                                    db.vw_memberpatientlist.gender,\
+                                                                    db.vw_memberpatientlist.age,\
+                                                                    
+                                                                    limitby=limitby)
+        
+        if(maxcount == 0):
+          maxcount = db((db.vw_memberpatientlist.email.like("%"+patientsearch+"%")) & (db.vw_memberpatientlist.providerid == providerid) & \
+                        (qry) & \
+                        (db.vw_memberpatientlist.is_active == True)).count()
+      else:
+        pats=db((db.vw_memberpatientlist.email.like("%"+patientsearch+"%")) &\
+                (qry) & \
+                (db.vw_memberpatientlist.is_active == True)).select(db.vw_memberpatientlist.hmopatientmember,\
+                                                                    db.vw_memberpatientlist.patientmember,\
+                                                                    db.vw_memberpatientlist.fname,\
+                                                                    db.vw_memberpatientlist.lname,\
+                                                                    db.vw_memberpatientlist.primarypatientid,\
+                                                                    db.vw_memberpatientlist.patientid,\
+                                                                    db.vw_memberpatientlist.patienttype,\
+                                                                    db.vw_memberpatientlist.relation,\
+                                                                    db.vw_memberpatientlist.cell,\
+                                                                    db.vw_memberpatientlist.email,\
+                                                                    db.vw_memberpatientlist.dob,\
+                                                                    db.vw_memberpatientlist.gender,\
+                                                                    db.vw_memberpatientlist.age,\
+                                                                    
+                                                                    limitby=limitby)
+        
+        if(maxcount == 0):
+          maxcount = db((db.vw_memberpatientlist.email.like("%"+patientsearch+"%")) &\
+                        (qry) & \
+                        (db.vw_memberpatientlist.is_active == True)).count()
       
-      if(maxcount == 0):
-        maxcount = db((db.vw_memberpatientlist.email.like("%"+patientsearch+"%")) & (db.vw_memberpatientlist.providerid == providerid) & \
-                      (qry) & \
-                      (db.vw_memberpatientlist.is_active == True)).count()
       
     #if pats is empty, then search for phrase in patient (fname lname:membercode)
     else:
-      pats = db((db.vw_memberpatientlist.patient.like("%" + patientsearch + "%")) & (db.vw_memberpatientlist.patientmember.like("%" + patientmembersearch + "%")) & (db.vw_memberpatientlist.providerid == providerid) & \
-                (qry) & \
-                (db.vw_memberpatientlist.is_active == True)).select(db.vw_memberpatientlist.hmopatientmember,\
-                                                                  db.vw_memberpatientlist.patientmember,\
-                                                                  db.vw_memberpatientlist.fname,\
-                                                                  db.vw_memberpatientlist.lname,\
-                                                                  db.vw_memberpatientlist.primarypatientid,\
-                                                                  db.vw_memberpatientlist.patientid,\
-                                                                  db.vw_memberpatientlist.patienttype,\
-                                                                  db.vw_memberpatientlist.relation,\
-                                                                  db.vw_memberpatientlist.cell,\
-                                                                  db.vw_memberpatientlist.email,\
-                                                                  db.vw_memberpatientlist.dob,\
-                                                                  db.vw_memberpatientlist.gender,\
-                                                                  db.vw_memberpatientlist.age,\
-                                                                  
-                                                                  limitby=limitby)
-      if(maxcount == 0):
-        maxcount = db((db.vw_memberpatientlist.patient.like("%" + patientsearch + "%")) & (db.vw_memberpatientlist.patientmember.like("%" + patientmembersearch + "%")) &(db.vw_memberpatientlist.providerid == providerid) & \
-                      (qry) & \
-                      (db.vw_memberpatientlist.is_active == True)).count()
-        
-
-  
-    
+      if(providerid != 0):
+        pats = db((db.vw_memberpatientlist.patient.like("%" + patientsearch + "%")) & (db.vw_memberpatientlist.patientmember.like("%" + patientmembersearch + "%")) & (db.vw_memberpatientlist.providerid == providerid) & \
+                  (qry) & \
+                  (db.vw_memberpatientlist.is_active == True)).select(db.vw_memberpatientlist.hmopatientmember,\
+                                                                    db.vw_memberpatientlist.patientmember,\
+                                                                    db.vw_memberpatientlist.fname,\
+                                                                    db.vw_memberpatientlist.lname,\
+                                                                    db.vw_memberpatientlist.primarypatientid,\
+                                                                    db.vw_memberpatientlist.patientid,\
+                                                                    db.vw_memberpatientlist.patienttype,\
+                                                                    db.vw_memberpatientlist.relation,\
+                                                                    db.vw_memberpatientlist.cell,\
+                                                                    db.vw_memberpatientlist.email,\
+                                                                    db.vw_memberpatientlist.dob,\
+                                                                    db.vw_memberpatientlist.gender,\
+                                                                    db.vw_memberpatientlist.age,\
+                                                                    
+                                                                    limitby=limitby)
+        if(maxcount == 0):
+          maxcount = db((db.vw_memberpatientlist.patient.like("%" + patientsearch + "%")) & (db.vw_memberpatientlist.patientmember.like("%" + patientmembersearch + "%")) &(db.vw_memberpatientlist.providerid == providerid) & \
+                        (qry) & \
+                        (db.vw_memberpatientlist.is_active == True)).count()
+      else:
+        pats = db((db.vw_memberpatientlist.patient.like("%" + patientsearch + "%")) & (db.vw_memberpatientlist.patientmember.like("%" + patientmembersearch + "%")) &\
+                  (qry) & \
+                  (db.vw_memberpatientlist.is_active == True)).select(db.vw_memberpatientlist.hmopatientmember,\
+                                                                    db.vw_memberpatientlist.patientmember,\
+                                                                    db.vw_memberpatientlist.fname,\
+                                                                    db.vw_memberpatientlist.lname,\
+                                                                    db.vw_memberpatientlist.primarypatientid,\
+                                                                    db.vw_memberpatientlist.patientid,\
+                                                                    db.vw_memberpatientlist.patienttype,\
+                                                                    db.vw_memberpatientlist.relation,\
+                                                                    db.vw_memberpatientlist.cell,\
+                                                                    db.vw_memberpatientlist.email,\
+                                                                    db.vw_memberpatientlist.dob,\
+                                                                    db.vw_memberpatientlist.gender,\
+                                                                    db.vw_memberpatientlist.age,\
+                                                                    
+                                                                    limitby=limitby)
+        if(maxcount == 0):
+          maxcount = db((db.vw_memberpatientlist.patient.like("%" + patientsearch + "%")) & (db.vw_memberpatientlist.patientmember.like("%" + patientmembersearch + "%")) & \
+                        (qry) & \
+                        (db.vw_memberpatientlist.is_active == True)).count()
     
     
     for pat in pats:

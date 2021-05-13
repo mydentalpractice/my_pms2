@@ -8633,7 +8633,7 @@ XXXZZZZupdate role in doctor to refer to role_default
 
 21/4/2021
 =========
-1. YYYZZZrole_default,  set role = 'Office_Staff' instead of Office Boy
+1. XXXYYYZZZrole_default,  set role = 'Office_Staff' instead of Office Boy
 
 28/4/202
 ========
@@ -8641,9 +8641,18 @@ XXXZZZZupdate role in doctor to refer to role_default
 
 30/04/2021
 ==========
-1. YYYZZZconsentform table
+1. XXXYYYZZZconsentform table
 
 5/5/2021
 ========
-1. ZZZModified Patientmember - added imageid
-2. ZZZModified Provider - added imageid
+1. XXYYYZZZModified Patientmember - added imageid
+2. XXXYYYZZZModified Provider - added imageid
+
+5/8/2021
+=========
+1. XXXYYYZZZ Create new vw_clinic
+
+5/10/2021
+==========
+1. ZZZadd is_active flag in medicine_default 
+2. ZZZmodify medicine_default strngthuom to strengthuom

@@ -38,16 +38,18 @@ def list_medicine():
     providername = providerdict["providername"]
 
      
-    query = ((db.medicine.providerid == providerid) & (db.medicine.is_active == True))
-    fields = (db.medicine.medicine,db.medicine.medicinetype,db.medicine.strength, db.medicine.strengthuom, db.medicine.instructions)
+    #query = ((db.medicine.providerid == providerid) & (db.medicine.is_active == True))
+    #fields = (db.medicine.medicine,db.medicine.medicinetype,db.medicine.strength, db.medicine.strengthuom, db.medicine.instructions)
     
+    query = ((db.medicine_default.is_active == True))
+    fields = (db.medicine_default.medicine,db.medicine_default.meditype,db.medicine_default.strength, db.medicine_default.strengthuom, db.medicine_default.instructions)
    
     
     headers = {\
-        'medicine.medicine' : 'Medicine Name',
-        'medicine.medicinetype' : 'Medicine Type',
-        'medicine.strength' : 'Dosage',
-        'medicine.strengthuom' : 'Measure'
+        'medicine_default.medicine' : 'Medicine Name',
+        'medicine_default.meditype' : 'Medicine Type',
+        'medicine_default.strength' : 'Dosage',
+        'medicine_default.strengthuom' : 'Measure'
     }
     
     links = [\
@@ -55,13 +57,13 @@ def list_medicine():
         dict(header=CENTER('Delete'),body=lambda row: CENTER(A(IMG(_src="/my_pms2/static/img/delete.png",_width=30, _height=30),_href=URL("prescription","delete_medicine",vars=dict(medicineid=row.id)))))
         ]
     
-    orderby = (db.medicine.medicine)
+    orderby = (db.medicine_default.medicine)
         
     exportlist = dict( csv_with_hidden_cols=False,  html=False,tsv_with_hidden_cols=False, tsv=False, json=False,xml=False)    
 
     returnurl = URL('admin', 'providerhome')
 
-    maxtextlengths = {'medicine.medicine':128, 'medicine.medicinetype':32,'medicine.strength':16, 'medicine.strengthuom':16}
+    maxtextlengths = {'medicine_default.medicine':128, 'medicine_default.meditype':32,'medicine_default.strength':16, 'medicine_default.strengthuom':16}
     
     form = SQLFORM.grid(query=query,
                             headers=headers,
@@ -115,36 +117,41 @@ def new_medicine():
         
     page = 0
     
-    db.medicine.is_active.default = True
-    db.medicine.providerid.default = providerid
+    #db.medicine.is_active.default = True
+    #db.medicine.providerid.default = providerid
     
     if(source == "prescriptions"):
         crud.settings.create_next = returnurl
     else:
         crud.settings.create_next = URL('prescription','list_medicine')
     
-    formA = crud.create(db.medicine,message='New medicine added!')  
+    formA = crud.create(db.medicine_default,message='New medicine added!')  
     
-    xname = formA.element('input',_id='medicine_medicine')
-    xname['_class'] = 'form-control'
+    xname = formA.element('input',_id='medicine_default_medicine')
+    if(xname != None):
+        xname['_class'] = 'form-control' 
 
-    xtype = formA.element('select',_id='medicine_medicinetype')
-    xtype['_class'] = 'form-control'
+    xtype = formA.element('select',_id='medicine_default_meditype')
+    if(xtype != None):
+        xtype['_class'] = 'form-control'
     
-    xstr = formA.element('input',_id='medicine_strength')
-    xstr['_class'] = 'form-control'
+    xstr = formA.element('input',_id='medicine_default_strength')
+    if(xstr != None):
+        xstr['_class'] = 'form-control'
     
 
-    xuom = formA.element('select',_id='medicine_strengthuom')
-    xuom['_class'] = 'form-control'
+    xuom = formA.element('select',_id='medicine_default_strengthuom')
+    if(xuom != None):
+        xuom['_class'] = 'form-control'
     
 
-    xinstr = formA.element('input',_id='medicine_instructions')
-    xinstr['_class'] = 'form-control'
+    xinstr = formA.element('input',_id='medicine_default_instructions')
+    if(xinstr != None):
+        xinstr['_class'] = 'form-control'
 
-    formA.element('textarea[name=notes]')['_class'] = 'form-control'
-    formA.element('textarea[name=notes]')['_style'] = 'height:100px;line-height:1.0;'
-    formA.element('textarea[name=notes]')['_rows'] = 5
+    #formA.element('textarea[name=notes]')['_class'] = 'form-control'
+    #formA.element('textarea[name=notes]')['_style'] = 'height:100px;line-height:1.0;'
+    #formA.element('textarea[name=notes]')['_rows'] = 5
 
     
     return dict(formA=formA, returnurl=returnurl,page=page,providerid=providerid,providername=providername)
@@ -247,7 +254,8 @@ def get_prescriptions():
     
     formPres = SQLFORM.factory(\
         Field('prescriptiondate', 'date', label='Date',  default=datetime.date.today(),requires=IS_EMPTY_OR(IS_DATE(format=('%d/%m/%Y')))),
-        Field('medicine', 'integer', widget = lambda field, value:SQLFORM.widgets.options.widget(field, value, _default="0",_style="width:100%;height:35px",_class='form_details'),  label='Drug',requires=IS_IN_DB(db((db.medicine.providerid==providerid)&(db.medicine.is_active == True)), 'medicine.id', '%(medicine)s:%(strength)s:%(strengthuom)s')),
+        Field('medicine', 'integer', widget = lambda field, value:SQLFORM.widgets.options.widget(field, value, _default="0",_style="width:100%;height:35px",_class='form_details'),\
+              label='Drug',requires=IS_IN_DB(db((db.medicine_default.id > 0)&(db.medicine_default.is_active == True)), 'medicine_default.id', '%(medicine)s:%(strength)s:%(strengthuom)s')),
         Field('strength', 'string',represent=lambda v, r: '' if v is None else v),
         Field('strengthuom', 'string',represent=lambda v, r: '' if v is None else v,default="",requires=IS_IN_SET(STRENGTHUOM)),
         Field('frequency', 'string',represent=lambda v, r: '' if v is None else v,default=""),
@@ -744,7 +752,9 @@ def new_prescription():
     formA = SQLFORM.factory(\
         Field('prescriptiondate', 'date', label='Date',  default=datetime.date.today(),requires=IS_EMPTY_OR(IS_DATE(format=('%d/%m/%Y')))),
         Field('doctor', 'integer', default=doctorid, widget = lambda field, value:SQLFORM.widgets.options.widget(field, value, _style="width:100%;height:35px",_class='form_details'),  label='Drug',writable=False,requires=IS_IN_DB(db((db.doctor.providerid==providerid)&(db.doctor.is_active == True)), 'doctor.id', '%(name)s')),
-        Field('medicine', 'integer', widget = lambda field, value:SQLFORM.widgets.options.widget(field, value, _style="width:100%;height:35px",_class='form_details'),  label='Drug',requires=IS_IN_DB(db((db.medicine.providerid==providerid)&(db.medicine.is_active == True)), 'medicine.id', '%(medicine)s:%(strength)s:%(strengthuom)s')),
+        Field('medicine', 'integer', widget = lambda field, value:SQLFORM.widgets.options.widget(field, value, _default="0",_style="width:100%;height:35px",_class='form_details'),\
+              label='Drug',requires=IS_IN_DB(db((db.medicine_default.id > 0)&(db.medicine_default.is_active == True)), 'medicine_default.id', '%(medicine)s:%(strength)s:%(strengthuom)s')),
+        
         Field('strength', 'string',represent=lambda v, r: '' if v is None else v),
         Field('strengthuom', 'string',represent=lambda v, r: '' if v is None else v,default="",requires=IS_IN_SET(STRENGTHUOM)),
         Field('frequency', 'string',represent=lambda v, r: '' if v is None else v,default=""),
@@ -869,7 +879,9 @@ def update_prescription():
     formA = SQLFORM.factory(\
         Field('prescriptiondate', 'date', label='Date',  default=pres[0].prescriptiondate,requires=IS_EMPTY_OR(IS_DATE(format=('%d/%m/%Y')))),
         Field('doctor', 'integer', default=doctorid, widget = lambda field, value:SQLFORM.widgets.options.widget(field, value, _style="width:100%;height:35px",_class='form_details'),  label='Drug',requires=IS_IN_DB(db((db.doctor.providerid==providerid)&(db.doctor.is_active == True)), 'doctor.id', '%(name)s')),
-        Field('medicine', 'integer',default=common.getid(pres[0].medicineid), widget = lambda field, value:SQLFORM.widgets.options.widget(field, value, _style="width:100%;height:35px",_class='form_details'),  label='Drug',requires=IS_IN_DB(db((db.medicine.providerid==providerid)&(db.medicine.is_active == True)), 'medicine.id', '%(medicine)s:%(strength)s:%(strengthuom)s')),
+        Field('medicine', 'integer', default=common.getid(pres[0].medicineid),widget = lambda field, value:SQLFORM.widgets.options.widget(field, value, _default="0",_style="width:100%;height:35px",_class='form_details'),\
+              label='Drug',requires=IS_IN_DB(db((db.medicine_default.id > 0)&(db.medicine_default.is_active == True)), 'medicine_default.id', '%(medicine)s:%(strength)s:%(strengthuom)s')),
+        
         Field('strength', 'string',default=common.getstring(pres[0].strength),represent=lambda v, r: '' if v is None else v),
         Field('strengthuom', 'string', represent=lambda v, r: '' if v is None else v,default=common.getstring(pres[0].strengthuom),requires=IS_IN_SET(STRENGTHUOM)),
         Field('frequency', 'string',represent=lambda v, r: '' if v is None else v,default=common.getstring(pres[0].frequency)),

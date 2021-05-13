@@ -434,7 +434,7 @@ class Appointment:
         appts = db((db.vw_appointments.provider == providerid) & (db.vw_appointments.patientmember == memberid) & (db.vw_appointments.patient == patientid) & \
                    (db.vw_appointments.f_start_time >= start)  & (db.vw_appointments.f_start_time <= end) &\
                    (db.vw_appointments.is_active == True)).\
-            select(db.vw_appointments.f_uniqueid,db.vw_appointments.f_start_time,db.vw_appointments.f_patientname,\
+            select(db.vw_appointments.f_uniqueid,db.vw_appointments.f_start_time,db.vw_appointments.f_patientname,db.vw_appointments.blockappt,\
                    db.vw_appointments.doctor,db.vw_appointments.docname,db.vw_appointments.color,db.vw_appointments.cell, orderby=db.vw_appointments.f_start_time)
         
         apptlist = []
@@ -448,7 +448,8 @@ class Appointment:
                 "patcell": common.modify_cell(appt.cell),
                 "docname":common.getstring(appt.docname),
                 "doctorid": common.getstring(appt.doctor),
-                "color":common.getstring(appt.color)
+                "color":common.getstring(appt.color),
+                "blockappt":common.getboolean(appt.blockappt)
             }
             apptlist.append(apptobj)        
         
@@ -472,7 +473,7 @@ class Appointment:
         
         appts = db((db.vw_appointments.provider == providerid) & (db.vw_appointments.f_start_time >= start)  & \
                    (db.vw_appointments.f_start_time <= end) & (db.vw_appointments.is_active == True)).\
-            select(db.vw_appointments.f_uniqueid,db.vw_appointments.f_start_time,db.vw_appointments.f_patientname,\
+            select(db.vw_appointments.f_uniqueid,db.vw_appointments.f_start_time,db.vw_appointments.f_patientname,db.vw_appointments.blockappt,\
                    db.vw_appointments.doctor,db.vw_appointments.docname,db.vw_appointments.color,db.vw_appointments.cell, orderby=~db.vw_appointments.f_start_time)
         
         apptlist = []
@@ -486,7 +487,8 @@ class Appointment:
                 "patcell": common.modify_cell(appt.cell),
                 "docname":common.getstring(appt.docname),
                 "doctorid": common.getstring(appt.doctor),
-                "color":common.getstring(appt.color)
+                "color":common.getstring(appt.color),
+                "blockappt":common.getboolean(appt.blockappt)
             }
             apptlist.append(apptobj)        
         
@@ -510,7 +512,7 @@ class Appointment:
         
         appts = db((db.vw_appointments.provider == providerid) & (db.vw_appointments.f_start_time >= start)  & \
                    (db.vw_appointments.f_start_time <= end) & (db.vw_appointments.is_active == True)).\
-            select(db.vw_appointments.f_uniqueid,db.vw_appointments.f_start_time,db.vw_appointments.f_patientname,\
+            select(db.vw_appointments.f_uniqueid,db.vw_appointments.f_start_time,db.vw_appointments.f_patientname,db.vw_appointments.blockappt,\
                    db.vw_appointments.doctor,db.vw_appointments.docname,db.vw_appointments.color, db.vw_appointments.cell,orderby=db.vw_appointments.f_start_time)
         
         apptlist = []
@@ -524,6 +526,7 @@ class Appointment:
                 "patientname" : appt.f_patientname,
                 "patcell": common.modify_cell(appt.cell),
                 "docname":appt.docname,
+                "blockappt":common.getboolean(appt.blockappt)
             }
             apptlist.append(apptobj)        
         
@@ -550,7 +553,7 @@ class Appointment:
                    (db.vw_appointments.f_start_time >= start)  & \
                    (db.vw_appointments.f_start_time <= end) & (db.vw_appointments.is_active == True)).\
             select(db.vw_appointments.f_uniqueid,db.vw_appointments.f_start_time,db.vw_appointments.f_patientname,\
-                   db.vw_appointments.doctor,db.vw_appointments.docname,db.vw_appointments.color,db.vw_appointments.cell)
+                   db.vw_appointments.doctor,db.vw_appointments.docname,db.vw_appointments.color,db.vw_appointments.cell,db.vw_appointments.blockappt)
         
         apptlist = []
         
@@ -562,7 +565,8 @@ class Appointment:
                 "appttime"  : (appt.f_start_time).strftime("%I:%M %p"),
                 "patientname" : appt.f_patientname,
                 "docname":appt.docname,
-                "patcell":common.modify_cell(appt.cell)
+                "patcell":common.modify_cell(appt.cell),
+                "blockappt":common.getboolean(appt.blockappt)
             }
             apptlist.append(apptobj)        
         
@@ -588,7 +592,7 @@ class Appointment:
         appts = db((db.vw_appointments.provider == providerid) & (db.vw_appointments.f_start_time >= start)  & \
                    (db.vw_appointments.f_start_time <= end) & (db.vw_appointments.is_active == True)).\
             select(db.vw_appointments.f_uniqueid,db.vw_appointments.f_start_time,db.vw_appointments.f_patientname,\
-                   db.vw_appointments.doctor,db.vw_appointments.docname,db.vw_appointments.color,db.vw_appointments.cell)
+                   db.vw_appointments.doctor,db.vw_appointments.docname,db.vw_appointments.color,db.vw_appointments.cell,db.vw_appointments.blockappt)
         
         apptlist = []
         
@@ -600,7 +604,8 @@ class Appointment:
                 "appttime"  : (appt.f_start_time).strftime("%I:%M %p"),
                 "patientname" : appt.f_patientname,
                 "docname":appt.docname,
-                "patcell":common.modify_cell(appt.cell)
+                "patcell":common.modify_cell(appt.cell),
+                "blockappt":common.getboolean(appt.blockappt)
             }
             apptlist.append(apptobj)        
         
@@ -741,6 +746,7 @@ class Appointment:
                     "gender":common.getstring(appt[0].gender),
                     "dob":common.getstringfromdate(appt[0].dob,"%d/%M/%Y"),  
                     "age":calculateAge(appt[0].dob) if(appt[0].dob != None) else 0,
+                    "blockappt":common.getboolean(appt[0].blockappt),
                     "result":"success",
                     "error_message":""
                       

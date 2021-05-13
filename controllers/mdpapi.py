@@ -60,7 +60,7 @@ def sendOTPCashless(avars):
     apikey = "" if(len(props)==0) else props[0].api_key
     
     try:
-	orlgr = mdpreligare.ReligareCashless(current.globalenv['db'],int(common.getid(str(avars["providerid"]))),apikey,url)
+	orlgr = mdpreligare.ReligareCashless(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0,apikey,url)
 	rsp = orlgr.sendOTP(str(avars["mobile_number"]),str(avars["policy_number"]), str(avars["customer_id"]))
 
     except Exception as e:
@@ -80,7 +80,7 @@ def validateOTPCashless(avars):
     
     rsp={}
     try:
-	orlgr = mdpreligare.ReligareCashless(current.globalenv['db'],int(common.getid(str(avars["providerid"]))),apikey,url)
+	orlgr = mdpreligare.ReligareCashless(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0,apikey,url)
 	rsp = orlgr.validateOTP(str(avars["ackid"]), str(avars["otp"]), str(avars["policy_number"]),\
 	                        str(avars["customer_id"]), str(avars["mobile_number"]),str(avars["policy_name"]))
 	
@@ -101,7 +101,7 @@ def getOPDServicesCashless(avars):
 	file_data = avars['document']
 	x = uuid.uuid1()
 	filename = x.hex + ".jpg"
-	orlgr = mdpreligare.ReligareCashless(current.globalenv['db'],int(common.getid(str(avars["providerid"]))),apikey,url)
+	orlgr = mdpreligare.ReligareCashless(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0,apikey,url)
 	rsp = orlgr.getOPDServices(str(avars["ackid"]), str(avars["policy_number"]), 
 	                           str(avars["primary_customer_id"]),str(avars["customer_id"]),\
 	                           str(avars["mobile_number"]),str(avars["policy_name"]))
@@ -121,7 +121,7 @@ def getTransactionIDCashless(avars):
 
     rsp = {}
     try:
-	orlgr = mdpreligare.ReligareCashless(current.globalenv['db'],int(common.getid(str(avars["providerid"]))),apikey,url)
+	orlgr = mdpreligare.ReligareCashless(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0,apikey,url)
 	rsp = orlgr.geTransactionID(str(avars["ackid"]), str(avars["service_id"]),\
 	                            str(avars["procedurecode"]),str(avars["procedurename"]),\
 	                            str(avars["procedurefee"]),
@@ -142,7 +142,7 @@ def sendOTPXXX(avars):
     rsp = {}
     orlgr = None
     try:
-	orlgr = mdpreligare.ReligareXXX(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+	orlgr = mdpreligare.ReligareXXX(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
 	rsp = orlgr.sendOTP(str(avars["policy_number"]), str(avars["customer_id"]), str(avars["voucher_code"]),str(avars["policy_name"]))
 
     except Exception as e:
@@ -157,7 +157,7 @@ def sendOTPXXX(avars):
 def validateOTPXXX(avars):
     rsp={}
     try:
-	orlgr = mdpreligare.ReligareXXX(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+	orlgr = mdpreligare.ReligareXXX(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
 	rsp = orlgr.validateOTP(str(avars["ackid"]), str(avars["otp"]), str(avars["policy_number"]),\
 	                        str(avars["customer_id"]), str(avars["voucher_code"]),str(avars["mobile_number"]),str(avars["policy_name"]))
 	
@@ -177,7 +177,7 @@ def uploadDocumentXXX(avars):
 	file_data = avars['document']
 	x = uuid.uuid1()
 	filename = x.hex + ".jpg"
-	orlgr = mdpreligare.ReligareXXX(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+	orlgr = mdpreligare.ReligareXXX(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
 	rsp = orlgr.uploadDocument(str(avars["ackid"]), file_data,filename,str(avars["policy_number"]), 
 	                           str(avars["primary_customer_id"]),str(avars["customer_id"]),\
 	                           str(avars["voucher_code"]),str(avars["mobile_number"]),str(avars["policy_name"]))
@@ -192,7 +192,7 @@ def uploadDocumentXXX(avars):
 def getreligarepatientXXX(avars):
     rsp={}
     try:
-	orlgr = mdpreligare.ReligareXXX(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+	orlgr = mdpreligare.ReligareXXX(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
 	rsp = orlgr.getreligarepatient(avars)
 	
     except Exception as e:
@@ -202,7 +202,7 @@ def getreligarepatientXXX(avars):
 def updatereligarepatientXXX(avars):
     rsp={}
     try:
-	orlgr = mdpreligare.ReligareXXX(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+	orlgr = mdpreligare.ReligareXXX(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
 	rsp = orlgr.updatereligarepatient(str(avars["memberid"]),str(avars["email"]), str(avars["address1"]), str(avars["address2"]), \
 	    str(avars["address3"]), str(avars["city"]),str(avars["st"]),str(avars["pin"]),str(avars["mobile_number"]))
 	
@@ -213,7 +213,7 @@ def updatereligarepatientXXX(avars):
 def getreligareproceduresXXX(avars):
     rsp = {}
     try:
-	orlgr = mdpreligare.ReligareXXX(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+	orlgr = mdpreligare.ReligareXXX(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
 	rsp = orlgr.getreligareprocedures(str(avars["ackid"]), str(avars["procedurepriceplancode"]),\
 	                                  str(avars["phrase"]) if "phrase" in avars else "",\
 	                                  int(common.getid(str(avars["page"]))) if "page" in avars else 0,\
@@ -239,7 +239,7 @@ def getcompanyprocedures(avars):
 def getnoncompanyprocedures(avars):
     rsp = {}
     try:
-	orlgr = mdpprocedure.Procedure(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+	orlgr = mdpprocedure.Procedure(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
 	rsp = orlgr.getnoncompanyprocedures(str(avars["procedurepriceplancode"]),\
 	                                  str(avars["phrase"]) if "phrase" in avars else "",\
 	                                  int(common.getid(str(avars["page"]))) if "page" in avars else 0,\
@@ -253,7 +253,7 @@ def getnoncompanyprocedures(avars):
 def getTransactionIDXXX(avars):
     rsp = {}
     try:
-	orlgr = mdpreligare.ReligareXXX(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+	orlgr = mdpreligare.ReligareXXX(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
 	rsp = orlgr.geTransactionID(str(avars["ackid"]), str(avars["service_id"]),\
 	                            str(avars["procedurecode"]),str(avars["procedurename"]),\
 	                            str(avars["procedurefee"]),
@@ -270,7 +270,7 @@ def getTransactionIDXXX(avars):
 def addRlgProcedureToTreatmentXXX(avars):
     rsp = {}
     try:
-	orlgr = mdpreligare.ReligareXXX(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+	orlgr = mdpreligare.ReligareXXX(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
 	rsp = orlgr.addRlgProcedureToTreatment(str(avars["ackid"]), \
 	                                    str(avars["otp"]),\
 	                                    str(avars["treatmentid"]),\
@@ -297,7 +297,7 @@ def addRlgProcedureToTreatmentXXX(avars):
 def settleTransactionXXX(avars):
     rsp = {}
     try:
-	orlgr = mdpreligare.ReligareXXX(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+	orlgr = mdpreligare.ReligareXXX(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
 	rsp = orlgr.settleTransaction(int(common.getid(str(avars["treatmentid"]))),int(common.getid(str(avars["treatmentprocedureid"]))))
     except Exception as e:
 	rsp = json.dumps({"result":"fail", "error_message":"Exception Error - " + str(e)})
@@ -311,7 +311,7 @@ def settleTransactionXXX(avars):
 def voidTransactionXXX(avars):
     rsp = {}
     try:
-	orlgr = mdpreligare.ReligareXXX(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+	orlgr = mdpreligare.ReligareXXX(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
 	rsp = orlgr.voidTransaction(int(common.getid(str(avars["treatmentid"]))),int(common.getid(str(avars["treatmentprocedureid"]))))
     except Exception as e:
 	rsp = json.dumps({"result":"fail", "error_message":"Exception Error - " + str(e)})
@@ -322,7 +322,7 @@ def voidTransactionXXX(avars):
 def validaterlgmember399(avars):
 
     try:
-	orlgr = mdpreligare.Religare399(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+	orlgr = mdpreligare.Religare399(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
 	rsp = orlgr.validaterlgmember399(str(avars["plan_code"]), str(avars["policy"]), str(avars["voucher_code"]))
 
     except Exception as e:
@@ -333,7 +333,7 @@ def validaterlgmember399(avars):
     
 def getreligarepatient399(avars):
     try:
-	orlgr = mdpreligare.Religare399(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+	orlgr = mdpreligare.Religare399(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
 	rsp = orlgr.getreligarepatient399(avars)
 
     except Exception as e:
@@ -345,7 +345,7 @@ def getreligarepatient399(avars):
     
 def updatereligarepatient399(avars):
     try:
-	orlgr = mdpreligare.Religare399(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+	orlgr = mdpreligare.Religare399(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
 	rsp = orlgr.updatereligarepatient399(avars)
 
     except Exception as e:
@@ -356,7 +356,7 @@ def updatereligarepatient399(avars):
         
 def getreligareprocedures399(avars):
     try:
-	orlgr = mdpreligare.Religare399(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+	orlgr = mdpreligare.Religare399(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
 	rsp = orlgr.getreligareprocedures399(avars)
 
     except Exception as e:
@@ -367,7 +367,7 @@ def getreligareprocedures399(avars):
 
 def addRlgProcedureToTreatment399(avars):
     try:
-	orlgr = mdpreligare.Religare399(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+	orlgr = mdpreligare.Religare399(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
 	rsp = orlgr.addRlgProcedureToTreatment399(avars)
 
     except Exception as e:
@@ -408,7 +408,7 @@ def encrypts128(avars):
     return rsp 
 
 def encrypt_json(avars):
-    orlgr = mdpreligare.Religare(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+    orlgr = mdpreligare.Religare(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
     jsonobj = avars["jsonobj"]
     jsonobjstr = json.dumps(jsonobj)
    
@@ -421,7 +421,7 @@ def sendOTP(avars):
     rsp = {}
     orlgr = None
     try:
-	orlgr = mdpreligare.Religare(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+	orlgr = mdpreligare.Religare(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
 	rsp = orlgr.sendOTP(str(avars["policy_number"]), str(avars["customer_id"]), str(avars["voucher_code"]))
 
     except Exception as e:
@@ -436,7 +436,7 @@ def sendOTP(avars):
 def validateOTP(avars):
     rsp={}
     try:
-	orlgr = mdpreligare.Religare(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+	orlgr = mdpreligare.Religare(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
 	rsp = orlgr.validateOTP(str(avars["ackid"]), str(avars["otp"]), str(avars["policy_number"]), str(avars["customer_id"]), str(avars["mobile_number"]))
 	
     except Exception as e:
@@ -448,7 +448,7 @@ def getReligarePatient(avars):
     
     rsp = {}
     try:
-	orlgr = mdpreligare.Religare(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+	orlgr = mdpreligare.Religare(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
 	rsp = orlgr.getreligarepatient(str(avars["customer_id"]),\
 	                               str(avars["membername"]),\
 	                               str(avars["mobile_number"]),\
@@ -466,7 +466,7 @@ def updateReligarePatient(avars):
     
     rsp = {}
     try:
-	orlgr = mdpreligare.Religare(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+	orlgr = mdpreligare.Religare(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
 	rsp = orlgr.updatereligarepatient(str(avars["memberid"]),str(avars["email"]), str(avars["address1"]), str(avars["address2"]), \
 	    str(avars["address3"]), str(avars["city"]),str(avars["st"]),str(avars["pin"]),str(avars["cell"]))
 	
@@ -481,7 +481,7 @@ def uploadDocument(avars):
     rsp = {}
     try:
 	
-	orlgr = mdpreligare.Religare(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+	orlgr = mdpreligare.Religare(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
 	#filename = "C:\\ib\\xray1.jpg"
 	file_data = avars['document']
 	#with open(filename, "rb") as imageFile:
@@ -512,7 +512,7 @@ def uploadDocument(avars):
 def addProcedure(avars):
     rsp = {}
     try:
-	orlgr = mdpreligare.Religare(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+	orlgr = mdpreligare.Religare(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
 	rsp = orlgr.addProcedure(str(avars["ackid"]), str(avars["sub_service_id"]),str(avars["treatment_code"]),str(avars["treatment_name"]),str(avars["swipe_value"]))
     except Exception as e:
 	rsp = json.dumps({"result":"fail", "error_message":"Exception Error - " + str(e)})
@@ -523,7 +523,7 @@ def addProcedure(avars):
 def getTransactionID(avars):
     rsp = {}
     try:
-	orlgr = mdpreligare.Religare(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+	orlgr = mdpreligare.Religare(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
 	rsp = orlgr.geTransactionID(str(avars["ackid"]), str(avars["service_id"]),\
 	                            str(avars["procedurecode"]),str(avars["procedurename"]),\
 	                            str(avars["procedurefee"]),
@@ -539,7 +539,7 @@ def getTransactionID(avars):
 def addRlgProcedureToTreatment(avars):
     rsp = {}
     try:
-	orlgr = mdpreligare.Religare(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+	orlgr = mdpreligare.Religare(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
 	rsp = orlgr.addRlgProcedureToTreatment(str(avars["ackid"]), \
 	                                    str(avars["otp"]),\
 	                                    str(avars["treatmentid"]),\
@@ -564,7 +564,7 @@ def addRlgProcedureToTreatment(avars):
 def voidTransaction(avars):
     rsp = {}
     try:
-	orlgr = mdpreligare.Religare(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+	orlgr = mdpreligare.Religare(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
 	rsp = orlgr.voidTransaction(int(common.getid(str(avars["treatmentid"]))),int(common.getid(str(avars["treatmentprocedureid"]))))
     except Exception as e:
 	rsp = json.dumps({"result":"fail", "error_message":"Exception Error - " + str(e)})
@@ -574,7 +574,7 @@ def voidTransaction(avars):
 def getreligareprocedures(avars):
     rsp = {}
     try:
-	orlgr = mdpreligare.Religare(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+	orlgr = mdpreligare.Religare(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
 	rsp = orlgr.getreligareprocedures(str(avars["ackid"]), str(avars["procedurepriceplancode"]),\
 	                                  str(avars["phrase"]) if "phrase" in avars else "",\
 	                                  int(common.getid(str(avars["page"]))) if "page" in avars else 0,\
@@ -588,7 +588,7 @@ def getreligareprocedures(avars):
 def settleTransaction(avars):
     rsp = {}
     try:
-	orlgr = mdpreligare.Religare(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+	orlgr = mdpreligare.Religare(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
 	rsp = orlgr.settleTransaction(int(common.getid(str(avars["treatmentid"]))),int(common.getid(str(avars["treatmentprocedureid"]))))
     except Exception as e:
 	rsp = json.dumps({"result":"fail", "error_message":"Exception Error - " + str(e)})
@@ -630,7 +630,7 @@ def resetpassword(avars):
     return mdp_user
 
 def encrypt_login(avars):
-    orlgr = mdpreligare.Religare(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+    orlgr = mdpreligare.Religare(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
     rsp = orlgr.encrypt_login("login",0,str(avars["username"]),str(avars["password"])) 
     return json.dumps({"req_data":rsp})
     
@@ -731,12 +731,12 @@ def updatememberprovider(avars):
     return prov
 
 def getprovider(avars):
-    oprov = mdpprovider.Provider(db, int(common.getid(str(avars["providerid"]))))
+    oprov = mdpprovider.Provider(db, int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
     prov = oprov.getprovider()
     return prov
 
 def addproviderimage(avars):
-    oprov = mdpprovider.Provider(db, int(common.getid(str(avars["providerid"]))))
+    oprov = mdpprovider.Provider(db, int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
     avars["appath"] = current.globalenv["request"].folder
     prov = oprov.addproviderimage(avars)
     return prov
@@ -776,7 +776,7 @@ def addproviderimage(avars):
 #"relation ": "Self",
 #"fullname ": "WLK102_FN WLK102_LN"
 def newpatient(avars):
-    opat = mdppatient.Patient(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+    opat = mdppatient.Patient(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
     pat = opat.newpatient(str(avars['fname']),str(avars['mname']),str(avars['lname']),str(avars['cell']),str(avars['email']))
     #pat = opat.getpatient(pat[0],pat[1])
     return pat
@@ -786,7 +786,7 @@ def newpatient(avars):
 #input - groupref,title,fname,mname,lname,cell,emailid,dob,gender,address1,address2,address3,city,st,pin,
 #output - memberid,patientid 
 def updatewalkinpatient(avars):
-    opat = mdppatient.Patient(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+    opat = mdppatient.Patient(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
     pat = opat.updatewalkinpatient(avars)
     return pat
 
@@ -794,12 +794,12 @@ def updatewalkinpatient(avars):
 #input - groupref,title,fname,mname,lname,cell,emailid,dob,gender,address1,address2,address3,city,st,pin,
 #output - memberid,patientid 
 def newalkinpatient(avars):
-    opat = mdppatient.Patient(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+    opat = mdppatient.Patient(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
     pat = opat.newalkinpatient(avars)
     return pat
 
 def deletewalkinpatient(avars):
-    opat = mdppatient.Patient(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+    opat = mdppatient.Patient(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
     pat = opat.deletewalkinpatient(int(common.getid(str(avars["memberid"]))))
     return pat
 
@@ -844,7 +844,7 @@ def deletewalkinpatient(avars):
     #"fullname ": "FN2_DEP1 LN2_DEP1"
 #}
 def getpatient(avars):
-    opat = mdppatient.Patient(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+    opat = mdppatient.Patient(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
     urlprops = db(db.urlproperties.id > 0).select(db.urlproperties.mydp_ipaddress)
     imageurl =urlprops[0].mydp_ipaddress + URL('dentalimage',"download")    
     pat = opat.getpatient(str(avars['memberid']),str(avars['patientid']),imageurl)
@@ -853,7 +853,7 @@ def getpatient(avars):
     return pat 
 
 def addpatientimage(avars):
-    opat = mdppatient.Patient(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+    opat = mdppatient.Patient(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
     avars["appath"] = current.globalenv["request"].folder
     pat = opat.addpatientimage(avars)
     
@@ -911,7 +911,7 @@ def addpatientimage(avars):
 #}
 
 def searchpatient(avars):
-    opat = mdppatient.Patient(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+    opat = mdppatient.Patient(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0 )
     
     company = avars["company"] if "company" in avars else ""
     company = "" if (company == None) | (company == "") else company
@@ -926,7 +926,7 @@ def searchpatient(avars):
     return rsp
 
 def getMediAssistPatients(avars):
-    opat = mdppatient.Patient(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+    opat = mdppatient.Patient(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
     rsp = opat.getMediAssistPatients(int(common.getid(str(avars["page"]))) if "page" in avars else 1,
                             int(common.getid(str(avars["maxcount"]))) if "maxcount" in avars else 0
                              )
@@ -935,13 +935,13 @@ def getMediAssistPatients(avars):
 
 #This returns a list of patient notes entered by a doctor(s)
 def getpatientnotes(avars):
-    opat = mdppatient.Patient(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+    opat = mdppatient.Patient(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
     rsp = opat.getpatientnotes(int(common.getid(str(avars['page'])))  if 'page' in avars else 0,str(avars['memberid']),str(avars['patientid']))
     return rsp
 
 #this saves new note added to the patient notes log
 def addpatientnotes(avars):
-    opat = mdppatient.Patient(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+    opat = mdppatient.Patient(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
     rsp = opat.addpatientnotes(str(avars['memberid']),str(avars['patientid']),str(avars['notes']))
     return rsp
 
@@ -1002,12 +1002,12 @@ def doctitles(avars):
     return rsp
 
 def getMedicalHistory(avars):
-    opat = mdppatient.Patient(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+    opat = mdppatient.Patient(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
     rsp = opat.getMedicalHistory(str(avars['memberid']),str(avars['patientid']))    
     return rsp
 
 def updateMedicalHistory(avars):
-    opat = mdppatient.Patient(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+    opat = mdppatient.Patient(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
     rsp = opat.updateMedicalHistory(str(avars['memberid']),str(avars['patientid']),avars["medhistory"])    
     return rsp
 
@@ -1024,12 +1024,12 @@ def rolelist(avars):
     return rllist
 
 def doctorlist(avars):
-    odr = mdpdoctor.Doctor(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+    odr = mdpdoctor.Doctor(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
     drlist = odr.doctorlist()
     return drlist
     
 def getdoctor(avars):
-    odr = mdpdoctor.Doctor(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+    odr = mdpdoctor.Doctor(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
     doctor = odr.doctor(int(common.getid(str(avars["doctorid"]))))
     return doctor
 ############################ APPOINTMENT API ##################################################
@@ -1037,7 +1037,7 @@ def getdoctor(avars):
     
 
 def new_appointment(avars):
-    oappts = mdpappointment.Appointment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+    oappts = mdpappointment.Appointment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
     rsp = oappts.new_appointment(avars)
     return rsp    
     
@@ -1130,14 +1130,14 @@ def reSchedule(avars):
 #X
 def getappointments(avars):
     
-    oappts = mdpappointment.Appointment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+    oappts = mdpappointment.Appointment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
     rsp = oappts.appointments(int(common.getid(str(avars["month"]))),int(common.getid(str(avars["year"]))))
     return rsp
 
 #X
 def getpatappointmentcountbymonth(avars):
     
-    oappts = mdpappointment.Appointment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+    oappts = mdpappointment.Appointment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
     rsp = oappts.getpatappointmentcountbymonth(int(common.getid(str(avars["month"]))),int(common.getid(str(avars["year"]))),\
                                           int(common.getid(str(avars["memberid"]))),int(common.getid(str(avars["patientid"]))))
     return rsp
@@ -1145,7 +1145,7 @@ def getpatappointmentcountbymonth(avars):
 #X
 def getappointmentsbypatient(avars):
     
-    oappts = mdpappointment.Appointment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+    oappts = mdpappointment.Appointment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
     rsp = oappts.getappointmentsbypatient(int(common.getid(str(avars["month"]))),\
                                           int(common.getid(str(avars["year"]))),\
                                           int(common.getid(str(avars["memberid"]))),
@@ -1155,14 +1155,14 @@ def getappointmentsbypatient(avars):
 #X
 def getappointmentsbymonth(avars):
     
-    oappts = mdpappointment.Appointment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+    oappts = mdpappointment.Appointment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
     rsp = oappts.getappointmentsbymonth(int(common.getid(str(avars["month"]))),int(common.getid(str(avars["year"]))))
     return rsp
 
 #this method returns all appointments for a specific day (dd/mm/yyyy) for a provider/patient
 #X
 def getpatappointmentsbyday(avars):
-    oappts = mdpappointment.Appointment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+    oappts = mdpappointment.Appointment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
     rsp = oappts.getpatappointmentsbyday(int(common.getid(str(avars["day"]))),int(common.getid(str(avars["month"]))),int(common.getid(str(avars["year"]))),\
                                          int(common.getid(str(avars["memberid"]))),int(common.getid(str(avars["patientid"])))\
                                          )
@@ -1173,7 +1173,7 @@ def getpatappointmentsbyday(avars):
 
 #X this method returns all appointments for a specific day (dd/mm/yyyy)
 def getappointmentsbyday(avars):
-    oappts = mdpappointment.Appointment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+    oappts = mdpappointment.Appointment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
     rsp = oappts.getappointmentsbyday(int(common.getid(str(avars["day"]))),\
                                       int(common.getid(str(avars["month"]))),\
                                       int(common.getid(str(avars["year"]))))
@@ -1182,12 +1182,12 @@ def getappointmentsbyday(avars):
 #this method returns all number of appointments for each day of a month
 #X
 def getappointmentcountbymonth(avars):
-    oappts = mdpappointment.Appointment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+    oappts = mdpappointment.Appointment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
     rsp = oappts.getappointmentcountbymonth(int(common.getid(str(avars["month"]))),int(common.getid(str(avars["year"]))))
     return rsp
 #X
 def getdocappointmentcountbymonth(avars):
-    oappts = mdpappointment.Appointment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+    oappts = mdpappointment.Appointment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
     rsp = oappts.getdocappointmentcountbymonth(int(common.getid(str(avars["month"]))),int(common.getid(str(avars["year"]))))
     return rsp
 
@@ -1198,19 +1198,19 @@ def getdocappointmentcountbymonth(avars):
 #X
 def getappointment(avars):
     
-    oappts = mdpappointment.Appointment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+    oappts = mdpappointment.Appointment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
     rsp = oappts.appointment(int(common.getid(str(avars["appointmentid"]))))
     return rsp
 #X
 def checkinappointment(avars):
     
-    oappts = mdpappointment.Appointment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+    oappts = mdpappointment.Appointment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
     rsp = oappts.checkinappointment(int(common.getid(str(avars["appointmentid"]))))
     return rsp
 #X
 def newappointment(avars):
     logger.loggerpms2.info("Enter newappointment in mdpapi")
-    oappts = mdpappointment.Appointment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+    oappts = mdpappointment.Appointment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
     rsp = oappts.newappointment(int(common.getid(str(avars["memberid"]))),int(common.getid(str(avars["patientid"]))),\
                                 int(common.getid(str(avars["doctorid"]))),\
                                 str(avars["complaint"]),str(avars["startdt"]),int(common.getid(str(avars["duration"]))),\
@@ -1221,7 +1221,7 @@ def newappointment(avars):
 #X
 def updateappointment(avars):
     
-    oappts = mdpappointment.Appointment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+    oappts = mdpappointment.Appointment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
     
    # (self,appointmentid,doctorid,complaint,startdt,duration,providernotes,cell,status,treatmentid,appPath):
     rsp = oappts.updateappointment(\
@@ -1242,7 +1242,7 @@ def updateappointment(avars):
 #X
 def cancelappointment(avars):
     
-    oappts = mdpappointment.Appointment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+    oappts = mdpappointment.Appointment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
     
    # (self,appointmentid,doctorid,complaint,startdt,duration,providernotes,cell,status,treatmentid,appPath):
     rsp = oappts.cancelappointment(\
@@ -1271,7 +1271,7 @@ def appointmentduration(avars):
     return rsp
 
 def list_open_slots(avars):
-    oappts = mdpappointment.Appointment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+    oappts = mdpappointment.Appointment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
     rsp = oappts.list_open_slots(avars)
     return rsp    
 
@@ -1281,7 +1281,7 @@ def list_open_slots(avars):
 #totaltreatmentcost,totalinspays,totalcopay,totalpaid,totaldue}
 def listpayments(avars):
     
-    opaymnt = mdppayment.Payment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+    opaymnt = mdppayment.Payment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
     rsp = opaymnt.listpayments(int(common.getid(str(avars["memberid"]))),int(common.getid(str(avars["patientid"]))))
     return rsp
 
@@ -1290,33 +1290,33 @@ def listpayments(avars):
 #totaltreatmentcost,totalinspays,totalcopay,totalpaid,totaldue}
 def getpayment(avars):
     
-    opaymnt = mdppayment.Payment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+    opaymnt = mdppayment.Payment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
     rsp = opaymnt.getpayment(int(common.getid(str(avars["paymentid"]))))
     return rsp
 
 def paymentcallback(avars):
-    opaymnt = mdppayment.Payment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+    opaymnt = mdppayment.Payment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
     rsp = opaymnt.paymentcallback(avars)
     return rsp
     
 def newpayment(avars):
-    opaymnt = mdppayment.Payment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+    opaymnt = mdppayment.Payment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
     rsp = opaymnt.newpayment(int(common.getid(str(avars["memberid"]))),int(common.getid(str(avars["patientid"]))),int(common.getid(str(avars["treatmentid"]))))
     return rsp
 
 def getpaymentlist(avars):
-    opaymnt = mdppayment.Payment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+    opaymnt = mdppayment.Payment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
     rsp = opaymnt.getpaymentlist(int(common.getid(str(avars["memberid"]))),int(common.getid(str(avars["patientid"]))),int(common.getid(str(avars["treatmentid"]))))
     return rsp
 
 def paymentreceipt(avars):
-    opaymnt = mdppayment.Payment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+    opaymnt = mdppayment.Payment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
     rsp = opaymnt.paymentreceipt(int(common.getid(str(avars["paymentid"]))))
     return rsp
 
 
 def getsignedkey(avars):
-    opaymnt = mdppayment.Payment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+    opaymnt = mdppayment.Payment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
     rsp = opaymnt.getsignedkey(str(avars["signedip"]),current.globalenv["request"].folder)
     return rsp
 
@@ -1324,7 +1324,7 @@ def getsignedkey(avars):
 def gettreatments(avars):
     #logger.loggerpms2.info("Enter Get Treatments")
     
-    otrtmnt = mdptreatment.Treatment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+    otrtmnt = mdptreatment.Treatment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
     rsp = otrtmnt.gettreatments(int(common.getid(str(avars["page"]))) if "page" in avars else 0, 
                                 int(common.getid(str(avars["memberid"]))) if "memberid" in avars else 0,
                                 int(common.getid(str(avars["patientid"]))) if "patientid" in avars else 0,
@@ -1339,7 +1339,7 @@ def gettreatments(avars):
 #def gettreatmentsbypatient(avars):
     ##logger.loggerpms2.info("Enter Get Treatments")
     
-    #otrtmnt = mdptreatment.Treatment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+    #otrtmnt = mdptreatment.Treatment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
     #rsp = otrtmnt.gettreatments(int(common.getid(str(avars["page"]))) if "page" in avars else 1, 
                                 #int(common.getid(str(avars["memberid"]))),int(common.getid(str(avars["patientid"]))),
                                 #common.getstring(str(avars["searchphrase"])) if "searchphrase" in avars else "",
@@ -1353,7 +1353,7 @@ def gettreatments(avars):
 def getopentreatments(avars):
     #logger.loggerpms2.info("Enter Get Treatments")
     
-    otrtmnt = mdptreatment.Treatment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+    otrtmnt = mdptreatment.Treatment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
     rsp = otrtmnt.getopentreatments(int(common.getid(str(avars["page"]))) if "page" in avars else 1, 
                                     int(common.getid(str(avars["memberid"]))) if "memberid" in avars else 0,\
                                     int(common.getid(str(avars["patientid"]))) if "patientid" in avars else 0,\
@@ -1367,21 +1367,21 @@ def getopentreatments(avars):
 def gettreatment(avars):
     #logger.loggerpms2.info("Enter Get Treatment")
     
-    otrtmnt = mdptreatment.Treatment(current.globalenv['db'],int(common.getid(str(avars["providerid"])))  if "providerid" in avars else 0)
+    otrtmnt = mdptreatment.Treatment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0 )
     rsp = otrtmnt.gettreatment(int(common.getid(str(avars["treatmentid"])))  if "treatmentid" in avars else 0)
     return rsp
 
 def sendforauthorization(avars):
     #logger.loggerpms2.info("Enter Get Treatment")
     
-    otrtmnt = mdptreatment.Treatment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+    otrtmnt = mdptreatment.Treatment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
     rsp = otrtmnt.sendforauthorization(request.folder,int(common.getid(str(avars["treatmentid"]))))
     return rsp
 
 
 def newtreatment(avars):
     #logger.loggerpms2.info("Enter New Treatment")    
-    otrtmnt = mdptreatment.Treatment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+    otrtmnt = mdptreatment.Treatment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
     rsp = otrtmnt.newtreatment(int(common.getid(str(avars["memberid"]))),
                                int(common.getid(str(avars["patientid"]))))
     
@@ -1389,7 +1389,7 @@ def newtreatment(avars):
 
 def newtreatment_clinic(avars):
     #logger.loggerpms2.info("Enter New Treatment")    
-    otrtmnt = mdptreatment.Treatment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+    otrtmnt = mdptreatment.Treatment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
     rsp = otrtmnt.newtreatment_clinic(avars)
         
         
@@ -1404,7 +1404,7 @@ def newtreatment_clinic(avars):
 def updatetreatment(avars):
     #logger.loggerpms2.info("Enter Update Treatment")
     
-    otrtmnt = mdptreatment.Treatment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+    otrtmnt = mdptreatment.Treatment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
     rsp = otrtmnt.updatetreatment(int(common.getid(str(avars["treatmentid"]))), 
                                   str(avars["treatmentdate"]) if "treatmentdate" in avars else None, 
                                   str(avars["chiefcomplaint"]) if 'chiefcomplaint' in avars else None,\
@@ -1418,7 +1418,7 @@ def updatetreatment(avars):
 
 def treatmentstatus(avars):
     #logger.loggerpms2.info("Enter New Treatment")    
-    otrtmnt = mdptreatment.Treatment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+    otrtmnt = mdptreatment.Treatment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
     rsp = otrtmnt.treatmentstatus()
     
     return rsp
@@ -1428,7 +1428,7 @@ def treatmentstatus(avars):
 def getprocedure(avars):
     #logger.loggerpms2.info("Enter Get Procedures")
     
-    oproc = mdpprocedure.Procedure(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+    oproc = mdpprocedure.Procedure(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
     rsp = oproc.getprocedure(avars)
     return rsp
 
@@ -1436,7 +1436,7 @@ def getprocedure(avars):
 def getprocedures(avars):
     #logger.loggerpms2.info("Enter Get Procedures")
     
-    oproc = mdpprocedure.Procedure(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+    oproc = mdpprocedure.Procedure(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
     rsp = oproc.getprocedures(int(common.getid(str(avars["treatmentid"]))),\
                               common.getstring(str(avars["searchphrase"])),\
                               int(common.getid(str(avars['page'])))  if 'page' in avars else 0,\
@@ -1445,28 +1445,28 @@ def getprocedures(avars):
     return rsp
 
 def canceltreatmentprocedure(avars):
-    oproc = mdpprocedure.Procedure(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+    oproc = mdpprocedure.Procedure(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
     rsp = oproc.canceltreatmentprocedure(int(common.getid(str(avars["treatmentid"]))),int(common.getid(str(avars["treatmentprocedureid"]))))
     return rsp
 
 def completetreatmentprocedure(avars):
-    oproc = mdpprocedure.Procedure(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+    oproc = mdpprocedure.Procedure(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
     rsp = oproc.completetreatmentprocedure(int(common.getid(str(avars["treatmentid"]))),int(common.getid(str(avars["treatmentprocedureid"]))))
     return rsp
 
 def gettreatmentprocedures(avars):
-    oproc = mdpprocedure.Procedure(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+    oproc = mdpprocedure.Procedure(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
     rsp = oproc.gettreatmentprocedures(int(common.getid(str(avars["treatmentid"]))))
     return rsp
 
 
 def gettreatmentprocedure(avars):
-    oproc = mdpprocedure.Procedure(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+    oproc = mdpprocedure.Procedure(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
     rsp = oproc.gettreatmentprocedure(int(common.getid(str(avars["treatmentid"]))),int(common.getid(str(avars["treatmentprocedureid"]))))
     return rsp
 
 def updatetreatmentprocedure(avars):
-    oproc = mdpprocedure.Procedure(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+    oproc = mdpprocedure.Procedure(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
     rsp = oproc.updatetreatmentprocedure(int(common.getid(str(avars["treatmentid"]))),\
                                          int(common.getid(str(avars["treatmentprocedureid"]))),\
                                          float(common.getvalue(str(avars["procedurefee"]))) if 'procedurefee' in avars else 0, \
@@ -1477,13 +1477,13 @@ def updatetreatmentprocedure(avars):
     return rsp
 
 def addproceduretotreatment(avars):
-    oproc = mdpprocedure.Procedure(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+    oproc = mdpprocedure.Procedure(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
     rsp = oproc.addproceduretotreatment(str(avars['procedurecode']), str(avars['treatmentid']), str(avars['plan']),str(avars["tooth"]),str(avars["quadrant"]),str(avars["remarks"]))
     return rsp
 
 def addSPLproceduretotreatment(avars):
     logger.loggerpms2.info("Enter addSPLproceduretotreatment (avars) " + json.dumps(avars))
-    oproc = mdpprocedure.Procedure(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+    oproc = mdpprocedure.Procedure(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
     rsp = oproc.addSPLproceduretotreatment(str(avars['procedurecode']), str(avars['treatmentid']), str(avars['plan']),str(avars["tooth"]),str(avars["quadrant"]),str(avars["remarks"]))
     return rsp
 
@@ -1491,7 +1491,7 @@ def addSPLproceduretotreatment(avars):
 def uploadimage(avars):
     
     #def uploadimage(self,imagedata,memberid,patientid,treatmentid,title,tooth,quadrant,imagedate,description):    
-    oimage = mdpimage.Image(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+    oimage = mdpimage.Image(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
     rsp = oimage.uploadimage(str(avars["imagedata"]),
                                   int(common.getid(str(avars["memberid"]))),
                                   int(common.getid(str(avars["patientid"]))),
@@ -1534,7 +1534,7 @@ def preupload():
 def xuploadimage(avars):
     
     #def uploadimage(self,imagedata,memberid,patientid,treatmentid,title,tooth,quadrant,imagedate,description):    
-    oimage = mdpimage.Image(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+    oimage = mdpimage.Image(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
     rsp = oimage.xuploadimage(str(avars["imagedata"]),request.folder)
     
     return rsp
@@ -1542,7 +1542,7 @@ def xuploadimage(avars):
 def downloadimage(avars):
     
     urlprops = db(db.urlproperties.id > 0).select(db.urlproperties.mydp_ipaddress)
-    oimage = mdpimage.Image(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+    oimage = mdpimage.Image(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
     imgobj = oimage.downloadimage(str(avars["imageid"]))
     imgobj["imageurl"] = urlprops[0].mydp_ipaddress + URL('my_dentalplan','media',"media_download", args=avars["imageid"])
     
@@ -1552,24 +1552,24 @@ def downloadimage(avars):
 
 
 def getimages(avars):
-    oimage = mdpimage.Image(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+    oimage = mdpimage.Image(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
     rsp = oimage.getimages(int(common.getid(str(avars['page'])))  if 'page' in avars else 0,str(avars['memberid']),str(avars['patientid']))
     return rsp
 
 def deleteimage(avars):
-    oimage = mdpimage.Image(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+    oimage = mdpimage.Image(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
     rsp = oimage.deleteimage(int(common.getid(str(avars['imageid']))))
     return rsp
     
 def updateimage(avars):
-    oimage = mdpimage.Image(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+    oimage = mdpimage.Image(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
     rsp = oimage.updateimage(int(common.getid(str(avars['imageid']))), str(avars["title"]), str(avars["tooth"]), str(avars["quadrant"]), str(avars["description"]))
     return rsp
 
 
 ############################ Prescription API ##################################################
 def getmedicines(avars):
-    opres = mdpprescription.Prescription(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+    opres = mdpprescription.Prescription(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
     rsp = opres.getmedicines(common.getstring(str(avars["searchphrase"])),\
                               int(common.getid(str(avars['page'])))  if 'page' in avars else 0,\
                               int(common.getid(str(avars['maxcount'])))  if 'maxcount' in avars else 0
@@ -1580,21 +1580,21 @@ def getmedicines(avars):
 
 
 def getmedicine(avars):
-    opres = mdpprescription.Prescription(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+    opres = mdpprescription.Prescription(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
     rsp = opres.getmedicine(int(common.getid(str(avars['medicineid']))))
     
     
     return rsp
 
 def updatemedicine(avars):
-    opres = mdpprescription.Prescription(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+    opres = mdpprescription.Prescription(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
     rsp = opres.updatemedicine(avars['medicine'])
     
     
     return rsp
 
 def getprescriptions(avars):
-    opres = mdpprescription.Prescription(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+    opres = mdpprescription.Prescription(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
     rsp = opres.getprescriptions(\
                                int(common.getid(str(avars['memberid'])))  if 'memberid' in avars else 0,\
                                int(common.getid(str(avars['patientid'])))  if 'patientid' in avars else 0,\
@@ -1605,24 +1605,24 @@ def getprescriptions(avars):
     return rsp
 
 def getprescription(avars):
-    opres = mdpprescription.Prescription(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+    opres = mdpprescription.Prescription(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
     rsp = opres.getprescription(\
                                int(common.getid(str(avars['presid'])))  if 'presid' in avars else 0
                               )
     return rsp
 
 def newprescription(avars):
-    opres = mdpprescription.Prescription(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+    opres = mdpprescription.Prescription(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
     rsp = opres.newprescription(avars)
     return rsp
 
 def updateprescription(avars):
-    opres = mdpprescription.Prescription(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+    opres = mdpprescription.Prescription(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
     rsp = opres.updateprescription(int(common.getid(str(avars['presid'])))  if 'presid' in avars else 0,avars)
     return rsp
 
 def deleteprescription(avars):
-    opres = mdpprescription.Prescription(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+    opres = mdpprescription.Prescription(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
     rsp = opres.deleteprescription(int(common.getid(str(avars['presid'])))  if 'presid' in avars else 0)
     return rsp
 
@@ -1884,7 +1884,7 @@ def downloadphoto(avars):
 def groupsmsmessage(avars):
     
     #logger.loggerpms2.info("Enter GroupSMSMessage API")
-    oappts = mdpappointment.Appointment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))))
+    oappts = mdpappointment.Appointment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
     rsp = oappts.groupsms(request.folder)
     
     return rsp
@@ -1904,14 +1904,14 @@ def task(avars):
 ############################ Medi Claim API ##################################################
 def addmediclaim(avars):
     
-    oclaim = mdpmediclaim.Mediclaim(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
+    oclaim = mdpmediclaim.Mediclaim(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0 )
     rsp = oclaim.addmediclaim(int(common.getid(avars["treatmentid"]))  if "treatmentid" in avars else 0, avars)
     
     return rsp
 
 def getmediclaims(avars):
     
-    oclaim = mdpmediclaim.Mediclaim(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
+    oclaim = mdpmediclaim.Mediclaim(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0 )
     rsp = oclaim.getmediclaims(int(common.getid(avars["treatmentid"])) if "treatmentid" in avars else 0 )
     
     return rsp
@@ -1919,14 +1919,14 @@ def getmediclaims(avars):
 
 def getmediclaim(avars):
     
-    oclaim = mdpmediclaim.Mediclaim(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
+    oclaim = mdpmediclaim.Mediclaim(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0 )
     rsp = oclaim.getmediclaim(int(common.getid(avars["mediclaimid"])) if "mediclaimid" in avars else 0 )
     
     return rsp
 
 def updatemediclaim(avars):
     
-    oclaim = mdpmediclaim.Mediclaim(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
+    oclaim = mdpmediclaim.Mediclaim(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0 )
     rsp = oclaim.updatemediclaim(int(common.getid(avars["mediclaimid"])) if "mediclaimid" in avars else 0 , avars)
     
     return rsp
@@ -1942,28 +1942,28 @@ def deletemediclaim(avars):
 
 def addmediclaimcharts(avars):
     
-    oclaim = mdpmediclaim.Mediclaim(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
+    oclaim = mdpmediclaim.Mediclaim(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0 )
     rsp = oclaim.addmediclaimcharts(int(common.getid(avars["mediclaimid"])) if "mediclaimid" in avars else 0,avars )
     
     return rsp
 
 def updatemediclaimcharts(avars):
     
-    oclaim = mdpmediclaim.Mediclaim(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
+    oclaim = mdpmediclaim.Mediclaim(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0 )
     rsp = oclaim.updatemediclaimcharts(int(common.getid(avars["mediclaimid"])) if "mediclaimid" in avars else 0,avars )
     
     return rsp
 
 def getmediclaimcharts(avars):
     
-    oclaim = mdpmediclaim.Mediclaim(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
+    oclaim = mdpmediclaim.Mediclaim(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0 )
     rsp = oclaim.getmediclaimcharts(int(common.getid(avars["mediclaimid"])) if "mediclaimid" in avars else 0 )
     
     return rsp
 
 def deletemediclaimcharts(avars):
     
-    oclaim = mdpmediclaim.Mediclaim(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
+    oclaim = mdpmediclaim.Mediclaim(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0 )
     rsp = oclaim.deletemediclaimcharts(int(common.getid(avars["mediclaimid"])) if "mediclaimid" in avars else 0 )
     
     return rsp
@@ -1971,7 +1971,7 @@ def deletemediclaimcharts(avars):
 
 def addmediclaimprocedure(avars):
     
-    oclaim = mdpmediclaim.Mediclaim(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
+    oclaim = mdpmediclaim.Mediclaim(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0 )
     rsp = oclaim.addmediclaimprocedure(int(common.getid(avars["mediclaimid"])) if "mediclaimid" in avars else 0,
                                        int(common.getid(avars["procedureid"])) if "procedureid" in avars else 0,
                                        int(common.getid(avars["treatmentprocedureid"])) if "treatmentprocedureid" in avars else 0,
@@ -2868,30 +2868,30 @@ def mdpapi():
     def POST(*args, **vars):
 	i = 0
         try:
-	    #logger.loggerpms2.info(">>Enter API==>>")
-	    db = current.globalenv['db']
-	    props = db(db.urlproperties.id > 0).select(db.urlproperties.encryption)
+	    logger.loggerpms2.info(">>Enter MDP API==>>")
+	    #db = current.globalenv['db']
+	    #props = db(db.urlproperties.id > 0).select(db.urlproperties.encryption)
 	    #encryption = False if(len(props) == 0) else common.getboolean(props[0].encryption)
 	    orlgr = mdpreligare.Religare(current.globalenv['db'],0)
-	    #logger.loggerpms2.info(">>API==>>1")
+	    logger.loggerpms2.info(">>API==>>1")
             
             
             encryption = vars.has_key("req_data")
 	   
 	    
 	    if(encryption):
-		#logger.loggerpms2.info(">>API==>>2")
+		logger.loggerpms2.info(">>Encryption API==>>2\n" + vars["req_data"])
 		
 		encrypt_req = vars["req_data"]
-		#logger.loggerpms2.info(">>API==>>3")
+		logger.loggerpms2.info(">>API==>>3" )
 		
 		vars = json.loads(orlgr.decrypts(vars["req_data"]))
-		#logger.loggerpms2.info(">>API==>>4")
+		logger.loggerpms2.info(">>API==>>4 " + json.dumps(vars) )
 		
-	    #logger.loggerpms2.info(">>API==>>5")
+	    logger.loggerpms2.info(">>API==>>5 \n" + json.dumps(vars) )
 		
 	    action = str(vars["action"])
-	    #logger.loggerpms2.info(">>API ACTION==>>" + action)
+	    logger.loggerpms2.info(">>API ACTION==>>" + action)
 	    #logger.loggerpms2.info(">>API ACTION==>>" + action)
 	    if(action == 'getreligareprocedures'):
 		logger.loggerpms2.info(">>Get Religare Procedures\n")
@@ -2907,8 +2907,8 @@ def mdpapi():
 		return rsp
 	    
         except Exception as e:
-	    #logger.loggerpms2.info("API Exception Error =>>\n")
-	    #logger.loggerpms2.info(str(e))
+	    logger.loggerpms2.info("API Exception Error =>>\n")
+	    logger.loggerpms2.info(str(e))
             raise HTTP(500)   
 
     def PUT(*args, **vars):
@@ -3286,14 +3286,14 @@ def userAPI():
 	    dsobj = datasecurity.DataSecurity()
 	    encryption = vars.has_key("req_data")
 	    if(encryption):
-		#logger.loggerpms2.info(">>Agent with Encryption")
+		logger.loggerpms2.info(">>User with Encryption")
 		encrypt_req = vars["req_data"]
 		vars = json.loads(dsobj.decrypts(encrypt_req))
-		loggerr.loggerpms2.info("UserAPI-Derypted data -==>" + json.dumps(vars))
+		logger.loggerpms2.info("UserAPI-Derypted data -==>" + json.dumps(vars))
 		
 	    #decrypted request date
 	    action = str(vars["action"])
-	    logger.loggerpms2.info(">>Agent ACTION==>>" + action)
+	    logger.loggerpms2.info(">>User ACTION==>>" + action)
 	    
 	    #return json.dumps({"action":action})
 	    rsp = userAPI_switcher.get(action,unknown)(vars)
@@ -3305,8 +3305,8 @@ def userAPI():
 		return rsp
 	    
 	except Exception as e:
-	    mssg = "AGENT API Exception Error =>>\n" + str(e)
-	    #logger.loggerpms2.info(mssg)
+	    mssg = "User API Exception Error =>>\n" + str(e)
+	    logger.loggerpms2.info(mssg)
 	    raise HTTP(500)   
 
     def PUT(*args, **vars):

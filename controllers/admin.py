@@ -630,6 +630,7 @@ def login():
                                                         )                   
                 
                 redirect(URL('admin','providerhome'))
+                #redirect(URL('admin','select_clinic'))
     elif form.errors:
         logmssg = "Login Error " + str(form.errors)
         db.loghistory.insert(username = "", logerror = logmssg, logstatus = False,\
@@ -680,6 +681,47 @@ def reset_password():
 
     return dict(form=form)
     
+
+
+def select_clinic():
+
+    formheader = "New Agent"
+    username = ""
+    returnurl = URL('admin','login')
+
+    provdict = common.getprovider(auth,db)
+    providerid = int(provdict["providerid"])
+    if(providerid  < 0):
+        raise HTTP(400,"PMS-Error: There is no valid logged-in Provider: providerhome()")    
+
+
+    #primary clinicid of this provider
+    c = db((db.vw_clinic.is_active == True) & (db.vw_clinic.ref_code == 'PRV') & (db.vw_clinic.ref_id == providerid) & (db.vw_clinic.primary_clinic == True)).select()
+    clinicid = int(common.getid(c[0].id)) if(len(c) == 1) else 0
+    clinics = db((db.vw_clinic.ref_code == 'PRV') & (db.vw_clinic.ref_id == providerid) & (db.vw_clinic.is_active == True ))
+    
+    form = SQLFORM.factory(
+        Field('clinic', 'string', widget = lambda field, value:SQLFORM.widgets.options.widget(field, value,_style="width:100%;height:35px",_class='form-control'),
+              label='Please Select your clinic',default=clinicid, requires=IS_IN_DB(clinics, 'vw_clinic.id',"%(name)s"))
+        
+
+    )
+
+    #xclinic = form.element('input',_id='no_table_clinic')
+    #xclinic['_class'] =  'form-control'
+    #xclinic['_placeholder'] =  'Select Clinic'
+    #xclinic['_autocomplete'] =  'off'
+
+    clinic = None
+    if form.process().accepted:
+        clinicid = form.vars.clinic
+        d=db((db.clinic.id == clinicid)&(db.clinic.is_active == True)).select()
+        clinicname= common.getstring(d[0].name) if (len(d)==1) else ""
+        session.clinicid = clinicid
+        session.clinicname = clinicname
+        redirect(URL('admin','providerhome', vars=dict(clinicid=clinicid,clinicname=clinicname))) 
+
+    return dict(form=form,returnurl = returnurl,clinic=clinic) 
 
 def request_username():
     email = request.vars.usernameemail
@@ -1460,6 +1502,7 @@ def providerhome():
     prov = db(db.provider.id == providerid).select(db.provider.pa_practicename,db.provider.pa_practiceaddress)
     
    
+    
     if(request.vars.moment != None):
         y = (request.vars.moment).split("T")
         if(y[1] == "00:00:00 00:00"):
@@ -1509,16 +1552,20 @@ def providerhome():
     patientid = 0   
     
     
-    
+ 
     sqlquery = db((db.vw_memberpatientlist.providerid == providerid) & (db.vw_memberpatientlist.is_active == True))
     
     
     form = SQLFORM.factory(
+        
            Field('patientmember1', 'string',    label='Patient ID',requires=IS_NOT_EMPTY()),
            Field('xpatientmember1', 'string',   label='Member ID', default = ""),
            Field('xaction','string', label='', default='X')
                        
     )
+
+   
+
        
     xpatientmember = form.element('#no_table_patientmember1')
     #xpatientmember['_class'] = 'w3-input w3-border'

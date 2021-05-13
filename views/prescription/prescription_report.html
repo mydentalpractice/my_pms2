@@ -83,7 +83,7 @@
                      <br/>
                      <table class="table table-bordered" style="margin-top:1%; ">
                      <h5 style="color:#1875b2;" class="right">
-                      <strong>Patient:&nbsp;&nbsp;{{=pat[0].fullname}}&nbsp;&nbsp;({{=pat[0].patientmember}})&nbsp;&nbsp;(1)</strong>
+                      <strong>Patient:&nbsp;&nbsp;{{if(len(pat) > 0):}}{{=pat[0].fullname}}&nbsp;&nbsp;({{=pat[0].patientmember}})&nbsp;&nbsp;(1){{pass}}</strong>
                       </h5>
 			<thead>
 			  <tr style="background-color:#1875b2;color:#ffffff">

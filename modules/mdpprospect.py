@@ -606,7 +606,7 @@ class Prospect:
             ds = db((db.clinic_ref.ref_code == "PST") & (db.clinic_ref.ref_id == prospectid)).select()
             for d in ds:
                 
-                db.clinic_ref.update_or_insert((ref_code == "PRV") & (clinic_id == d.clinic_id),
+                db.clinic_ref.update_or_insert((db.clinic_ref.ref_code == "PRV") & (db.clinic_ref.clinic_id == d.clinic_id),
                                                ref_code = "PRV",
                                                ref_id = providerid,
                                                clinic_id = d.clinic_id

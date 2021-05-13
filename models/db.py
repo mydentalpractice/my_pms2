@@ -2793,6 +2793,17 @@ db.define_table('medicine',
 db.medicine._singular = "medicine"
 db.medicine._plural   = "medicine"
 
+db.define_table('medicine_default',
+                Field('medicine', 'string',represent=lambda v, r: '' if v is None else v,default=""),
+                Field('meditype','string',represent=lambda v, r: '' if v is None else v,requires=IS_IN_SET(MEDICINETYPE)),
+                Field('strength', 'string',represent=lambda v, r: '' if v is None else v,default=""),
+                Field('strengthuom', 'string',represent=lambda v, r: '' if v is None else v,default="",requires=IS_IN_SET(STRENGTHUOM)),
+                Field('instructions', 'string',represent=lambda v, r: '' if v is None else v,default=""),
+                Field('is_active','boolean', default = True)
+            
+                )
+db.medicine_default._singular = "medicine_default"
+db.medicine_default._plural   = "medicine_default"
 
 db.define_table('vw_patientprescription',
                 Field('providerid', 'integer'),
@@ -4308,6 +4319,83 @@ db.define_table('vw_prescription_groupby_treatment',
                 Field('treatmentid','integer')
                
                 )
+
+
+db.define_table('vw_clinic',
+                
+                Field('id','integer'),
+                Field('clinic_ref','string'),
+                    
+                Field('name','string'),
+                Field('address1','string'),
+                Field('address2','string'),
+                Field('address3','string'),
+                Field('city', 'string',default='--Select City--',label='City',length=50,requires = IS_IN_SET(CITIES)),
+                Field('st', 'string',default='--Select State--',label='State',length=50,requires = IS_IN_SET(STATES)),
+                Field('pin','string'),
+                
+                Field('cell','string'),
+                Field('telephone','string'),
+                Field('email','string'),
+
+                Field('website','string'),
+                Field('gps_location','string'),
+                Field('whatsapp','string'),
+                Field('facebook','string'),
+                Field('twitter','string'),
+
+                Field('status','string'),
+                Field('primary_clinic','boolean'),
+                
+                Field('mdp_registration','string'),
+                Field('dentalchairs','string'),
+                Field('auto_clave','string',default='Yes',requires=IS_IN_SET(YESNO)),
+                Field('implantology','string'),
+                Field('instrument_sterilization','string'),
+                Field('waste_displosal','string'),
+                Field('suction_machine','string'),
+                Field('laser','string'),
+                Field('RVG_OPG','string'),
+                
+                Field('radiation_protection','string'),                
+                Field('computers','string'),                
+                Field('network','string'),                
+                Field('internet','string'),                
+                Field('air_conditioned','string'),                
+                Field('waiting_area','string'),                
+                Field('backup_power','string'),                
+                Field('toilet','string'),                
+                Field('water_filter','string'),                
+                Field('parking_facility','string'),                
+                Field('receptionist','string'),                
+                Field('credit_card','string'),                
+                Field('certifcates','string'),                
+                Field('emergency_drugs','string'),                
+                Field('infection_control','string'),                
+                Field('daily_autoclaved','string'),                
+                Field('patient_records','string'),                
+                Field('patient_consent','string'),                
+                Field('patient_traffic','string'),                
+                Field('nabh_iso_certifcation','string'),     
+                Field('intra_oral_camera','string'),     
+                Field('rotary_endodontics','string'),     
+                Field('bank_id','integer'), 
+                
+                Field('state_dental_registration','string'),
+                Field('registration_certificate','string'),
+                
+                Field('notes','text'),
+                Field('ref_code','string'),                
+                Field('ref_id','integer'), 
+                Field('clinic_id','integer'), 
+                
+                
+                auth.signature                
+                )
+
+db.clinic._singular = "clinic"
+db.clinic._plural   = "clinic"
+
 
 def geocode2(form):
     from gluon.tools import geocode

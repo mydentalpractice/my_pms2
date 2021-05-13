@@ -28,7 +28,7 @@ from applications.my_pms2.modules import logger
 
 class User:
   def __init__(self,db,auth,username,password):
-    logger.loggerpms2.info("Enter User __init__")
+    #logger.loggerpms2.info("Enter User __init__")
     self.db = db
     self.auth = auth
     self.username  = username
@@ -280,7 +280,7 @@ class User:
     rspobj = {}
     
     try:
-      cell = common.getkeyvalue(avars,"cell","")
+      cell = str(common.getkeyvalue(avars,"cell",""))
       usr = db(db.auth_user.cell == cell).select()
     
       if(len(usr) > 1):
