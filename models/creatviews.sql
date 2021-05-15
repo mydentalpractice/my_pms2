@@ -8654,5 +8654,6 @@ XXXZZZZupdate role in doctor to refer to role_default
 
 5/10/2021
 ==========
-1. ZZZadd is_active flag in medicine_default 
-2. ZZZmodify medicine_default strngthuom to strengthuom
+1. YYYZZZadd is_active flag in medicine_default 
+2. YYYZZZmodify medicine_default strngthuom to strengthuom
+3. YYYZZZadd imageid col in doctor table

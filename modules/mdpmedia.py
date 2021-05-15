@@ -26,8 +26,240 @@ class Media:
         
         
         return 
+    
+    def get_provider_image(self,avars):
+        db = self.db
+        providerid = self.providerid
+
+        try:
+            
+            r = db((db.provider.id == providerid)&(db.provider.is_active == True)).select(db.provider.imageid)
+            mediaid = 0 if(len(r)==0) else  int( common.getid(r[0].imageid))
+
+            avars["action"] = 'downloadmedia'
+            avars["mediaid"] = str(mediaid),
+            avars["mediatype"] = "image"
+            avars["mediaformat"] = "jpg"
+            avars["providerid"] = str(providerid)
+
+            rsp = json.loads(self.downloadmedia(mediaid))
+
+           
+
+        except Exception as e:
+            logger.loggerpms2.info("Get Provider Image API  Exception:\n" + str(e))      
+            excpobj = {}
+            excpobj["result"] = "fail"
+            excpobj["error_message"] = "Get Provider Image API Exception Error - " + str(e)
+            return json.dumps(excpobj)
+
+        return json.dumps(rsp)        
+    
+    def get_doctor_image(self,avars):
+        db = self.db
+        providerid = self.providerid
+
+        try:
+            doctorid = int(common.getkeyvalue(avars,"doctorid","0"))
+            
+            r = db((db.doctor.id == doctorid)&(db.doctor.is_active == True)).select(db.doctor.imageid)
+            mediaid = 0 if(len(r)==0) else  int( common.getid(r[0].imageid))
+
+            avars["action"] = 'downloadmedia'
+            avars["mediaid"] = str(mediaid),
+            avars["mediatype"] = "image"
+            avars["mediaformat"] = "jpg"
+            avars["providerid"] = str(providerid)
+
+            rsp = json.loads(self.downloadmedia(mediaid))
+
+           
+
+        except Exception as e:
+            logger.loggerpms2.info("Get Doctor Image API  Exception:\n" + str(e))      
+            excpobj = {}
+            excpobj["result"] = "fail"
+            excpobj["error_message"] = "Get Doctor Image API Exception Error - " + str(e)
+            return json.dumps(excpobj)
+
+        return json.dumps(rsp)        
+    
+    def get_patient_image(self,avars):
+        db = self.db
+        providerid = self.providerid
+
+        try:
+            patientid = int(common.getkeyvalue(avars,"patientid","0"))
+            
+            r = db((db.patientmember.id == patientid)&(db.patientmember.is_active == True)).select(db.patientmember.imageid)
+            mediaid = 0 if(len(r)==0) else  int( common.getid(r[0].imageid))
+
+            avars["action"] = 'downloadmedia'
+            avars["mediaid"] = str(mediaid),
+            avars["mediatype"] = "image"
+            avars["mediaformat"] = "jpg"
+            avars["providerid"] = str(providerid)
+
+            rsp = json.loads(self.downloadmedia(mediaid))
+
+           
+
+        except Exception as e:
+            logger.loggerpms2.info("Get Patient Image API  Exception:\n" + str(e))      
+            excpobj = {}
+            excpobj["result"] = "fail"
+            excpobj["error_message"] = "Get Patient Image API Exception Error - " + str(e)
+            return json.dumps(excpobj)
+
+        return json.dumps(rsp)        
+    
+    def get_staff_image(self,avars):
+        db = self.db
+        providerid = self.providerid
+
+        try:
+            staffid = int(common.getkeyvalue(avars,"staffid","0"))
+            
+            r = db((db.doctor.id == staffid)&(db.doctor.is_active == True)).select(db.doctor.imageid)
+            mediaid = 0 if(len(r)==0) else  int( common.getid(r[0].imageid))
+
+            avars["action"] = 'downloadmedia'
+            avars["mediaid"] = str(mediaid),
+            avars["mediatype"] = "image"
+            avars["mediaformat"] = "jpg"
+            avars["providerid"] = str(providerid)
+
+            rsp = json.loads(self.downloadmedia(mediaid))
+
+           
+
+        except Exception as e:
+            logger.loggerpms2.info("Get Staff Image API  Exception:\n" + str(e))      
+            excpobj = {}
+            excpobj["result"] = "fail"
+            excpobj["error_message"] = "Get Staff Image API Exception Error - " + str(e)
+            return json.dumps(excpobj)
+
+        return json.dumps(rsp)   
+    
+    
+    def add_provider_image(self,avars):
+        db = self.db
+        providerid = self.providerid
+
+        try:
+
+            avars["action"] = 'upload_media'
+            avars["ref_code"] = "PRV"
+            avars["ref_id"] = str(providerid)
+            avars["mediatype"] = "image"
+            avars["mediaformat"] = "jpg"
+            avars["providerid"] = str(providerid)
 
 
+
+            rsp = json.loads(self.upload_media(avars))
+
+            if(rsp["result"] == "success"):
+                db(db.provider.id == providerid).update(imageid = common.getkeyvalue(rsp,"mediaid","0"))
+
+        except Exception as e:
+            logger.loggerpms2.info("Add Provider Image API  Exception:\n" + str(e))      
+            excpobj = {}
+            excpobj["result"] = "fail"
+            excpobj["error_message"] = "Add Provider Image API Exception Error - " + str(e)
+            return json.dumps(excpobj)
+
+        return json.dumps(rsp)        
+        
+    
+    def add_patient_image(self,avars):
+        db = self.db
+        providerid = self.providerid
+
+        try:
+
+            avars["action"] = 'upload_media'
+            avars["ref_code"] = "MEM"
+            avars["ref_id"] = str(patientid)
+            avars["mediatype"] = "image"
+            avars["mediaformat"] = "jpg"
+            avars["providerid"] = str(providerid)
+
+
+
+            rsp = json.loads(self.upload_media(avars))
+
+            if(rsp["result"] == "success"):
+                db(db.patientmember.id == patientid).update(imageid = common.getkeyvalue(rsp,"mediaid","0"))
+
+        except Exception as e:
+            logger.loggerpms2.info("Add Patient Member Image API  Exception:\n" + str(e))      
+            excpobj = {}
+            excpobj["result"] = "fail"
+            excpobj["error_message"] = "Add Patient Member Image API Exception Error - " + str(e)
+            return json.dumps(excpobj)
+
+        return json.dumps(rsp)        
+    
+    def add_doctor_image(self,avars):
+        db = self.db
+        providerid = self.providerid
+
+        try:
+
+            avars["action"] = 'upload_media'
+            avars["ref_code"] = "DOC"
+            avars["ref_id"] = str(doctorid)
+            avars["mediatype"] = "image"
+            avars["mediaformat"] = "jpg"
+            avars["providerid"] = str(providerid)
+
+
+
+            rsp = json.loads(self.upload_media(avars))
+
+            if(rsp["result"] == "success"):
+                db(db.doctor.id == doctorid).update(imageid = common.getkeyvalue(rsp,"mediaid","0"))
+
+        except Exception as e:
+            logger.loggerpms2.info("Add Doctor Image API  Exception:\n" + str(e))      
+            excpobj = {}
+            excpobj["result"] = "fail"
+            excpobj["error_message"] = "Add Doctor Image API Exception Error - " + str(e)
+            return json.dumps(excpobj)
+
+        return json.dumps(rsp)        
+    
+    def add_staff_image(self,avars):
+        db = self.db
+        providerid = self.providerid
+
+        try:
+
+            avars["action"] = 'upload_media'
+            avars["ref_code"] = "DOC"
+            avars["ref_id"] = str(staffid)
+            avars["mediatype"] = "image"
+            avars["mediaformat"] = "jpg"
+            avars["providerid"] = str(providerid)
+
+
+
+            rsp = json.loads(self.upload_media(avars))
+
+            if(rsp["result"] == "success"):
+                db(db.doctor.id == staffid).update(imageid = common.getkeyvalue(rsp,"mediaid","0"))
+
+        except Exception as e:
+            logger.loggerpms2.info("Add Doctor Image API  Exception:\n" + str(e))      
+            excpobj = {}
+            excpobj["result"] = "fail"
+            excpobj["error_message"] = "Add Doctor Image API Exception Error - " + str(e)
+            return json.dumps(excpobj)
+
+        return json.dumps(rsp)        
+    
     def deletemedia(self, mediaid):
 
         db = self.db

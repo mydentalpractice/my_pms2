@@ -2330,6 +2330,142 @@ def getmedia_list(avars):
     
     return rsp
 
+def add_provider_image(avars):
+    logger.loggerpms2.info("Enter Add Priovider Media-Request\n" + str(avars) )
+
+    
+    omedia = mdpmedia.Media(current.globalenv['db'],\
+                            int(avars["providerid"]) if "providerid" in avars else 0,\
+                            avars["mediatype"] if "mediatype" in avars else "image",\
+                            avars["mediaformat"] if "mediaformat" in avars else "jpg"
+                            )
+    avars["appath"] = current.globalenv["request"].folder
+    rsp = omedia.add_provider_image(avars)
+    
+   
+    logger.loggerpms2.info("Exit Add Provider Media-Response\n" + rsp )
+
+    return rsp
+
+def add_patient_image(avars):
+    logger.loggerpms2.info("Enter Add Patient Media-Request\n" + str(avars) )
+
+    
+    omedia = mdpmedia.Media(current.globalenv['db'],\
+                            int(avars["providerid"]) if "providerid" in avars else 0,\
+                            avars["mediatype"] if "mediatype" in avars else "image",\
+                            avars["mediaformat"] if "mediaformat" in avars else "jpg"
+                            )
+    avars["appath"] = current.globalenv["request"].folder
+    rsp = omedia.add_patient_image(avars)
+    
+   
+    logger.loggerpms2.info("Exit Add Patient Media-Response\n" + rsp )
+
+    return rsp
+
+def add_doctor_image(avars):
+    logger.loggerpms2.info("Enter Add Doctor Media-Request\n" + str(avars) )
+
+    
+    omedia = mdpmedia.Media(current.globalenv['db'],\
+                            int(avars["providerid"]) if "providerid" in avars else 0,\
+                            avars["mediatype"] if "mediatype" in avars else "image",\
+                            avars["mediaformat"] if "mediaformat" in avars else "jpg"
+                            )
+    avars["appath"] = current.globalenv["request"].folder
+    rsp = omedia.add_doctor_image(avars)
+    
+   
+    logger.loggerpms2.info("Exit Add Doctor Media-Response\n" + rsp )
+
+    return rsp
+
+def add_staff_image(avars):
+    logger.loggerpms2.info("Enter Add Staff Media-Request\n" + str(avars) )
+
+    
+    omedia = mdpmedia.Media(current.globalenv['db'],\
+                            int(avars["providerid"]) if "providerid" in avars else 0,\
+                            avars["mediatype"] if "mediatype" in avars else "image",\
+                            avars["mediaformat"] if "mediaformat" in avars else "jpg"
+                            )
+    avars["appath"] = current.globalenv["request"].folder
+    rsp = omedia.add_staff_image(avars)
+    
+   
+    logger.loggerpms2.info("Exit Add Staff Media-Response\n" + rsp )
+
+    return rsp
+
+def get_provider_image(avars):
+    logger.loggerpms2.info("Enter Get Priovider Media-Request\n" + str(avars) )
+
+    
+    omedia = mdpmedia.Media(current.globalenv['db'],\
+                            int(avars["providerid"]) if "providerid" in avars else 0,\
+                            avars["mediatype"] if "mediatype" in avars else "image",\
+                            avars["mediaformat"] if "mediaformat" in avars else "jpg"
+                            )
+    avars["appath"] = current.globalenv["request"].folder
+    rsp = omedia.get_provider_image(avars)
+    
+   
+    logger.loggerpms2.info("Exit Get Provider Media-Response\n" + rsp )
+
+    return rsp
+
+def get_patient_image(avars):
+    logger.loggerpms2.info("Enter Get Patient Media-Request\n" + str(avars) )
+
+    
+    omedia = mdpmedia.Media(current.globalenv['db'],\
+                            int(avars["providerid"]) if "providerid" in avars else 0,\
+                            avars["mediatype"] if "mediatype" in avars else "image",\
+                            avars["mediaformat"] if "mediaformat" in avars else "jpg"
+                            )
+    avars["appath"] = current.globalenv["request"].folder
+    rsp = omedia.get_patient_image(avars)
+    
+   
+    logger.loggerpms2.info("Exit Get Patient Media-Response\n" + rsp )
+
+    return rsp
+
+def get_doctor_image(avars):
+    logger.loggerpms2.info("Enter Get Doctor Media-Request\n" + str(avars) )
+
+    
+    omedia = mdpmedia.Media(current.globalenv['db'],\
+                            int(avars["providerid"]) if "providerid" in avars else 0,\
+                            avars["mediatype"] if "mediatype" in avars else "image",\
+                            avars["mediaformat"] if "mediaformat" in avars else "jpg"
+                            )
+    avars["appath"] = current.globalenv["request"].folder
+    rsp = omedia.get_doctor_image(avars)
+    
+   
+    logger.loggerpms2.info("Exit Get Doctor Media-Response\n" + rsp )
+
+    return rsp
+
+def get_staff_image(avars):
+    logger.loggerpms2.info("Enter Get Staff Media-Request\n" + str(avars) )
+
+    
+    omedia = mdpmedia.Media(current.globalenv['db'],\
+                            int(avars["providerid"]) if "providerid" in avars else 0,\
+                            avars["mediatype"] if "mediatype" in avars else "image",\
+                            avars["mediaformat"] if "mediaformat" in avars else "jpg"
+                            )
+    avars["appath"] = current.globalenv["request"].folder
+    rsp = omedia.get_staff_image(avars)
+    
+   
+    logger.loggerpms2.info("Exit Add Staff Media-Response\n" + rsp )
+
+    return rsp
+
 
 ############################# End Media API ##################################################
 
@@ -2744,7 +2880,10 @@ CFAPI_switcher = {
 mediaAPI_switcher = {
     
     "upload_mediafile":upload_mediafile,"upload_media":upload_media,"downloadmedia":downloadmedia,\
-    "getmedia_list":getmedia_list,"updatemedia":updatemedia,"deletemedia":deletemedia
+    "getmedia_list":getmedia_list,"updatemedia":updatemedia,"deletemedia":deletemedia,\
+    "add_provider_image":add_provider_image,"add_patient_image":add_patient_image,"add_doctor_image":add_doctor_image,"add_staff_image":add_staff_image,
+    "get_provider_image":get_provider_image,"get_patient_image":get_patient_image,"get_doctor_image":get_doctor_image,"get_staff_image":get_staff_image,
+    
 }
 
 opsTimingAPI_switcher = {

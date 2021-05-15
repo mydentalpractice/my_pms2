@@ -959,8 +959,8 @@ class Appointment:
         try:
             appt = db(db.t_appointment.id == appointmentid).select()  
             
-            currnotes = common.getstring(appt[0].description)
-            complaint = appt[0].f_title,
+            currnotes = "" if(len(appt) == 0) else common.getstring(appt[0].description)
+            complaint = "" if(len(appt) == 0) else appt[0].f_title,
             apptobj = {}
             
             db(db.t_appointment.id == appointmentid).update(f_status = "Cancelled", sendsms = False, sendrem=False, smsaction='cancelled', \
@@ -1189,7 +1189,7 @@ class Appointment:
         return json.dumps(newapptobj)
 
     def update_appointment(self,avars):
-        logger.loggerpms2.info("Enter Update_Appointment API ==>")
+        logger.loggerpms2.info("Enter Update_Appointment API ==>" + json.dumps(avars))
         db = self.db
         auth = current.auth
         
@@ -1204,8 +1204,8 @@ class Appointment:
                 
                 def_start_time_str = common.getstringfromdate(ds[0].f_start_time,"%d/%m/%Y %H:%M")
                 def_end_time_str  = common.getstringfromdate(ds[0].f_end_time,"%d/%m/%Y %H:%M")
-                notes = common.getkeyvalue(avars,"notes",ds[0].description),
-                cc = common.getkeyvalue(avars,"f_title",ds[0].f_title),
+                notes = common.getkeyvalue(avars,"notes",ds[0].description)
+                cc = common.getkeyvalue(avars,"f_title",ds[0].f_title)
                 db(db.t_appointment.id == appointmentid).update(\
                     
                     f_uniqueid = int(common.getkeyvalue(avars,"f_uniqueid","0" if(ds[0].f_uniqueid == None) else str(ds[0].f_uniqueid))),
@@ -1256,7 +1256,7 @@ class Appointment:
         return json.dumps(apptobj)
         
     def cancel_appointment(self,avars):
-        logger.loggerpms2.info("Enter Cancel_Appointment API ==>")
+        logger.loggerpms2.info("Enter Cancel_Appointment API ==>"  + json.dumps(avars))
         db = self.db
         auth = current.auth
         
@@ -1267,7 +1267,7 @@ class Appointment:
         try:
             
             appointmentid = int(common.getkeyvalue(avars,"appointmentid","0"))
-            appt = db((db.t_appointment.id == appointmentid) & (db.t_appointment.is_active == True)).select(db.t_appointment.description)
+            appt = db((db.t_appointment.id == appointmentid) & (db.t_appointment.is_active == True)).select(db.t_appointment.description,db.t_appointment.f_title)
             desc = "" if len(appt) != 1 else appt[0].description
             notes = common.getkeyvalue(avars,"notes",desc)
             cc = "" if len(appt) != 1 else appt[0].f_title
