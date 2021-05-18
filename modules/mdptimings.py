@@ -272,6 +272,280 @@ class OPS_Timing:
             return json.dumps(excpobj)
         
         return json.dumps({"result":"success","error_code":"","error_message":"","ops_timing_count":len(ops), "ops_timing_list":opslist})            
+
+    def list_ops_timing_2(self,avars):
+        auth  = current.auth
+        db = self.db
+        
+        try:
+            
+            ref_code = avars["ref_code"] if "ref_code" in avars else ""
+            ref_id = int(common.getid(avars["ref_id"])) if "ref_id" in avars else 0            
+            
+            opslist = []
+            opsobj = {}
+            
+            rspobj = {}
+            
+            from_date = None
+            to_date = None
+            
+            
+            
+            fromdtstr = common.getkeyvalue(avars,"from_date","01/01/2000")
+            fromdt = None
+            if(fromdtstr != None):
+                fromdt = common.getdatefromstring(fromdtstr, "%d/%m/%Y") 
+
+            todtstr = common.getkeyvalue(avars,"to_date","31/12/2099")
+            todt = None
+            if(todtstr != None):
+                todt = common.getdatefromstring(todtstr, "%d/%m/%Y")
+
+          
+            
+            ops = None
+            if(ref_code == ""):
+                if(ref_id == 0):
+                    ops = db((db.ops_timing.is_active == True)& (db.ops_timing.calendar_date >= fromdt)& (db.ops_timing.calendar_date <= todt)).\
+                        select(db.ops_timing.ALL,db.ops_timing_ref.ALL,\
+                                                                                        left=db.ops_timing.on((db.ops_timing.id == db.ops_timing_ref.ops_timing_id)))
+                else:
+                    ops = db((db.ops_timing_ref.ref_id == ref_id)& (db.ops_timing.calendar_date >= fromdt)& (db.ops_timing.calendar_date <= todt) &  (db.ops_timing.is_active == True)).select(db.ops_timing.ALL,db.ops_timing_ref.ALL,\
+                                                                                        left=db.ops_timing.on((db.ops_timing.id == db.ops_timing_ref.ops_timing_id)))
+                    
+            else:
+                if(ref_id == 0):
+                    ops = db((db.ops_timing_ref.ref_code==ref_code)& (db.ops_timing.calendar_date >= fromdt)& (db.ops_timing.calendar_date <= todt) &  (db.ops_timing.is_active == True)).select(db.ops_timing.ALL,db.ops_timing_ref.ALL,\
+                                                                                        left=db.ops_timing.on((db.ops_timing.id == db.ops_timing_ref.ops_timing_id)))
+                else:
+                    ops = db((db.ops_timing_ref.ref_code==ref_code) &(db.ops_timing_ref.ref_id == ref_id)& (db.ops_timing.calendar_date >= fromdt)& (db.ops_timing.calendar_date <= todt) &  (db.ops_timing.is_active == True)).select(db.ops_timing.ALL,db.ops_timing_ref.ALL,\
+                                                                                        left=db.ops_timing.on((db.ops_timing.id == db.ops_timing_ref.ops_timing_id)))
+                
+            
+           
+            monlist = []
+            tuelist = []
+            wedlist = []
+            thulist = []
+            frilist = []
+            satlist = []
+            sunlist = []
+            
+            
+            
+            for op in ops:
+                
+                if((op.ops_timing.day_of_week).lower() == "mon"):
+                    if(op.ops_timing.is_lunch == True):
+                        opsobj = {
+                            "is_lunch":True}
+                        monlist.append(opsobj)
+                    
+                    if(op.ops_timing.is_holiday == True):
+                        opsobj = {"is_holiday":True,"calendar_date":common.getstringfromdate(op.ops_timing.calendar_date, "%d/%m/%Y"),}
+                        monlist.append(opsobj)
+                        continue
+                    if(op.ops_timing.is_saturday == True):
+                        opsobj = {"is_saturday":True,"calendar_date":common.getstringfromdate(op.ops_timing.calendar_date, "%d/%m/%Y"),}
+                        monlist.append(opsobj)
+                        continue
+                    if(op.ops_timing.is_sunday == True):
+                        opsobj = {"is_sunday":True,"calendar_date":common.getstringfromdate(op.ops_timing.calendar_date, "%d/%m/%Y"),}
+                        monlist.append(opsobj)
+                        continue
+                    opsobj = {
+                        "ops_timing_id":str(common.getid(op.ops_timing.id)),
+                        "calendar_date":common.getstringfromdate(op.ops_timing.calendar_date, "%d/%m/%Y"),                        
+                        "open_time":common.getstringfromtime(op.ops_timing.open_time, "%I:%M %p"),
+                        "close_time":common.getstringfromtime(op.ops_timing.close_time, "%I:%M %p")
+                    }
+                    monlist.append(opsobj)
+                    
+                if((op.ops_timing.day_of_week).lower() == "tue"):
+                    if(op.ops_timing.is_lunch == True):
+                        opsobj = {"is_lunch":True}
+                        tuelist.append(opsobj)
+                    
+                    if(op.ops_timing.is_holiday == True):
+                        opsobj = {"is_holiday":True,"calendar_date":common.getstringfromdate(op.ops_timing.calendar_date, "%d/%m/%Y"),}
+                        tuelist.append(opsobj)
+                        continue
+                    if(op.ops_timing.is_saturday == True):
+                        opsobj = {"is_saturday":True,"calendar_date":common.getstringfromdate(op.ops_timing.calendar_date, "%d/%m/%Y"),}
+                        tuelist.append(opsobj)
+                        continue
+                    if(op.ops_timing.is_sunday == True):
+                        opsobj = {"is_sunday":True,"calendar_date":common.getstringfromdate(op.ops_timing.calendar_date, "%d/%m/%Y"),}
+                        tuelist.append(opsobj)
+                        continue
+                    opsobj = {
+                        "ops_timing_id":str(common.getid(op.ops_timing.id)),
+                        "calendar_date":common.getstringfromdate(op.ops_timing.calendar_date, "%d/%m/%Y"),                        
+                        "open_time":common.getstringfromtime(op.ops_timing.open_time, "%I:%M %p"),
+                        "close_time":common.getstringfromtime(op.ops_timing.close_time, "%I:%M %p")
+                    }
+                    tuelist.append(opsobj)
+                    
+                if((op.ops_timing.day_of_week).lower() == "wed"):
+                    if(op.ops_timing.is_lunch == True):
+                        opsobj = {"is_lunch":True}
+                        wedlist.append(opsobj)
+                    
+                    if(op.ops_timing.is_holiday == True):
+                        opsobj = {"is_holiday":True,"calendar_date":common.getstringfromdate(op.ops_timing.calendar_date, "%d/%m/%Y"),}
+                        wedlist.append(opsobj)
+                        continue
+                    if(op.ops_timing.is_saturday == True):
+                        opsobj = {"is_saturday":True,"calendar_date":common.getstringfromdate(op.ops_timing.calendar_date, "%d/%m/%Y"),}
+                        wedlist.append(opsobj)
+                        continue
+                    if(op.ops_timing.is_sunday == True):
+                        opsobj = {"is_sunday":True,"calendar_date":common.getstringfromdate(op.ops_timing.calendar_date, "%d/%m/%Y"),}
+                        wedlist.append(opsobj)
+                        continue
+                    opsobj = {
+                        "ops_timing_id":str(common.getid(op.ops_timing.id)),
+                        "calendar_date":common.getstringfromdate(op.ops_timing.calendar_date, "%d/%m/%Y"),                        
+                        "open_time":common.getstringfromtime(op.ops_timing.open_time, "%I:%M %p"),
+                        "close_time":common.getstringfromtime(op.ops_timing.close_time, "%I:%M %p")
+                    }
+                    wedlist.append(opsobj)
+                    
+                if((op.ops_timing.day_of_week).lower() == "thu"):
+                    if(op.ops_timing.is_lunch == True):
+                        opsobj = {"is_lunch":True}
+                        thulist.append(opsobj)
+                    
+                    if(op.ops_timing.is_holiday == True):
+                        opsobj = {"is_holiday":True,"calendar_date":common.getstringfromdate(op.ops_timing.calendar_date, "%d/%m/%Y"),}
+                        thulist.append(opsobj)
+                        continue
+                    if(op.ops_timing.is_saturday == True):
+                        opsobj = {"is_saturday":True,"calendar_date":common.getstringfromdate(op.ops_timing.calendar_date, "%d/%m/%Y"),}
+                        thulist.append(opsobj)
+                        continue
+                    if(op.ops_timing.is_sunday == True):
+                        opsobj = {"is_sunday":True,"calendar_date":common.getstringfromdate(op.ops_timing.calendar_date, "%d/%m/%Y"),}
+                        thulist.append(opsobj)
+                        continue
+                    opsobj = {
+                        "ops_timing_id":str(common.getid(op.ops_timing.id)),
+                        "calendar_date":common.getstringfromdate(op.ops_timing.calendar_date, "%d/%m/%Y"),                        
+                        "open_time":common.getstringfromtime(op.ops_timing.open_time, "%I:%M %p"),
+                        "close_time":common.getstringfromtime(op.ops_timing.close_time, "%I:%M %p")
+                    }
+                    thulist.append(opsobj)
+                
+                if((op.ops_timing.day_of_week).lower() == "fri"):
+                    if(op.ops_timing.is_lunch == True):
+                        opsobj = {"is_lunch":True}
+                        frilist.append(opsobj)
+                    
+                    if(op.ops_timing.is_holiday == True):
+                        opsobj = {"is_holiday":True,"calendar_date":common.getstringfromdate(op.ops_timing.calendar_date, "%d/%m/%Y"),}
+                        frilist.append(opsobj)
+                        continue
+                    if(op.ops_timing.is_saturday == True):
+                        opsobj = {"is_saturday":True,"calendar_date":common.getstringfromdate(op.ops_timing.calendar_date, "%d/%m/%Y"),}
+                        frilist.append(opsobj)
+                        continue
+                    if(op.ops_timing.is_sunday == True):
+                        opsobj = {"is_sunday":True,"calendar_date":common.getstringfromdate(op.ops_timing.calendar_date, "%d/%m/%Y"),}
+                        frilist.append(opsobj)
+                        continue
+                    opsobj = {
+                        "ops_timing_id":str(common.getid(op.ops_timing.id)),
+                        "calendar_date":common.getstringfromdate(op.ops_timing.calendar_date, "%d/%m/%Y"),                        
+                        "open_time":common.getstringfromtime(op.ops_timing.open_time, "%I:%M %p"),
+                        "close_time":common.getstringfromtime(op.ops_timing.close_time, "%I:%M %p")
+                    }
+                    frilist.append(opsobj)
+                    
+                if((op.ops_timing.day_of_week).lower() == "sat"):
+                    if(op.ops_timing.is_lunch == True):
+                        opsobj = {"is_lunch":True}
+                        satlist.append(opsobj)
+                    
+                    if(op.ops_timing.is_holiday == True):
+                        opsobj = {"is_holiday":True,"calendar_date":common.getstringfromdate(op.ops_timing.calendar_date, "%d/%m/%Y"),}
+                        
+                        satlist.append(opsobj)
+                        continue
+                    if(op.ops_timing.is_saturday == True):
+                        opsobj = {"is_saturday":True,"calendar_date":common.getstringfromdate(op.ops_timing.calendar_date, "%d/%m/%Y"),}
+                        satlist.append(opsobj)
+                        continue
+                    if(op.ops_timing.is_sunday == True):
+                        opsobj = {"is_sunday":True,"calendar_date":common.getstringfromdate(op.ops_timing.calendar_date, "%d/%m/%Y"),}
+                        satlist.append(opsobj)
+                        continue
+                    opsobj = {
+                        "ops_timing_id":str(common.getid(op.ops_timing.id)),
+                        "calendar_date":common.getstringfromdate(op.ops_timing.calendar_date, "%d/%m/%Y"),                        
+                        "open_time":common.getstringfromtime(op.ops_timing.open_time, "%I:%M %p"),
+                        "close_time":common.getstringfromtime(op.ops_timing.close_time, "%I:%M %p")
+                    }
+                    satlist.append(opsobj)
+            
+                if((op.ops_timing.day_of_week).lower() == "sun"):
+                    if(op.ops_timing.is_lunch == True):
+                        opsobj = {"is_lunch":True,"calendar_date":common.getstringfromdate(op.ops_timing.calendar_date, "%d/%m/%Y"),}
+                        sunlist.append(opsobj)
+                    
+                    if(op.ops_timing.is_holiday == True):
+                        opsobj = {"is_holiday":True,"calendar_date":common.getstringfromdate(op.ops_timing.calendar_date, "%d/%m/%Y"),}
+                        
+                        sunlist.append(opsobj)
+                        continue
+                    if(op.ops_timing.is_saturday == True):
+                        opsobj = {"is_saturday":True,"calendar_date":common.getstringfromdate(op.ops_timing.calendar_date, "%d/%m/%Y"),}
+                        sunlist.append(opsobj)
+                        continue
+                    if(op.ops_timing.is_sunday == True):
+                        opsobj = {"is_sunday":True,"calendar_date":common.getstringfromdate(op.ops_timing.calendar_date, "%d/%m/%Y"),}
+                        sunlist.append(opsobj)
+                        continue
+                    opsobj = {
+                        "ops_timing_id":str(common.getid(op.ops_timing.id)),
+                        "calendar_date":common.getstringfromdate(op.ops_timing.calendar_date, "%d/%m/%Y"),                        
+                        "open_time":common.getstringfromtime(op.ops_timing.open_time, "%I:%M %p"),
+                        "close_time":common.getstringfromtime(op.ops_timing.close_time, "%I:%M %p")
+                    }
+                    sunlist.append(opsobj)
+            
+                
+            rspobj = {
+                "result":"success",
+                "error_message":"",
+                "error_code":"",
+                "ref_code":op.ops_timing_ref.ref_code,
+                "ref_id":op.ops_timing_ref.ref_id,
+                
+                "mon":monlist,
+                "tue":tuelist,
+                "wed":wedlist,
+                "thu":thulist,
+                "fri":frilist,
+                "sat":satlist,
+                "sun":sunlist
+            
+            }
+               
+               
+             
+            
+        except Exception as e:
+            mssg = "list OPS Timing Exception:\n" + str(e)
+            logger.loggerpms2.info(mssg)      
+            excpobj = {}
+            excpobj["result"] = "fail"
+            excpobj["error_code"] = "MDP100"
+            excpobj["error_message"] = mssg
+            return json.dumps(excpobj)
+        
+        return json.dumps(rspobj)            
+
     
     def new_ops_timing(self,avars):
         auth  = current.auth

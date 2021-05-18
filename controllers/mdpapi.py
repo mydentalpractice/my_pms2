@@ -912,17 +912,21 @@ def addpatientimage(avars):
 
 def searchpatient(avars):
     opat = mdppatient.Patient(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0 )
+    rsp = opat.searchpatient(avars)    
     
-    company = avars["company"] if "company" in avars else ""
-    company = "" if (company == None) | (company == "") else company
+    #company = avars["company"] if "company" in avars else ""
+    #company = "" if (company == None) | (company == "") else company
     
-    member = avars.get('member',None)
-    rsp = opat.searchpatient(int(common.getid(str(avars["page"]))) if "page" in avars else 1,str(avars["searchphrase"]),
-                            int(common.getid(str(avars["maxcount"]))) if "maxcount" in avars else 0,
-                            str(avars["patientmembersearch"]) if "patientmembersearch" in avars else "",
-                            None if ((member == "") | (member == None)) else common.getboolean(avars["member"]),
-                            company
-                             )
+    #member = avars.get('member',None)
+    #searchphrase = str(avars["searchphrase"]) if "searchphrase" in avars else ""
+    #patientmembersearch = str(avars["patientmembersearch"]) if "patientmembersearch" in avars else searchphrase
+    #rsp = opat.searchpatient(int(common.getid(str(avars["page"]))) if "page" in avars else 0,
+                            #searchphrase,
+                            #int(common.getid(str(avars["maxcount"]))) if "maxcount" in avars else 0,
+                            #patientmembersearch,
+                            #None if ((member == "") | (member == None)) else common.getboolean(avars["member"]),
+                            #company
+                             #)
     return rsp
 
 def getMediAssistPatients(avars):
@@ -2657,6 +2661,13 @@ def list_ops_timing(avars):
     rsp = ops.list_ops_timing(avars)
     return rsp
 
+def list_ops_timing_2(avars):
+    logger.loggerpms2.info("Enter List OPS Timing2 Request\n" + str(avars) )
+    ops = mdptimings.OPS_Timing(current.globalenv['db'])
+    rsp = ops.list_ops_timing_2(avars)
+    return rsp
+
+
 def new_ops_timing(avars):
     logger.loggerpms2.info("Enter New OPS Timing Request\n" + str(avars) )
     ops = mdptimings.OPS_Timing(current.globalenv['db'])
@@ -2889,7 +2900,7 @@ mediaAPI_switcher = {
 opsTimingAPI_switcher = {
     
     "get_ops_timing":get_ops_timing,"update_ops_timing":update_ops_timing,"delete_ops_timng":delete_ops_timng,\
-    "list_ops_timing":list_ops_timing,"new_ops_timing":new_ops_timing,"new_all_ops_timing":new_all_ops_timing
+    "list_ops_timing":list_ops_timing,"new_ops_timing":new_ops_timing,"new_all_ops_timing":new_all_ops_timing,"list_ops_timing_2":list_ops_timing_2,
 }
 
 accountAPI_switcher = {
