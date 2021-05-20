@@ -708,7 +708,7 @@ class Media:
 
         try:
             
-            urlprops = db(db.urlproperties.id >0 ).select(db.urlproperties.pagination)
+            urlprops = db(db.urlproperties.id >0 ).select()
             items_per_page = 10 if(len(urlprops) <= 0) else int(common.getvalue(urlprops[0].pagination))
             limitby = ((page)*items_per_page,(page+1)*items_per_page)         
     
@@ -770,13 +770,17 @@ class Media:
  
     
             for media in medias:
-    
+                mediaid = int(common.getid(media.dentalimage.id))
+                
                 mediaobj = {
                     "ref_code":media.dentalimage_ref.ref_code,
                     "ref_id":media.dentalimage_ref.ref_id,
-                    "mediaid":int(common.getid(media.dentalimage.id)),
+                    "mediaid":mediaid,
+                    "mediaurl" : urlprops[0].mydp_ipaddress + "/my_dentalplan/media/media_download/" + str(mediaid),
+                    "media"  : common.getstring(media.dentalimage.image),
+                    "uploadfolder":common.getstring(media.dentalimage.uploadfolder),                    
                     "title"  : common.getstring(media.dentalimage.title),
-                    "mediadate":(media.dentalimage.imagedate).strftime("%d/%m/%Y"),
+                    "mediadate":common.getstringfromdate((media.dentalimage.imagedate),"%d/%m/%Y"),
                     "mediatype":common.getstring(media.dentalimage.mediatype)
                 }
                 medialist.append(mediaobj)

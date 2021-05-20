@@ -55,6 +55,7 @@ class Clinic:
         
         cliniclist = []
         rspobj = {}
+        urlprops = db(db.urlproperties.id >0 ).select()
         
         try:
             
@@ -70,6 +71,9 @@ class Clinic:
                 if(len(r)!=1):
                     continue
                 
+                p = db((db.dentalimage_ref.ref_code == "CLN") & (db.dentalimage_ref.ref_id == d.clinic_id)).select()
+                mediaid = 0 if(len(p) == 0) else int(common.getid(p[0].media_id))
+                md = db((db.dentalimage.id == mediaid) & (db.dentalimage.is_active == True)).select()
                 dobj = {
                     
                     "ref_code":ref_code,
@@ -82,6 +86,11 @@ class Clinic:
                     "cell":r[0].cell if len(r) == 1 else "",
                     "email":r[0].email if len(r) == 1 else "",
                     "primary_clinic":r[0].primary_clinic if len(r) == 1 else False,
+                    "mediaurl" : urlprops[0].mydp_ipaddress + "/my_dentalplan/media/media_download/" + str(mediaid),
+                    "media"  : "" if(len(md) == 0) else  common.getstring(md[0].image),
+                    "uploadfolder":"" if(len(md) == 0) else common.getstring(md[0].uploadfolder),
+                    "title":"" if(len(md) == 0) else common.getstring(md[0].title),
+                    "imagedate":"00/00/00" if(len(md) == 0) else common.getstringfromdate(md[0].imagedate,"%d/%m/%Y"),
                     
                 }
                 cliniclist.append(dobj)
@@ -204,9 +213,9 @@ class Clinic:
         return json.dumps(rspobj)
     
     
-        def list_clinic(self,avars):
-            auth  = current.auth
-            db = self.db
+    def xlist_clinic(self,avars):
+        auth  = current.auth
+        db = self.db
         
         try:
             
@@ -276,13 +285,17 @@ class Clinic:
         auth  = current.auth
         rspobj = {}
         owner = ""
-        
+        urlprops = db(db.urlproperties.id >0 ).select()
         try:
             clinicid = int(common.getkeyvalue(avars,"clinicid",0))
             r = db(db.clinic_ref.clinic_id ==clinicid).select()
             ref_code = r[0].ref_code if len(r) == 1 else ""
             ref_id = int(r[0].ref_id) if len(r) == 1 else 0
             ds = db((db.clinic.id == clinicid) & (db.clinic.is_active == True)).select()
+            
+            p = db((db.dentalimage_ref.ref_code == "CLN") & (db.dentalimage_ref.ref_id == clinicid)).select()
+            mediaid = 0 if(len(p) == 0) else int(common.getid(p[0].media_id))
+            md = db((db.dentalimage.id == mediaid) & (db.dentalimage.is_active == True)).select()            
             
                    
 
@@ -305,6 +318,14 @@ class Clinic:
                 "clinincid":str(clinicid),
                 "bank_id":str(ds[0].bank_id),
                 "clinic_ref":ds[0].clinic_ref,            
+
+                "mediaurl" : urlprops[0].mydp_ipaddress + "/my_dentalplan/media/media_download/" + str(mediaid),
+                "media"  : "" if(len(md) == 0) else  common.getstring(md[0].image),
+                "uploadfolder":"" if(len(md) == 0) else common.getstring(md[0].uploadfolder),
+                "title":"" if(len(md) == 0) else common.getstring(md[0].title),
+                "imagedate":"00/00/00" if(len(md) == 0) else common.getstringfromdate(md[0].imagedate,"%d/%m/%Y"),
+                
+                
                 "name":ds[0].name,            
                 "address1":ds[0].address1,            
                 "address2":ds[0].address2,            
