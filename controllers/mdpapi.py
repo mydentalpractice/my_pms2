@@ -1041,8 +1041,15 @@ def getdoctor(avars):
     
 
 def new_appointment(avars):
+    
     oappts = mdpappointment.Appointment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
     rsp = oappts.new_appointment(avars)
+    #obj = json.loads(rsp)
+    #apptPath = current.globalenv["request"].folder
+    #appointmentid = common.getkeyvalue(obj,"appointmentid",0)
+    #if((appointmentid != 0) & (apptPath != "")):
+	#oappts.sms_confirmation(apptPath,appointmentid,"create") 
+	
     return rsp    
     
 def get_appointment(avars):
@@ -1058,6 +1065,14 @@ def list_appointment(avars):
 def update_appointment(avars):
     oappts = mdpappointment.Appointment(current.globalenv['db'],common.getkeyvalue(avars,"poviderid",0))
     rsp = oappts.update_appointment(avars)
+    
+    # Send Confirmation SMS
+    #obj = json.loads(rsp)
+    #apptPath = current.globalenv["request"].folder
+    #appointmentid = common.getkeyvalue(obj,"appointmentid",0)
+    #if((appointmentid != 0) & (apptPath != "")):
+	#oappts.sms_confirmation(apptPath,appointmentid,"update") 
+    
     return rsp    
     
 def cancel_appointment(avars):
@@ -1124,6 +1139,13 @@ def confirm(avars):
 def reSchedule(avars):
     oappts = mdpappointment.Appointment(current.globalenv['db'],common.getkeyvalue(avars,"poviderid",0))
     rsp = oappts.reSchedule(avars)
+    # Send Confirmation SMS
+    obj = json.loads(rsp)
+    apptPath = current.globalenv["request"].folder
+    appointmentid = common.getkeyvalue(obj,"appointmentid",0)
+    if((appointmentid != 0) & (apptPath != "")):
+	oappts.sms_confirmation(apptPath,appointmentid,"update")     
+	
     return rsp
     
 
@@ -2205,7 +2227,7 @@ def addABHICLProcedureToTreatment(avars):
 
 ############################# Media API ######################################################
 def upload_media(avars):
-    logger.loggerpms2.info("Enter Upload Media-Request\n" + str(avars) )
+    logger.loggerpms2.info("Enter Upload Media-Request\n" )
 
     
     omedia = mdpmedia.Media(current.globalenv['db'],\
@@ -2217,7 +2239,7 @@ def upload_media(avars):
     rsp = omedia.upload_media(avars)
     
    
-    logger.loggerpms2.info("Exit Upload Media-Response\n" + rsp )
+    logger.loggerpms2.info("Exit Upload Media-Response\n" )
 
     return rsp
 

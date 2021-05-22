@@ -472,7 +472,7 @@ class Media:
 
     def upload_media(self,avars):
 
-        logger.loggerpms2.info("Enter upload_media")
+        logger.loggerpms2.info("Enter upload_media  " + json.dumps(avars))
         db = self.db
         providerid = self.providerid
         auth = current.auth
@@ -627,7 +627,8 @@ class Media:
             excpobj["error_code"] = "MDP100"
             excpobj["error_message"] = "Upload Media Exception Error - " + str(e)
             return json.dumps(excpobj)        
-          
+        
+        logger.loggerpms2.info("Exit Upload Media " + json.dumps(mediaobj))
         return json.dumps(mediaobj)
 
 

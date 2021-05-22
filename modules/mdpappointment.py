@@ -864,7 +864,7 @@ class Appointment:
         
                 
                 pat = db((db.vw_memberpatientlist.primarypatientid == memberid) & (db.vw_memberpatientlist.patientid == patientid)).\
-                    select(db.vw_memberpatientlist.fullname)
+                    select(db.vw_memberpatientlist.fullname,db.vw_memberpatientlist.dob)
                 
                 #check for block
                 if((self.isBlocked(startapptdt,endapptdt,doctorid)==False)):
@@ -1130,7 +1130,7 @@ class Appointment:
             memberid = int(common.getkeyvalue(avars,"memberid","0"))
             patientid = int(common.getkeyvalue(avars,"patientid","0"))
             cell = common.getkeyvalue(avars,"cell","1111111111")
-                            
+           
             complaint = common.getkeyvalue(avars,"complaint","")
             
             
@@ -1156,7 +1156,7 @@ class Appointment:
                 location = location.strip()
         
             pat = db((db.vw_memberpatientlist.primarypatientid == memberid) & (db.vw_memberpatientlist.patientid == patientid)).\
-                            select(db.vw_memberpatientlist.fullname)        
+                            select(db.vw_memberpatientlist.fullname,db.vw_memberpatientlist.dob,db.vw_memberpatientlist.email,db.vw_memberpatientlist.cell)        
             #check for block
             if((self.isBlocked(startapptdt,endapptdt,doctorid,clinicid)==False)):
                 apptid  = db.t_appointment.insert(f_start_time=startapptdt, f_end_time = endapptdt, f_duration = duration, f_status = "Blocked", \
@@ -1175,9 +1175,18 @@ class Appointment:
                 #save in case report
                 common.logapptnotes(db,complaint,notes,apptid)
 
-                newapptobj= {"result":"success","error_message":"","appointment_ref":appointment_ref,"appointmentid":apptid,"appointment_start":startdtstr,"message":"success"}    
+                                          
+                
+                dobstr = "" if(len(pat) == 0) else common.getstringfromdate(pat[0].dob,"%d/%m/%Y")
+                email = "" if(len(pat) == 0) else common.getstring(pat[0].email)
+                cell = "" if(len(pat) == 0) else common.getstring(pat[0].cell)
+                
+                newapptobj= {"result":"success","error_message":"","appointment_ref":appointment_ref,"appointmentid":apptid,"appointment_start":startdtstr,"message":"success","dob":dobstr,"email":email,"cell":cell}    
             else:
-                newapptobj = {"result":"blocked","error_message":"","appointment_ref":appointment_ref, "appointmentid":0,"message":"The appointment date and time is blocked"}
+                dobstr = "" if(len(pat) == 0) else common.getstringfromdate(pat[0].dob,"%d/%m/%Y")
+                email = "" if(len(pat) == 0) else common.getstring(pat[0].email)
+                cell = "" if(len(pat) == 0) else common.getstring(pat[0].cell)
+                newapptobj = {"result":"blocked","error_message":"","appointment_ref":appointment_ref, "appointmentid":0,"dob":dobstr,"email":email,"cell":cell,"message":"The appointment date and time is blocked"}
 
         except Exception as e:
             excpobj = {}
@@ -1206,6 +1215,12 @@ class Appointment:
                 def_end_time_str  = common.getstringfromdate(ds[0].f_end_time,"%d/%m/%Y %H:%M")
                 notes = common.getkeyvalue(avars,"notes",ds[0].description)
                 cc = common.getkeyvalue(avars,"f_title",ds[0].f_title)
+                
+                memberid = int(common.getkeyvalue(avars,"memberid","0" if(ds[0].patientmember == None) else str(ds[0].patientmember)))
+                patientid = int(common.getkeyvalue(avars,"patientid","0" if(ds[0].patient == None) else str(ds[0].patient)))              
+                pat = db((db.vw_memberpatientlist.primarypatientid == memberid) & (db.vw_memberpatientlist.patientid == patientid)).\
+                                           select(db.vw_memberpatientlist.fullname,db.vw_memberpatientlist.dob,db.vw_memberpatientlist.email,db.vw_memberpatientlist.cell)     
+                
                 db(db.t_appointment.id == appointmentid).update(\
                     
                     f_uniqueid = int(common.getkeyvalue(avars,"f_uniqueid","0" if(ds[0].f_uniqueid == None) else str(ds[0].f_uniqueid))),
@@ -1241,7 +1256,11 @@ class Appointment:
                     )
                 
                 common.logapptnotes(db, cc, notes, appointmentid)
-                apptobj= {"result":"success", "appointmentid":appointmentid,"error_message":"","message":"Appointment updated successfully"}
+                dobstr = "" if(len(pat) == 0) else common.getstringfromdate(pat[0].dob,"%d/%m/%Y")
+                email = "" if(len(pat) == 0) else common.getstring(pat[0].email)
+                cell = "" if(len(pat) == 0) else common.getstring(pat[0].cell)
+                
+                apptobj= {"result":"success", "appointmentid":appointmentid,"dob":dobstr,"email":email,"cell":cell,"error_message":"","message":"Appointment updated successfully"}
                 
             else:
                 apptobj = {"result":"fail", "appointmentid":appointmentid,"error_message":"Error Updating Appointment","error_code":""}
@@ -1305,10 +1324,23 @@ class Appointment:
             appointmentid = int(common.getkeyvalue(avars,"appointmentid","0"))
             appt = db((db.vw_appointments.id == appointmentid) &  (db.vw_appointments.blockappt == blockappt) &  (db.vw_appointments.is_active == True)).select()
             providerid = appt[0].provider if(len(appt) == 1) else 0
+            memberid = int(common.getid(appt[0].patientmember)) if(len(appt) == 1) else 0
+            patientid = int(common.getid(appt[0].patient)) if(len(appt) == 1) else 0
+
+            pat = db((db.vw_memberpatientlist.primarypatientid == memberid) & (db.vw_memberpatientlist.patientid == patientid)).\
+                select(db.vw_memberpatientlist.fullname,db.vw_memberpatientlist.dob,db.vw_memberpatientlist.email,db.vw_memberpatientlist.cell)     
+            
+            
+            dobstr = "" if(len(pat) == 0) else common.getstringfromdate(pat[0].dob,"%d/%m/%Y")
+            email = "" if(len(pat) == 0) else common.getstring(pat[0].email)
+            cell = "" if(len(pat) == 0) else common.getstring(pat[0].cell)
+
             
             prov = db(db.provider.id == providerid).select(db.provider.pa_locationurl)
             locationurl = prov[0].pa_locationurl if len(prov) == 1 else ""
             apptobj = {}
+            
+            
 
 
                               
@@ -1335,7 +1367,7 @@ class Appointment:
                 x=common.getstring(appt[0].clinic_ref)
                 x=common.getstring(appt[0].clinic_name)
                 x=common.getboolean(appt[0].blockappt)
-                
+                dobstr = common.getstringfromdate(appt[0].dob,"%d/%M/%Y")
                 apptobj= {
                     "providerid":str(providerid),
                     "appointmentid":str(appointmentid),
@@ -1362,8 +1394,10 @@ class Appointment:
                     "clinic_name":common.getstring(appt[0].clinic_name),
                     "block":common.getboolean(appt[0].blockappt),
                     "gender":common.getstring(appt[0].gender),
-                    "dob":common.getstringfromdate(appt[0].dob,"%d/%M/%Y"),
+                    "dob":dobstr,
                     "age":calculateAge(appt[0].dob) if(appt[0].dob != None) else 0,
+                    "email":email,
+                    "cell":cell,
                     "result":"success",
                     "error_message":""
                       
