@@ -423,6 +423,7 @@ class Appointment:
     #return - list of appointments
     #apptid, doctorid, patientname, apptdatetime, color
     def getappointmentsbypatient(self,month,year,memberid,patientid):
+        logger.loggerpms2.info("Enter API getappointmentsbypatient " + str(month) + " " + str(year) + " " + str(memberid) + " " + str(patientid))
         
         db = self.db
         providerid = self.providerid
@@ -462,6 +463,7 @@ class Appointment:
     #return - list of appointments
     #apptid, doctorid, doctorname, patientname, apptdatetime, color
     def appointments(self,month,year):
+        logger.loggerpms2.info("Enter API appointments " + str(month) + " " + str(year))
         
         db = self.db
         providerid = self.providerid
@@ -501,6 +503,7 @@ class Appointment:
     #return - list of appointments
     #apptid, doctorid, doctorname, patientname, apptdatetime, color
     def getappointmentsbymonth(self,month,year):
+        logger.loggerpms2.info("Enter API getappointmentsbymonth "+ str(month) + " " + str(year))
         
     
         db = self.db
@@ -540,6 +543,7 @@ class Appointment:
     #return - list of appointments
     #apptid, doctorid, doctorname, patientname, apptdatetime, color
     def getpatappointmentsbyday(self,day,month,year,memberid,patientid):
+        logger.loggerpms2.info("Enter API getpatappointmentsbyday "+ str(day) + " " + str(month) + " " + str(year) )
         
     
         db = self.db
@@ -580,7 +584,7 @@ class Appointment:
     #return - list of appointments
     #apptid, doctorid, doctorname, patientname, apptdatetime, color
     def getappointmentsbyday(self,day,month,year):
-        
+        logger.loggerpms2.info("Enter API getappointmentsbyday "+ str(day) + " " + str(month) + " " + str(year) )
     
         db = self.db
         providerid = self.providerid
@@ -614,6 +618,7 @@ class Appointment:
     #this method returns number of appointments/day for all the days in a month
     def getappointmentcountbymonth(self,month,year):
 
+        logger.loggerpms2.info("Enter API getappointmentcountbymonth "+  str(month) + " " + str(year)  )
         db = self.db
         providerid = self.providerid
         
@@ -639,12 +644,13 @@ class Appointment:
             }
             apptlist.append(apptobj)
             
-        
+       
+        logger.loggerpms2.info("Exit API getappointmentcountbymonth" )
         return json.dumps({"apptlist":apptlist})            
 
     #this method returns number of appointments/day for all the days in a month
     def getpatappointmentcountbymonth(self,month,year,memberid,patientid):
-
+        logger.loggerpms2.info("Enter API getpatappointmentcountbymonth " + str(month) + " " + str(year) + " " + str(memberid)  + " " + str(patientid) )
         db = self.db
         providerid = self.providerid
         
@@ -671,12 +677,13 @@ class Appointment:
             }
             apptlist.append(apptobj)
             
+        logger.loggerpms2.info("Exit API getpatappointmentcountbymonth" )
         
         return json.dumps({"apptlist":apptlist})            
     
     #this method returns number of appointments/doc in a month
     def getdocappointmentcountbymonth(self,month,year):
- 
+        logger.loggerpms2.info("Enter API getdocappointmentcountbymonth " + str(month) + " " + str(year))   
         db = self.db
         providerid = self.providerid
         
@@ -714,7 +721,7 @@ class Appointment:
     #this method return the appointment detail for the specific appointment
     #
     def appointment(self,apptid):
-        
+        logger.loggerpms2.info("Enter API appointment " + str(apptid))
         db = self.db
         providerid = self.providerid
         prov = db(db.provider.id == providerid).select(db.provider.pa_locationurl)
@@ -952,6 +959,7 @@ class Appointment:
             
             return json.dumps(newapptobj)    
     def cancelappointment(self,appointmentid,providernotes,appPath):
+        logger.loggerpms2.info("Enter Cancel Appointment APi")
         db = self.db
         providerid = self.providerid
         auth = current.auth
@@ -993,6 +1001,7 @@ class Appointment:
         return json.dumps(apptobj)
                                                         
     def checkinappointment(self,apptid):
+        logger.loggerpms2.info("Enter Checkin Appointment APi")
         
         db = self.db
         auth = current.auth
@@ -1016,7 +1025,7 @@ class Appointment:
     
     
     def updateappointment(self,appointmentid,doctorid,complaint,startdt,duration,providernotes,cell,status,treatmentid,appPath):
-        
+        logger.loggerpms2.info("Enter API updateappointment " + str(appointmentid))
         db = self.db
         providerid = self.providerid
         auth = current.auth
@@ -1118,7 +1127,7 @@ class Appointment:
     
      
     def new_appointment(self,avars):
-        logger.loggerpms2.info("Enter New_Appointment API ==>")
+        logger.loggerpms2.info("Enter New_Appointment API ==>" + json.dumps(avars))
         auth = current.auth
         db = self.db
         try:
@@ -1480,6 +1489,8 @@ class Appointment:
 
     
     def add_block_datetime(self,avars):
+        
+        logger.loggerpms2.info("Enter Add Block Datetime API")
         avars["block"] = True
        
         block_start_str = common.getkeyvalue(avars,"block_start",None)
@@ -1639,6 +1650,7 @@ class Appointment:
     
     
     def reSchedule(self,avars):
+        logger.loggerpms2.info("Enter API reSchedule  " + json.dumps(avars))
         duration = common.getkeyvalue(avars,"duration","30")
         defdtstr = common.getstringfromdate(datetime.datetime.today(), "%d/%m/%Y %H:%M")
         startdtstr = common.getkeyvalue(avars,"appointment_start",defdtstr)
@@ -1658,6 +1670,7 @@ class Appointment:
     #this method returns number of appointments/day for all the days in a month
     #filtered by provider and clinic
     def list_day_appointment_count(self,avars):
+        logger.loggerpms2.info("Enter API list_day_appointment_count  " + json.dumps(avars))
 
         db = self.db
         try:
@@ -1732,7 +1745,7 @@ class Appointment:
     #this API gets a list of appointment for a Provider/Clinic/Doctor a day/month/year
     def list_appointments_byday(self,avars):
         
-        logger.loggerpms2.info("Enter Get Appointments by Day/Month/Year for a particular provider, clinic, doctor")
+        logger.loggerpms2.info("Enter list_appointments_byday  " + json.dumps(avars))
         db = self.db
         auth = current.auth
         
@@ -1765,6 +1778,7 @@ class Appointment:
     
     #this method returns number of appointments/day for all the days in a month
     def list_appointment_count_bymonth(self,avars):
+        logger.loggerpms2.info("Enter list_appointment_count_bymonth  " + json.dumps(avars))
 
         db = self.db
         try:
@@ -1831,5 +1845,5 @@ class Appointment:
             excpobj["error_message"] = "Get Appointments Count by Month  API Exception Error - " + str(e)
             excpobj["error_code"] = ""
             return json.dumps(excpobj)
-        
+        logger.loggerpms2.info("Exit list_appointment_count_bymonth  " + json.dumps(apptobj))
         return json.dumps(apptobj)       

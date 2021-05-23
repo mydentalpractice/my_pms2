@@ -8657,3 +8657,7 @@ XXXZZZZupdate role in doctor to refer to role_default
 1. YYYZZZadd is_active flag in medicine_default 
 2. YYYZZZmodify medicine_default strngthuom to strengthuom
 3. YYYZZZadd imageid col in doctor table
+
+5/22/2021
+=========
+1. New tables for Cities & States

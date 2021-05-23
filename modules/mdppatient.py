@@ -398,7 +398,9 @@ class Patient:
         qry = (qry) & (db.vw_memberpatientlist.company == companyid)
   
     
-      
+      #if(patientsearch != ""):
+        #qry = ((qry) & ((db.vw_memberpatientlist.patient.like("%" + patientsearch + "%")) | (db.vw_memberpatientlist.patientmember.like("%" + patientmembersearch + "%"))))
+        
       logger.loggerpms2.info("Search Query = " + str(qry))
       
       
@@ -442,7 +444,11 @@ class Patient:
         
       #if pats is empty, then search for phrase in patient (fname lname:membercode)
       else:
-        pats = db((qry) & ((db.vw_memberpatientlist.patient.like("%" + patientsearch + "%")) | (db.vw_memberpatientlist.patientmember.like("%" + patientmembersearch + "%"))))\
+        if(patientsearch != ""):
+          qry = ((qry) & ((db.vw_memberpatientlist.patient.like("%" + patientsearch + "%")) | (db.vw_memberpatientlist.patientmember.like("%" + patientmembersearch + "%"))))        
+          logger.loggerpms2.info("Search Patient Query = " + str(qry))
+        
+        pats = db((qry))\
           .select(db.vw_memberpatientlist.hmopatientmember,\
                   db.vw_memberpatientlist.patientmember,\
                   db.vw_memberpatientlist.fname,\
@@ -458,7 +464,7 @@ class Patient:
                   db.vw_memberpatientlist.age,\
                   limitby=limitby)
         
-        maxcount = maxcount if (maxcount > 0) else db( (qry) & ((db.vw_memberpatientlist.patient.like("%" + patientsearch + "%")) | (db.vw_memberpatientlist.patientmember.like("%" + patientmembersearch + "%")))).count()
+        maxcount = maxcount if (maxcount > 0) else db((qry)).count()
       
       
       
@@ -654,7 +660,7 @@ class Patient:
   # "dependants":{[]}
   #}
   def getpatient(self,memberid,patientid,imageurl):
-    
+    logger.loggerpms2.info("Enter GetPatient API =>> " + str(memberid) + " " + str(patientid))
     db = self.db
     providerid = self.providerid
     memobj = {}
@@ -763,7 +769,7 @@ class Patient:
       excpobj["error_message"] = "Get Patient API Exception Error - " + str(e)
       return json.dumps(excpobj)  
                    
-    
+    logger.loggerpms2.info(json.dumps(memobj))
     return json.dumps(memobj)
   
   #def xsearchpatient(self,page,patientsearch,maxcount):
@@ -1196,6 +1202,7 @@ class Patient:
     
   #memberid, patientid, title, fname, mname, lname, gender, dob(dd/mm/yyyy), addr1, addr2, addr3, city, st, pin, cell, email  
   def updatewalkinpatient(self,patobj):
+    logger.loggerpms2.info("Enter Update Walk In Patient ==> "+ json.dumps(patobj))
     
     db = self.db
     providerid = self.providerid
@@ -1203,29 +1210,37 @@ class Patient:
     retobj = {}
     try:
       memberid = int(common.getid(patobj["memberid"]))
+      patientid = int(common.getid(patobj["patientid"]))
+      
+      pats = db((db.patientmember.id == memberid) & (db.patientmember.is_active == True)).select()              
+      
+      
+      dobstr = common.getkeyvalue(patobj,"dob","")
+      dob = common.getdatefromstring(dobstr,"%d/%m/%Y") if(dobstr != "") else (None if(len(pat) == 0) else pat[0].dob)
       
       db(db.patientmember.id == memberid).update(\
     
-        title = patobj['title'],
-        fname = patobj["fname"],
-        mname = patobj["mname"],
-        lname = patobj["lname"],
-        dob = datetime.datetime.strptime(patobj['dob'], "%d/%m/%Y"),
-        cell = patobj["cell"],
-        email = patobj["email"],
-        gender = patobj["gender"],
-        address1 = patobj["address1"],
-        address2 = patobj["address2"],
-        address3 = patobj["address3"],
-        city = patobj["city"],
-        st = patobj["st"],
-        pin = patobj["pin"],
+        title = common.getkeyvalue(patobj,'title', pats[0].title if(len(pats) > 0) else ""),
+        fname = common.getkeyvalue(patobj,'fname', pats[0].fname if(len(pats) > 0) else ""),
+        mname = common.getkeyvalue(patobj,'mname', pats[0].mname if(len(pats) > 0) else ""),
+        lname = common.getkeyvalue(patobj,'lname', pats[0].lname if(len(pats) > 0) else ""),
+        dob = dob,
+        cell = common.getkeyvalue(patobj,'cell', pats[0].cell if(len(pats) > 0) else ""),
+        email = common.getkeyvalue(patobj,'email', pats[0].email if(len(pats) > 0) else ""),
+        gender = common.getkeyvalue(patobj,'gender', pats[0].gender if(len(pats) > 0) else ""),
+        address1 = common.getkeyvalue(patobj,'address1', pats[0].address1 if(len(pats) > 0) else ""),
+        address2 = common.getkeyvalue(patobj,'address2', pats[0].address2 if(len(pats) > 0) else ""),
+        address3 =common.getkeyvalue(patobj,'address3', pats[0].address3 if(len(pats) > 0) else ""),
+        city = common.getkeyvalue(patobj,'city', pats[0].city if(len(pats) > 0) else ""),
+        st = common.getkeyvalue(patobj,'st', pats[0].st if(len(pats) > 0) else ""),
+        pin = common.getkeyvalue(patobj,'pin', pats[0].pin if(len(pats) > 0) else ""),
+        status = common.getkeyvalue(patobj,'status', pats[0].status if(len(pats) > 0) else ""),
         modified_on = common.getISTFormatCurrentLocatTime(),
         modified_by = 1 if(auth.user == None) else auth.user.id     
         
       )
       
-      retobj = {"result":"success","error_message":""}
+      retobj = {"result":"success","error_message":"","memberid":str(memberid),"patientid":str(patientid)}
     except Exception as e:
       logger.loggerpms2.info("Update Walk-in Patient API  Exception:\n" + str(e))
       excpobj = {}

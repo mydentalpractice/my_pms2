@@ -826,6 +826,29 @@ class User:
   #PLANRELATIONS=('Self', 'Spouse', 'Son', 'Daughter', 'Son_in_Law', 'Daughter_in_Law', 'Father', 'Mother', 'Father_in_Law', 'Mother_in_Law','Grandmother','Grandfather','Sibling','Relative')
   #xPLANRDEPENDANTS=('Self', 'Dependant_1', 'Dependant_2', 'Dependant_3', 'Dependant_4', 'Dependant_5', 'Dependant_6', 'Dependant_7')  
 
+
+  def getcities(self):
+    #cities
+    cities = []
+    db = self.db
+    cc = db(db.cities.id>0).select()
+    for c in cc:
+      cities.append(c.city)
+    
+    rspobj = {"result":"success","cities":cities}
+    return json.dumps(rspobj)
+  
+  def getstates(self):
+    states = []
+    db = self.db
+    cc = db(db.states.id>0).select()
+    for c in cc:
+      states.append(c.st)
+
+    
+    rspobj = {"result":"success","states":states}
+    return json.dumps(rspobj)
+  
   def getallconstants(self):
     
     #get appointment status
@@ -859,6 +882,15 @@ class User:
     
     #regions
     
+    #cities
+    cities = []
+    db = self.db
+    cc = db(db.cities.id>0).select()
+    for c in cc:
+      cities.append(c.city)
+
+    #states
+   
     
     obj = {
      "gender":gr,
@@ -875,6 +907,7 @@ class User:
     
      "office_staff":office_staff,
      "priority":priority
+     
     }
     
     

@@ -673,6 +673,19 @@ def getallconstants(avars):
     
     return rsp
 
+def getcities(avars):
+    ouser = mdpuser.User(current.globalenv['db'],None,"","")
+    rsp = ouser.getcities()
+    
+    return rsp
+
+def getstates(avars):
+    ouser = mdpuser.User(current.globalenv['db'],None,"","")
+    rsp = ouser.getstates()
+    
+    return rsp
+
+
 def member_registration(avars):
     ouser = mdpuser.User(current.globalenv['db'],current.auth,"","")
     rsp = ouser.member_registration(current.globalenv["request"], str(avars["sitekey"]), \
@@ -2981,7 +2994,7 @@ mdpapi_switcher = {"listappointments":getappointments,"getappointmentsbymonth":g
                    "getpatientnotes":getpatientnotes,"addpatientnotes":addpatientnotes,"addSPLproceduretotreatment":addSPLproceduretotreatment,"addpatientimage":addpatientimage,\
                    "uploadimage":uploadimage,"xuploadimage":xuploadimage,"downloadimage":downloadimage,"getimages":getimages,"deleteimage":deleteimage,"updateimage":updateimage,\
                    "genders":genders,"cities":cities,"states":states,"regions":regions,"regionswithid":regionswithid,"status":status,"otpvalidation":otpvalidation,"appointmentstatus":appointmentstatus,\
-                   "appointmentduration":appointmentduration,"pattitles":pattitles,"doctitles":doctitles, "getallconstants":getallconstants,\
+                   "appointmentduration":appointmentduration,"pattitles":pattitles,"doctitles":doctitles, "getallconstants":getallconstants,"getcities":getcities,"getstates":getstates,\
                    "encrypt":encrypt,"decrypt":decrypt,"decrypts128":decrypts128,"encrypts128":encrypts128,"uploadDocument":uploadDocument,"sendOTP":sendOTP,"validateOTP":validateOTP,\
                    "uploadDocument":uploadDocument,"addProcedure":addProcedure,"getTransactionID":getTransactionID,"getReligarePatient":getReligarePatient,\
                    "addRlgProcedureToTreatment":addRlgProcedureToTreatment,"voidTransaction":voidTransaction,"settleTransaction":settleTransaction,\
