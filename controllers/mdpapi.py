@@ -1070,9 +1070,20 @@ def get_appointment(avars):
     rsp = oappts.get_appointment(avars)
     return rsp    
 
+def get_appointment_limited(avars):
+    oappts = mdpappointment.Appointment(current.globalenv['db'],common.getkeyvalue(avars,"poviderid",0))
+    rsp = oappts.get_appointment_limited(avars)
+    return rsp    
+
+
 def list_appointment(avars):
     oappts = mdpappointment.Appointment(current.globalenv['db'],common.getkeyvalue(avars,"poviderid",0))
     rsp = oappts.list_appointment(avars)
+    return rsp    
+
+def list_appointment_limited(avars):
+    oappts = mdpappointment.Appointment(current.globalenv['db'],common.getkeyvalue(avars,"poviderid",0))
+    rsp = oappts.list_appointment_limited(avars)
     return rsp    
 
 def update_appointment(avars):
@@ -2964,7 +2975,8 @@ appointmentAPI_switcher = {
     "cancel_appointment":cancel_appointment,"add_block":add_block_datetime,"remove_block":remove_block_datetime,"list_block":list_block_datetime,
     "get_block":get_block_datetime,"list_appointment_count_byday":list_appointment_count_byday,"checkIn_appointment":checkIn,"checkOut_appointment":checkOut,"confirm_appointment":confirm,
     "reSchedule_appointment":reSchedule,"list_appointments_byday":list_appointments_byday,"list_appointmentstatus":appointmentstatus,"list_appointmentduration":appointmentduration,
-    "list_appointment_count_bymonth":list_appointment_count_bymonth,"list_open_slots":list_open_slots
+    "list_appointment_count_bymonth":list_appointment_count_bymonth,"list_open_slots":list_open_slots,
+    "get_appointment_limited":get_appointment_limited,"list_appointment_limited":list_appointment_limited
 }
 
 agentAPI_switcher = {

@@ -420,7 +420,7 @@ class Patient:
                                 db.vw_memberpatientlist.dob,\
                                 db.vw_memberpatientlist.gender,\
                                 db.vw_memberpatientlist.age,\
-                                limitby=limitby)
+                                limitby=limitby,orderby=db.vw_memberpatientlist.fname)
           maxcount = maxcount if (maxcount > 0 ) else db((qry) & (db.vw_memberpatientlist.cell.like("%" + patientsearch + "%"))).count()
       
       #is it email only
@@ -439,7 +439,7 @@ class Patient:
                               db.vw_memberpatientlist.dob,\
                               db.vw_memberpatientlist.gender,\
                               db.vw_memberpatientlist.age,\
-                              limitby=limitby)
+                              limitby=limitby,orderby=db.vw_memberpatientlist.fname)
         maxcount = maxcount if (maxcount > 0 ) else db((qry) & (db.vw_memberpatientlist.email.like("%" + patientsearch + "%"))),count()
         
       #if pats is empty, then search for phrase in patient (fname lname:membercode)
@@ -462,7 +462,7 @@ class Patient:
                   db.vw_memberpatientlist.dob,\
                   db.vw_memberpatientlist.gender,\
                   db.vw_memberpatientlist.age,\
-                  limitby=limitby)
+                  limitby=limitby,orderby=db.vw_memberpatientlist.fname)
         
         maxcount = maxcount if (maxcount > 0) else db((qry)).count()
       

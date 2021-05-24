@@ -8660,4 +8660,6 @@ XXXZZZZupdate role in doctor to refer to role_default
 
 5/22/2021
 =========
-1. New tables for Cities & States
+1. YYYZZZNew tables for Cities & States
+2. YYYZZZAdded field 'newcity' in prospects table
+3. YYYYZZZAdded hmopatientmember in vw_appointments

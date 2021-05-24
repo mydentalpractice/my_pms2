@@ -150,6 +150,9 @@ use_janrain(auth, filename='private/janrain.key')
 db.define_table('cities',
                 Field('city','string')
                 )
+db.cities._singular = "cities"
+db.cities._plural   = "cities"
+
 
 
 db.define_table('states',
@@ -971,6 +974,7 @@ db.define_table('prospect',
                 Field('status', 'string', default='New'),
                 
                 Field('bankid','reference providerbank'),                
+                Field('newcity', 'string'),
                 
                 auth.signature,
                 format='%(providername)s (%(provider)s')
@@ -3326,6 +3330,7 @@ db.define_table('vw_appointments',
                 Field('membercode', 'string'),
                 Field('dob', 'datetime',requires=IS_DATE(format=T('%d/%m/%Y'))),
                 Field('gender', 'string'),
+                Field('hmopatientmember', 'boolean',default="False"),
                 Field('clinicid', 'integer'),
                 Field('clinic_ref', 'string'),
                 Field('clinic_name', 'string'),

@@ -1168,7 +1168,8 @@ class Appointment:
                             select(db.vw_memberpatientlist.fullname,db.vw_memberpatientlist.dob,db.vw_memberpatientlist.email,db.vw_memberpatientlist.cell)        
             #check for block
             if((self.isBlocked(startapptdt,endapptdt,doctorid,clinicid)==False)):
-                apptid  = db.t_appointment.insert(f_start_time=startapptdt, f_end_time = endapptdt, f_duration = duration, f_status = "Blocked", \
+                sts = "Blocked" if(blockappt == True) else "Open"
+                apptid  = db.t_appointment.insert(f_start_time=startapptdt, f_end_time = endapptdt, f_duration = duration, f_status = sts, \
                                                   cell = cell,f_title = complaint,f_treatmentid = 0,blockappt = blockappt,\
                                                   f_patientname = common.getstring("" if (len(pat) == 0) else pat[0].fullname),
                                                   description = notes,f_location = location, sendsms = True, smsaction = 'create',sendrem = True,
@@ -1216,6 +1217,8 @@ class Appointment:
         
         
         try:
+            blockappt = common.getboolean(common.getkeyvalue(avars,"block","False"))
+            
             appointmentid = int(common.getkeyvalue(avars,"appointmentid","0"))
             ds = db((db.t_appointment.id == appointmentid) & (db.t_appointment.is_active == True)).select()  
             if(len(ds) == 1):
@@ -1230,6 +1233,7 @@ class Appointment:
                 pat = db((db.vw_memberpatientlist.primarypatientid == memberid) & (db.vw_memberpatientlist.patientid == patientid)).\
                                            select(db.vw_memberpatientlist.fullname,db.vw_memberpatientlist.dob,db.vw_memberpatientlist.email,db.vw_memberpatientlist.cell)     
                 
+                sts = "Blocked" if (blockappt == True) else common.getkeyvalue(avars,"f_status",ds[0].f_status)
                 db(db.t_appointment.id == appointmentid).update(\
                     
                     f_uniqueid = int(common.getkeyvalue(avars,"f_uniqueid","0" if(ds[0].f_uniqueid == None) else str(ds[0].f_uniqueid))),
@@ -1237,7 +1241,7 @@ class Appointment:
                    
                     f_patientname = common.getkeyvalue(avars,"f_patientname",ds[0].f_patientname),
                     f_location = common.getkeyvalue(avars,"f_location",ds[0].f_location),
-                    f_status = common.getkeyvalue(avars,"f_status",ds[0].f_status),
+                    f_status = sts,
                     description = notes,
                     newpatient = common.getkeyvalue(avars,"newpatient",ds[0].newpatient),
                    
@@ -1255,7 +1259,7 @@ class Appointment:
                     patientmember = int(common.getkeyvalue(avars,"memberid","0" if(ds[0].patientmember == None) else str(ds[0].patientmember))),
                     patient = int(common.getkeyvalue(avars,"patientid","0" if(ds[0].patient == None) else str(ds[0].patient))),
                     
-                    blockappt = common.getboolean(common.getkeyvalue(avars,"blockappt","False")),
+                    blockappt = blockappt,
                     sendsms = common.getboolean(common.getkeyvalue(avars,"sendsms","False")),
                     sendrem = common.getboolean(common.getkeyvalue(avars,"sendrem","False")),
                     
@@ -1420,9 +1424,113 @@ class Appointment:
         
         return json.dumps(apptobj)
     
+    def get_appointment_limited(self,avars):
+            logger.loggerpms2.info("Enter Get_Appointment_Limited API ==> " +str(avars))
+            auth = current.auth
+            db = self.db
+            appointmentid= 0
+            try:
+                blockappt = common.getboolean(common.getkeyvalue(avars,"block","False"))
+                appointmentid = int(common.getkeyvalue(avars,"appointmentid","0"))
+                appt = db((db.vw_appointments.id == appointmentid) &\
+                          (db.vw_appointments.is_active == True)).select()
+                
+                    
+                
+                providerid = appt[0].provider if(len(appt) == 1) else 0
+                memberid = int(common.getid(appt[0].patientmember)) if(len(appt) == 1) else 0
+                patientid = int(common.getid(appt[0].patient)) if(len(appt) == 1) else 0
     
-    def list_appointment(self,avars):
-        logger.loggerpms2.info("Enter List Appointments")
+                pat = db((db.vw_memberpatientlist.primarypatientid == memberid) & (db.vw_memberpatientlist.patientid == patientid)).\
+                    select(db.vw_memberpatientlist.fullname,db.vw_memberpatientlist.dob,db.vw_memberpatientlist.email,db.vw_memberpatientlist.cell)     
+                
+                
+                dobstr = "" if(len(pat) == 0) else common.getstringfromdate(pat[0].dob,"%d/%m/%Y")
+                email = "" if(len(pat) == 0) else common.getstring(pat[0].email)
+                cell = "" if(len(pat) == 0) else common.getstring(pat[0].cell)
+    
+                
+                prov = db(db.provider.id == providerid).select(db.provider.pa_locationurl)
+                locationurl = prov[0].pa_locationurl if len(prov) == 1 else ""
+                apptobj = {}
+                
+                
+    
+    
+                                  
+                if(len(appt) == 1):
+                    #x=str(providerid)
+                    #x=str(appointmentid)
+                    #x= (appt[0].f_start_time).strftime("%d/%m/%Y %I:%M %p")
+                    #x= "30" if(common.getstring(appt[0].f_duration) == "") else int(appt[0].f_duration)
+                    #x=common.getstring(appt[0].f_title)
+                    #x=common.getstring(appt[0].description)
+                    #x=common.getstring(appt[0].f_location)
+                    #x=locationurl
+                    #x=common.getstring(appt[0].f_status) if(common.getstring(appt[0].f_status) != "") else "Open"
+                    #x=common.getid(appt[0].patientmember)
+                    #x=common.getid(appt[0].patient)
+                    #x=common.getstring(appt[0].f_patientname)
+                    #x=common.modify_cell(appt[0].cell)
+                    #x=common.getid(appt[0].clinicid)
+                    #x=common.getid(appt[0].doctor)
+                    #x=common.getstring(appt[0].docname)
+                    #x=common.modify_cell(appt[0].doccell)
+                    #x=common.getstring(appt[0].color) if(common.getstring(appt[0].color) != "") else "#ff0000"
+                    #x=common.modify_cell(appt[0].provcell)
+                    #x=common.getstring(appt[0].clinic_ref)
+                    #x=common.getstring(appt[0].clinic_name)
+                    #x=common.getboolean(appt[0].blockappt)
+                    dobstr = common.getstringfromdate(appt[0].dob,"%d/%M/%Y")
+                    apptobj= {
+                        #"providerid":str(providerid),
+                        "appointmentid":str(appointmentid),
+                        "apptdatetime" : (appt[0].f_start_time).strftime("%d/%m/%Y %I:%M %p"),
+                        #"apptenddatetime" : (appt[0].f_end_time).strftime("%d/%m/%Y %I:%M %p"),
+                        "duration": "30" if(common.getstring(appt[0].f_duration) == "") else str(int(appt[0].f_duration)),
+                        #"days":"0" if(common.getstring(appt[0].f_duration) == "") else str(int(round((appt[0].f_duration)/1440))),
+                        #"complaint":common.getstring(appt[0].f_title),
+                        #"notes":common.getstring(appt[0].description),
+                        #"location":common.getstring(appt[0].f_location),
+                        #"locationurl":locationurl,
+                        "status":common.getstring(appt[0].f_status) if(common.getstring(appt[0].f_status) != "") else "Open",
+                        #"memberid":common.getid(appt[0].patientmember),
+                        #"patientid":common.getid(appt[0].patient),
+                        "patientname" : common.getstring(appt[0].f_patientname),
+                        "patientcode" : common.getstring(appt[0].membercode),
+                        #"patcell":common.modify_cell(appt[0].cell),
+                        #"clinicid":common.getid(appt[0].clinicid),
+                        #"doctorid":common.getid(appt[0].doctor),
+                        "docname":common.getstring(appt[0].docname),
+                        #"doccell":common.modify_cell(appt[0].doccell),
+                        #"color": common.getstring(appt[0].color) if(common.getstring(appt[0].color) != "") else "#ff0000",
+                        #"provcell":common.modify_cell(appt[0].provcell),
+                        #"clinic_ref":common.getstring(appt[0].clinic_ref),
+                        #"clinic_name":common.getstring(appt[0].clinic_name),
+                        #"block":common.getboolean(appt[0].blockappt),
+                        #"gender":common.getstring(appt[0].gender),
+                        #"dob":dobstr,
+                        #"age":calculateAge(appt[0].dob) if(appt[0].dob != None) else 0,
+                        #"email":email,
+                        "cell":cell,
+                        "hmopatientmember":common.getboolean(appt[0].hmopatientmember)  if(appt[0].hmopatientmember != "") else False
+                       
+                          
+                        } 
+                    
+                    
+            except Exception as e:
+                excpobj = {}
+                excpobj["result"] = "fail"
+                excpobj["error_message"] = "Get_Appointment API Exception Error - " + str(e) + "apptid = " +str(appointmentid)
+                excpobj["error_code"] = ""
+                return json.dumps(excpobj)
+            
+            return json.dumps(apptobj)
+    
+    
+    def list_appointment_limited(self,avars):
+        logger.loggerpms2.info("Enter List Appointments Limited")
         db = self.db
         auth = current.auth
         
@@ -1433,6 +1541,113 @@ class Appointment:
             memberid = int(common.getkeyvalue(avars,"memberid","0"))
             patientid = int(common.getkeyvalue(avars,"patientid","0"))
             blockappt = common.getboolean(common.getkeyvalue(avars,"block","False"))
+            
+            page = common.getkeyvalue(avars,"page","0")
+            page = 0 if((page==None)|(page == "")) else int(common.getid(page))
+        
+            maxcount = common.getkeyvalue(avars,"maxcount","0")
+            maxcount = 0 if((maxcount==None)|(maxcount == "")) else int(common.getid(maxcount))
+            
+            
+            
+                   
+            page = page -1
+            urlprops = db(db.urlproperties.id >0 ).select(db.urlproperties.pagination)
+            items_per_page = 10 if(len(urlprops) <= 0) else int(common.getvalue(urlprops[0].pagination))
+            limitby = None if page < 0 else ((page)*items_per_page,(page+1)*items_per_page)             
+            
+            if(blockappt == False):
+                query = ((db.t_appointment.blockappt == blockappt) & (db.t_appointment.f_status != "Blocked") & (db.t_appointment.is_active == True))
+            else:
+                query = (((db.t_appointment.blockappt == blockappt) | (db.t_appointment.f_status == "Blocked")) & (db.t_appointment.is_active == True))
+                
+            
+            if(providerid != 0):
+                query = query & (db.t_appointment.provider == providerid)
+
+            if(doctorid != 0):
+                query = query & (db.t_appointment.doctor == doctorid)
+
+            if(clinicid != 0):
+                query = query & (db.t_appointment.clinicid == clinicid)
+                
+            if(memberid != 0):
+                query = query & (db.t_appointment.patientmember == memberid)
+                    
+            if(patientid != 0):
+                query = query & (db.t_appointment.patient == patientid)
+            
+            
+            currdate = common.getISTFormatCurrentLocatTime()
+          
+
+            
+            fromdtstr = common.getkeyvalue(avars,"from_date",common.getstringfromdate(currdate,"%d/%m/%Y %H:%M"))
+            fromapptdt = None
+            fromapptdt90 = None
+            if(fromdtstr != None):
+                fromapptdt = common.getdatefromstring(fromdtstr, "%d/%m/%Y %H:%M")
+                fromapptdt90 = fromapptdt + timedelta(days=90)
+
+            todtstr = common.getkeyvalue(avars,"to_date",common.getstringfromdate(fromapptdt90,"%d/%m/%Y %H:%M"))
+            toapptdt = None
+            if(todtstr != None):
+                toapptdt = common.getdatefromstring(todtstr, "%d/%m/%Y %H:%M")
+            
+
+            if(fromapptdt != None):
+                query = query & (db.t_appointment.f_start_time >= fromapptdt)
+                
+            if(toapptdt != None):
+                query = query & (db.t_appointment.f_start_time <= toapptdt)
+        
+            appts = db((query)).select(db.t_appointment.ALL,orderby=db.t_appointment.f_start_time,limitby=limitby)
+            
+            apptlist = []
+                   
+            for appt in appts:
+                apptobj = json.loads(self.get_appointment_limited({"appointmentid":appt.id,"block":blockappt}))
+                apptlist.append(apptobj)             
+            
+            apptobj = {"result":"success", "error_message":"", "error_code":"", "page":str(page+1),"apptcount":str(len(appts)), "apptlist":apptlist}
+        
+        except Exception as e:
+            excpobj = {}
+            excpobj["result"] = "fail"
+            excpobj["error_message"] = "List_Appointment API Exception Error - " + str(e)
+            excpobj["error_code"] = ""
+            return json.dumps(excpobj)    
+        
+        return json.dumps(apptobj)
+
+    
+    def list_appointment(self,avars):
+        logger.loggerpms2.info("Enter List Appointments")
+        db = self.db
+        auth = current.auth
+        
+        try:
+            
+            page = common.getkeyvalue(avars,"page","0")
+            page = 0 if((page==None)|(page == "")) else int(common.getid(page))
+    
+            maxcount = common.getkeyvalue(avars,"maxcount","0")
+            maxcount = 0 if((maxcount==None)|(maxcount == "")) else int(common.getid(maxcount))
+
+            
+            providerid = int(common.getkeyvalue(avars,"providerid","0"))
+            clinicid = int(common.getkeyvalue(avars,"clinicid","0"))
+            doctorid = int(common.getkeyvalue(avars,"doctorid","0"))
+            memberid = int(common.getkeyvalue(avars,"memberid","0"))
+            patientid = int(common.getkeyvalue(avars,"patientid","0"))
+            blockappt = common.getboolean(common.getkeyvalue(avars,"block","False"))
+            
+            urlprops = db(db.urlproperties.id >0 ).select(db.urlproperties.pagination)
+        
+            page = page -1
+            urlprops = db(db.urlproperties.id >0 ).select(db.urlproperties.pagination)
+            items_per_page = 10 if(len(urlprops) <= 0) else int(common.getvalue(urlprops[0].pagination))
+            limitby = None if page < 0 else ((page)*items_per_page,(page+1)*items_per_page)      
             
             
             query = ((db.t_appointment.blockappt == blockappt)&(db.t_appointment.is_active == True))
@@ -1451,20 +1666,24 @@ class Appointment:
                     
             if(patientid != 0):
                 query = query & (db.t_appointment.patient == patientid)
-            
-            fromdtstr = common.getkeyvalue(avars,"from_date",None)
-            fromapptdt = None
-            if(fromdtstr != None):
-                fromapptdt = common.getdatefromstring(fromdtstr, "%d/%m/%Y %H:%M") 
 
-            todtstr = common.getkeyvalue(avars,"to_date",None)
+            currdate = common.getISTFormatCurrentLocatTime()
+
+            fromdtstr = common.getkeyvalue(avars,"from_date",common.getstringfromdate(currdate,"%d/%m/%Y %H:%M"))
+            fromapptdt = None
+            fromapptdt90 = None
+            if(fromdtstr != None):
+                fromapptdt = common.getdatefromstring(fromdtstr, "%d/%m/%Y %H:%M")
+                fromapptdt90 = fromapptdt + timedelta(days=90)
+
+            todtstr = common.getkeyvalue(avars,"to_date",common.getstringfromdate(fromapptdt90,"%d/%m/%Y %H:%M"))
             toapptdt = None
             if(todtstr != None):
                 toapptdt = common.getdatefromstring(todtstr, "%d/%m/%Y %H:%M")
             
-
             if(fromapptdt != None):
                 query = query & (db.t_appointment.f_start_time >= fromapptdt)
+                
             if(toapptdt != None):
                 query = query & (db.t_appointment.f_start_time <= toapptdt)
         
@@ -1527,7 +1746,7 @@ class Appointment:
     
     def remove_block_datetime(self,avars):
   
-        logger.loggerpms2.info("Enter Remove_Block API ==>")
+        logger.loggerpms2.info("Enter Remove_Block API ==>" + str(avars))
         db = self.db
         auth = current.auth
         
@@ -1561,8 +1780,8 @@ class Appointment:
             blockid = int(common.getkeyvalue(avars,"blockid","0"))
             db((db.t_appointment.f_uniqueid == blockid)).update(\
                 blockappt = False,   
-                is_active = False,
-                    
+                is_active = True,
+                f_status = 'Open',
                 modified_on=common.getISTFormatCurrentLocatTime(),
                 modified_by= 1 if(auth.user == None) else auth.user.id
                 
@@ -1585,7 +1804,7 @@ class Appointment:
     
     def remove_block_datetime_byID(self,avars):
       
-            logger.loggerpms2.info("Enter Remove_Block API ==>")
+            logger.loggerpms2.info("Enter Remove_Block_byID API ==>"+ str(avars))
             db = self.db
             auth = current.auth
             
@@ -1599,7 +1818,8 @@ class Appointment:
                 blockid = int(common.getkeyvalue(avars,"blockid","0"))
                 db((db.t_appointment.f_uniqueid == blockid)).update(\
                     blockappt = False,   
-                    is_active = False,
+                    is_active = True,
+                    f_status = 'Open',
                         
                     modified_on=common.getISTFormatCurrentLocatTime(),
                     modified_by= 1 if(auth.user == None) else auth.user.id

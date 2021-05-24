@@ -173,7 +173,10 @@ class Prospect:
                 "groupemail":ds[0].groupemail,
                 "bankid":str(ds[0].bankid),
                 
-                "clinic_count":str(clinic_count),    
+                "clinic_count":str(clinic_count),  
+                
+                "newcity":common.getstring(ds[0].newcity),
+                
                 "result":"success",
                 "error_message":"",
                 "error_code":""
@@ -308,6 +311,7 @@ class Prospect:
                 groupsms=common.getkeyvalue(avars,'groupsms',ds[0].groupsms),
                 groupemail=common.getkeyvalue(avars,'groupemail',ds[0].groupemail),
                 bankid=common.getkeyvalue(avars,'bankid',ds[0].bankid),
+                newcity = common.getkeyvalue(avars,'newcity',ds[0].newcity),
                 
                 modified_on=common.getISTFormatCurrentLocatTime(),
                 modified_by= 1 if(auth.user == None) else auth.user.id
@@ -353,6 +357,7 @@ class Prospect:
             st=common.getkeyvalue(avars,'st',"")
             pin=common.getkeyvalue(avars,'pin',"")
             cell = common.getkeyvalue(avars,"cell","")
+            newcity = common.getkeyvalue(avars,"newcity","")
             
             practiceaddress = ""
             practiceaddress = practiceaddress + "" if(address1 == "") else address1
@@ -493,6 +498,7 @@ class Prospect:
                 capitationytd  = 0,
                 captiationmtd  = 0,
                 
+                newcity = newcity,
                
 
                 is_active = True,
