@@ -1620,7 +1620,7 @@ def updateimage(avars):
 ############################ Prescription API ##################################################
 def getmedicines(avars):
     opres = mdpprescription.Prescription(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
-    rsp = opres.getmedicines(common.getstring(str(avars["searchphrase"])),\
+    rsp = opres.getmedicines(common.getstring(str(avars["searchphrase"])  if 'searchphrase' in avars else "", ),\
                               int(common.getid(str(avars['page'])))  if 'page' in avars else 0,\
                               int(common.getid(str(avars['maxcount'])))  if 'maxcount' in avars else 0
                               )

@@ -238,7 +238,7 @@ db.define_table('clinic',
                 
                 Field('mdp_registration','string'),
                 Field('dentalchairs','string'),
-                Field('auto_clave','string',default='Yes',requires=IS_IN_SET(YESNO)),
+                Field('auto_clave','string',default='yes',requires=IS_IN_SET(YESNO)),
                 Field('implantology','string'),
                 Field('instrument_sterilization','string'),
                 Field('waste_displosal','string'),

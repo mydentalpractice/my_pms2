@@ -171,7 +171,7 @@ class Treatment:
             
             if(page >= 0):
                 treatments = db(query).select(db.vw_treatmentlist.id,db.vw_treatmentlist.tplanid,db.vw_treatmentlist.treatment,db.vw_treatmentlist.startdate, \
-                                              db.vw_treatmentlist.status,db.vw_treatmentlist.treatmentcost,db.vw_treatmentlist.patientname,\
+                                              db.vw_treatmentlist.memberid,db.vw_treatmentlist.patientid,db.vw_treatmentlist.status,db.vw_treatmentlist.treatmentcost,db.vw_treatmentlist.patientname,db.vw_treatmentlist.memberid,db.vw_treatmentlist.patientid,\
                                               db.vw_treatment_procedure_group.shortdescription,\
                                               left=db.vw_treatment_procedure_group.on(db.vw_treatment_procedure_group.treatmentid==db.vw_treatmentlist.id),\
                                               limitby=limitby, orderby=~db.vw_treatmentlist.id)
@@ -179,7 +179,7 @@ class Treatment:
                     maxcount = db(query).count()
             else:
                 treatments = db(query).select(db.vw_treatmentlist.id,db.vw_treatmentlist.tplanid,db.vw_treatmentlist.treatment,db.vw_treatmentlist.startdate, \
-                                              db.vw_treatmentlist.status,db.vw_treatmentlist.treatmentcost,db.vw_treatmentlist.patientname,\
+                                              db.vw_treatmentlist.memberid,db.vw_treatmentlist.patientid,db.vw_treatmentlist.status,db.vw_treatmentlist.treatmentcost,db.vw_treatmentlist.patientname,db.vw_treatmentlist.memberid,db.vw_treatmentlist.patientid,\
                                               db.vw_treatment_procedure_group.shortdescription,\
                                               left=db.vw_treatment_procedure_group.on(db.vw_treatment_procedure_group.treatmentid==db.vw_treatmentlist.id), \
                                               orderby=~db.vw_treatmentlist.id)
@@ -201,12 +201,16 @@ class Treatment:
                     "treatment": common.getstring(treatment.vw_treatmentlist.treatment),
                     "treatmentdate"  : (treatment.vw_treatmentlist.startdate).strftime("%d/%m/%Y"),
                     "patientname" : common.getstring(treatment.vw_treatmentlist.patientname),
+                    "memberid":int(common.getid(treatment.vw_treatmentlist.memberid)),
+                    "patientid":int(common.getid(treatment.vw_treatmentlist.patientid)),
                     "procedures":common.getstring(treatment.vw_treatment_procedure_group.shortdescription),
                     "status": "Started" if(common.getstring(treatment.vw_treatmentlist.status) == "") else common.getstring(treatment.vw_treatmentlist.status),
                     "totaltreatmentcost":float(common.getstring(r["totaltreatmentcost"])),
                     "totalcopay":float(common.getstring(r["totalcopay"])),
                     "totalinspays":float(common.getstring(r["totalinspays"])),
-                    "totaldue":float(common.getstring(r["totaldue"]))
+                    "totaldue":float(common.getstring(r["totaldue"])),
+                    "totalpaid":float(common.getstring(r["totaltreatmentcost"]))-float(common.getstring(r["totaldue"])),
+                    
                     
                 }
                 treatmentlist.append(treatmentobj)        
@@ -279,7 +283,7 @@ class Treatment:
             
             if(page >= 0):
                 treatments = db(query).select(db.vw_treatmentlist.id,db.vw_treatmentlist.tplanid,db.vw_treatmentlist.treatment,db.vw_treatmentlist.startdate, db.vw_treatmentlist.patientname,\
-                                              db.vw_treatmentlist.status,db.vw_treatmentlist.treatmentcost,db.vw_treatment_procedure_group.shortdescription,\
+                                              db.vw_treatmentlist.memberid,db.vw_treatmentlist.patientid,db.vw_treatmentlist.status,db.vw_treatmentlist.treatmentcost,db.vw_treatment_procedure_group.shortdescription,\
                                               db.vw_treatmentlist.doctorid,db.vw_treatmentlist.doctorname, db.vw_treatmentlist.clinicid, db.vw_treatmentlist.clinicname,\
                                               left=db.vw_treatment_procedure_group.on(db.vw_treatment_procedure_group.treatmentid==db.vw_treatmentlist.id),\
                                               limitby=limitby, orderby=~db.vw_treatmentlist.id)
@@ -287,7 +291,7 @@ class Treatment:
                     maxcount = db(query).count()
             else:
                 treatments = db(query).select(db.vw_treatmentlist.id,db.vw_treatmentlist.tplanid,db.vw_treatmentlist.treatment,db.vw_treatmentlist.startdate, db.vw_treatmentlist.patientname,\
-                                              db.vw_treatmentlist.status,db.vw_treatmentlist.treatmentcost,db.vw_treatment_procedure_group.shortdescription,\
+                                              db.vw_treatmentlist.memberid,db.vw_treatmentlist.patientid,db.vw_treatmentlist.status,db.vw_treatmentlist.treatmentcost,db.vw_treatment_procedure_group.shortdescription,\
                                               db.vw_treatmentlist.doctorid,db.vw_treatmentlist.doctorname, db.vw_treatmentlist.clinicid, db.vw_treatmentlist.clinicname,\
                                               left=db.vw_treatment_procedure_group.on(db.vw_treatment_procedure_group.treatmentid==db.vw_treatmentlist.id), \
                                               orderby=~db.vw_treatmentlist.id)
@@ -310,6 +314,8 @@ class Treatment:
                     "treatment": common.getstring(treatment.vw_treatmentlist.treatment),
                     "treatmentdate"  : (treatment.vw_treatmentlist.startdate).strftime("%d/%m/%Y"),
                     "patientname" : common.getstring(treatment.vw_treatmentlist.patientname),
+                    "memberid":int(common.getid(treatment.vw_treatmentlist.memberid)),
+                    "patientid":int(common.getid(treatment.vw_treatmentlist.patientid)),
                     "doctorid":str(treatment.vw_treatmentlist.doctorid),
                     "doctorname":treatment.vw_treatmentlist.doctorname,
                     "clinicid":str(treatment.vw_treatmentlist.clinicid),
@@ -319,7 +325,8 @@ class Treatment:
                     "totaltreatmentcost":float(common.getstring(r["totaltreatmentcost"])),
                     "totalcopay":float(common.getstring(r["totalcopay"])),
                     "totalinspays":float(common.getstring(r["totalinspays"])),
-                    "totaldue":float(common.getstring(r["totaldue"]))
+                    "totaldue":float(common.getstring(r["totaldue"])),
+                    "totalpaid":float(common.getstring(r["totaltreatmentcost"]))-float(common.getstring(r["totaldue"])),
                    
                     
                 }
@@ -521,7 +528,8 @@ class Treatment:
                     "treatmentid":treatmentid,
                     "tplanid":tplanid,
                     "treatment": common.getstring(treatment[0].vw_treatmentlist.treatment),
-                    
+                    "memberid":memberid,
+                    "patientid":patientid,
                     "treatmentdate"  : (treatment[0].vw_treatmentlist.startdate).strftime("%d/%m/%Y"),
                     "patientname": common.getstring(treatment[0].vw_treatmentlist.patientname),
                     "chiefcomplaint" : common.getstring(treatment[0].vw_treatmentlist.chiefcomplaint),
@@ -538,7 +546,8 @@ class Treatment:
                     "totaltreatmentcost":float(common.getstring(r["totaltreatmentcost"])),
                     "totalcopay":float(common.getstring(r["totalcopay"])),
                     "totalinspays":float(common.getstring(r["totalinspays"])),
-                    "totaldue":float(common.getstring(r["totaldue"]))
+                    "totaldue":float(common.getstring(r["totaldue"])),
+                    "totalpaid":float(common.getstring(r["totaltreatmentcost"])) - float(common.getstring(r["totaldue"])),
                     
                     
                 }        

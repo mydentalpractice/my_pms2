@@ -1380,7 +1380,7 @@ class Appointment:
                 x=common.getstring(appt[0].clinic_ref)
                 x=common.getstring(appt[0].clinic_name)
                 x=common.getboolean(appt[0].blockappt)
-                dobstr = common.getstringfromdate(appt[0].dob,"%d/%M/%Y")
+                dobstr = common.getstringfromdate(appt[0].dob,"%d/%m/%Y")
                 apptobj= {
                     "providerid":str(providerid),
                     "appointmentid":str(appointmentid),
@@ -1530,7 +1530,7 @@ class Appointment:
     
     
     def list_appointment_limited(self,avars):
-        logger.loggerpms2.info("Enter List Appointments Limited")
+        logger.loggerpms2.info("Enter List Appointments Limited  " + json.dumps(avars))
         db = self.db
         auth = current.auth
         
@@ -1614,7 +1614,7 @@ class Appointment:
         except Exception as e:
             excpobj = {}
             excpobj["result"] = "fail"
-            excpobj["error_message"] = "List_Appointment API Exception Error - " + str(e)
+            excpobj["error_message"] = "List_Appointment_limited  API Exception Error - " + str(e)
             excpobj["error_code"] = ""
             return json.dumps(excpobj)    
         
@@ -1622,7 +1622,7 @@ class Appointment:
 
     
     def list_appointment(self,avars):
-        logger.loggerpms2.info("Enter List Appointments")
+        logger.loggerpms2.info("Enter List Appointments " + json.dumps(avars))
         db = self.db
         auth = current.auth
         
@@ -1687,7 +1687,7 @@ class Appointment:
             if(toapptdt != None):
                 query = query & (db.t_appointment.f_start_time <= toapptdt)
         
-            appts = db((query)).select(db.t_appointment.ALL,orderby=db.t_appointment.f_start_time)
+            appts = db((query)).select(db.t_appointment.ALL,orderby=db.t_appointment.f_start_time,limitby=limitby)
             
             apptlist = []
                    
@@ -1695,7 +1695,7 @@ class Appointment:
                 apptobj = json.loads(self.get_appointment({"appointmentid":appt.id,"block":blockappt}))
                 apptlist.append(apptobj)             
             
-            apptobj = {"result":"success", "error_message":"", "error_code":"", "apptcount":str(len(appts)), "apptlist":apptlist}
+            apptobj = {"result":"success", "error_message":"", "error_code":"", "apptcount":str(len(appts)), "page":str(page+1),"apptlist":apptlist}
         
         except Exception as e:
             excpobj = {}

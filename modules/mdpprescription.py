@@ -260,17 +260,22 @@ class Prescription:
         page = page -1
         urlprops = db(db.urlproperties.id >0 ).select(db.urlproperties.pagination)
         items_per_page = 10 if(len(urlprops) <= 0) else int(common.getvalue(urlprops[0].pagination))
-        limitby = ((page)*items_per_page,(page+1)*items_per_page) if page >= 0 else None        
+        limitby = ((page)*items_per_page,(page+1)*items_per_page) if page >= 0 else None     
+        if(page < 0):
+            limitby = None
+        
+        
         medobj = {}
         medlist = []
         try:
+            #query =((db.medicine_default.id > 0) & (db.medicine_default.is_active == True))
             if((searchphrase == "") | (searchphrase == None)):
-                query =((db.medicine.providerid == providerid) & (db.medicine.is_active == True))
+                query =((db.medicine_default.id > 0) & (db.medicine_default.is_active == True))
             else:
-                query= ((db.medicine.providerid == providerid) & (db.medicine.medicine.like('%' + searchphrase + '%')) & (db.medicine.is_active == True))
+                query= ((db.medicine_default.id > 0) & (db.medicine_default.medicine.like('%' + searchphrase + '%')) & (db.medicine_default.is_active == True))
     
         
-            medicines = db(query).select(db.medicine.ALL, limitby = limitby)
+            medicines = db(query).select(db.medicine_default.ALL, limitby=limitby)
             maxcount = db(query).count() if maxcount == 0 else maxcount    
     
             for medicine in medicines:
@@ -279,7 +284,7 @@ class Prescription:
                 
                     "medicineid":int(common.getid(medicine.id)),
                     "medicine":common.getstring(medicine.medicine),
-                    "medicinetype":common.getstring(medicine.medicinetype),
+                    "medicinetype":common.getstring(medicine.meditype),
                     "strength":common.getstring(medicine.strength),
                     "strengthuom":common.getstring(medicine.strengthuom)
                 }
@@ -316,7 +321,7 @@ class Prescription:
         medobj = {}
         
         try:
-            medicines = db((db.medicine.providerid == providerid) & (db.medicine.id == medicineid) & (db.medicine.is_active == True)).select()
+            medicines = db((db.medicine_default.id == medicineid) & (db.medicine_default.is_active == True)).select()
            
             for medicine in medicines:
                            
@@ -324,11 +329,10 @@ class Prescription:
                 
                     "medicineid":int(common.getid(medicine.id)),
                     "medicine":common.getstring(medicine.medicine),
-                    "medicinetype":common.getstring(medicine.medicinetype),
+                    "medicinetype":common.getstring(medicine.meditype),
                     "strength":common.getstring(medicine.strength),
                     "strengthuom":common.getstring(medicine.strengthuom),
-                    "instructions":common.getstring(medicine.instructions),
-                    "notes":common.getstring(medicine.notes)
+                    "instructions":common.getstring(medicine.instructions)
                 }
             
                 medobj["result"] = "success"    
@@ -352,19 +356,14 @@ class Prescription:
         try:
             auth = current.auth
             medicineid = int(common.getid(medobj["medicineid"]))
-            medid = db.medicine.update_or_insert(((db.medicine.id == medicineid) & (db.medicine.providerid == providerid) & (db.medicine.is_active == True)),
-                                         providerid  = providerid,
+            medid = db.medicine_default.update_or_insert(((db.medicine_default.id == medicineid) & (db.medicine_default.is_active == True)),
+                                        
                                          medicine = common.getstring(medobj["medicine"]),
-                                         medicinetype = common.getstring(medobj["medicinetype"]),
+                                         meditype = common.getstring(medobj["medicinetype"]),
                                          strength = common.getstring(medobj["strength"]),
                                          strengthuom = common.getstring(medobj["strengthuom"]),
                                          instructions = common.getstring(medobj["instructions"]),
-                                         notes = common.getstring(medobj["notes"]),
-                                         is_active = True,
-                                         created_on = common.getISTFormatCurrentLocatTime(),
-                                         created_by = 1 if(auth.user == None) else auth.user.id,
-                                         modified_on = common.getISTFormatCurrentLocatTime(),
-                                         modified_by = 1 if(auth.user == None) else auth.user.id
+                                         is_active = True
                                          )
                                          
                                          

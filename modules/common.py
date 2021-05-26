@@ -20,6 +20,10 @@ getstring = lambda text: text if((text != None)&(text != "")&(text != "None")) e
 getbool =   lambda text: text if((text != None)&(text != "")&(text != "None")) else False
 getboolean =   lambda text: True if((text != None)&(text != "")&(text != "None")&((text == "True")|(text == "true")|(text==True)|(text=="1")|(text=="on")|(text=="On"))) else False
 
+
+getyesno = lambda text: "yes" if((text == "True")) else ("no" if(text=="False") else "yes")
+gettruefalse = lambda text: "True" if((text == "yes")) else ("False" if(text=="no") else "True")
+
 #getmode    = lambda mode:mode if(mode != None) else 'None'
 
 fmt = "%Y-%m-%d %H:%M:%S"
