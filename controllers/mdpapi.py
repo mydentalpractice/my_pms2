@@ -756,6 +756,10 @@ def addproviderimage(avars):
 
 ######################################################## PATIENT APIS  ##################################    
 
+def registerVCPatient(avars):
+    opat = mdppatient.Patient(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
+    rsp = opat.registerVCPatient(avars)
+    return rsp
 
 
 #this method creates a new walk-in patient
@@ -2995,7 +2999,8 @@ mdpapi_switcher = {"listappointments":getappointments,"getappointmentsbymonth":g
                    "getpatappointmentcountbymonth":getpatappointmentcountbymonth,"getpatappointmentsbyday":getpatappointmentsbyday,\
                    "createappointment":newappointment,'updateappointment':updateappointment,'cancelappointment':cancelappointment,'checkinappointment':checkinappointment,\
                    "login":mdplogin,"logout":mdplogout,"forgotusername":forgotusername,"forgotpassword":forgotpassword,"getmailserverdetails":getmailserverdetails,\
-                   "resetpassword":resetpassword,"searchpatient":searchpatient,"newpatient":newpatient,"getpatient":getpatient,"newalkinpatient":newalkinpatient,"updatewalkinpatient":updatewalkinpatient,\
+                   "resetpassword":resetpassword,"searchpatient":searchpatient,"newpatient":newpatient,"getpatient":getpatient,\
+                   "newalkinpatient":newalkinpatient,"updatewalkinpatient":updatewalkinpatient,"registerVCPatient":registerVCPatient,\
                    "doctorlist":doctorlist,"doctor":getdoctor,"rolelist":rolelist,"specialitylist":specialitylist,"newpayment":newpayment,\
                    "listpayments":listpayments,"getpayment":getpayment,"paymentcallback":paymentcallback,"groupsmsmessage":groupsmsmessage,"paymentreceipt":paymentreceipt,\
                    "getpaymentlist":getpaymentlist, "getsignedkey":getsignedkey,"getopentreatments":getopentreatments,\

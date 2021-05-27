@@ -1743,7 +1743,106 @@ class Patient:
     return json.dumps(patobj)
    
  
-   
+  
+  
+  
+  def registerVCPatient(self,avars):
+    logger.loggerpms2.info("Enter Register VC Patient " + json.dumps(avars))
+    db = self.db
+    providerid = self.providerid
+    
+    try:
+      
+      if(providerid == 0):
+        prov = db(db.provider.provider == 'P0001').select(db.provider.id)
+        providerid = prov[0].id if(len(prov) > 0) else 0
+        
+        if(providerid == 0):
+          mssg = "Register VC Patient API - Invalid Providerid"
+          logger.loggerpms2.info(mssg)    
+          excpobj = {}
+          excpobj["result"] = "fail"
+          excpobj["error_message"] = mssg
+          return json.dumps(excpobj)
+      
+      
+    
+      
+      
+      cell = common.getkeyvalue(avars,"cell","")
+      email = common.getkeyvalue(avars,"email","")
+      name = common.getkeyvalue(avars,"name","")
+      
+      x = name.split(' ')
+      fname = name if(len(x) == 0) else x[0]
+      lname = "" if(len(x)<=1) else x[1]      
+
+      dobstr = common.getkeyvalue(avars,"dob",common.getstringfromdate(common.getISTFormatCurrentLocatTime(),"%d/%m/%Y"))
+      
+      reqObj={
+        "action":"searchpatient",
+        "providerid":str(providerid),
+        "searchphrase":cell
+      }
+      respObj = json.loads(self.searchpatient(reqObj))
+      
+      #error search patient
+      if(respObj["result"] != "success"):
+        mssg = "Register VC Patient API - Invalid Search Patient"
+        logger.loggerpms2.info(mssg)    
+        excpobj = {}
+        excpobj["result"] = "fail"
+        excpobj["error_message"] = mssg
+        return json.dumps(excpobj)
+      
+      #patient already registered
+      if(respObj["patientcount"] > 0):
+        xrespObj = {}
+        xrespObj["result"] = "success"
+        xrespObj["error_message"] = ""
+        patientlist = respObj["patientlist"]
+        xrespObj["patientmember"] = patientlist[0]["patientmember"]
+        xrespObj["memberid"] = patientlist[0]["memberid"]
+        xrespObj["patientid"] = patientlist[0]["patientid"]
+        
+        return json.dumps(xrespObj)
+      
+      
+      #register walk-in patient
+      reqObj = {
+        "action":"newalkinpatient",
+        "providerid":providerid,
+        "fname":fname,
+        "lname":lname,
+        "cell":cell,
+        "email":email,
+        "dob": dobstr
+      }
+      
+      self.providerid = providerid
+      self.db = db
+      respObj = json.loads(self.newalkinpatient(reqObj))
+      
+      if(respObj["result"] != "success"):
+        mssg = "Register VC Patient API - Error Registering Walk-in Patient " + name
+        logger.loggerpms2.info(mssg)    
+        excpobj = {}
+        excpobj["result"] = "fail"
+        excpobj["error_message"] = mssg
+        return json.dumps(excpobj)
+          
+    except Exception as e:
+      mssg = "Register VC Patient API  Exception:\n" + str(e)
+      logger.loggerpms2.info(mssg)      
+      excpobj = {}
+      excpobj["result"] = "fail"
+      excpobj["error_message"] =mssg
+      return json.dumps(excpobj)
+    
+    logger.loggerpms2.info("Exit Register VC Patient " + json.dumps(respObj))
+    return json.dumps(respObj)
+    
+    
   def addpatientimage(self,avars):
     
     db = self.db
@@ -1780,6 +1879,8 @@ class Patient:
         return json.dumps(excpobj)
       
     return json.dumps(rsp)
+    
+
     
       
     
