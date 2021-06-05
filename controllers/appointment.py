@@ -65,6 +65,8 @@ def saveNewAppt(userid,form2,providerid):
         appt  = 0
         planid = 0
         treatmentid = 0
+        clinicid = session.clinicid
+        clinicname = session.clinicname
         
         doctorid = int(common.getid(form2.vars.doctor))
         
@@ -124,6 +126,7 @@ def saveNewAppt(userid,form2,providerid):
                            hmoplan = hmoplanid,
                            groupregion = 1,
                            provider  = providerid,
+                           clinicid = session.clinicid,
                            hmopatientmember = False,
                            
                            newmember = True,
@@ -139,7 +142,7 @@ def saveNewAppt(userid,form2,providerid):
                        
                         
                         apptid  = db.t_appointment.insert(f_start_time=apptdt, f_end_time = endapptdt, f_duration= duration, cell = common.getstring(form2.vars.cell),
-                                                        f_title = common.getstring(form2.vars.title),f_status='Open',
+                                                        f_title = common.getstring(form2.vars.title),f_status='Confirmed',
                                                         f_patientname = common.getstring(form2.vars.patientmember),
                                                         f_location = form2.vars.location,
                                                         f_treatmentid = treatmentid,
@@ -147,6 +150,7 @@ def saveNewAppt(userid,form2,providerid):
                                                         doctor = doctorid,
                                                         patient=patientid,
                                                         patientmember=patientid,
+                                                        clinicid = clinicid,
                                                         sendsms = True,
                                                         sendrem = True,
                                                         smsaction = "create",
@@ -156,9 +160,10 @@ def saveNewAppt(userid,form2,providerid):
                 else:
                        
                         apptid  = db.t_appointment.insert(f_start_time=apptdt, f_end_time = endapptdt, f_duration = duration, cell = common.getstring(form2.vars.cell),
-                                                        f_title = common.getstring(form2.vars.title),f_status='Open',
+                                                        f_title = common.getstring(form2.vars.title),f_status='Confirmed',
                                                         f_treatmentid = treatmentid,
                                                         f_patientname = common.getstring(form2.vars.patientmember),
+                                                        clinicid = clinicid,
                                                         description = form2.vars.description,f_location = form2.vars.location, sendsms = True, sendrem=True,smsaction="create",
                                                         doctor = doctorid, provider=providerid, patient=patientid,patientmember=memberid, is_active=True,
                                                         created_on=common.getISTFormatCurrentLocatTime(),modified_on=common.getISTFormatCurrentLocatTime(),
@@ -185,6 +190,8 @@ def prevnextappt():
         raise HTTP(400,"PMS-Error: There is no valid logged-in Provider: providerhome()")    
    
     prov = db(db.provider.id == providerid).select(db.provider.pa_practicename,db.provider.pa_practiceaddress)
+
+    clinicid = session.clinicid
     
     x = (datetime.datetime.today()).strftime("%d/%m/%Y %H:%M")
     xdt = datetime.datetime.strptime(x, "%d/%m/%Y %H:%M")
@@ -219,14 +226,14 @@ def prevnextappt():
     start = "2100-01-01 00:00"
     end   = "2100-01-01 00:00"  
  
-    #get all appointments for this provider and default month
-    rows=db((db.t_appointment.provider==providerid) & (db.t_appointment.f_start_time>=defstart) &(db.t_appointment.f_start_time<=defend) &(db.t_appointment.is_active==True) ).\
+    #get all appointments for this provider & Clinicid and default month
+    rows=db((db.t_appointment.provider==providerid) & (db.t_appointment.clinicid==clinicid) & (db.t_appointment.f_start_time>=defstart) &(db.t_appointment.f_start_time<=defend) &(db.t_appointment.is_active==True) ).\
             select(db.t_appointment.id,db.t_appointment.f_title,db.t_appointment.f_start_time,db.t_appointment.f_end_time,db.t_appointment.f_patientname,db.t_appointment.is_active, \
                    db.doctor.color, left=db.doctor.on(db.doctor.id == db.t_appointment.doctor))  
     
-    dailyappts  = db((db.vw_appointment_today.providerid == providerid) & (db.vw_appointment_today.is_active == True)).select(orderby=db.vw_appointment_today.f_start_time)
-    weeklyappts = db((db.vw_appointment_weekly.providerid == providerid) & (db.vw_appointment_weekly.is_active == True)).select(orderby=db.vw_appointment_weekly.f_start_time)
-    monthlyappts = db((db.vw_appointment_monthly.providerid == providerid) & (db.vw_appointment_monthly.is_active == True)).select(orderby=db.vw_appointment_monthly.f_start_time)
+    dailyappts  = db((db.vw_appointment_today.providerid == providerid) & (db.vw_appointment_today.clinicid==clinicid) & (db.vw_appointment_today.is_active == True)).select(orderby=db.vw_appointment_today.f_start_time)
+    weeklyappts = db((db.vw_appointment_weekly.providerid == providerid) & (db.vw_appointment_weekly.clinicid==clinicid) & (db.vw_appointment_weekly.is_active == True)).select(orderby=db.vw_appointment_weekly.f_start_time)
+    monthlyappts = db((db.vw_appointment_monthly.providerid == providerid) & (db.vw_appointment_monthly.clinicid==clinicid) & (db.vw_appointment_monthly.is_active == True)).select(orderby=db.vw_appointment_monthly.f_start_time)
     
    
     
@@ -980,6 +987,7 @@ def appointment():
     patientid = 0
     provloc = ""
     provcode = ""
+    clinicid = session.clinicid
     
     page       = common.getgridpage(request.vars)
     memberpage = int(common.getpage(request.vars.memberpage))
@@ -995,13 +1003,25 @@ def appointment():
     if(len(pats)>0):
         patientname = pats[0].fullname   # fname Lname (Neeta Hebbar)
         membername  = pats[0].patient    # fname, lname, memberid (Neeta Hebbad : BLR100823)
+        
+        
 
     if(patientid > 0):
-        rows=db((db.t_appointment.provider==providerid) & (db.t_appointment.patientmember == memberid) & (db.t_appointment.patient==patientid) & (db.t_appointment.is_active==True)).\
-            select(db.t_appointment.ALL, db.doctor.ALL, left=db.doctor.on(db.doctor.id == db.t_appointment.doctor))
+        if(clinicid == 0):
+                rows=db((db.t_appointment.provider==providerid) & (db.t_appointment.patientmember == memberid) & (db.t_appointment.patient==patientid) & (db.t_appointment.is_active==True)).\
+                    select(db.t_appointment.ALL, db.doctor.ALL, left=db.doctor.on(db.doctor.id == db.t_appointment.doctor))
+        else:
+                rows=db((db.t_appointment.provider==providerid) & (db.t_appointment.clinicid==clinicid) & (db.t_appointment.patientmember == memberid) & (db.t_appointment.patient==patientid) & (db.t_appointment.is_active==True)).\
+                        select(db.t_appointment.ALL, db.doctor.ALL, left=db.doctor.on(db.doctor.id == db.t_appointment.doctor))
+                
     else:
-        rows=db((db.t_appointment.provider==providerid)& (db.t_appointment.is_active==True) ).\
-            select(db.t_appointment.ALL, db.doctor.ALL, left=db.doctor.on(db.doctor.id == db.t_appointment.doctor))
+        if(clinicid == 0):
+                rows=db((db.t_appointment.provider==providerid)& (db.t_appointment.is_active==True) ).\
+                    select(db.t_appointment.ALL, db.doctor.ALL, left=db.doctor.on(db.doctor.id == db.t_appointment.doctor))
+        else:
+                rows=db((db.t_appointment.provider==providerid)& (db.t_appointment.clinicid==clinicid)& (db.t_appointment.is_active==True) ).\
+                        select(db.t_appointment.ALL, db.doctor.ALL, left=db.doctor.on(db.doctor.id == db.t_appointment.doctor))
+        
     
     start = "2100-01-01 00:00:00"
     end   = "2100-01-01 00:00:00"
@@ -1557,7 +1577,7 @@ def appointpatient_selector():
 def new_appointment():
     
     
-  
+    clinicid = session.clinicid
     providerid = int(common.getid(request.vars.providerid))
     provdict = common.getproviderfromid(db,providerid)
     prov = db(db.provider.id == providerid).select(db.provider.pa_practicename,db.provider.pa_practiceaddress)
@@ -2087,6 +2107,7 @@ def appointment_block():
     provdict = common.getprovider(auth, db)
     providername = provdict["providername"]
     providerid = provdict["providerid"]
+    clinicid = session.clinicid
     
     doctorid = int(common.getdefaultdoctor(db, providerid))    
     
@@ -2149,7 +2170,8 @@ def appointment_block():
                                         f_treatmentid = "",
                                         description = form2.vars.description,
                                         doctor = doctorid,
-                                      provider=providerid,  
+                                      provider=providerid, 
+                                      clinicid = clinicid,
                                       is_active=True,
                                       newpatient = False,
                                       blockappt = True,
@@ -2708,6 +2730,7 @@ def customer_appointment():
 
         prov = db(db.provider.id == providerid).select(db.provider.pa_practicename,db.provider.pa_practiceaddress)
 
+        
 
         if(request.vars.moment != None):
                 y = (request.vars.moment).split("T")
@@ -2747,9 +2770,9 @@ def customer_appointment():
 
 
 
-        dailyappts  = db((db.vw_appointment_today.providerid == providerid) & (db.vw_appointment_today.is_active == True)).select(orderby=db.vw_appointment_today.f_start_time)
-        weeklyappts = db((db.vw_appointment_weekly.providerid == providerid) & (db.vw_appointment_weekly.is_active == True)).select(orderby=db.vw_appointment_weekly.f_start_time)
-        monthlyappts = db((db.vw_appointment_monthly.providerid == providerid) & (db.vw_appointment_monthly.is_active == True)).select(orderby=db.vw_appointment_monthly.f_start_time)
+        dailyappts  = db((db.vw_appointment_today.providerid == providerid)  &(db.vw_appointment_today.is_active == True)).select(orderby=db.vw_appointment_today.f_start_time)
+        weeklyappts = db((db.vw_appointment_weekly.providerid == providerid)  &(db.vw_appointment_weekly.is_active == True)).select(orderby=db.vw_appointment_weekly.f_start_time)
+        monthlyappts = db((db.vw_appointment_monthly.providerid == providerid)  &(db.vw_appointment_monthly.is_active == True)).select(orderby=db.vw_appointment_monthly.f_start_time)
 
 
 

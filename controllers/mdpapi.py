@@ -42,6 +42,7 @@ from applications.my_pms2.modules import mdpclinic
 from applications.my_pms2.modules import mdpprospect
 from applications.my_pms2.modules import mdpagent
 from applications.my_pms2.modules import mdpconsentform
+from applications.my_pms2.modules import mdpshopsee
 
 from applications.my_pms2.modules import logger
 
@@ -1185,7 +1186,9 @@ def reSchedule(avars):
 def getappointments(avars):
     
     oappts = mdpappointment.Appointment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
-    rsp = oappts.appointments(int(common.getid(str(avars["month"]))),int(common.getid(str(avars["year"]))))
+    rsp = oappts.appointments(int(common.getid(str(avars["month"]))),int(common.getid(str(avars["year"]))),                                          
+                              int(common.getid(str(avars["clinicid"]))) if "clinicid" in avars else 0                                      
+                             )
     return rsp
 
 #X
@@ -1193,7 +1196,9 @@ def getpatappointmentcountbymonth(avars):
     
     oappts = mdpappointment.Appointment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
     rsp = oappts.getpatappointmentcountbymonth(int(common.getid(str(avars["month"]))),int(common.getid(str(avars["year"]))),\
-                                          int(common.getid(str(avars["memberid"]))),int(common.getid(str(avars["patientid"]))))
+                                          int(common.getid(str(avars["memberid"]))),int(common.getid(str(avars["patientid"]))),
+                                          int(common.getid(str(avars["clinicid"]))) if "clinicid" in avars else 0                                      
+                                          )
     return rsp
 
 #X
@@ -1203,14 +1208,19 @@ def getappointmentsbypatient(avars):
     rsp = oappts.getappointmentsbypatient(int(common.getid(str(avars["month"]))),\
                                           int(common.getid(str(avars["year"]))),\
                                           int(common.getid(str(avars["memberid"]))),
-                                          int(common.getid(str(avars["patientid"]))))
+                                          int(common.getid(str(avars["patientid"]))),
+                                          int(common.getid(str(avars["clinicid"]))) if "clinicid" in avars else 0                                      
+                                          )
     return rsp
 
 #X
 def getappointmentsbymonth(avars):
     
     oappts = mdpappointment.Appointment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
-    rsp = oappts.getappointmentsbymonth(int(common.getid(str(avars["month"]))),int(common.getid(str(avars["year"]))))
+    rsp = oappts.getappointmentsbymonth(int(common.getid(str(avars["month"]))),int(common.getid(str(avars["year"]))),
+                                        int(common.getid(str(avars["clinicid"]))) if "clinicid" in avars else 0                                      
+                                        
+                                        )
     return rsp
 
 #this method returns all appointments for a specific day (dd/mm/yyyy) for a provider/patient
@@ -1218,7 +1228,8 @@ def getappointmentsbymonth(avars):
 def getpatappointmentsbyday(avars):
     oappts = mdpappointment.Appointment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
     rsp = oappts.getpatappointmentsbyday(int(common.getid(str(avars["day"]))),int(common.getid(str(avars["month"]))),int(common.getid(str(avars["year"]))),\
-                                         int(common.getid(str(avars["memberid"]))),int(common.getid(str(avars["patientid"])))\
+                                         int(common.getid(str(avars["memberid"]))),int(common.getid(str(avars["patientid"]))),\
+                                         int(common.getid(str(avars["clinicid"]))) if "clinicid" in avars else 0  
                                          )
     
     return rsp
@@ -1230,19 +1241,26 @@ def getappointmentsbyday(avars):
     oappts = mdpappointment.Appointment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
     rsp = oappts.getappointmentsbyday(int(common.getid(str(avars["day"]))),\
                                       int(common.getid(str(avars["month"]))),\
-                                      int(common.getid(str(avars["year"]))))
+                                      int(common.getid(str(avars["year"]))),
+                                      int(common.getid(str(avars["clinicid"]))) if "clinicid" in avars else 0  
+                                      )
     return rsp
 
 #this method returns all number of appointments for each day of a month
 #X
 def getappointmentcountbymonth(avars):
     oappts = mdpappointment.Appointment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
-    rsp = oappts.getappointmentcountbymonth(int(common.getid(str(avars["month"]))),int(common.getid(str(avars["year"]))))
+    rsp = oappts.getappointmentcountbymonth(int(common.getid(str(avars["month"]))),
+                                            int(common.getid(str(avars["year"]))),
+                                            int(common.getid(str(avars["clinicid"]))) if "clinicid" in avars else 0  
+                                            )
     return rsp
 #X
 def getdocappointmentcountbymonth(avars):
     oappts = mdpappointment.Appointment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
-    rsp = oappts.getdocappointmentcountbymonth(int(common.getid(str(avars["month"]))),int(common.getid(str(avars["year"]))))
+    rsp = oappts.getdocappointmentcountbymonth(int(common.getid(str(avars["month"]))),int(common.getid(str(avars["year"]))),
+                                               int(common.getid(str(avars["clinicid"]))) if "clinicid" in avars else 0  
+                                               )
     return rsp
 
 
@@ -1263,33 +1281,40 @@ def checkinappointment(avars):
     return rsp
 #X
 def newappointment(avars):
-    logger.loggerpms2.info("Enter newappointment in mdpapi")
+    avars["appPath"] = current.globalenv["request"].folder
+    logger.loggerpms2.info("Enter newappointment in mdpapi " + json.dumps(avars))
     oappts = mdpappointment.Appointment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
-    rsp = oappts.newappointment(int(common.getid(str(avars["memberid"]))),int(common.getid(str(avars["patientid"]))),\
-                                int(common.getid(str(avars["doctorid"]))),\
-                                str(avars["complaint"]),str(avars["startdt"]),int(common.getid(str(avars["duration"]))),\
-                                str(avars["providernotes"]),str(avars["cell"]),\
-                                current.globalenv["request"].folder)
+    rsp = oappts.newappointment(avars)
+    
+    #rsp = oappts.newappointment(int(common.getid(str(avars["memberid"]))),int(common.getid(str(avars["patientid"]))),\
+                                #int(common.getid(str(avars["doctorid"]))),\
+                                #str(avars["complaint"]),str(avars["startdt"]),int(common.getid(str(avars["duration"]))),\
+                                #str(avars["providernotes"]),str(avars["cell"]),\
+                                #current.globalenv["request"].folder)
+    
+    
     logger.loggerpms2.info("Exit newappointment in mdpapi " + str(rsp) )
     return rsp
 #X
 def updateappointment(avars):
-    
+    avars["appPath"] = current.globalenv["request"].folder
     oappts = mdpappointment.Appointment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
-    
-   # (self,appointmentid,doctorid,complaint,startdt,duration,providernotes,cell,status,treatmentid,appPath):
-    rsp = oappts.updateappointment(\
+    rsp = oappts.updateappointment(avars)
         
-        int(common.getid(str(avars["appointmentid"]))) if("appointmentid" in avars) else 0,
-        int(common.getid(str(avars["doctorid"]))) if("doctorid" in avars) else 0,
-        common.getstring(str(avars["complaint"]))  if("complaint" in avars) else "",
-        common.getstring(str(avars["startdt"]))  if("startdt" in avars) else "",
-        int(common.getid(str(avars["duration"]))) if("duration" in avars) else 0,
-        common.getstring(str(avars["providernotes"]))  if("providernotes"in avars) else "",
-        common.getstring(str(avars["cell"]))  if("cell" in avars) else "",
-        common.getstring(str(avars["status"]))  if("status" in avars) else "",
-        int(common.getid(str(avars["treatmentid"]))) if("treatmentid" in avars) else 0,
-        current.globalenv["request"].folder)    
+    
+
+    #rsp = oappts.updateappointment(\
+        
+        #int(common.getid(str(avars["appointmentid"]))) if("appointmentid" in avars) else 0,
+        #int(common.getid(str(avars["doctorid"]))) if("doctorid" in avars) else 0,
+        #common.getstring(str(avars["complaint"]))  if("complaint" in avars) else "",
+        #common.getstring(str(avars["startdt"]))  if("startdt" in avars) else "",
+        #int(common.getid(str(avars["duration"]))) if("duration" in avars) else 0,
+        #common.getstring(str(avars["providernotes"]))  if("providernotes"in avars) else "",
+        #common.getstring(str(avars["cell"]))  if("cell" in avars) else "",
+        #common.getstring(str(avars["status"]))  if("status" in avars) else "",
+        #int(common.getid(str(avars["treatmentid"]))) if("treatmentid" in avars) else 0,
+        #current.globalenv["request"].folder)    
 
 
     return rsp
@@ -1379,15 +1404,17 @@ def gettreatments(avars):
     #logger.loggerpms2.info("Enter Get Treatments")
     
     otrtmnt = mdptreatment.Treatment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
-    rsp = otrtmnt.gettreatments(int(common.getid(str(avars["page"]))) if "page" in avars else 0, 
-                                int(common.getid(str(avars["memberid"]))) if "memberid" in avars else 0,
-                                int(common.getid(str(avars["patientid"]))) if "patientid" in avars else 0,
-                                common.getstring(str(avars["searchphrase"])) if "searchphrase" in avars else "",
-                                int(common.getid(str(avars["maxcount"]))) if "maxcount" in avars else 0,
-                                (None if(avars["treatmentyear"] == "") else avars["treatmentyear"])  if "treatmentyear" in avars else None,
-                                int(common.getid(str(avars["clinicid"]))) if "clinicid" in avars else 0,                             
+    rsp = otrtmnt.gettreatments(avars)
+    
+    #rsp = otrtmnt.gettreatments(int(common.getid(str(avars["page"]))) if "page" in avars else 0, 
+                                #int(common.getid(str(avars["memberid"]))) if "memberid" in avars else 0,
+                                #int(common.getid(str(avars["patientid"]))) if "patientid" in avars else 0,
+                                #common.getstring(str(avars["searchphrase"])) if "searchphrase" in avars else "",
+                                #int(common.getid(str(avars["maxcount"]))) if "maxcount" in avars else 0,
+                                #(None if(avars["treatmentyear"] == "") else avars["treatmentyear"])  if "treatmentyear" in avars else None,
+                                #int(common.getid(str(avars["clinicid"]))) if "clinicid" in avars else 0,                             
                                                                                            
-                                )
+                                #)
     return rsp
 
 #def gettreatmentsbypatient(avars):
@@ -1408,11 +1435,15 @@ def getopentreatments(avars):
     #logger.loggerpms2.info("Enter Get Treatments")
     
     otrtmnt = mdptreatment.Treatment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
+    rsp = otrtmnt.getopentreatments(avars)
+
+    
     rsp = otrtmnt.getopentreatments(int(common.getid(str(avars["page"]))) if "page" in avars else 1, 
                                     int(common.getid(str(avars["memberid"]))) if "memberid" in avars else 0,\
                                     int(common.getid(str(avars["patientid"]))) if "patientid" in avars else 0,\
                                     common.getstring(str(avars["searchphrase"])) if "searchphrase" in avars else "",\
-                                    int(common.getid(str(avars["maxcount"]))) if "maxcount" in avars else 0
+                                    int(common.getid(str(avars["maxcount"]))) if "maxcount" in avars else 0,
+                                    int(common.getid(str(avars["clinicid"]))) if "clinicid" in avars else 0, 
                                                                                            
                                 )
     return rsp
@@ -1436,8 +1467,7 @@ def sendforauthorization(avars):
 def newtreatment(avars):
     #logger.loggerpms2.info("Enter New Treatment")    
     otrtmnt = mdptreatment.Treatment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
-    rsp = otrtmnt.newtreatment(int(common.getid(str(avars["memberid"]))),
-                               int(common.getid(str(avars["patientid"]))))
+    rsp = otrtmnt.newtreatment(avars)
     
     return rsp
 
@@ -1465,7 +1495,7 @@ def updatetreatment(avars):
                                   int(common.getid(str(avars["doctorid"]) if "doctorid" in avars else None)),\
                                   str(avars["notes"]) if "notes"  in avars else None,\
                                   str(avars["status"]) if 'status' in avars else None,\
-				  int(common.getid(str(avars["clinicid"]))) if "clinicid" in avars else None)
+				  int(common.getid(str(avars["clinicid"]))) if "clinicid" in avars else 0)
     
     
     return rsp
@@ -2891,8 +2921,15 @@ def new_agent_prospect(avars):
     return rsp
 ############################# END AGENT API  ###################################################
 
-############################# START PLANS API  ###################################################
-############################# END PLANS API  ###################################################
+############################# START SHOPSEE API  ###################################################
+def create_transaction(avars):
+    
+    obj = mdpshopsee.Shopsee(current.globalenv['db'])
+    rsp = obj.create_transaction(avars)
+    
+    return rsp
+
+############################# END SHOPSEE API  ###################################################
 
 ############################# START CF API  ###################################################
 def new_consentform(avars):
@@ -2929,6 +2966,10 @@ def unknown(avars):
     
     #"list_plans":list_plans
 #}
+SHOPSEE_switcher = {
+    "create_transaction":create_transaction
+
+}
 
 CFAPI_switcher = {
     "list_consentform":list_consentform,
@@ -3561,4 +3602,46 @@ def CFAPI():
 
     return locals()
 
+
+@request.restful()
+def shopseeAPI():
+    response.view = 'generic' + request.extension
+    def GET(*args, **vars):
+	return
+
+    def POST(*args, **vars):
+	i = 0
+	try:
+	    #logger.loggerpms2.info(">>Enter Agent API==>>")
+	    dsobj = datasecurity.DataSecurity()
+	    encryption = vars.has_key("req_data")
+	    if(encryption):
+		#logger.loggerpms2.info(">>Agent with Encryption")
+		encrypt_req = vars["req_data"]
+		vars = json.loads(dsobj.decrypts(encrypt_req))
+	    
+	    #decrypted request date
+	    action = str(vars["action"])
+	    #logger.loggerpms2.info(">>Agent ACTION==>>" + action)
+	    
+	    #return json.dumps({"action":action})
+	    rsp = SHOPSEE_switcher.get(action,unknown)(vars)
+	    common.setcookies(response)
+	    if(encryption):
+		return json.dumps({"resp_data":dsobj.encrypts(rsp)})
+	    else:
+		return rsp
+	    
+	except Exception as e:
+	    mssg = "SHOPSEE API Exception Error =>>\n" + str(e)
+	    #logger.loggerpms2.info(mssg)
+	    raise HTTP(500)   
+
+    def PUT(*args, **vars):
+	return dict()
+
+    def DELETE(*args, **vars):
+	return dict()
+
+    return locals()
 

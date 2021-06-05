@@ -40,6 +40,14 @@ class Appointment:
     def __init__(self,db,providerid):
         self.db = db
         self.providerid = providerid
+        
+        #setting the primary clinic as default clinic id for backward compatibility
+        #all appointments from Practice App 1.0 will have clinicid = primary clinic
+        
+        clns = db((db.clinic_ref.ref_code == 'PRV') & (db.clinic_ref.ref_id == providerid) & (db.clinic.primary_clinic == True) &(db.clinic.is_active == True)).\
+            select(db.clinic_ref.clinic_id, left=db.clinic.on(db.clinic.id==db.clinic_ref.clinic_id))
+        self.clinicid = 0 if(len(clns) == 0) else clns[0].clinic_id
+        
         return     
     
     def appointmentstatus(self):
@@ -55,6 +63,8 @@ class Appointment:
             
             db = self.db
             
+           
+                
             retval = False
             str1 = datetime.datetime.strftime(startdt, "%Y-%m-%d %H:%M:%S")
             str2 = datetime.datetime.strftime(enddt,  "%Y-%m-%d %H:%M:%S")
@@ -81,6 +91,7 @@ class Appointment:
     def isBlocked(self, startdt, enddt,doctorid,clinicid=0):
         
         db = self.db
+       
         
         retval = False
         str1 = datetime.datetime.strftime(startdt, "%Y-%m-%d %H:%M:%S")
@@ -422,11 +433,12 @@ class Appointment:
     #year = YYYY  e.g. 2018
     #return - list of appointments
     #apptid, doctorid, patientname, apptdatetime, color
-    def getappointmentsbypatient(self,month,year,memberid,patientid):
-        logger.loggerpms2.info("Enter API getappointmentsbypatient " + str(month) + " " + str(year) + " " + str(memberid) + " " + str(patientid))
+    def getappointmentsbypatient(self,month,year,memberid,patientid,clinicid=0):
+        logger.loggerpms2.info("Enter API getappointmentsbypatient " + str(month) + " " + str(year) + " " + str(memberid) + " " + str(patientid) + " " + str(clinicid))
         
         db = self.db
         providerid = self.providerid
+        clinicid = self.clinicid
         
         start = str(year) + "-" + str(month).zfill(2) + "-01 00:00:00"
         end   = str(year) + "-" + str(month).zfill(2) + "-31 23:59:00"  #no need to take 30 or 31 days - just default to 31 days
@@ -462,7 +474,7 @@ class Appointment:
     #year = YYYY  e.g. 2018
     #return - list of appointments
     #apptid, doctorid, doctorname, patientname, apptdatetime, color
-    def appointments(self,month,year):
+    def appointments(self,month,year,clinicid=0):
         logger.loggerpms2.info("Enter API appointments " + str(month) + " " + str(year))
         
         db = self.db
@@ -472,11 +484,17 @@ class Appointment:
         start = str(year) + "-" + str(month).zfill(2) + "-01 00:00:00"
         end   = str(year) + "-" + str(month).zfill(2) + "-31 23:59:00"  #no need to take 30 or 31 days - just default to 31 days
     
-        
-        appts = db((db.vw_appointments.provider == providerid) & (db.vw_appointments.f_start_time >= start)  & \
-                   (db.vw_appointments.f_start_time <= end) & (db.vw_appointments.is_active == True)).\
-            select(db.vw_appointments.f_uniqueid,db.vw_appointments.f_start_time,db.vw_appointments.f_patientname,db.vw_appointments.blockappt,\
-                   db.vw_appointments.doctor,db.vw_appointments.docname,db.vw_appointments.color,db.vw_appointments.cell, orderby=~db.vw_appointments.f_start_time)
+        appts = None
+        if(clinicid == 0):
+            appts = db((db.vw_appointments.provider == providerid) & (db.vw_appointments.f_start_time >= start) & \
+                       (db.vw_appointments.f_start_time <= end) & (db.vw_appointments.is_active == True)).\
+                select(db.vw_appointments.f_uniqueid,db.vw_appointments.f_start_time,db.vw_appointments.f_patientname,db.vw_appointments.blockappt,db.vw_appointments.clinicid,\
+                       db.vw_appointments.doctor,db.vw_appointments.docname,db.vw_appointments.color,db.vw_appointments.cell, orderby=~db.vw_appointments.f_start_time)
+        else:
+            appts = db((db.vw_appointments.provider == providerid) & (db.vw_appointments.f_start_time >= start) & (db.vw_appointments.clinicid == clinicid)   & \
+                       (db.vw_appointments.f_start_time <= end) & (db.vw_appointments.is_active == True)).\
+                select(db.vw_appointments.f_uniqueid,db.vw_appointments.f_start_time,db.vw_appointments.f_patientname,db.vw_appointments.blockappt,db.vw_appointments.clinicid,\
+                       db.vw_appointments.doctor,db.vw_appointments.docname,db.vw_appointments.color,db.vw_appointments.cell, orderby=~db.vw_appointments.f_start_time)
         
         apptlist = []
         
@@ -488,7 +506,8 @@ class Appointment:
                 "patientname" : common.getstring(appt.f_patientname),
                 "patcell": common.modify_cell(appt.cell),
                 "docname":common.getstring(appt.docname),
-                "doctorid": common.getstring(appt.doctor),
+                "doctorid": int(common.getid(appt.doctor)),
+                "clinicid": int(common.getid(appt.clinicid)),
                 "color":common.getstring(appt.color),
                 "blockappt":common.getboolean(appt.blockappt)
             }
@@ -502,21 +521,27 @@ class Appointment:
     #year = YYYY  e.g. 2018
     #return - list of appointments
     #apptid, doctorid, doctorname, patientname, apptdatetime, color
-    def getappointmentsbymonth(self,month,year):
-        logger.loggerpms2.info("Enter API getappointmentsbymonth "+ str(month) + " " + str(year))
+    def getappointmentsbymonth(self,month,year,clinicid=0):
+        logger.loggerpms2.info("Enter API getappointmentsbymonth "+ str(month) + " " + str(year) + " " + str(clinicid))
         
     
         db = self.db
         providerid = self.providerid
+        #clinicid = self.clinicid
         
         start = str(year) + "-" + str(month).zfill(2) + "-01 00:00:00"
         end   = str(year) + "-" + str(month).zfill(2) + "-31 23:59:00"  #no need to take 30 or 31 days - just default to 31 days
         
-        
-        appts = db((db.vw_appointments.provider == providerid) & (db.vw_appointments.f_start_time >= start)  & \
-                   (db.vw_appointments.f_start_time <= end) & (db.vw_appointments.is_active == True)).\
-            select(db.vw_appointments.f_uniqueid,db.vw_appointments.f_start_time,db.vw_appointments.f_patientname,db.vw_appointments.blockappt,\
-                   db.vw_appointments.doctor,db.vw_appointments.docname,db.vw_appointments.color, db.vw_appointments.cell,orderby=db.vw_appointments.f_start_time)
+        if(clinicid == 0):
+            appts = db((db.vw_appointments.provider == providerid) & (db.vw_appointments.f_start_time >= start)  & \
+                       (db.vw_appointments.f_start_time <= end) & (db.vw_appointments.is_active == True)).\
+                select(db.vw_appointments.f_uniqueid,db.vw_appointments.f_start_time,db.vw_appointments.f_patientname,db.vw_appointments.blockappt,db.vw_appointments.clinicid,\
+                       db.vw_appointments.doctor,db.vw_appointments.docname,db.vw_appointments.color, db.vw_appointments.cell,orderby=db.vw_appointments.f_start_time)
+        else:
+            appts = db((db.vw_appointments.provider == providerid) & (db.vw_appointments.f_start_time >= start) & (db.vw_appointments.clinicid == clinicid)  & \
+                       (db.vw_appointments.f_start_time <= end) & (db.vw_appointments.is_active == True)).\
+                select(db.vw_appointments.f_uniqueid,db.vw_appointments.f_start_time,db.vw_appointments.f_patientname,db.vw_appointments.blockappt,db.vw_appointments.clinicid,\
+                       db.vw_appointments.doctor,db.vw_appointments.docname,db.vw_appointments.color, db.vw_appointments.cell,orderby=db.vw_appointments.f_start_time)
         
         apptlist = []
         
@@ -529,6 +554,8 @@ class Appointment:
                 "patientname" : appt.f_patientname,
                 "patcell": common.modify_cell(appt.cell),
                 "docname":appt.docname,
+                "clinicid" : int(common.getid(appt.clinicid)),
+                
                 "blockappt":common.getboolean(appt.blockappt)
             }
             apptlist.append(apptobj)        
@@ -542,8 +569,8 @@ class Appointment:
     #year = YYYY  e.g. 2018
     #return - list of appointments
     #apptid, doctorid, doctorname, patientname, apptdatetime, color
-    def getpatappointmentsbyday(self,day,month,year,memberid,patientid):
-        logger.loggerpms2.info("Enter API getpatappointmentsbyday "+ str(day) + " " + str(month) + " " + str(year) )
+    def getpatappointmentsbyday(self,day,month,year,memberid,patientid,clinicid=0):
+        logger.loggerpms2.info("Enter API getpatappointmentsbyday "+ str(day) + " " + str(month) + " " + str(year) + " " + str(clinicid) )
         
     
         db = self.db
@@ -552,13 +579,19 @@ class Appointment:
         start = str(year) + "-" + str(month).zfill(2) + "-" + str(day).zfill(2) + " 00:00:00"
         end   = str(year) + "-" + str(month).zfill(2) + "-" + str(day).zfill(2) + " 23:59:59"
         
-        
-        appts = db((db.vw_appointments.provider == providerid) & (db.vw_appointments.patientmember == memberid) & (db.vw_appointments.patient == patientid) & \
-                   (db.vw_appointments.f_start_time >= start)  & \
-                   (db.vw_appointments.f_start_time <= end) & (db.vw_appointments.is_active == True)).\
-            select(db.vw_appointments.f_uniqueid,db.vw_appointments.f_start_time,db.vw_appointments.f_patientname,\
-                   db.vw_appointments.doctor,db.vw_appointments.docname,db.vw_appointments.color,db.vw_appointments.cell,db.vw_appointments.blockappt)
-        
+        if(clinicid == 0):
+            appts = db((db.vw_appointments.provider == providerid) & (db.vw_appointments.patientmember == memberid) & (db.vw_appointments.patient == patientid) & \
+                       (db.vw_appointments.f_start_time >= start)  & \
+                       (db.vw_appointments.f_start_time <= end) & (db.vw_appointments.is_active == True)).\
+                select(db.vw_appointments.f_uniqueid,db.vw_appointments.f_start_time,db.vw_appointments.f_patientname,db.vw_appointments.clinicid,\
+                       db.vw_appointments.doctor,db.vw_appointments.docname,db.vw_appointments.color,db.vw_appointments.cell,db.vw_appointments.blockappt)
+        else:
+            appts = db((db.vw_appointments.provider == providerid) & (db.vw_appointments.patientmember == memberid) & (db.vw_appointments.patient == patientid) & (db.vw_appointments.clinicid == clinicid) & \
+                       (db.vw_appointments.f_start_time >= start)  & \
+                       (db.vw_appointments.f_start_time <= end) & (db.vw_appointments.is_active == True)).\
+                select(db.vw_appointments.f_uniqueid,db.vw_appointments.f_start_time,db.vw_appointments.f_patientname,db.vw_appointments.clinicid,\
+                       db.vw_appointments.doctor,db.vw_appointments.docname,db.vw_appointments.color,db.vw_appointments.cell,db.vw_appointments.blockappt)
+            
         apptlist = []
         
         for appt in appts:
@@ -570,6 +603,7 @@ class Appointment:
                 "patientname" : appt.f_patientname,
                 "docname":appt.docname,
                 "patcell":common.modify_cell(appt.cell),
+                "clinicid" : int(common.getid(appt.clinicid)),
                 "blockappt":common.getboolean(appt.blockappt)
             }
             apptlist.append(apptobj)        
@@ -583,8 +617,8 @@ class Appointment:
     #year = YYYY  e.g. 2018
     #return - list of appointments
     #apptid, doctorid, doctorname, patientname, apptdatetime, color
-    def getappointmentsbyday(self,day,month,year):
-        logger.loggerpms2.info("Enter API getappointmentsbyday "+ str(day) + " " + str(month) + " " + str(year) )
+    def getappointmentsbyday(self,day,month,year,clinicid=0):
+        logger.loggerpms2.info("Enter API getappointmentsbyday "+ str(day) + " " + str(month) + " " + str(year) + " " + str(clinicid) )
     
         db = self.db
         providerid = self.providerid
@@ -592,12 +626,17 @@ class Appointment:
         start = str(year) + "-" + str(month).zfill(2) + "-" + str(day).zfill(2) + " 00:00:00"
         end   = str(year) + "-" + str(month).zfill(2) + "-" + str(day).zfill(2) + " 23:59:59"
         
-        
-        appts = db((db.vw_appointments.provider == providerid) & (db.vw_appointments.f_start_time >= start)  & \
-                   (db.vw_appointments.f_start_time <= end) & (db.vw_appointments.is_active == True)).\
-            select(db.vw_appointments.f_uniqueid,db.vw_appointments.f_start_time,db.vw_appointments.f_patientname,\
-                   db.vw_appointments.doctor,db.vw_appointments.docname,db.vw_appointments.color,db.vw_appointments.cell,db.vw_appointments.blockappt)
-        
+        if(clinicid==0):
+            appts = db((db.vw_appointments.provider == providerid) & (db.vw_appointments.f_start_time >= start) & \
+                       (db.vw_appointments.f_start_time <= end) & (db.vw_appointments.is_active == True)).\
+                select(db.vw_appointments.f_uniqueid,db.vw_appointments.f_start_time,db.vw_appointments.f_patientname,db.vw_appointments.clinicid,\
+                       db.vw_appointments.doctor,db.vw_appointments.docname,db.vw_appointments.color,db.vw_appointments.cell,db.vw_appointments.blockappt)
+        else:
+            appts = db((db.vw_appointments.provider == providerid) & (db.vw_appointments.f_start_time >= start) & (db.vw_appointments.clinicid == clinicid)  & \
+                       (db.vw_appointments.f_start_time <= end) & (db.vw_appointments.is_active == True)).\
+                select(db.vw_appointments.f_uniqueid,db.vw_appointments.f_start_time,db.vw_appointments.f_patientname,db.vw_appointments.clinicid,\
+                       db.vw_appointments.doctor,db.vw_appointments.docname,db.vw_appointments.color,db.vw_appointments.cell,db.vw_appointments.blockappt)
+            
         apptlist = []
         
         for appt in appts:
@@ -609,6 +648,7 @@ class Appointment:
                 "patientname" : appt.f_patientname,
                 "docname":appt.docname,
                 "patcell":common.modify_cell(appt.cell),
+                "clinicid" : int(common.getid(appt.clinicid)),
                 "blockappt":common.getboolean(appt.blockappt)
             }
             apptlist.append(apptobj)        
@@ -616,21 +656,30 @@ class Appointment:
         return json.dumps({"apptcount":len(appts), "apptlist":apptlist})    
 
     #this method returns number of appointments/day for all the days in a month
-    def getappointmentcountbymonth(self,month,year):
+    def getappointmentcountbymonth(self,month,year,clinicid = 0):
 
-        logger.loggerpms2.info("Enter API getappointmentcountbymonth "+  str(month) + " " + str(year)  )
+        logger.loggerpms2.info("Enter API getappointmentcountbymonth "+  str(month) + " " + str(year)  + " " +str(clinicid) )
         db = self.db
         providerid = self.providerid
+        #clinicid = self.clinicid
         
         start = str(year) + "-" + str(month).zfill(2) + "-01 00:00:00"
         end   = str(year) + "-" + str(month).zfill(2) + "-31 23:59:00"  #no need to take 30 or 31 days - just default to 31 days
         
         #All unblocked & uncancelled appointments
-        strsql = "select DATE(f_start_time) as apptdate, count(*) as apptcount from vw_appointments where provider = " + str(providerid)
-        strsql = strsql + " and f_start_time >= '"  + start +  "'"
-        strsql = strsql + " and f_start_time <= '"  + end +  "'"
-        strsql = strsql + " and is_active = 'T' "
-        strsql = strsql + " group by DATE(f_start_time)"
+        if(clinicid == 0):
+            strsql = "select DATE(f_start_time) as apptdate, count(*) as apptcount from vw_appointments where provider = " + str(providerid) 
+            strsql = strsql + " and f_start_time >= '"  + start +  "'"
+            strsql = strsql + " and f_start_time <= '"  + end +  "'"
+            strsql = strsql + " and is_active = 'T' "
+            strsql = strsql + " group by DATE(f_start_time)"
+        else:
+            strsql = "select DATE(f_start_time) as apptdate, count(*) as apptcount from vw_appointments where provider = " + str(providerid) + " and clinicid = " + str(clinicid)
+            strsql = strsql + " and f_start_time >= '"  + start +  "'"
+            strsql = strsql + " and f_start_time <= '"  + end +  "'"
+            strsql = strsql + " and is_active = 'T' "
+            strsql = strsql + " group by DATE(f_start_time)"
+            
         
         ds = db.executesql(strsql)
         apptobj = {}
@@ -649,21 +698,32 @@ class Appointment:
         return json.dumps({"apptlist":apptlist})            
 
     #this method returns number of appointments/day for all the days in a month
-    def getpatappointmentcountbymonth(self,month,year,memberid,patientid):
-        logger.loggerpms2.info("Enter API getpatappointmentcountbymonth " + str(month) + " " + str(year) + " " + str(memberid)  + " " + str(patientid) )
+    def getpatappointmentcountbymonth(self,month,year,memberid,patientid,clinicid=0):
+        logger.loggerpms2.info("Enter API getpatappointmentcountbymonth " + str(month) + " " + str(year) + " " + str(memberid)  + " " + str(patientid) + " " +str(clinicid) )
         db = self.db
         providerid = self.providerid
+       
         
         start = str(year) + "-" + str(month).zfill(2) + "-01 00:00:00"
         end   = str(year) + "-" + str(month).zfill(2) + "-31 23:59:00"  #no need to take 30 or 31 days - just default to 31 days
         
-        strsql = "select DATE(f_start_time) as apptdate, count(*) as apptcount from vw_appointments where provider = " + str(providerid)
-        strsql = strsql + " and patientmember = "  + str(memberid) +  ""
-        strsql = strsql + " and patient = "  + str(patientid) +  ""
-        strsql = strsql + " and f_start_time >= '"  + start +  "'"
-        strsql = strsql + " and f_start_time <= '"  + end +  "'"
-        strsql = strsql + " and is_active = 'T' "
-        strsql = strsql + " group by DATE(f_start_time)"
+        if(clinicid == 0):
+            strsql = "select DATE(f_start_time) as apptdate, count(*) as apptcount from vw_appointments where provider = " + str(providerid)
+            strsql = strsql + " and patientmember = "  + str(memberid) +  ""
+            strsql = strsql + " and patient = "  + str(patientid) +  ""
+            strsql = strsql + " and f_start_time >= '"  + start +  "'"
+            strsql = strsql + " and f_start_time <= '"  + end +  "'"
+            strsql = strsql + " and is_active = 'T' "
+            strsql = strsql + " group by DATE(f_start_time)"
+        else:
+            strsql = "select DATE(f_start_time) as apptdate, count(*) as apptcount from vw_appointments where provider = " + str(providerid) + " and clinicid = " + str(clinicid)
+            strsql = strsql + " and patientmember = "  + str(memberid) +  ""
+            strsql = strsql + " and patient = "  + str(patientid) +  ""
+            strsql = strsql + " and f_start_time >= '"  + start +  "'"
+            strsql = strsql + " and f_start_time <= '"  + end +  "'"
+            strsql = strsql + " and is_active = 'T' "
+            strsql = strsql + " group by DATE(f_start_time)"
+            
         
         ds = db.executesql(strsql)
         apptobj = {}
@@ -682,20 +742,28 @@ class Appointment:
         return json.dumps({"apptlist":apptlist})            
     
     #this method returns number of appointments/doc in a month
-    def getdocappointmentcountbymonth(self,month,year):
-        logger.loggerpms2.info("Enter API getdocappointmentcountbymonth " + str(month) + " " + str(year))   
+    def getdocappointmentcountbymonth(self,month,year,clinicid=0):
+        logger.loggerpms2.info("Enter API getdocappointmentcountbymonth " + str(month) + " " + str(year) + " " + str(clinicid))   
         db = self.db
         providerid = self.providerid
+        #clinicid = self.clinicid
         
         start = str(year) + "-" + str(month).zfill(2) + "-01 00:00:00"
         end   = str(year) + "-" + str(month).zfill(2) + "-31 23:59:00"  #no need to take 30 or 31 days - just default to 31 days
         
-        
-        strsql = "select doctorid, doctorname, doccolor,count(*),doccell as apptcount from vw_appointment_monthly where providerid = " + str(providerid)
-        strsql = strsql + " and f_start_time >= '"  + start +  "'"
-        strsql = strsql + " and f_start_time <= '"  + end +  "'"
-        strsql = strsql + " and is_active = 'T' "
-        strsql = strsql + " group by doctorid"
+        if(clinicid == 0):
+            strsql = "select doctorid, doctorname, doccolor,count(*),doccell as apptcount from vw_appointment_monthly where providerid = " + str(providerid)
+            strsql = strsql + " and f_start_time >= '"  + start +  "'"
+            strsql = strsql + " and f_start_time <= '"  + end +  "'"
+            strsql = strsql + " and is_active = 'T' "
+            strsql = strsql + " group by doctorid"
+        else:
+            strsql = "select doctorid, doctorname, doccolor,count(*),doccell as apptcount from vw_appointment_monthly where providerid = " + str(providerid) + " and clinicid = " + str(clinicid)
+            strsql = strsql + " and f_start_time >= '"  + start +  "'"
+            strsql = strsql + " and f_start_time <= '"  + end +  "'"
+            strsql = strsql + " and is_active = 'T' "
+            strsql = strsql + " group by doctorid"
+            
         
         ds = db.executesql(strsql)
         apptobj = {}
@@ -734,13 +802,14 @@ class Appointment:
             if(len(appt) == 1):
                 apptobj= {
                     "appointmentid":apptid,
+                    "clinicid":int(common.getid(appt[0].clinicid)),
                     "apptdatetime" : (appt[0].f_start_time).strftime("%d/%m/%Y %I:%M %p"),
                     "duration": 30 if(common.getstring(appt[0].f_duration) == "") else int(appt[0].f_duration),
                     "complaint":common.getstring(appt[0].f_title),
                     "notes":common.getstring(appt[0].description),
                     "location":common.getstring(appt[0].f_location),
                     "locationurl":locationurl,
-                    "status":common.getstring(appt[0].f_status) if(common.getstring(appt[0].f_status) != "") else "Open",
+                    "status":common.getstring(appt[0].f_status) if(common.getstring(appt[0].f_status) != "") else "Confirmed",
                     "memberid":int(common.getid(appt[0].patientmember)),
                     "patientid":int(common.getid(appt[0].patient)),
                     "patientname" : common.getstring(appt[0].f_patientname),
@@ -782,75 +851,36 @@ class Appointment:
     # provider notes
     # app status
     #}
-    def xnewappointment(self,memberid,patientid,doctorid,complaint,startdt,duration,providernotes,cell,appPath,appointment_ref = None):
-        logger.loggerpms2.info("Enter newappointment in mdpappointment" + str(memberid) + " " + startdt)
-        db = self.db
-        providerid = self.providerid
-        auth = current.auth
+   
         
-        newapptobj = {}
+     
+    #def newappointment(self,memberid,patientid,doctorid,complaint,startdt,duration,providernotes,cell,appPath,appointment_ref = None):
+    def newappointment(self,avars):        
         
-        
-        try:
-            #location of the Provider's practice
-            location = ""
-            provs = db(db.provider.id == providerid).select()
-            if(len(provs) == 1):
-                location = provs[0].pa_practicename + ", " + provs[0].pa_practiceaddress
+            memberid = int(common.getid(common.getkeyvalue(avars,"memberid","0")))
+            patientid = int(common.getid(common.getkeyvalue(avars,"patientid","0")))
+            doctorid = int(common.getid(common.getkeyvalue(avars,"doctorid","0")))
+            clinicid = int(common.getid(common.getkeyvalue(avars,"clinicid","0")))
             
-            # find out day of the appt.
-            startapptdt    = common.getdt(datetime.datetime.strptime(startdt,"%d/%m/%Y %H:%M"))
-            endapptdt = startapptdt + timedelta(minutes=duration)
+            complaint = common.getkeyvalue(avars,"complaint","")
             
-            
-    
-            
-            pat = db((db.vw_memberpatientlist.primarypatientid == memberid) & (db.vw_memberpatientlist.patientid == patientid)).\
-                select(db.vw_memberpatientlist.fullname)
-            
-            #check for block
-            if((self.isBlocked(startapptdt,endapptdt,doctorid)==False)):
-                logger.loggerpms2.info("Not Blocked")
-                apptid  = db.t_appointment.insert(f_start_time=startapptdt, f_end_time = endapptdt, f_duration = duration, f_status = "Open", 
-                                                  cell = cell,f_title = complaint,f_treatmentid = 0,
-                                                  f_patientname = common.getstring(pat[0].fullname),
-                                                  description = providernotes,f_location = location, sendsms = True, smsaction = 'create',sendrem = True,
-                                                  doctor = doctorid, provider=providerid, patient=patientid,patientmember=memberid, is_active=True,
-                                                  created_on=common.getISTFormatCurrentLocatTime(),modified_on=common.getISTFormatCurrentLocatTime(),
-                                                  created_by = 1,
-                                                  modified_by= 1) 
-                
-                
-                db.commit()
-                logger.loggerpms2.info("New Appointment " + str(apptid))
-                appointment_ref = apptid if(appointment_ref == None) else appointment_ref
-                
-                db(db.t_appointment.id == apptid).update(f_uniqueid = appointment_ref)
-                
-                #save in case report
-                common.logapptnotes(db,complaint,providernotes,apptid)
-                
-                # Send Confirmation SMS
-                #self.sms_confirmation(appPath,apptid,"create")
-                
-                newapptobj= {"result":"success","error_message":"","appointment_ref":appointment_ref,"appointmentid":apptid,"message":"success"}
-             
-            else:
-                logger.loggerpms2.info("Blocked")
-                newapptobj = {"result":"success","error_message":"","appointment_ref":appointment_ref, "appointmentid":0,"message":"Invalid Appointment Date and Time"}
-        except Exception as e:
-            excpobj = {}
-            excpobj["result"] = "fail"
-            excpobj["error_message"] = "New Appointment API Exception Error - " + str(e)
-            return json.dumps(excpobj)       
+            startdt = common.getkeyvalue(avars,"startdt",common.getstringfromdate(common.getISTFormatCurrentLocatTime(),"%d/%m/%Y"))
+            duration = int(common.getid(common.getkeyvalue(avars,"duration","30")))
+
+            providernotes = common.getkeyvalue(avars,"providernotes","")
+            cell = common.getkeyvalue(avars,"cell","")
+            appPath = common.getkeyvalue(avars,"appPath","")
+            appointment_ref = common.getkeyvalue(avars,"appointment_ref","")
             
 
-        
-        return json.dumps(newapptobj)
-    def newappointment(self,memberid,patientid,doctorid,complaint,startdt,duration,providernotes,cell,appPath,appointment_ref = None):
-            logger.loggerpms2.info("Enter newappointment in mdpappointment" + str(memberid) + " " + startdt)
+            
+            logger.loggerpms2.info("Enter newappointment in mdpappointment" + str(memberid) + " " + startdt + " " + str(self.clinicid))
+            
             db = self.db
             providerid = self.providerid
+            
+            clinicid = self.clinicid if(clinicid == 0) else clinicid
+
             auth = current.auth
             
             newapptobj = {}
@@ -874,7 +904,7 @@ class Appointment:
                     select(db.vw_memberpatientlist.fullname,db.vw_memberpatientlist.dob)
                 
                 #check for block
-                if((self.isBlocked(startapptdt,endapptdt,doctorid)==False)):
+                if((self.isBlocked(startapptdt,endapptdt,doctorid,clinicid)==False)):
                     logger.loggerpms2.info("Not Blocked")
                     
                     #strSQL = ""
@@ -919,11 +949,12 @@ class Appointment:
                     #logger.loggerpms2.info("Insert Appointment SQL ",strSQL)
                    
                     
-                    apptid  = db.t_appointment.insert(f_start_time=startapptdt, f_end_time = endapptdt, f_duration = duration, f_status = "Open", 
+                    apptid  = db.t_appointment.insert(f_start_time=startapptdt, f_end_time = endapptdt, f_duration = duration, f_status = "Confirmed", 
                                                       cell = cell,f_title = complaint,f_treatmentid = 0,
                                                       f_patientname = common.getstring(pat[0].fullname),
                                                       description = providernotes,f_location = location, sendsms = True, smsaction = 'create',sendrem = True,
-                                                      doctor = doctorid, provider=providerid, patient=patientid,patientmember=memberid, is_active=True,
+                                                      doctor = doctorid, provider=providerid, clinicid=clinicid,\
+                                                      patient=patientid,patientmember=memberid, is_active=True,
                                                       created_on=common.getISTFormatCurrentLocatTime(),modified_on=common.getISTFormatCurrentLocatTime(),
                                                       created_by = 1,
                                                       modified_by= 1) 
@@ -934,7 +965,9 @@ class Appointment:
                     #apptid = int(common.getid(ds[0].id) if (len(ds) == 1) else "0")
                     
                     logger.loggerpms2.info("New Appointment " + str(apptid))
-                    appointment_ref = apptid if(appointment_ref == None) else appointment_ref
+                    
+                    appointment_ref = common.getkeyvalue(avars,"appointment_ref", str(apptid))
+                    appointment_ref = str(apptid) if(common.getstring(appointment_ref) == "") else appointment_ref
                     
                     db(db.t_appointment.id == apptid).update(f_uniqueid = appointment_ref)
                     
@@ -944,11 +977,12 @@ class Appointment:
                     # Send Confirmation SMS
                     #self.sms_confirmation(appPath,apptid,"create")
                     
-                    newapptobj= {"result":"success","error_message":"","appointment_ref":appointment_ref,"appointmentid":apptid,"message":"success"}
+                    newapptobj= {"result":"success","error_message":"","appointment_ref":appointment_ref,"appointmentid":apptid,"clinicid":clinicid,"message":"success"}
                  
                 else:
                     logger.loggerpms2.info("Blocked")
-                    newapptobj = {"result":"success","error_message":"","appointment_ref":appointment_ref, "appointmentid":0,"message":"Invalid Appointment Date and Time"}
+                    newapptobj = {"result":"success","error_message":"","appointment_ref":appointment_ref,"clinicid":clinicid, "appointmentid":0,"message":"Invalid Appointment Date and Time"}
+                    
             except Exception as e:
                 excpobj = {}
                 excpobj["result"] = "fail"
@@ -1024,7 +1058,29 @@ class Appointment:
         return json.dumps(retval)
     
     
-    def updateappointment(self,appointmentid,doctorid,complaint,startdt,duration,providernotes,cell,status,treatmentid,appPath):
+    #def updateappointment(self,appointmentid,doctorid,complaint,startdt,duration,providernotes,cell,status,treatmentid,appPath):
+    def updateappointment(self,avars):
+        
+        treatmentid = int(common.getid(common.getkeyvalue(avars,"treatmentid","0")))
+        appointmentid = int(common.getid(common.getkeyvalue(avars,"appointmentid","0")))
+        doctorid = int(common.getid(common.getkeyvalue(avars,"doctorid","0")))
+        clinicid = int(common.getid(common.getkeyvalue(avars,"clinicid","0")))
+        
+        complaint = common.getkeyvalue(avars,"complaint","")
+        
+        startdt = common.getkeyvalue(avars,"startdt",common.getstringfromdate(common.getISTFormatCurrentLocatTime(),"%d/%m/%Y"))
+        duration = int(common.getid(common.getkeyvalue(avars,"duration","30")))
+
+        providernotes = common.getkeyvalue(avars,"providernotes","")
+        cell = common.getkeyvalue(avars,"cell","")
+        status = common.getkeyvalue(avars,"status","Confirmed")
+        
+        appPath = common.getkeyvalue(avars,"appPath","")
+        
+        
+        
+        
+        
         logger.loggerpms2.info("Enter API updateappointment " + str(appointmentid))
         db = self.db
         providerid = self.providerid
@@ -1059,6 +1115,8 @@ class Appointment:
                     description = providernotes if(providernotes != "") else currnotes,
                     doctor = doctorid if(doctorid != 0) else appt[0].doctor,
                     cell = cell if(common.getstring(cell) != "") else appt[0].cell,
+                    clinicid = clinicid if(clinicid != 0) else int(common.getid(appt[0].clinicid)),
+                    
                     modified_on = common.getISTFormatCurrentLocatTime(),
                     modified_by= 1 if(auth.user == None) else auth.user.id
                     )
@@ -1168,7 +1226,7 @@ class Appointment:
                             select(db.vw_memberpatientlist.fullname,db.vw_memberpatientlist.dob,db.vw_memberpatientlist.email,db.vw_memberpatientlist.cell)        
             #check for block
             if((self.isBlocked(startapptdt,endapptdt,doctorid,clinicid)==False)):
-                sts = "Blocked" if(blockappt == True) else "Open"
+                sts = "Blocked" if(blockappt == True) else "Confirmed"
                 apptid  = db.t_appointment.insert(f_start_time=startapptdt, f_end_time = endapptdt, f_duration = duration, f_status = sts, \
                                                   cell = cell,f_title = complaint,f_treatmentid = 0,blockappt = blockappt,\
                                                   f_patientname = common.getstring("" if (len(pat) == 0) else pat[0].fullname),
@@ -1226,7 +1284,7 @@ class Appointment:
                 def_start_time_str = common.getstringfromdate(ds[0].f_start_time,"%d/%m/%Y %H:%M")
                 def_end_time_str  = common.getstringfromdate(ds[0].f_end_time,"%d/%m/%Y %H:%M")
                 notes = common.getkeyvalue(avars,"notes",ds[0].description)
-                cc = common.getkeyvalue(avars,"f_title",ds[0].f_title)
+                cc = common.getkeyvalue(avars,"complaint",ds[0].f_title)
                 
                 memberid = int(common.getkeyvalue(avars,"memberid","0" if(ds[0].patientmember == None) else str(ds[0].patientmember)))
                 patientid = int(common.getkeyvalue(avars,"patientid","0" if(ds[0].patient == None) else str(ds[0].patient)))              
@@ -1341,13 +1399,13 @@ class Appointment:
             patientid = int(common.getid(appt[0].patient)) if(len(appt) == 1) else 0
 
             pat = db((db.vw_memberpatientlist.primarypatientid == memberid) & (db.vw_memberpatientlist.patientid == patientid)).\
-                select(db.vw_memberpatientlist.fullname,db.vw_memberpatientlist.dob,db.vw_memberpatientlist.email,db.vw_memberpatientlist.cell)     
+                select(db.vw_memberpatientlist.fullname,db.vw_memberpatientlist.patientmember,db.vw_memberpatientlist.dob,db.vw_memberpatientlist.email,db.vw_memberpatientlist.cell)     
             
             
             dobstr = "" if(len(pat) == 0) else common.getstringfromdate(pat[0].dob,"%d/%m/%Y")
             email = "" if(len(pat) == 0) else common.getstring(pat[0].email)
             cell = "" if(len(pat) == 0) else common.getstring(pat[0].cell)
-
+            patientmember = "" if(len(pat) == 0) else common.getstring(pat[0].patientmember)
             
             prov = db(db.provider.id == providerid).select(db.provider.pa_locationurl)
             locationurl = prov[0].pa_locationurl if len(prov) == 1 else ""
@@ -1366,7 +1424,7 @@ class Appointment:
                 x=common.getstring(appt[0].description)
                 x=common.getstring(appt[0].f_location)
                 x=locationurl
-                x=common.getstring(appt[0].f_status) if(common.getstring(appt[0].f_status) != "") else "Open"
+                x=common.getstring(appt[0].f_status) if(common.getstring(appt[0].f_status) != "") else "Confirmed"
                 x=common.getid(appt[0].patientmember)
                 x=common.getid(appt[0].patient)
                 x=common.getstring(appt[0].f_patientname)
@@ -1392,10 +1450,11 @@ class Appointment:
                     "notes":common.getstring(appt[0].description),
                     "location":common.getstring(appt[0].f_location),
                     "locationurl":locationurl,
-                    "status":common.getstring(appt[0].f_status) if(common.getstring(appt[0].f_status) != "") else "Open",
+                    "status":common.getstring(appt[0].f_status) if(common.getstring(appt[0].f_status) != "") else "Confirmed",
                     "memberid":common.getid(appt[0].patientmember),
                     "patientid":common.getid(appt[0].patient),
                     "patientname" : common.getstring(appt[0].f_patientname),
+                    "patientmember" : patientmember,
                     "patcell":common.modify_cell(appt[0].cell),
                     "clinicid":common.getid(appt[0].clinicid),
                     "doctorid":common.getid(appt[0].doctor),
@@ -1493,7 +1552,7 @@ class Appointment:
                         #"notes":common.getstring(appt[0].description),
                         #"location":common.getstring(appt[0].f_location),
                         #"locationurl":locationurl,
-                        "status":common.getstring(appt[0].f_status) if(common.getstring(appt[0].f_status) != "") else "Open",
+                        "status":common.getstring(appt[0].f_status) if(common.getstring(appt[0].f_status) != "") else "Confirmed",
                         #"memberid":common.getid(appt[0].patientmember),
                         #"patientid":common.getid(appt[0].patient),
                         "patientname" : common.getstring(appt[0].f_patientname),
@@ -1541,6 +1600,7 @@ class Appointment:
             memberid = int(common.getkeyvalue(avars,"memberid","0"))
             patientid = int(common.getkeyvalue(avars,"patientid","0"))
             blockappt = common.getboolean(common.getkeyvalue(avars,"block","False"))
+            status = common.getkeyvalue(avars,"status","")
             
             page = common.getkeyvalue(avars,"page","0")
             page = 0 if((page==None)|(page == "")) else int(common.getid(page))
@@ -1556,8 +1616,15 @@ class Appointment:
             items_per_page = 10 if(len(urlprops) <= 0) else int(common.getvalue(urlprops[0].pagination))
             limitby = None if page < 0 else ((page)*items_per_page,(page+1)*items_per_page)             
             
+            query = (1==1)
             if(blockappt == False):
-                query = ((db.t_appointment.blockappt == blockappt) & (db.t_appointment.f_status != "Blocked") & (db.t_appointment.is_active == True))
+                if(status == ""):
+                    query = query & (db.t_appointment.blockappt == blockappt)& (db.t_appointment.is_active == True)
+                else:
+                    query = query & (db.t_appointment.blockappt == blockappt) &  (db.t_appointment.f_status == status)& (db.t_appointment.is_active == True)
+                
+                
+                #query = ((db.t_appointment.blockappt == blockappt) & (db.t_appointment.f_status != "Blocked") & (db.t_appointment.is_active == True))
             else:
                 query = (((db.t_appointment.blockappt == blockappt) | (db.t_appointment.f_status == "Blocked")) & (db.t_appointment.is_active == True))
                 
@@ -1577,7 +1644,8 @@ class Appointment:
             if(patientid != 0):
                 query = query & (db.t_appointment.patient == patientid)
             
-            
+                
+                
             currdate = common.getISTFormatCurrentLocatTime()
           
 
@@ -1641,6 +1709,7 @@ class Appointment:
             memberid = int(common.getkeyvalue(avars,"memberid","0"))
             patientid = int(common.getkeyvalue(avars,"patientid","0"))
             blockappt = common.getboolean(common.getkeyvalue(avars,"block","False"))
+            status = common.getkeyvalue(avars,"status","")
             
             urlprops = db(db.urlproperties.id >0 ).select(db.urlproperties.pagination)
         
@@ -1649,8 +1718,17 @@ class Appointment:
             items_per_page = 10 if(len(urlprops) <= 0) else int(common.getvalue(urlprops[0].pagination))
             limitby = None if page < 0 else ((page)*items_per_page,(page+1)*items_per_page)      
             
-            
-            query = ((db.t_appointment.blockappt == blockappt)&(db.t_appointment.is_active == True))
+            query = (1==1)
+            if(blockappt == False):
+                if(status == ""):
+                    query = query & (db.t_appointment.blockappt == blockappt)& (db.t_appointment.is_active == True)
+                else:
+                    query = query & (db.t_appointment.blockappt == blockappt) &  (db.t_appointment.f_status == status)& (db.t_appointment.is_active == True)
+                
+                
+                #query = ((db.t_appointment.blockappt == blockappt) & (db.t_appointment.f_status != "Blocked") & (db.t_appointment.is_active == True))
+            else:
+                query = (((db.t_appointment.blockappt == blockappt) | (db.t_appointment.f_status == "Blocked")) & (db.t_appointment.is_active == True))
             
             if(providerid != 0):
                 query = query & (db.t_appointment.provider == providerid)
@@ -1666,6 +1744,10 @@ class Appointment:
                     
             if(patientid != 0):
                 query = query & (db.t_appointment.patient == patientid)
+
+
+           
+                
 
             currdate = common.getISTFormatCurrentLocatTime()
 

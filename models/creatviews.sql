@@ -8663,3 +8663,97 @@ XXXZZZZupdate role in doctor to refer to role_default
 1. YYYZZZNew tables for Cities & States
 2. YYYZZZAdded field 'newcity' in prospects table
 3. YYYYZZZAdded hmopatientmember in vw_appointments
+4, ZZZZadding clinicid to vw_appointment* views
+5. New Table Shopsee Properties to add SHOPSEE specific 
+CREATE TABLE `shopsee_properties` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `shopsee_stg_url` varchar(512) DEFAULT NULL,
+  `shopsee_prod_url` varchar(512) DEFAULT NULL,
+  `shopsee_api_token` varchar(512) DEFAULT NULL,
+  `shopsee_response_key` varchar(512) DEFAULT NULL,
+  `shopsee_axis_db_card` varchar(45) DEFAULT NULL,
+  `shopsee_axis_cr_card` varchar(45) DEFAULT NULL,
+  `shopsee_hdfc_db_card` varchar(45) DEFAULT NULL,
+  `shopsee_axis_db_card_exp` varchar(45) DEFAULT NULL,
+  `shopsee_axis_db_card_cvv` varchar(45) DEFAULT NULL,
+  `shopsee_axis_db_card_otp` varchar(45) DEFAULT NULL,
+  `shopsee_axis_cr_card_exp` varchar(45) DEFAULT NULL,
+  `shopsee_axis_cr_card_cvv` varchar(45) DEFAULT NULL,
+  `shopsee_axis_cr_card_otp` varchar(45) DEFAULT NULL,
+  `shopsee_hdfc_db_card_exp` varchar(45) DEFAULT NULL,
+  `shopsee_hdfc_db_card_cvv` varchar(45) DEFAULT NULL,
+  `shopsee_hdfc_db_card_otp` varchar(45) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+ALTER TABLE `mydp_prod`.`shopsee_properties` 
+ADD COLUMN `shopsee_url` VARCHAR(512) NULL DEFAULT NULL AFTER `id`,
+ADD COLUMN `shopsee_returnURL` VARCHAR(512) NULL DEFAULT NULL AFTER `shopsee_url`;
+
+Script file to clear user for sign-up
+=====================================
+
+9035314080 9741628429 7014405827
+
+SELECT * FROM mydp_prod.auth_user where cell = '7014405827'
+SELECT * FROM mydp_prod.agent where cell = '7014405827'
+SELECT * FROM mydp_prod.provider where cell = '7014405827'
+SELECT * FROM mydp_prod.prospect where  cell = '7014405827'
+SELECT * FROM mydp_prod.clinic where cell = '7014405827'
+SELECT * FROM mydp_prod.patientmember where cell = '7014405827'
+SELECT * FROM mydp_prod.webmember where cell = '7014405827'
+select * from doctor where cell = '7014405827'
+9916314080
+SELECT * FROM mydp_prod.auth_user where cell = '7062559946'
+SELECT * FROM mydp_prod.agent where cell = '7062559946'
+SELECT * FROM mydp_prod.provider where cell = '7062559946'
+SELECT * FROM mydp_prod.prospect where  cell = '7062559946'
+SELECT * FROM mydp_prod.clinic where cell = '7062559946'
+SELECT * FROM mydp_prod.patientmember where cell = '7062559946'
+SELECT * FROM mydp_prod.webmember where cell = '7062559946'
+select * from doctor where cell = '7062559946'
+
+SELECT * FROM mydp_prod.auth_user where cell = '9035314080'
+SELECT * FROM mydp_prod.agent where cell = '9035314080'
+SELECT * FROM mydp_prod.provider where cell = '9035314080'
+SELECT * FROM mydp_prod.prospect where  cell = '9035314080'
+SELECT * FROM mydp_prod.clinic where cell = '9035314080'
+SELECT * FROM mydp_prod.patientmember where cell = '9035314080'
+SELECT * FROM mydp_prod.webmember where cell = '9035314080'
+select * from doctor where cell = '9035314080'
+
+select * from prospect order by id desc
+select * from clinic order by id desc
+select * from clinic_ref order by id desc
+select * from provider order by id desc
+select * from doctor order by id desc
+select * from doctor_ref order by id desc
+
+select * from patientmember order by id desc
+
+SELECT * FROM mydp_prod.auth_user where cell = '9741628429'
+SELECT * FROM mydp_prod.agent where cell = '9741628429'
+SELECT * FROM mydp_prod.provider where cell = '9741628429'
+SELECT * FROM mydp_prod.prospect where  cell = '9741628429'
+SELECT * FROM mydp_prod.clinic where cell = '9741628429'
+SELECT * FROM mydp_prod.patientmember where cell = '9741628429'
+SELECT * FROM mydp_prod.webmember where cell = '9741628429'
+select * from doctor where cell = '9741628429'
+SELECT * FROM mydp_prod.webmember where webmember = 'P00019249'
+
+
+9035314080 9741628429 7014405827
+update auth_user set cell = concat(id,cell) , email = concat(id,email) where cell = '7239962886 ';
+update provider set cell = concat(id,cell) , email = concat(id,email) where cell = '7239962886 ';
+update prospect set cell = concat(id,cell) , email = concat(id,email) where cell = '7239962886 ';
+update patientmember set cell = concat(id,cell) , email = concat(id,email) where cell = '7239962886 ';
+update webmember set cell = concat(id,cell) , email = concat(id,email) where cell = '7239962886 ';
+update clinic set cell = concat(id,cell) , email = concat(id,email) where cell = '7239962886 ';
+update doctor set cell = concat(id,cell) , email = concat(id,email) where cell = '7239962886 ';
+manjunathshidling1@gmail.com
+SELECT * FROM mydp_prod.auth_user where cell = '9035314080'
+SELECT * FROM mydp_prod.agent where cell = '9035314080'
+SELECT * FROM mydp_prod.provider where cell = '9035314080'
+SELECT * FROM mydp_prod.prospect where  cell = '9035314080'
+SELECT * FROM mydp_prod.clinic where cell = '9035314080'
+SELECT * FROM mydp_prod.patientmember where cell = '9035314080'
+SELECT * FROM mydp_prod.webmember where cell = '9035314080'

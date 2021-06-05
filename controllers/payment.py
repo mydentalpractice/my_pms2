@@ -31,6 +31,7 @@ from decimal  import Decimal
 #sys.path.append('modules')
 from applications.my_pms2.modules import common
 from applications.my_pms2.modules import account
+from applications.my_pms2.modules import mdpshopsee
 from applications.my_pms2.modules import logger
 
 #from gluon.contrib import common
@@ -1354,6 +1355,70 @@ def generateHashForMessage(keyfile, message):
 
     return signhex
 
+
+
+def make_payment_shopse():
+    
+    logger.loggerpms2.info("Enter Shopse Payment")
+    
+    providerid = int(common.getstring(request.vars.providerid))
+    
+    #payment, member info
+    paymentid = int(common.getid(request.vars.paymentid))
+    paymentmode = common.getstring(request.vars.paymentmod)
+    paymentamount = float(common.getvalue(request.vars.invoiceamt))
+    paymentamount = str(paymentamount if(paymentamount != 0) else 2000.0)
+    
+    vwfp = db(db.vw_fonepaise.paymentid == paymentid).select()
+    
+    treatmentid = int(common.getid(vwfp[0].treatmentid))
+    reference_no = (common.getstring(vwfp[0].invoice))[:(20-len(str(paymentid)))] +"_" + str(paymentid) if(len(vwfp) == 1) else "0000_REFNO"
+    reference_no=reference_no if(reference_no != "") else "0000_REFNO"
+    
+    memberid = int(common.getid(vwfp[0].memberid)) if(len(vwfp) == 1) else 0
+    pats = db(db.patientmember.id == memberid).select()
+
+    u = db(db.shopsee_properties.id > 0).select(db.shopsee_properties.shopsee_returnURL)
+    #call Shopsee API
+    reqobj={
+        "action":"create_transaction",
+        "orderId":str(reference_no),       #<treatment>_<paymentid>
+        "amount":paymentamount,
+        "mobile":str(pats[0].cell),
+        "email":str(pats[0].email),
+        "returnUrl":str(u[0].shopsee_returnURL),
+        "productName":str(reference_no),
+        "productId":str(treatmentid),
+        "firstName":str(pats[0].fname) if(len(pats)==1) else "",
+        "lastName":str(pats[0].lname) if(len(pats)==1) else "",
+        "address": {
+        "line1": pats[0].address1 if(len(pats)==1) else "331-332 Ganpat Plaza",
+        "line2": pats[0].address2 if(len(pats)==1) else "MI Road",
+        "city": pats[0].city if(len(pats)==1) else "Jaipur",
+        "state": pats[0].st if(len(pats)==1) else "Rajasthan",
+        "country":"India",
+        "pincode":pats[0].pin if(len(pats)==1) else "302001",
+        },
+        
+        "customParams": {
+        "providerid":str(providerid),
+        "paymentid":str(paymentid),
+        "treatmentid":str(treatmentid),
+        }    
+    }
+
+    #call create transaction API
+    obj = mdpshopsee.Shopsee(db)
+    rspobj = json.loads(obj.create_transaction(reqobj))
+    
+    if(rspobj["result"] == "success"):
+        redirect(rspobj["paymentRedirectUrl"])
+    
+    
+    
+    return dict(rspobj = json.dumps(rspobj))
+
+
 #this method is called when Online Payment : create_payment->update_payment->make_payment_hdfc->HDFC site->payment_success (callback).
 #redirect(URL('payment','make_payment',vars=dict(paymentid=paymentid,paymentmode=paymentmode,invoiceamt=paymentamount,returnurl=returnurl)))
 
@@ -2122,9 +2187,11 @@ def update_payment():
     if(common.getstring(request.vars.mode) != "update"):
         if((source == "create") & ((paymentmode == 'Cash') | (paymentmode == 'Cashless') | (paymentmode == 'Cheque'))):
             redirect(URL('payment','cashpayment_success', vars=dict(paymentmode=paymentmode,paymentid=paymentid,providerid=providerid,returnurl=returnurl)))
+        elif ((source=="create") & (paymentmode == "Shopse")):
+            redirect(URL('payment','make_payment_shopse',vars=dict(providerid=providerid,paymentid=paymentid,paymentmode=paymentmode,invoiceamt=paymentamount,returnurl=returnurl)))
         else:
             redirect(URL('payment','make_payment_hdfc',vars=dict(paymentid=paymentid,paymentmode=paymentmode,invoiceamt=paymentamount,returnurl=returnurl)))
-         
+            
     
    
     treatment=""

@@ -1429,8 +1429,33 @@ db.define_table('rlgproperties',
                 Field('api_key', 'string',default=''),
                 Field('url', 'string',default=''),
 )
-db.rlgproperties._singular = "PaymentTxLog"
-db.rlgproperties._plural = "PaymentTxLog"
+db.rlgproperties._singular = "rlgproperties"
+db.rlgproperties._plural = "rlgproperties"
+
+
+db.define_table('shopsee_properties',
+                Field('shopsee_url', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'), default=''),
+                Field('shopsee_returnURL', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'), default=''),
+                Field('shopsee_stg_url', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'), default=''),
+                Field('shopsee_prod_url', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'), default=''),
+                Field('shopsee_api_token', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'), default=''),
+                Field('shopsee_response_key', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'), default=''),
+                Field('shopsee_axis_db_card', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'), default=''),
+                Field('shopsee_axis_cr_card', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'), default=''),
+                Field('shopsee_hdfc_db_card', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'), default=''),
+                Field('shopsee_axis_db_card_exp', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'), default=''),
+                Field('shopsee_axis_db_card_cvv', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'), default=''),
+                Field('shopsee_axis_db_card_otp', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'), default=''),
+                Field('shopsee_axis_cr_card_exp', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'), default=''),
+                Field('shopsee_axis_cr_card_cvv', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'), default=''),
+                Field('shopsee_axis_cr_card_otp', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'), default=''),
+                Field('shopsee_hdfc_db_card_exp', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'), default=''),
+                Field('shopsee_hdfc_db_card_cvv', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'), default=''),
+                Field('shopsee_hdfc_db_card_otp', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'), default=''),
+)
+db.shopsee_properties._singular = "shopsee_properties"
+db.shopsee_properties._plural = "shopsee_properties"
+
 
 db.define_table('urlproperties',
                 Field('callbackurl', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'), default=''),
@@ -1995,6 +2020,7 @@ db.define_table('vw_appointmentreminders',
                 Field('hmopatientmember','boolean'),  
                 Field('activeappt','boolean'),  
                 Field('provider','integer',represent=lambda v, r: 0 if v is None else v),
+                Field('clinicid','integer',represent=lambda v, r: 0 if v is None else v),
                 Field('patient','integer',represent=lambda v, r: 0 if v is None else v),
                 Field('lastreminder','date',represent=lambda v, r: '' if v is None else v),
                 migrate = False
@@ -2184,7 +2210,7 @@ db.define_table('payment',
                 Field('paymentdate', 'date',widget = lambda field, value:SQLFORM.widgets.date.widget(field, value, _style='height:30px', _class='w3-input w3-border w3-small date '), default=request.now, label='Payment Date',length=50,requires=IS_DATE(format=T('%d/%m/%Y'),error_message='must be d/m/Y!')),
                 Field('amount', 'double',represent=lambda v, r: 0.00 if v is None else v,widget = lambda field, value:SQLFORM.widgets.double.widget(field, value, _class='w3-input w3-border w3-small'), default=0, label='Payment Amount',length=50),
                 Field('paymenttype', 'string',represent=lambda v, r: '' if v is None else v, widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _style="width:100%;height:35px",_class='w3-input w3-border w3-small'), default='Treatment',label='Payment Type',length=10),
-                Field('paymentmode', 'string',represent=lambda v, r: '' if v is None else v, widget = lambda field, value:SQLFORM.widgets.options.widget(field, value, _style="width:100%;height:35px",_class='w3-input w3-border w3-small'), default='Cash',label='Payment Mode',requires=IS_IN_SET(('Cash','Credit','Cheque','Cashless')),length=10),
+                Field('paymentmode', 'string',represent=lambda v, r: '' if v is None else v, widget = lambda field, value:SQLFORM.widgets.options.widget(field, value, _style="width:100%;height:35px",_class='w3-input w3-border w3-small'), default='Cash',label='Payment Mode',requires=IS_IN_SET(('Cash','Credit','Cheque','Cashless','Shopse')),length=10),
                 Field('payor', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='w3-input w3-border w3-small'), default='',label='Paid By'),
                 Field('notes', 'text', default='',label='Notesl'),
                 Field('patientmember',  widget = lambda field, value:SQLFORM.widgets.options.widget(field, value,_style="width:100%;height:35px",_class='w3-input w3-border w3-small'), requires=IS_IN_DB(db, 'patientmember.id', '%(fname)s (%(patientmember)s)')),
@@ -2770,6 +2796,7 @@ db.define_table('vw_appointment_count_sub',
                 Field('doctor', 'integer'),
                 Field('appointments', 'integer'),
                 Field('provider', 'integer'),
+                Field('clinicid', 'integer'),
                 Field('starttime', 'datetime')
                 )
 db.vw_appointment_count_sub._singular = "vw_appointment_count_sub"
@@ -2781,6 +2808,7 @@ db.define_table('vw_appointment_count',
                 Field('color', 'string'),
                 Field('providerid', 'integer'),
                 Field('appointments', 'integer'),
+                Field('clinicid', 'integer'),
                 Field('color', 'string'),
                 Field('starttime', 'datetiem'),
                 Field('is_active', 'boolean')
@@ -3193,6 +3221,7 @@ db.define_table('vw_appointment_today',
                 Field('f_status', 'string'),
                 Field('description', 'string'),
                 Field('providerid', 'integer'),
+                Field('clinicid', 'integer'),
                 Field('doctorname','string'),
                 Field('doctorid','integer'),
                 Field('treatmentid','integer'),
@@ -3226,6 +3255,7 @@ db.define_table('vw_appointment_monthly',
                 Field('treatment','string'),
                 Field('patientid', 'integer'),
                 Field('memberid','integer'),
+                Field('clinicid', 'integer'),
                 
                 Field('patientcell','string'),
                 Field('newpatient','boolean'),
@@ -3254,6 +3284,7 @@ db.define_table('vw_appointment_weekly',
                 Field('treatment','string'),
                 Field('patientid', 'integer'),
                 Field('memberid','integer'),
+                Field('clinicid', 'integer'),
                 
                 Field('patientcell','string'),
                 Field('newpatient','boolean'),

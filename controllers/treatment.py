@@ -435,6 +435,7 @@ def gettplans(db,providerid, memberid, tplan,member,fromdt,todt,status,limitby):
 #this function will return a grid fulfilling the query
 def gettreatmentgrid(page, imagepage, providerid, providername, treatment, memberid=0,patientid=0):
     
+    clinicid = 0
     
     pattern = "%" + treatment + "%"
     
@@ -469,6 +470,8 @@ def gettreatmentgrid(page, imagepage, providerid, providername, treatment, membe
     query = query & (db.vw_treatmentlist.patientid == patientid) if(memberid > 0) else (1==1)
 
     query = query & (db.vw_treatmentlist.providerid == providerid) if(providerid > 0) else (1==1)
+
+    query = query & (db.vw_treatmentlist.clinicid == clinicid) if(clinicid > 0) else (1==1)
     
     query = query & (db.vw_treatmentlist.is_active == True)
     
@@ -480,10 +483,11 @@ def gettreatmentgrid(page, imagepage, providerid, providername, treatment, membe
     logger.loggerpms2.info("Grid QUey ==>>" + pattern + "\n" + str(query))
     
     fields=(db.vw_treatmentlist.patientname,db.vw_treatmentlist.treatment,db.vw_treatmentlist.chiefcomplaint,db.vw_treatmentlist.startdate,db.vw_treatmentlist.dentalprocedure, db.vw_treatmentlist.shortdescription, db.vw_treatmentlist.memberid,
-            db.vw_treatmentlist.treatmentplan,db.vw_treatmentlist.status,db.vw_treatmentlist.treatmentcost,db.vw_treatmentlist.memberid,db.vw_treatmentlist.patientid,db.vw_treatmentlist.tplanid)
+            db.vw_treatmentlist.treatmentplan,db.vw_treatmentlist.status,db.vw_treatmentlist.treatmentcost,db.vw_treatmentlist.memberid,db.vw_treatmentlist.patientid,db.vw_treatmentlist.tplanid,db.vw_treatmentlist.clinicname)
 
     headers={
         'vw_treatmentlist.treatment':'Treatment No.',
+        'vw_treatmentlist.clinicname':'Clinic',
         'vw_treatmentlist.chiefcomplaint':'Complaint',
         'vw_treatmentlist.patientname':'Patient',
         'vw_treatmentlist.startdate':'Treatment Date',
@@ -858,6 +862,7 @@ def list_treatments():
     provdict = common.getprovider(auth, db)
     providerid = int(common.getid(provdict["providerid"]))
     providername = common.getstring(provdict["providername"])
+    clinicid = 0 #session.clinicid
     
     page     = common.getgridpage(request.vars)
     page     = 1 if(page == 0) else page
@@ -918,9 +923,16 @@ def list_treatments():
             xphrase = common.getstring(strarr[0]) if(len(strarr) >=1) else xphrase
             
             
-            r = db((db.vw_treatmentlist.pattreatment.like("%" + xphrase.strip() + "%")) & \
-                                     (db.vw_treatmentlist.providerid == providerid) & \
-                                     (db.vw_treatmentlist.is_active == True)).select()            
+            if(clinicid == 0):
+                r = db((db.vw_treatmentlist.pattreatment.like("%" + xphrase.strip() + "%")) & \
+                                         (db.vw_treatmentlist.providerid == providerid) & \
+                                         (db.vw_treatmentlist.is_active == True)).select()     
+            else:
+                r = db((db.vw_treatmentlist.pattreatment.like("%" + xphrase.strip() + "%")) & \
+                                                     (db.vw_treatmentlist.providerid == providerid) & \
+                                                     (db.vw_treatmentlist.clinicid == clinicid) & \
+                                                     (db.vw_treatmentlist.is_active == True)).select()            
+                                            
             
             if(len(r)>=1):
                 treatment = "" if(len(r) > 1) else common.getstring(r[0].treatment)    
@@ -3570,6 +3582,7 @@ def new_treatment():
     provdict = common.getprovider(auth, db)
     providername  = provdict["providername"]
     providerid = provdict["providerid"]
+    clinicid = session.clinicid
     
     #default attending doctor to owner doctor
     doctorid = int(common.getid(request.vars.doctorid))
@@ -3626,6 +3639,7 @@ def new_treatment():
             pattitle = title,
             patienttype = patienttype,
             patientname = fullname,
+            
             status = 'Started',
             totaltreatmentcost = 0,
             totalcopay = 0,
@@ -3655,6 +3669,7 @@ def new_treatment():
             status ='Started',
             treatmentplan = tplanid,
             provider = providerid,
+            clinicid = clinicid,
             dentalprocedure = 0,
             doctor = doctorid,
             quadrant = 0,

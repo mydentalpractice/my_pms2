@@ -586,8 +586,8 @@ def login():
     
     if form.process().accepted:
         logger.loggerpms2.info("MyDentalPlan Login ==>>" + common.getstring(form.vars.username) + " " + common.getstring(form.vars.password.password))
-        
-           
+        session.clinicid = 0
+        session.clinicname = ""
 
         user = auth.login_bare(form.vars.username, form.vars.password.password)
         
@@ -629,8 +629,9 @@ def login():
                                                         created_on=common.getISTFormatCurrentLocatTime(), created_by=1,modified_on=common.getISTFormatCurrentLocatTime(),modified_by=1
                                                         )                   
                 
-                redirect(URL('admin','providerhome'))
-                #redirect(URL('admin','select_clinic'))
+                #redirect(URL('admin','providerhome'))
+                redirect(URL('admin','select_clinic'))
+                
     elif form.errors:
         logmssg = "Login Error " + str(form.errors)
         db.loghistory.insert(username = "", logerror = logmssg, logstatus = False,\
@@ -1494,12 +1495,16 @@ def secondsFormat(datestr):
 @auth.requires_login()    
 def providerhome():
   
+    clinicid = session.clinicid
+    clinicname = session.clinicname
+    
     provdict = common.getprovider(auth,db)
     providerid = int(provdict["providerid"])
     if(providerid  < 0):
         raise HTTP(400,"PMS-Error: There is no valid logged-in Provider: providerhome()")    
    
     prov = db(db.provider.id == providerid).select(db.provider.pa_practicename,db.provider.pa_practiceaddress)
+    
     
    
     
@@ -1535,15 +1540,27 @@ def providerhome():
     end   = "2100-01-01 00:00"  
  
     #get all appointments for this provider and default month
-    rows=db((db.t_appointment.provider==providerid) & (db.t_appointment.f_start_time>=defstart) &(db.t_appointment.f_start_time<=defend) &(db.t_appointment.is_active==True) ).\
-            select(db.t_appointment.id,db.t_appointment.f_title,db.t_appointment.f_start_time,db.t_appointment.f_end_time,db.t_appointment.f_patientname,db.t_appointment.blockappt,db.t_appointment.is_active, \
-                   db.doctor.color, left=db.doctor.on(db.doctor.id == db.t_appointment.doctor))  
+    if(clinicid == 0):
+        rows=db((db.t_appointment.provider==providerid) & (db.t_appointment.f_start_time>=defstart) &(db.t_appointment.f_start_time<=defend) &(db.t_appointment.is_active==True) ).\
+                select(db.t_appointment.id,db.t_appointment.f_title,db.t_appointment.f_start_time,db.t_appointment.f_end_time,db.t_appointment.f_patientname,db.t_appointment.blockappt,db.t_appointment.is_active, \
+                       db.doctor.color, left=db.doctor.on(db.doctor.id == db.t_appointment.doctor))  
+        dailyappts  = db((db.vw_appointment_today.providerid == providerid) & (db.vw_appointment_today.is_active == True)).select(orderby=db.vw_appointment_today.f_start_time)
+        weeklyappts = db((db.vw_appointment_weekly.providerid == providerid) & (db.vw_appointment_weekly.is_active == True)).select(orderby=db.vw_appointment_weekly.f_start_time)
+        monthlyappts = db((db.vw_appointment_monthly.providerid == providerid) & (db.vw_appointment_monthly.is_active == True)).select(orderby=db.vw_appointment_monthly.f_start_time)
+
+
+    else:
+        rows=db((db.t_appointment.provider==providerid)& ((db.t_appointment.clinicid==clinicid)&(db.t_appointment.clinicid!=None)) &\
+                (db.t_appointment.f_start_time>=defstart) &(db.t_appointment.f_start_time<=defend) &(db.t_appointment.is_active==True) ).\
+                select(db.t_appointment.id,db.t_appointment.f_title,db.t_appointment.f_start_time,db.t_appointment.f_end_time,db.t_appointment.f_patientname,db.t_appointment.blockappt,db.t_appointment.is_active, \
+                       db.doctor.color, left=db.doctor.on(db.doctor.id == db.t_appointment.doctor))  
+        
+        dailyappts  = db((db.vw_appointment_today.providerid == providerid) & (db.vw_appointment_today.clinicid == clinicid) &  (db.vw_appointment_today.is_active == True)).select(orderby=db.vw_appointment_today.f_start_time)
+        weeklyappts = db((db.vw_appointment_weekly.providerid == providerid) & (db.vw_appointment_weekly.clinicid == clinicid) & (db.vw_appointment_weekly.is_active == True)).select(orderby=db.vw_appointment_weekly.f_start_time)
+        monthlyappts = db((db.vw_appointment_monthly.providerid == providerid) & (db.vw_appointment_monthly.clinicid == clinicid) & (db.vw_appointment_monthly.is_active == True)).select(orderby=db.vw_appointment_monthly.f_start_time)
     
     
     
-    dailyappts  = db((db.vw_appointment_today.providerid == providerid) & (db.vw_appointment_today.is_active == True)).select(orderby=db.vw_appointment_today.f_start_time)
-    weeklyappts = db((db.vw_appointment_weekly.providerid == providerid) & (db.vw_appointment_weekly.is_active == True)).select(orderby=db.vw_appointment_weekly.f_start_time)
-    monthlyappts = db((db.vw_appointment_monthly.providerid == providerid) & (db.vw_appointment_monthly.is_active == True)).select(orderby=db.vw_appointment_monthly.f_start_time)
     
    
     

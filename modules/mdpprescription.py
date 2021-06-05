@@ -58,7 +58,16 @@ class Prescription:
                     "medicine":pres.medicine + " " + pres.strength + " " + pres.strengthuom if((pres.medicine != "") & (pres.medicine != None)) else "",
                     "presdate":(pres.prescriptiondate).strftime("%d/%m/%Y"),
                     "frequency":pres.frequency,
-                    "duration":pres.dosage
+                    "duration":pres.dosage,
+                    
+                    "dosage":pres.dosage,
+                    "strength":pres.strength,
+                    "strengthuom":pres.strengthuom,
+                    "presdate":(pres.prescriptiondate).strftime("%d/%m/%Y"),
+                    "quantity":pres.quantity,                    
+                    
+                    "remarks":pres.remarks,
+                    "instructions":pres.remarks
                     
                 }
                 preslist.append(presobj)      
@@ -101,8 +110,16 @@ class Prescription:
 
         try:
             prescriptions = db( (db.vw_patientprescription.id == presid) & (db.vw_patientprescription.is_active == True)).select()
+            
            
+            
+            
             for pres in prescriptions:
+                pat = db((db.patientmember.id == pres.memberid) & (db.patientmember.is_active == True)).select(db.patientmember.cell,  db.patientmember.email)
+                prov = db((db.provider.id == pres.providerid)& (db.provider.is_active == True)).select(db.provider.cell, db.provider.email)
+                
+                clinics = db((db.clinic_ref.ref_code == "PRV") & (db.clinic_ref.ref_id == pres.providerid) & (db.clinic.primary_clinic == True) & (db.clinic.is_active == True)).\
+                    select(db.clinic.ALL, left=db.clinic.on(db.clinic.id == db.clinic_ref.clinic_id))
                            
                 presobj = {
                     
@@ -129,7 +146,21 @@ class Prescription:
                     "frequency":pres.frequency,
                     "duration":pres.dosage,
                     "quantity":pres.quantity,
-                    "remarks":pres.remarks
+                    "remarks":pres.remarks,
+                    "instructions":pres.remarks,
+                    
+                    "patcell":pat[0].cell if(len(pat) >0 ) else "",
+                    "patemail":pat[0].email if(len(pat) >0 ) else "",
+                    "provcell":prov[0].cell if(len(prov) >0 ) else "",
+                    "provemail":prov[0].email if(len(prov) >0 ) else "",
+                  
+                    "clinic_name":clinics[0].name if(len(clinics) >0 ) else "",
+                    "clinic_address1":clinics[0].address1 if(len(clinics) >0 ) else "",
+                    "clinic_address2":clinics[0].address2 if(len(clinics) >0 ) else "",
+                    "clinic_address3":clinics[0].address3 if(len(clinics) >0 ) else "",
+                    "clinic_city":clinics[0].city if(len(clinics) >0 ) else "",
+                    "clinic_st":clinics[0].st if(len(clinics) >0 ) else "",
+                    "clinic_pin":clinics[0].pin if(len(clinics) >0 ) else ""
                 
                 }
             
@@ -147,6 +178,7 @@ class Prescription:
     
     def newprescription(self,presdata):
         
+        logger.loggerpms2,info("Enter new pescriptions " + json.dumps(presdata))
         db = self.db
         providerid = self.providerid
         

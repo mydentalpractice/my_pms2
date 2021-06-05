@@ -303,6 +303,7 @@ def getprovider(auth,db):
     longitude = ""
     locationurl = ""
     
+    
     if(auth.has_membership('provider')):
         rows = db((db.provider.sitekey == auth.user.sitekey) & (db.provider.is_active == True)).select()
         if(len(rows)==1):
