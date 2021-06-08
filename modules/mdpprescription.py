@@ -174,11 +174,12 @@ class Prescription:
             excpobj["error_message"] = "Get Prescription Error - " + str(e)
             return json.dumps(excpobj) 
         
+        logger.loggerpms2.info("Exit Get Prescription = " + json.dumps(presobj))
         return json.dumps(presobj)
     
     def newprescription(self,presdata):
         
-        logger.loggerpms2,info("Enter new pescriptions " + json.dumps(presdata))
+        logger.loggerpms2.info("Enter new pescriptions " + json.dumps(presdata))
         db = self.db
         providerid = self.providerid
         

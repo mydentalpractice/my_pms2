@@ -2929,6 +2929,28 @@ def create_transaction(avars):
     
     return rsp
 
+def complete_transaction(avars):
+    
+    obj = mdpshopsee.Shopsee(current.globalenv['db'])
+    rsp = obj.create_transaction(avars)
+    
+    return rsp
+
+def callback_transaction(avars):
+    
+    obj = mdpshopsee.Shopsee(current.globalenv['db'])
+    rsp = obj.create_transaction(avars)
+    
+    return rsp
+
+def mdp_shopse_webhook(avars):
+    
+    obj = mdpshopsee.Shopsee(current.globalenv['db'])
+    rsp = obj.mdp_shopse_webhook(avars)
+    
+    return rsp
+
+
 ############################# END SHOPSEE API  ###################################################
 
 ############################# START CF API  ###################################################
@@ -2962,12 +2984,11 @@ def unknown(avars):
     return dict()
 
 
-#plansAPI_switcher = {
-    
-    #"list_plans":list_plans
-#}
-SHOPSEE_switcher = {
-    "create_transaction":create_transaction
+shopseAPI_switcher = {
+    "create_transaction":create_transaction,
+    "complete_transaction":complete_transaction,
+    "callback_transaction":callback_transaction,
+    "shopSeTxnId":mdp_shopse_webhook
 
 }
 
@@ -3604,7 +3625,7 @@ def CFAPI():
 
 
 @request.restful()
-def shopseeAPI():
+def shopseAPI():
     response.view = 'generic' + request.extension
     def GET(*args, **vars):
 	return
@@ -3612,7 +3633,7 @@ def shopseeAPI():
     def POST(*args, **vars):
 	i = 0
 	try:
-	    #logger.loggerpms2.info(">>Enter Agent API==>>")
+	    logger.loggerpms2.info(">>Enter Shopse API==>>")
 	    dsobj = datasecurity.DataSecurity()
 	    encryption = vars.has_key("req_data")
 	    if(encryption):
@@ -3621,11 +3642,15 @@ def shopseeAPI():
 		vars = json.loads(dsobj.decrypts(encrypt_req))
 	    
 	    #decrypted request date
-	    action = str(vars["action"])
-	    #logger.loggerpms2.info(">>Agent ACTION==>>" + action)
+	    if(vars.has_key("action") == True):
+		action = str(vars["action"])
+	    else:
+		action = "shopSeTxnId"
+		
+	    logger.loggerpms2.info(">>ShopSe ACTION==>>" + action)
 	    
 	    #return json.dumps({"action":action})
-	    rsp = SHOPSEE_switcher.get(action,unknown)(vars)
+	    rsp = shopseAPI_switcher.get(action,unknown)(vars)
 	    common.setcookies(response)
 	    if(encryption):
 		return json.dumps({"resp_data":dsobj.encrypts(rsp)})

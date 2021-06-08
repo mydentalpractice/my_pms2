@@ -31,6 +31,7 @@ from decimal  import Decimal
 #sys.path.append('modules')
 from applications.my_pms2.modules import common
 from applications.my_pms2.modules import account
+from applications.my_pms2.modules import mdppayment
 from applications.my_pms2.modules import mdpshopsee
 from applications.my_pms2.modules import logger
 
@@ -1355,6 +1356,226 @@ def generateHashForMessage(keyfile, message):
 
     return signhex
 
+#https://www.merchantreturnurl.com/shopse/response?orderId=1111111120&shopSeTxnId=S7GoWcPoG5RQRWf&status=succ
+#ess&message=success&signature=S7GoWcPoG5RQRWfS7GoWcPoG5RQRWfS7GoWcPoG5RQRWfS7GoWcPoG5RQRWf
+#callback_transaction
+def shopse_payment_callback():
+    
+    
+    reqobj = {}
+    
+    reqobj["orderid"] = request.vars.orderId
+    reqobj["shopSeTxnId"] = request.vars.shopSeTxnId
+    reqobj["status"] = request.vars.status
+    reqobj["message"] = request.vars.message
+    reqobj["signature"] = request.vars.signature
+    
+    p = db((db.payment.fp_merchantid == request.vars.orderId) & (db.payment.fp_paymentref ==request.vars.shopSeTxnId )).select(db.payment.id,db.payment.provider)
+    paymentid = int(common.getid(p[0].id)) if(len(p) >= 1) else 0
+    providerid = int(common.getid(p[0].provider)) if(len(p) >= 1) else 0
+    
+    shopseobj = mdpshopsee.Shopsee(db)
+    rsp = json.loads(shopseobj.callback_transaction(reqobj))
+    
+    
+    paymentobj = mdppayment.Payment(db, providerid)
+    receiptobj = json.loads(paymentobj.paymentreceipt(paymentid))
+    returnurl = URL("admin","logout") 
+    
+    
+    dttodaydate = common.getISTFormatCurrentLocatTime()
+    todaydate = dttodaydate.strftime("%d/%m/%Y")
+
+    
+      
+    doctortitle = ''
+    doctorname = ''
+    treatment = ''
+    chiefcomplaint = ''
+    description = ''
+    otherinfo = ''
+
+    providerid = 0
+    treatmentid = 0
+    tplanid = 0
+    patientinfo = None
+    hmopatientmember = False
+    
+    r = db(db.vw_fonepaise.paymentid == paymentid).select()
+    if(len(r)>0):
+        
+        treatmentid = int(common.getid(r[0].treatmentid))
+        tplanid = int(common.getid(r[0].tplanid))
+        providerid = int(common.getid(r[0].providerid))
+        providerinfo  = getproviderinformation(providerid)
+        patientinfo = getpatientinformation(int(common.getid(r[0].patientid)),int(common.getid(r[0].memberid)))
+        hmopatientmember = patientinfo["hmopatientmember"]
+        
+        doctortitle = common.getstring(r[0].doctortitle)
+        doctorname  = common.getstring(r[0].doctorname)
+
+
+        treatment = common.getstring(r[0].treatment)
+        description = common.getstring(r[0].description)
+        chiefcomplaint = common.getstring(r[0].chiefcomplaint)
+        otherinfo = chiefcomplaint
+
+
+    paymentref = ""
+    paymentdate = dttodaydate
+    paymenttype = ""
+    paymentdetail = ""
+    paymentmode = ""
+    cardtype = ""
+    merchantid = ""
+    merchantdisplay = ""
+    invoice = ""
+    invoiceamt = 0.00
+    amount = 0.00
+    fee = 0.00
+    status = "S"
+    chequeno = ""
+    bankname= ""
+    accountname = ""
+    accountno = ""
+    error = ""
+    errormssg = ""
+    
+    p = db(db.payment.id == paymentid).select()
+
+    
+    if(len(p)>0):
+        paymentref = p[0].fp_paymentref #shopse tx id
+        paymentdate = (p[0].fp_paymentdate).strftime("%d/%m/%Y") if((p[0].fp_paymentdate != None)) else todaydate
+        paymenttype = p[0].fp_paymenttype
+        paymentdetail = p[0].fp_paymentdetail
+        paymentmode = p[0].paymentmode
+        cardtype = p[0].fp_cardtype
+        merchantid = p[0].fp_merchantid
+        merchantdisplay = p[0].fp_merchantdisplay
+        invoice = p[0].fp_invoice
+        invoiceamt = float(common.getvalue(p[0].fp_invoiceamt))
+        amount = float(common.getvalue(p[0].fp_amount))
+        fee = float(common.getvalue(p[0].fp_fee))
+        status = p[0].fp_status
+        chequeno = common.getstring(p[0].chequeno)
+        bankname= common.getstring(p[0].bankname)
+        accountname = common.getstring(p[0].accountname)
+        accountno = common.getstring(p[0].accountno)
+        if(status == 'S'):
+            error = ""
+            errormsg = ""
+        else:
+            error  = common.getstring(p[0].fp_error)
+            errormsg = common.getstring(p[0].fp_errormsg)
+        
+    #Procedure Grid
+    query = ((db.vw_treatmentprocedure.treatmentid  == treatmentid) & (db.vw_treatmentprocedure.is_active == True))
+
+
+    fields=(db.vw_treatmentprocedure.altshortdescription, \
+               db.vw_treatmentprocedure.procedurefee,\
+               db.vw_treatmentprocedure.treatmentdate)
+ 
+ 
+    headers={
+        'vw_treatmentprocedure.altshortdescription':'Description',
+        'vw_treatmentprocedure.procedurefee':'Procedure Cost',
+        'vw_treatmentprocedure.treatmentdate':'Treatment Date'
+    }
+ 
+    links = None
+    maxtextlengths = {'vw_treatmentprocedure.altshortdescription':200}
+    
+    exportlist = dict( csv_with_hidden_cols=False, html=False,tsv_with_hidden_cols=False, tsv=False, json=False, csv=False, xml=False)
+       
+    formProcedure = SQLFORM.grid(query=query,
+                        headers=headers,
+                        fields=fields,
+                        links=links,
+                        paginate=10,
+                        maxtextlengths=maxtextlengths,
+                        orderby=None,
+                        exportclasses=exportlist,
+                        links_in_grid=True,
+                        searchable=False,
+                        create=False,
+                        deletable=False,
+                        editable=False,
+                        details=False,
+                        user_signature=True
+                       )  
+    
+             
+    totpaid = 0
+    tottreatmentcost  = 0
+    totinspays = 0    
+    totaldue = 0
+    
+    
+    if(status == 'S'):
+               
+      
+        paytm = calculatepayments(tplanid,providerid)
+        tottreatmentcost= paytm["totaltreatmentcost"]
+        totinspays= paytm["totalinspays"]
+        totpaid=paytm["totalpaid"] 
+        totaldue = paytm["totaldue"]        
+    
+   
+    
+    
+    returnurl = request.vars.returnurl
+
+    return dict(formProcedure=formProcedure,\
+                todaydate = todaydate,\
+                providerid = providerid,
+                practicename = providerinfo["practicename"],\
+                providername  = providerinfo["providername"],\
+                provideregnon = providerinfo["providerregno"],\
+                practiceaddress1 = providerinfo["practiceaddress1"],\
+                practiceaddress2 = providerinfo["practiceaddress2"],\
+                practicephone = providerinfo["practicephone"],\
+                practiceemail =providerinfo["practiceemail"],\
+                patientname = patientinfo["patientname"],\
+                patientmember = patientinfo["patientmember"],\
+                patientemail = patientinfo["patientemail"],\
+                patientcell = patientinfo["patientcell"],\
+                patientgender=  patientinfo["patientgender"],\
+                patientage =patientinfo["patientage"],\
+                patientaddress =patientinfo["patientaddress"],\
+                groupref = patientinfo["groupref"],\
+                companyname = patientinfo["companyname"],\
+                planname  = patientinfo["planname"],\
+                paymentref =paymentref,\
+                paymentdate = paymentdate,\
+                paymenttype = paymenttype,\
+                paymentdetail = paymentdetail,\
+                paymentmode = paymentmode,\
+                cardtype = cardtype,\
+                merchantid = merchantid,\
+                merchantdisplay = merchantdisplay,\
+                invoice = invoice,\
+                invoiceamt = invoiceamt,\
+                amount = amount,\
+                fee = fee,\
+                totaldue=totaldue,\
+                status = status,\
+                doctorname  = doctorname,\
+                treatment = treatment,\
+                description =description,\
+                chiefcomplaint = chiefcomplaint,\
+                otherinfo=otherinfo,\
+                chequeno = chequeno,\
+                bankname= bankname,\
+                accountname = accountname,\
+                accountno = accountno,\
+                error = error,\
+                errormsg=errormsg,\
+                returnurl=returnurl
+                )
+    
+  
 
 
 def make_payment_shopse():
@@ -1367,7 +1588,7 @@ def make_payment_shopse():
     paymentid = int(common.getid(request.vars.paymentid))
     paymentmode = common.getstring(request.vars.paymentmod)
     paymentamount = float(common.getvalue(request.vars.invoiceamt))
-    paymentamount = str(paymentamount if(paymentamount != 0) else 2000.0)
+    paymentamount = str(paymentamount if(paymentamount != 0) else 10000.0)   #this has to be defaulted to 0 in actual scenario
     
     vwfp = db(db.vw_fonepaise.paymentid == paymentid).select()
     

@@ -8664,6 +8664,7 @@ XXXZZZZupdate role in doctor to refer to role_default
 2. YYYZZZAdded field 'newcity' in prospects table
 3. YYYYZZZAdded hmopatientmember in vw_appointments
 4, ZZZZadding clinicid to vw_appointment* views
+5. YYYZZZ vw_patientprescription
 5. New Table Shopsee Properties to add SHOPSEE specific 
 CREATE TABLE `shopsee_properties` (
   `id` int(11) NOT NULL AUTO_INCREMENT,

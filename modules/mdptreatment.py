@@ -590,7 +590,7 @@ class Treatment:
                 for proc in procs:
                     
                     procobj = {
-                    
+                        "treatment_procedure_id":proc.id,
                         "procedurecode":proc.procedurecode,
                         "altshortdescription":common.getstring(proc.altshortdescription),
                         "relgrproc":common.getboolean(proc.relgrproc),
