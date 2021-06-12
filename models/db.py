@@ -229,6 +229,8 @@ db.define_table('clinic',
 
                 Field('website','string'),
                 Field('gps_location','string'),
+                Field('longitude','string'),
+                Field('latitude','string'),
                 Field('whatsapp','string'),
                 Field('facebook','string'),
                 Field('twitter','string'),

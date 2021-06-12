@@ -80,6 +80,8 @@ class ConsentForm:
                 membername = common.getkeyvalue(avars,"membername",""),
                 status = common.getkeyvalue(avars,"status","")
             )
+            
+            db(db.consentform.id == cfsid).update(consentformid = cfsid)
             cfsobj = {}
             cfsobj["result"] = "success"
             cfsobj["error_message"] = ""

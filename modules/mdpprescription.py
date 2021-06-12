@@ -134,7 +134,7 @@ class Prescription:
                     "patient": pres.fullname,
                     "doctor":pres.doctorname,
                     "gender":pres.gender,
-                    "dob":(pres.dob).strftime("%d/%m/%Y"),
+                    "dob":(pres.dob).strftime("%d/%m/%Y") if(pres.dob != None) else common.getstringfromdate(common.getISTFormatCurrentLocatTime(),"%d/%m/%Y"),
                     "medicineid":pres.medicineid,
                     "medicinename":pres.medicine,
                     "medicinetype":pres.medicinetype,
@@ -142,7 +142,7 @@ class Prescription:
                     "dosage":pres.dosage,
                     "strength":pres.strength,
                     "strengthuom":pres.strengthuom,
-                    "presdate":(pres.prescriptiondate).strftime("%d/%m/%Y"),
+                    "presdate":(pres.prescriptiondate).strftime("%d/%m/%Y") if(pres.prescriptiondate != None) else common.getstringfromdate(common.getISTFormatCurrentLocatTime(),"%d/%m/%Y"),
                     "frequency":pres.frequency,
                     "duration":pres.dosage,
                     "quantity":pres.quantity,
@@ -220,7 +220,7 @@ class Prescription:
         return json.dumps(jsonresp)
         
     def updateprescription(self,presid,presdata):
-        
+        logger.loggerpms2.info("Enter Update Prescription " + str(presid) + " " + json.dumps(presdata))
         db = self.db
         providerid = self.providerid
         
@@ -229,7 +229,7 @@ class Prescription:
         try:
             #update prescription
             db(db.prescription.id == presid).update(\
-                prescriptiondate=datetime.datetime.strptime(presdata["presdate"],"%d/%m/%Y"),
+                prescriptiondate=common.getdatefromstring(presdata["presdate"], "%d/%m/%Y") if((presdata["presdate"] != None) & (presdata["presdate"] != "") ) else common.getISTFormatCurrentLocatTime() ,
                 medicineid=presdata["medicineid"],
                 treatmentid=presdata["treatmentid"],
                 dosage=presdata["dosage"],
@@ -255,6 +255,7 @@ class Prescription:
               "error_message":"Update Prescription Exception:\n" + str(e)
             }
         
+        logger.loggerpms2.info("Exit Update Prescription " + " " + json.dumps(jsonresp))
         return json.dumps(jsonresp)
     
     def deleteprescription(self,presid):

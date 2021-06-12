@@ -91,6 +91,8 @@ class Clinic:
                     "uploadfolder":"" if(len(md) == 0) else common.getstring(md[0].uploadfolder),
                     "title":"" if(len(md) == 0) else common.getstring(md[0].title),
                     "imagedate":"00/00/00" if(len(md) == 0) else common.getstringfromdate(md[0].imagedate,"%d/%m/%Y"),
+                    "longitude":r[0].longitude if len(r) == 1 else "",
+                    "latitude":r[0].latitude if len(r) == 1 else "",
                     
                 }
                 cliniclist.append(dobj)
@@ -338,7 +340,10 @@ class Clinic:
                 "telephone":ds[0].telephone,            
                 "email":ds[0].email,            
                 "website":ds[0].website,            
-                "gps_location":ds[0].gps_location,            
+                "gps_location":ds[0].gps_location, 
+                "longitude":ds[0].longitude,
+                "latitude":ds[0].latitude,
+                
                 "whatsapp":ds[0].whatsapp,            
                 "facebook":ds[0].facebook,            
                 "twitter":ds[0].twitter,            
@@ -466,6 +471,8 @@ class Clinic:
                 status = common.getkeyvalue(avars,'status',ds[0].status),
                 website = common.getkeyvalue(avars,'website',ds[0].website),
                 gps_location = common.getkeyvalue(avars,'gps_location',ds[0].gps_location),
+                longitude = common.getkeyvalue(avars,'longitude',ds[0].longitude),
+                latitude = common.getkeyvalue(avars,'latitude',ds[0].latitude),
                 whatsapp = common.getkeyvalue(avars,'whatsapp',ds[0].whatsapp),
                 facebook = common.getkeyvalue(avars,'facebook',ds[0].facebook),
                 twitter = common.getkeyvalue(avars,'twitter',ds[0].twitter),
@@ -565,6 +572,9 @@ class Clinic:
                 status = common.getkeyvalue(avars,'status',""),
                 website = common.getkeyvalue(avars,'website',""),
                 gps_location = common.getkeyvalue(avars,'gps_location',""),
+                longitude = common.getkeyvalue(avars,'longitude',""),
+                latitude = common.getkeyvalue(avars,'latitude',""),
+                
                 whatsapp = common.getkeyvalue(avars,'whatsapp',""),
                 facebook = common.getkeyvalue(avars,'facebook',""),
                 twitter = common.getkeyvalue(avars,'twitter',""),

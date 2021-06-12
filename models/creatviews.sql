@@ -8665,7 +8665,7 @@ XXXZZZZupdate role in doctor to refer to role_default
 3. YYYYZZZAdded hmopatientmember in vw_appointments
 4, ZZZZadding clinicid to vw_appointment* views
 5. YYYZZZ vw_patientprescription
-5. New Table Shopsee Properties to add SHOPSEE specific 
+6. New Table Shopsee Properties to add SHOPSEE specific 
 CREATE TABLE `shopsee_properties` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `shopsee_stg_url` varchar(512) DEFAULT NULL,
@@ -8689,6 +8689,9 @@ CREATE TABLE `shopsee_properties` (
 ALTER TABLE `mydp_prod`.`shopsee_properties` 
 ADD COLUMN `shopsee_url` VARCHAR(512) NULL DEFAULT NULL AFTER `id`,
 ADD COLUMN `shopsee_returnURL` VARCHAR(512) NULL DEFAULT NULL AFTER `shopsee_url`;
+
+
+7. YYYYZZZZAdded longitude & latitude fileds in clinic table
 
 Script file to clear user for sign-up
 =====================================
