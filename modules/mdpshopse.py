@@ -17,9 +17,11 @@ from applications.my_pms2.modules import mdppatient
 from applications.my_pms2.modules import account
 from applications.my_pms2.modules import mdppayment
 
+from applications.my_pms2.modules import datasecurity
+
 from applications.my_pms2.modules import logger
 
-class Shopsee:
+class Shopse:
 
     def __init__(self,db):
         self.db = db
@@ -32,6 +34,56 @@ class Shopsee:
         self.shopsee_api_token = r[0].shopsee_api_token
         self.shopsee_response_key = r[0].shopsee_response_key
 
+
+    def encrypt_sha256_shopse(self,avars):
+        
+        logger.loggerpms2.info("Enter Encrypt Sha256 Shopse " + json.dumps(avars))
+        
+        try:
+            jsonobj = avars
+            keys = jsonobj.keys()
+            keylist = []
+            for key in keys:
+                obj = {}
+                obj[key] = common.getkeyvalue(avars,key,"")
+                keylist.append(obj)
+    
+            keylist.sort()
+            avars2 = {}
+            rspstr = ""
+            first  = True
+            for x in range(len(keylist)):
+                o = keylist[x]
+                keys = o.keys()
+                keyname = keys[0]
+                keyval = avars[keyname]
+                if(keyname == "action"):
+                    continue
+                if(first):
+                    rspstr = str(keyname) + "=" + str(keyval)
+                    first = False
+                else:
+                    rspstr = rspstr + "&" + str(keyname) + "=" + str(keyval)
+            
+            logger.loggerpms2.info("Signature String to Encrypt " + rspstr)
+            
+            
+            rspstr = urllib.quote(rspstr.encode('utf-8'))
+            obj = datasecurity.DataSecurity()
+            rsp = json.loads(obj.encrypt_sha256_shopse(rspstr))
+
+        except Exception as e:
+            error_message = "Shopsee Encrypt Sha256  API Exception " + str(e)
+            logger.loggerpms2.info(error_message)      
+            jsonresp = {
+              "result":"fail",
+              "error_message":error_message
+            }
+            return json.dumps(jsonresp)
+    
+        logger.loggerpms2.info("Exit Shopse Encrypt Sha256 " + json.dumps(rsp))
+        return json.dumps(rsp)
+            
     def create_transaction(self,avars):
         logger.loggerpms2.info("Enter Shopsee CreateTransaction API == >" + json.dumps(avars))
         db = self.db

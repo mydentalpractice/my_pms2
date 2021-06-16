@@ -42,7 +42,7 @@ from applications.my_pms2.modules import mdpclinic
 from applications.my_pms2.modules import mdpprospect
 from applications.my_pms2.modules import mdpagent
 from applications.my_pms2.modules import mdpconsentform
-from applications.my_pms2.modules import mdpshopsee
+from applications.my_pms2.modules import mdpshopse
 
 from applications.my_pms2.modules import logger
 
@@ -2924,32 +2924,67 @@ def new_agent_prospect(avars):
 ############################# START SHOPSEE API  ###################################################
 def create_transaction(avars):
     
-    obj = mdpshopsee.Shopsee(current.globalenv['db'])
+    obj = mdpshopse.Shopse(current.globalenv['db'])
     rsp = obj.create_transaction(avars)
     
     return rsp
 
 def complete_transaction(avars):
     
-    obj = mdpshopsee.Shopsee(current.globalenv['db'])
+    obj = mdpshopse.Shopse(current.globalenv['db'])
     rsp = obj.create_transaction(avars)
     
     return rsp
 
 def callback_transaction(avars):
     
-    obj = mdpshopsee.Shopsee(current.globalenv['db'])
-    rsp = obj.create_transaction(avars)
-    
+    obj = mdpshopse.Shopse(current.globalenv['db'])
+    rsp = obj.callback_transaction(avars)
     return rsp
 
 def mdp_shopse_webhook(avars):
     
-    obj = mdpshopsee.Shopsee(current.globalenv['db'])
+    obj = mdpshopse.Shopsee(current.globalenv['db'])
     rsp = obj.mdp_shopse_webhook(avars)
     
     return rsp
 
+def encrypt_sha256_shopse(avars):
+
+    
+    jsonobj = avars
+    keys = jsonobj.keys()
+    keylist = []
+
+    
+    for key in keys:
+	obj = {}
+	obj[key] = common.getkeyvalue(avars,key,"")
+	keylist.append(obj)
+	
+    keylist.sort()
+    avars2 = {}
+    rspstr = ""
+    first  = True
+    for x in range(len(keylist)):
+	o = keylist[x]
+	keys = o.keys()
+	keyname = keys[0]
+	keyval = avars[keyname]
+	if(keyname == "action"):
+	    continue
+	if(first):
+	    rspstr = str(keyname) + "=" + str(keyval)
+	    first = False
+	else:
+	    rspstr = rspstr + "&" + str(keyname) + "=" + str(keyval)
+	
+    	
+    obj = datasecurity.DataSecurity()
+    
+    rsp = obj.encrypt_sha256_shopse(rspstr)
+    
+    return rsp
 
 ############################# END SHOPSEE API  ###################################################
 
@@ -2988,7 +3023,8 @@ shopseAPI_switcher = {
     "create_transaction":create_transaction,
     "complete_transaction":complete_transaction,
     "callback_transaction":callback_transaction,
-    "shopSeTxnId":mdp_shopse_webhook
+    "shopSeTxnId":mdp_shopse_webhook,
+    "encrypt_sha256_shopse":encrypt_sha256_shopse
 
 }
 

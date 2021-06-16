@@ -28,6 +28,51 @@ class DataSecurity:
     def __init__(self):
         return 
 
+    #encrypt sha256 + base64 encode
+    def encrypt_sha256_shopse(self,raw):
+
+        #phpurl = "http://myphp.com/myphp.php"
+        phpurl = "http://myphp.com/encrypt_sha256_shopse.php"
+        dsobj = {"raw":raw}
+
+        resp = requests.post(phpurl,json=dsobj)
+
+        jsonresp = {}
+        if((resp.status_code == 200)|(resp.status_code == 201)|(resp.status_code == 202)|(resp.status_code == 203)):
+            respobj = resp.json()    
+            jsonresp = {
+                "encrypt": respobj["encrypt"]
+
+            }
+        else:
+            jsonresp={"encrypt": "Response Error - " + str(resp.status_code)}
+
+        return json.dumps(jsonresp)
+
+    #encrypt sha256 + base64 encode
+    def encrypts_sha256_shopse(self,raw):
+
+        phpurl = "http://myphp.com/encrypt_sha256_shopse.php"
+
+        dsobj = {"raw":raw}
+
+        resp = requests.post(phpurl,json=dsobj)
+
+        jsonresp = {}
+        if((resp.status_code == 200)|(resp.status_code == 201)|(resp.status_code == 202)|(resp.status_code == 203)):
+            respobj = resp.json()    
+            jsonresp = {
+                "encrypt": respobj["encrypt"]
+
+            }
+        else:
+            jsonresp={"encrypt": "Response Error - " + str(reps.status_code)}
+
+        return jsonresp["encrypt"]
+
+
+
+
     #this method - encrypts  AES-256-CBC + base64 encode
     def encrypts(self,raw):
 

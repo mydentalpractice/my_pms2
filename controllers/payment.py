@@ -31,8 +31,9 @@ from decimal  import Decimal
 #sys.path.append('modules')
 from applications.my_pms2.modules import common
 from applications.my_pms2.modules import account
+from applications.my_pms2.modules import datasecurity
 from applications.my_pms2.modules import mdppayment
-from applications.my_pms2.modules import mdpshopsee
+from applications.my_pms2.modules import mdpshopse
 from applications.my_pms2.modules import logger
 
 #from gluon.contrib import common
@@ -1364,164 +1365,224 @@ def shopse_payment_callback():
     
     reqobj = {}
     
-    reqobj["orderid"] = request.vars.orderId
-    reqobj["shopSeTxnId"] = request.vars.shopSeTxnId
-    reqobj["status"] = request.vars.status
-    reqobj["message"] = request.vars.message
-    reqobj["signature"] = request.vars.signature
     
+    params = request.vars
+    
+    keys = params.keys()
+    
+    for key in keys:
+        if(key == 'signature'):
+            continue
+        reqobj[key] = params[key]
+        
+    
+    
+    encryptObj = mdpshopse.Shopse(db)
+    encryptrsp = encryptObj.encrypt_sha256_shopse(reqobj)
+    encryptrsp = json.loads(encryptrsp)
+    
+    encryptrsp = encryptrsp["encrypt"]
+    signature = request.vars.signature
+
     p = db((db.payment.fp_merchantid == request.vars.orderId) & (db.payment.fp_paymentref ==request.vars.shopSeTxnId )).select(db.payment.id,db.payment.provider)
     paymentid = int(common.getid(p[0].id)) if(len(p) >= 1) else 0
     providerid = int(common.getid(p[0].provider)) if(len(p) >= 1) else 0
-    
-    shopseobj = mdpshopsee.Shopsee(db)
-    rsp = json.loads(shopseobj.callback_transaction(reqobj))
-    
-    
-    paymentobj = mdppayment.Payment(db, providerid)
-    receiptobj = json.loads(paymentobj.paymentreceipt(paymentid))
-    returnurl = URL("admin","logout") 
-    
-    
-    dttodaydate = common.getISTFormatCurrentLocatTime()
-    todaydate = dttodaydate.strftime("%d/%m/%Y")
-
-    
-      
-    doctortitle = ''
-    doctorname = ''
-    treatment = ''
-    chiefcomplaint = ''
-    description = ''
-    otherinfo = ''
-
-    providerid = 0
-    treatmentid = 0
-    tplanid = 0
-    patientinfo = None
-    hmopatientmember = False
+    providerinfo  = getproviderinformation(providerid)
     
     r = db(db.vw_fonepaise.paymentid == paymentid).select()
+    patientinfo = None
     if(len(r)>0):
-        
-        treatmentid = int(common.getid(r[0].treatmentid))
-        tplanid = int(common.getid(r[0].tplanid))
-        providerid = int(common.getid(r[0].providerid))
-        providerinfo  = getproviderinformation(providerid)
         patientinfo = getpatientinformation(int(common.getid(r[0].patientid)),int(common.getid(r[0].memberid)))
-        hmopatientmember = patientinfo["hmopatientmember"]
+
+    
+    if(encryptrsp == signature):
         
-        doctortitle = common.getstring(r[0].doctortitle)
-        doctorname  = common.getstring(r[0].doctorname)
-
-
-        treatment = common.getstring(r[0].treatment)
-        description = common.getstring(r[0].description)
-        chiefcomplaint = common.getstring(r[0].chiefcomplaint)
-        otherinfo = chiefcomplaint
-
-
-    paymentref = ""
-    paymentdate = dttodaydate
-    paymenttype = ""
-    paymentdetail = ""
-    paymentmode = ""
-    cardtype = ""
-    merchantid = ""
-    merchantdisplay = ""
-    invoice = ""
-    invoiceamt = 0.00
-    amount = 0.00
-    fee = 0.00
-    status = "S"
-    chequeno = ""
-    bankname= ""
-    accountname = ""
-    accountno = ""
-    error = ""
-    errormssg = ""
+        shopseobj = mdpshopsee.Shopse(db)
+        rsp = json.loads(shopseobj.callback_transaction(reqobj))
+        
+        
+        paymentobj = mdppayment.Payment(db, providerid)
+        receiptobj = json.loads(paymentobj.paymentreceipt(paymentid))
+        returnurl = URL("admin","logout") 
+        
+        
+        dttodaydate = common.getISTFormatCurrentLocatTime()
+        todaydate = dttodaydate.strftime("%d/%m/%Y")
     
-    p = db(db.payment.id == paymentid).select()
-
+        
+          
+        doctortitle = ''
+        doctorname = ''
+        treatment = ''
+        chiefcomplaint = ''
+        description = ''
+        otherinfo = ''
     
-    if(len(p)>0):
-        paymentref = p[0].fp_paymentref #shopse tx id
-        paymentdate = (p[0].fp_paymentdate).strftime("%d/%m/%Y") if((p[0].fp_paymentdate != None)) else todaydate
-        paymenttype = p[0].fp_paymenttype
-        paymentdetail = p[0].fp_paymentdetail
-        paymentmode = p[0].paymentmode
-        cardtype = p[0].fp_cardtype
-        merchantid = p[0].fp_merchantid
-        merchantdisplay = p[0].fp_merchantdisplay
-        invoice = p[0].fp_invoice
-        invoiceamt = float(common.getvalue(p[0].fp_invoiceamt))
-        amount = float(common.getvalue(p[0].fp_amount))
-        fee = float(common.getvalue(p[0].fp_fee))
-        status = p[0].fp_status
-        chequeno = common.getstring(p[0].chequeno)
-        bankname= common.getstring(p[0].bankname)
-        accountname = common.getstring(p[0].accountname)
-        accountno = common.getstring(p[0].accountno)
+        providerid = 0
+        treatmentid = 0
+        tplanid = 0
+        patientinfo = None
+        hmopatientmember = False
+        
+        r = db(db.vw_fonepaise.paymentid == paymentid).select()
+        if(len(r)>0):
+            
+            treatmentid = int(common.getid(r[0].treatmentid))
+            tplanid = int(common.getid(r[0].tplanid))
+            providerid = int(common.getid(r[0].providerid))
+            providerinfo  = getproviderinformation(providerid)
+            patientinfo = getpatientinformation(int(common.getid(r[0].patientid)),int(common.getid(r[0].memberid)))
+            hmopatientmember = patientinfo["hmopatientmember"]
+            
+            doctortitle = common.getstring(r[0].doctortitle)
+            doctorname  = common.getstring(r[0].doctorname)
+    
+    
+            treatment = common.getstring(r[0].treatment)
+            description = common.getstring(r[0].description)
+            chiefcomplaint = common.getstring(r[0].chiefcomplaint)
+            otherinfo = chiefcomplaint
+    
+    
+        paymentref = ""
+        paymentdate = dttodaydate
+        paymenttype = ""
+        paymentdetail = ""
+        paymentmode = ""
+        cardtype = ""
+        merchantid = ""
+        merchantdisplay = ""
+        invoice = ""
+        invoiceamt = 0.00
+        amount = 0.00
+        fee = 0.00
+        status = "S"
+        chequeno = ""
+        bankname= ""
+        accountname = ""
+        accountno = ""
+        error = ""
+        errormssg = ""
+        
+        p = db(db.payment.id == paymentid).select()
+    
+        
+        if(len(p)>0):
+            paymentref = p[0].fp_paymentref #shopse tx id
+            paymentdate = (p[0].fp_paymentdate).strftime("%d/%m/%Y") if((p[0].fp_paymentdate != None)) else todaydate
+            paymenttype = p[0].fp_paymenttype
+            paymentdetail = p[0].fp_paymentdetail
+            paymentmode = p[0].paymentmode
+            cardtype = p[0].fp_cardtype
+            merchantid = p[0].fp_merchantid
+            merchantdisplay = p[0].fp_merchantdisplay
+            invoice = p[0].fp_invoice
+            invoiceamt = float(common.getvalue(p[0].fp_invoiceamt))
+            amount = float(common.getvalue(p[0].fp_amount))
+            fee = float(common.getvalue(p[0].fp_fee))
+            status = p[0].fp_status
+            chequeno = common.getstring(p[0].chequeno)
+            bankname= common.getstring(p[0].bankname)
+            accountname = common.getstring(p[0].accountname)
+            accountno = common.getstring(p[0].accountno)
+            if(status == 'S'):
+                error = ""
+                errormsg = ""
+            else:
+                error  = common.getstring(p[0].fp_error)
+                errormsg = common.getstring(p[0].fp_errormsg)
+            
+        #Procedure Grid
+        query = ((db.vw_treatmentprocedure.treatmentid  == treatmentid) & (db.vw_treatmentprocedure.is_active == True))
+    
+    
+        fields=(db.vw_treatmentprocedure.altshortdescription, \
+                   db.vw_treatmentprocedure.procedurefee,\
+                   db.vw_treatmentprocedure.treatmentdate)
+     
+     
+        headers={
+            'vw_treatmentprocedure.altshortdescription':'Description',
+            'vw_treatmentprocedure.procedurefee':'Procedure Cost',
+            'vw_treatmentprocedure.treatmentdate':'Treatment Date'
+        }
+     
+        links = None
+        maxtextlengths = {'vw_treatmentprocedure.altshortdescription':200}
+        
+        exportlist = dict( csv_with_hidden_cols=False, html=False,tsv_with_hidden_cols=False, tsv=False, json=False, csv=False, xml=False)
+           
+        formProcedure = SQLFORM.grid(query=query,
+                            headers=headers,
+                            fields=fields,
+                            links=links,
+                            paginate=10,
+                            maxtextlengths=maxtextlengths,
+                            orderby=None,
+                            exportclasses=exportlist,
+                            links_in_grid=True,
+                            searchable=False,
+                            create=False,
+                            deletable=False,
+                            editable=False,
+                            details=False,
+                            user_signature=True
+                           )  
+        
+                 
+        totpaid = 0
+        tottreatmentcost  = 0
+        totinspays = 0    
+        totaldue = 0
+        
+        
         if(status == 'S'):
-            error = ""
-            errormsg = ""
-        else:
-            error  = common.getstring(p[0].fp_error)
-            errormsg = common.getstring(p[0].fp_errormsg)
+            paytm = calculatepayments(tplanid,providerid)
+            tottreatmentcost= paytm["totaltreatmentcost"]
+            totinspays= paytm["totalinspays"]
+            totpaid=paytm["totalpaid"] 
+            totaldue = paytm["totaldue"]
+    else:
+        dttodaydate = common.getISTFormatCurrentLocatTime()
+        todaydate = dttodaydate.strftime("%d/%m/%Y")        
         
-    #Procedure Grid
-    query = ((db.vw_treatmentprocedure.treatmentid  == treatmentid) & (db.vw_treatmentprocedure.is_active == True))
-
-
-    fields=(db.vw_treatmentprocedure.altshortdescription, \
-               db.vw_treatmentprocedure.procedurefee,\
-               db.vw_treatmentprocedure.treatmentdate)
- 
- 
-    headers={
-        'vw_treatmentprocedure.altshortdescription':'Description',
-        'vw_treatmentprocedure.procedurefee':'Procedure Cost',
-        'vw_treatmentprocedure.treatmentdate':'Treatment Date'
-    }
- 
-    links = None
-    maxtextlengths = {'vw_treatmentprocedure.altshortdescription':200}
-    
-    exportlist = dict( csv_with_hidden_cols=False, html=False,tsv_with_hidden_cols=False, tsv=False, json=False, csv=False, xml=False)
-       
-    formProcedure = SQLFORM.grid(query=query,
-                        headers=headers,
-                        fields=fields,
-                        links=links,
-                        paginate=10,
-                        maxtextlengths=maxtextlengths,
-                        orderby=None,
-                        exportclasses=exportlist,
-                        links_in_grid=True,
-                        searchable=False,
-                        create=False,
-                        deletable=False,
-                        editable=False,
-                        details=False,
-                        user_signature=True
-                       )  
-    
-             
-    totpaid = 0
-    tottreatmentcost  = 0
-    totinspays = 0    
-    totaldue = 0
-    
-    
-    if(status == 'S'):
-               
+        formProcedure = None
+        paymentref = ""
+        paymentdate = dttodaydate
+        paymenttype = ""
+        paymentdetail = ""
+        paymentmode = ""
+        cardtype = ""
+        merchantid = ""
+        merchantdisplay = ""
+        invoice = ""
+        invoiceamt = 0.00
+        amount = 0.00
+        fee = 0.00
+        status = "F"
+        chequeno = ""
+        bankname= ""
+        accountname = ""
+        accountno = ""
+        error = ""
+        errormssg = "Signature Mismatch"
+        tottreatmentcost= 0
+        totinspays= 0
+        totpaid=0
+        totaldue = 0
+        doctorname  = ""
+        treatment = ""
+        description =""
+        chiefcomplaint = ""
+        otherinfo=""
       
-        paytm = calculatepayments(tplanid,providerid)
-        tottreatmentcost= paytm["totaltreatmentcost"]
-        totinspays= paytm["totalinspays"]
-        totpaid=paytm["totalpaid"] 
-        totaldue = paytm["totaldue"]        
-    
+  
+      
+     
+   
+        
+        
+        
    
     
     
@@ -1537,16 +1598,16 @@ def shopse_payment_callback():
                 practiceaddress2 = providerinfo["practiceaddress2"],\
                 practicephone = providerinfo["practicephone"],\
                 practiceemail =providerinfo["practiceemail"],\
-                patientname = patientinfo["patientname"],\
-                patientmember = patientinfo["patientmember"],\
-                patientemail = patientinfo["patientemail"],\
-                patientcell = patientinfo["patientcell"],\
-                patientgender=  patientinfo["patientgender"],\
-                patientage =patientinfo["patientage"],\
-                patientaddress =patientinfo["patientaddress"],\
-                groupref = patientinfo["groupref"],\
-                companyname = patientinfo["companyname"],\
-                planname  = patientinfo["planname"],\
+                patientname = patientinfo["patientname"]  if(patientinfo != None) else "",\
+                patientmember = patientinfo["patientmember"]   if(patientinfo != None) else "",\
+                patientemail = patientinfo["patientemail"]  if(patientinfo != None) else "",\
+                patientcell = patientinfo["patientcell"]  if(patientinfo != None) else "",\
+                patientgender=  patientinfo["patientgender"]  if(patientinfo != None) else "",\
+                patientage =patientinfo["patientage"]  if(patientinfo != None) else "",\
+                patientaddress =patientinfo["patientaddress"]  if(patientinfo != None) else "",\
+                groupref = patientinfo["groupref"]  if(patientinfo != None) else "",\
+                companyname = patientinfo["companyname"]  if(patientinfo != None) else "",\
+                planname  = patientinfo["planname"]  if(patientinfo != None) else "",\
                 paymentref =paymentref,\
                 paymentdate = paymentdate,\
                 paymenttype = paymenttype,\
@@ -1571,7 +1632,7 @@ def shopse_payment_callback():
                 accountname = accountname,\
                 accountno = accountno,\
                 error = error,\
-                errormsg=errormsg,\
+                errormsg=errormssg,\
                 returnurl=returnurl
                 )
     
@@ -1629,7 +1690,7 @@ def make_payment_shopse():
     }
 
     #call create transaction API
-    obj = mdpshopsee.Shopsee(db)
+    obj = mdpshopsee.Shopse(db)
     rspobj = json.loads(obj.create_transaction(reqobj))
     
     if(rspobj["result"] == "success"):
