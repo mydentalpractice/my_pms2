@@ -8654,18 +8654,18 @@ XXXZZZZupdate role in doctor to refer to role_default
 
 5/10/2021
 ==========
-1. YYYZZZadd is_active flag in medicine_default 
-2. YYYZZZmodify medicine_default strngthuom to strengthuom
-3. YYYZZZadd imageid col in doctor table
+1. XXXYYYZZZadd is_active flag in medicine_default 
+2. XXXXYYYZZZmodify medicine_default strngthuom to strengthuom
+3. XXXYYYZZZadd imageid col in doctor table
 
 5/22/2021
 =========
-1. YYYZZZNew tables for Cities & States
-2. YYYZZZAdded field 'newcity' in prospects table
-3. YYYYZZZAdded hmopatientmember in vw_appointments
-4, ZZZZadding clinicid to vw_appointment* views
-5. YYYZZZ vw_patientprescription
-6. New Table Shopsee Properties to add SHOPSEE specific 
+1. XXXYYYZZZNew tables for Cities & States
+2. XXXYYYZZZAdded field 'newcity' in prospects table
+3. XXXXYYYYZZZAdded hmopatientmember in vw_appointments
+4, XXXXYYYZZZZadding clinicid to vw_appointment* views
+5. XXXXYYYZZZ vw_patientprescription
+6. YYYZZZZNew Table Shopsee Properties to add SHOPSEE specific 
 CREATE TABLE `shopsee_properties` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `shopsee_stg_url` varchar(512) DEFAULT NULL,
@@ -8691,7 +8691,41 @@ ADD COLUMN `shopsee_url` VARCHAR(512) NULL DEFAULT NULL AFTER `id`,
 ADD COLUMN `shopsee_returnURL` VARCHAR(512) NULL DEFAULT NULL AFTER `shopsee_url`;
 
 
-7. YYYYZZZZAdded longitude & latitude fileds in clinic table
+7. XXXXYYYYZZZZAdded longitude & latitude fileds in clinic table
+
+
+8. XXXXYYYZZZ Add IND_IS_SYNC in auth_user
+ALTER TABLE `mydp_prod`.`auth_user` 
+ADD COLUMN `IND_IS_SYNC` CHAR(1) NULL DEFAULT NULL AFTER `impersonatorlname`;
+
+9. XXXXYYYZZZ Add IND_VC in provider
+ALTER TABLE `mydp_prod`.`provider` 
+ADD COLUMN `IND_VC` CHAR(1) NULL DEFAULT 'F' AFTER `imageid`;
+
+10 XXXXYYYYZZZ Add IND_IS_SYNCH
+ALTER TABLE `mydp_prod`.`doctor` 
+ADD COLUMN `IND_IS_SYNC` CHAR(1) NULL AFTER `modified_on`;
+
+11. XXXXYYYZZZ vw_doctor (IND_IS_SYNC)
+
+12. XXXXYYYYZZZ vw_provider (IND_VC)
+
+13. XXXXYYYZZZ added col IND_IS_SYNC in Company table
+ALTER TABLE `mydp_prod`.`company` 
+ADD COLUMN `IND_IS_SYNC` CHAR(1) NULL AFTER `chequepayment`;
+
+
+24/06/2021
+===========
+1. YYYZZZZAdd Product Name & Product ID fields Shopsee Properties
+ALTER TABLE `mydp_prod`.`shopsee_properties` 
+ADD COLUMN `product_name` VARCHAR(512) NULL DEFAULT NULL AFTER `shopsee_hdfc_db_card_otp`,
+ADD COLUMN `product_id` VARCHAR(512) NULL DEFAULT NULL AFTER `product_name`;
+
+2.ZZZZAdd webHookUrl
+ALTER TABLE `mydp_prod`.`shopsee_properties` 
+ADD COLUMN `webhookUrl` VARCHAR(512) NULL DEFAULT NULL AFTER `product_id`;
+
 
 Script file to clear user for sign-up
 =====================================

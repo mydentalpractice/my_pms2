@@ -14,7 +14,13 @@ import base64
 import hashlib
 import sha
 #import rsa
-import OpenSSL
+
+import hmac
+
+import urllib
+
+
+
 
 #from Crypto.PublicKey import RSA 
 #from Crypto.Signature import SHA512
@@ -1357,8 +1363,24 @@ def generateHashForMessage(keyfile, message):
 
     return signhex
 
-#https://www.merchantreturnurl.com/shopse/response?orderId=1111111120&shopSeTxnId=S7GoWcPoG5RQRWf&status=succ
-#ess&message=success&signature=S7GoWcPoG5RQRWfS7GoWcPoG5RQRWfS7GoWcPoG5RQRWfS7GoWcPoG5RQRWf
+def generateHashForShopSe(key, message):
+    
+    
+    bkey = key.encode()   
+    message = message.encode()    
+    signature = hmac.new(bkey, message, hashlib.sha256).hexdigest()
+   
+  
+    
+
+    return signhex
+
+
+#http://13.71.115.17/my_pms2/payment/shopse_payment_callback?
+#orderId=TRBLRGSP12710003_1748&shopSeTxnId=S22062112450579710&
+#status=success&statusCode=0&statusMessage=Transaction%20successful&
+#currentTime=1624365999529&
+#signature=JDwshy9b%2BH4y09cUJwxbycKJdbE2g5lQ8AA%2B5EdFbUo%3D
 #callback_transaction
 def shopse_payment_callback():
     
@@ -1375,16 +1397,20 @@ def shopse_payment_callback():
             continue
         reqobj[key] = params[key]
         
+    #sig = generateHashForShopSe('l42eh9thfp2rxbjxtlkt2ch57aqxsg', 'currentTime%3D1624365999529%26orderId%3DTRBLRGSP12710003_1748%26shopSeTxnId%3DS22062112450579710%26status%3Dsuccess%26statusCode%3D0%26statusMessage%3DTransaction+successful')
     
+    
+   
     
     encryptObj = mdpshopse.Shopse(db)
     encryptrsp = encryptObj.encrypt_sha256_shopse(reqobj)
     encryptrsp = json.loads(encryptrsp)
     
     encryptrsp = encryptrsp["encrypt"]
-    signature = request.vars.signature
+    signature = urllib.quote_plus(request.vars.signature)
 
-    p = db((db.payment.fp_merchantid == request.vars.orderId) & (db.payment.fp_paymentref ==request.vars.shopSeTxnId )).select(db.payment.id,db.payment.provider)
+    p = db((db.payment.fp_paymentref == request.vars.orderId) & (db.payment.fp_paymentdetail ==request.vars.shopSeTxnId )).select(db.payment.id,db.payment.provider)
+    
     paymentid = int(common.getid(p[0].id)) if(len(p) >= 1) else 0
     providerid = int(common.getid(p[0].provider)) if(len(p) >= 1) else 0
     providerinfo  = getproviderinformation(providerid)
@@ -1397,7 +1423,7 @@ def shopse_payment_callback():
     
     if(encryptrsp == signature):
         
-        shopseobj = mdpshopsee.Shopse(db)
+        shopseobj = mdpshopse.Shopse(db)
         rsp = json.loads(shopseobj.callback_transaction(reqobj))
         
         
@@ -1468,10 +1494,10 @@ def shopse_payment_callback():
     
         
         if(len(p)>0):
-            paymentref = p[0].fp_paymentref #shopse tx id
+            paymentref = p[0].fp_paymentref #order id
             paymentdate = (p[0].fp_paymentdate).strftime("%d/%m/%Y") if((p[0].fp_paymentdate != None)) else todaydate
             paymenttype = p[0].fp_paymenttype
-            paymentdetail = p[0].fp_paymentdetail
+            paymentdetail = p[0].fp_paymentdetail  #shopseTxId
             paymentmode = p[0].paymentmode
             cardtype = p[0].fp_cardtype
             merchantid = p[0].fp_merchantid
@@ -1654,6 +1680,8 @@ def make_payment_shopse():
     vwfp = db(db.vw_fonepaise.paymentid == paymentid).select()
     
     treatmentid = int(common.getid(vwfp[0].treatmentid))
+    treatment = (common.getstring(vwfp[0].treatment))[:(20-len(str(paymentid)))] if(len(vwfp) ==1 ) else "TR_" + common.getstringfromdate(common.getISTFormatCurrentLocatTime(),"%d/%m/%Y %H:%M:%S")
+    
     reference_no = (common.getstring(vwfp[0].invoice))[:(20-len(str(paymentid)))] +"_" + str(paymentid) if(len(vwfp) == 1) else "0000_REFNO"
     reference_no=reference_no if(reference_no != "") else "0000_REFNO"
     
@@ -1664,13 +1692,11 @@ def make_payment_shopse():
     #call Shopsee API
     reqobj={
         "action":"create_transaction",
-        "orderId":str(reference_no),       #<treatment>_<paymentid>
+        "treatment":treatment,
+        "paymentid":paymentid,
         "amount":paymentamount,
         "mobile":str(pats[0].cell),
         "email":str(pats[0].email),
-        "returnUrl":str(u[0].shopsee_returnURL),
-        "productName":str(reference_no),
-        "productId":str(treatmentid),
         "firstName":str(pats[0].fname) if(len(pats)==1) else "",
         "lastName":str(pats[0].lname) if(len(pats)==1) else "",
         "address": {
@@ -1683,14 +1709,14 @@ def make_payment_shopse():
         },
         
         "customParams": {
-        "providerid":str(providerid),
-        "paymentid":str(paymentid),
-        "treatmentid":str(treatmentid),
+        "providerid":providerid,
+        "paymentid":paymentid,
+        "treatmentid":treatmentid,
         }    
     }
 
     #call create transaction API
-    obj = mdpshopsee.Shopse(db)
+    obj = mdpshopse.Shopse(db)
     rspobj = json.loads(obj.create_transaction(reqobj))
     
     if(rspobj["result"] == "success"):

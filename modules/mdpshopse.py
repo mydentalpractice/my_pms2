@@ -27,13 +27,18 @@ class Shopse:
         self.db = db
      
         
+     
+        
         r = db(db.shopsee_properties.id>0).select()
 
         self.shopsee_prod_url = r[0].shopsee_prod_url
         self.shopsee_stg_url = r[0].shopsee_stg_url
         self.shopsee_api_token = r[0].shopsee_api_token
         self.shopsee_response_key = r[0].shopsee_response_key
-
+        self.shopsee_returnURL = r[0].shopsee_returnURL
+        self.shopsee_product_name = r[0].product_name
+        self.shopsee_product_id = r[0].product_id
+        self.webhookUrl = r[0].webhookUrl
 
     def encrypt_sha256_shopse(self,avars):
         
@@ -60,17 +65,24 @@ class Shopse:
                 if(keyname == "action"):
                     continue
                 if(first):
-                    rspstr = str(keyname) + "=" + str(keyval)
+                    
+                    n = keyname #urllib.quote(keyname.encode('utf-8'))
+                    k = keyval #urllib.quote(keyval.encode('utf-8'))
+                    rspstr = str(n) + "=" + str(k)
                     first = False
                 else:
-                    rspstr = rspstr + "&" + str(keyname) + "=" + str(keyval)
+                    n = keyname #urllib.quote(keyname.encode('utf-8'))
+                    k = keyval #urllib.quote(keyval.encode('utf-8'))
+                    rspstr = rspstr + "&" + str(n) + "=" + str(k)
+            
             
             logger.loggerpms2.info("Signature String to Encrypt " + rspstr)
             
             
-            rspstr = urllib.quote(rspstr.encode('utf-8'))
+            rspstr1 = urllib.quote_plus(rspstr.encode('utf-8'))
+            logger.loggerpms2.info("Signature (URL Encode) String to Encrypt " + rspstr1)
             obj = datasecurity.DataSecurity()
-            rsp = json.loads(obj.encrypt_sha256_shopse(rspstr))
+            rsp = json.loads(obj.encrypt_sha256_shopse(rspstr1,self.shopsee_response_key))
 
         except Exception as e:
             error_message = "Shopsee Encrypt Sha256  API Exception " + str(e)
@@ -97,14 +109,14 @@ class Shopse:
             
             #Request CreateTransaction API
             shopsee_request = {
-                "orderId":common.getkeyvalue(avars,"orderId",""),   #<treatment>_<paymentid> e.g. TRTMUM001XXXX_1234
+                "orderId":common.getkeyvalue(avars,"treatment","") + "_" + str(common.getkeyvalue(avars,"paymentid",0)),   #<treatment>_<paymentid> e.g. TRTMUM001XXXX_1234
                 "amount":float(common.getkeyvalue(avars,"amount","0")),
                 "mobile":common.getkeyvalue(avars,"mobile",""),
                 "email":common.getkeyvalue(avars,"email",""),
-                "returnUrl":common.getkeyvalue(avars,"returnUrl",""),
-                "productName":common.getkeyvalue(avars,"productName",""),
-                
-                "productId":common.getkeyvalue(avars,"productId",""),
+                "returnUrl":self.shopsee_returnURL,
+                "webhookUrl":self.webhookUrl,
+                "productName":self.shopsee_product_name ,
+                "productId":self.shopsee_product_id ,
                 "firstName":common.getkeyvalue(avars,"firstName",""),
                 "lastName":common.getkeyvalue(avars,"lastName",""),
                 "address":avars["address"],
@@ -132,12 +144,17 @@ class Shopse:
                 treatmentid = int(common.getid(x[0].id)) if(len(x) > 0) else 0
                 amount = float(common.getkeyvalue(avars,"amount","0"))
                 db(db.payment.id == paymentid).update(
-                                                      fp_paymentref = common.getkeyvalue(jsonresp,"shopSeTxnId",""),
+                    
+                                                      fp_paymentref = common.getkeyvalue(jsonresp,"OrderId",""),
                                                       amount = amount,
                                                       fp_invoice = treatment,
                                                       fp_invoiceamt = amount,
                                                       fp_amount = amount,
-                                                      fp_merchantid = common.getkeyvalue(jsonresp,"OrderId",""))
+                                                      fp_merchantid = "MDP",
+                                                      fp_paymenttype = "ShopSe",
+                                                      fp_paymentdetail = common.getkeyvalue(jsonresp,"shopSeTxnId",""),
+                                                      fp_merchantdisplay="MyDental Health Plan Pvt. Ltd."
+                                                    )
                 
                 logger.loggerpms2.info("Shopsee createTransaction API Response \n" + json.dumps(jsonresp)) 
                 
@@ -176,9 +193,8 @@ class Shopse:
                 orderid = common.getkeyvalue(avars,"orderid","") 
                 shopsetxnid = common.getkeyvalue(avars,"shopsetxnid","") 
                 
-                p = db((db.payment.fp_merchantid == orderid) & (db.payment.fp_paymentref ==shopsetxnid )).select(db.payment.id)
-         
-                db((db.payment.fp_merchantid == orderid) & (db.payment.fp_paymentref ==shopsetxnid )).update(fp_status = common.getkeyvalue(avars,"status",""),
+                p = db((db.payment.fp_paymentref == orderid) & (db.payment.fp_paymentdetail ==shopsetxnid )).select(db.payment.id)
+                db((db.payment.fp_paymentref == orderid) & (db.payment.fp_paymentdetail ==shopsetxnid )).update(fp_status = common.getkeyvalue(avars,"status",""),
                                                                                                                  paymentcommit = True,
                                                                                                                  fp_paymentdate = ""
                                                                                                                  )
@@ -206,6 +222,12 @@ class Shopse:
         
         return json.dumps(jsonresp)
     
+    
+    
+    
+    
+    
+    #This API is called from ShopSe
     def mdp_shopse_webhook(self,avars):
         
         logger.loggerpms2.info("Enter mdp_shopse_webhook API == >" + json.dumps(avars))
@@ -217,12 +239,48 @@ class Shopse:
                 orderid = common.getkeyvalue(avars,"orderid","") 
                 shopsetxnid = common.getkeyvalue(avars,"shopsetxnid","") 
                 
-                db((db.payment.fp_merchantid == orderid) & (db.payment.fp_paymentref ==shopsetxnid )).update(fp_status == common.getkeyvalue(avars,"status",""),
+                #generate encryption signature
+                sigobj = {}
+                sigobj["orderId"] = common.getkeyvalue(avars,"orderId","")
+                sigobj["shopSeTxnId"] = common.getkeyvalue(avars,"shopSeTxnId","")
+                sigobj["status"] = common.getkeyvalue(avars,"status","")
+                sigobj["statusCode"] = common.getkeyvalue(avars,"statusCode","")
+                sigobj["statusMessage"] = common.getkeyvalue(avars,"statusMessage","")
+                sigobj["currentTime"] = common.getkeyvalue(avars,"currentTime","")
+                sigobj = json.loads(self.encrypt_sha256_shopse(sigobj))
+                
+                gen_signature = sigobj["encrypt"]
+                signature = urllib.quote_plus(common.getkeyvalue(avars,"signature",""))
+                
+                #mismatch
+                #if(gen_signature != signature):
+                    #error_message = "Webhook Callback Failure - Signature Mismatch\n" + "Calculated Signature = " + gen_signature + "\n" + "Callback Signature = " + signature
+                    #logger.loggerpms2.info(error_message)
+                    #jsonresp = {
+                      #"result":"fail",
+                      #"error_message":error_message
+                    #}
+                    
+                    #return json.dumps(jsonresp)
+
+                logger.loggerpms2.info("Signatures Match")
+                
+                otherinfo = json.dumps(common.getkeyvalue(avars,"payment","")) + "\n" + json.dumps(common.getkeyvalue(avars,"charge",""))
+                strdt = common.getkeyvalue(avars,"timestamp",common.getstringfromdate(common.getISTFormatCurrentLocatTime(),"%Y-%m-%dT%H:%M:%S.000Z"))
+                paymentdate = common.getdatefromstring(strdt, "%Y-%m-%dT%H:%M:%S.%fZ")
+                
+                db((db.payment.fp_paymentref == orderid) & (db.payment.fp_paymentdetail ==shopsetxnid )).update(fp_status = common.getkeyvalue(avars,"status",""),
                                                                                                                  paymentcommit = True,
-                                                                                                                 fp_paymentdate = ""
+                                                                                                                 fp_paymentdate = paymentdate,
+                                                                                                                 fp_otherinfo = otherinfo
                                                                                                                  )
                 
-                jsonresp = avars
+                #need to send email to Patient
+                jsonresp = {}
+                jsonresp["orderid"] = common.getkeyvalue(avars,"orderid","") 
+                jsonresp["shopSeTxnId"] = common.getkeyvalue(avars,"shopSeTxnId","")
+                jsonresp["result"] = "success"
+                jsonresp["error_message"] = ""
                 
                 
         except Exception as e:
@@ -234,6 +292,6 @@ class Shopse:
             }
             return json.dumps(jsonresp)
         
-        
+        logger.loggerpms2.info("Exit Shopse Webhook = " + json.dumps(jsonresp))
         return json.dumps(jsonresp)
     

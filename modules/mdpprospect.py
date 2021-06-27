@@ -430,6 +430,49 @@ class Prospect:
                 
             
             #create a new prospect
+            
+            provider=common.getkeyvalue(avars,'provider',"")
+            title=common.getkeyvalue(avars,'title',"")
+            providername=common.getkeyvalue(avars,'providername',"")
+            practicename=common.getkeyvalue(avars,'practicename',"")
+            address1=common.getkeyvalue(avars,'address1',"")
+            address2=common.getkeyvalue(avars,'address2',"")
+            address3=common.getkeyvalue(avars,'address3',"")
+            city=common.getkeyvalue(avars,'city',"")
+            st=common.getkeyvalue(avars,'st',""),
+            pin=common.getkeyvalue(avars,'pin',"")
+
+            
+           
+            
+            p_address1=common.getkeyvalue(avars,'p_address1',address1)
+            p_address1 = address1 if(p_address1 == "") else p_address1
+            p_address2=common.getkeyvalue(avars,'p_address2',address2)
+            p_address2 = address2 if(p_address2 == "") else p_address2
+            p_address3=common.getkeyvalue(avars,'p_address3',address3)
+            p_address3 = address3 if(p_address3 == "") else p_address3
+            p_city=common.getkeyvalue(avars,'p_city',city)
+            p_city = city if(p_city == "") else p_city
+            p_st=common.getkeyvalue(avars,'p_st',st)
+            p_st = st if(p_st == "") else p_st
+            p_pin=common.getkeyvalue(avars,'p_pin',pin)
+            p_pin = pin if(p_pin == "") else p_pin
+            
+           
+            
+            pa_providername=  common.getkeyvalue(avars,'pa_providername',"")
+            pa_providername = providername if(pa_providername == "") else pa_providername
+            pa_practicename=  common.getkeyvalue(avars,'pa_practicename',"")
+            pa_practicename = practicename if(pa_practicename == "") else pa_practicename
+            pa_practiceaddress=common.getkeyvalue(avars,'pa_practiceaddress',"")
+            pa_practiceaddress = practiceaddress if(pa_practiceaddress == "") else pa_practiceaddress
+            pa_address=common.getkeyvalue(avars,'pa_address',practiceaddress)
+            pa_address = practiceaddress if(pa_address == "") else pa_address
+            pa_pan=common.getkeyvalue(avars,'pa_pan',""),
+            pa_practicepin=common.getkeyvalue(avars,'pa_practicepin',"")
+            pa_practicepin = pin if(pa_practicepin == "") else pa_practicepin
+            
+            
             prospectid = db.prospect.insert(\
                 
                 
@@ -443,12 +486,12 @@ class Prospect:
                 city=common.getkeyvalue(avars,'city',""),
                 st=common.getkeyvalue(avars,'st',""),
                 pin=common.getkeyvalue(avars,'pin',""),
-                p_address1=common.getkeyvalue(avars,'p_address1',address1),
-                p_address2=common.getkeyvalue(avars,'p_address2',address2),
-                p_address3=common.getkeyvalue(avars,'p_address3',address3),
-                p_city=common.getkeyvalue(avars,'p_city',city),
-                p_st=common.getkeyvalue(avars,'p_st',st),
-                p_pin=common.getkeyvalue(avars,'p_pin',pin),
+                p_address1=p_address1,
+                p_address2=p_address2,
+                p_address3=p_address3,
+                p_city=p_city,
+                p_st=p_st,
+                p_pin=p_pin,
                 telephone=common.getkeyvalue(avars,'telephone',""),
                 cell=common.getkeyvalue(avars,'cell',""),
                 email=common.getkeyvalue(avars,'email',""),
@@ -467,12 +510,13 @@ class Prospect:
                 registration=common.getkeyvalue(avars,'registration',""),
                 registered=common.getboolean(common.getkeyvalue(avars,'registered',"True")),
                 languagesspoken=common.getkeyvalue(avars,'languagesspoken',"English"),
-                pa_providername=common.getkeyvalue(avars,'pa_providername',common.getkeyvalue(avars,'providername',"")),
-                pa_practicename=common.getkeyvalue(avars,'pa_practicename',common.getkeyvalue(avars,'practicename',"")),
-                pa_practiceaddress=common.getkeyvalue(avars,'pa_practiceaddress',practiceaddress),
+                
+                pa_providername=  pa_providername,
+                pa_practicename=  pa_practicename,
+                pa_practiceaddress=pa_practiceaddress,
                 pa_dob=common.getdatefromstring(common.getkeyvalue(avars,'pa_dob',common.getstringfromdate(datetime.datetime.today(),"%d/%m/%Y")),"%d/%m/%Y"),
                 pa_parent=common.getkeyvalue(avars,'pa_parent',""),
-                pa_address=common.getkeyvalue(avars,'pa_address',practiceaddress),
+                pa_address=pa_address,
                 pa_pan=common.getkeyvalue(avars,'pa_pan',""),
                 pa_regno=common.getkeyvalue(avars,'pa_regno',""),
                 pa_date=common.getdatefromstring(common.getkeyvalue(avars,'pa_date',common.getstringfromdate(datetime.datetime.today(),"%d/%m/%Y")),"%d/%m/%Y"),
@@ -484,7 +528,7 @@ class Prospect:
                 pa_day=common.getkeyvalue(avars,'pa_day',""),
                 pa_month=common.getkeyvalue(avars,'pa_month',""),
                 pa_location=common.getkeyvalue(avars,'pa_location',common.getkeyvalue(avars,'city',"")),
-                pa_practicepin=common.getkeyvalue(avars,'pa_practicepin',""),
+                pa_practicepin=pa_practicepin,
                 pa_hours=common.getkeyvalue(avars,'pa_hours',""),
                 pa_longitude=common.getkeyvalue(avars,'pa_longitude',""),
                 pa_latitude=common.getkeyvalue(avars,'pa_latitude',""),

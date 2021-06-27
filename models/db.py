@@ -415,6 +415,8 @@ db.define_table('auth_user',
           writable=False,readable=False),
     Field('impersonatorid','integer',default=1,
           writable=False,readable=False),
+
+    Field('IND_IS_SYNC','boolean'),
     
     format='%(username)s')
 
@@ -538,6 +540,7 @@ db.define_table('company',
                 Field('cashlesspayment','boolean', default=True),
                 Field('cashpayment','boolean', default=True),
                 Field('chequepayment','boolean', default=True),
+                Field('IND_IS_SYNC','boolean'),
                 Field('hmoplan', 'reference hmoplan'),
                 Field('agent', 'reference agent'),
                 Field('groupkey', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'),default='', label='Group Key', length=20),
@@ -883,6 +886,7 @@ db.define_table('provider',
                 
                 Field('bankid','reference providerbank'),                
                 Field('imageid','integer'),                
+                Field('IND_VC','boolean',default=False),
                 
                 auth.signature,
                 format='%(providername)s (%(provider)s')
@@ -1440,6 +1444,7 @@ db.define_table('shopsee_properties',
                 Field('shopsee_returnURL', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'), default=''),
                 Field('shopsee_stg_url', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'), default=''),
                 Field('shopsee_prod_url', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'), default=''),
+                Field('webhookUrl', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'), default=''),
                 Field('shopsee_api_token', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'), default=''),
                 Field('shopsee_response_key', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'), default=''),
                 Field('shopsee_axis_db_card', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'), default=''),
@@ -1454,6 +1459,8 @@ db.define_table('shopsee_properties',
                 Field('shopsee_hdfc_db_card_exp', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'), default=''),
                 Field('shopsee_hdfc_db_card_cvv', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'), default=''),
                 Field('shopsee_hdfc_db_card_otp', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'), default=''),
+                Field('product_name', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'), default=''),
+                Field('product_id', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'), default=''),
 )
 db.shopsee_properties._singular = "shopsee_properties"
 db.shopsee_properties._plural = "shopsee_properties"
@@ -2703,6 +2710,7 @@ db.define_table('doctor',
                 Field('practice_owner','boolean', default = False),
                 
                 Field('approval_date','datetime'),
+                Field('IND_IS_SYNC','boolean'),
                 
                 Field('is_active','boolean', default = True),
                 
@@ -3302,7 +3310,9 @@ db.vw_appointment_weekly._plural   = "vw_appointment_weekly"
 db.define_table('vw_provider',
                 Field('providerid', 'integer'),
                 Field('provider', 'string'),
-                Field('is_active','boolean')
+                Field('is_active','boolean'),
+                Field('IND_VC','boolean')
+                
                 )
 db.vw_provider._singular = "vw_provider"
 db.vw_provider._plural   = "vw_provider"
@@ -3501,7 +3511,9 @@ db.define_table('vw_doctor',
     Field('stafftype','string'),
     Field('notes','text'),
     Field('practice_owner','boolean'),
-    Field('is_active','boolean')
+    Field('is_active','boolean'),
+    Field('IND_IS_SYNC','boolean')
+    
     )
     
     

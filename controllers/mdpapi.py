@@ -2944,7 +2944,7 @@ def callback_transaction(avars):
 
 def mdp_shopse_webhook(avars):
     
-    obj = mdpshopse.Shopsee(current.globalenv['db'])
+    obj = mdpshopse.Shopse(current.globalenv['db'])
     rsp = obj.mdp_shopse_webhook(avars)
     
     return rsp
