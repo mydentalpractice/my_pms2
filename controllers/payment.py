@@ -1407,7 +1407,7 @@ def shopse_payment_callback():
     encryptrsp = json.loads(encryptrsp)
     
     encryptrsp = encryptrsp["encrypt"]
-    signature = urllib.quote_plus(request.vars.signature)
+    signature = urllib.quote_plus(request.vars.signature)  if "signature" in request.vars else ""
 
     p = db((db.payment.fp_paymentref == request.vars.orderId) & (db.payment.fp_paymentdetail ==request.vars.shopSeTxnId )).select(db.payment.id,db.payment.provider)
     
@@ -1689,6 +1689,8 @@ def make_payment_shopse():
     pats = db(db.patientmember.id == memberid).select()
 
     u = db(db.shopsee_properties.id > 0).select(db.shopsee_properties.shopsee_returnURL)
+    
+    
     #call Shopsee API
     reqobj={
         "action":"create_transaction",
@@ -1713,6 +1715,8 @@ def make_payment_shopse():
         "paymentid":paymentid,
         "treatmentid":treatmentid,
         }    
+        
+        
     }
 
     #call create transaction API

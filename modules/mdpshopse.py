@@ -107,6 +107,31 @@ class Shopse:
             #shopsee_header = {"Content-Type":"application/json"}
             shopsee_header = {"Content-Type":"application/json","Authorization":self.shopsee_api_token}
             
+            
+            #get list of procedures for a treatment
+            treatment = common.getkeyvalue(avars,"treatment","")
+            trs= db((db.treatment.treatment == treatment) & (db.treatment.is_active  == True)).select(db.treatment.id)
+            treatmentid = trs[0].id if(len(trs)==1) else 0
+            procs = db((db.vw_treatmentprocedure.treatmentid  == treatmentid) & (db.vw_treatmentprocedure.is_active == True)).select()
+            
+            proclist = []
+            procobj = {}
+            providerid = 0
+            
+            for proc in procs:
+                providerid = proc.providerid
+                procobj={}
+                procobj["productId"] = proc.procedurecode
+                procobj["name"] = proc.altshortdescription
+                procobj["amount"] = proc.procedurefee
+                proclist.append(procobj)
+            
+            provdict = common.getproviderfromid(db,providerid)
+            customParams = avars["customParams"] if ("customParams" in avars) else {}
+            
+            customParams["SalesPersonEmail"] = provdict["email"]
+            customParams["SalesPersonMobile"] = provdict["cell"]
+            
             #Request CreateTransaction API
             shopsee_request = {
                 "orderId":common.getkeyvalue(avars,"treatment","") + "_" + str(common.getkeyvalue(avars,"paymentid",0)),   #<treatment>_<paymentid> e.g. TRTMUM001XXXX_1234
@@ -115,12 +140,13 @@ class Shopse:
                 "email":common.getkeyvalue(avars,"email",""),
                 "returnUrl":self.shopsee_returnURL,
                 "webhookUrl":self.webhookUrl,
-                "productName":self.shopsee_product_name ,
-                "productId":self.shopsee_product_id ,
+                "productName":treatment ,
+                "productId":treatmentid,
                 "firstName":common.getkeyvalue(avars,"firstName",""),
                 "lastName":common.getkeyvalue(avars,"lastName",""),
                 "address":avars["address"],
-                "customParams":avars["customParams"]
+                "customParams":avars["customParams"],
+                "products":proclist
             }
         
             logger.loggerpms2.info("SHOPSEE REQUEST\n" + json.dumps(shopsee_request))

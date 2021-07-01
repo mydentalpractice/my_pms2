@@ -16,10 +16,82 @@ class Prospect:
     def __init__(self,db):
         self.db = db
     
+        
+    def list_spat_provider(self,avars):
+        logger.loggerpms2.info("Enter SPAT Provider List - " + json.dumps(avars))
+        auth  = current.auth
+        db = self.db        
     
-     
+        jsonresp = {}
+        try:
+            i = 0
+            ref_code = avars["spatcode"] if "spatcode" in avars else "AGN"
+            ref_id = int(common.getid(avars["spatid"])) if "spatid" in avars else 0            
+            
+            lst = []
+            obj = {}
+            
+            rspobj = {}
+            
+            ds = None
+            if(ref_code == ""):
+                if(ref_id == 0):
+                    ds = db((db.provider.is_active == True)).select(db.provider.ALL,db.prospect_ref.ALL,\
+                                                                                        left=db.provider.on((db.provider.id == db.prospect_ref.providerid_id)))
+                else:
+                    ds = db((db.prospect_ref.ref_id == ref_id) &  (db.provider.is_active == True)).select(db.provider.ALL,db.prospect_ref.ALL,\
+                                                                                        left=db.provider.on((db.provider.id == db.prospect_ref.provider_id)))
+                    
+            else:
+                
+                if(ref_id == 0):
+                    ds = db((db.prospect_ref.ref_code == ref_code) &  (db.provider.is_active == True)).select(db.provider.ALL,db.prospect_ref.ALL,\
+                                                                                        left=db.provider.on((db.provider.id == db.prospect_ref.provider_id)))
+      
+                else:
+                    ds = db((db.prospect_ref.ref_code == ref_code)&(db.prospect_ref.ref_id == ref_id) &  (db.provider.is_active == True)).select(db.provider.ALL,db.prospect_ref.ALL,\
+                                                                                        left=db.provider.on((db.provider.id == db.prospect_ref.provider_id)))
+      
+            
+            for d in ds:
+               
+                clinic_count = db((db.clinic_ref.ref_code == 'PRV') & (db.clinic_ref.ref_id == d.provider.id)).count()
+                obj = {
+                    "spat_code":d.prospect_ref.ref_code,   #AGN
+                    "spatid":d.prospect_ref.ref_id,       #ID to either AGent Table
+                    
+                    "providerid":d.provider.id,
+                    "providername":d.provider.providername,
+                    "cell":d.provider.cell,
+                    "email":d.provider.email,
+                    "status":d.provider.status,
+                    "clinic_count":str(clinic_count)
+                }
+                lst.append(obj)   
+
+            jsonresp["result"] = "success"
+            jsonresp["error_code"] = ""
+            jsonresp["error_message"] = ""
+            jsonresp["count"] = len(ds)
+            jsonresp["list"] = lst
+
+            
+            
+        except Exception as e:
+            mssg = "list SPAT Provider Exception:\n" + str(e)
+            logger.loggerpms2.info(mssg)      
+            excpobj = {}
+            excpobj["result"] = "fail"
+            excpobj["error_code"] = "MDP-PRST-101"
+            excpobj["error_message"] = mssg
+            return json.dumps(excpobj)        
         
         
+        jsonrespstring = json.dumps(jsonresp)
+        
+        logger.loggerpms2.info("Exit List_prospect_provider ==> " + jsonrespstring)       
+        return jsonrespstring
+    
     
     def list_prospect(self,avars):
         auth  = current.auth

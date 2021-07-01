@@ -210,7 +210,12 @@
 					       <!--<a href="#" class="btn green" onclick="makeOnlinePayment()" style="margin: 8px 3px;float:right">Online Payment </a>&nbsp;&nbsp;-->
 					       {{pass}}
 					       {{if(online):}}
-					       <button id="SP" style="margin: 8px 3px;float:right"  type="submit"  onclick="loader(this.id),makeShopseePayment()" class="btn green" >Shopse Payment <i class="fa fa-spinner fa-spin" id="loaderDIVSP" style="display:none"></i></button>
+					       <!--<button id="SP" style="margin: 8px 3px;float:right"  type="submit"  onclick="loader(this.id),makeShopseePayment()" class="btn green" >Shopse Payment <i class="fa fa-spinner fa-spin" id="loaderDIVSP" style="display:none"></i>-->
+					       <!--</button>-->
+					       
+					       <button id="SP" style="float:right"  type="submit"  onclick="loader(this.id),makeShopseePayment()"  ><img src="..\static\images\shopsebtn.png" /><i class="fa fa-spinner fa-spin" id="loaderDIVSP" style="display:none"></i>
+                                                  					       
+					       </button>
 					       {{pass}}
 					       </span>
 					       

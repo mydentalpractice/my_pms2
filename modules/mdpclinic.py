@@ -71,9 +71,24 @@ class Clinic:
                 if(len(r)!=1):
                     continue
                 
+                imglst = []
+                imgobj = {}
+                
                 p = db((db.dentalimage_ref.ref_code == "CLN") & (db.dentalimage_ref.ref_id == d.clinic_id)).select()
                 mediaid = 0 if(len(p) == 0) else int(common.getid(p[0].media_id))
                 md = db((db.dentalimage.id == mediaid) & (db.dentalimage.is_active == True)).select()
+                for i in p:
+                    imgobj = {}
+                    mediaid = i.media_id
+                    imgs = db((db.dentalimage.id == mediaid) & (db.dentalimage.is_active == True)).select()
+                    
+                    imgobj["mediaurl"] = urlprops[0].mydp_ipaddress + "/my_dentalplan/media/media_download/" + str(mediaid)
+                    imgobj["media" ] = "" if(len(imgs) == 0) else  common.getstring(imgs[0].image)
+                    imgobj["uploadfolder"] = "" if(len(imgs) == 0) else common.getstring(imgs[0].uploadfolder)
+                    imgobj["title"] = "" if(len(imgs) == 0) else common.getstring(imgs[0].title)
+                    imgobj["imagedate"]= "00/00/00" if(len(imgs) == 0) else common.getstringfromdate(imgs[0].imagedate,"%d/%m/%Y")
+                    imglst.append(imgobj)
+                    
                 dobj = {
                     
                     "ref_code":ref_code,
@@ -91,8 +106,10 @@ class Clinic:
                     "uploadfolder":"" if(len(md) == 0) else common.getstring(md[0].uploadfolder),
                     "title":"" if(len(md) == 0) else common.getstring(md[0].title),
                     "imagedate":"00/00/00" if(len(md) == 0) else common.getstringfromdate(md[0].imagedate,"%d/%m/%Y"),
+                    "imagelist":imglst,
                     "longitude":r[0].longitude if len(r) == 1 else "",
                     "latitude":r[0].latitude if len(r) == 1 else "",
+                    "gps_location":r[0].gps_location if len(r) == 1 else "",
                     
                 }
                 cliniclist.append(dobj)

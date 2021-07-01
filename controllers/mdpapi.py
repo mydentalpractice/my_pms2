@@ -2867,6 +2867,14 @@ def new_prospect(avars):
     rsp = prs.new_prospect(avars)
     return rsp
 
+def list_spat_provider(avars):
+
+    prs = mdpprospect.Prospect(current.globalenv['db'])
+
+    rsp = prs.list_spat_provider(avars)
+    return rsp
+    
+    
 def list_prospect(avars):
     logger.loggerpms2.info("Enter List Prospect Request\n" + str(avars) )
     prs = mdpprospect.Prospect(current.globalenv['db'])
@@ -3069,7 +3077,7 @@ doctorAPI_switcher = {
 
 prospectAPI_switcher = {
     "new_prospect":new_prospect,"list_prospect":list_prospect,"get_prospect":get_prospect,"update_prospect":update_prospect,"delete_propsect":delete_propsect,\
-    "approve_prospect":approve_prospect, "enroll_prospect":enroll_prospect
+    "approve_prospect":approve_prospect, "enroll_prospect":enroll_prospect,"list_spat_provider":list_spat_provider
 }
 
 appointmentAPI_switcher = {
