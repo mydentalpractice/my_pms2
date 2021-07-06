@@ -1498,10 +1498,13 @@ def providerhome():
     clinicid = session.clinicid
     clinicname = session.clinicname
     
+    
     provdict = common.getprovider(auth,db)
     providerid = int(provdict["providerid"])
     if(providerid  < 0):
         raise HTTP(400,"PMS-Error: There is no valid logged-in Provider: providerhome()")    
+
+    logger.loggerpms2.info("Enter Provider Home = " + str(providerid) + " " + str(clinicid) + " " + clinicname)
    
     prov = db(db.provider.id == providerid).select(db.provider.pa_practicename,db.provider.pa_practiceaddress)
     
@@ -1548,6 +1551,7 @@ def providerhome():
         weeklyappts = db((db.vw_appointment_weekly.providerid == providerid) & (db.vw_appointment_weekly.is_active == True)).select(orderby=db.vw_appointment_weekly.f_start_time)
         monthlyappts = db((db.vw_appointment_monthly.providerid == providerid) & (db.vw_appointment_monthly.is_active == True)).select(orderby=db.vw_appointment_monthly.f_start_time)
 
+        logger.loggerpms2.info("ProviderHome clinicid == 0" + " " + str(clinicid) + " rows " + str(len(rows)) + " daily " + str(len(dailyappts)) + " weekly " + str(len(weeklyappts))+ " monthly " + str(len(monthlyappts)))
 
     else:
         rows=db((db.t_appointment.provider==providerid)& ((db.t_appointment.clinicid==clinicid)&(db.t_appointment.clinicid!=None)) &\
@@ -1558,8 +1562,9 @@ def providerhome():
         dailyappts  = db((db.vw_appointment_today.providerid == providerid) & (db.vw_appointment_today.clinicid == clinicid) &  (db.vw_appointment_today.is_active == True)).select(orderby=db.vw_appointment_today.f_start_time)
         weeklyappts = db((db.vw_appointment_weekly.providerid == providerid) & (db.vw_appointment_weekly.clinicid == clinicid) & (db.vw_appointment_weekly.is_active == True)).select(orderby=db.vw_appointment_weekly.f_start_time)
         monthlyappts = db((db.vw_appointment_monthly.providerid == providerid) & (db.vw_appointment_monthly.clinicid == clinicid) & (db.vw_appointment_monthly.is_active == True)).select(orderby=db.vw_appointment_monthly.f_start_time)
-    
-    
+        
+        logger.loggerpms2.info("ProviderHome clinicid != 0" + " " + str(clinicid) + " rows " + str(len(rows)) + " daily " + str(len(dailyappts)) + " weekly " + str(len(weeklyappts))+ " monthly " + str(len(monthlyappts)))
+         
     
     
    

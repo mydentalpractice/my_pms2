@@ -8665,7 +8665,7 @@ XXXZZZZupdate role in doctor to refer to role_default
 3. XXXXYYYYZZZAdded hmopatientmember in vw_appointments
 4, XXXXYYYZZZZadding clinicid to vw_appointment* views
 5. XXXXYYYZZZ vw_patientprescription
-6. YYYZZZZNew Table Shopsee Properties to add SHOPSEE specific 
+6. XXXYYYZZZZNew Table Shopsee Properties to add SHOPSEE specific 
 CREATE TABLE `shopsee_properties` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `shopsee_stg_url` varchar(512) DEFAULT NULL,
@@ -8717,12 +8717,12 @@ ADD COLUMN `IND_IS_SYNC` CHAR(1) NULL AFTER `chequepayment`;
 
 24/06/2021
 ===========
-1. YYYZZZZAdd Product Name & Product ID fields Shopsee Properties
+1. XXXYYYZZZZAdd Product Name & Product ID fields Shopsee Properties
 ALTER TABLE `mydp_prod`.`shopsee_properties` 
 ADD COLUMN `product_name` VARCHAR(512) NULL DEFAULT NULL AFTER `shopsee_hdfc_db_card_otp`,
 ADD COLUMN `product_id` VARCHAR(512) NULL DEFAULT NULL AFTER `product_name`;
 
-2.ZZZZAdd webHookUrl
+2.XXXXYYYYZZZZAdd webHookUrl
 ALTER TABLE `mydp_prod`.`shopsee_properties` 
 ADD COLUMN `webhookUrl` VARCHAR(512) NULL DEFAULT NULL AFTER `product_id`;
 

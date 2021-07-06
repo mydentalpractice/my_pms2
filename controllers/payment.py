@@ -1384,7 +1384,7 @@ def generateHashForShopSe(key, message):
 #callback_transaction
 def shopse_payment_callback():
     
-    
+    logger.loggerpms2.info("Enter Shopse Payment Callback " + json.dumps(request.vars))
     reqobj = {}
     
     
@@ -1422,13 +1422,14 @@ def shopse_payment_callback():
 
     
     if(encryptrsp == signature):
-        
+        logger.loggerpms2.info("ShopSe-Enter Callback Transaction Sign Match ==>" + signature + "\n" + json.dumps(reqobj))
         shopseobj = mdpshopse.Shopse(db)
         rsp = json.loads(shopseobj.callback_transaction(reqobj))
-        
+        logger.loggerpms2.info("ShopSe-Return Callback Transaction=>>" + json.dumps(rsp))
         
         paymentobj = mdppayment.Payment(db, providerid)
         receiptobj = json.loads(paymentobj.paymentreceipt(paymentid))
+        logger.loggerpms2.info("Shopse - Exit Payment Receipt " + json.dumps(receiptobj))
         returnurl = URL("admin","logout") 
         
         

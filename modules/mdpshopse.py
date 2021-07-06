@@ -208,6 +208,8 @@ class Shopse:
         logger.loggerpms2.info("Shopsee Exit createTransaction API \n" + json.dumps(jsonresp)) 
         return json.dumps(jsonresp)
     
+    #2021-07-06 09:22:02,321 - web2py.app.my_pms2 - INFO - Enter Shopsee callback_transaction API == >{"orderId": "TRCHAGSP13010001_2158", "status": "failed", "currentTime": "1625543519024", "shopSeTxnId": "S06072103513799343", "statusMessage": "We are observing technical issues with the Bank. Please try again after some time.", "statusCode": "53"}
+    #2021-07-06 09:22:02,321 - web2py.app.my_pms2 - INFO - Exit Shopsee callback_transaction API Exception 'message'
     
     def callback_transaction(self,avars):
         

@@ -324,7 +324,7 @@ class Payment:
         #get list of payments made for this treatment
         payments = db((db.vw_paymentlist.is_active == True) & (db.vw_paymentlist.providerid == providerid) &\
                    (db.vw_paymentlist.treatmentid==treatmentid) & (db.vw_paymentlist.memberid==memberid) & \
-                   (db.vw_paymentlist.patientid==patientid)).select()        
+                   (db.vw_paymentlist.patientid==patientid)).select(db.vw_paymentlist.ALL, orderby = ~(db.vw_paymentlist.paymentdate))
         
         paylist = []
         payobj = {}

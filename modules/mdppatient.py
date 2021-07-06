@@ -112,7 +112,7 @@ class Patient:
       medhist = db((db.medicalnotes.patientid == patientid) & (db.medicalnotes.memberid == memberid)).select()
       
       pats = db((db.vw_memberpatientlist.patientid == patientid) & (db.vw_memberpatientlist.primarypatientid == memberid)).\
-        select(db.vw_memberpatientlist.dob,db.vw_memberpatientlist.gender)
+        select(db.vw_memberpatientlist.dob,db.vw_memberpatientlist.gender,db.vw_memberpatientlist.fullname)
       
       
       ageyear = pats[0].dob.year if(pats[0].dob != None) else datetime.date.today().year
@@ -153,6 +153,9 @@ class Patient:
           medhistobj["dob"] = pats[0].dob.strftime("%d/%m/%Y")  if(pats[0].dob != None) else ""
           medhistobj["age"] = age
           medhistobj["gender"] = pats[0].gender
+          medhistobj["memberid"] = memberid
+          medhistobj["patientid"] = patientid
+          medhistobj["membername"] = pat[0].fullame
           
           medhistobj["result"] = "success"
           medhistobj["error_message"] = ""

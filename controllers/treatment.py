@@ -485,9 +485,10 @@ def gettreatmentgrid(page, imagepage, providerid, providername, treatment, membe
     fields=(db.vw_treatmentlist.patientname,db.vw_treatmentlist.treatment,db.vw_treatmentlist.chiefcomplaint,db.vw_treatmentlist.startdate,db.vw_treatmentlist.dentalprocedure, db.vw_treatmentlist.shortdescription, db.vw_treatmentlist.memberid,
             db.vw_treatmentlist.treatmentplan,db.vw_treatmentlist.status,db.vw_treatmentlist.treatmentcost,db.vw_treatmentlist.memberid,db.vw_treatmentlist.patientid,db.vw_treatmentlist.tplanid,db.vw_treatmentlist.clinicname)
 
+    #'vw_treatmentlist.clinicname':'Clinic',
+
     headers={
         'vw_treatmentlist.treatment':'Treatment No.',
-        'vw_treatmentlist.clinicname':'Clinic',
         'vw_treatmentlist.chiefcomplaint':'Complaint',
         'vw_treatmentlist.patientname':'Patient',
         'vw_treatmentlist.startdate':'Treatment Date',
@@ -510,6 +511,7 @@ def gettreatmentgrid(page, imagepage, providerid, providername, treatment, membe
     db.vw_treatmentlist.dentalprocedure.readable = False
     db.vw_treatmentlist.shortdescription.readable = False
     
+    db.vw_treatmentlist.clinicname.readable = False
     
     links = [\
            dict(header=CENTER("Open"), body=lambda row: CENTER(A(IMG(_src="/my_pms2/static/img/edit.png",_width=25, _height=25),_href=URL("treatment","update_treatment",vars=dict(page=page,imagepage=imagepage,treatmentid=row.id, providerid=providerid))))),

@@ -511,7 +511,7 @@ class Prospect:
             address2=common.getkeyvalue(avars,'address2',"")
             address3=common.getkeyvalue(avars,'address3',"")
             city=common.getkeyvalue(avars,'city',"")
-            st=common.getkeyvalue(avars,'st',""),
+            st=common.getkeyvalue(avars,'st',"")
             pin=common.getkeyvalue(avars,'pin',"")
 
             
@@ -540,7 +540,7 @@ class Prospect:
             pa_practiceaddress = practiceaddress if(pa_practiceaddress == "") else pa_practiceaddress
             pa_address=common.getkeyvalue(avars,'pa_address',practiceaddress)
             pa_address = practiceaddress if(pa_address == "") else pa_address
-            pa_pan=common.getkeyvalue(avars,'pa_pan',""),
+            pa_pan=common.getkeyvalue(avars,'pa_pan',"")
             pa_practicepin=common.getkeyvalue(avars,'pa_practicepin',"")
             pa_practicepin = pin if(pa_practicepin == "") else pa_practicepin
             
