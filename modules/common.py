@@ -602,7 +602,7 @@ def gettreatmentgrid(db,page, imagepage, providerid, providername, treatment,mem
     
     query = (db.vw_treatmentlist.memberid == memberid) if(memberid > 0) else (1==1)
     
-    query = query & (db.vw_treatmentlist.patientid == patientid) if(memberid > 0) else (1==1)
+    query = query & (db.vw_treatmentlist.patientid == patientid) if(memberid > 0) else query
 
     query =  (query )
      

@@ -193,6 +193,8 @@ class OPS_Timing:
         return json.dumps(rspobj) 
     
     def list_ops_timing(self,avars):
+        
+        logger.loggerpms2.info("Enter List OPS Timing " + json.dumps(avars))
         auth  = current.auth
         db = self.db
         
@@ -274,6 +276,8 @@ class OPS_Timing:
         return json.dumps({"result":"success","error_code":"","error_message":"","ops_timing_count":len(ops), "ops_timing_list":opslist})            
 
     def list_ops_timing_2(self,avars):
+        logger.loggerpms2.info("Enter List OPS Timing2 " + json.dumps(avars))
+        
         auth  = current.auth
         db = self.db
         
@@ -519,9 +523,8 @@ class OPS_Timing:
                 "result":"success",
                 "error_message":"",
                 "error_code":"",
-                "ref_code":op.ops_timing_ref.ref_code,
-                "ref_id":op.ops_timing_ref.ref_id,
-                
+                "ref_code":ref_code,
+                "ref_id":ref_id,
                 "mon":monlist,
                 "tue":tuelist,
                 "wed":wedlist,
@@ -536,7 +539,7 @@ class OPS_Timing:
              
             
         except Exception as e:
-            mssg = "list OPS Timing Exception:\n" + str(e)
+            mssg = "list OPS Timing2 Exception:\n" + str(e)
             logger.loggerpms2.info(mssg)      
             excpobj = {}
             excpobj["result"] = "fail"

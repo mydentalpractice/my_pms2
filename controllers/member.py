@@ -85,30 +85,48 @@ def getdsmembers(db,providerid, member,fname,lname,cell,email,limitby,membertype
 @auth.requires(auth.has_membership('provider') or auth.has_membership('webadmin')) 
 @auth.requires_login()
 def getmembergrid(page,providerid, providername, memberid, patientid,patientmemberphrase, newmember=False):
-    
-    if((patientid != 0) & (memberid != 0)):
-        #if(newmember == True):
-            #query = ((db.vw_memberpatientlist.providerid == providerid) & (db.vw_memberpatientlist.hmopatientmember == True) & (db.vw_memberpatientlist.is_active == True) & \
-                     #(db.vw_memberpatientlist.primarypatientid == memberid) & (db.vw_memberpatientlist.patientid == patientid) & \
-                     #(datetime.date.today().strftime('%Y-%m-%d') <= db.vw_memberpatientlist.premenddt) & (db.vw_memberpatientlist.newmember == True))
-        #else:
-        query = ((db.vw_memberpatientlist.providerid == providerid) & (db.vw_memberpatientlist.hmopatientmember == True) & (db.vw_memberpatientlist.is_active == True) & \
-                 (db.vw_memberpatientlist.primarypatientid == memberid) & (db.vw_memberpatientlist.patientid == patientid))
-                 #(datetime.date.today().strftime('%Y-%m-%d') <= db.vw_memberpatientlist.premenddt) )
-            
+
+    if(patientmemberphrase == ""):
+        query = (db.vw_memberpatientlist.providerid == 0)
     else:
-        #if(newmember == True):
-            #query = ((db.vw_memberpatientlist.providerid == providerid) & (db.vw_memberpatientlist.hmopatientmember == True) & \
-                     #(db.vw_memberpatientlist.is_active == True) & \
-                     #((db.vw_memberpatientlist.patient == patientmemberphrase) | (db.vw_memberpatientlist.patient.like('%' + patientmemberphrase + '%'))) &\
-                     #(datetime.date.today().strftime('%Y-%m-%d') <= db.vw_memberpatientlist.premenddt) &  (db.vw_memberpatientlist.newmember == True))
+        #if((patientid != 0) & (memberid != 0)):
+            ##if(newmember == True):
+                ##query = ((db.vw_memberpatientlist.providerid == providerid) & (db.vw_memberpatientlist.hmopatientmember == True) & (db.vw_memberpatientlist.is_active == True) & \
+                         ##(db.vw_memberpatientlist.primarypatientid == memberid) & (db.vw_memberpatientlist.patientid == patientid) & \
+                         ##(datetime.date.today().strftime('%Y-%m-%d') <= db.vw_memberpatientlist.premenddt) & (db.vw_memberpatientlist.newmember == True))
+            ##else:
+            #query = ((db.vw_memberpatientlist.providerid == providerid) & (db.vw_memberpatientlist.hmopatientmember == True) & (db.vw_memberpatientlist.is_active == True) & \
+                     #(db.vw_memberpatientlist.primarypatientid == memberid) & (db.vw_memberpatientlist.patientid == patientid))
+                     ##(datetime.date.today().strftime('%Y-%m-%d') <= db.vw_memberpatientlist.premenddt) )
+                
         #else:
-        query = ((db.vw_memberpatientlist.providerid == providerid) & \
-                 (db.vw_memberpatientlist.hmopatientmember == True)&\
-                 ((db.vw_memberpatientlist.patient == patientmemberphrase) | (db.vw_memberpatientlist.patient.like('%' + patientmemberphrase + '%'))) &\
-                 (db.vw_memberpatientlist.is_active == True))
-                 #(datetime.date.today().strftime('%Y-%m-%d') <= db.vw_memberpatientlist.premenddt) & \
+            ##if(newmember == True):
+                ##query = ((db.vw_memberpatientlist.providerid == providerid) & (db.vw_memberpatientlist.hmopatientmember == True) & \
+                         ##(db.vw_memberpatientlist.is_active == True) & \
+                         ##((db.vw_memberpatientlist.patient == patientmemberphrase) | (db.vw_memberpatientlist.patient.like('%' + patientmemberphrase + '%'))) &\
+                         ##(datetime.date.today().strftime('%Y-%m-%d') <= db.vw_memberpatientlist.premenddt) &  (db.vw_memberpatientlist.newmember == True))
+            ##else:
+            #query = ((db.vw_memberpatientlist.providerid == providerid) & \
+                     #(db.vw_memberpatientlist.hmopatientmember == True)&\
+                     #((db.vw_memberpatientlist.patient == patientmemberphrase) | (db.vw_memberpatientlist.patient.like('%' + patientmemberphrase + '%'))) &\
+                     #(db.vw_memberpatientlist.is_active == True))
+                     ##(datetime.date.today().strftime('%Y-%m-%d') <= db.vw_memberpatientlist.premenddt) & \
+    
+        
+        if((patientid != 0) & (memberid != 0)):
             
+            query = ((1==1) & (db.vw_memberpatientlist.hmopatientmember == True) & (db.vw_memberpatientlist.is_active == True) & \
+                     (db.vw_memberpatientlist.primarypatientid == memberid) & (db.vw_memberpatientlist.patientid == patientid))
+                     #(datetime.date.today().strftime('%Y-%m-%d') <= db.vw_memberpatientlist.premenddt) )
+                
+        else:
+           
+            query = ((1==1) & \
+                     (db.vw_memberpatientlist.hmopatientmember == True)&\
+                     ((db.vw_memberpatientlist.patient == patientmemberphrase) | (db.vw_memberpatientlist.patient.like('%' + patientmemberphrase + '%'))) &\
+                     (db.vw_memberpatientlist.is_active == True))
+                     #(datetime.date.today().strftime('%Y-%m-%d') <= db.vw_memberpatientlist.premenddt) & \
+                
     
     #query = (((db.vw_memberpatientlist.patient == patientmemberphrase) | (db.vw_memberpatientlist.patient.like('%' + patientmemberphrase + '%'))) &\
                #(db.vw_memberpatientlist.hmopatientmember == True) & (db.vw_memberpatientlist.providerid == providerid) & (db.vw_memberpatientlist.is_active == True))    

@@ -373,7 +373,19 @@ class Patient:
       
       result = False
       patlist = []
-     
+      
+      
+      #when there is no search phrase, return an empty member list
+      #this is in tune with new business logic that MDP Member can 
+      #go to any Provider for the Treatment
+      if((patientsearch == "") | (patientsearch == None)):
+        rsp = {"patientcount":0,"page":0,"patientlist":[], "runningcount":0, "maxcount":0, "next":False, "prev":False,\
+                                 "patientsearch":"","patientmembersearch":"","member":True,"company":"","result":"success","error_message":"","error_code":""} 
+        
+        logger.loggerpms2.info("Search Patient is empty")
+        return json.dumps(rsp)
+        
+        
       pats=None
       
       urlprops = db(db.urlproperties.id >0 ).select(db.urlproperties.pagination)

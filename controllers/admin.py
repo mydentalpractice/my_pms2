@@ -869,9 +869,11 @@ def member_selector():
     
     selected = ""
     if(request.vars.xpatientmember1.isdigit()):
-        selected = [row.patient for row in db((db.vw_memberpatientlist.providerid == providerid) & (db.vw_memberpatientlist.hmopatientmember == True) & (db.vw_memberpatientlist.is_active == True) & (db.vw_memberpatientlist.cell.like(pattern))).select()]
+        #selected = [row.patient for row in db((db.vw_memberpatientlist.providerid == providerid) & (db.vw_memberpatientlist.hmopatientmember == True) & (db.vw_memberpatientlist.is_active == True) & (db.vw_memberpatientlist.cell.like(pattern))).select()]
+        selected = [row.patient for row in db((1==1) & (db.vw_memberpatientlist.hmopatientmember == True) & (db.vw_memberpatientlist.is_active == True) & (db.vw_memberpatientlist.cell.like(pattern))).select()]
     else:
-        selected = [row.patient for row in db((db.vw_memberpatientlist.providerid == providerid) & (db.vw_memberpatientlist.hmopatientmember == True) & (db.vw_memberpatientlist.is_active == True) & (db.vw_memberpatientlist.pattern.like(pattern))).select()]
+        #selected = [row.patient for row in db((db.vw_memberpatientlist.providerid == providerid) & (db.vw_memberpatientlist.hmopatientmember == True) & (db.vw_memberpatientlist.is_active == True) & (db.vw_memberpatientlist.pattern.like(pattern))).select()]
+        selected = [row.patient for row in db((1==1) & (db.vw_memberpatientlist.hmopatientmember == True) & (db.vw_memberpatientlist.is_active == True) & (db.vw_memberpatientlist.pattern.like(pattern))).select()]
     
     
     
@@ -1244,7 +1246,7 @@ def getpatientgrid(page,providerid, providername, phrase):
     
     query = (db.vw_treatmentlist.memberid == memberid) if(memberid > 0) else (1==1)
     
-    query = query & (db.vw_treatmentlist.patientid == patientid) if(memberid > 0) else (1==1)
+    query = query & (db.vw_treatmentlist.patientid == patientid) if(memberid > 0) else query
 
     query =  (query )
      

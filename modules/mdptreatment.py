@@ -163,8 +163,8 @@ class Treatment:
         
         try:
             query = (db.vw_treatmentlist.memberid == memberid) if(memberid > 0) else (1==1)
-            query = query & (db.vw_treatmentlist.patientid == patientid) if(patientid > 0) else (1==1)
-            query = query & (db.vw_treatmentlist.clinicid == clinicid) if(clinicid > 0) else (1==1)
+            query = query & (db.vw_treatmentlist.patientid == patientid) if(patientid > 0) else query
+            query = query & (db.vw_treatmentlist.clinicid == clinicid) if(clinicid > 0) else query
             query = query & (db.vw_treatmentlist.status == "Started")  
             
             #IB 31/01/2020 Sending all treatments
@@ -261,6 +261,8 @@ class Treatment:
         
         db = self.db
         providerid = self.providerid
+        
+   
         
         memberid = int(common.getid(common.getkeyvalue(avars,"memberid","0")))
         patientid = int(common.getid(common.getkeyvalue(avars,"patientid","0")))
@@ -407,7 +409,7 @@ class Treatment:
             query = (db.vw_treatmentlist.memberid == memberid) if(memberid > 0) else (1==1)
     
                
-            query = query & (db.vw_treatmentlist.patientid == patientid) if(patientid > 0) else (1==1)
+            query = query & (db.vw_treatmentlist.patientid == patientid) if(patientid > 0) else query
             
             
            

@@ -703,7 +703,7 @@ class ABHICL:
       
       query = ""
       query = (db.vw_treatmentlist.companyid == companyid) if(companyid > 0) else (1==1)
-      query = query & ((db.vw_treatmentlist.memberid == memberid)&(db.vw_treatmentlist.patientid == patientid)) if(abhiclid != "") else (1==1)
+      query = query & ((db.vw_treatmentlist.memberid == memberid)&(db.vw_treatmentlist.patientid == patientid)) if(abhiclid != "") else query
       query = query & ((db.vw_treatmentlist.startdate >= from_date) & (db.vw_treatmentlist.startdate <= to_date))
       
       
@@ -840,7 +840,7 @@ class ABHICL:
       
       query = ""
       query = (db.vw_appointments.companyid == companyid) if(companyid > 0) else (1==1)
-      query = query & ((db.vw_appointments.patientmember == memberid)&(db.vw_appointments.patient == patientid)) if(abhiclid != "") else (1==1)
+      query = query & ((db.vw_appointments.patientmember == memberid)&(db.vw_appointments.patient == patientid)) if(abhiclid != "") else query
       query = query & ((db.vw_appointments.f_start_time >= from_date) & (db.vw_appointments.f_start_time <= to_date))
       
       

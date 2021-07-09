@@ -467,11 +467,11 @@ def gettreatmentgrid(page, imagepage, providerid, providername, treatment, membe
     
     query = (db.vw_treatmentlist.memberid == memberid) if(memberid > 0) else (1==1)
     
-    query = query & (db.vw_treatmentlist.patientid == patientid) if(memberid > 0) else (1==1)
+    query = query & (db.vw_treatmentlist.patientid == patientid) if(patientid > 0) else query
 
-    query = query & (db.vw_treatmentlist.providerid == providerid) if(providerid > 0) else (1==1)
+    query = query & (db.vw_treatmentlist.providerid == providerid) if(providerid > 0) else query
 
-    query = query & (db.vw_treatmentlist.clinicid == clinicid) if(clinicid > 0) else (1==1)
+    query = query & (db.vw_treatmentlist.clinicid == clinicid) if(clinicid > 0) else query
     
     query = query & (db.vw_treatmentlist.is_active == True)
     

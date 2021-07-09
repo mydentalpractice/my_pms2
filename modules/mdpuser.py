@@ -272,7 +272,7 @@ class User:
   #assuming Cell is unique
   def otp_login(self,avars):
     
-    logger.loggerpms2.info("Enter otp_login", json.dumps(avars))
+    logger.loggerpms2.info("Enter otp_login "  +  json.dumps(avars))
     auth = self.auth
     db = self.db
    
