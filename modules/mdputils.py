@@ -13,9 +13,11 @@ from applications.my_pms2.modules import common
 from applications.my_pms2.modules import logger
 
 
+#THIS API is called to determine the member's procedure price plan code based on 
+#the provider's region, plan and policy
 def getprocedurepriceplancodeformember(db,providerid,memberid,patientid,policy_name=""):
     
-    procedurepriceplancode = "PREMWALKIN"
+    procedurepriceplancode = "PREMWALKIN"  #default it to PREMWALKIN
     
     try:   
         
@@ -29,7 +31,7 @@ def getprocedurepriceplancodeformember(db,providerid,memberid,patientid,policy_n
         # get patient's company
         pats = db((db.vw_memberpatientlist.primarypatientid == memberid) & (db.vw_memberpatientlist.patientid == patientid)).select(db.vw_memberpatientlist.company,db.vw_memberpatientlist.hmoplan)
         companyid = int(common.getid(pats[0].company)) if(len(pats) == 1) else 0
-	planid = int(common.getid(pats[0].hmoplan)) if(len(pats) == 1) else 0
+	planid = int(common.getid(pats[0].hmoplan)) if(len(pats) == 1) else 0  #this is the patient's previously assigned plan-typically at registration
         
         companys = db((db.company.id == companyid) & (db.company.is_active == True)).select(db.company.company)
         companycode = common.getstring(companys[0].company) if(len(companys) == 1) else "PREMWALKIN"
@@ -54,6 +56,8 @@ def getprocedurepriceplancodeformember(db,providerid,memberid,patientid,policy_n
     
     
     return procedurepriceplancode
+
+
 
 #policyproduct refers to insurance company's insurance product like Colgate2000, 399Plan, 499Plan, ABHICL399  etc.
 def getprocedurepriceplancode(db,policyproduct, providercode, regioncode, companycode,plancode=None):

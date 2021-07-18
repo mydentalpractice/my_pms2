@@ -1,5 +1,8 @@
+
+
 import datetime 
 from datetime import timedelta
+
 
 
 import time
@@ -29,6 +32,14 @@ gettruefalse = lambda text: "True" if((text == "yes")) else ("False" if(text=="n
 fmt = "%Y-%m-%d %H:%M:%S"
 
 
+def convert24to12clock(timestr):
+
+        d = datetime.datetime.strptime(timestr,"%H:%M")
+
+        e = d.strftime("%I:%M %p")
+        return e
+
+        
 def getkeyvalue(jobj, key1, defval):
         
 
@@ -714,3 +725,10 @@ def generateackid(base,digits):
         for j in range(0,(digits-len(base))):
                 ackid += str(random.randint(0,9))  
         return ackid
+
+def getmessage(db,message_code):
+        
+        mssgs = db((db.mdpmessages.message_code == message_code)).select()
+        
+        return "" if(len(mssgs != 1)) else mssgs[0].mdpmessage
+        

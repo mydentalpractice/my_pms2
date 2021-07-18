@@ -486,6 +486,13 @@ class Customer:
     def customer(self,avars):
         db = self.db
         customer_ref = common.getkeyvalue(avars, "customer_ref", "")
+        customer_ref = customer_ref if(customer_ref == "") else common.getkeyvalue(avars,"cell","")
+        plan_code = common.getkeyvalue(avars, "plan_code", "RPIP599")
+        c = db((db.company.company == plan_code) & (db.company.is_active == True)).select()
+        company_id = c[0].id if(len(c) == 1) else 0
+        avars["planid"] = str(company_id)
+        avars["companyid"] = str(company_id)
+        
         jsonresp={}
         if(customer_ref != ""):
             c = db((db.customer.customer_ref == customer_ref) & (db.customer.is_active == True)).select(db.customer.id, db.customer.customer_ref)
@@ -517,8 +524,18 @@ class Customer:
         
         try:
             i=0
-            
+            planid = 1
+            companyid = 1
+            providerid = 1
             customer_ref = common.getkeyvalue(avars, "customer_ref", common.generateackid("VIT",8))
+            plancode = common.getkeyvalue(avars,"plancode", "")
+            if(plancode != ""):
+                c = db(db.customer.customer == plancode).select()
+                companyid = 1 if(len(c) ==0) else c[0].id
+                p = db(db.hmoplan.hmoplancode == plancode).select()
+                planid = 1 if(len(p) ==0) else p[0].id
+                
+                
             
             if(customer_ref != "" ):
                 customer_id = db.customer.insert(
@@ -629,6 +646,129 @@ class Customer:
       
         return json.dumps(jsonresp)
     
+    
+    #customer with dependants
+    def new_customer(self,avars):
+        
+        db = self.db        
+        auth = current.auth
+        jsonresp = {}
+        customer_id = 0
+        
+        try:
+            i=0
+            
+            customer_ref = common.getkeyvalue(avars, "customer_ref", common.generateackid("VIT",8))
+            
+            if(customer_ref != "" ):
+                customer_id = db.customer.insert(
+                    customer_ref = customer_ref,
+                    fname = common.getkeyvalue(avars,"fname", customer_ref + "_First"),
+                    mname = common.getkeyvalue(avars,"mname", ""),
+                    lname = common.getkeyvalue(avars,"lname", customer_ref + "_Last"),
+
+                    address1 = common.getkeyvalue(avars,"address1", "331-332 Ganpati Plaza"),
+                    address2 = common.getkeyvalue(avars,"address2", "MI Road"),
+                    address3 = common.getkeyvalue(avars,"address3", ""),
+                    city = common.getkeyvalue(avars,"city", "Jaipur"),
+                    st = common.getkeyvalue(avars,"st", "Rajasthan (RJ)"),
+                    pin = common.getkeyvalue(avars,"pin", "302001"),
+                    pin1 = common.getkeyvalue(avars,"pin1", "302001"),
+                    pin2 = common.getkeyvalue(avars,"pin2", "302001"),
+                    pin3 = common.getkeyvalue(avars,"pin3", "302001"),
+
+                    gender = common.getkeyvalue(avars,"gender", "Male"),
+                    dob = common.getdatefromstring(common.getkeyvalue(avars,"dob", common.getstringfromdate(datetime.date.today(),"%d/%m/%Y")),"%d/%m/%Y"),
+                    
+                    telephone = common.getkeyvalue(avars,"telephone", ""),
+                    cell = common.getkeyvalue(avars,"cell", "8001027526 "),
+                    email = common.getkeyvalue(avars,"email", "info@mydentalplan.in"),
+                    
+                    status = common.getkeyvalue(avars,"status", "No_Attempt"),
+                    
+                    providerid = int(common.getkeyvalue(avars,"providerid", "1")),
+                    companyid = int(common.getkeyvalue(avars,"companyid", "1")),
+                    planid = int(common.getkeyvalue(avars,"planid", "1")),
+                    regionid = int(common.getkeyvalue(avars,"regionid", "1")),
+                   
+                    enrolldate = common.getdatefromstring(
+                        common.getkeyvalue(avars, "enrolldate",common.getstringfromdate(common.getISTFormatCurrentLocatTime(),"%d/%m/%Y")),"%d/%m/%Y"),
+                    
+                    appointment_id = common.getkeyvalue(avars,"appointment_id",common.getstringfromdate(common.getISTFormatCurrentLocatTime(),"%d/%m/%Y %H:%M")),
+                    appointment_datetime = common.getdatefromstring(
+                        common.getkeyvalue(avars, "appointment_datetime",common.getstringfromdate(common.getISTFormatCurrentLocatTime(),"%d/%m/%Y %H:%M")),"%d/%m/%Y %H:%M"),
+                    
+                    notes = common.getkeyvalue(avars,"notes",""),
+                    
+                    is_active = True,
+                    
+                    created_on = common.getISTFormatCurrentLocatTime(),
+                    created_by = 1 if(auth.user == None) else auth.user.id,
+                    modified_on = common.getISTFormatCurrentLocatTime(),
+                    modified_by =1 if(auth.user == None) else auth.user.id                
+                )
+                db(db.customer.id == customer_id).update(customer = customer_id)
+                
+                
+                #register customer dependants
+         
+                deps = common.getkeyvalue(avars,"dependants",None)
+                              
+                dependantscount = 0 if deps == None else len(deps)
+                if(dependantscount > 0):
+                    for dep in deps:
+                        
+                        depid=db.customerdependants.insert(
+                            
+                            fname=dep["fname"],
+                            mname=dep["mname"] if "mname" in dep else "",
+                            lname=dep["lname"],
+                            depdob=common.getdatefromstring(dep["depdob"], "%d/%m/%Y"),
+                            gender=dep["gender"],
+                            relation=dep["relation"],
+                            customer_id=customer_id,
+                            
+                            dependant_ref = customer_ref + "_" + dep["relation"],
+                            is_active = True,
+                            created_on = common.getISTFormatCurrentLocatTime(),
+                            created_by = 1 if(auth.user == None) else auth.user.id,
+                            modified_on = common.getISTFormatCurrentLocatTime(),
+                            modified_by =1 if(auth.user == None) else auth.user.id                
+                        )
+                    
+                        db(db.customerdependants.id == depid).update(dependant = str(depid))
+                    
+                    
+                jsonresp = {
+                    "result":"success",
+                    "error_message":"",
+                    "error_code":"",
+                    "mdp_customer_id":customer_id,
+                    "customer_ref":customer_ref,
+                    "dependantscount":str(dependantscount)
+                }
+            else:
+                error_code = "NEW_CUST_002"
+                mssg = error_code + ":" + "New Customer not created! No unique Customer_Ref:\n"
+                logger.loggerpms2.info(mssg)
+                jsonresp = {
+                    "result":"fail",
+                    "error_message":mssg,
+                    "error_code":error_code
+                }            
+            
+        except Exception as e:
+            error_code = "NEW_CUST_001"
+            mssg = error_code + ":" + "Exception New Customer:\n" + "(" + str(e) + ")"
+            logger.loggerpms2.info(mssg)
+            jsonresp = {
+                "result":"fail",
+                "error_message":mssg,
+                "error_code":error_code
+            }            
+      
+        return json.dumps(jsonresp)
+
     def update_customer(self,avars):
         db = self.db        
         auth = current.auth        
@@ -639,6 +779,16 @@ class Customer:
             
             if(customer_ref != "" ):
                 c = db((db.customer.customer_ref == customer_ref)& (db.customer.is_active == True)).select()
+                defdate = c[0].enrolldate
+                defdatestr = common.getstringfromdate(defdate,"%d/%m/%Y")
+                enrolldatestr = common.getkeyvalue(avars, "enrolldate",defdatestr)
+                enrolldate = common.getdatefromstring(enrolldatestr, "%d/%m/%Y")
+                
+                
+                defapptdate = c[0].appointment_datetime
+                defapptdatestr = common.getstringfromdate(defapptdate, "%d/%m/%Y %H:%M")
+                apptdatestr = common.getkeyvalue(avars, "appointment_datetime",defapptdatestr)
+                apptdate = common.getdatefromstring(apptdatestr, "%d/%m/%Y %H:%M")
                 
                 db((db.customer.customer_ref == customer_ref) & (db.customer.is_active == True)).update(
                     customer_ref = common.getkeyvalue(avars,"customer_ref", c[0].customer_ref),
@@ -657,7 +807,7 @@ class Customer:
                     pin3 = common.getkeyvalue(avars,"pin3", c[0].pin3),
 
                     gender = common.getkeyvalue(avars,"gender", c[0].gender),
-                    dob = common.getkeyvalue(avars,"dob",  c[0].do),
+                    dob = common.getkeyvalue(avars,"dob",  c[0].dob),
                     
                     telephone = common.getkeyvalue(avars,"telephone",  c[0].telephone),
                     cell = common.getkeyvalue(avars,"cell",  c[0].cell),
@@ -670,11 +820,9 @@ class Customer:
                     planid = int(common.getkeyvalue(avars,"planid",  c[0].planid)),
                     regionid = int(common.getkeyvalue(avars,"regionid",  c[0].regionid)),
 
-                    enrolldate = common.getdatefromstring(
-                        common.getvalue(avars, "enrolldate",common.getstringfromdate(c[0].enrolldate,"%d/%m/%Y")),"%d/%m/%Y"),
+                    enrolldate = enrolldate,
+                    appointment_datetime =apptdate,
 
-                    appointment_datetime = common.getdatefromstring(
-                        common.getvalue(avars, "appointment_datetime",common.getstringfromdate(c[0].appointment_datetime,"%d/%m/%Y %H:%M")),"%d/%m/%Y %H:%M"),
 
                     notes = common.getkeyvalue(avars,"notes",c[0].notes),
                     
@@ -686,25 +834,32 @@ class Customer:
                 
                          
                 deps = common.getkeyvalue(avars,"dependants",None)
-                for dep in deps:
-                    depid = int(dep["dependant"])
-                    db(db.customerdependants.id == depid).update(
-                        dependant = dep["dependant"],
-                        dependant_ref = dep["dependant_ref"],
-                        fname = dep["fname"],
-                        mname = dep["mname"],
-                        lname = dep["lname"],
-                        gender = dep["gender"],
-                        relation = dep["relation"],
-                        depdob = common.getdatefromstring(dep["depdob"], "%d/%m/%Y"),
+                if(deps != None):
+                    for dep in deps:
+                        depid = int(dep["dependant"])
+                        db(db.customerdependants.id == depid).update(
+                            dependant = dep["dependant"],
+                            dependant_ref = dep["dependant_ref"],
+                            fname = dep["fname"],
+                            mname = dep["mname"],
+                            lname = dep["lname"],
+                            gender = dep["gender"],
+                            relation = dep["relation"],
+                            depdob = common.getdatefromstring(dep["depdob"], "%d/%m/%Y"),
+                            
+                            modified_on = common.getISTFormatCurrentLocatTime(),
+                            modified_by =1 if(auth.user == None) else auth.user.id                            
+                            
                         
-                        modified_on = common.getISTFormatCurrentLocatTime(),
-                        modified_by =1 if(auth.user == None) else auth.user.id                            
-                        
-                    
-                    )
+                        )
                     
                     
+                jsonresp = {
+                    "result":"success",
+                    "error_message":"",
+                    "error_code":"",
+                    "customer_ref":customer_ref
+                }            
                
                 
             else:
@@ -1053,6 +1208,7 @@ class Customer:
                 cobj["pin3"] = c[0].pin3
                 
                 cobj["providerid"] = c[0].providerid
+                cobj["clinicid"] = c[0].clinicid
                 cobj["companyid"] = c[0].companyid
                 cobj["regionid"] = c[0].regionid
                 cobj["planid"] = c[0].planid

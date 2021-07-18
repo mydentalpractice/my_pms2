@@ -8727,6 +8727,19 @@ ALTER TABLE `mydp_prod`.`shopsee_properties`
 ADD COLUMN `webhookUrl` VARCHAR(512) NULL DEFAULT NULL AFTER `product_id`;
 
 
+
+
+10/07/2021
+===========
+
+1. YYYZZZAdded tables benefit_master, benefit_master_x_plan,benefit_master_x_message,benefit_master_x_slabs,benefit_member,benefit_messages,benefit_redeem_slabs,benefit_member_x_benfit_master
+
+2. XXXXYYYZZZModified Customer table by adding 'clinicid'
+
+3. delete benefit_message, benefit_master_x_message
+
+4. YYYZZZAdd mdpmessages table (populate)
+
 Script file to clear user for sign-up
 =====================================
 

@@ -147,6 +147,108 @@ use_janrain(auth, filename='private/janrain.key')
 ## >>> for row in rows: print row.id, row.myfield
 #########################################################################
 
+
+
+db.define_table('benefit_member',
+                Field('member_id','integer'),
+                Field('member_code','string'),
+                Field('plan_id','integer'),
+                Field('treatment_id','integer'),
+                Field('treatment_proc_id','integer'),
+                Field('plan_code', 'string'),
+                Field('redeem_date','date',default=datetime.date.today(),requires=IS_EMPTY_OR(IS_DATE(format=T('%d/%m/%Y')))),
+                Field('redeem_amount','double'),
+                Field('last_redeemed_date','date',default=datetime.date.today(),requires=IS_EMPTY_OR(IS_DATE(format=T('%d/%m/%Y')))),
+                Field('last_redeemed_amount','double'),
+                Field('balance_benefit_amount','double'),
+                
+                Field('is_active','boolean',default=True),
+                auth.signature
+                )
+
+db.benefit_member._singular = "benefit_member"
+db.benefit_member._plural   = "benefit_member"
+
+
+db.define_table('benefit_member_x_member',
+                Field('member_id','integer'),
+                Field('benefit_member_id','integer')
+                )
+db.benefit_member_x_member._singular = "benefit_member_x_member"
+db.benefit_member_x_member._plural   = "benefit_member_x_member"
+
+
+
+
+db.define_table('benefit_master',
+                Field('benefit_code','string'),
+                Field('benefit_name','string'),
+                Field('benefit_start_date','date',default=datetime.date.today(),requires=IS_EMPTY_OR(IS_DATE(format=T('%d/%m/%Y')))),
+                Field('benefit_end_date','date',default=datetime.date.today(),requires=IS_EMPTY_OR(IS_DATE(format=T('%d/%m/%Y')))),
+                Field('benefit_value','double'),
+                Field('is_valid','boolean',default=True),
+                Field('is_active','boolean',default=True),
+                auth.signature
+                )
+
+db.benefit_master._singular = "benefit_master"
+db.benefit_master._plural   = "benefit_master"
+
+
+db.define_table('benefit_master_x_plan',
+                Field('benefit_master_id','integer'),
+                Field('plan_id','integer'),
+                Field('benefit_master_code','string'),
+                Field('plan_code','string')
+                )
+
+
+db.benefit_master_x_plan._singular = "benefit_master_x_plan"
+db.benefit_master_x_plan._plural   = "benefit_master_x_plan"
+
+db.define_table('benefit_master_x_member',
+                Field('member_id','integer'),
+                Field('benefit_master_id','integer'),
+                Field('plan_id','integer'),
+                Field('plan_code','string')
+                )
+
+
+db.benefit_master_x_member._singular = "benefit_master_x_member"
+db.benefit_master_x_member._plural   = "benefit_master_x_member"
+
+
+db.define_table('benefit_master_slabs',
+                Field('redeem_mode','string',default="S"),
+                Field('redeem_percent','float',default=0.0),
+                Field('redeeem_lower_limit','float',default=0.0),
+                Field('redeem_upper_limit','float',default=0.0),
+                Field('redeem_value','float',default=0.0),
+                )
+db.benefit_master_slabs._singular = "benefit_master_slabs"
+db.benefit_master_slabs._plural   = "benefit_master_slabs"
+
+db.define_table('benefit_master_x_slabs',
+                Field('benefit_master_id','integer'),
+                Field('benefit_master_slabs_id','integer'),
+                Field('benefit_master_code','string')
+                )
+
+db.benefit_master_x_slabs._singular = "benefit_master_x_slabs"
+db.benefit_master_x_slabs._plural   = "benefit_master_x_slabs"
+
+db.define_table('mdpmessages',
+               Field('message_code','string'),
+               Field('mdpmessage','string')
+               
+               )
+db.mdpmessages._singular = "mdpmessages"
+db.mdpmessages._plural   = "mdpmessages"
+
+
+
+
+
 db.define_table('cities',
                 Field('city','string')
                 )
@@ -4065,6 +4167,7 @@ db.define_table('customer',
 'date',widget = lambda field, value:SQLFORM.widgets.date.widget(field, value, _style='height:30px'), label='Web Enroll Date',default=request.now,requires=IS_DATE(format=T('%d/%m/%Y'),error_message='must be d/m/Y!'),length=20),
                Field('companyid','reference company'),
                Field('providerid','reference provider'),
+               Field('clinicid','integer'),
                Field('regionid','reference groupregion'),
                Field('planid','reference hmoplan'),
                Field('pin1', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'),label='Pin',length=20),

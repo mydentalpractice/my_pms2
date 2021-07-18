@@ -857,8 +857,33 @@ def provider_selector():
 
 def member_selector():
     provdict = common.getprovider(auth,db)
-    providerid = common.getid(provdict["providerid"])    
- 
+    providerid = common.getid(provdict["providerid"]) 
+    
+    
+    query = ""
+    
+    #display all those patients who have seeked appointments with this provider. Appointment guarantees that these patient/members have 
+    #agreed to this provider.
+    memberset = set()
+
+    appts = db((db.t_appointment.is_active == True)&\
+               (db.t_appointment.f_status != 'Cancelled')&\
+               (db.t_appointment.provider == providerid)).select(db.t_appointment.patientmember, db.t_appointment.patient)
+
+    for appt in appts:
+        if(appt.patientmember in memberset):
+            continue
+        memberset.add(appt.patientmember)
+
+    query = (db.vw_memberpatientlist.is_active == True)
+
+
+    #all MDP Members who have had appointments with this Provider in the past,current & future
+    query = (query) & ((db.vw_memberpatientlist.primarypatientid.belongs(memberset)) &  (db.vw_memberpatientlist.hmopatientmember == True))
+                       #(datetime.date.today().strftime('%Y-%m-%d') <= db.vw_memberpatientlist.premenddt))
+
+    
+    
     if(request.vars.xpatientmember1 == ""):
         pattern = '%'
     else:
@@ -870,10 +895,10 @@ def member_selector():
     selected = ""
     if(request.vars.xpatientmember1.isdigit()):
         #selected = [row.patient for row in db((db.vw_memberpatientlist.providerid == providerid) & (db.vw_memberpatientlist.hmopatientmember == True) & (db.vw_memberpatientlist.is_active == True) & (db.vw_memberpatientlist.cell.like(pattern))).select()]
-        selected = [row.patient for row in db((1==1) & (db.vw_memberpatientlist.hmopatientmember == True) & (db.vw_memberpatientlist.is_active == True) & (db.vw_memberpatientlist.cell.like(pattern))).select()]
+        selected = [row.patient for row in db((1==1) &(query) & (db.vw_memberpatientlist.hmopatientmember == True) & (db.vw_memberpatientlist.is_active == True) & (db.vw_memberpatientlist.cell.like(pattern))).select()]
     else:
         #selected = [row.patient for row in db((db.vw_memberpatientlist.providerid == providerid) & (db.vw_memberpatientlist.hmopatientmember == True) & (db.vw_memberpatientlist.is_active == True) & (db.vw_memberpatientlist.pattern.like(pattern))).select()]
-        selected = [row.patient for row in db((1==1) & (db.vw_memberpatientlist.hmopatientmember == True) & (db.vw_memberpatientlist.is_active == True) & (db.vw_memberpatientlist.pattern.like(pattern))).select()]
+        selected = [row.patient for row in db((1==1) &(query) & (db.vw_memberpatientlist.hmopatientmember == True) & (db.vw_memberpatientlist.is_active == True) & (db.vw_memberpatientlist.pattern.like(pattern))).select()]
     
     
     
@@ -888,8 +913,8 @@ def member_selector():
 def nonmember_selector():
     provdict = common.getprovider(auth,db)
     providerid = common.getid(provdict["providerid"])    
-    
-    
+   
+
     if(request.vars.xpatientmember1 == ""):
         pattern = '%'
     else:
@@ -918,6 +943,59 @@ def patient_selector():
     provdict = common.getprovider(auth,db)
     providerid = common.getid(provdict["providerid"])    
     
+    #display all those patients who have seeked appointments with this provider. Appointment guarantees that these patient/members have 
+    #agreed to this provider.
+    memberset = set()
+
+    appts = db((db.t_appointment.is_active == True)&\
+               (db.t_appointment.f_status != 'Cancelled')&\
+               (db.t_appointment.provider == providerid)).select(db.t_appointment.patientmember, db.t_appointment.patient)
+
+    for appt in appts:
+        if(appt.patientmember in memberset):
+            continue
+        memberset.add(appt.patientmember)      
+
+    qry = (db.vw_memberpatientlist.is_active == True)
+    
+    
+    if(providerid > 0):  #list of walk-in patients for this Provider + list of MDP Members matching the search phrase
+        qry = (qry) & (((db.vw_memberpatientlist.hmopatientmember == False) & (db.vw_memberpatientlist.providerid == providerid)) |\
+                       ((db.vw_memberpatientlist.primarypatientid.belongs(memberset)) &  (db.vw_memberpatientlist.hmopatientmember == True) &  (datetime.date.today().strftime('%Y-%m-%d') <= db.vw_memberpatientlist.premenddt) ))
+    else: # list of MDP Members matching the search phrase
+        qry = (qry) & ((db.vw_memberpatientlist.primarypatientid.belongs(memberset)) &  (db.vw_memberpatientlist.hmopatientmember == True) &  (datetime.date.today().strftime('%Y-%m-%d') <= db.vw_memberpatientlist.premenddt))
+
+    
+    
+    if(request.vars.xpatientmember1 == ""):
+        pattern = '%'
+    else:
+        if(request.vars.xpatientmember1.isdigit()):
+            pattern = request.vars.xpatientmember1.capitalize() + '%'
+        else:
+            pattern = '%' + request.vars.xpatientmember1.capitalize() + '%'
+    
+    selected = ""
+    if(request.vars.xpatientmember1.isdigit()):
+        selected = [row.patient for row in db((qry)  & (db.vw_memberpatientlist.cell.like(pattern))).select()]
+    else:
+        selected = [row.patient for row in db((qry) & (db.vw_memberpatientlist.pattern.like(pattern))).select()]
+    
+           
+        
+        
+    return ''.join([DIV(k,
+                 _onclick="jQuery('#no_table_patientmember1').val('%s')" % k,
+                 _onmouseover="this.style.backgroundColor='cyan'",
+                 _onmouseout="this.style.backgroundColor='white'",
+                 _style="z-index:500000;width:100%;font-family:verdana;font-size:12px;color:black;font-weight:normal"                 
+                 
+                 ).xml() for k in selected])
+
+def xpatient_selector():
+    provdict = common.getprovider(auth,db)
+    providerid = common.getid(provdict["providerid"])    
+    
     
     if(request.vars.xpatientmember1 == ""):
         pattern = '%'
@@ -943,7 +1021,6 @@ def patient_selector():
                  _style="z-index:500000;width:100%;font-family:verdana;font-size:12px;color:black;font-weight:normal"                 
                  
                  ).xml() for k in selected])
-
 
 def treatment_selector():
     provdict = common.getprovider(auth,db)

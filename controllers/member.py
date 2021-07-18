@@ -84,7 +84,130 @@ def getdsmembers(db,providerid, member,fname,lname,cell,email,limitby,membertype
 
 @auth.requires(auth.has_membership('provider') or auth.has_membership('webadmin')) 
 @auth.requires_login()
-def getmembergrid(page,providerid, providername, memberid, patientid,patientmemberphrase, newmember=False):
+def getmembergrid(page,providerid, providername, memberid, patientid,patientsearch, newmember=False):
+
+    #display all those patients who have seeked appointments with this provider. Appointment guarantees that these patient/members have 
+    #agreed to this provider.
+    memberset = set()
+  
+    appts = db((db.t_appointment.is_active == True)&\
+               (db.t_appointment.f_status != 'Cancelled')&\
+               (db.t_appointment.provider == providerid)).select(db.t_appointment.patientmember, db.t_appointment.patient)
+  
+    for appt in appts:
+        if(appt.patientmember in memberset):
+            continue
+        memberset.add(appt.patientmember)
+        
+    query = (db.vw_memberpatientlist.is_active == True)
+    
+    #removing premenndt check
+    if((patientid != 0) & (memberid != 0)):
+        query = (query) & ((db.vw_memberpatientlist.hmopatientmember == True) & (db.vw_memberpatientlist.is_active == True) & \
+                 (db.vw_memberpatientlist.primarypatientid == memberid) & (db.vw_memberpatientlist.patientid == patientid))
+                 #(datetime.date.today().strftime('%Y-%m-%d') <= db.vw_memberpatientlist.premenddt) )
+            
+    else:
+        #all MDP Members who have had appointments with this Provider in the past,current & future
+        query = (query) & ((db.vw_memberpatientlist.primarypatientid.belongs(memberset)) &  (db.vw_memberpatientlist.hmopatientmember == True))
+                       #(datetime.date.today().strftime('%Y-%m-%d') <= db.vw_memberpatientlist.premenddt))
+
+    
+    #is it numeric only, then search on cell numbero
+    if(patientsearch.replace("+",'').replace(' ','').isdigit()):
+        query = (query) & (db.vw_memberpatientlist.cell.like("%" + patientsearch + "%"))
+    #is it email only
+    elif(patientsearch.find("@") >= 0):
+        query = (query) & (db.vw_memberpatientlist.email.like("%" + patientsearch + "%"))
+        
+    #if pats is empty, then search for phrase in patient (fname lname:membercode)
+    else:
+        if(patientsearch != ""):
+            query = ((query) & ((db.vw_memberpatientlist.patient.like("%" + patientsearch + "%")) | (db.vw_memberpatientlist.patientmember.like("%" + patientsearch + "%"))))        
+
+    logger.loggerpms2.info("Search Patient Query = " + str(query))
+        
+    fields=(db.vw_memberpatientlist.fullname,db.vw_memberpatientlist.patient,db.vw_memberpatientlist.patientmember, db.vw_memberpatientlist.cell, db.vw_memberpatientlist.email,\
+            db.vw_memberpatientlist.premstartdt,db.vw_memberpatientlist.premenddt, db.vw_memberpatientlist.hmoplanname,\
+            db.vw_memberpatientlist.primarypatientid,db.vw_memberpatientlist.patientid, db.vw_memberpatientlist.gender,db.vw_memberpatientlist.patienttype,db.vw_memberpatientlist.hmoplan\
+            )    
+    
+    headers={
+            'vw_memberpatientlist.patientmember':'Member ID',
+            'vw_memberpatientlist.fullname':'Name',
+            'vw_memberpatientlist.cell':'Mobile',
+            'vw_memberpatientlist.gender':'Email',
+            'vw_memberpatientlist.hmoplanname': 'Plan',
+            'vw_memberpatientlist.premstartdt':'Prem. Start',
+            'vw_memberpatientlist.premenddt':'Prem. End',
+            }
+    
+    exportlist = dict( csv_with_hidden_cols=False, html=False,tsv_with_hidden_cols=False, tsv=False, json=False, csv=False, xml=False)
+   
+    db.vw_memberpatientlist.id.readable = False
+    db.vw_memberpatientlist.primarypatientid.readable = False 
+    db.vw_memberpatientlist.patientid.readable = False 
+    db.vw_memberpatientlist.patienttype.readable = False
+    db.vw_memberpatientlist.gender.readable = False
+    #db.vw_memberpatientlist.fullname.readable = False
+    db.vw_memberpatientlist.patient.readable = False
+    #db.vw_memberpatientlist.email.readable = False 
+    db.vw_memberpatientlist.dob.readable = False 
+    
+    db.vw_memberpatientlist.regionid.readable = False
+    
+    db.vw_memberpatientlist.providerid.readable = False
+    db.vw_memberpatientlist.is_active.readable = False
+    db.vw_memberpatientlist.hmopatientmember.readable = False 
+    
+    db.vw_memberpatientlist.hmoplan.readable = False 
+    db.vw_memberpatientlist.hmoplancode.readable = False 
+    db.vw_memberpatientlist.company.readable = False 
+    db.vw_memberpatientlist.newmember.readable = False 
+    db.vw_memberpatientlist.freetreatment.readable = False 
+    db.vw_memberpatientlist.age.readable = False 
+    db.vw_memberpatientlist.totaltreatmentcost.readable = False 
+    db.vw_memberpatientlist.totaldue.readable = False 
+   
+    exportlist = dict( csv_with_hidden_cols=False, html=False,tsv_with_hidden_cols=False, tsv=False, json=False, csv=False, xml=False)
+   
+    links = [dict(header=CENTER('PlanPDF'),body=lambda row: CENTER(A(IMG(_src="/my_pms2/static/img/reports.png",_width=30, _height=30),_href=URL('reports','viewplanpdf',vars=dict(planid=row.hmoplan)),_target="blank"))),
+             dict(header=CENTER('Notes'), body=lambda row: CENTER(A(IMG(_src="/my_pms2/static/img/edit.png",_width=25, _height=25),_href=URL("casereport","casereport",vars=dict(page=page,memberid=row.primarypatientid,patientid=row.patientid, providerid=providerid,source='members'))))),\
+             dict(header=CENTER('Open'), body=lambda row: CENTER(A(IMG(_src="/my_pms2/static/img/edit.png",_width=25, _height=25),_href=URL("member","member_update",vars=dict(page=page,memberid=row.primarypatientid,patientid=row.patientid, treatmentid=0, providerid=providerid,providername=providername))))),\
+             dict(header=CENTER('Treatment'),body=lambda row: CENTER(A(IMG(_src="/my_pms2/static/img/treatments.png",_width=30, _height=30),_href=URL("treatment","list_treatments",vars=dict(page=page,memberid=row.primarypatientid,patientid=row.patientid, providerid=providerid,providername=providername,status='Open'))))),\
+             dict(header=CENTER('Payment'), body=lambda row: CENTER(A(IMG(_src="/my_pms2/static/img/payments.png",_width=30, _height=30),_href=URL("payment","list_payment",vars=dict(page=page,memberid=row.primarypatientid,patientid=row.patientid, fullname=row.fullname, patient=row.patient,providerid=providerid,providername=providername))))),\
+             dict(header=CENTER('Image'),body=lambda row:CENTER(A(IMG(_src="/my_pms2/static/img/x-rays.png",_width=30, _height=30),_href=URL("dentalimage","list_dentalimages",vars=dict(memberpage=page,page=0,memberid=row.primarypatientid,patientid=row.patientid, providerid=providerid,providername=providername))))),\
+             dict(header=CENTER('Media'),body=lambda row:CENTER(A(IMG(_src="/my_pms2/static/img/x-rays.png",_width=30, _height=30),_href=URL("media","list_media",vars=dict(page=page,memberid=row.primarypatientid,patientid=row.patientid, providerid=providerid,providername=providername)))))
+             ]
+
+    
+    orderby = (~db.vw_memberpatientlist.primarypatientid, ~db.vw_memberpatientlist.patienttype)
+    
+    maxtextlengths = {'vw_memberpatientlist.hmoplanname':50, 'vw_memberpatientlist.email':50,}
+    form = SQLFORM.grid(query=query,
+                            headers=headers,
+                            fields=fields,
+                            links=links,
+                            paginate=10,
+                            orderby=orderby,
+                            maxtextlengths=maxtextlengths,
+                            exportclasses=exportlist,
+                            links_in_grid=True,
+                            searchable=False,
+                            create=False,
+                            deletable=False,
+                            editable=False,
+                            details=False,
+                            ui = 'jquery-ui',                           
+                            user_signature=True
+                           )
+  
+   
+    
+    return form
+@auth.requires(auth.has_membership('provider') or auth.has_membership('webadmin')) 
+@auth.requires_login()
+def xgetmembergrid(page,providerid, providername, memberid, patientid,patientmemberphrase, newmember=False):
 
     if(patientmemberphrase == ""):
         query = (db.vw_memberpatientlist.providerid == 0)
@@ -217,19 +340,31 @@ def getmembergrid(page,providerid, providername, memberid, patientid,patientmemb
 
 @auth.requires(auth.has_membership('provider') or auth.has_membership('webadmin')) 
 @auth.requires_login()
-def getnonmembergrid(page,providerid, providername, memberid, patientid,patientmemberphrase, newmember=False):
+def getnonmembergrid(page,providerid, providername, memberid, patientid,patientsearch, newmember=False):
     
     if((patientid != 0) & (memberid != 0)):
         query = ((db.vw_memberpatientlist.providerid == providerid) & (db.vw_memberpatientlist.hmopatientmember == False) & (db.vw_memberpatientlist.is_active == True) & \
                  (db.vw_memberpatientlist.primarypatientid == memberid) & (db.vw_memberpatientlist.patientid == patientid) )
             
     else:
-        #query = ((db.vw_memberpatientlist.providerid == providerid) & (db.vw_memberpatientlist.hmopatientmember == False) & \
-                 #(db.vw_memberpatientlist.fullname.like('%' + patientmemberphrase + '%'))  & (db.vw_memberpatientlist.is_active == True))
-        query = (((db.vw_memberpatientlist.patient == patientmemberphrase) | (db.vw_memberpatientlist.patient.like('%' + patientmemberphrase + '%'))) &\
-                (db.vw_memberpatientlist.hmopatientmember == False) & (db.vw_memberpatientlist.providerid == providerid) & (db.vw_memberpatientlist.is_active == True))
+        query = ((db.vw_memberpatientlist.hmopatientmember == False) & (db.vw_memberpatientlist.providerid == providerid) & (db.vw_memberpatientlist.is_active == True))
     
     
+    
+    #is it numeric only, then search on cell numbero
+    if(patientsearch.replace("+",'').replace(' ','').isdigit()):
+        query = (query) & (db.vw_memberpatientlist.cell.like("%" + patientsearch + "%"))
+    #is it email only
+    elif(patientsearch.find("@") >= 0):
+        query = (query) & (db.vw_memberpatientlist.email.like("%" + patientsearch + "%"))
+        
+    #if pats is empty, then search for phrase in patient (fname lname:membercode)
+    else:
+        if(patientsearch != ""):
+            query = ((query) & ((db.vw_memberpatientlist.patient.like("%" + patientsearch + "%")) | (db.vw_memberpatientlist.patientmember.like("%" + patientsearch + "%"))))        
+
+    logger.loggerpms2.info("Search Patient Query = " + str(query))    
+
     fields=(db.vw_memberpatientlist.fullname,db.vw_memberpatientlist.patientmember,db.vw_memberpatientlist.cell,db.vw_memberpatientlist.email,\
             db.vw_memberpatientlist.patient,db.vw_memberpatientlist.patienttype,db.vw_memberpatientlist.hmoplanname, \
             db.vw_memberpatientlist.patientid,db.vw_memberpatientlist.premstartdt,db.vw_memberpatientlist.premenddt, \

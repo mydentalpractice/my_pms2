@@ -43,6 +43,7 @@ from applications.my_pms2.modules import mdpprospect
 from applications.my_pms2.modules import mdpagent
 from applications.my_pms2.modules import mdpconsentform
 from applications.my_pms2.modules import mdpshopse
+from applications.my_pms2.modules import mdpbenefits
 
 from applications.my_pms2.modules import logger
 
@@ -2996,6 +2997,33 @@ def encrypt_sha256_shopse(avars):
 
 ############################# END SHOPSEE API  ###################################################
 
+
+############################# START CUSTOMER API  ###################################################
+def customer(avars):
+    
+    obj = mdpcustomer.Customer(current.globalenv['db'])
+    rsp = obj.customer(avars)
+    
+    return rsp
+
+def update_customer(avars):
+    
+    obj = mdpcustomer.Customer(current.globalenv['db'])
+    rsp = obj.update_customer(avars)
+    
+    return rsp
+
+############################# END CUSTOMER API  ###################################################
+
+############################# START BENEFITS API  ###################################################
+def get_benefits(avars):
+    
+    obj = mdpbenefits.Benefit(current.globalenv['db'])
+    rsp = obj.get_benefits(avars)
+    
+    return rsp
+############################# END BENEFITS API  ###################################################
+
 ############################# START CF API  ###################################################
 def new_consentform(avars):
     logger.loggerpms2.info("Enter New Consent Form Request\n" + str(avars) )
@@ -3025,6 +3053,19 @@ def consentforms(avars):
 
 def unknown(avars):
     return dict()
+
+
+customerAPI_switcher = {
+    "customer":customer,
+    "update_customer":update_customer
+
+}
+
+
+benefitsAPI_switcher = {
+    "get_benefits":get_benefits
+
+}
 
 
 shopseAPI_switcher = {
@@ -3714,3 +3755,96 @@ def shopseAPI():
 
     return locals()
 
+@request.restful()
+def benefitsAPI():
+    response.view = 'generic' + request.extension
+    def GET(*args, **vars):
+	return
+
+    def POST(*args, **vars):
+	i = 0
+	try:
+	    logger.loggerpms2.info(">>Enter Benefits API==>>")
+	    dsobj = datasecurity.DataSecurity()
+	    encryption = vars.has_key("req_data")
+	    if(encryption):
+		#logger.loggerpms2.info(">>Agent with Encryption")
+		encrypt_req = vars["req_data"]
+		vars = json.loads(dsobj.decrypts(encrypt_req))
+	    
+	    #decrypted request date
+	    if(vars.has_key("action") == True):
+		action = str(vars["action"])
+	    else:
+		action = "benefits"
+		
+	    logger.loggerpms2.info(">>Benefits ACTION==>>" + action)
+	    
+	    #return json.dumps({"action":action})
+	    rsp = benefitsAPI_switcher.get(action,unknown)(vars)
+	    common.setcookies(response)
+	    if(encryption):
+		return json.dumps({"resp_data":dsobj.encrypts(rsp)})
+	    else:
+		return rsp
+	    
+	except Exception as e:
+	    mssg = "Benefits API Exception Error =>>\n" + str(e)
+	    #logger.loggerpms2.info(mssg)
+	    raise HTTP(500)   
+
+    def PUT(*args, **vars):
+	return dict()
+
+    def DELETE(*args, **vars):
+	return dict()
+
+    return locals()
+
+
+@request.restful()
+def customerAPI():
+    response.view = 'generic' + request.extension
+    def GET(*args, **vars):
+	return
+
+    def POST(*args, **vars):
+	i = 0
+	try:
+	    logger.loggerpms2.info(">>Enter Custoemr API==>>")
+	    dsobj = datasecurity.DataSecurity()
+	    encryption = vars.has_key("req_data")
+	    if(encryption):
+		#logger.loggerpms2.info(">>Agent with Encryption")
+		encrypt_req = vars["req_data"]
+		vars = json.loads(dsobj.decrypts(encrypt_req))
+	    
+	    #decrypted request date
+	    if(vars.has_key("action") == True):
+		action = str(vars["action"])
+	    else:
+		action = "benefits"
+		
+	    logger.loggerpms2.info(">>Customer ACTION==>>" + action)
+	    
+	    #return json.dumps({"action":action})
+	    rsp = customerAPI_switcher.get(action,unknown)(vars)
+	    common.setcookies(response)
+	    if(encryption):
+		return json.dumps({"resp_data":dsobj.encrypts(rsp)})
+	    else:
+		return rsp
+	    
+	except Exception as e:
+	    mssg = "Customer API Exception Error =>>\n" + str(e)
+	    #logger.loggerpms2.info(mssg)
+	    raise HTTP(500)   
+
+    def PUT(*args, **vars):
+	return dict()
+
+    def DELETE(*args, **vars):
+	return dict()
+
+    return locals()
+    

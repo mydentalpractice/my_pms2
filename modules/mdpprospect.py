@@ -704,11 +704,13 @@ class Prospect:
     
         try:
     
+            
             #create provider for this prospect
             prospectid = common.getkeyvalue(avars,"prospectid","0")
             
             
             #create a new provider
+            avars["registered"] = True  #defaulted to True
             prv = mdpprovider.Provider(db, 0)
             prvobj = json.loads(prv.new_provider(avars))
             providerid = common.getkeyvalue(prvobj,"providerid","0")

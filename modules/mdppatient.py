@@ -320,21 +320,9 @@ class Patient:
   
   
   
-  #Searches for a patient in member, memberdependants, non-members for the patientsearch phrase
-  #filters on cell, email, patientcode, patient fname/lname
-  #
-  #returns:
-  #result as follows:
-  #{
-  # results: True or False
-  # count
-  # [
-  #   {
-  #      member, patientid, memberid, patientmember, fname, lname, cell,email, relation,patienttype,primary
-  #   }
-  # ]
-  
-  
+  # Display all Walk-in Patients assigned to the Provider matching the 'Search'
+  # For Members, Display all those Patients who have seeked appointments in the past or in future. This means that
+  # since taking an appointment, they have agreed to the Provider. List these members based on the search phrase filter
   
   #def searchpatient(self,page,patientsearch,maxcount,patientmembersearch,hmopatientmember, company=""):
   def searchpatient(self,avars):    
@@ -358,7 +346,7 @@ class Patient:
       patientmembersearch = patientsearch if((patientmembersearch==None)|(patientmembersearch=="")) else patientmembersearch
       
       hmopatientmember = common.getkeyvalue(avars,"member","")
-      hmopatientmember = "" if((hmopatientmember==None)|(hmopatientmember=="")) else common.getboolean(hmopatientmember)
+      hmopatientmember = "" if((hmopatientmember==None)|(hmopatientmember=="")) else common.getboolean(hmopatientmember)  #default to walk-in members
       
 
       company = common.getkeyvalue(avars,"company","")
@@ -375,15 +363,7 @@ class Patient:
       patlist = []
       
       
-      #when there is no search phrase, return an empty member list
-      #this is in tune with new business logic that MDP Member can 
-      #go to any Provider for the Treatment
-      if((patientsearch == "") | (patientsearch == None)):
-        rsp = {"patientcount":0,"page":0,"patientlist":[], "runningcount":0, "maxcount":0, "next":False, "prev":False,\
-                                 "patientsearch":"","patientmembersearch":"","member":True,"company":"","result":"success","error_message":"","error_code":""} 
-        
-        logger.loggerpms2.info("Search Patient is empty")
-        return json.dumps(rsp)
+     
         
         
       pats=None
@@ -394,21 +374,50 @@ class Patient:
       urlprops = db(db.urlproperties.id >0 ).select(db.urlproperties.pagination)
       items_per_page = 10 if(len(urlprops) <= 0) else int(common.getvalue(urlprops[0].pagination))
       limitby = None if page < 0 else ((page)*items_per_page,(page+1)*items_per_page)      
+      memberset = set()
       
+      #display all those patients who have seeked appointments with this provider. Appointment guarantees that these patient/members have 
+      #agreed to this provider.
+      memberset = set()
+    
+      appts = db((db.t_appointment.is_active == True)&\
+                 (db.t_appointment.f_status != 'Cancelled')&\
+                 (db.t_appointment.provider == providerid)).select(db.t_appointment.patientmember, db.t_appointment.patient)
+    
+      for appt in appts:
+        if(appt.patientmember in memberset):
+          continue
+        memberset.add(appt.patientmember)      
+
       qry = (db.vw_memberpatientlist.is_active == True)
       if(hmopatientmember == True):
-        qry = (qry) & ((db.vw_memberpatientlist.hmopatientmember == True) &  (datetime.date.today().strftime('%Y-%m-%d') <= db.vw_memberpatientlist.premenddt))
+        qry = (qry) & ((db.vw_memberpatientlist.primarypatientid.belongs(memberset)) & (db.vw_memberpatientlist.hmopatientmember == True))
+        #qry = (qry) & ((db.vw_memberpatientlist.primarypatientid.belongs(memberset)) & (db.vw_memberpatientlist.hmopatientmember == True) &  (datetime.date.today().strftime('%Y-%m-%d') <= db.vw_memberpatientlist.premenddt))
+        #qry = (qry) & ((patientsearch != "") & (db.vw_memberpatientlist.hmopatientmember == True) &  (datetime.date.today().strftime('%Y-%m-%d') <= db.vw_memberpatientlist.premenddt))
+      
       elif(hmopatientmember==False):
+        #display all Walk-in Patients for this Provider
         if(providerid > 0):
           qry = (qry) & (db.vw_memberpatientlist.hmopatientmember == False) & (db.vw_memberpatientlist.providerid == providerid)
         else:
-          qry = (qry) & (db.vw_memberpatientlist.hmopatientmember == False)
+          qry = qry & ( 1 !=1 ) #display no walk in patients
+         
       else:
-        if(providerid > 0):
-          qry = (qry) & (((db.vw_memberpatientlist.hmopatientmember == False) & (db.vw_memberpatientlist.providerid == providerid)) | (  (db.vw_memberpatientlist.hmopatientmember == True) &  (datetime.date.today().strftime('%Y-%m-%d') <= db.vw_memberpatientlist.premenddt) ))
-        else:
-          qry = (qry) & ((db.vw_memberpatientlist.hmopatientmember == False) | (  (db.vw_memberpatientlist.hmopatientmember == True) &  (datetime.date.today().strftime('%Y-%m-%d') <= db.vw_memberpatientlist.premenddt) ))
-      
+        if(providerid > 0):  #list of walk-in patients for this Provider + list of MDP Members matching the search phrase  (removed premenddt check)
+          qry = (qry) & (((db.vw_memberpatientlist.hmopatientmember == False) & (db.vw_memberpatientlist.providerid == providerid)) |\
+                         ((db.vw_memberpatientlist.primarypatientid.belongs(memberset)) &  (db.vw_memberpatientlist.hmopatientmember == True)))
+        else: # list of MDP Members matching the search phrase
+          qry = (qry) & ((db.vw_memberpatientlist.primarypatientid.belongs(memberset)) &  (db.vw_memberpatientlist.hmopatientmember == True))
+
+
+
+        #if(providerid > 0):  #list of walk-in patients for this Provider + list of MDP Members matching the search phrase
+          #qry = (qry) & (((db.vw_memberpatientlist.hmopatientmember == False) & (db.vw_memberpatientlist.providerid == providerid)) |\
+                         #((patientsearch != "") &  (db.vw_memberpatientlist.hmopatientmember == True) &  (datetime.date.today().strftime('%Y-%m-%d') <= db.vw_memberpatientlist.premenddt) ))
+        #else: # list of MDP Members matching the search phrase
+          #qry = (qry) & ((patientsearch != "") &  (db.vw_memberpatientlist.hmopatientmember == True) &  (datetime.date.today().strftime('%Y-%m-%d') <= db.vw_memberpatientlist.premenddt))
+          ##qry = (qry) & ((db.vw_memberpatientlist.hmopatientmember == False) | (  (db.vw_memberpatientlist.hmopatientmember == True) &  (datetime.date.today().strftime('%Y-%m-%d') <= db.vw_memberpatientlist.premenddt) ))
+    
       if(companyid >0):
         qry = (qry) & (db.vw_memberpatientlist.company == companyid)
   

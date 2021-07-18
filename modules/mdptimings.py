@@ -554,7 +554,7 @@ class OPS_Timing:
         auth  = current.auth
         db = self.db
         
-        logger.loggerpms2.info("Enter new_ops_timings")
+        logger.loggerpms2.info("Enter new_ops_timings =?" + str(avars))
         try:
             ref_code = common.getkeyvalue(avars,"ref_code","")
             ref_id = int(common.getkeyvalue(avars,"ref_id",0))
@@ -573,6 +573,7 @@ class OPS_Timing:
                 strtime = common.getkeyvalue(avars,"open_time","12:00 AM")
             else:
                 strtime = common.getkeyvalue(avars,"open_time","09:00 AM")
+                
             open_time = datetime.datetime(*(common.gettimefromstring(strtime, "%I:%M %p"))[:6])
             
             
@@ -627,7 +628,7 @@ class OPS_Timing:
         auth  = current.auth
         db = self.db
         
-        logger.loggerpms2.info("Enter new_ops_timings")
+        logger.loggerpms2.info("Enter new_ops_timings =>"   + str(avars))
         try:
             ref_code = common.getkeyvalue(avars,"ref_code","")
             ref_id = int(common.getkeyvalue(avars,"ref_id",0))
@@ -687,8 +688,16 @@ class OPS_Timing:
                         timings = common.getkeyvalue(avars,day_name,None)
                         if(timings != None):
                             for timing in timings:
-                                open_time = common.getkeyvalue(timing,"open_time","")
-                                close_time = common.getkeyvalue(timing,"close_time","")
+                                otstr = common.getkeyvalue(timing,"open_time","9:00")
+                                otstr = "9:00" if(otstr == "") else otstr
+                                #logger.loggerpms2.info("OTSTR = " + otstr)
+                                open_time = common.convert24to12clock(otstr)
+                                
+                                ctstr = common.getkeyvalue(timing,"close_time","18:00")
+                                ctstr = "18:00" if(otstr == "") else otstr
+                                #ogger.loggerpms2.info("OTSTR = " + ctstr)
+                                
+                                close_time = common.convert24to12clock(ctstr)
                                 isHoliday = common.getkeyvalue(timing,"isHoliday","False")
                                 isLunch = common.getkeyvalue(timing,"isLunch","False")
                                 isSaturday = common.getkeyvalue(timing,"isSaturday","False")

@@ -126,11 +126,12 @@ class Shopse:
                 procobj["amount"] = proc.procedurefee
                 proclist.append(procobj)
             
-            provdict = common.getproviderfromid(db,providerid)
-            customParams = avars["customParams"] if ("customParams" in avars) else {}
             
-            customParams["SalesPersonEmail"] = provdict["email"]
-            customParams["SalesPersonMobile"] = provdict["cell"]
+            customParams = avars["customParams"] if ("customParams" in avars) else {}
+           
+            provdict = common.getproviderfromid(db,providerid)
+            customParams["salesPersonEmail"] = provdict["email"]
+            customParams["salesPersonMobile"] = provdict["cell"]
             
             #Request CreateTransaction API
             shopsee_request = {
@@ -140,12 +141,12 @@ class Shopse:
                 "email":common.getkeyvalue(avars,"email",""),
                 "returnUrl":self.shopsee_returnURL,
                 "webhookUrl":self.webhookUrl,
-                "productName":treatment ,
+                "productName":treatment,
                 "productId":treatmentid,
                 "firstName":common.getkeyvalue(avars,"firstName",""),
                 "lastName":common.getkeyvalue(avars,"lastName",""),
                 "address":avars["address"],
-                "customParams":avars["customParams"],
+                "customParams":customParams,
                 "products":proclist
             }
         

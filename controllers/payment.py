@@ -1681,9 +1681,11 @@ def make_payment_shopse():
     vwfp = db(db.vw_fonepaise.paymentid == paymentid).select()
     
     treatmentid = int(common.getid(vwfp[0].treatmentid))
-    treatment = (common.getstring(vwfp[0].treatment))[:(20-len(str(paymentid)))] if(len(vwfp) ==1 ) else "TR_" + common.getstringfromdate(common.getISTFormatCurrentLocatTime(),"%d/%m/%Y %H:%M:%S")
+    treatment = (common.getstring(vwfp[0].treatment)) if(len(vwfp) ==1 ) else "TR_" + common.getstringfromdate(common.getISTFormatCurrentLocatTime(),"%d/%m/%Y %H:%M:%S")
+    #treatment = (common.getstring(vwfp[0].treatment))[:(20-len(str(paymentid)))] if(len(vwfp) ==1 ) else "TR_" + common.getstringfromdate(common.getISTFormatCurrentLocatTime(),"%d/%m/%Y %H:%M:%S")
     
-    reference_no = (common.getstring(vwfp[0].invoice))[:(20-len(str(paymentid)))] +"_" + str(paymentid) if(len(vwfp) == 1) else "0000_REFNO"
+    #reference_no = (common.getstring(vwfp[0].invoice))[:(20-len(str(paymentid)))] +"_" + str(paymentid) if(len(vwfp) == 1) else "0000_REFNO"
+    reference_no = (common.getstring(vwfp[0].invoice)) +"_" + str(paymentid) if(len(vwfp) == 1) else "0000_REFNO"
     reference_no=reference_no if(reference_no != "") else "0000_REFNO"
     
     memberid = int(common.getid(vwfp[0].memberid)) if(len(vwfp) == 1) else 0
