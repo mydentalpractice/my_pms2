@@ -101,6 +101,15 @@ def getmembergrid(page,providerid, providername, memberid, patientid,patientsear
         
     query = (db.vw_memberpatientlist.is_active == True)
     
+    if(providerid > 0):
+        q = (query) & ((db.vw_memberpatientlist.hmopatientmember == True) & (db.vw_memberpatientlist.providerid == providerid))
+        pats = db(q).select(db.vw_memberpatientlist.primarypatientid)
+        for pat in pats:
+            if(pat.primarypatientid in memberset):
+                continue
+            memberset.add(pat.primarypatientid)
+
+    
     #removing premenndt check
     if((patientid != 0) & (memberid != 0)):
         query = (query) & ((db.vw_memberpatientlist.hmopatientmember == True) & (db.vw_memberpatientlist.is_active == True) & \

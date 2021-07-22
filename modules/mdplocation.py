@@ -238,3 +238,97 @@ class Location:
         return json.dumps(excpobj)    
     
     return
+  
+
+  
+    
+  #Returns list of clinics within a radius of the origin location
+  def getclinicswithinradius(self,originlat,originlong,radius,unit):
+        
+      db = self.db
+      auth = current.auth
+      
+      try:
+        
+        clnlist = []
+        clnobj = {}
+        
+        clns = db((db.vw_clinic.id > 0 ) &\
+                   db.vw_clinic.is_active == True).select(db.provider.id,
+                                                          db.provider.provider,
+                                                          db.provider.providername,
+                                                          db.provider.pa_practicename,
+                                                          db.provider.pa_practiceaddress,
+                                                          db.provider.pa_longitude,
+                                                          db.provider.pa_latitude,
+                                                          db.provider.pa_locationurl,
+                                                          db.vw_clinic.name,
+                                                          db.vw_clinic.city,
+                                                          db.vw_clinic.pin,
+                                                          db.vw_clinic.cell,
+                                                          db.vw_clinic.email,
+                                                          db.vw_clinic.longitude,
+                                                          db.vw_clinic.latitude,
+                                                          db.vw_clinic.gps_location,
+                                                          db.vw_clinic.primary_clinic,
+                                                          left = db.provider.on((db.provider.id == db.vw_clinic.ref_id) & (db.vw_clinic.ref_code == "PRV")))
+
+        for cln in clns:
+          if((common.isfloat(cln.latitude) == False) | (common.isfloat(cln.longitude) == False)):
+            continue
+        
+          logger.loggerpms2.info("Long/Lat :" + cln.name + ":" + str(cln.longitude) + ":" + str(cln.latitude))
+          destlat = float(common.getid(cln.latitude))
+          destlong = float(common.getid(cln.longitude))
+          
+          jsonobj = json.loads(self.getdistance(originlat,originlong,destlat,destlong,unit))
+          
+          dist = round(float(common.getstring(jsonobj.get("distance","0.0"))),2)
+          
+          #if provider distance is within radius, then add to the list
+          if(dist <= radius):
+            clnobj={
+            
+              "providerid":int(common.getid(cln.id)),
+              "provider":common.getstring(cln.provider),
+              "providername":common.getstring(cln.providername),
+              "practicename":common.getstring(cln.pa_practicename),
+              "practiceaddress":common.getstring(cln.pa_practiceaddress),
+              "name":cln.name,
+              "city":cln.city,
+              "pin":cln.pin,
+              "cell":cln.cell,
+              "email":cln.email,
+              "primary_clinic":common.getboolean(cln.primary_clinic),
+              "latitude":cln.latitude,
+              "longitude":cln.longitude,
+              "location":cln.gps_location
+            }
+            
+            clnlist.append(clnobj)
+        
+        clnobj = {
+        
+          "result":"success",
+          "error_message":"",
+          "radius":radius,
+          "unit":unit,
+           
+           "originlat":originlat,
+           "originlong":originlong,
+           "clnlist":clnlist,
+        } 
+        
+        return json.dumps(provobj)
+      
+      except Exception as e:
+          error_message = "Get Clinics within Radius Exception Error - " + str(e)
+          logger.loggerpms2.info(error_message)
+          excpobj = {}
+          excpobj["result"] = "fail"
+          excpobj["error_message"] = error_message
+          return json.dumps(excpobj)    
+      
+      return
+  
+        

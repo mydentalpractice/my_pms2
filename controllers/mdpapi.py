@@ -1807,7 +1807,7 @@ def getrazorpay_constants(avars):
     return rsp
 
 def create_razorpay_order(avars):
-    orazorpay = mdprazorpay.Razorpay(current.globalenv['db'],int(common.getid(avars['providerid'])))
+    orazorpay = mdprazorpay.Razorpay(current.globalenv['db'],int(common.getid(common.getkeyvalue(avars,'providerid','0'))))
     rsp = orazorpay.create_razorpay_order(float(common.getvalue(avars['amount'])),\
                                           common.getstring(avars["currency"]),\
                                           common.getstring(avars["receipt"]),\
@@ -2225,6 +2225,18 @@ def getproviderswithinradius(avars):
                                            #)
     
     return rsp
+
+def getclinicswithinradius(avars):
+    
+    oloc = mdplocation.Location(current.globalenv['db'])
+    rsp = oloc.getclinicswithinradius(float(common.getstring(avars["originlat"])) if "originlat" in avars else 0,
+                                           float(common.getstring(avars["originlong"])) if "originlong" in avars else 0,                                           
+                                           float(common.getstring(avars["radius"])) if "radius" in avars else 0,                                           
+                                           avars["unit"] if "unit" in avars else "km"                                          
+                                           )
+    
+    return rsp
+
 
 #Returns list of providers in a specific pin
 def getproviderswithpincode(avars):
@@ -3013,6 +3025,20 @@ def update_customer(avars):
     
     return rsp
 
+def get_customer(avars):
+    
+    obj = mdpcustomer.Customer(current.globalenv['db'])
+    rsp = obj.get_customer(avars)
+    
+    return rsp
+
+def customer_payment(avars):
+    
+    obj = mdpcustomer.Customer(current.globalenv['db'])
+    rsp = obj.customer_payment(avars)
+    
+    return rsp
+
 ############################# END CUSTOMER API  ###################################################
 
 ############################# START BENEFITS API  ###################################################
@@ -3057,7 +3083,9 @@ def unknown(avars):
 
 customerAPI_switcher = {
     "customer":customer,
-    "update_customer":update_customer
+    "update_customer":update_customer,
+    "customer_payment":customer_payment,
+    "get_customer":get_customer
 
 }
 
@@ -3184,7 +3212,7 @@ mdpapi_switcher = {"listappointments":getappointments,"getappointmentsbymonth":g
                    "getmediclaimprocedures":getmediclaimprocedures,"deletemediclaimprocedure":deletemediclaimprocedure,"getmediclaims":getmediclaims,
                    "uploadmediclaimsignature":uploadmediclaimsignature,"downloadmediclaimsignature":downloadmediclaimsignature,"deletemediclaimsignature":deletemediclaimsignature,\
                    "addmediclaimattachment":addmediclaimattachment,"getmediclaimattachments":getmediclaimattachments,"deletemediclaimattachment":deletemediclaimattachment,\
-                   "getdistance":getdistance,"getproviderswithinradius":getproviderswithinradius,"getproviderswithpincode":getproviderswithpincode,\
+                   "getdistance":getdistance,"getproviderswithinradius":getproviderswithinradius,"getproviderswithpincode":getproviderswithpincode,"getclinicswithinradius":getclinicswithinradius,\
                    "task":task,"createwebmember_razorpay_order":createwebmember_razorpay_order,"capturewebmember_razorpay_payment":capturewebmember_razorpay_payment,\
                    "printpremium_payment_receipt":printpremium_payment_receipt,"updatememberprovider":updatememberprovider,"getprovider":getprovider,"addproviderimage":addproviderimage,\
                    "validaterlgmember399":validaterlgmember399,"getreligarepatient399":getreligarepatient399,"updatereligarepatient399":updatereligarepatient399,\

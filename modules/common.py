@@ -32,6 +32,16 @@ gettruefalse = lambda text: "True" if((text == "yes")) else ("False" if(text=="n
 fmt = "%Y-%m-%d %H:%M:%S"
 
 
+
+def getregioncodefromcity(db,city):
+        rgn = db((db.groupregion.region == city) & (db.groupregion.is_active == True)).select()
+        return rgn[0].groupregion if(len(rgn) != 0) else "JAI"
+
+def getregionidfromcity(db,city):
+        rgn = db((db.groupregion.region == city) & (db.groupregion.is_active == True)).select()
+        return rgn[0].id if(len(rgn) != 0) else 0
+
+        
 def convert24to12clock(timestr):
 
         d = datetime.datetime.strptime(timestr,"%H:%M")
@@ -730,5 +740,5 @@ def getmessage(db,message_code):
         
         mssgs = db((db.mdpmessages.message_code == message_code)).select()
         
-        return "" if(len(mssgs != 1)) else mssgs[0].mdpmessage
+        return "" if(len(mssgs) != 1) else mssgs[0].mdpmessage
         

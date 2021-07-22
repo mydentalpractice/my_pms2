@@ -8732,13 +8732,29 @@ ADD COLUMN `webhookUrl` VARCHAR(512) NULL DEFAULT NULL AFTER `product_id`;
 10/07/2021
 ===========
 
-1. YYYZZZAdded tables benefit_master, benefit_master_x_plan,benefit_master_x_message,benefit_master_x_slabs,benefit_member,benefit_messages,benefit_redeem_slabs,benefit_member_x_benfit_master
+1. XXXYYYZZZAdded tables benefit_master, benefit_master_x_plan,benefit_master_x_message,benefit_master_x_slabs,benefit_member,benefit_messages,benefit_redeem_slabs,benefit_member_x_benfit_master
 
 2. XXXXYYYZZZModified Customer table by adding 'clinicid'
 
-3. delete benefit_message, benefit_master_x_message
+3. XXXXYYYYZZZdelete benefit_message, benefit_master_x_message
 
-4. YYYZZZAdd mdpmessages table (populate)
+4. XXXXYYYZZZAdd mdpmessages table (populate)
+
+19/07/2021
+=============
+1. XXXYYZZZ modified vw_clinic : addd latitude & longitude
+
+2. XXXYYYZZZ modified benefit_master : added benefit_premium  
+
+3. YYYYZZZZmodified customer table to add payment related information - tx_id, payment_id, payment_amount, payment_date,amount_paid, payment_status
+
+22/07/2021
+===========
+1. Modify treatmentplan table to add totalcompanypays
+
+2. Modify payment table to add companypays
+
+3. Modify vw_paymentlist,vw_payments,vw_treatmentplancost,vw_treatmentplansummarybypatient,vw_treatmentplansummarybytreatment
 
 Script file to clear user for sign-up
 =====================================

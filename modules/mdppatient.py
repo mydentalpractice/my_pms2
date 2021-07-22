@@ -389,7 +389,18 @@ class Patient:
           continue
         memberset.add(appt.patientmember)      
 
+      #also add those patients & members who is assigned to this Provider outside the Appt. but from Customer Support
+      
       qry = (db.vw_memberpatientlist.is_active == True)
+
+      if(providerid > 0):
+        q = (qry) & ((db.vw_memberpatientlist.hmopatientmember == True) & (db.vw_memberpatientlist.providerid == providerid))
+        pats = db(q).select(db.vw_memberpatientlist.primarypatientid)
+        for pat in pats:
+          if(pat.primarypatientid in memberset):
+            continue
+          memberset.add(pat.primarypatientid)
+      
       if(hmopatientmember == True):
         qry = (qry) & ((db.vw_memberpatientlist.primarypatientid.belongs(memberset)) & (db.vw_memberpatientlist.hmopatientmember == True))
         #qry = (qry) & ((db.vw_memberpatientlist.primarypatientid.belongs(memberset)) & (db.vw_memberpatientlist.hmopatientmember == True) &  (datetime.date.today().strftime('%Y-%m-%d') <= db.vw_memberpatientlist.premenddt))

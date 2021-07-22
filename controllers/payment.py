@@ -38,6 +38,7 @@ from decimal  import Decimal
 from applications.my_pms2.modules import common
 from applications.my_pms2.modules import account
 from applications.my_pms2.modules import datasecurity
+from applications.my_pms2.modules import mdpbenefits
 from applications.my_pms2.modules import mdppayment
 from applications.my_pms2.modules import mdpshopse
 from applications.my_pms2.modules import logger
@@ -2709,12 +2710,17 @@ def calculatepayments(tplanid,providerid):
     totalinspays = 0
     totaldue = 0
     totalpaid = 0
+    totalcompanypays = 0
     
     tplan = db(db.treatmentplan.id == tplanid).select()
     if(len(tplan) > 0):
         treatmentcost = float(common.getvalue(tplan[0].totaltreatmentcost))
         copay = float(common.getvalue(tplan[0].totalcopay))
         inspays = float(common.getvalue(tplan[0].totalinspays))
+        memberid = int(common.getid(tplan[0].primarypatient))
+        bnftobj  = mdpbenefits.Benefit(db)
+        
+        totalcompanypays = bnftobj.get_benefits(avars)
         
         r = db((db.vw_treatmentplansummarybytreatment.provider==providerid) & (db.vw_treatmentplansummarybytreatment.id == tplanid)).select()
         if(len(r)>0):

@@ -484,14 +484,19 @@ class Customer:
 
     
     def customer(self,avars):
+        logger.loggerpms2.info("Enter customer " + json.dumps(avars))
         db = self.db
         customer_ref = common.getkeyvalue(avars, "customer_ref", "")
         customer_ref = customer_ref if(customer_ref == "") else common.getkeyvalue(avars,"cell","")
+        
         plan_code = common.getkeyvalue(avars, "plan_code", "RPIP599")
-        c = db((db.company.company == plan_code) & (db.company.is_active == True)).select()
+        
+        company_code = common.getkeyvalue(avars, "company_code", plan_code)
+        c = db((db.company.company == company_code) & (db.company.is_active == True)).select()
         company_id = c[0].id if(len(c) == 1) else 0
-        avars["planid"] = str(company_id)
+        
         avars["companyid"] = str(company_id)
+        avars["company_code"] = company_code
         
         jsonresp={}
         if(customer_ref != ""):
@@ -516,7 +521,7 @@ class Customer:
         return json.dumps(jsonresp)
     
     #customer with dependants
-    def new_customer(self,avars):
+    def xnew_customer(self,avars):
         db = self.db        
         auth = current.auth
         jsonresp = {}
@@ -649,6 +654,7 @@ class Customer:
     
     #customer with dependants
     def new_customer(self,avars):
+        logger.loggerpms2.info("Enter new customer " + json.dumps(avars))
         
         db = self.db        
         auth = current.auth
@@ -660,6 +666,21 @@ class Customer:
             
             customer_ref = common.getkeyvalue(avars, "customer_ref", common.generateackid("VIT",8))
             
+            city = common.getkeyvalue(avars,"city", "Jaipur")
+            regionid = common.getregionidfromcity(db,city)
+            regioncode =  common.getregioncodefromcity(db,city)
+            
+            prp = db((db.provider_region_plan.companycode == common.getkeyvalue(avars,"company_code","RPIP599")) &\
+                     (db.provider_region_plan.regioncode == regioncode) &\
+                     (db.provider_region_plan.policy == common.getkeyvalue(avars,"plan_code","RPIP599")) &\
+                     (db.provider_region_plan.is_active == True)).select()
+            
+            
+            plancode = prp[0].plancode if(len(prp) != 0) else "PREMWALKIN"
+            h = db((db.hmoplan.hmoplancode == plancode) & (db.hmoplan.is_active == True)).select()
+            planid = h[0].id if (len(h) != 0) else "1"
+            
+            logger.loggerpms2.info("Creating new customer " + plancode + " " + str(planid) + " " + regioncode + " " + str(len(prp)))
             if(customer_ref != "" ):
                 customer_id = db.customer.insert(
                     customer_ref = customer_ref,
@@ -670,7 +691,7 @@ class Customer:
                     address1 = common.getkeyvalue(avars,"address1", "331-332 Ganpati Plaza"),
                     address2 = common.getkeyvalue(avars,"address2", "MI Road"),
                     address3 = common.getkeyvalue(avars,"address3", ""),
-                    city = common.getkeyvalue(avars,"city", "Jaipur"),
+                    city = city,
                     st = common.getkeyvalue(avars,"st", "Rajasthan (RJ)"),
                     pin = common.getkeyvalue(avars,"pin", "302001"),
                     pin1 = common.getkeyvalue(avars,"pin1", "302001"),
@@ -688,8 +709,8 @@ class Customer:
                     
                     providerid = int(common.getkeyvalue(avars,"providerid", "1")),
                     companyid = int(common.getkeyvalue(avars,"companyid", "1")),
-                    planid = int(common.getkeyvalue(avars,"planid", "1")),
-                    regionid = int(common.getkeyvalue(avars,"regionid", "1")),
+                    planid = planid,
+                    regionid = regionid,
                    
                     enrolldate = common.getdatefromstring(
                         common.getkeyvalue(avars, "enrolldate",common.getstringfromdate(common.getISTFormatCurrentLocatTime(),"%d/%m/%Y")),"%d/%m/%Y"),
@@ -709,6 +730,7 @@ class Customer:
                 )
                 db(db.customer.id == customer_id).update(customer = customer_id)
                 
+               
                 
                 #register customer dependants
          
@@ -790,6 +812,16 @@ class Customer:
                 apptdatestr = common.getkeyvalue(avars, "appointment_datetime",defapptdatestr)
                 apptdate = common.getdatefromstring(apptdatestr, "%d/%m/%Y %H:%M")
                 
+                payment_id = common.getkeyvalue(avars,"payment_id","RPIP599_" + common.getstringfromdate(common.getISTFormatCurrentLocatTime(),"%d/%m/%Y %H:%M:%S"))
+                payment_date = common.getkeyvalue(avars,"payment_date",common.getstringfromdate(common.getISTFormatCurrentLocatTime(),"%d/%m/%Y"))
+                payment_date = common.getdatefromstring(payment_date,"%d/%m/%Y")
+                payment_status = common.getkeyvalue(avars,"payment_status","success")
+                payment_amount = float(common.getvalue(common.getkeyvalue(avars,"payment_amount","0")))
+                amount_paid = float(common.getvalue(common.getkeyvalue(avars,"amount_paid","0")))
+
+                
+           
+                
                 db((db.customer.customer_ref == customer_ref) & (db.customer.is_active == True)).update(
                     customer_ref = common.getkeyvalue(avars,"customer_ref", c[0].customer_ref),
                     fname = common.getkeyvalue(avars,"fname", c[0].fname),
@@ -823,6 +855,11 @@ class Customer:
                     enrolldate = enrolldate,
                     appointment_datetime =apptdate,
 
+                    payment_id = payment_id,
+                    payment_amount = payment_amount,
+                    payment_date = payment_date,
+                    payment_status = payment_status,
+                    amount_paid = amount_paid,
 
                     notes = common.getkeyvalue(avars,"notes",c[0].notes),
                     
@@ -887,18 +924,21 @@ class Customer:
 
    
 
-    def get_customer(self,customerid):
+    def get_customer(self,avars):
+        logger.loggerpms2.info("Enter get_customer " + json.dumps(avars))
         db = self.db        
         auth = current.auth
         
         deplist = []
         depobj = {}
         depcount = 0
-        
+        customerid = 0
         jsonresp = {}
         try:
+            customer_ref = common.getkeyvalue(avars,"customer_ref","")
+            c = db((db.customer.customer_ref == customer_ref) & (db.customer.is_active == True)).select()
+            customerid = 0 if(len(c) != 1) else int(common.getid(c[0].id))
             
-            c = db((db.customer.id == customerid) & (db.customer.is_active == True)).select()
             jsonresp={
                 "result":"success",
                 "error_message":"",
@@ -942,41 +982,49 @@ class Customer:
                 "appointment_id":c[0].appointment_id,
                 "appointment_datetime":common.getstringfromdate(c[0].appointment_datetime,"%d/%m/%Y %H:%M"),
                 
+                "payment_id": c[0].payment_id,
+                "payment_amount" : str(c[0].payment_amount),
+                "payment_date":common.getstringfromdate(c[0].payment_date,"%d/%m/%Y"),
+                "payment_status":c[0].payment_status,
+                "amount_paid" : str(c[0].amount_paid),
+                
+                
+                
                 "notes":c[0].notes,
                 
                 "is_active":str(c[0].is_active),
                 
-                "created_on":c[0].common.getstringfromdate(c[0].created_on,"%d/%m/%Y %H:%M"),
+                "created_on":common.getstringfromdate(c[0].created_on,"%d/%m/%Y %H:%M"),
                 "created_by":c[0].created_by,
-                "modified_on":c[0].common.getstringfromdate(c[0].modified_on,"%d/%m/%Y %H:%M"),
-                "modified_by":c[0].modified_by,
+                "modified_on":common.getstringfromdate(c[0].modified_on,"%d/%m/%Y %H:%M"),
+                "modified_by":c[0].modified_by
             
             }
             
             #get customers
             deps = db((db.customerdependants.customer_id == customerid) & (db.customerdependants.is_active == True)).select()
             depcount = 0 if deps == None else len(deps)
-            
-            for dep in deps:
-                depobj= {
+            if(depcount>0):
+                for dep in deps:
+                    depobj= {
+                        
+                        "dependant_id" : dep["id"],
+                        "dependant":dep["dependant"],
+                        "dependant_ref" :dep["dependant_ref"],
+                        "fname":dep["fname"],
+                        "mname":dep["mname"] if "mname" in dep else "",
+                        "lname":dep["lname"],
+                        "gender":dep["gender"],
+                        "relation":dep["relation"],
+                        "depdob":common.getstringfromdate(dep["depdob"],"%d/%m/%Y"),
                     
-                    "dependant_id" : dep["id"],
-                    "dependant":dep["dependant"],
-                    "dependant_ref" :dep["dependant_ref"],
-                    "fname":dep["fname"],
-                    "mname":dep["mname"] if "mname" in dep else "",
-                    "lname":dep["lname"],
-                    "gender":dep["gender"],
-                    "relation":dep["relation"],
-                    "depdob":common.getstringfromdate(dep["depdob"],"%d/%m/%Y"),
+                    
+                    }
+                    deplist.append(depobj)
                 
-                
-                }
-                deplist.append(depobj)
-            
-            jsonresp["dependants"] = deplist
-            jsonresp["dependantscount"] = depcount
-                
+                jsonresp["dependants"] = deplist
+                jsonresp["dependantscount"] = depcount
+                    
         except Exception as e:
             error_code = "GET_CUST_001"
             mssg = error_code + ":" + "Exception GET Customer:\n" + "(" + str(e) + ")"
@@ -987,6 +1035,8 @@ class Customer:
                 "error_code":error_code
             }            
       
+      
+        logger.loggerpms2.info("Exit get_customer " + json.dumps(jsonresp))
         return json.dumps(jsonresp)
     
     def delete_customer(self,avars):
@@ -1295,3 +1345,73 @@ class Customer:
             }            
     
         return json.dumps(jsonresp)
+    
+   
+    
+    def customer_payment(self,avars):
+        
+        logger.loggerpms2.info("Enter customer_payment " + json.dumps(avars) )    
+        
+        db = self.db
+        auth = current.auth
+
+        jsonresp = {}
+        
+        try:
+            customer_ref = common.getkeyvalue(avars,"customer_ref","")
+            paymentid = int(common.getid(common.getkeyvalue(avars,"paymentid","0")))
+            c = db((db.customer.customer_ref == customer_ref) & (db.customer.is_active == True)).select()
+            customerid = c[0].id if(len(c)==1) else customer_id            
+            
+            if(paymentid == 0):
+                c = self.get_customer(customerid)
+                defdt = common.getISTFormatCurrentLocatTime()
+                defdtstr = common.getstringfromdate(defdt,"%d/%m/%Y %H:%M:%S")
+                payment_date = common.getdatefromstring(common.getkeyvalue(avars,"payment_date",defdtstr),"%d/%m/%Y")
+                
+                paymentid = db.payment.insert(
+                    paymentdate= payment_date,
+                    amount = float(common.getkeyvalue(avars,"amount_paid","0")),
+                    paymenttype = "Premium",
+                    paymentmode = "Online",
+                    fp_paymentref = common.getkeyvalue(avars,"payment_id","RPIP599_" + defdtstr),
+                    fp_status = common.getkeyvalue(avars,"payment_status","success"),
+                    fp_paymenttype = "Premium",
+                    fp_paymentdate =  payment_date,
+                    fp_amount = float(common.getkeyvalue(avars,"amount_paid","0")),
+                    fp_invoice = common.getkeyvalue(avars,"payment_id","RPIP599_" + defdtstr),
+                    fp_invoiceamt = float(common.getkeyvalue(avars,"amount_paid","0")),
+                    is_active=True,chequeno="0000",bankname="XXXX",accountname="XXXX",accountno="0000"
+                )
+            
+                jsonresp = {
+                    "result":"success",
+                    "error_message":"",
+                    "error_code":"",
+                    
+                    "paymentid":str(paymentid),
+                    
+                    "payment_ref":common.getkeyvalue(avars,"payment_id","RPIP599_" + defdtstr),
+                    
+                     "payment_status" : common.getkeyvalue(avars,"payment_status","success"),
+                     "paymenttype" : "Premium",
+                     "paymentmode" : "Online",
+                     "paymentdate" : common.getstringfromdate(payment_date,"%d/%m/%Y"),
+                     "amount_paid" : float(common.getkeyvalue(avars,"amount_paid","0"))
+                }
+                
+            
+                
+                             
+        except Exception as e:
+            error_code = "ENROLL_CUST_001"
+            mssg = error_code + ":" + "Exception Enroll Member:\n" + "(" + str(e) + ")"
+            logger.loggerpms2.info(mssg)
+            jsonresp = {
+                "result":"fail",
+                "error_message":mssg,
+                "error_code":error_code
+            }            
+        
+        return json.dumps(jsonresp)                 
+    

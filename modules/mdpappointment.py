@@ -1190,16 +1190,21 @@ class Appointment:
         db = self.db
         try:
             
+            
             blockappt = common.getboolean(common.getkeyvalue(avars,"block","False"))
             providerid = int(common.getkeyvalue(avars,"providerid","0"))
             clinicid = int(common.getkeyvalue(avars,"clinicid","0"))
-            doctorid = int(common.getkeyvalue(avars,"doctorid","0"))
+            
             memberid = int(common.getkeyvalue(avars,"memberid","0"))
-            patientid = int(common.getkeyvalue(avars,"patientid","0"))
+            patientid = int(common.getkeyvalue(avars,"patientid",common.getstring(memberid)))
             cell = common.getkeyvalue(avars,"cell","1111111111")
            
             complaint = common.getkeyvalue(avars,"complaint","")
             
+            #if doctorid == 0, then practice owner becomes the defautl doctor
+            d = db((db.doctor.providerid == providerid) & (db.doctor.practice_owner == True)&(db.doctor.is_active == True)).select()
+            defdoctorid = d[0].id if(len(d) != 0) else 0
+            doctorid = int(common.getkeyvalue(avars,"doctorid",common.getstring(defdoctorid)))
             
             duration = common.getkeyvalue(avars,"duration","30")
             defdtstr = common.getstringfromdate(datetime.datetime.today(), "%d/%m/%Y %H:%M")
