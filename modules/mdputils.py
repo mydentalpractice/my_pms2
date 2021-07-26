@@ -125,7 +125,7 @@ def getprocedurepriceplancode(db,policyproduct, providercode, regioncode, compan
 	    h = db(db.hmoplan.hmoplancode == plancode).select()
 	    planid = int(common.getid(h[0].id)) if(len(h) == 1) else 1
 	    
-	    
+	    policy = common.getstring(planprov[0].policy) if(len(planprov) == 1) else None
 	    procedurepriceplancode = common.getstring(planprov[0].procedurepriceplancode) if(len(planprov) == 1) else None
 	    procedurepriceplancode = None if(procedurepriceplancode == "") else procedurepriceplancode
 	    
@@ -135,5 +135,5 @@ def getprocedurepriceplancode(db,policyproduct, providercode, regioncode, compan
 	raise Exception(str(e))
 	
 	
-    return dict(planid = planid, plancode = plancode, procedurepriceplancode=procedurepriceplancode)
+    return dict(policy=policy,planid = planid, plancode = plancode, procedurepriceplancode=procedurepriceplancode)
 

@@ -359,11 +359,12 @@ def updatetreatmentcostandcopay(treatmentid,tplanid):
     tp = db((db.treatmentplan.id == tplanid) & (db.treatmentplan.is_active == True)).select(db.treatmentplan.totaltreatmentcost,\
                                                                                                 db.treatmentplan.totalpaid,\
                                                                                                 db.treatmentplan.totalcopaypaid,\
+                                                                                                db.treatmentplan.totalcompanypays,\
                                                                                                 db.treatmentplan.totalinspaid)
     
     if(len(tp) == 1):
         totaldue = float(common.getvalue(tp[0].totaltreatmentcost)) - float(common.getvalue(tp[0].totalpaid)) - \
-            float(common.getvalue(tp[0].totalcopaypaid)) - float(common.getvalue(tp[0].totalinspaid))
+            float(common.getvalue(tp[0].totalcopaypaid)) - float(common.getvalue(tp[0].totalinspaid) - float(common.getvalue(tp[0].totalcompanypays)))
     
     
     db(db.treatment.id == treatmentid).update(actualtreatmentcost = totalactualtreatmentcost, treatmentcost=totaltreatmentcost, copay=totalcopay, inspay=totalinspays, companypay= totalcompanypays)

@@ -45,7 +45,29 @@
 							      </div>
                                                        </div>
                                                   </div>
+						  <div class="col-md-4 np" >
+						  <h5><strong>Running Payment Total for this treatment</strong></h5>
+						  <div class="col-md-3">
+					     
+						       <div class="mt-repeater-input">
+								    <label class="m_title">Total Paid</label>
+								    <br>
+								    {{=totalpaid}}
+						       </div>  
 						  
+						   </div>
+						
+						  <div class="col-md-3">
+					     
+						       <div class="mt-repeater-input">
+								    <label class="m_title">Total Due</label>
+								    <br>
+								    {{=totaldue}}
+						       </div>  
+						  
+						   </div>
+						
+					    </div>  
 						  
 					   <div class="col-md-12 np">
                                                   <div class="col-md-3">
@@ -57,62 +79,30 @@
                                                        </div>  
                                                   
                                                    </div>
-						    
-						
+						  {{if(hmopatientmember == True):}}
                                                   <div class="col-md-3">
                                              
                                                        <div class="mt-repeater-input">
-						       {{if(hmopatientmember == True):}}
                                                                     <label class="m_title">Authorized Payment by Insurance</label>
                                                                     <br>
                                                                     {{=inspays}}
-							 {{pass}}
                                                        </div>  
                                                   
                                                    </div>
-						  
-						  
-						  
+						  {{pass}}
+						  {{if(hmopatientmember == True):}}
                                                   <div class="col-md-3">
                                              
                                                        <div class="mt-repeater-input">
-						        
-							{{if(hmopatientmember == True):}}
                                                                     <label class="m_title">CoPay by Patient</label>
                                                                     <br>
                                                                     {{=copay}}
-							{{pass}}	    
                                                        </div>  
                                                   
                                                    </div>
-						   
-						   
-						   <div class="col-md-3 np" >
-						  <h5><strong>Running Payment Total for this treatment</strong></h5>
-                                                  <div class="col-md-3">
-                                             
-                                                       <div class="mt-repeater-input">
-                                                                    <label class="m_title">Total Paid</label>
-                                                                    <br>
-                                                                    {{=totalpaid}}
-                                                       </div>  
-                                                  
-                                                   </div>
-						
-                                                  <div class="col-md-3">
-                                             
-                                                       <div class="mt-repeater-input">
-                                                                    <label class="m_title">Total Due</label>
-                                                                    <br>
-                                                                    {{=totaldue}}
-                                                       </div>  
-                                                  
-                                                   </div>
-						
-                                            </div>
-					   
+						   {{pass}}
                                             </div>                                          
-				     
+				    
 												    
 
 				              
@@ -170,9 +160,10 @@
 						   
                                                        <div class="col-md-3">
                                                            <div class="mt-repeater-input">
-                                                                        <label class="m_title">Amount</label>
+                                                                        <label class="m_title" style="color:red">Amount</label>
                                                                         <br/>
                                                                          {{=formA.custom.widget.amount}}
+									 <label id="valerr" class="m_title" style="color:red" value=""></label>
                                                            </div>  
                                                        </div> 
 						       
@@ -196,27 +187,40 @@
                                                     <label class="m_title">Notes</label>
                                                     {{=formA.custom.widget.notes}}
                                             </div> 
-											<div class="col-md-12">
-                                              
+				    <div class="col-md-12">
+					      
 					       <span>
-						   
-						   
-						   
-						   
-					       
-                                              
-                                               <a href="{{=returnurl}}" class="btn green w3-right" style="margin-top: 8px;">Cancel </a>&nbsp;&nbsp;
-											   <button  style="margin: 8px 3px; display:none" type="submit" id="chequePayment" onclick="loader(this.id),makeChequePayment()" class="btn green w3-right">Cheque Payment </button>&nbsp;&nbsp;
-											   <button style="margin: 8px 3px;" type="button" id="CKP1"  class="btn green w3-right" data-toggle="modal" data-target="#myModal">Cheque Payment  </button>
-											   <button id="CP1" style="margin: 8px 3px;"type="submit" onclick="loader(this.id),makeCashPayment()" class="btn green w3-right">Cash Payment <i class="fa fa-spinner fa-spin" id="loaderDIVCP1" style="display:none"></i></button>&nbsp;&nbsp;
-											   <button id="CP0" style="margin: 8px 3px;"type="submit"   onclick="loader(this.id),makeCashlessPayment()" class="btn green w3-right">Cashless Payment <i class="fa fa-spinner fa-spin" id="loaderDIVCP0" style="display:none"></i></button>&nbsp;&nbsp;
-											   <button id="OP" style="margin: 8px 3px;" type="submit"  onclick="loader(this.id),makeOnlinePayment()" class="btn green w3-right">Online Payment <i class="fa fa-spinner fa-spin" id="loaderDIVOP" style="display:none"></i></button>
-					       
-					      </span>
-					       
-					       
-                                            </div>
+					       <a href="{{=returnurl}}" class="btn green" style="margin: 8px 3px;float:right">Cancel </a>&nbsp;&nbsp;
+					       {{if(cheque):}}
+					       <button style="margin: 8px 3px;float:right" type="button" id="CKP1"  class="btn green" data-toggle="modal" data-target="#myModal"  >Cheque Payment  </button>
+					       {{pass}}
+					       {{if(cheque):}}
+					       <button  style="margin: 8px 3px;float:right;display:none" type="submit" id="chequePayment" onclick="makeChequePayment()" class="btn green" >xCheque Payment </button>
+					       {{pass}}
 
+					       {{if(cash):}}
+					       <button id="CP1" style="margin: 8px 3px;float:right" type="submit" onclick="loader(this.id),makeCashPayment()" class="btn green" >Cash Payment <i class="fa fa-spinner fa-spin" id="loaderDIVCP1" style="display:none"></i></button>&nbsp;&nbsp;
+					       {{pass}}
+
+					       {{if(cashless):}}
+					       <button id="CP0" style="margin: 8px 3px;float:right" type="submit"   onclick="loader(this.id),makeCashlessPayment()" class="btn green" >Cashless Payment <i class="fa fa-spinner fa-spin" id="loaderDIVCP0" style="display:none"></i></button>&nbsp;&nbsp;
+					       {{pass}}
+					       {{if(online):}}
+					       <button id="OP" style="margin: 8px 3px;float:right"  type="submit"  onclick="loader(this.id),makeOnlinePayment()" class="btn green" >Online Payment <i class="fa fa-spinner fa-spin" id="loaderDIVOP" style="display:none"></i></button>
+					       <!--<a href="#" class="btn green" onclick="makeOnlinePayment()" style="margin: 8px 3px;float:right">Online Payment </a>&nbsp;&nbsp;-->
+					       {{pass}}
+					       {{if(online):}}
+					       <!--<button id="SP" style="margin: 8px 3px;float:right"  type="submit"  onclick="loader(this.id),makeShopseePayment()" class="btn green" >Shopse Payment <i class="fa fa-spinner fa-spin" id="loaderDIVSP" style="display:none"></i>-->
+					       <!--</button>-->
+					       
+					       <button id="SP" style="float:right"  type="submit"  onclick="loader(this.id),makeShopseePayment()"  ><img src="..\static\images\shopsebtn.png" /><i class="fa fa-spinner fa-spin" id="loaderDIVSP" style="display:none"></i>
+                                                  					       
+					       </button>
+					       {{pass}}
+					       </span>
+					       
+					       
+					    </div>
                                            <div class="col-md-12" style="margin:5px 5px 30px 5px;">
 						{{=formC}}
                                             </div> 
@@ -224,7 +228,7 @@
 						{{=formB}}
                                             </div> 
 					    
-					                                                              
+					                                                             
                                             <br/>
 					    <h5></h5>
 					    
@@ -248,6 +252,11 @@
                         </div>
                         
                  
+	    
+	    
+{{=formA.custom.widget.companypays}}
+{{=formA.custom.widget.policy}}
+
 <div style="display:none">
 {{=formA.custom.widget.is_active}}
 {{=formA.custom.widget.treatmentplan}}
@@ -317,14 +326,63 @@ ajax('{{=URL('payment','tplans')}}', ['patientmember','provider'], 'tplandiv');
 };
 
 function makeOnlinePayment(){
-   
+
+    <!--alert('Online payment is unavalaible. We are upgrading this feature! For now, please use other payment methods')-->
+    
+    var x = document.getElementById("payment_paymentmode")
+    var y = {{=totaldue}}
+    var z = document.getElementById("payment_amount").value
+    if(z > y){
+       alert("Payment Amount value(" + z + ") cannot be more than Total Due Amount()" + y + "). \r\nPlease enter Amount Value less or equal to Total Due Amount!") 
+       x.value="error"
+       document.getElementById("valerr").innerHTML = "Please wait...";
+       document.getElementById("payment_amount").value = 0.00;
+       return
+    }
+    else
+    {
     var x = document.getElementById("payment_paymentmode")
     x.value = 'Credit'
+    }
+}
+function makeShopseePayment(){
+
+   
+    
+    var x = document.getElementById("payment_paymentmode")
+    var y = {{=totaldue}}
+    var z = document.getElementById("payment_amount").value
+    if(z > y){
+       alert("Payment Amount value(" + z + ") cannot be more than Total Due Amount()" + y + "). \r\nPlease enter Amount Value less or equal to Total Due Amount!") 
+       x.value="error"
+       document.getElementById("valerr").innerHTML = "Please wait...";
+       document.getElementById("payment_amount").value = 0.00;
+       return
+    }
+    else
+    {
+    var x = document.getElementById("payment_paymentmode")
+    x.value = 'Shopse'
+    }
 }
 
 function makeCashPayment(){
+<!--alert("Enter Cash Payment " + {{=totaldue}})-->
     var x = document.getElementById("payment_paymentmode")
+    var y = {{=totaldue}}
+    var z = document.getElementById("payment_amount").value
+<!--alert("Amont = " + z + " Due=" + y)-->
+    if(z > y){
+       alert("Payment Amount value(" + z + ") cannot be more than Total Due Amount()" + y + "). \r\nPlease enter Amount Value less or equal to Total Due Amount!") 
+       x.value="error"
+       document.getElementById("valerr").innerHTML = "Please wait..,";
+       document.getElementById("payment_amount").value = 0.00;
+       return
+    }
+    else
+    {
     x.value = 'Cash'
+    }
 }
 
 function makeCashlessPayment(){
@@ -338,8 +396,22 @@ function makeCashlessPayment(){
 
 function makeChequePayment(){
     var x = document.getElementById("payment_paymentmode")
+    var y = {{=totaldue}}
+    var z = document.getElementById("payment_amount").value
+<!--alert("Amont = " + z + " Due=" + y)-->
+
+    if(z > y){
+       alert("Payment Amount value(" + z + ") cannot be more than Total Due Amount()" + y + "). \r\nPlease enter Amount Value less or equal to Total Due Amount!") 
+       x.value="error"
+       document.getElementById("valerr").innerHTML = "Please wait...";
+       document.getElementById("payment_amount").value = 0.00;
+       return
+    }
+    else
+    {
     x.value = 'Cheque'
     document.getElementById("chequePayment").click()
+    }
     
 }
 

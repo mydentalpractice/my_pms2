@@ -17,6 +17,7 @@ from applications.my_pms2.modules import states
 from applications.my_pms2.modules import status
 from applications.my_pms2.modules import relations
 from applications.my_pms2.modules import mdpmedia
+from applications.my_pms2.modules import mdpbenefits
 from applications.my_pms2.modules import logger
 
 class Patient:
@@ -1378,6 +1379,7 @@ class Patient:
     provider = ""
     hmoplanid = 1
     companyid = 4 #default to MyDP
+    company = ""
     patobj = {}
     
     try:
@@ -1387,7 +1389,8 @@ class Patient:
       
       r = db((db.company.company == ' ') & (db.company.is_active == False)).select()
       if(len(r) > 0):
-          companyid = common.getid(r[0].id)    
+          companyid = common.getid(r[0].id)
+          company = r[0].company
       
       r = db((db.hmoplan.hmoplancode.lower() == 'premwalkin') & (db.hmoplan.is_active == False)).select()
       if(len(r) > 0):
@@ -1432,15 +1435,14 @@ class Patient:
       
       )
       
-     
-      #patobj={
-       
-        
-        #"memberid":patid,
-        #"patientid":patid,
-       
-      #}
+      obj={
+        "plan":company,
+        "memberid":patid
+      }
       
+      bnft = mdpbenefits.Benefit(db)
+      bnft.map_member_benefit(obj)
+
       pat = db((db.vw_memberpatientlist.primarypatientid == patid) & \
                      (db.vw_memberpatientlist.patientid == patid) & \
                      (db.vw_memberpatientlist.providerid == providerid)).select(db.vw_memberpatientlist.ALL)
@@ -1611,6 +1613,11 @@ class Patient:
       
       
       xrows = db(db.membercount.company == companyid).select()
+      if(len(xrows) == 0):
+        db.membercount.insert(company=companyid,dummy1= 'X')
+        db.commit()
+        xrows = db(db.membercount.company == companyid).select()
+        
       membercount = int(xrows[0].membercount)
      
       
@@ -1704,7 +1711,14 @@ class Patient:
           
           )
      
+      obj={
+        "plan":companycode,
+        "memberid":patid
+      }
       
+      bnft = mdpbenefits.Benefit(db)
+      bnft.map_member_benefit(obj)
+  
       pat = db((db.vw_memberpatientlist.primarypatientid == patid) & \
                      (db.vw_memberpatientlist.patientid == patid) & \
                      (db.vw_memberpatientlist.providerid == providerid)).select(db.vw_memberpatientlist.ALL)

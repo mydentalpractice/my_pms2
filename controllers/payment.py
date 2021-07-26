@@ -38,6 +38,7 @@ from decimal  import Decimal
 from applications.my_pms2.modules import common
 from applications.my_pms2.modules import account
 from applications.my_pms2.modules import datasecurity
+from applications.my_pms2.modules import mdputils
 from applications.my_pms2.modules import mdpbenefits
 from applications.my_pms2.modules import mdppayment
 from applications.my_pms2.modules import mdpshopse
@@ -690,13 +691,14 @@ def payment_success():
     tplanid = 0
     patientinfo = None
     hmopatientmember = False
+    memberid = 0
     
     providerinfo = getproviderinformation(0)
     patientinfo = getpatientinformation(0,0)
    
     r = db(db.vw_fonepaise.paymentid == paymentid).select()
     if(len(r)>0):
-        
+        memberid = int(common.getid(r[0].memberid))
         treatmentid = int(common.getid(r[0].treatmentid))
         tplanid = int(common.getid(r[0].tplanid))
         providerid = int(common.getid(r[0].providerid))
@@ -817,20 +819,40 @@ def payment_success():
         totpaid=paytm["totalpaid"] 
         totaldue = paytm["totaldue"]        
 
-    #tp = db(db.treatmentplan.id == tplanid).select()
-    #if(len(tp)>0):
-        #totpaid = float(common.getstring(tp[0].totalpaid))
-        #tottreatmentcost = float(common.getstring(tp[0].totaltreatmentcost))
-        #totinspays = float(common.getstring(tp[0].totalinspays))
-        #totaldue = tottreatmentcost - (totpaid + float(amount) + totinspays)
-    
-    #if(status == 'S'):
-        #db(db.treatmentplan.id == tplanid).update(
-            #totalpaid = totpaid + float(amount),
-            #totaldue  = totaldue
-    #)
-
+        #Call Benefit Success
+        trtmnt = db((db.treatment.id == treatmentid) & (db.treatment.is_active == True)).select()
+        discount_amount = trtmnt[0].companypay if(len(trtmnt) > 0) else 0
         
+        pmnt = db((db.payment.id == paymentid) & (db.payment.is_active == True)).select()
+        policy = pmnt[0].policy if(len(pmnt) > 0) else ""
+        obj={
+            "paymentid":str(paymentid),
+            "plan":policy,
+            "discount_amount":str(discount_amount),
+            "memberid":str(memberid),
+            "treatmentid":str(treatmentid)
+        }
+        bnftobj = mdpbenefits.Benefit(db)
+        rspObj = bnftobj.benefit_success(bnftobj)
+    else:
+        #Call Benefit Failure
+        trtmnt = db((db.treatment.id == treatmentid) & (db.treatment.is_active == True)).select()
+        discount_amount = trtmnt[0].companypay if(len(trtmnt) > 0) else 0
+    
+        pmnt = db((db.payment.id == paymentid) & (db.payment.is_active == True)).select()
+        policy = pmnt[0].policy if(len(pmnt) > 0) else ""
+        
+        
+        obj={
+            "paymentid":str(paymentid),
+            "plan":policy,
+            "discount_amount":str(discount_amount),
+            "memberid":str(memberid),
+            "treatmentid":str(treatmentid)
+            
+        }
+        bnftobj = mdpbenefits.Benefit(db)
+        rspObj = bnftobj.benefit_failure(bnftobj)
     
     
     return dict(formProcedure=formProcedure,\
@@ -1049,8 +1071,43 @@ def payment_success_hdfc():
         tottreatmentcost= paytm["totaltreatmentcost"]
         totinspays= paytm["totalinspays"]
         totpaid=paytm["totalpaid"] 
-        totaldue = paytm["totaldue"]        
-
+        totaldue = paytm["totaldue"]  
+        
+        #Call Benefit Success
+        trtmnt = db((db.treatment.id == treatmentid) & (db.treatment.is_active == True)).select()
+        discount_amount = trtmnt[0].companypay if(len(trtmnt) > 0) else 0
+        
+        pmnt = db((db.payment.id == paymentid) & (db.payment.is_active == True)).select()
+        policy = pmnt[0].policy if(len(pmnt) > 0) else ""
+        obj={
+            "paymentid":str(paymentid),
+            "plan":policy,
+            "discount_amount":str(discount_amount),
+            "memberid":str(memberid),
+            "treatmentid":str(treatmentid)
+        }
+        bnftobj = mdpbenefits.Benefit(db)
+        rspObj = bnftobj.benefit_success(bnftobj)
+    else:
+        
+        #Call Benefit Failure
+        trtmnt = db((db.treatment.id == treatmentid) & (db.treatment.is_active == True)).select()
+        discount_amount = trtmnt[0].companypay if(len(trtmnt) > 0) else 0
+    
+        pmnt = db((db.payment.id == paymentid) & (db.payment.is_active == True)).select()
+        policy = pmnt[0].policy if(len(pmnt) > 0) else ""
+        
+        
+        obj={
+            "paymentid":str(paymentid),
+            "plan":policy,
+            "discount_amount":str(discount_amount),
+            "memberid":str(memberid),
+            "treatmentid":str(treatmentid)
+            
+        }
+        bnftobj = mdpbenefits.Benefit(db)
+        rspObj = bnftobj.benefit_failure(bnftobj)
 
         
     
@@ -2359,6 +2416,8 @@ def create_payment():
     provdict = common.getprovider(auth,db)
     providerid = common.getid(provdict["providerid"])
     providername = common.getstring(provdict["providername"])
+    providercode = common.getstring(provdict["provider"])
+    
     
     page         = 1 if(int(common.getpage(request.vars.page)) == 0) else int(common.getpage(request.vars.page))
     memberid     = int(common.getid(request.vars.memberid))
@@ -2370,12 +2429,55 @@ def create_payment():
     fullname = ""
     hmopatientmember = True
     
+   
+    
+
+    prov = db((db.provider.id == providerid) & (db.provider.is_active == True)).select()
+    city = prov[0].city if(len(prov) != 0) else "Jaipur"
+    regionid = common.getregionidfromcity(db,city)
+    regioncode =  common.getregioncodefromcity(db,city)
+    
+    members = db((db.patientmember.id == memberid) & (db.patientmember.is_active == True)).select(db.patientmember.company)
+
+    companyid = common.getid(members[0].company) if (len(members) == 1) else "0"
+    c = db((db.company.id == companyid) & (db.company.is_active == True)).select(db.company.company)
+    companycode = c[0].company if (len(c) ==1) else ""
+
+    cp = db(db.companypolicy.companycode == companycode).select()
+    policy = cp[0].policy if(len(cp) != 0) else ""
+    
+    #calculate the discount for this member 
+    #update the treatment, treatmentplan. 
+    #There is an assumption that there will be no companypay from Plans 
+    benefit_amount = 0
+    reqobj = {
+        "action": "get_benefit",
+        "memberid":str(memberid),
+        "providerid":str(providerid),
+        "plan":policy
+    }
+
+    bnftobj  = mdpbenefits.Benefit(db)
+
+    benefit = json.loads(bnftobj.get_benefits(reqobj))
+    if(benefit["result"]=="success"):
+        discount_amount = float(common.getvalue(benefit["discount_amount"]))
+        
+        #update totalcompanypays (we are saving discount_amount as companypays )
+        db(db.treatment.id == treatmentid).update(companypay = discount_amount)    
+        #update treatmentplan assuming there is one treatment per tplan
+        db(db.treatmentplan.id==tplanid).update(totalcompanypays = discount_amount) 
+        db.commit()
+        
+
     pats = db((db.vw_memberpatientlist.patientid==patientid)&(db.vw_memberpatientlist.primarypatientid==memberid)&(db.vw_memberpatientlist.is_active==True)).select(\
         db.vw_memberpatientlist.ALL, db.company.ALL,\
         left=db.company.on(db.company.id==db.vw_memberpatientlist.company)
     
     
     )
+
+
     
     #payment modes are dependant on the company
     online = True
@@ -2398,7 +2500,7 @@ def create_payment():
         returnurl = URL('payment','list_payment',vars=dict(page=page,providerid=providerid))
     
     creattreturnurl = URL('payment', 'create_payment', vars=dict(page=page,patientname=patient,tplanid=tplanid,treatmentid=treatmentid,\
-                                                                 patientid=patientid,memberid=memberid,providerid=providerid))
+                                                                 patientid=patientid,memberid=memberid,providerid=providerid,policy=policy))
     
     db.payment.treatmentplan.default=tplanid
     db.payment.patientmember.default=memberid
@@ -2406,8 +2508,10 @@ def create_payment():
     db.payment.is_active.default = True
     db.payment.paymentcommit.default = False
     db.payment.amount.default = 0.00
+    db.payment.policy.default = policy
+   
     
-    formA = crud.create(db.payment, next='update_payment?page=' + str(page) + "&source=create" + "&memberid=" + str(memberid) + "&patientid=" + str(patientid) + "&paymentid=[id]"  + "&patient=" + patient + "&fullname=" + fullname+ "&treatmentid=" + str(treatmentid), message="Please make online payment for credit card")  ## company Details entry form
+    formA = crud.create(db.payment, next='update_payment?page=' + str(page) + "&source=create" + "&memberid=" + str(memberid) + "&patientid=" + str(patientid) + "&paymentid=[id]"  + "&patient=" + patient + "&fullname=" + fullname+ "&treatmentid=" + str(treatmentid) + "&policy=" + policy)  ## company Details entry form
     
     xnotes = formA.element('textarea',_id='payment_notes')
     if(xnotes != None):
@@ -2423,6 +2527,7 @@ def create_payment():
         xdob['_placeholder'] = 'dd/mm/yyyy'     
      
    
+    
     if(treatmentid > 0):
         formC = getproceduregrid(treatmentid, providerid)
     else:
@@ -2440,21 +2545,27 @@ def create_payment():
                          
     if(len(tps)>0):
         treatment = tps[0].treatment
-   
-    paytm = calculatepayments(tplanid,providerid)
+    
+    
+    paytm = calculatepayments(tplanid,providerid,policy)
 
     members = db((db.vw_memberpatientlist.is_active == True) & (db.vw_memberpatientlist.providerid == providerid) & \
                 (db.vw_memberpatientlist.primarypatientid == db.vw_memberpatientlist.patientid)).select(db.vw_memberpatientlist.ALL, orderby=db.vw_memberpatientlist.fullname)
     
     db.payment.amount.requires = paytm["totaldue"]
+    
+    
     if formA.accepted:
         i =0
     else:
         str1 = str(formA.errors)
   
-    return dict(formA=formA,formB=formB,formC=formC, patient=patient,fullname=fullname,hmopatientmember=hmopatientmember,providername=provdict["providername"],providerid=provdict["providerid"],page=page,returnurl=returnurl,memberid=memberid,tplanid=tplanid,treatment=treatment,
-                treatmentcost=paytm["treatmentcost"],copay=paytm["copay"],inspays=paytm["inspays"],totaltreatmentcost=paytm["totaltreatmentcost"],totalinspays=paytm["totalinspays"],totalcopay=paytm["totalcopay"],\
-                                totalpaid=paytm["totalpaid"],totaldue=paytm["totaldue"],online=online,cashless=cashless,cash=cash,cheque=cheque                
+    return dict(formA=formA,formB=formB,formC=formC, patient=patient,fullname=fullname,hmopatientmember=hmopatientmember,providername=provdict["providername"],
+                providerid=provdict["providerid"],page=page,returnurl=returnurl,memberid=memberid,tplanid=tplanid,treatment=treatment,
+                treatmentcost=paytm["treatmentcost"],copay=paytm["copay"],inspays=paytm["inspays"],companypays=paytm["companypays"],
+                totaltreatmentcost=paytm["totaltreatmentcost"],totalinspays=paytm["totalinspays"],totalcopay=paytm["totalcopay"],
+                                totalpaid=paytm["totalpaid"],totaldue=paytm["totaldue"],online=online,cashless=cashless,cash=cash,cheque=cheque,
+                                totalcompanypays=paytm["totalcompanypays"],precopay=paytm["precopay"],totalprecopay=paytm["totalprecopay"],policy=policy
                         )    
     
 
@@ -2487,6 +2598,7 @@ def update_payment():
     patient     = common.getstring(request.vars.patient) 
     fullname    = common.getstring(request.vars.fullname)
     treatmentid     = int(common.getid(request.vars.treatmentid))
+    policy     = request.vars.policy
     
     provdict = common.getprovider(auth,db)
     providerid = common.getid(provdict["providerid"])
@@ -2494,7 +2606,7 @@ def update_payment():
 
     #returnurl = common.getstring(request.vars.returnurl)
     returnurl = URL('payment', 'create_payment', vars=dict(page=page,patientname=patient,tplanid=tplanid,treatmentid=treatmentid,\
-                                                                 patientid=patientid,memberid=memberid,providerid=providerid))
+                                                                 patientid=patientid,memberid=memberid,providerid=providerid,policy=policy))
     
     
     if(returnurl == ""):
@@ -2587,6 +2699,7 @@ def update_payment():
 
     
     
+        
     
     
     return dict(formA=formA, patient=patient,fullname=fullname,returnurl=returnurl,source=source, page=page, paymentid=paymentid,\
@@ -2595,8 +2708,8 @@ def update_payment():
                 totalcost=totalcost,\
                 treatmentcost=paytm["treatmentcost"],copay=paytm["copay"],inspays=paytm["inspays"],\
                 totaltreatmentcost=paytm["totaltreatmentcost"],totalinspays=paytm["totalinspays"],totalcopay=paytm["totalcopay"],\
-                totalpaid=paytm["totalpaid"],totaldue=paytm["totaldue"]
-               
+                totalpaid=paytm["totalpaid"],totaldue=paytm["totaldue"],
+                companypays=paytm["companypays"], totalcompanypays=paytm["totalcompanypays"],precopay=paytm["precopay"],totalprecopay=paytm["totalprecopay"],policy=policy
                 
                 )
 
@@ -2700,13 +2813,16 @@ def calculatepayments(tplanid,memberid,providerid):
     return dict(treatmentcost=treatmentcost,copay=copay,inspays=inspays,totaltreatmentcost=totaltreatmentcost,totalinspays=totalinspays,totalcopay=totalcopay,\
                 totalpaid=totalpaid,totaldue=totaldue)
 
-def calculatepayments(tplanid,providerid):
+def calculatepayments(tplanid,providerid,policy):
     treatmentcost = 0
     copay = 0
     inspays = 0
+    companypays = 0
+    precopay = 0
     
     totaltreatmentcost = 0
     totalcopay = 0
+    totalprecopay = 0
     totalinspays = 0
     totaldue = 0
     totalpaid = 0
@@ -2715,24 +2831,31 @@ def calculatepayments(tplanid,providerid):
     tplan = db(db.treatmentplan.id == tplanid).select()
     if(len(tplan) > 0):
         treatmentcost = float(common.getvalue(tplan[0].totaltreatmentcost))
-        copay = float(common.getvalue(tplan[0].totalcopay))
+        companypays = float(common.getvalue(tplan[0].totalcompanypays))
+        precopay =float(common.getvalue(tplan[0].totalcopay))
+        copay = float(common.getvalue(tplan[0].totalcopay)) - companypays
         inspays = float(common.getvalue(tplan[0].totalinspays))
         memberid = int(common.getid(tplan[0].primarypatient))
-        bnftobj  = mdpbenefits.Benefit(db)
         
-        totalcompanypays = bnftobj.get_benefits(avars)
+        
+        
+        
+            
         
         r = db((db.vw_treatmentplansummarybytreatment.provider==providerid) & (db.vw_treatmentplansummarybytreatment.id == tplanid)).select()
         if(len(r)>0):
             totaltreatmentcost = float(common.getvalue(r[0].totalcost))
             totalinspays = float(common.getvalue(r[0].totalinspays))
-            totalcopay = float(common.getvalue(r[0].totalcopay))
+            totalcompanypays = float(common.getvalue(r[0].totalcompanypays))
+            totalprecopay = float(common.getvalue(r[0].totalcopay))
+            totalcopay = float(common.getvalue(r[0].totalcopay)) - totalcompanypays
             totalpaid = float(common.getvalue(r[0].totalpaid))
             totaldue = totalcopay - totalpaid
         
         
-    return dict(treatmentcost=treatmentcost,copay=copay,inspays=inspays,totaltreatmentcost=totaltreatmentcost,totalinspays=totalinspays,totalcopay=totalcopay,\
-                totalpaid=totalpaid,totaldue=totaldue)
+    return dict(treatmentcost=treatmentcost,copay=copay,precopay=precopay,inspays=inspays,companypays=companypays, totaltreatmentcost=totaltreatmentcost,totalinspays=totalinspays,\
+                totalprecopay=totalprecopay,totalcopay=totalcopay,\
+                totalpaid=totalpaid,totaldue=totaldue,totalcompanypays=totalcompanypays)
 
 def paymentsummary():
     

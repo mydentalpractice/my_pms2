@@ -8752,9 +8752,13 @@ ADD COLUMN `webhookUrl` VARCHAR(512) NULL DEFAULT NULL AFTER `product_id`;
 ===========
 1. Modify treatmentplan table to add totalcompanypays
 
-2. Modify payment table to add companypays
+2. Modify payment table to add companypays,policy
 
 3. Modify vw_paymentlist,vw_payments,vw_treatmentplancost,vw_treatmentplansummarybypatient,vw_treatmentplansummarybytreatment
+
+4. New Table company_policy
+
+
 
 Script file to clear user for sign-up
 =====================================

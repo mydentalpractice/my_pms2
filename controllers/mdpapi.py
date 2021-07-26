@@ -3048,6 +3048,29 @@ def get_benefits(avars):
     rsp = obj.get_benefits(avars)
     
     return rsp
+
+def benefit_success(avars):
+    
+    obj = mdpbenefits.Benefit(current.globalenv['db'])
+    rsp = obj.benefit_success(avars)
+    
+    return rsp
+
+def benefit_failure(avars):
+    
+    obj = mdpbenefits.Benefit(current.globalenv['db'])
+    rsp = obj.benefit_failure(avars)
+    
+    return rsp
+
+def map_member_benefit(avars):
+    
+    obj = mdpbenefits.Benefit(current.globalenv['db'])
+    rsp = obj.map_member_benefit(avars)
+    
+    return rsp
+
+
 ############################# END BENEFITS API  ###################################################
 
 ############################# START CF API  ###################################################
@@ -3085,13 +3108,16 @@ customerAPI_switcher = {
     "customer":customer,
     "update_customer":update_customer,
     "customer_payment":customer_payment,
-    "get_customer":get_customer
+    "get_customer":get_customer,
+    "map_member_benefit":map_member_benefit
 
 }
 
 
 benefitsAPI_switcher = {
-    "get_benefits":get_benefits
+    "get_benefits":get_benefits,
+    "benefit_success":benefit_success,
+    "benefit_failure":benefit_failure
 
 }
 

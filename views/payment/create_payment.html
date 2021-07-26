@@ -45,115 +45,145 @@
 							      </div>
                                                        </div>
                                                   </div>
-						  <div class="col-md-4 np" >
-						  <h5><strong>Running Payment Total for this treatment</strong></h5>
-						  <div class="col-md-3">
-					     
-						       <div class="mt-repeater-input">
-								    <label class="m_title">Total Paid</label>
-								    <br>
-								    {{=totalpaid}}
-						       </div>  
 						  
-						   </div>
-						
-						  <div class="col-md-3">
-					     
-						       <div class="mt-repeater-input">
-								    <label class="m_title">Total Due</label>
-								    <br>
-								    {{=totaldue}}
-						       </div>  
 						  
-						   </div>
-						
-					    </div>  
 						  
 					   <div class="col-md-12 np">
-                                                  <div class="col-md-3">
-                                             
-                                                       <div class="mt-repeater-input">
-                                                                    <label class="m_title">Treatment Fee</label>
-                                                                    <br>
-                                                                    {{=treatmentcost}}
-                                                       </div>  
-                                                  
-                                                   </div>
-						  {{if(hmopatientmember == True):}}
-                                                  <div class="col-md-3">
-                                             
-                                                       <div class="mt-repeater-input">
-                                                                    <label class="m_title">Authorized Payment by Insurance</label>
-                                                                    <br>
-                                                                    {{=inspays}}
-                                                       </div>  
-                                                  
-                                                   </div>
-						  {{pass}}
-						  {{if(hmopatientmember == True):}}
-                                                  <div class="col-md-3">
-                                             
-                                                       <div class="mt-repeater-input">
-                                                                    <label class="m_title">CoPay by Patient</label>
-                                                                    <br>
-                                                                    {{=copay}}
-                                                       </div>  
-                                                  
-                                                   </div>
-						   {{pass}}
-                                            </div>                                          
-				    
-												    
+					    <h5><strong>Current Treatment Procedure</strong></h5>
+					   <table class="table table-striped table-bordered table-hover">
+					     <tr>
+					        <td style="width:50%">
+						<label class="m_title">Treatment Fee</label>
+						</td>
+						
+						<td style="width:50%">
+						{{=treatmentcost}}
+						</td>
+					     </tr>
+					     <tr>
+						<td>
+						<label class="m_title">Authorized Payment by Insurance</label>
+						</td>
+						<td>
+						{{=inspays}}
+						</td>
+					     </tr>
+					     <tr>
+						<td>
+						<label class="m_title">Patient Pays (pre-Discount)</label>
+						</td>
+						
+						<td>
+						{{=precopay}}
+						</td>
+					     </tr>
+					      <tr>
+						<td>
+						<label class="m_title">Discount</label>
+						</td>
+						
+						<td>
+						{{=companypays}}
+						</td>
+					     </tr>
+					     <tr>
+						<td>
+						<label class="m_title">Patient Pays (after-Discount)</label>
+						</td>
+						
+						<td>
+						{{=copay}}
+						</td>
+					     </tr>
+					   
+					   </table>
+					   
+					   </div>
+					   <br>  
+					   
+					   <div class="col-md-12 np">
+					  <h5><strong>Running Total</strong></h5>
+					   <table class="table table-striped table-bordered table-hover">
+					   
+						<!--<tr>-->
+						    <!--<td style="width:50%">-->
+						    <!--<label class="m_title">Total Fees</label>-->
+						    <!--</td>-->
+						    
+						    <!--<td style="width:50%">-->
+						    <!--{=totaltreatmentcost}}-->
+						    <!--</td>-->
+						<!--</tr>		-->
+						<!--<tr>-->
+						    <!--<td style="width:50%">-->
+						    <!--<label class="m_title">Total Authorized Pay</label>-->
+						    <!--</td>-->
+						    
+						    <!--<td style="width:50%">-->
+						    <!--{=totalinspays}}-->
+						    <!--</td>-->
+						<!--</tr>		-->
+						<!--<tr>-->
+						    <!--<td style="width:50%">-->
+						    <!--<label class="m_title">Total Paient Pays (with applicable Discounts)</label>-->
+						    <!--</td>-->
+						    
+						    <!--<td style="width:50%">-->
+						   <!--{=totalcopay}}-->
+						    <!--</td>-->
+						<!--</tr>		-->
 
-				              
-						<div class="col-md-12 np" style="display:none">
-						 
-                                                  <div class="col-md-4">
-								 
-                                                       <div class="mt-repeater-input">
-                                                                    <label class="m_title">Total Fees</label>
-                                                                    <br>
-                                                                    {{=totaltreatmentcost}}
-                                                       </div>  
-                                                  
-                                                   </div>
+						<tr>
+						    <td style="width:50%">
+						    <label class="m_title">Total Paid</label>
+						    </td>
+						    
+						    <td style="width:50%">
+						   {{=totalpaid}}
+						    </td>
+						</tr>		
 
-                                                  <div class="col-md-4">
-                                             
-                                                       <div class="mt-repeater-input">
-                                                                    <label class="m_title">Total Authorized Pay</label>
-                                                                    <br>
-                                                                    {{=totalinspays}}
-                                                       </div>  
-                                                  
-                                                   </div>
+						<tr>
+						    <td style="width:50%">
+						    <label class="m_title">Total Due</label>
+						    </td>
+						    
+						    <td style="width:50%">
+						   {{=totaldue}}
+						    </td>
+						</tr>		
+						
+					   </table>
+					  
+					 			   
+					
+					   </div>
+					   <br>
+					  <!--<div class="col-md-12 np">-->
 
-                                                  <div class="col-md-4">
-                                             
-                                                       <div class="mt-repeater-input">
-                                                                    <label class="m_title">Total Copay</label>
-                                                                    <br>
-                                                                    {{=totalcopay}}
-                                                       </div>  
-                                                  
-                                                   </div>
-
-				                  </div>
-						  <hr>
-						  
-
-						  <div class="col-md-4">
-					     
-						       <div class="mt-repeater-input">
-								    <label class="m_title">Discounts</label>
-								    <br>
-								    {{=totalcompanypays}}
-						       </div>  
-						  
-						   </div>
-
-						  </div>						                            
-                                     
+					   <!--<h5><strong>Running Total</strong></h5>-->
+					  <!--<table class="table table-striped table-bordered table-hover">-->
+						<!--<tr>-->
+						    <!--<td style="width:50%">-->
+						    <!--<label class="m_title">Total Paid</label>-->
+						    <!--</td>-->
+						    
+						    <!--<td style="width:50%">-->
+						    <!--{=totalpaid}}-->
+						    <!--</td>-->
+						<!--</tr>	-->
+						<!--<tr>-->
+						    <!--<td style="width:50%">-->
+						    <!--<label class="m_title">Total Due</label>-->
+						    <!--</td>-->
+						    
+						    <!--<td style="width:50%">-->
+						    <!--{=totaldue}}-->
+						    <!--</td>-->
+						<!--</tr>							-->
+					  <!--</table>-->
+					  <!--</div>-->
+				     	
 					    
 					    
                                              <div class="col-md-12 np">
@@ -171,7 +201,7 @@
 						   
                                                        <div class="col-md-3">
                                                            <div class="mt-repeater-input">
-                                                                        <label class="m_title" style="color:red">Amount</label>
+                                                                        <label class="m_title" style="color:red">Amount to Pay</label>
                                                                         <br/>
                                                                          {{=formA.custom.widget.amount}}
 									 <label id="valerr" class="m_title" style="color:red" value=""></label>
@@ -262,7 +292,10 @@
                             </div>
                         </div>
                         
-                 
+                        
+
+
+
 <div style="display:none">
 {{=formA.custom.widget.is_active}}
 {{=formA.custom.widget.treatmentplan}}
@@ -283,8 +316,14 @@
 {{=formA.custom.widget.fp_error}}
 {{=formA.custom.widget.fp_errormsg}}
 {{=formA.custom.widget.fp_otherinfo}}
-                
 
+
+{{=formA.custom.widget.companypays}}
+{{=formA.custom.widget.accountname}}
+{{=formA.custom.widget.accountno}}
+{{=formA.custom.widget.chequeno}}
+{{=formA.custom.widget.bankname}}
+{{=formA.custom.widget.policy}}
 </div> 
                         
 
@@ -297,7 +336,7 @@
 
 jQuery(document).ready(function(){
     
-    changeTreatmentPlan();
+    <!--changeTreatmentPlan();-->
 });
 
 
