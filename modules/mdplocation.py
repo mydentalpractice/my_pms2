@@ -262,6 +262,7 @@ class Location:
                                                           db.provider.pa_longitude,
                                                           db.provider.pa_latitude,
                                                           db.provider.pa_locationurl,
+                                                          db.vw_clinic.clinicid,
                                                           db.vw_clinic.name,
                                                           db.vw_clinic.city,
                                                           db.vw_clinic.pin,
@@ -274,12 +275,12 @@ class Location:
                                                           left = db.provider.on((db.provider.id == db.vw_clinic.ref_id) & (db.vw_clinic.ref_code == "PRV")))
 
         for cln in clns:
-          if((common.isfloat(cln.latitude) == False) | (common.isfloat(cln.longitude) == False)):
+          if((common.isfloat(common.getvalue(cln.vw_clinic.latitude)) == False) | (common.isfloat(common.getvalue(cln.vw_clinic.longitude)) == False)):
             continue
         
-          logger.loggerpms2.info("Long/Lat :" + cln.name + ":" + str(cln.longitude) + ":" + str(cln.latitude))
-          destlat = float(common.getid(cln.latitude))
-          destlong = float(common.getid(cln.longitude))
+          logger.loggerpms2.info("Long/Lat :" + cln.vw_clinic.name + ":" + str(cln.vw_clinic.longitude) + ":" + str(cln.vw_clinic.latitude))
+          destlat = float(common.getid(cln.vw_clinic.latitude))
+          destlong = float(common.getid(cln.vw_clinic.longitude))
           
           jsonobj = json.loads(self.getdistance(originlat,originlong,destlat,destlong,unit))
           
@@ -289,20 +290,21 @@ class Location:
           if(dist <= radius):
             clnobj={
             
-              "providerid":int(common.getid(cln.id)),
-              "provider":common.getstring(cln.provider),
-              "providername":common.getstring(cln.providername),
-              "practicename":common.getstring(cln.pa_practicename),
-              "practiceaddress":common.getstring(cln.pa_practiceaddress),
-              "name":cln.name,
-              "city":cln.city,
-              "pin":cln.pin,
-              "cell":cln.cell,
-              "email":cln.email,
-              "primary_clinic":common.getboolean(cln.primary_clinic),
-              "latitude":cln.latitude,
-              "longitude":cln.longitude,
-              "location":cln.gps_location
+              "providerid":int(common.getid(cln.provider.id)),
+              "provider":common.getstring(cln.provider.provider),
+              "providername":common.getstring(cln.provider.providername),
+              "practicename":common.getstring(cln.provider.pa_practicename),
+              "practiceaddress":common.getstring(cln.provider.pa_practiceaddress),
+              "clinicid":int(common.getid(cln.vw_clinic.clinicid)),
+              "name":cln.vw_clinic.name,
+              "city":cln.vw_clinic.city,
+              "pin":cln.vw_clinic.pin,
+              "cell":cln.vw_clinic.cell,
+              "email":cln.vw_clinic.email,
+              "primary_clinic":common.getboolean(cln.vw_clinic.primary_clinic),
+              "latitude":cln.vw_clinic.latitude,
+              "longitude":cln.vw_clinic.longitude,
+              "location":cln.vw_clinic.gps_location
             }
             
             clnlist.append(clnobj)
@@ -319,7 +321,7 @@ class Location:
            "clnlist":clnlist,
         } 
         
-        return json.dumps(provobj)
+        return json.dumps(clnobj)
       
       except Exception as e:
           error_message = "Get Clinics within Radius Exception Error - " + str(e)

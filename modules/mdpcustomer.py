@@ -487,7 +487,7 @@ class Customer:
         logger.loggerpms2.info("Enter customer " + json.dumps(avars))
         db = self.db
         customer_ref = common.getkeyvalue(avars, "customer_ref", "")
-        customer_ref = customer_ref if(customer_ref == "") else common.getkeyvalue(avars,"cell","")
+        customer_ref = customer_ref if(customer_ref != "") else common.getkeyvalue(avars,"cell","")
         
         plan_code = common.getkeyvalue(avars, "plan_code", "RPIP599")
         
@@ -680,6 +680,19 @@ class Customer:
             h = db((db.hmoplan.hmoplancode == plancode) & (db.hmoplan.is_active == True)).select()
             planid = h[0].id if (len(h) != 0) else "1"
             
+            #default provider id & companyid & clinicid
+            r = db((db.provider.provider == "P0001") & (db.provider.is_active == True)).select(db.provider.id)
+            defproviderid = int(common.getid(r[0].id)) if(len(r) > 0) else 1
+            
+            r = db((db.company.company == "MYDP") & (db.company.is_active == True)).select(db.company.id)
+            defcompanyid = int(common.getid(r[0].id)) if(len(r) > 0) else 1
+            
+            r = db((db.clinic_ref.ref_code == "PRV") &\
+                   (db.clinic_ref.ref_id == defproviderid) &\
+                   (db.clinic.primary_clinic == True) &\
+                   (db.clinic.is_active == True)).select(db.clinic.id,left=db.clinic.on(db.clinic.id == db.clinic_ref.clinic_id))
+            defclinicid = int(common.getid(r[0].id)) if(len(r) > 0) else 1
+            
             logger.loggerpms2.info("Creating new customer " + plancode + " " + str(planid) + " " + regioncode + " " + str(len(prp)))
             if(customer_ref != "" ):
                 customer_id = db.customer.insert(
@@ -707,8 +720,9 @@ class Customer:
                     
                     status = common.getkeyvalue(avars,"status", "No_Attempt"),
                     
-                    providerid = int(common.getkeyvalue(avars,"providerid", "1")),
-                    companyid = int(common.getkeyvalue(avars,"companyid", "1")),
+                    providerid = int(common.getkeyvalue(avars,"providerid", defproviderid)),
+                    companyid = int(common.getkeyvalue(avars,"companyid", defcompanyid)),
+                    clinicid = int(common.getkeyvalue(avars,"clinicid", defclinicid)),
                     planid = planid,
                     regionid = regionid,
                    
@@ -801,6 +815,7 @@ class Customer:
             
             if(customer_ref != "" ):
                 c = db((db.customer.customer_ref == customer_ref)& (db.customer.is_active == True)).select()
+                mdp_customer_id = int(common.getid(c[0].id)) if(len(c) == 1) else 0
                 defdate = c[0].enrolldate
                 defdatestr = common.getstringfromdate(defdate,"%d/%m/%Y")
                 enrolldatestr = common.getkeyvalue(avars, "enrolldate",defdatestr)
@@ -895,7 +910,8 @@ class Customer:
                     "result":"success",
                     "error_message":"",
                     "error_code":"",
-                    "customer_ref":customer_ref
+                    "customer_ref":customer_ref,
+                    "mdp_customer_id":str(mdp_customer_id)
                 }            
                
                 
@@ -1215,7 +1231,7 @@ class Customer:
         jsonresp = {}
 
         
-        logger.loggerpms2.info("Enter enroll_customer " + str(customerid) )    
+        logger.loggerpms2.info("Enter enroll_customer " + json.dumps(avars) )    
         
         try:
             
@@ -1277,20 +1293,20 @@ class Customer:
                 
                 
                      
-
-                for dep in deps:
-                    depobj = {
-                        "dependant":dep["dependant"],
-                        "dependant_ref":dep["dependant_ref"],
-                        "customer_id":dep["customer_id"],
-                        "fname":dep["fname"],
-                        "mname":dep["mname"]  if "mname" in dep else "",
-                        "lname":dep["lname"],
-                        "depdob":common.getstringfromdate(dep["depdob"],"%d/%m/%Y"),
-                        "gender":dep["gender"],
-                        "relation":dep["relation"],
-                    }
-                    deplist.append(depobj)
+                if(len(deps) > 0):
+                    for dep in deps:
+                        depobj = {
+                            "dependant":dep["dependant"],
+                            "dependant_ref":dep["dependant_ref"],
+                            "customer_id":dep["customer_id"],
+                            "fname":dep["fname"],
+                            "mname":dep["mname"]  if "mname" in dep else "",
+                            "lname":dep["lname"],
+                            "depdob":common.getstringfromdate(dep["depdob"],"%d/%m/%Y"),
+                            "gender":dep["gender"],
+                            "relation":dep["relation"],
+                        }
+                        deplist.append(depobj)
                 
                 cobj["dependants"] = deplist
                 pat = mdppatient.Patient(db, c[0].providerid)
@@ -1317,7 +1333,7 @@ class Customer:
                 mssg = error_code + ":" + "Customer Ref Number is not unique"
                 logger.loggerpms2.info(mssg)
                 jsonresp = {
-                    "result":"fail",
+                    "result":"success",
                     "error_message":mssg,
                     "error_code":error_code
                 }                            
@@ -1361,7 +1377,7 @@ class Customer:
             customer_ref = common.getkeyvalue(avars,"customer_ref","")
             paymentid = int(common.getid(common.getkeyvalue(avars,"paymentid","0")))
             c = db((db.customer.customer_ref == customer_ref) & (db.customer.is_active == True)).select()
-            customerid = c[0].id if(len(c)==1) else customer_id            
+            customerid = c[0].id if(len(c)==1) else 0            
             
             if(paymentid == 0):
                 c = self.get_customer(customerid)

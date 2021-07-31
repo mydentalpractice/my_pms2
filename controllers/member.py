@@ -85,7 +85,7 @@ def getdsmembers(db,providerid, member,fname,lname,cell,email,limitby,membertype
 @auth.requires(auth.has_membership('provider') or auth.has_membership('webadmin')) 
 @auth.requires_login()
 def getmembergrid(page,providerid, providername, memberid, patientid,patientsearch, newmember=False):
-
+    #logger.loggerpms2.info("Enter getmembergrin " + str(providerid) + " " + str(memberid) + " " + str(patientid) + " " + str(patientsearch))
     #display all those patients who have seeked appointments with this provider. Appointment guarantees that these patient/members have 
     #agreed to this provider.
     memberset = set()
@@ -109,7 +109,7 @@ def getmembergrid(page,providerid, providername, memberid, patientid,patientsear
                 continue
             memberset.add(pat.primarypatientid)
 
-    
+    #logger.loggerpms2.info("Membergrid-Memberset " + str(len(memberset)) +" " + str(memberset))
     #removing premenndt check
     if((patientid != 0) & (memberid != 0)):
         query = (query) & ((db.vw_memberpatientlist.hmopatientmember == True) & (db.vw_memberpatientlist.is_active == True) & \
@@ -134,7 +134,7 @@ def getmembergrid(page,providerid, providername, memberid, patientid,patientsear
         if(patientsearch != ""):
             query = ((query) & ((db.vw_memberpatientlist.patient.like("%" + patientsearch + "%")) | (db.vw_memberpatientlist.patientmember.like("%" + patientsearch + "%"))))        
 
-    logger.loggerpms2.info("Search Patient Query = " + str(query))
+    #logger.loggerpms2.info("Search Patient Query = " + str(query))
         
     fields=(db.vw_memberpatientlist.fullname,db.vw_memberpatientlist.patient,db.vw_memberpatientlist.patientmember, db.vw_memberpatientlist.cell, db.vw_memberpatientlist.email,\
             db.vw_memberpatientlist.premstartdt,db.vw_memberpatientlist.premenddt, db.vw_memberpatientlist.hmoplanname,\
@@ -617,6 +617,7 @@ def list_patients():
     formA = getmembergrid(page,providerid, providername, memberid, patientid,patientmember1,newmember)
     
     if form.accepts(request,session,keepvalues=True):
+        logger.loggerpms2.info("Enter list_patient on submit " + form.vars.patientmember1 + " " + form.vars.xpatientmember1)
         if(form.vars.patientmember1 == ""):
             form.vars.xpatientmember1 = ""
             

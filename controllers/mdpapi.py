@@ -1178,7 +1178,12 @@ def reSchedule(avars):
 	
     return rsp
     
-
+def sendAllAppointmentsSMSEmail(avars):
+    appPath = current.globalenv["request"].folder
+    avars["appPath"] =appPath
+    oappts = mdpappointment.Appointment(current.globalenv['db'],common.getkeyvalue(avars,"poviderid",0))
+    rsp = oappts.sendAllAppointmentsSMSEmail(avars)
+    return rsp
 
 #getappointments 
 #providerid, month, year
@@ -3032,6 +3037,14 @@ def get_customer(avars):
     
     return rsp
 
+def enroll_customer(avars):
+    
+    obj = mdpcustomer.Customer(current.globalenv['db'])
+    rsp = obj.enroll_customer(avars)
+    
+    return rsp
+
+
 def customer_payment(avars):
     
     obj = mdpcustomer.Customer(current.globalenv['db'])
@@ -3109,6 +3122,7 @@ customerAPI_switcher = {
     "update_customer":update_customer,
     "customer_payment":customer_payment,
     "get_customer":get_customer,
+    "enroll_customer":enroll_customer,
     "map_member_benefit":map_member_benefit
 
 }
@@ -3197,7 +3211,7 @@ userAPI_switcher = {
 
 mdpapi_switcher = {"listappointments":getappointments,"getappointmentsbymonth":getappointmentsbymonth,"getappointmentsbyday":getappointmentsbyday,"getappointment":getappointment,\
                    "getappointmentcountbymonth":getappointmentcountbymonth,"getdocappointmentcountbymonth":getdocappointmentcountbymonth,"getappointmentsbypatient":getappointmentsbypatient,\
-                   "getpatappointmentcountbymonth":getpatappointmentcountbymonth,"getpatappointmentsbyday":getpatappointmentsbyday,\
+                   "getpatappointmentcountbymonth":getpatappointmentcountbymonth,"getpatappointmentsbyday":getpatappointmentsbyday,"sendAllAppointmentsSMSEmail":sendAllAppointmentsSMSEmail,\
                    "createappointment":newappointment,'updateappointment':updateappointment,'cancelappointment':cancelappointment,'checkinappointment':checkinappointment,\
                    "login":mdplogin,"logout":mdplogout,"forgotusername":forgotusername,"forgotpassword":forgotpassword,"getmailserverdetails":getmailserverdetails,\
                    "resetpassword":resetpassword,"searchpatient":searchpatient,"newpatient":newpatient,"getpatient":getpatient,\

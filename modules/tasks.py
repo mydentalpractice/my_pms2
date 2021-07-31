@@ -14,7 +14,7 @@ from applications.my_pms2.modules import logger
 datefmt = "%d/%m/%Y"
 datetimefmt = "%d/%m/%Y %H:%M:%S"
 
-def senddoctornewaptgroupsms(db,appPath,ccs,doctorid,smsdate,providerid=0):
+def senddoctornewaptgroupsms(db,appPath,ccs,doctorid,clinicid,smsdate,providerid=0):
     
     
     logger.loggerpms2.info("Enter senddoctornewaptgroupsms")
@@ -31,131 +31,151 @@ def senddoctornewaptgroupsms(db,appPath,ccs,doctorid,smsdate,providerid=0):
 
     retval = False 
 
-    #get all new appointments for this doctor and provider
-    appts = db((db.vw_appointments.sendsms == True) & (db.vw_appointments.doctor == doctorid) &\
-               ((db.vw_appointments.is_active == True) | ((db.vw_appointments.is_active == False)&(db.vw_appointments.f_status == 'Cancelled')))).select() \
-            if(providerid == 0) else \
-            db((db.vw_appointments.sendsms == True) & (db.vw_appointments.doctor == doctorid) & (db.vw_appointments.provider == providerid) & \
-               ((db.vw_appointments.is_active == True) | ((db.vw_appointments.is_active == False)&(db.vw_appointments.f_status == 'Cancelled')))).select()    
-    
-     
+    try:
+        #get all new appointments for this doctor and provider
+        appts = db((db.vw_appointments.sendsms == True) & (db.vw_appointments.doctor == doctorid) & (db.vw_appointments.clinicid == clinicid) &\
+                   ((db.vw_appointments.is_active == True) | ((db.vw_appointments.is_active == False)&(db.vw_appointments.f_status == 'Cancelled')))).\
+                    select(db.vw_appointments.ALL, db.clinic.ALL,left=db.clinic.on(db.clinic.id==db.vw_appointments.clinicid)) \
+                if(providerid == 0) else \
+                db((db.vw_appointments.sendsms == True) & (db.vw_appointments.doctor == doctorid) & (db.vw_appointments.provider == providerid) & (db.vw_appointments.clinicid == clinicid) & \
+                   ((db.vw_appointments.is_active == True) | ((db.vw_appointments.is_active == False)&(db.vw_appointments.f_status == 'Cancelled')))).\
+                    select(db.vw_appointments.ALL, db.clinic.ALL,left=db.clinic.on(db.clinic.id==db.vw_appointments.clinicid))    
         
-    apptcount = common.getid(len(appts))
-    
-    
-    if(apptcount > 0):
-        grpdocmessage = ("$docname,\nYou have $count appointments as of  $smsdate\n").replace("$count", str(apptcount)).replace("$smsdate", smsdate.strftime("%d/%m/%Y"))
+         
+            
+        apptcount = common.getid(len(appts))
         
-        if(len(appts) > 0):   # the doctor information is goign to be same for this group of appointments
-            doccell = common.modify_cell(common.getstring(appts[0].doccell))
-            docname  = common.getstring(appts[0].docname)
-            docemail = common.getstring(appts[0].docemail) 
-            grpdocmessage = grpdocmessage.replace("$docname", docname)
+        
+        if(apptcount > 0):
+            grpdocmessage = ""
             
-            docsms = common.getboolean(appts[0].docsms)
-            docemailflag = common.getboolean(appts[0].docemailflag)
-            groupsms = common.getboolean(appts[0].groupsms)
-            groupemail = common.getboolean(appts[0].groupemail)
+            #grpdocmessage = ("$docname,\nYou have $count appointments as of  $smsdate\n").replace("$count", str(apptcount)).replace("$smsdate", smsdate.strftime("%d/%m/%Y"))
             
-        for appt in appts:
-            providerid = int(common.getid(appt.provider))
-            prov = db(db.provider.id == providerid).select(db.provider.pa_locationurl)
-            locationurl = prov[0].pa_locationurl if len(prov) == 1 else ""            
-            patientid = int(common.getid(appt.patient))
-            fname   = common.getstring(appt.f_patientname)  if((appt.f_patientname != "") & (appt.f_patientname != None))  else "Patient"
-            patcell = common.modify_cell(common.getstring(appt.cell))
-            appttime = (appt.f_start_time).strftime('%d/%m/%Y %I:%M %p')
-            location = common.getstring(appt.f_location) + "\n" + locationurl
-            provcell = common.modify_cell(common.getstring(appt.provcell))
-            provtel = common.getstring(appt.provtel)
-           
-            pats = db(db.patientmember.id == patientid).select(db.patientmember.cell, db.patientmember.email)
-            if(patcell == ""):
-                patcell = common.modify_cell(common.getstring(pats[0].cell)) if(len(pats) > 0 ) else "910000000000"
-            patemail = common.getstring(pats[0].email) if(len(pats) > 0 ) else "x@x.com"
-
-
-            #grpdocmessage = grpdocmessage + "\n" + fname + " (+" + patcell  + "): " + appttime
-           
-            #send SMS & email to patient
-            smsfile = ""
-            if(appt.smsaction == "create"):
-                #new appointment message
-                smsfile  = os.path.join(appPath,'templates/reminders/sms','SMS_ApptConfirm.txt') 
-            elif(appt.smsaction == "update"):
-                #reschedule  appointment message
-                smsfile  = os.path.join(appPath,'templates/reminders/sms','SMS_ApptReschedule.txt') 
-            elif(appt.smsaction == "cancel"):
-                smsfile  = os.path.join(appPath,'templates/reminders/sms','SMS_ApptCancel.txt') 
-            else:
-                smsfile  = os.path.join(appPath,'templates/reminders/sms','SMS_ApptConfirm.txt') 
+            if(len(appts) > 0):   # the doctor information is goign to be same for this group of appointments
+                doccell = common.modify_cell(common.getstring(appts[0].vw_appointments.doccell))
+                docname  = common.getstring(appts[0].vw_appointments.docname)
+                docemail = common.getstring(appts[0].vw_appointments.docemail) 
                 
-            f = open(smsfile,'rb')
-            temp = Template(f.read())
-            f.close()  
-            patmessage = temp.template
-            patmessage = patmessage.replace("$fname", fname)
-            patmessage = patmessage.replace("$docname", docname)
-            patmessage = patmessage.replace("$appointmentdate", appttime)
-            patmessage = patmessage.replace("$provplace", location)
-            patmessage = patmessage.replace("$doccell", "+" + doccell)
-            patmessage = patmessage.replace("$clinicno", provtel) if(provtel != "" ) else patmessage.replace("$clinicno", "+" + doccell)  
-            if(patcell != ""):
-                mail.sendSMS2Email(db,patcell,patmessage)
-            if(patemail != ""):
-                mail.groupEmail(db, patemail, ccs, "Appointment: " + appttime, patmessage)  # send email to patient
-            
-            #send SMS to doctor 
-            if(appt.smsaction == "create"):
-                #new appointment message
-                smsfile  = os.path.join(appPath,'templates/reminders/sms','SMS_ApptConfirmDoc.txt') 
-            elif(appt.smsaction == "update"):
-                #reschedule  appointment message
-                smsfile  = os.path.join(appPath,'templates/reminders/sms','SMS_ApptRescheduleDoc.txt') 
-            elif(appt.smsaction == "cancel"):
-                smsfile  = os.path.join(appPath,'templates/reminders/sms','SMS_ApptCancel.txt') 
-            else:
-                smsfile  = os.path.join(appPath,'templates/reminders/sms','SMS_ApptCancelDoc.txt')             
-        
-            f = open(smsfile,'rb')
-            temp = Template(f.read())
-            f.close()  
-            docmessage = temp.template
-            docmessage = docmessage.replace("$fname", fname)
-            docmessage = docmessage.replace("$docname", docname)
-            docmessage = docmessage.replace("$appointmentdate", appttime)
-            docmessage = docmessage.replace("$patcell", "+" + patcell) 
-
-            grpdocmessage = grpdocmessage + docmessage.replace(docname+",","" )
-            
-            if((doccell != "") & (docsms == True)):
-                db(db.t_appointment.id == appt.id).update(sendsms = False)
-                db.commit()
-                retval = mail.sendSMS2Email(db,doccell,docmessage)
                 
-            if((docemail != "") & (docemailflag == True)):
-                mail.groupEmail(db, docemail, ccs, "Appointment: " + appttime, docmessage)  # send email to patient
+                docsms = common.getboolean(appts[0].vw_appointments.docsms)
+                docemailflag = common.getboolean(appts[0].vw_appointments.docemailflag)
+                groupsms = common.getboolean(appts[0].vw_appointments.groupsms)
+                groupemail = common.getboolean(appts[0].vw_appointments.groupemail)
+                
+            for appt in appts:
+                
+                providerid = int(common.getid(appt.vw_appointments.provider))
+                prov = db(db.provider.id == providerid).select(db.provider.pa_locationurl)
+                locationurl = prov[0].pa_locationurl if len(prov) == 1 else "" 
+                
+                patientid = int(common.getid(appt.vw_appointments.patient))
+                fname   = common.getstring(appt.f_patientname)  if((appt.vw_appointments.f_patientname != "") & (appt.vw_appointments.f_patientname != None))  else "Patient"
+                patcell = common.modify_cell(common.getstring(appt.vw_appointments.cell))
+                appttime = (appt.vw_appointments.f_start_time).strftime('%d/%m/%Y %I:%M %p')
+                location = common.getstring(appt.vw_appointments.f_location) + "\n" + locationurl
+                provcell = common.modify_cell(common.getstring(appt.vw_appointments.provcell))
+                provtel = common.getstring(appt.vw_appointments.provtel)
+               
+                pats = db(db.patientmember.id == patientid).select(db.patientmember.cell, db.patientmember.email)
+                if(patcell == ""):
+                    patcell = common.modify_cell(common.getstring(pats[0].cell)) if(len(pats) > 0 ) else "910000000000"
+                patemail = common.getstring(pats[0].email) if(len(pats) > 0 ) else "x@x.com"
+                
+                #clinicname. clinicaddress, clinicno, cliniclocation
+                clinicname = common.getstring(appt.clinic.name)
+                clinicaddress1 = common.getstring(appt.clinic.address1) + " " + common.getstring(appt.clinic.address2) + " " + common.getstring(appt.clinic.address3) + " "
+                clinicaddress2 = common.getstring(appt.clinic.city) + " " + common.getstring(appt.clinic.st) +" - " + common.getstring(appt.clinic.pin)
+                cliniclocation = common.getstring(appt.clinic.gps_location)
+                cliniccell = common.modify_cell(common.getstring(appt.clinic.cell))
+                clinictel  = common.getstring(appt.clinic.telephone)
+                clinicno = clinictel if(clinictel != "" ) else cliniccell
+    
+                #grpdocmessage = grpdocmessage + "\n" + fname + " (+" + patcell  + "): " + appttime
+                
+                #send SMS & email to patient
+                smsfile = ""
+                if(appt.smsaction == "create"):
+                    #new appointment message
+                    smsfile  = os.path.join(appPath,'templates/reminders/sms','SMS_ApptConfirm.txt') 
+                elif(appt.smsaction == "update"):
+                    #reschedule  appointment message
+                    smsfile  = os.path.join(appPath,'templates/reminders/sms','SMS_ApptReschedule.txt') 
+                elif(appt.smsaction == "cancel"):
+                    smsfile  = os.path.join(appPath,'templates/reminders/sms','SMS_ApptCancel.txt') 
+                else:
+                    smsfile  = os.path.join(appPath,'templates/reminders/sms','SMS_ApptConfirm.txt') 
+                    
+                f = open(smsfile,'rb')
+                temp = Template(f.read())
+                f.close()  
+                patmessage = temp.template
+                patmessage = patmessage.replace("$fname", fname)
+                patmessage = patmessage.replace("$docname", docname)
+                patmessage = patmessage.replace("$appointmentdate", appttime)
+                patmessage = patmessage.replace("$clinicname", clinicname)             
+                patmessage = patmessage.replace("$clinicaddress1", clinicaddress1)             
+                patmessage = patmessage.replace("$clinicaddress2", clinicaddress2)             
+                patmessage = patmessage.replace("$cliniclocation", cliniclocation)             
+                patmessage = patmessage.replace("$clinicno", clinicno)             
+    
+    
+                if(patcell != ""):
+                    mail.sendSMS2Email(db,patcell,patmessage)
+                if(patemail != ""):
+                    mail.groupEmail(db, patemail, ccs, "Appointment: " + appttime, patmessage)  # send email to patient
+                
+                
+                #send SMS to doctor 
+                if(appt.smsaction == "create"):
+                    #new appointment message
+                    smsfile  = os.path.join(appPath,'templates/reminders/sms','SMS_ApptConfirmDoc.txt') 
+                elif(appt.smsaction == "update"):
+                    #reschedule  appointment message
+                    smsfile  = os.path.join(appPath,'templates/reminders/sms','SMS_ApptRescheduleDoc.txt') 
+                elif(appt.smsaction == "cancel"):
+                    smsfile  = os.path.join(appPath,'templates/reminders/sms','SMS_ApptCancel.txt') 
+                else:
+                    smsfile  = os.path.join(appPath,'templates/reminders/sms','SMS_ApptCancelDoc.txt')             
             
-        
-        try:
-            if(groupsms == True):
-                for appt in appts:
+                f = open(smsfile,'rb')
+                temp = Template(f.read())
+                f.close()  
+                docmessage = temp.template
+                docmessage = docmessage.replace("$fname", fname)
+                docmessage = docmessage.replace("$docname", docname)
+                docmessage = docmessage.replace("$appointmentdate", appttime)
+                docmessage = docmessage.replace("$patcell", patcell)
+    
+               
+                
+                if((doccell != "") & (docsms == True)):
                     db(db.t_appointment.id == appt.id).update(sendsms = False)
                     db.commit()
-                if(doccell == provcell):  # do not send sms if the doctor is same as provider  but keep thw docmessage
-                    retval = True
+                    retval = mail.sendSMS2Email(db,doccell,docmessage)
+                    
+                if((docemail != "") & (docemailflag == True)):
+                    mail.groupEmail(db, docemail, ccs, "Appointment: " + appttime, docmessage)  # send email to doctor
+                
+            
+                if(groupsms == True):
+                    for appt in appts:
+                        db(db.t_appointment.id == appt.id).update(sendsms = False)
+                        db.commit()
+                    if(doccell == provcell):  # do not send sms if the doctor is same as provider  but keep thw docmessage
+                        retval = True
+                    else:
+                        retval = mail.sendSMS2Email(db, doccell, grpdocmessage) 
+                    #send email irrespective whether SMS sent or no.
+                    if(docemail != ""):
+                        retval1 = mail.groupEmail(db, docemail, ccs, "Appointments:" + appttime, grpdocmessage) 
                 else:
-                    retval = mail.sendSMS2Email(db, doccell, grpdocmessage) 
-                #send email irrespective whether SMS sent or no.
-                if(docemail != ""):
-                    retval1 = mail.groupEmail(db, docemail, ccs, "Appointments:" + appttime, grpdocmessage) 
-            else:
-                grpdocmessage = ""
-                apptcount = 0
-                retval = False       
-        except Exception,e:
-            logger.loggerpms2.info("Senddoctornewapptgroupseme Exception " + str(e))
-        
+                    grpdocmessage = ""
+                    apptcount = 0
+                    retval = False
+                    
+    except Exception,e:
+        logger.loggerpms2.info("Senddoctornewapptgroupseme Exception " + str(e))
+    
     return dict(retval = retval, docmessage = grpdocmessage, docsmscount = apptcount)
 
 

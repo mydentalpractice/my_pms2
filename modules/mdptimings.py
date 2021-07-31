@@ -694,7 +694,7 @@ class OPS_Timing:
                                 open_time = common.convert24to12clock(otstr)
                                 
                                 ctstr = common.getkeyvalue(timing,"close_time","18:00")
-                                ctstr = "18:00" if(otstr == "") else otstr
+                                ctstr = "18:00" if(ctstr == "") else ctstr
                                 #ogger.loggerpms2.info("OTSTR = " + ctstr)
                                 
                                 close_time = common.convert24to12clock(ctstr)

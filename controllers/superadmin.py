@@ -68,8 +68,10 @@ def smsservice():
           if(groupapptsms == "1"):
                message = "Re-Enter Loop"  + " " + (common.getISTFormatCurrentLocatTime()).strftime(datetimefmt)
                logger.loggerpms2.info(message)
+               obj = {"appPath":request.folder}
                o = mdpappointment.Appointment(db, 1)
-               r = o.groupsms(request.folder)
+               r = o.sendAllAppointmentsSMSEmail(obj)
+               #r = o.groupsms(request.folder)
                jsonr = json.loads(r)
                if(jsonr["result"] == "fail"):
                     message = message + " " + jsonr["error_message"]

@@ -57,7 +57,7 @@ def getkeyvalue(jobj, key1, defval):
 
         for key in keys:
                 if(key.lower() == key1.lower()):
-                        return jobj.get(key,"defval")
+                        return jobj.get(key,defval)
 
 
         return defval
@@ -99,7 +99,19 @@ def getstringfromtime(timeobj, fmt):
         
        
         return strtime
+
+
+#this returns local current (IST) date  as datetime object
+def getISTFormatCurrentLocatDate():
+        loctime = getISTCurrentLocatTime()
+        dttodaydate =   datetime.datetime.strptime(loctime.strftime("%d") + "/" + loctime.strftime("%m") + "/" + loctime.strftime("%Y"),\
+                                                   "%d/%m/%Y")
+        str1 = getstringfromdate(dttodaydate,"%d/%m/%Y")
+        dt1 = getdatefromstring(str1,"%d/%m/%Y")
         
+        return dt1
+
+
 #this returns local current (IST) date and time as datetime object
 def getISTFormatCurrentLocatTime():
         loctime = getISTCurrentLocatTime()
@@ -710,9 +722,11 @@ def modify_cell(cell):
         
         cellno = cell.lstrip('0')  # remove leading zero  in case cell  = 078901234544
         if(len(cellno) == 10):     # pure number with no Country code
-                cellno = "91" + cellno 
+                cellno = "+91" + cellno 
         elif(not cellno.startswith("91")):
-                cellno = "91" + cellno
+                cellno = "+91" + cellno
+        elif(cellno.startswith("91")):
+                cellno = "+" + cellno
 
         return cellno
 

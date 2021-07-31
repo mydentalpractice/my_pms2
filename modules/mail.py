@@ -7,6 +7,14 @@ import json
 import requests
 
 
+import urllib
+import base64
+import hashlib
+import uuid
+
+
+
+
 from applications.my_pms2.modules import common
 
 from applications.my_pms2.modules import logger
@@ -1574,6 +1582,100 @@ def sendSMS_MSG91(db, cellnos, message):
     
     return json.dumps(resp)
 
+
+def encoderequestdata(self,jsondata):
+    jsonstr = json.dumps(jsondata)
+    jsonstrencrypt = self.encrypts(jsonstr)
+    
+    #jsonstrencoded = base64.b64encode(jsonstrencrypt)
+    #jsonstrdecrypt = self.decrypts(jsonstrencrypt)
+    reqobj = {"req_data":jsonstrencrypt}
+
+    return reqobj  
+
+
+#import urllib,urllib.request,urllib.parse
+#class SendSms:
+#def __init__(self,mobilenumber,message):
+#url = "http://www.smscountry.com/smscwebservice_bulk.aspx"
+#values = {'user' : 'XXXX',
+#'passwd' : 'XXXX',
+#'message' : message,
+#'mobilenumber':mobilenumber,
+#'mtype':'N',
+#'DR':'Y'
+#}
+#data = urllib.parse.urlencode(values)
+#data = data.encode('utf-8')
+#request = urllib.request.Request(url,data)
+#response = urllib.request.urlopen(request)
+#print (response.read().decode('utf-8'))
+#http://api.smscountry.com/SMSCwebservice_bulk.aspx?User=xxxxxx&passwd=xxxxxxxxxxx 
+#x&mobilenumber=xxxxxxxxxx&message=xxxxxxxxx&sid =xxxxxxxx&mtype=N&DR=Y
+
+
+def sendAPI_SMS2Email(db, cellnos, message):
+    
+    logger.loggerpms2.info("Enter API SendSMS2Email " + cellnos )
+    
+    retVal = False
+    server = None
+    sender = None
+    login = None
+    smsusername = None
+    smsemail = None
+    subject = "Email2SMS"
+    tls = True
+    
+    #get email details from urlPropertieslect()
+    jsonresp={}
+    respstr = ""
+    
+    try:    
+        props = db(db.urlproperties.id == 1).select()
+        if(len(props)>0):
+            url = props[0].mydp_getrsa_url
+            server = props[0].mailserver + ":"  + props[0].mailserverport
+            sender = props[0].mailsender
+            login  = props[0].mailusername + ":" + props[0].mailpassword
+            mailcc = props[0].mailcc
+            smsusername = props[0].smsusername
+            port = int(props[0].mailserverport)
+            tls = True if((port !=25) & (port != 26)) else False
+        else:
+            retVal = False
+            raise HTTP(400,"Mail attributes not found")
+
+        #SMS URL
+     
+        requestObj = {
+            'user' : smsusername,
+            'passwd' : '71328781',
+            'message' : message,
+            'mobilenumber':cellnos,
+            'mtype':'N',
+            'DR':'Y'
+        }
+        
+        resp = requests.post(url,data=requestObj)
+        jsonresp = {}
+        
+        if((resp.status_code == 200)|(resp.status_code == 201)|(resp.status_code == 202)|(resp.status_code == 203)):
+            respstr =   resp.text
+            logger.loggerpms2.info("Send SMS API Response Successs=> " + respstr)
+            retVal = True
+        else:
+            retVal = False
+            logger.loggerpms2.info("Send SMS API - Response Error " + resp.status_code)
+    
+    except Exception as e:
+        error_message = "sendAPI_SMS2Email API Exception " + str(e)
+        logger.loggerpms2.info(error_message)
+        retVal = False
+
+    return retVal
+
+
 #using Format 1
 def sendSMS2Email(db, cellnos, message):
     
@@ -1722,9 +1824,9 @@ def groupEmail(db,emails,ccs, subject,message):
         subject =  subject
         message = message
         
-        logger.loggerpms2.info("GropuEmail:Before Send Email " + message)
+        #logger.loggerpms2.info("GropuEmail:Before Send Email " + message)
         retVal = mail.send(to,subject,message,cc=[ccs])
-        logger.loggerpms2.info("GropuEmail:After Send Email " + message)
+        #logger.loggerpms2.info("GropuEmail:After Send Email " + message)
         
 
     else:

@@ -2339,6 +2339,7 @@ db.define_table('payment',
                 Field('provider', widget = lambda field, value:SQLFORM.widgets.options.widget(field, value,_style="width:100%;height:35px",_class='w3-input w3-border w3-small'), requires=IS_IN_DB(db, 'provider.id', '%(provider)s')),
                 Field('is_active','boolean'),
                 Field('paymentcommit','boolean',default=True),
+                Field('precommitamount', 'double'),
                 
                 Field('fp_status', 'string' ),
                 Field('fp_paymentref', 'string'),
@@ -4506,6 +4507,9 @@ db.define_table('vw_prescription_groupby_treatment',
 db.define_table('vw_clinic',
                 
                 Field('id','integer'),
+                Field('clinicid','integer'),
+                
+                
                 Field('clinic_ref','string'),
                     
                 Field('name','string'),

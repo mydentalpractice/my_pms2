@@ -1180,7 +1180,322 @@ class Appointment:
         
         return json.dumps(r)
        
+    def sendPatSMSEmail(self,avars):
+        db = self.db
+        rspobj = {}
+        rspmail = {}
+        patobj = {}
+        patsmslist = []
+        patemaillist=[]
+        
+        try:
 
+            ccs = common.getkeyvalue(avars,"ccs","")
+            appPath = common.getkeyvalue(avars,"appPath","")
+            apptid = int(common.getid(common.getkeyvalue(avars,"appointmentid","0")))
+            appts = db((db.vw_appointments.sendsms == True) & (db.vw_appointments.id == apptid) & \
+                       ((db.vw_appointments.is_active == True) | ((db.vw_appointments.is_active == False)&(db.vw_appointments.f_status == 'Cancelled')))).\
+                select(db.vw_appointments.ALL, db.clinic.ALL,left=db.clinic.on(db.clinic.id==db.vw_appointments.clinicid))
+            
+            sendsms = common.getboolean(common.getkeyvalue(avars,"sendsms","True"))
+            sendemail = common.getboolean(common.getkeyvalue(avars,"sendemail","True"))
+            retVal = True
+            retVal1 = True                                        
+            for appt in appts:
+                memberid = int(common.getid(appt.vw_appointments.patientmember))
+                patientid = int(common.getid(appt.vw_appointments.patient))
+                providerid = int(common.getid(appt.vw_appointments.provider))
+                clinicid = int(common.getid(appt.vw_appointments.clinicid))
+                doctorid = int(common.getid(appt.vw_appointments.doctor))
+                appttime = (appt.vw_appointments.f_start_time).strftime('%d/%m/%Y %I:%M %p')
+            
+                #clinicname. clinicaddress, clinicno, cliniclocation
+                clinicname = common.getstring(appt.clinic.name)
+                clinicaddress1 = common.getstring(appt.clinic.address1) + " " + common.getstring(appt.clinic.address2) + " " + common.getstring(appt.clinic.address3) + " "
+                clinicaddress2 = common.getstring(appt.clinic.city) + " " + common.getstring(appt.clinic.st) +" - " + common.getstring(appt.clinic.pin)
+                cliniclocation = common.getstring(appt.clinic.gps_location)
+                cliniccell = common.modify_cell(common.getstring(appt.clinic.cell))
+                clinictel  = common.getstring(appt.clinic.telephone)
+                clinicno = clinictel if(clinictel != "" ) else cliniccell            
+            
+                fname   = common.getstring(appt.vw_appointments.f_patientname)  if((appt.vw_appointments.f_patientname != "") & (appt.vw_appointments.f_patientname != None))  else "Patient"
+                
+                docname = common.getstring(appt.vw_appointments.docname)
+
+                pats = db((db.vw_memberpatientlist.patientid == patientid) & (db.vw_memberpatientlist.primarypatientid==memberid) & (db.vw_memberpatientlist.is_active==True)).\
+                    select(db.vw_memberpatientlist.cell, db.vw_memberpatientlist.email)
+                
+                patcell = common.modify_cell(common.getstring(pats[0].cell)) if(len(pats) > 0 ) else "910000000000"
+                patemail = common.getstring(pats[0].email) if(len(pats) > 0 ) else "x@x.com"                
+    
+                #send SMS & email to patient
+                smsfile = ""
+                if(appt.vw_appointments.smsaction == "create"):
+                    #new appointment message
+                    smsfile  = os.path.join(appPath,'templates/sms','SMS_ApptConfirm.txt') 
+                elif(appt.vw_appointments.smsaction == "update"):
+                    #reschedule  appointment message
+                    smsfile  = os.path.join(appPath,'templates/sms','SMS_ApptReschedule.txt') 
+                elif(appt.vw_appointments.smsaction == "cancel"):
+                    smsfile  = os.path.join(appPath,'templates/sms','SMS_ApptCancel.txt') 
+                else:
+                    smsfile  = os.path.join(appPath,'templates/sms','SMS_ApptConfirm.txt') 
+        
+                f = open(smsfile,'rb')
+                temp = Template(f.read())
+                f.close()  
+                patmessage = temp.template
+                patmessage = patmessage.replace("$fname", fname)
+                patmessage = patmessage.replace("$docname", docname)
+                patmessage = patmessage.replace("$appointmentdate", appttime)
+                patmessage = patmessage.replace("$clinicname", clinicname)             
+                patmessage = patmessage.replace("$clinicaddress1", clinicaddress1)             
+                patmessage = patmessage.replace("$clinicaddress2", clinicaddress2)             
+                patmessage = patmessage.replace("$cliniclocation", cliniclocation)             
+                patmessage = patmessage.replace("$clinicno", clinicno)             
+        
+                retVal = True
+                if((patcell != "") & (sendsms)):
+                    #retVal = mail.sendSMS2Email(db,patcell,patmessage)
+                    retVal = mail.sendAPI_SMS2Email(db,patcell,patmessage)
+                    
+                if((patemail != "")&(sendemail)):
+                    retVal1= mail.groupEmail(db, patemail, ccs, "Appointment: " + appttime, patmessage)  # send email to patient        
+                
+                rspobj = {}
+                if(retVal == True):
+                    mssg = "sendPatSMSEmail: Patient SMS sent successfully to this patient " + fname + "(" + patcell + ")"
+                    rspobj["appointmentid"] = str(apptid)
+                    rspobj["result"] = "success"
+                    rspobj["error_message"] = ""
+                    rspobj["message"] = mssg
+                else:
+                    rspobj["appointmentid"] = str(apptid)
+                    mssg = "sendPatSMSEmail:  Error sending Patient SMS to this patient " + fname + "(" + patcell + ")"
+                    rspobj["result"] = "fail"
+                    rspobj["error_message"] = mssg
+                    
+                patsmslist.append(rspobj)
+                
+                rspmail={}
+                if(retVal1 == True):
+                    mssg = "sendPatSMSEmail: Patient Email sent successfully to this patient " + fname + "(" + patemail + ")"
+                    rspmail["result"] = "success"
+                    rspmail["error_message"] = ""
+                    rspmail["message"] = mssg
+                    rspmail["appointmentid"] = str(apptid)
+                else:
+                    mssg = "sendPatSMSEmail:  Error sending Patient Email Sent  to this patient " + fname + "(" + patemail + ")"
+                    rspmail["result"] = "fail"
+                    rspmail["error_message"] = mssg
+                    rspmail["appointmentid"] = str(apptid)
+
+                patemaillist.append(rspmail)
+                
+                    
+                
+            patobj["patientSMS"] = patsmslist
+            patobj["patientEmail"] = patemaillist
+            patobj["result"] = "success"
+            patobj["error_message"] = ""            
+                    
+        except Exception as e:
+            mssg = "sendPatSMSEmail API Exception Error ==>>" + str(e)
+            excpobj = {}
+            excpobj["result"] = "fail"
+            excpobj["error_message"] = mssg
+            excpobj["error_code"] = ""
+            return json.dumps(excpobj)    
+            
+                
+        return json.dumps(patobj)        
+
+
+    def sendDocSMSEmail(self,avars):
+        db = self.db
+        rspobj = {}
+        rspmail = {}
+        docobj = {}
+        docsmslist = []
+        docemaillist=[]        
+
+        try:
+
+            ccs = common.getkeyvalue(avars,"ccs","")
+            appPath = common.getkeyvalue(avars,"appPath","")
+            apptid = int(common.getid(common.getkeyvalue(avars,"appointmentid","0")))
+            appts = db((db.vw_appointments.sendsms == True) & (db.vw_appointments.id == apptid) & \
+                       ((db.vw_appointments.is_active == True) | ((db.vw_appointments.is_active == False)&(db.vw_appointments.f_status == 'Cancelled')))).\
+                select(db.vw_appointments.ALL, db.clinic.ALL,left=db.clinic.on(db.clinic.id==db.vw_appointments.clinicid))
+            
+            sendsms = common.getboolean(common.getkeyvalue(avars,"sendsms","True"))
+            sendemail = common.getboolean(common.getkeyvalue(avars,"sendemail","True"))
+            retVal = True
+            retVal1 = True
+            
+            for appt in appts:
+                memberid = int(common.getid(appt.vw_appointments.patientmember))
+                patientid = int(common.getid(appt.vw_appointments.patient))
+                providerid = int(common.getid(appt.vw_appointments.provider))
+                clinicid = int(common.getid(appt.vw_appointments.clinicid))
+                doctorid = int(common.getid(appt.vw_appointments.doctor))
+                appttime = (appt.vw_appointments.f_start_time).strftime('%d/%m/%Y %I:%M %p')
+            
+                fname   = common.getstring(appt.vw_appointments.f_patientname)  if((appt.vw_appointments.f_patientname != "") & (appt.vw_appointments.f_patientname != None))  else "Patient"
+                
+                docname = common.getstring(appt.vw_appointments.docname)
+                doccell = common.modify_cell(common.getstring(appt.vw_appointments.doccell))
+                docemail = common.getstring(appt.vw_appointments.docemail)
+                
+                pats = db((db.vw_memberpatientlist.patientid == patientid) & (db.vw_memberpatientlist.primarypatientid==memberid) & (db.vw_memberpatientlist.is_active==True)).\
+                    select(db.vw_memberpatientlist.cell, db.vw_memberpatientlist.email)
+                
+                patcell = common.modify_cell(common.getstring(pats[0].cell)) if(len(pats) > 0 ) else "910000000000"
+                             
+                #send SMS & email to patient
+                smsfile = ""
+                if(appt.vw_appointments.smsaction == "create"):
+                    #new appointment message
+                    smsfile  = os.path.join(appPath,'templates/sms','SMS_ApptConfirmDoc.txt') 
+                elif(appt.vw_appointments.smsaction == "update"):
+                    #reschedule  appointment message
+                    smsfile  = os.path.join(appPath,'templates/sms','SMS_ApptRescheduleDoc.txt') 
+                elif(appt.vw_appointments.smsaction == "cancel"):
+                    smsfile  = os.path.join(appPath,'templates/sms','SMS_ApptCancel.txt') 
+                else:
+                    smsfile  = os.path.join(appPath,'templates/sms','SMS_ApptCancelDoc.txt')             
+        
+                f = open(smsfile,'rb')
+                temp = Template(f.read())
+                f.close()  
+                docmessage = temp.template
+                docmessage = docmessage.replace("$fname", fname)
+                docmessage = docmessage.replace("$docname", docname)
+                docmessage = docmessage.replace("$appointmentdate", appttime)
+                docmessage = docmessage.replace("$patcell", patcell)
+        
+                retVal = True
+                retVal1 = True
+                if((doccell != "") & (sendsms)):
+                    #retVal = mail.sendSMS2Email(db,doccell,docmessage)
+                    retVal = mail.sendAPI_SMS2Email(db,doccell,docmessage)
+                    
+                if((docemail != "")&(sendemail)):
+                    retVal1 = mail.groupEmail(db, docemail, ccs, "Appointment: " + appttime, docmessage)  # send email to patient        
+                
+                
+                
+                rspobj = {}
+                if(retVal == True):
+                    mssg = "sendDocSMSEmail: Doctor SMS sent successfully to this doctor " + docname + "(" + doccell + ")"
+                    rspobj["appointmentid"] = str(apptid)
+                    rspobj["result"] = "success"
+                    rspobj["error_message"] = ""
+                    rspobj["message"] = mssg
+                else:
+                    mssg = "sendDocSMSEmail:  Error sending SMS  to this doctor " + docname + "(" + doccell + ")"
+                    rspobj["appointmentid"] = str(apptid)
+                    rspobj["result"] = "fail"
+                    rspobj["error_message"] = mssg
+                
+                docsmslist.append(rspobj)
+                
+                rspmail={}
+                if(retVal1 == True):
+                    mssg = "sendDocSMSEmail: Doctor Email sent successfully to this doctor " + docname + "(" + docemail + ")"
+                    rspmail["result"] = "success"
+                    rspmail["error_message"] = ""
+                    rspmail["message"] = mssg
+                else:
+                    mssg = "sendDocSMSEmail:  Error sending Email to this doctor " + docname + "(" + docemail + ")"
+                    rspmail["result"] = "fail"
+                    rspmail["error_message"] = mssg
+                
+                docemaillist.append(rspmail)
+              
+                
+        
+            docobj["DocSMS"] = docsmslist
+            docobj["DocEmail"] = docemaillist
+            docobj["result"] = "success"
+            docobj["error_message"] = ""            
+        
+        
+        
+        except Exception as e:
+            mssg = "sendDocSMSEmail API Exception Error ==>>" + str(e)
+            excpobj = {}
+            excpobj["result"] = "fail"
+            excpobj["error_message"] = mssg
+            excpobj["error_code"] = ""
+            return json.dumps(excpobj)    
+            
+                
+        return json.dumps(docobj)        
+    
+   
+    
+    def sendAllAppointmentsSMSEmail(self,avars):
+        logger.loggerpms2.info("Enter sendAllAppointmentsSMSEmail " + json.dumps(avars))
+
+        db = self.db
+        rspObj = {}
+        try:
+            appPath = common.getkeyvalue(avars,"appPath","")
+            props = db(db.urlproperties.id>0).select()
+            ccs = props[0].mailcc if(len(props)>0) else ""
+            
+            #get all appointments for which SMS has not been sent & appointment date > from Date & < to Date
+            appts = db((db.vw_appointments.sendsms == True) &\
+                       ((db.vw_appointments.is_active == True) | ((db.vw_appointments.is_active == False)&(db.vw_appointments.f_status == 'Cancelled')))).\
+                select(db.vw_appointments.id)
+            
+            patlist = []
+            doclist = []
+            
+            for appt in appts:
+                i=0
+                #send SMS to Patient
+                avars["appointmentid"]  = str(appt.id)
+                avars["ccs"]  = ccs
+                patrspObj = json.loads(self.sendPatSMSEmail(avars))
+                
+                patlist.append(patrspObj)
+                
+
+                
+                            
+                #send SMS to Doctor
+                avars["appointmentid"]  = str(appt.id)
+                avars["ccs"]  = ccs
+                docrspObj = json.loads(self.sendDocSMSEmail(avars))
+                doclist.append(docrspObj)
+                
+                #send SMS to Provider
+            
+            
+                smslst = patrspObj["patientSMS"]
+                for sms in smslst:
+                    apptid = sms["appointmentid"]
+                    if(sms["result"] == "success"):
+                        db(db.t_appointment.id == apptid).update(sendsms = False)                
+       
+            rspObj["result"] = "success"
+            rspObj["error_message"] = ""
+            rspObj["patSMSEmail"] = patlist
+            rspObj["docSMSEmail"] = doclist
+            
+        
+        except Exception as e:
+            mssg = "sendSMS API Exception Error ==>>" + str(e)
+            excpobj = {}
+            excpobj["result"] = "fail"
+            excpobj["error_message"] = mssg
+            excpobj["error_code"] = ""
+            return json.dumps(excpobj)    
+            
+       
+        return json.dumps(rspObj)
     
     
      

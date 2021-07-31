@@ -8750,14 +8750,21 @@ ADD COLUMN `webhookUrl` VARCHAR(512) NULL DEFAULT NULL AFTER `product_id`;
 
 22/07/2021
 ===========
-1. Modify treatmentplan table to add totalcompanypays
+1. YYZZModify treatmentplan table to add totalcompanypays
 
-2. Modify payment table to add companypays,policy
+2. YYZZModify payment table to add companypays,policy
 
-3. Modify vw_paymentlist,vw_payments,vw_treatmentplancost,vw_treatmentplansummarybypatient,vw_treatmentplansummarybytreatment
+3. YYZZModify vw_paymentlist,vw_payments,vw_treatmentplancost,vw_treatmentplansummarybypatient,vw_treatmentplansummarybytreatment
 
-4. New Table company_policy
+4. YYZZNew Table company_policy
 
+5. YYZZUpdate urlprops table mydp_getrsa_url = http://www.smscountry.com/smscwebservice_bulk.aspx
+   
+6. YYYZZZCopy SMS Templates to templates\sms folder
+
+7. ZZZModify payment table - add column precommitamount
+ALTER TABLE `mydp_prod`.`payment` 
+ADD COLUMN `precommitamount` DOUBLE NULL DEFAULT 0 AFTER `policy`;
 
 
 Script file to clear user for sign-up

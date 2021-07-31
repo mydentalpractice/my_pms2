@@ -885,7 +885,7 @@ def member_selector():
             memberset.add(pat.primarypatientid)
 
 
-
+    #logger.loggerpms2.info("Admin-Member Selector " + str(len(memberset)) + " " + str(memberset))
     #all MDP Members who have had appointments with this Provider in the past,current & future
     query = (query) & ((db.vw_memberpatientlist.primarypatientid.belongs(memberset)) &  (db.vw_memberpatientlist.hmopatientmember == True))
                        #(datetime.date.today().strftime('%Y-%m-%d') <= db.vw_memberpatientlist.premenddt))
@@ -1064,7 +1064,7 @@ def treatment_selector():
 
 
 
-def newpatient_selector():
+def znewpatient_selector():
     
     if not request.vars.patientmember:
             return ''    
@@ -1131,7 +1131,7 @@ def newpatient_selector():
                  _style="z-index:500000;width:100%;font-family:verdana;font-size:12px;color:black;font-weight:normal"                 
                  ).xml() for k in selected])
 
-def xnewpatient_selector():
+def newpatient_selector():
     
     if not request.vars.patientmember:
             return ''    

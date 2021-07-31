@@ -161,27 +161,45 @@ class Shopse:
                 jsonresp["result"] = "success"
                 jsonresp["error_message"] = ""
                 
-                #complete the transaction
+                #complete the transaction, #orderid = <treatment>_<paymentid>
                 arr = common.getkeyvalue(jsonresp,"orderid","0_0")
                 arr = arr.split("_")
-                
+               
                 paymentid = int(common.getid(arr[1])) if (len(arr) >= 2) else 0
                 treatment = common.getstring(arr[0]) if (len(arr) >= 1) else ""
                 x=db((db.treatment.treatment == treatment) & (db.treatment.is_active == True)).select(db.treatment.id)
                 treatmentid = int(common.getid(x[0].id)) if(len(x) > 0) else 0
                 amount = float(common.getkeyvalue(avars,"amount","0"))
+                
+        
                 db(db.payment.id == paymentid).update(
                     
                                                       fp_paymentref = common.getkeyvalue(jsonresp,"OrderId",""),
-                                                      amount = amount,
                                                       fp_invoice = treatment,
-                                                      fp_invoiceamt = amount,
-                                                      fp_amount = amount,
                                                       fp_merchantid = "MDP",
                                                       fp_paymenttype = "ShopSe",
                                                       fp_paymentdetail = common.getkeyvalue(jsonresp,"shopSeTxnId",""),
-                                                      fp_merchantdisplay="MyDental Health Plan Pvt. Ltd."
+                                                      fp_merchantdisplay="MyDental Health Plan Pvt. Ltd.",
+                                                      precommitamount = amount,   #temporary storing the amount  to commit on callback 
+                                                      paymentcommit = False,
+                                                      paymentmode = "Online",
+                                                      fp_status = "Open"
                                                     )
+                #db(db.payment.id == paymentid).update(
+                    
+                                                      #fp_paymentref = common.getkeyvalue(jsonresp,"OrderId",""),
+                                                      #amount = amount,
+                                                      #fp_invoice = treatment,
+                                                      #fp_invoiceamt = amount,
+                                                      #fp_amount = amount,
+                                                      #fp_merchantid = "MDP",
+                                                      #fp_paymenttype = "ShopSe",
+                                                      #fp_paymentdetail = common.getkeyvalue(jsonresp,"shopSeTxnId",""),
+                                                      #fp_merchantdisplay="MyDental Health Plan Pvt. Ltd.",
+                                                      #paymentcommit = False,
+                                                      #paymentmode = Online
+                                                    #)
+                
                 
                 logger.loggerpms2.info("Shopsee createTransaction API Response \n" + json.dumps(jsonresp)) 
                 
@@ -211,7 +229,10 @@ class Shopse:
     
     #2021-07-06 09:22:02,321 - web2py.app.my_pms2 - INFO - Enter Shopsee callback_transaction API == >{"orderId": "TRCHAGSP13010001_2158", "status": "failed", "currentTime": "1625543519024", "shopSeTxnId": "S06072103513799343", "statusMessage": "We are observing technical issues with the Bank. Please try again after some time.", "statusCode": "53"}
     #2021-07-06 09:22:02,321 - web2py.app.my_pms2 - INFO - Exit Shopsee callback_transaction API Exception 'message'
+    #import requests
     
+    #x = requests.get('https://w3schools.com')
+    #print(x.status_code)    
     def callback_transaction(self,avars):
         
         logger.loggerpms2.info("Enter Shopsee callback_transaction API == >" + json.dumps(avars))
@@ -222,10 +243,16 @@ class Shopse:
                 orderid = common.getkeyvalue(avars,"orderid","") 
                 shopsetxnid = common.getkeyvalue(avars,"shopsetxnid","") 
                 
-                p = db((db.payment.fp_paymentref == orderid) & (db.payment.fp_paymentdetail ==shopsetxnid )).select(db.payment.id)
+                p = db((db.payment.fp_paymentref == orderid) & (db.payment.fp_paymentdetail ==shopsetxnid )).select(db.payment.id,db.payment.precommitamount)
+                amount = float(common.getvalue(p[0].precommitamount)) if(len(p) != 0) else 0
+               
                 db((db.payment.fp_paymentref == orderid) & (db.payment.fp_paymentdetail ==shopsetxnid )).update(fp_status = common.getkeyvalue(avars,"status",""),
                                                                                                                  paymentcommit = True,
-                                                                                                                 fp_paymentdate = ""
+                                                                                                                 fp_paymentdate = common.getISTFormatCurrentLocatTime(),
+                                                                                                                 amount = amount,
+                                                                                                                 fp_invoiceamt = amount,
+                                                                                                                 fp_amount = amount, 
+                                                                                                                 precommitamount = 0
                                                                                                                  )
                 
                 jsonresp = avars
@@ -235,6 +262,22 @@ class Shopse:
                 
             else:
                 jsonresp = avars
+                
+                orderid = common.getkeyvalue(avars,"orderid","") 
+                shopsetxnid = common.getkeyvalue(avars,"shopsetxnid","") 
+                
+                p = db((db.payment.fp_paymentref == orderid) & (db.payment.fp_paymentdetail ==shopsetxnid )).select(db.payment.id)
+                
+                db((db.payment.fp_paymentref == orderid) & (db.payment.fp_paymentdetail ==shopsetxnid )).update(fp_status = common.getkeyvalue(avars,"status",""),
+                                                                                                                 paymentcommit = False,
+                                                                                                                 fp_paymentdate = common.getISTFormatCurrentLocatTime(),
+                                                                                                                 amount = 0,
+                                                                                                                 fp_invoiceamt = 0,
+                                                                                                                 fp_amount = 0,  
+                                                                                                                 precommitamount = 0
+                                                                                                                 
+                                                                                                                 )
+                
                 jsonresp["result"] = "fail"
                 jsonresp["error_message"] = avars["message"]
                 
