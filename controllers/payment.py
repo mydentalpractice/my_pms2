@@ -833,7 +833,7 @@ def payment_success():
             "treatmentid":str(treatmentid)
         }
         bnftobj = mdpbenefits.Benefit(db)
-        rspObj = bnftobj.benefit_success(bnftobj)
+        rspObj = bnftobj.benefit_success(obj)
     else:
         #Call Benefit Failure
         trtmnt = db((db.treatment.id == treatmentid) & (db.treatment.is_active == True)).select()
@@ -852,7 +852,7 @@ def payment_success():
             
         }
         bnftobj = mdpbenefits.Benefit(db)
-        rspObj = bnftobj.benefit_failure(bnftobj)
+        rspObj = bnftobj.benefit_failure(obj)
     
     
     return dict(formProcedure=formProcedure,\
@@ -1087,7 +1087,15 @@ def payment_success_hdfc():
             "treatmentid":str(treatmentid)
         }
         bnftobj = mdpbenefits.Benefit(db)
-        rspObj = bnftobj.benefit_success(bnftobj)
+        rspObj = bnftobj.benefit_success(obj)
+        if(benefit['result'] == "success"):
+            
+            #update totalcompanypays (we are saving discount_amount as companypays )
+            db(db.treatment.id == treatmentid).update(companypay = discount_amount)    
+            #update treatmentplan assuming there is one treatment per tplan
+            db(db.treatmentplan.id==tplanid).update(totalcompanypays = discount_amount) 
+            db.commit()             
+    
     else:
         
         #Call Benefit Failure
@@ -1107,7 +1115,7 @@ def payment_success_hdfc():
             
         }
         bnftobj = mdpbenefits.Benefit(db)
-        rspObj = bnftobj.benefit_failure(bnftobj)
+        rspObj = bnftobj.benefit_failure(obj)
 
         
     
@@ -1467,7 +1475,9 @@ def shopse_payment_callback():
     encryptrsp = encryptrsp["encrypt"]
     signature = urllib.quote_plus(request.vars.signature)  if "signature" in request.vars else ""
 
-    p = db((db.payment.fp_paymentref == request.vars.orderId) & (db.payment.fp_paymentdetail ==request.vars.shopSeTxnId )).select(db.payment.id,db.payment.provider)
+    #for now we are not checking for ShopSeTxnId
+    #p = db((db.payment.fp_paymentref == request.vars.orderId) & (db.payment.fp_paymentdetail ==request.vars.shopSeTxnId )).select(db.payment.id,db.payment.provider)
+    p = db((db.payment.fp_paymentref == request.vars.orderId)).select(db.payment.id,db.payment.provider)
     
     paymentid = int(common.getid(p[0].id)) if(len(p) >= 1) else 0
     providerid = int(common.getid(p[0].provider)) if(len(p) >= 1) else 0
@@ -1480,10 +1490,10 @@ def shopse_payment_callback():
 
     
     if(encryptrsp == signature):
-        logger.loggerpms2.info("ShopSe-Enter Callback Transaction Sign Match ==>" + signature + "\n" + json.dumps(reqobj))
+        logger.loggerpms2.info("ShopSe-Enter Callback Transaction Sign Match ==>" + signature + "\n" + json.dumps(reqobj) + " " + str(paymentid))
         shopseobj = mdpshopse.Shopse(db)
         rsp = json.loads(shopseobj.callback_transaction(reqobj))
-        logger.loggerpms2.info("ShopSe-Return Callback Transaction=>>" + json.dumps(rsp))
+        logger.loggerpms2.info("ShopSe-Return Callback Transaction=>>" + json.dumps(rsp) + " " + str(paymentid))
         
         paymentobj = mdppayment.Payment(db, providerid)
         receiptobj = json.loads(paymentobj.paymentreceipt(paymentid))
@@ -2813,7 +2823,7 @@ def calculatepayments(tplanid,memberid,providerid):
     return dict(treatmentcost=treatmentcost,copay=copay,inspays=inspays,totaltreatmentcost=totaltreatmentcost,totalinspays=totalinspays,totalcopay=totalcopay,\
                 totalpaid=totalpaid,totaldue=totaldue)
 
-def calculatepayments(tplanid,providerid,policy):
+def calculatepayments(tplanid,providerid,policy=None):
     treatmentcost = 0
     copay = 0
     inspays = 0

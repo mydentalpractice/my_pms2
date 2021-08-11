@@ -13,6 +13,7 @@ from uuid import uuid4
 
 
 from applications.my_pms2.modules import common
+from applications.my_pms2.modules import account
 from applications.my_pms2.modules import mdppatient
 from applications.my_pms2.modules import account
 from applications.my_pms2.modules import mdppayment
@@ -140,7 +141,7 @@ class Shopse:
                 "mobile":common.getkeyvalue(avars,"mobile",""),
                 "email":common.getkeyvalue(avars,"email",""),
                 "returnUrl":self.shopsee_returnURL,
-                "webhookUrl":self.webhookUrl,
+                #"webhookUrl":self.webhookUrl,
                 "productName":treatment,
                 "productId":treatmentid,
                 "firstName":common.getkeyvalue(avars,"firstName",""),
@@ -171,7 +172,9 @@ class Shopse:
                 treatmentid = int(common.getid(x[0].id)) if(len(x) > 0) else 0
                 amount = float(common.getkeyvalue(avars,"amount","0"))
                 
-        
+                logger.loggerpms2.info("Shopsee createTransaction API Response \n" + json.dumps(jsonresp)) 
+                logger.loggerpms2.info("Shopsee Create Transaction API - amount=" + str(amount) + " paymentid " + str(paymentid)+" treatmentid " + str(treatmentid))
+                
                 db(db.payment.id == paymentid).update(
                     
                                                       fp_paymentref = common.getkeyvalue(jsonresp,"OrderId",""),
@@ -185,26 +188,7 @@ class Shopse:
                                                       paymentmode = "Online",
                                                       fp_status = "Open"
                                                     )
-                #db(db.payment.id == paymentid).update(
-                    
-                                                      #fp_paymentref = common.getkeyvalue(jsonresp,"OrderId",""),
-                                                      #amount = amount,
-                                                      #fp_invoice = treatment,
-                                                      #fp_invoiceamt = amount,
-                                                      #fp_amount = amount,
-                                                      #fp_merchantid = "MDP",
-                                                      #fp_paymenttype = "ShopSe",
-                                                      #fp_paymentdetail = common.getkeyvalue(jsonresp,"shopSeTxnId",""),
-                                                      #fp_merchantdisplay="MyDental Health Plan Pvt. Ltd.",
-                                                      #paymentcommit = False,
-                                                      #paymentmode = Online
-                                                    #)
-                
-                
-                logger.loggerpms2.info("Shopsee createTransaction API Response \n" + json.dumps(jsonresp)) 
-                
-               
-                
+
             else:
                 jsonresp={
                     "result" : "fail",
@@ -237,47 +221,63 @@ class Shopse:
         
         logger.loggerpms2.info("Enter Shopsee callback_transaction API == >" + json.dumps(avars))
         db = self.db
-   
+       
         try:
-            if(common.getkeyvalue(avars,"status","") == "success"):
-                orderid = common.getkeyvalue(avars,"orderid","") 
-                shopsetxnid = common.getkeyvalue(avars,"shopsetxnid","") 
+            status = common.getkeyvalue(avars,"status","")
+            status = "failed" if(status == "") else status
+            
+            orderid = common.getkeyvalue(avars,"orderid","") 
+            shopsetxnid = common.getkeyvalue(avars,"shopsetxnid","") 
+
+            #temporary suspending shopSeTxId check
+            #p = db((db.payment.fp_paymentref == orderid) & (db.payment.fp_paymentdetail ==shopsetxnid )).select(db.payment.id,db.payment.precommitamount)
+            p = db((db.payment.fp_paymentref == orderid)).select() 
+            providerid = int(common.getid(p[0].provider)) if(len(p) != 0) else 0
+            amount = float(common.getvalue(p[0].precommitamount)) if(len(p) != 0) else 0
+            memberid = int(common.getid(p[0].patientmember)) if(len(p) != 0) else 0
+            tplanid = int(common.getid(p[0].treatmentplan)) if(len(p) != 0) else 0
+            paymentid = int(common.getid(p[0].id)) if(len(p) >= 1) else 0
+            
+            patobj = mdppatient.Patient(db, providerid)
+            rsp = json.loads(patobj.getMemberPolicy({"providerid":str(providerid),"memberid":str(memberid)}))
+            policy = common.getkeyvalue(rsp,"plan","PREMWALKIN")
+            
+            logger.loggerpms2.info("ShopSe Call Back Transaction API==>Amount " + str(amount) + " status " + status + " " + policy + " " + str(paymentid))
+            
+            paymentdate = common.getISTFormatCurrentLocatTime()
+            if((status.lower() == "success")|(status.lower() == "s")):
+                db((db.payment.fp_paymentref == orderid)).update(fp_status = status,
+                                                                paymentcommit = True,
+                                                                fp_paymentdate =paymentdate ,
+                                                                amount = amount,
+                                                                fp_invoiceamt = amount,
+                                                                fp_amount = amount, 
+                                                                precommitamount = 0
+                                                                )
                 
-                p = db((db.payment.fp_paymentref == orderid) & (db.payment.fp_paymentdetail ==shopsetxnid )).select(db.payment.id,db.payment.precommitamount)
-                amount = float(common.getvalue(p[0].precommitamount)) if(len(p) != 0) else 0
-               
-                db((db.payment.fp_paymentref == orderid) & (db.payment.fp_paymentdetail ==shopsetxnid )).update(fp_status = common.getkeyvalue(avars,"status",""),
-                                                                                                                 paymentcommit = True,
-                                                                                                                 fp_paymentdate = common.getISTFormatCurrentLocatTime(),
-                                                                                                                 amount = amount,
-                                                                                                                 fp_invoiceamt = amount,
-                                                                                                                 fp_amount = amount, 
-                                                                                                                 precommitamount = 0
-                                                                                                                 )
                 
+                #here need to update treatmentplan tables
+                account._updatetreatmentpayment(db, tplanid, paymentid)
+                db.commit()
+   
                 jsonresp = avars
-                jsonresp["paymentid"] = int(common.getid(p[0].id)) if(len(p) >= 1) else 0
+                jsonresp["paymentid"] = paymentid
                 jsonresp["result"] = "success"
                 jsonresp["error_message"] = ""
                 
+                
+                
             else:
+                db((db.payment.fp_paymentref == orderid)).update(fp_status = status,
+                                                                paymentcommit = False,
+                                                                fp_paymentdate =paymentdate,
+                                                                amount = 0,
+                                                                #fp_invoiceamt = 0,
+                                                                fp_amount = 0,  
+                                                                precommitamount = 0
+                                                                
+                                                                )
                 jsonresp = avars
-                
-                orderid = common.getkeyvalue(avars,"orderid","") 
-                shopsetxnid = common.getkeyvalue(avars,"shopsetxnid","") 
-                
-                p = db((db.payment.fp_paymentref == orderid) & (db.payment.fp_paymentdetail ==shopsetxnid )).select(db.payment.id)
-                
-                db((db.payment.fp_paymentref == orderid) & (db.payment.fp_paymentdetail ==shopsetxnid )).update(fp_status = common.getkeyvalue(avars,"status",""),
-                                                                                                                 paymentcommit = False,
-                                                                                                                 fp_paymentdate = common.getISTFormatCurrentLocatTime(),
-                                                                                                                 amount = 0,
-                                                                                                                 fp_invoiceamt = 0,
-                                                                                                                 fp_amount = 0,  
-                                                                                                                 precommitamount = 0
-                                                                                                                 
-                                                                                                                 )
-                
                 jsonresp["result"] = "fail"
                 jsonresp["error_message"] = avars["message"]
                 
@@ -291,8 +291,9 @@ class Shopse:
             }
             return json.dumps(jsonresp)
         
-        
-        return json.dumps(jsonresp)
+        dmp = json.dumps(jsonresp)
+        logger.loggerpms2.info("Exit Callback Transaction==>>" + dmp)
+        return dmp
     
     
     
@@ -307,7 +308,9 @@ class Shopse:
         jsonresp = {}
         
         try:
-            if(common.getkeyvalue(avars,"status","") == "success"):
+            status = common.getkeyvalue(avars,"status","failed")
+            
+            if((status.lower() == "success")|(status.lower() == 's')):
                 orderid = common.getkeyvalue(avars,"orderid","") 
                 shopsetxnid = common.getkeyvalue(avars,"shopsetxnid","") 
                 
@@ -315,7 +318,7 @@ class Shopse:
                 sigobj = {}
                 sigobj["orderId"] = common.getkeyvalue(avars,"orderId","")
                 sigobj["shopSeTxnId"] = common.getkeyvalue(avars,"shopSeTxnId","")
-                sigobj["status"] = common.getkeyvalue(avars,"status","")
+                sigobj["status"] = status
                 sigobj["statusCode"] = common.getkeyvalue(avars,"statusCode","")
                 sigobj["statusMessage"] = common.getkeyvalue(avars,"statusMessage","")
                 sigobj["currentTime"] = common.getkeyvalue(avars,"currentTime","")
@@ -341,7 +344,7 @@ class Shopse:
                 strdt = common.getkeyvalue(avars,"timestamp",common.getstringfromdate(common.getISTFormatCurrentLocatTime(),"%Y-%m-%dT%H:%M:%S.000Z"))
                 paymentdate = common.getdatefromstring(strdt, "%Y-%m-%dT%H:%M:%S.%fZ")
                 
-                db((db.payment.fp_paymentref == orderid) & (db.payment.fp_paymentdetail ==shopsetxnid )).update(fp_status = common.getkeyvalue(avars,"status",""),
+                db((db.payment.fp_paymentref == orderid) & (db.payment.fp_paymentdetail ==shopsetxnid )).update(fp_status = status,
                                                                                                                  paymentcommit = True,
                                                                                                                  fp_paymentdate = paymentdate,
                                                                                                                  fp_otherinfo = otherinfo
@@ -353,6 +356,11 @@ class Shopse:
                 jsonresp["shopSeTxnId"] = common.getkeyvalue(avars,"shopSeTxnId","")
                 jsonresp["result"] = "success"
                 jsonresp["error_message"] = ""
+            else:
+                #need to send email to Patient
+                jsonresp = {}
+                jsonresp["result"] = "fail"
+                jsonresp["error_message"] = "The status of webhook callback is " + status
                 
                 
         except Exception as e:

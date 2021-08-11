@@ -3052,6 +3052,14 @@ def customer_payment(avars):
     
     return rsp
 
+def customer_check_registration(avars):
+    
+    obj = mdpcustomer.Customer(current.globalenv['db'])
+    rsp = obj.customer_check_registration(avars)
+    
+    return rsp
+
+
 ############################# END CUSTOMER API  ###################################################
 
 ############################# START BENEFITS API  ###################################################
@@ -3123,7 +3131,8 @@ customerAPI_switcher = {
     "customer_payment":customer_payment,
     "get_customer":get_customer,
     "enroll_customer":enroll_customer,
-    "map_member_benefit":map_member_benefit
+    "map_member_benefit":map_member_benefit,
+    "customer_check_registration":customer_check_registration
 
 }
 
@@ -3285,30 +3294,30 @@ def mdpapi():
     def POST(*args, **vars):
 	i = 0
         try:
-	    logger.loggerpms2.info(">>Enter MDP API==>>")
+	    #logger.loggerpms2.info(">>Enter MDP API==>>")
 	    #db = current.globalenv['db']
 	    #props = db(db.urlproperties.id > 0).select(db.urlproperties.encryption)
 	    #encryption = False if(len(props) == 0) else common.getboolean(props[0].encryption)
 	    orlgr = mdpreligare.Religare(current.globalenv['db'],0)
-	    logger.loggerpms2.info(">>API==>>1")
+	    #logger.loggerpms2.info(">>API==>>1")
             
             
             encryption = vars.has_key("req_data")
 	   
 	    
 	    if(encryption):
-		logger.loggerpms2.info(">>Encryption API==>>2\n" + vars["req_data"])
+		#logger.loggerpms2.info(">>Encryption API==>>2\n" + vars["req_data"])
 		
 		encrypt_req = vars["req_data"]
-		logger.loggerpms2.info(">>API==>>3" )
+		#logger.loggerpms2.info(">>API==>>3" )
 		
 		vars = json.loads(orlgr.decrypts(vars["req_data"]))
-		logger.loggerpms2.info(">>API==>>4 " + json.dumps(vars) )
+		#logger.loggerpms2.info(">>API==>>4 " + json.dumps(vars) )
 		
-	    logger.loggerpms2.info(">>API==>>5 \n" + json.dumps(vars) )
+	    #logger.loggerpms2.info(">>API==>>5 \n" + json.dumps(vars) )
 		
 	    action = str(vars["action"])
-	    logger.loggerpms2.info(">>API ACTION==>>" + action)
+	    
 	    #logger.loggerpms2.info(">>API ACTION==>>" + action)
 	    if(action == 'getreligareprocedures'):
 		logger.loggerpms2.info(">>Get Religare Procedures\n")

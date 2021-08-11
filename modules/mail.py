@@ -1835,6 +1835,44 @@ def groupEmail(db,emails,ccs, subject,message):
     
     return retVal
 
+def _groupEmail(db,mail,emails,ccs, subject,message):
+    
+    retVal = True
+    
+    # get mail details
+    tls = True
+    props = db(db.urlproperties.id>0).select()
+
+    if(len(props)>0):
+        server = props[0].mailserver + ":"  + props[0].mailserverport
+        sender = props[0].mailsender
+        login  = props[0].mailusername + ":" + props[0].mailpassword
+        port = int(props[0].mailserverport)
+        if((port != 25) & (port != 26)):
+            tls = True
+        else:
+            tls = False
+
+        #mail = Mail()
+        mail.settings.server = server
+        mail.settings.sender = sender
+        mail.settings.login =  login
+        mail.settings.tls = tls
+
+        to      =  emails
+        subject =  subject
+        message = message
+        
+        #logger.loggerpms2.info("GropuEmail:Before Send Email " + message)
+        retVal = mail.send(to,subject,message,cc=[ccs])
+        #logger.loggerpms2.info("GropuEmail:After Send Email " + message)
+        
+
+    else:
+        retVal = False
+        raise HTTP(400,"Mail attributes not found")
+    
+    return retVal
 
 def emailDentalCaseSheet(db,request,preregid,email):
 

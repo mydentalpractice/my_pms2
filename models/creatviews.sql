@@ -8740,32 +8740,37 @@ ADD COLUMN `webhookUrl` VARCHAR(512) NULL DEFAULT NULL AFTER `product_id`;
 
 4. XXXXYYYZZZAdd mdpmessages table (populate)
 
+5. XXXYYZZPopulate Benefit Master, Benefit Master Slabs, benefit_master_x_message,benefit_master_x_slabs,
+
+
 19/07/2021
 =============
 1. XXXYYZZZ modified vw_clinic : addd latitude & longitude
 
 2. XXXYYYZZZ modified benefit_master : added benefit_premium  
 
-3. YYYYZZZZmodified customer table to add payment related information - tx_id, payment_id, payment_amount, payment_date,amount_paid, payment_status
+3. XXXYYYYZZZZmodified customer table to add payment related information - tx_id, payment_id, payment_amount, payment_date,amount_paid, payment_status
 
 22/07/2021
 ===========
-1. YYZZModify treatmentplan table to add totalcompanypays
+1. XXYYZZModify treatmentplan table to add totalcompanypays
 
-2. YYZZModify payment table to add companypays,policy
+2. XXXYYZZModify payment table to add companypays,policy,precommitamount
 
-3. YYZZModify vw_paymentlist,vw_payments,vw_treatmentplancost,vw_treatmentplansummarybypatient,vw_treatmentplansummarybytreatment
+3. XXXYYZZModify vw_paymentlist,vw_payments,vw_treatmentplancost,vw_treatmentplansummarybypatient,vw_treatmentplansummarybytreatment
 
-4. YYZZNew Table company_policy
+4. XXXYYZZNew Table company_policy
 
-5. YYZZUpdate urlprops table mydp_getrsa_url = http://www.smscountry.com/smscwebservice_bulk.aspx
+5. XXXYYZZUpdate urlprops table mydp_getrsa_url = http://www.smscountry.com/smscwebservice_bulk.aspx
    
-6. YYYZZZCopy SMS Templates to templates\sms folder
+6. XXXYYYZZZCopy SMS Templates to templates\sms folder
 
-7. ZZZModify payment table - add column precommitamount
+7. XXXYYYZZZModify payment table - add column precommitamount
 ALTER TABLE `mydp_prod`.`payment` 
 ADD COLUMN `precommitamount` DOUBLE NULL DEFAULT 0 AFTER `policy`;
 
+
+8. XXXXZZZ modify vw_payments,  changes totaldue to subtract totalcompanypays
 
 Script file to clear user for sign-up
 =====================================

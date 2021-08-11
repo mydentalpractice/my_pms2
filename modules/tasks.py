@@ -14,7 +14,7 @@ from applications.my_pms2.modules import logger
 datefmt = "%d/%m/%Y"
 datetimefmt = "%d/%m/%Y %H:%M:%S"
 
-def senddoctornewaptgroupsms(db,appPath,ccs,doctorid,clinicid,smsdate,providerid=0):
+def xsenddoctornewaptgroupsms(db,appPath,ccs,doctorid,clinicid,smsdate,providerid=0):
     
     
     logger.loggerpms2.info("Enter senddoctornewaptgroupsms")
@@ -182,7 +182,7 @@ def senddoctornewaptgroupsms(db,appPath,ccs,doctorid,clinicid,smsdate,providerid
 
 
 
-def senddoctorremaptgroupsms(db,appPath,ccs,doctorid,smsdate,smsdateUSFormat,providerid=0):
+def xsenddoctorremaptgroupsms(db,appPath,ccs,doctorid,smsdate,smsdateUSFormat,providerid=0):
     
     docname = ""
     doccell = ""
@@ -300,7 +300,7 @@ def senddoctorremaptgroupsms(db,appPath,ccs,doctorid,smsdate,smsdateUSFormat,pro
     return dict(retval = retval, docmessage = grpdocmessage, docsmscount = apptcount)
 
 
-def sendAptReminders(db,appPath):
+def xsendAptReminders(db,appPath):
     
     loccurrdate = common.getISTCurrentLocatTime()
     smsdate  = datetime.datetime.strptime(loccurrdate.strftime("%d") + "/" + loccurrdate.strftime("%m") + "/" + loccurrdate.strftime("%Y"), "%d/%m/%Y")
@@ -373,7 +373,7 @@ def sendAptReminders(db,appPath):
 #and sends a single sms for this group of new appointments
 #the sms are scanned and sent every hour. No smses are sent
 #if no new appointments are created
-def sendNewAptGrpSMS(db,appPath):
+def xsendNewAptGrpSMS(db,appPath):
     
     
     
@@ -453,7 +453,7 @@ def sendNewAptGrpSMS(db,appPath):
 
 #THis function is called fiveminutes past hour, 24x7 from a task that runs 24x7 in the background
 #The group SMS will not be sent between 00:00:00 to 06:59:59  each day.
-def sendGroupSMS(db,appPath):
+def xsendGroupSMS(db,appPath):
     message = "Enter SendGroupSMS" + " " + (common.getISTFormatCurrentLocatTime()).strftime(datetimefmt)
     logger.loggerpms2.info(message)    
     

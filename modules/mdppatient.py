@@ -25,6 +25,65 @@ class Patient:
     self.db = db
     self.providerid = providerid
     return 
+
+  #returns the policy which the patient has subscribed to  
+  def getMemberPolicy(self,avars):
+    logger.loggerpms2.info("Enter getMemberPolicy==> " + str(avars))
+    db = self.db
+    rspobj={}
+    
+    try:
+      
+      
+      p = db((db.provider.provider == "P0001") & (db.provider.is_active == True)).select(db.provider.id)
+      defproviderid = int(common.getid(p[0].id if(len(p) >=1) else 0))
+      
+      providerid = int(common.getid(common.getkeyvalue(avars,"providerid",str(defproviderid))))
+      prov = db((db.provider.id == providerid) & (db.provider.is_active == True)).select(db.provider.city)
+      
+      #region regiond code      
+      city = prov[0].city if(len(prov) != 0) else "Jaipur"
+      regionid = common.getregionidfromcity(db,city)
+      regioncode =  common.getregioncodefromcity(db,city)         
+    
+      #get company code
+      memberid = int(common.getid(common.getkeyvalue(avars,"memberid","0")))
+      members = db((db.patientmember.id == memberid) & (db.patientmember.is_active == True)).select(db.patientmember.company,db.patientmember.hmoplan)
+    
+      companyid = int(common.getid(members[0].company) if (len(members) == 1) else "0")
+      c = db((db.company.id == companyid) & (db.company.is_active == True)).select(db.company.company)
+      companycode = c[0].company if (len(c) ==1) else ""
+    
+    
+      #get hmoplan code
+      hmoplanid = int(common.getid(members[0].hmoplan) if (len(members) == 1) else "0")  #members hmoplan assigned
+      h = db((db.hmoplan.id == hmoplanid) & (db.hmoplan.is_active == True)).select()    
+      hmoplancode = h[0].hmoplancode if(len(h) == 1) else "PREMWALKIN"
+    
+      #get policy from provider-region-plan corr to companycode, regioncode and hmoplancode
+      prp = db((db.provider_region_plan.companycode == companycode) &\
+               (db.provider_region_plan.regioncode == regioncode) &\
+               (db.provider_region_plan.plancode == hmoplancode) &\
+               (db.provider_region_plan.is_active == True)).select() 
+    
+      policy = prp[0].policy if(len(prp) == 1) else "PREMWALKIN"  #get policy corr.
+      
+      rspobj = {}
+      rspobj["memberid"] = str(memberid)
+      rspobj["providerid"] = str(providerid)
+      rspobj["plan"] = policy
+      
+
+    except Exception as e:
+      mssg = "Get Member Policy Exception:\n" + str(e)
+      logger.loggerpms2.info(mssg)      
+      excpobj = {}
+      excpobj["result"] = "fail"
+      excpobj["error_message"] = mssg
+      return json.dumps(excpobj)     
+    
+    logger.loggerpms2.info("Exit getMemberPolicy==> " + json.dumps(rspobj))
+    return json.dumps(rspobj)
   
   def relations(self):
     return json.dumps(relations.RELATIONS)

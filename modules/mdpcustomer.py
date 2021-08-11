@@ -65,6 +65,47 @@ class Customer:
         self.providerid = providerid
         auth = current.auth
     
+    def customer_check_registration(self, avars):
+        logger.loggerpms2.info("Enter Check Customer Registration " + json.dumps(avars))
+        
+        db = self.db
+        auth = current.auth        
+        jsonresp={}
+        count = 0
+        try:
+            jsonresp = {}
+            
+            cell = common.getkeyvalue(avars, "cell", "")
+
+            c = db((db.customer.cell == cell) & (db.customer.is_active == True)).count()
+            
+            if(c >= 1):
+                mssg = "This number " +  cell + " is already registered with us. Please register with another cell number or call Customer Support"
+                jsonresp = {
+                    "result":"success",
+                    "new_customer":"false",
+                    "error_message":mssg,
+                    "error_code":""
+                    
+                }
+            else:
+                jsonresp = {
+                    "result":"success",
+                    "new_customer":"true"
+                }                    
+
+        except Exception as e:
+            error_code = "CHK_REGISTRATION"
+            mssg = error_code + ":" + "Exception Check Registration:\n" + "(" + str(e) + ")"
+            logger.loggerpms2.info(mssg)
+            jsonresp = {
+                "result":"fail",
+                "error_message":mssg,
+                "error_code":error_code
+            }                    
+            
+        return json.dumps(jsonresp)
+        
     #this method is called from end-of-day processing 
     #to process special customers and enroll them in MDP
     def enroll_all_SPL_customers(self,avars):
@@ -504,9 +545,11 @@ class Customer:
             if(len(c) == 0):
                 #new custoemr
                 jsonresp = json.loads(self.new_customer(avars))
+                jsonresp["new_customer"] = True
             else:
                 #update customer
                 jsonresp = json.loads(self.update_customer(avars))
+                jsonresp["new_customer"] = False
             
         else:
             error_code = "CUST_001"
@@ -806,6 +849,7 @@ class Customer:
         return json.dumps(jsonresp)
 
     def update_customer(self,avars):
+        logger.loggerpms2.info("Enter Update Customer " + json.dumps(avars))
         db = self.db        
         auth = current.auth        
         jsonresp = {}
@@ -827,6 +871,8 @@ class Customer:
                 apptdatestr = common.getkeyvalue(avars, "appointment_datetime",defapptdatestr)
                 apptdate = common.getdatefromstring(apptdatestr, "%d/%m/%Y %H:%M")
                 
+                
+                
                 payment_id = common.getkeyvalue(avars,"payment_id","RPIP599_" + common.getstringfromdate(common.getISTFormatCurrentLocatTime(),"%d/%m/%Y %H:%M:%S"))
                 payment_date = common.getkeyvalue(avars,"payment_date",common.getstringfromdate(common.getISTFormatCurrentLocatTime(),"%d/%m/%Y"))
                 payment_date = common.getdatefromstring(payment_date,"%d/%m/%Y")
@@ -835,7 +881,11 @@ class Customer:
                 amount_paid = float(common.getvalue(common.getkeyvalue(avars,"amount_paid","0")))
 
                 
-           
+                
+                xdob = common.getkeyvalue(avars,"dob",  c[0].dob)
+                if((xdob == None) | (xdob == "")):
+                    xdob = common.getISTFormatCurrentLocatDate()
+                    
                 
                 db((db.customer.customer_ref == customer_ref) & (db.customer.is_active == True)).update(
                     customer_ref = common.getkeyvalue(avars,"customer_ref", c[0].customer_ref),
@@ -854,8 +904,8 @@ class Customer:
                     pin3 = common.getkeyvalue(avars,"pin3", c[0].pin3),
 
                     gender = common.getkeyvalue(avars,"gender", c[0].gender),
-                    dob = common.getkeyvalue(avars,"dob",  c[0].dob),
-                    
+                    #dob = common.getkeyvalue(avars,"dob",  c[0].dob),
+                    #dob = xdob,
                     telephone = common.getkeyvalue(avars,"telephone",  c[0].telephone),
                     cell = common.getkeyvalue(avars,"cell",  c[0].cell),
                     email = common.getkeyvalue(avars,"email",  c[0].email),
@@ -982,6 +1032,7 @@ class Customer:
                 
                 "gender":c[0].gender,
                 "dob":common.getstringfromdate(c[0].dob, "%d/%m/%Y"),
+                
                 "status":c[0].status,
                 
                 "telephone":c[0].telephone,
@@ -1267,7 +1318,7 @@ class Customer:
                 cobj["cell"] = c[0].cell
                 cobj["email"] = c[0].email
                 
-                cobj["dob"] = c[0].dob.strftime("%d/%m/%Y")
+                cobj["dob"] = None if (c[0].dob == None) else c[0].dob.strftime("%d/%m/%Y")
                 cobj["status"] = c[0].status
                 cobj["pin1"] = c[0].pin1
                 cobj["pin2"] = c[0].pin2
@@ -1280,9 +1331,9 @@ class Customer:
                 cobj["planid"] = c[0].planid
                 
                 cobj["appointment_id"] = c[0].appointment_id
-                cobj["appointment_datetime"] = c[0].appointment_datetime.strftime("%d/%m/%Y %H:%M")
+                cobj["appointment_datetime"] =None if (c[0].appointment_datetime == None) else  c[0].appointment_datetime.strftime("%d/%m/%Y %H:%M")
                 
-                cobj["enrolldate"] = c[0].enrolldate.strftime("%d/%m/%Y")
+                cobj["enrolldate"] = None if (c[0].enrolldate == None) else c[0].enrolldate.strftime("%d/%m/%Y")
                 
                 cobj["notes"] = c[0].notes
                 
@@ -1380,7 +1431,11 @@ class Customer:
             customerid = c[0].id if(len(c)==1) else 0            
             
             if(paymentid == 0):
-                c = self.get_customer(customerid)
+                obj = {}
+                
+                obj["customerid"] = str(customerid)
+                obj["customer_ref"] = str(customer_ref)
+                c = self.get_customer(obj)
                 defdt = common.getISTFormatCurrentLocatTime()
                 defdtstr = common.getstringfromdate(defdt,"%d/%m/%Y %H:%M:%S")
                 payment_date = common.getdatefromstring(common.getkeyvalue(avars,"payment_date",defdtstr),"%d/%m/%Y")
@@ -1420,8 +1475,8 @@ class Customer:
                 
                              
         except Exception as e:
-            error_code = "ENROLL_CUST_001"
-            mssg = error_code + ":" + "Exception Enroll Member:\n" + "(" + str(e) + ")"
+            error_code = "CUSTOMER_Payment_001"
+            mssg = error_code + ":" + "Exception Customer Payment:\n" + "(" + str(e) + ")"
             logger.loggerpms2.info(mssg)
             jsonresp = {
                 "result":"fail",

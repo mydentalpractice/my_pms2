@@ -137,7 +137,7 @@ class Razorpay:
   
     
   def capture_razorpay_payment(self,amount,razorpay_id,razorpay_order_id,newpayment):
-    #logger.loggerpms2.info("Enter capture_razorpay_payment")
+    logger.loggerpms2.info("Enter capture_razorpay_payment " + str(amount) + " " + str(razorpay_id) + " " + str(razorpay_order_id) + " " + json.dumps(newpayment["addln_info"]))
     
     orderurl =   self.fp_produrl + "/payments/" + razorpay_id  +"/capture"
     paiseamount = int(amount * 100)
@@ -254,8 +254,9 @@ class Razorpay:
         "error_message": errstr
       }
     
-      
-    return json.dumps(jsonresp) 
+    dmp = json.dumps(jsonresp)  
+    logger.loggerpms2.info("Exit Captur Razorpay Payment " + dmp)
+    return dmp
 
   
   

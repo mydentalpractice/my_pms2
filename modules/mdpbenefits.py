@@ -13,6 +13,8 @@ class Benefit:
     self.db = db
     return 
   
+  
+  
   #this method maps member to benefit
   def map_member_benefit(self,avars):
     logger.loggerpms2.info("Enter map_member_benefits " + json.dumps(avars))
@@ -57,50 +59,70 @@ class Benefit:
   def get_benefits(self,avars):
     logger.loggerpms2.info("Enter get_benefits " + json.dumps(avars))
     db = self.db
-    benefit_obj = {}
-    auth = current.auth    
+    rspobj = {}
+    
     try:
-      
+
       policy = common.getkeyvalue(avars,"plan","")
-      providerid = int(common.getkeyvalue(avars,"providerid","0"))
-      prov = db((db.provider.id == providerid) & (db.provider.is_active == True)).select()
+      providerid = int(common.getid(common.getkeyvalue(avars,"providerid","0")))
+      prov = db((db.provider.id == providerid) & (db.provider.is_active == True)).select(db.provider.city)
+      logger.loggerpms2.info("Enter get_benefits 1" + str(providerid))
+      
+      #region regiond code      
       city = prov[0].city if(len(prov) != 0) else "Jaipur"
       regionid = common.getregionidfromcity(db,city)
       regioncode =  common.getregioncodefromcity(db,city)         
+      logger.loggerpms2.info("Enter get_benefits 2" + str(regionid) + " " +regioncode)
      
+      #get company code
       memberid = int(common.getkeyvalue(avars,"memberid","0"))
-      members = db((db.patientmember.id == memberid) & (db.patientmember.is_active == True)).select(db.patientmember.company)
-      
-      companyid = common.getid(members[0].company) if (len(members) == 1) else "0"
+      members = db((db.patientmember.id == memberid) & (db.patientmember.is_active == True)).select(db.patientmember.company,db.patientmember.hmoplan)
+
+      companyid = int(common.getid(members[0].company) if (len(members) == 1) else "0")
       c = db((db.company.id == companyid) & (db.company.is_active == True)).select(db.company.company)
       companycode = c[0].company if (len(c) ==1) else ""
+      logger.loggerpms2.info("Enter get_benefits 3" + str(companyid) + " " +companycode)
       
-     
-       
-
+      #get hmoplan code
+      hmoplanid = int(common.getid(members[0].hmoplan) if (len(members) == 1) else "0")  #members hmoplan assigned
+      h = db((db.hmoplan.id == hmoplanid) & (db.hmoplan.is_active == True)).select()    
+      hmoplancode = h[0].hmoplancode if(len(h) == 1) else "PREMWALKIN"
+      logger.loggerpms2.info("Enter get_benefits 4" + str(hmoplanid) + " " +hmoplancode)
+      
+      #get policy from provider-region-plan corr to companycode, regioncode and hmoplancode
       prp = db((db.provider_region_plan.companycode == companycode) &\
-               (db.provider_region_plan.regioncode == regioncode) &\
-               (db.provider_region_plan.policy == policy) &\
-               (db.provider_region_plan.is_active == True)).select()
-    
-    
-      plancode = prp[0].plancode if(len(prp) != 0) else "PREMWALKIN"
-      h = db((db.hmoplan.hmoplancode == plancode) & (db.hmoplan.is_active == True)).select()
-      planid = h[0].id if (len(h) != 0) else "1"
-
-     
+                     (db.provider_region_plan.regioncode == regioncode) &\
+                     (db.provider_region_plan.plancode == hmoplancode) &\
+                     (db.provider_region_plan.is_active == True)).select() 
+      
+      
+      policy = prp[0].policy if(len(prp) == 1) else "PREMWALKIN"  #get policy corr.
+      
+ 
       
       if(policy == "RPIP599"):
+        avars["plan"] = policy
         rspobj = json.loads(self.RPIP599(avars))
       else:
+        mssg = "Get Benefits:Invalid benefit Policy"
         rspobj = {}
         rspobj["result"] = "success"
-        rspobj["error_message"] = ""
-        rspobj["redeen_code"] = "BNFT_INVALID"
+        rspobj["error_message"] = mssg
+        rspobj["redeem_code"] = "BNFT_INVALID"
         rspobj["redeem_value"] = 0
         rspobj["redeem_date"] = common.getstringfromdate(datetime.date.today(), "%d/%m/%Y")
         rspobj["redeem_message"] = common.getmessage(db,"BNFT_INVALID")
-                             
+        rspobj["memberid"] = str(0)
+        rspobj["plan"] = policy
+     
+        rspobj["total_redeemed_benefits"] = 0
+        rspobj["benefit_code"] = ""
+        rspobj["benefit_name"] = ""
+        rspobj["benefit_value"] = str(0)
+        rspobj["discount_amount"] = str(0)
+   
+        
+      
     except Exception as e:
       mssg = "Get Bnefits  Exception:\n" + str(e)
       logger.loggerpms2.info(mssg)      
@@ -109,7 +131,7 @@ class Benefit:
       excpobj["error_message"] = mssg
       return json.dumps(excpobj)     
     
-    logger.loggerpms2.info("Exit get_benefits " + json.dumps(avars))
+    logger.loggerpms2.info("Exit get_benefits " + json.dumps(rspobj))
     
     return json.dumps(rspobj)
   
@@ -302,7 +324,8 @@ class Benefit:
     benefit_obj = {}
     auth = current.auth
     
-    policy = common.getkeyvalue(avars,"plan","")
+    policy = common.getkeyvalue(avars,"plan","")   #this is the plan passed from get_benefits
+    logger.loggerpms2.info("Enter RPIP599 1==>>" + policy)
       
     ##return rspobj
     #benefit_obj = {}
@@ -333,6 +356,7 @@ class Benefit:
       companyid = common.getid(members[0].company) if (len(members) == 1) else "0"
       c = db((db.company.id == companyid) & (db.company.is_active == True)).select(db.company.company)
       companycode = c[0].company if (len(c) ==1) else ""
+      logger.loggerpms2.info("Enter RPIP599 2==>>" + str(len(members)) + " " + str(companyid) + " " + companycode)
       
       
       #get benefit_master
@@ -347,22 +371,20 @@ class Benefit:
              (db.benefit_master.is_valid == True) & (db.benefit_master.is_active == True)).select(db.benefit_master.ALL,\
                                                                                                   left=db.benefit_master.on(db.benefit_master.id == db.benefit_master_x_member.benefit_master_id))
       bmid = bms[0].id if(len(bms)==1) else 0
+      logger.loggerpms2.info("Enter RPIP599 3==>>" + str(len(bms)))
       
     
 
-        #select benefit_master_slabs.* from benefit_master_x_slabs
-        #left join benefit_master_slabs  on benefit_master_slabs.id = benefit_master_x_slabs.benefit_master_slabs_id
-        #where benefit_master_x_slabs.benefit_master_id = 1 and benefit_master_x_slabs.benefit_master_code = 'RPIP599'
+      #select benefit_master_slabs.* from benefit_master_x_slabs
+      #left join benefit_master_slabs  on benefit_master_slabs.id = benefit_master_x_slabs.benefit_master_slabs_id
+      #where benefit_master_x_slabs.benefit_master_id = 1 and benefit_master_x_slabs.benefit_master_code = 'RPIP599'
       slbs = db((db.benefit_master_x_slabs.benefit_master_id == bmid)&(db.benefit_master_x_slabs.benefit_master_code==policy)).\
         select(db.benefit_master_slabs.ALL,left=db.benefit_master_slabs.on(db.benefit_master_slabs.id == db.benefit_master_x_slabs.benefit_master_slabs_id))
       
-      #xslbs = db((db.benefit_master_x_slabs.benefit_master_id == bmid)).select()
-      #slbid = xslbs[0].benefit_master_slabs_id if (len(xslbs)==0) else 0
-      #slbs = db(db.benefit_master_slab.id == slbid).select()
       
       #benefit start date & benefit end date
-      benefit_start_date = bms[0].benefit_start_date
-      benefit_end_date = bms[0].benefit_end_date
+      benefit_start_date = bms[0].benefit_start_date if(len(bms)==1) else common.getISTCurrentLocatTime()
+      benefit_end_date = bms[0].benefit_end_date if(len(bms)==1) else common.getISTCurrentLocatTime()
       
       #benefit value of the Plan 
       benefit_value = common.getvalue(bms[0].benefit_value if (len(bms) == 1) else 0)
@@ -442,7 +464,6 @@ class Benefit:
       #update benefit_member table on successful payment 
       #if(benefit_amount > 0):
         #benefit_member_id = db.benefit_member.insert(\
-          
           #member_id = memberid,
           #plan_id = planid,
           #plan_code = policy,
@@ -456,9 +477,6 @@ class Benefit:
           #created_by = 1 if(auth.user == None) else auth.user.id,
           #modified_on = common.getISTFormatCurrentLocatTime(),
           #modified_by =  1 if(auth.user == None) else auth.user.id    
-          
-      
-      
       #)
       
       
@@ -469,8 +487,8 @@ class Benefit:
       benefit_obj["error_message"] = ""
       benefit_obj["memberid"] = memberid
       benefit_obj["plan"] = policy
-      benefit_obj["plan"] = policy
-      benefit_obj["total_redeemed_benefits"] = str(benefit_amount + total_redeemed_benefits)
+   
+      benefit_obj["total_redeemed_benefits"] = str(benefit_amount + total_redeemed_benefits)   #this should only be updated by the benefit amount on payment success
       benefit_obj["benefit_code"] = (bms[0].benefit_code if (len(bms) == 1) else "")
       benefit_obj["benefit_name"] = (bms[0].benefit_name if (len(bms) == 1) else "")
       benefit_obj["benefit_value"] = str(benefit_value)
@@ -481,7 +499,7 @@ class Benefit:
       benefit_obj["discount_date"] = common.getstringfromdate(datetime.date.today(), "%d/%m/%Y")
       benefit_obj["discount_message"] = common.getmessage(db,"BNFT_OK")
                 
-      
+       
       
       
       

@@ -44,6 +44,9 @@ def getregionidfromcity(db,city):
         
 def convert24to12clock(timestr):
 
+        if((timestr.upper().find("AM") == -1)|(timestr.upper().find("PM") == -1)):
+                return timestr
+        
         d = datetime.datetime.strptime(timestr,"%H:%M")
 
         e = d.strftime("%I:%M %p")

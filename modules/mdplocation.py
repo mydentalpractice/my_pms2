@@ -278,7 +278,7 @@ class Location:
           if((common.isfloat(common.getvalue(cln.vw_clinic.latitude)) == False) | (common.isfloat(common.getvalue(cln.vw_clinic.longitude)) == False)):
             continue
         
-          logger.loggerpms2.info("Long/Lat :" + cln.vw_clinic.name + ":" + str(cln.vw_clinic.longitude) + ":" + str(cln.vw_clinic.latitude))
+          
           destlat = float(common.getid(cln.vw_clinic.latitude))
           destlong = float(common.getid(cln.vw_clinic.longitude))
           
@@ -288,6 +288,7 @@ class Location:
           
           #if provider distance is within radius, then add to the list
           if(dist <= radius):
+            logger.loggerpms2.info("Radius="+ str(radius) + "-Long/Lat:" + cln.vw_clinic.name + ":" + str(cln.vw_clinic.longitude) + ":" + str(cln.vw_clinic.latitude))
             clnobj={
             
               "providerid":int(common.getid(cln.provider.id)),

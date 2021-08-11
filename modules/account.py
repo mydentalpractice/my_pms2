@@ -814,3 +814,114 @@ def updatetreatmentcostandcopay(db,user,treatmentid):
     
     
     return dict()
+
+def _calculatepayments(db,tplanid,policy=None):
+  
+ 
+    treatmentcost = 0
+    copay = 0
+    inspays = 0
+    companypays = 0
+    precopay = 0
+
+    totaltreatmentcost = 0
+    totalcopay = 0
+    totalprecopay = 0
+    totalinspays = 0
+    totaldue = 0
+    totalpaid = 0
+    totalcompanypays = 0
+
+    r = None
+    tplan = db(db.treatmentplan.id == tplanid).select()
+    if(len(tplan) > 0):
+        treatmentcost = float(common.getvalue(tplan[0].totaltreatmentcost))
+        companypays = float(common.getvalue(tplan[0].totalcompanypays))
+        precopay =float(common.getvalue(tplan[0].totalcopay))
+        copay = float(common.getvalue(tplan[0].totalcopay)) - companypays
+        inspays = float(common.getvalue(tplan[0].totalinspays))
+        memberid = int(common.getid(tplan[0].primarypatient))
+
+        r = db((db.vw_treatmentplansummarybytreatment.id == tplanid)).select()
+        if(len(r)>0):
+            totaltreatmentcost = float(common.getvalue(r[0].totalcost))
+            totalinspays = float(common.getvalue(r[0].totalinspays))
+            totalcompanypays = float(common.getvalue(r[0].totalcompanypays))
+            totalprecopay = float(common.getvalue(r[0].totalcopay))
+            totalcopay = float(common.getvalue(r[0].totalcopay)) - totalcompanypays
+            totalpaid = float(common.getvalue(r[0].totalpaid))
+            totaldue = totalcopay - totalpaid
+
+            respobj = {}
+            respobj["totaltreatmentcost"]=totaltreatmentcost
+            respobj["totalinspays"]=totalinspays
+            respobj["totalcompanypays"]=totalcompanypays
+            respobj["totalprecopay"]=totalprecopay
+            respobj["totalcopay"]=totalcopay
+            respobj["totalpaid"]=totalpaid
+            respobj["totaldue"]=totaldue
+
+            respobj["treatmentcost"]=treatmentcost
+            respobj["copay"]=copay
+            respobj["precopay"]=precopay
+            respobj["inspays"]=inspays
+            respobj["companypays"]=companypays
+
+            respobj["result"] = "success"
+            respobj["error_message"] = ""
+
+        else:
+            msg = "_calculatepayments error for " + str(tplanid)
+            respobj["result"] = "fail"
+            respobj["error_message"] = msg
+
+
+
+    return json.dumps(respobj)
+
+def _updatetreatmentpayment(db,tplanid,paymentid,policy="PREMWALKIN"):
+    logger.loggerpms2.info("Enter Update Treatment Payment " + str(tplanid) + " " + str(paymentid))
+    
+    user = None
+    
+    tp = db((db.treatment.treatmentplan == tplanid) & (db.treatment.is_active == True)).select(db.treatment.id)
+    treatmentid = int(common.getid(tp[0].id))  if(len(tp) == 1) else 0
+    
+    paytm = json.loads(_calculatepayments(db, tplanid,policy))
+    logger.loggerpms2.info("Paytm Update Treatment Payment " + json.dumps(paytm))
+    
+    totalactualtreatmentcost = 0   #UCR Cost
+    totaltreatmentcost = 0  #Cost charged to the client which is equal to UCR fee by default
+    totalcopay = 0
+    totalinspays = 0
+    totalcompanypays = 0
+   
+    #update Treatment   
+    rows = db((db.vw_treatmentprocedure.treatmentid == treatmentid) & (db.vw_treatmentprocedure.is_active == True)).select()
+    for r in rows:
+        totalactualtreatmentcost = totalactualtreatmentcost + float(common.getvalue(r.ucrfee))
+        totaltreatmentcost = totaltreatmentcost + float(common.getvalue(r.procedurefee))
+        totalcopay = totalcopay + float(common.getvalue(r.copay))
+        totalinspays = totalinspays + float(common.getvalue(r.inspays)) 
+        totalcompanypays = totalcompanypays + float(common.getvalue(r.companypays))     
+       
+    
+    db(db.treatment.id == treatmentid).update(actualtreatmentcost = totalactualtreatmentcost, treatmentcost=totaltreatmentcost, \
+                                              copay=totalcopay, inspay=totalinspays, companypay= totalcompanypays,
+                                              modified_on = datetime.datetime.today(),modified_by = 1 if(user == None) else user.id)    
+    
+    
+    
+    db(db.treatmentplan.id == tplanid).update(
+        totaltreatmentcost =paytm["totaltreatmentcost"],
+        totalcopay = paytm["totalcopay"],
+        totalinspays = paytm["totalinspays"],
+        totalpaid = paytm["totalpaid"],
+        totaldue = paytm["totaldue"],
+        totalcompanypays = paytm["totalcompanypays"],
+        modified_on = common.getISTCurrentLocatTime(),modified_by = 1 if(user == None) else user.id
+    
+    
+    )
+    logger.loggerpms2.info("Exit Update Treamtnet Payment")
+    return json.dumps({"result":"success"})

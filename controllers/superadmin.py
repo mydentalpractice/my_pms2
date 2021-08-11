@@ -2,6 +2,7 @@
 # this file is released under public domain and you can use without limitations
 from gluon import current
 db = current.globalenv['db']
+from gluon.tools import Mail
 
 from gluon.tools import Crud
 crud = Crud(db)
@@ -17,6 +18,7 @@ import datetime
 import time
 import calendar
 from datetime import timedelta
+
 
 #import sys
 #sys.path.append('my_pms2/modules')
@@ -39,6 +41,7 @@ from applications.my_pms2.modules import logger
 datefmt = "%d/%m/%Y"
 datetimefmt = "%d/%m/%Y %H:%M:%S"
 
+_mail = None
 
 
 def testgroupsms():
@@ -69,12 +72,16 @@ def smsservice():
                message = "Re-Enter Loop"  + " " + (common.getISTFormatCurrentLocatTime()).strftime(datetimefmt)
                logger.loggerpms2.info(message)
                obj = {"appPath":request.folder}
+               
                o = mdpappointment.Appointment(db, 1)
                r = o.sendAllAppointmentsSMSEmail(obj)
                #r = o.groupsms(request.folder)
                jsonr = json.loads(r)
                if(jsonr["result"] == "fail"):
                     message = message + " " + jsonr["error_message"]
+          
+          
+               
      except Exception as e:
           message = "SMSService : Exception error - " + str(e)
           logger.loggerpms2.info(message)
@@ -90,7 +97,8 @@ def smsservice():
 def activitytracker():
 
 
-
+   
+    
     strdt  = request.vars.activitydate if((request.vars.activitydate != None)&(request.vars.activitydate != "")) else (datetime.date.today()).strftime("%d/%m/%Y")
     groupapptsms = request.vars.groupapptsms if((request.vars.groupapptsms != None)&(request.vars.groupapptsms != ""))  else True
     
@@ -731,6 +739,7 @@ def impersonate():
 @auth.requires(auth.has_membership('provider') or auth.has_membership('webadmin')) 
 @auth.requires_login()    
 def superadmin():
+    
     provdict = common.getprovider(auth, db)
     providerid = int(common.getstring(provdict["providerid"]))
     providername = common.getstring(provdict["providername"])
