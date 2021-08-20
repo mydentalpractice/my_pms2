@@ -900,7 +900,7 @@ def payment_success():
                 )
 
 def payment_success_hdfc():
-    logger.loggerpms2.info(request.vars)
+    logger.loggerpms2.info("Enter HDFC Payment Success " + request.vars)
     
     
     dttodaydate = common.getISTFormatCurrentLocatTime()
@@ -1087,8 +1087,8 @@ def payment_success_hdfc():
             "treatmentid":str(treatmentid)
         }
         bnftobj = mdpbenefits.Benefit(db)
-        rspObj = bnftobj.benefit_success(obj)
-        if(benefit['result'] == "success"):
+        rspObj = json.loads(bnftobj.benefit_success(obj))
+        if(rspObj['result'] == "success"):
             
             #update totalcompanypays (we are saving discount_amount as companypays )
             db(db.treatment.id == treatmentid).update(companypay = discount_amount)    

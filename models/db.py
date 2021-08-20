@@ -251,7 +251,8 @@ db.mdpmessages._plural   = "mdpmessages"
 
 
 db.define_table('cities',
-                Field('city','string')
+                Field('city','string'),
+                Field('regioncode','string')
                 )
 db.cities._singular = "cities"
 db.cities._plural   = "cities"

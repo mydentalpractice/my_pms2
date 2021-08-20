@@ -399,16 +399,16 @@ class Payment:
                 db.vw_payments.totalcopaypaid,\
                 db.vw_payments.totalinspaid,\
                 db.vw_payments.totalcompanypays,
-                db.vw_payments.totaldue,
+                db.vw_payments.totaldue
         
             )
             
             payobj = {}
     
             paymentlist = []
-            
+            logger.loggerpms2.info("getpayme for payments loop " + str(len(payments)))
             for payment in payments:
-                
+                payobj = {}
                 payobj = {
                     "memberid":payment.memberid,
                     "patientid":payment.patientid,
@@ -835,6 +835,8 @@ class Payment:
             paymentref = common.getstring(jsonConfirmPayment['payment_reference']) if('payment_reference' in jsonConfirmPayment) else ""   #yes 
             paymenttype = common.getstring(jsonConfirmPayment['payment_type']) if('payment_type' in jsonConfirmPayment) else ""            #yes
             paymentdetail = common.getstring(jsonConfirmPayment['payment_detail']) if('payment_detail' in jsonConfirmPayment) else ""      #yes
+            
+            
             cardtype = common.getstring(jsonConfirmPayment['card_type']) if('card_type' in jsonConfirmPayment) else paymenttype            #?
             merchantid = common.getstring(jsonConfirmPayment['merchant_id']) if('merchant_id' in jsonConfirmPayment) else ""               #yes
             merchantdisplay = common.getstring(jsonConfirmPayment['merchant_display']) if('merchant_display' in jsonConfirmPayment) else "" #yes
@@ -888,13 +890,13 @@ class Payment:
                 description = common.getstring(r[0].description)
                 chiefcomplaint = common.getstring(r[0].chiefcomplaint)
                 otherinfo = chiefcomplaint
-                    
+                   
             db(db.payment.id == paymentid).update(\
             
                 fp_paymentref = paymentref,
                 fp_paymentdate = datetime.datetime.strptime(paymentdate,"%d/%m/%Y"),
                 fp_paymenttype = paymenttype,
-                paymentmode = paymentdetail,
+                #paymentmode = paymentdetail,
                 fp_paymentdetail = paymentdetail,
                 fp_cardtype = cardtype,
                 fp_merchantid = merchantid,

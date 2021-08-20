@@ -10,7 +10,9 @@ import hashlib
 import uuid
 import hmac
 import random
-
+import binascii
+import requests
+import base64
 
 
 from applications.my_pms2.modules import common
@@ -63,6 +65,42 @@ class DataSecurity:
     def __init__(self):
         return 
 
+
+    def pinelabs_encrypt(self, key, message):
+        
+        logger.loggerpms2.info("Enter Pinelabs Encrypt " + message) 
+        rspobj = {}
+
+        try:
+            
+            
+            #base64 encoding
+            message = message.encode()
+            message = base64.encodestring(message)
+            message = message.decode()            
+        
+            byte_key = binascii.unhexlify(key)
+            message = message.encode()
+            encryptmessage = hmac.new(byte_key, message, hashlib.sha256).hexdigest().upper()        
+            
+            rspobj["encrypt"] = encryptmessage
+            rspobj["result"] = "success"
+            rspobj["error_code"] = ""
+            rspobj["error_message"] = mssg
+        
+        except Exception as e:
+            mssg = "Pine Labs Encryption Exception:\n" + str(e)
+            logger.loggerpms2.info(mssg)      
+            excpobj = {}
+            excpobj["result"] = "fail"
+            excpobj["error_code"] = "MDP100"
+            excpobj["error_message"] = mssg
+            return json.dumps(excpobj)     
+
+        logger.loggerpms2.info("Exit Pine Labs Encryption " + json.dumps(rspobj))      
+    
+        return(json.dumps(rspobj))
+    
     def encrypt_sha256_shopse(self,message,key):
         
         bkey = bytes(key)

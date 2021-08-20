@@ -81,7 +81,7 @@ class Benefit:
       companyid = int(common.getid(members[0].company) if (len(members) == 1) else "0")
       c = db((db.company.id == companyid) & (db.company.is_active == True)).select(db.company.company)
       companycode = c[0].company if (len(c) ==1) else ""
-      logger.loggerpms2.info("Enter get_benefits 3" + str(companyid) + " " +companycode)
+      logger.loggerpms2.info("Enter get_benefits 3" + str(companyid) + " " + companycode + " " + str(len(c)))
       
       #get hmoplan code
       hmoplanid = int(common.getid(members[0].hmoplan) if (len(members) == 1) else "0")  #members hmoplan assigned
@@ -112,7 +112,7 @@ class Benefit:
         rspobj["redeem_value"] = 0
         rspobj["redeem_date"] = common.getstringfromdate(datetime.date.today(), "%d/%m/%Y")
         rspobj["redeem_message"] = common.getmessage(db,"BNFT_INVALID")
-        rspobj["memberid"] = str(0)
+        rspobj["memberid"] = str(memberid)
         rspobj["plan"] = policy
      
         rspobj["total_redeemed_benefits"] = 0

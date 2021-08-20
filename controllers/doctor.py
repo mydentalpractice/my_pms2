@@ -541,6 +541,20 @@ def update_doctor():
     return dict(formA=formA, returnurl=returnurl,page=page,providerid=providerid,providername=providername)
 
 
+
+def refer_doctor_provider():
+    
+    docs = db((db.doctor.is_active == True) & (db.doctor.stafftype == 'Doctor')).select()
+    
+    for doc in docs:
+	providerid = doc.providerid
+	r = db((db.doctor_ref.ref_code == "PRV") & (db.doctor_ref.ref_id == providerid) & (db.doctor_ref.doctor_id == doc.id)).select()
+	if(len(r)==0):
+	    db.doctor_ref.insert(ref_code = 'PRV',ref_id = providerid, doctor_id = doc.id)
+    
+    return dict()
+
+    
 @auth.requires(auth.has_membership('provider') or auth.has_membership('webadmin')) 
 @auth.requires_login()
 def list_doctors():

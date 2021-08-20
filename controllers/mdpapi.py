@@ -43,6 +43,7 @@ from applications.my_pms2.modules import mdpprospect
 from applications.my_pms2.modules import mdpagent
 from applications.my_pms2.modules import mdpconsentform
 from applications.my_pms2.modules import mdpshopse
+from applications.my_pms2.modules import mdppinelabs
 from applications.my_pms2.modules import mdpbenefits
 
 from applications.my_pms2.modules import logger
@@ -384,13 +385,19 @@ def addRlgProcedureToTreatment399(avars):
 
 ######################################################## Religare  APIS  ##################################
 def encrypt(avars):
+    logger.loggerpms2.info("Enter Encrypt API " + json.dumps(avars))
     orlgr = mdpreligare.Religare(current.globalenv['db'],int(common.getid(avars["providerid"])))
+    logger.loggerpms2.info("Enter Encrypt API2 " + json.dumps(avars))
     rsp = orlgr.encrypt(avars["raw"])
+    logger.loggerpms2.info("Exit Encrypt API ")
+    
     return rsp    
 
 def decrypts(avars):
+    logger.loggerpms2.info("Enter Decrypt API " + json.dumps(avars))
     orlgr = mdpreligare.Religare(current.globalenv['db'],0)
     rsp = orlgr.decrypts(avars["encrypt"])
+    logger.loggerpms2.info("Exit Decrypt API ")
     return rsp 
 
     
@@ -1374,10 +1381,12 @@ def listpayments(avars):
 #Ouput: paymentcount, paymentsummary:{treatmentcost,copay,inspays,totaltreatmentcost,totalinspays,totalcopay,totaldue}, {memberid,patientid,patientname,paymentdate,treatmentid,treatmentdate,treatment,procedures,
 #totaltreatmentcost,totalinspays,totalcopay,totalpaid,totaldue}
 def getpayment(avars):
-    
+    logger.loggerpms2.info("Enter Get Payment API "  + json.dumps(avars ))
     opaymnt = mdppayment.Payment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
     rsp = opaymnt.getpayment(int(common.getid(str(avars["paymentid"]))))
+    logger.loggerpms2.info("Exit Get Payment API ")
     return rsp
+
 
 def paymentcallback(avars):
     opaymnt = mdppayment.Payment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
@@ -3121,8 +3130,21 @@ def consentforms(avars):
 
 ############################# END CF API  ###################################################
 
+
+############################# START PineLabs API  ###################################################
+def pinelabs_encrypt(avars):
+    logger.loggerpms2.info("Enter Pine Labs Encrypt\n" + str(avars) )
+    obj = mdppinelabs.PineLabs(current.globalenv['db'])
+    rsp = obj.pinelabs_encrypt(avars)
+    return rsp
+############################# END CF API  ###################################################
 def unknown(avars):
     return dict()
+
+
+pinelabsAPI_switcher = {
+    "pinelabs_encrypt":pinelabs_encrypt
+}
 
 
 customerAPI_switcher = {
@@ -3924,4 +3946,51 @@ def customerAPI():
 	return dict()
 
     return locals()
+
+@request.restful()
+def pinelabsAPI():
+    response.view = 'generic' + request.extension
+    def GET(*args, **vars):
+	return
+
+    def POST(*args, **vars):
+	i = 0
+	try:
+	    logger.loggerpms2.info(">>Enter Pine Labs API==>>")
+	    dsobj = datasecurity.DataSecurity()
+	    encryption = vars.has_key("req_data")
+	    if(encryption):
+		#logger.loggerpms2.info(">>Agent with Encryption")
+		encrypt_req = vars["req_data"]
+		vars = json.loads(dsobj.decrypts(encrypt_req))
+	    
+	    #decrypted request date
+	    if(vars.has_key("action") == True):
+		action = str(vars["action"])
+	    else:
+		action = "benefits"
+		
+	    logger.loggerpms2.info(">>Pine Labs ACTION==>>" + action)
+	    
+	    #return json.dumps({"action":action})
+	    rsp = pinelabsAPI_switcher.get(action,unknown)(vars)
+	    common.setcookies(response)
+	    if(encryption):
+		return json.dumps({"resp_data":dsobj.encrypts(rsp)})
+	    else:
+		return rsp
+	    
+	except Exception as e:
+	    mssg = "Pine Labs API Exception Error =>>\n" + str(e)
+	    #logger.loggerpms2.info(mssg)
+	    raise HTTP(500)   
+
+    def PUT(*args, **vars):
+	return dict()
+
+    def DELETE(*args, **vars):
+	return dict()
+
+    return locals()
+
     

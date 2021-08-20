@@ -163,7 +163,7 @@ class Patient:
     return json.dumps(rgnlist)
   
   def getMedicalHistory(self,memberid,patientid):
-  
+    
     db = self.db
     providerid = self.providerid    
     medhistobj = {}
@@ -215,7 +215,7 @@ class Patient:
           medhistobj["gender"] = pats[0].gender
           medhistobj["memberid"] = memberid
           medhistobj["patientid"] = patientid
-          medhistobj["membername"] = pat[0].fullame
+          medhistobj["membername"] = pats[0].fullname
           
           medhistobj["result"] = "success"
           medhistobj["error_message"] = ""

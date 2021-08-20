@@ -2531,7 +2531,7 @@ def update_treatment():
                 patient = common.getstring(rows[0].patient).strip()
                 membername = common.getstring(rows[0].fullname).strip()
                 hmopatientmember = rows[0].hmopatientmember
-                procedurepriceplancode = mdputils.getprocedurepriceplancodeformember(db,providerid, memberid, patientid) #IB:15-Mar-2020 rows[0].procedurepriceplancode
+                #procedurepriceplancode = mdputils.getprocedurepriceplancodeformember(db,providerid, memberid, patientid) #IB:15-Mar-2020 rows[0].procedurepriceplancode
                 newmember = common.getboolean(rows[0].newmember)          
                 freetreatment = common.getboolean(rows[0].freetreatment)                    
                 companyid = int(common.getstring(rows[0].company))
@@ -3620,8 +3620,7 @@ def new_treatment():
         newmember = common.getboolean(r[0].newmember)
         freetreatment = common.getboolean(r[0].freetreatment)
         patienttype = r[0].patienttype
-        procedurepriceplancode = mdputils.getprocedurepriceplancodeformember(db,providerid, memberid, patientid) #IB:15-Mar-2020 r[0].procedurepriceplancode
-
+        
     #treatment, tplan details
     treatmentid = int(common.getid(request.vars.treatmentid))
     tplanid     = int(common.getid(request.vars.tplanid))
@@ -3884,7 +3883,7 @@ def update_procedure():
 
 def add_proceduregrid():
     #x  = datetime.datetime.now()
-    #logger.loggerpms2.info("===================Enter Add_procedure=======================================")
+    logger.loggerpms2.info("===================Enter Add_procedure=======================================")
     
     #check whether webadmin login
     impersonated = auth.user.impersonated

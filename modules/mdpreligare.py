@@ -590,7 +590,7 @@ class Religare:
     #phpurl = "http://localhost/decrypt.php"
     
     rlgrobj = {"encrypt":encrypt}
-    
+    logger.loggerpms2.info("Decrypt " + phpurl + " " + json.dumps(rlgrobj))
     resp = requests.post(phpurl,json=rlgrobj)
     
     jsonresp = {}
@@ -599,6 +599,10 @@ class Religare:
           jsonresp = {
             "raw": respobj["raw"]
           }
+    else:
+	jsonresp = {"result":"fail", "error_code":resp.status_code}
+       
+    logger.loggerpms2.info("Exit Decrypt " + json.dumps(jsonresp)) 	  
     return json.dumps(jsonresp)  
 
   def encrypt_login(self,action,providerid,username,password):
@@ -639,7 +643,7 @@ class Religare:
     rlgrobj = {"raw":raw}
     
     resp = requests.post(phpurl,json=rlgrobj)
-    
+    logger.loggerpms2.info("Encrypt " + phpurl + " " + json.dumps(rlgrobj))
     jsonresp = {}
     if((resp.status_code == 200)|(resp.status_code == 201)|(resp.status_code == 202)|(resp.status_code == 203)):
           respobj = resp.json()    
@@ -647,6 +651,10 @@ class Religare:
             "encrypt": respobj["encrypt"]
            
           }
+    else:
+      jsonresp = {"result":"fail", "error_code":resp.status_code}
+    
+    logger.loggerpms2.info("Exit Encrypt " + json.dumps(jsonresp)) 
     return json.dumps(jsonresp)
   
   #this api will call Religare API 1 - 

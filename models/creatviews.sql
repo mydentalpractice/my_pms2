@@ -8772,6 +8772,35 @@ ADD COLUMN `precommitamount` DOUBLE NULL DEFAULT 0 AFTER `policy`;
 
 8. XXXXZZZ modify vw_payments,  changes totaldue to subtract totalcompanypays
 
+
+18/08/2021
+===========
+1.  ZZZAdded  regioncode fields in CITIES table
+
+2. Added 4 regions RG101, RG102, RG 103, RG104 in GroupRegion table
+
+
+19/08/2021
+==========
+1. Added tables for Home Visit Doctor ^ Customer
+
+2. Added table pinelabs for pinelans fields
+CREATE TABLE `mydp_prod`.`pinelabs` (
+  `id` INT(11) NOT NULL AUTO_INCREMENT,
+  `pl_url` VARCHAR(512) NULL DEFAULT 'https://uat.pinepg.in/api/v2/accept/payment',
+  `pl_uat` VARCHAR(512) NULL DEFAULT 'https://uat.pinepg.in/api/v2/accept/payment',
+  `pl_prod` VARCHAR(512) NULL DEFAULT 'https://pinepg.in/api/v2/accept/payment',
+  `pl_mid` VARCHAR(45) NULL DEFAULT '106598',
+  `pl_key` VARCHAR(45) NULL DEFAULT '55E0F73224EC458A8EC0B68F7B47ACAE',
+  `pl_ac` VARCHAR(45) NULL DEFAULT '4a39a6d4-46b7-474d-929d-21bf0e9ed607',
+  `pl_card` VARCHAR(45) NULL DEFAULT '4012001037141112',
+  `pl_name` VARCHAR(45) NULL DEFAULT 'HDFC TEST',
+  `pl_expiry` VARCHAR(45) NULL DEFAULT '11/23',
+  `pl_cvv` VARCHAR(45) NULL DEFAULT '123',
+  PRIMARY KEY (`id`));
+ALTER TABLE `mydp_prod`.`pinelabs` 
+ADD COLUMN `pl_callback` VARCHAR(1024) NULL AFTER `pl_cvv`;
+
 Script file to clear user for sign-up
 =====================================
 

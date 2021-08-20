@@ -205,6 +205,8 @@ class Razorpay:
         strdetailobj = json.dumps(newpayment["addln_info"])
         payobj = {}
         
+       
+	                                          
         payobj["payment_reference"] = razorpay_id + "_" + razorpay_order_id
         payobj["amount"] = amount
         payobj["addln_detail"] = strdetailobj
@@ -212,7 +214,7 @@ class Razorpay:
         payobj["merchant_display"] = newpayment["merchant_display"]
         payobj["invoice"] = newpayment["invoice"]
         payobj["payment_detail"] =  respobj.get("card_id","") 
-        
+       
         if(respobj.get("card",None) == None):
           payobj["payment_type"] = "Non Card"
         else:

@@ -301,7 +301,7 @@ class Procedure:
                                       tooth, quadrant,remarks):
 
 
-        logger.loggerpms2.info(">>Add Company Procedure to Treatment\n")
+        logger.loggerpms2.info(">>Add Company Procedure to Treatment\n " + str(treatmentid) + " " + procedurepriceplancode + " " + procedurecode)
 
         db = self.db
         providerid = self.providerid
@@ -380,8 +380,9 @@ class Procedure:
                 "error_code":"MDP100",
             }
 
-
-        return json.dumps(jsonresp)      
+        rsp = json.dumps(jsonresp)
+        logger.loggerpms2.info("Exit Add Company Procedure To Treatment " + rsp)
+        return rsp      
     
     
     
@@ -457,6 +458,8 @@ class Procedure:
         return json.dumps(retobj)    
     
     def getprocedure(self, avars):
+        
+        logger.loggerpms2.info("Enter getprocedure " + json.dumps(avars))
         db = self.db
         providerid = self.providerid
         
@@ -473,13 +476,15 @@ class Procedure:
         rspobj["procedurecode"] = "" if  (len(procs) == 0) else procs[0].dentalprocedure
         rspobj["procedurename"] = "" if (len(procs) == 0) else procs[0].shortdescription
         
-        
-        return json.dumps(rspobj)
+        rsp = json.dumps(rspobj)
+        logger.loggerpms2.info("Exit Get Procedure " + rsp)
+        return rsp
     
     #returns a list of dental procedures matching the searchphrase for a specific plan
     #search phrase can be 'procedure code', 'keywords', 'short description'
     def getprocedures(self,treatmentid, searchphrase, page=0, maxcount=0):
         
+        logger.loggerpms2.info("Enter getprocedures API " + str(treatmentid) + " " + searchphrase)
         db = self.db
         providerid = self.providerid
         
@@ -529,7 +534,8 @@ class Procedure:
             if(maxcount == 0):
                 maxcount = db(query).count()            
 
-            
+        
+        
         proclist = []
         procobj = {}        
         
@@ -560,8 +566,10 @@ class Procedure:
             bnext = False
             bprev = True  
         
- 
-        return json.dumps({"count":len(procs), "proclist":proclist,"page":page+1,"runningcount":xcount, "maxcount":maxcount, "next":bnext, "prev":bprev})
+        obj1= {"count":len(procs), "proclist":proclist,"page":page+1,"runningcount":xcount, "maxcount":maxcount, "next":bnext, "prev":bprev}
+        rsp = json.dumps(obj1)
+        logger.loggerpms2.info("Exit 'getprocedures " + rsp)
+        return rsp
     
     #returns a list of procedures in the selected treatment
     def gettreatmentprocedures(self,treatmentid):
@@ -598,7 +606,7 @@ class Procedure:
     
     #this procedure adds a new procedure to the treatment
     def addproceduretotreatment(self, procedurecode, treatmentid, plan, tooth, quadrant,remarks):
-        
+        logger.loggerpms2.info("Enter Add Procedure To Treatment - " + str(procedurecode) + " " + str(treatmentid) + " " + plan)
         db = self.db
         providerid = self.providerid
         auth = current.auth
@@ -657,7 +665,9 @@ class Procedure:
             retobj1["error_message"] = "Add Procedure to Treatment API Exception Error " + str(e)
             json.dumps(retobj1)
     
-        return json.dumps(jsonObj)
+        rsp = json.dumps(jsonObj)
+        logger.loggerpms2.info("Exit Add Procedure To Treatment " + rsp)
+        return rsp
     
     #this procedure adds a new procedure to the treatment
     def addSPLproceduretotreatment(self, procedurecode, treatmentid, plan, tooth, quadrant,remarks):
@@ -737,9 +747,10 @@ class Procedure:
             retobj1["error_message"] = "Add Procedure to Treatment API Exception Error " + str(e)
             logger.loggerpms2.info("addSPLproceduretotreatment Exceptionerror " + json.dumps(retobj1))
             json.dumps(retobj1)
-    
-        logger.loggerpms2.info("Exit addSPLprocedureToTreatment " + json.dumps(jsonObj))
-        return json.dumps(jsonObj)
+            
+        rsp = json.dumps(jsonObj)
+        logger.loggerpms2.info("Exit addSPLprocedureToTreatment " + rsp)
+        return rsp
     
 
     #this procedure updates a treatment procedure record

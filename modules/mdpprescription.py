@@ -217,7 +217,9 @@ class Prescription:
               "error_message":"Create Prescription Exception:\n" + str(e)
             }
         
-        return json.dumps(jsonresp)
+        rsp = json.dumps(jsonresp)        
+        logger.loggerpms2.info("Exit New Prescription " + rsp)
+        return rsp
         
     def updateprescription(self,presid,presdata):
         logger.loggerpms2.info("Enter Update Prescription " + str(presid) + " " + json.dumps(presdata))
