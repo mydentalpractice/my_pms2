@@ -8784,8 +8784,8 @@ ADD COLUMN `precommitamount` DOUBLE NULL DEFAULT 0 AFTER `policy`;
 ==========
 1. Added tables for Home Visit Doctor ^ Customer
 
-2. Added table pinelabs for pinelans fields
-CREATE TABLE `mydp_prod`.`pinelabs` (
+2. Added table pinelab_properties for pinelans fields
+CREATE TABLE `mydp_prod`.`pinelab_properties` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
   `pl_url` VARCHAR(512) NULL DEFAULT 'https://uat.pinepg.in/api/v2/accept/payment',
   `pl_uat` VARCHAR(512) NULL DEFAULT 'https://uat.pinepg.in/api/v2/accept/payment',

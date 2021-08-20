@@ -28,7 +28,7 @@ class PineLabs:
     def __init__(self,db):
         self.db = db
         
-        r = db(db.pinelabs.id>0).select()
+        r = db(db.pinelab_properties.id>0).select()
     
         self.pl_url = r[0].pl_url
         self.pl_prod = r[0].pl_prod
