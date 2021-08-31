@@ -19,6 +19,16 @@ from applications.my_pms2.modules import mdputils
 datefmt = "%d/%m/%Y"
 datetimefmt = "%d/%m/%Y %H:%M:%S"
 
+
+def showSendForAuthorization(status, authorization, authorized):
+    
+    if(status.lower() == 'started'):
+        return True if((authorization == True) & (authorized == False)) else False
+    
+    return False
+    
+
+
 def serializedatetime(o):
     if isinstance(o, datetime.datetime):
         return o.__str__()    
@@ -73,6 +83,7 @@ def updatetreatmentcostandcopay(db,treatmentid,tplanid):
     db.commit()
     
     return dict(totaltreatmentcost=totaltreatmentcost, totalcopay=totalcopay,totalinspays=totalinspays,totaldue=totaldue)
+
 
 class Treatment:
     
@@ -496,6 +507,11 @@ class Treatment:
         providerid = self.providerid        
         treatmentobj = {}
         
+        
+        t = db((db.treatment.id == treatmentid) & (db.treatment.is_active == True)).select(db.treatment.provider)
+        providerid =  int(common.getid(t[0].provider)) if(len(t) == 1) else 0
+        self.providerid = providerid
+        
         query = (1==1)
         query1 = (1==1)
         query = (query & (db.vw_treatmentprocedure.providerid == providerid)) if(providerid > 0) else query
@@ -521,11 +537,12 @@ class Treatment:
                                                                            db.vw_treatmentlist.memberid,
                                                                            db.vw_treatmentlist.patientid,
                                                                            db.vw_treatmentlist.tplanid,
+                                                                           db.vw_treatmentlist.providerid,\
                                                                            db.treatment.description,\
                                                                            db.vw_memberpatientlist.procedurepriceplancode,\
                                                                            db.vw_memberpatientlist.company,\
                                                                            db.vw_memberpatientlist.cell,\
-                                                                          
+                                                                           
                                                                            left = [db.treatment.on(db.treatment.id == db.vw_treatmentlist.id),\
                                                                                    db.vw_memberpatientlist.on((db.vw_memberpatientlist.primarypatientid==db.vw_treatmentlist.memberid)&\
                                                                                                               (db.vw_memberpatientlist.patientid==db.vw_treatmentlist.patientid))
@@ -540,6 +557,7 @@ class Treatment:
             
             
             if(len(treatment) == 1):
+                
                 #logger.loggerpms2.info("Enter Get Treatment API - A")
                 c = db(db.company.id == int(common.getid(treatment[0].vw_memberpatientlist.company))).select(db.company.authorizationrequired)
                 #logger.loggerpms2.info("Enter Get Treatment API - A1 " + str(len(c)))
@@ -552,6 +570,8 @@ class Treatment:
                 patientid = int(common.getid(treatment[0].vw_treatmentlist.patientid))
                 procedurepriceplancode = mdputils.getprocedurepriceplancodeformember(db,providerid,memberid,patientid)
                 #logger.loggerpms2.info("Enter Get Treatment API - B")
+                
+               
                 
                 treatmentobj = {
                     
@@ -572,13 +592,18 @@ class Treatment:
                     "treatmentcost":float(common.getvalue(treatment[0].vw_treatmentlist.treatmentcost)),
                     "description":common.getstring(treatment[0].treatment.description),
                     "plan":  procedurepriceplancode,   #IB:15-Mar-2020 common.getstring(treatment[0].vw_memberpatientlist.procedurepriceplancode),
-                    "authorization": False if(len(c) <= 0) else (len(procs)>0 & common.getboolean(c[0].authorizationrequired)),
+                    "authorization": False if(len(c) <= 0) else ((len(procs)>0) & common.getboolean(c[0].authorizationrequired)),
                     "authorized": True if(common.getstring(treatment[0].vw_treatmentlist.status) == "Authorized") else False,
                     "totaltreatmentcost":float(common.getstring(r["totaltreatmentcost"])),
                     "totalcopay":float(common.getstring(r["totalcopay"])),
                     "totalinspays":float(common.getstring(r["totalinspays"])),
                     "totaldue":float(common.getstring(r["totaldue"])),
                     "totalpaid":float(common.getstring(r["totaltreatmentcost"])) - float(common.getstring(r["totaldue"])),
+                    "showSendForAuthorization":showSendForAuthorization(\
+                                                                        "Started" if(common.getstring(treatment[0].vw_treatmentlist.status) == "") else common.getstring(treatment[0].vw_treatmentlist.status), \
+                                                                        False if(len(c) <= 0) else ((len(procs)>0) & common.getboolean(c[0].authorizationrequired)),\
+                                                                       True if(common.getstring(treatment[0].vw_treatmentlist.status) == "Authorized") else False\
+                                                                       )
                     
                     
                 }        

@@ -251,6 +251,12 @@
 					       <!--<a href="#" class="btn green" onclick="makeOnlinePayment()" style="margin: 8px 3px;float:right">Online Payment </a>&nbsp;&nbsp;-->
 					       {{pass}}
 					       {{if(online):}}
+					       <button id="PL" style="margin: 8px 3px;float:right"  type="submit"  onclick="loader(this.id),makePineLabsPayment()" class="btn green" >PineLabs Payment <i class="fa fa-spinner fa-spin" id="loaderDIVPL" style="display:none"></i></button>
+					       <!--<a href="#" class="btn green" onclick="makeOnlinePayment()" style="margin: 8px 3px;float:right">Online Payment </a>&nbsp;&nbsp;-->
+					       {{pass}}
+					       
+					       
+					       {{if(online):}}
 					       <!--<button id="SP" style="margin: 8px 3px;float:right"  type="submit"  onclick="loader(this.id),makeShopseePayment()" class="btn green" >Shopse Payment <i class="fa fa-spinner fa-spin" id="loaderDIVSP" style="display:none"></i>-->
 					       <!--</button>-->
 					       
@@ -410,6 +416,29 @@ function makeShopseePayment(){
     x.value = 'Shopse'
     }
 }
+
+function makePineLabsPayment(){
+
+   
+    
+    var x = document.getElementById("payment_paymentmode")
+    var y = {{=totaldue}}
+    var z = document.getElementById("payment_amount").value
+    if(z > y){
+       alert("Payment Amount value(" + z + ") cannot be more than Total Due Amount()" + y + "). \r\nPlease enter Amount Value less or equal to Total Due Amount!") 
+       x.value="error"
+       document.getElementById("valerr").innerHTML = "Please wait...";
+       document.getElementById("payment_amount").value = 0.00;
+       return
+    }
+    else
+    {
+    
+    var x = document.getElementById("payment_paymentmode")
+    x.value = 'PineLabs'
+    }
+}
+
 
 function makeCashPayment(){
 <!--alert("Enter Cash Payment " + {{=totaldue}})-->

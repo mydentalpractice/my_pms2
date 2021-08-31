@@ -1091,12 +1091,15 @@ class Payment:
         
     def paymentreceipt(self, paymentid):
         
-        logger.loggerpms2.info("Enter Payment Receipt ==>" + str(paymentid))
+        
         db = self.db
         providerid = self.providerid
         paymentcallbackobj = {}
         treatmentid = 0
         totalcompanypays = 0
+        
+        logger.loggerpms2.info("Enter Payment Receipt ==>" + str(paymentid) + " " + str(providerid))
+        
         try:
             dttodaydate = common.getISTFormatCurrentLocatDate()  
             
@@ -1127,6 +1130,8 @@ class Payment:
             acctname =common.getstring(payment[0].accountname) if(len(payment) == 1) else "XXXX"
             bankname =common.getstring(payment[0].bankname) if(len(payment) == 1) else "XXXX"
             
+            logger.loggerpms2.info("Enter Payment Receipt ==>A")
+                                   
             doctortitle = ''
             doctorname = ''
             treatment = ''
@@ -1189,7 +1194,8 @@ class Payment:
             totinspays = 0    
             totaldue = 0
             totcompanypays = 0
-           
+            logger.loggerpms2.info("Enter Payment Receipt ==>B " + str(tplanid))
+            
             tp = db(db.treatmentplan.id == tplanid).select()
             
             if(len(tp)>0):
@@ -1201,27 +1207,27 @@ class Payment:
         
             trtmnt = db((db.treatment.id == treatmentid) & (db.treatment.is_active == True)).select()
             discount_amount = trtmnt[0].companypay if(len(trtmnt) > 0) else 0            
-       
+            logger.loggerpms2.info("Enter Payment Receipt ==>C " )
             paymentcallbackobj = {
                 "todaydate":common.getstringfromdate(dttodaydate, "%d/%m/%Y"),
                 "providerid":providerid,
-                "practicename":providerinfo["practicename"],
-                "providername ":providerinfo["providername"],
-                "provideregnon":providerinfo["providerregno"],
-                "practiceaddress1":providerinfo["practiceaddress1"],
-                "practiceaddress2":providerinfo["practiceaddress2"],
-                "practicephone":providerinfo["practicephone"],
-                "practiceemail":providerinfo["practiceemail"],
-                "patientname":patientinfo["patientname"],
-                "patientmember":patientinfo["patientmember"],
-                "patientemail":patientinfo["patientemail"],
-                "patientcell":patientinfo["patientcell"],
-                "patientgender":patientinfo["patientgender"],
-                "patientage":patientinfo["patientage"],
-                "patientaddress":patientinfo["patientaddress"],
-                "groupref":patientinfo["groupref"],
-                "companyname":patientinfo["companyname"],
-                "planname ":patientinfo["planname"],
+                "practicename":providerinfo["practicename"] if(providerinfo != None) else "",
+                "providername ":providerinfo["providername"] if(providerinfo != None) else "",
+                "provideregnon":providerinfo["providerregno"] if(providerinfo != None) else "",
+                "practiceaddress1":providerinfo["practiceaddress1"] if(providerinfo != None) else "",
+                "practiceaddress2":providerinfo["practiceaddress2"] if(providerinfo != None) else "",
+                "practicephone":providerinfo["practicephone"] if(providerinfo != None) else "",
+                "practiceemail":providerinfo["practiceemail"] if(providerinfo != None) else "",
+                "patientname":patientinfo["patientname"] if(providerinfo != None) else "",
+                "patientmember":patientinfo["patientmember"] if(providerinfo != None) else "",
+                "patientemail":patientinfo["patientemail"] if(patientinfo != None) else "",
+                "patientcell":patientinfo["patientcell"] if(patientinfo != None) else "",
+                "patientgender":patientinfo["patientgender"] if(patientinfo != None) else "",
+                "patientage":patientinfo["patientage"] if(patientinfo != None) else "",
+                "patientaddress":patientinfo["patientaddress"] if(patientinfo != None) else "",
+                "groupref":patientinfo["groupref"] if(patientinfo != None) else "",
+                "companyname":patientinfo["companyname"] if(patientinfo != None) else "",
+                "planname ":patientinfo["planname"] if(patientinfo != None) else "",
                 "doctorname ":doctorname,
                 "treatment":treatment,
                 "fp_paymentref": paymentref,

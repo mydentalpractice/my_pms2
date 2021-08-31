@@ -6,6 +6,7 @@ from datetime import timedelta
 
 import json
 from applications.my_pms2.modules import common
+from applications.my_pms2.modules import mdpappointment
 from applications.my_pms2.modules import logger
 
 class Doctor:
@@ -262,6 +263,18 @@ class Doctor:
         groupsms=common.getboolean(common.getkeyvalue(avars,"groupsms","True")),
         groupemail=common.getboolean(common.getkeyvalue(avars,"groupemail","True")),
         
+        hv_doc=common.getboolean(common.getkeyvalue(avars,"hv_doc","False")),
+        hv_doc_gender=common.getkeyvalue(avars,"hv_doc_gender","Male"),
+        hv_doc_dob=common.getkeyvalue(avars,"hv_doc_dob","01/01/1900"),
+        
+        hv_doc_address1=common.getkeyvalue(avars,"hv_doc_address1",""),
+        hv_doc_address2=common.getkeyvalue(avars,"hv_doc_address2",""),
+        hv_doc_address3=common.getkeyvalue(avars,"hv_doc_address3",""),
+        hv_doc_city=common.getkeyvalue(avars,"hv_doc_city",""),
+        hv_doc_st=common.getkeyvalue(avars,"hv_doc_st",""),
+        hv_doc_pin=common.getkeyvalue(avars,"hv_doc_pin",""),
+        
+        
         is_active = True,
         created_on=common.getISTFormatCurrentLocatTime(),
         modified_on=common.getISTFormatCurrentLocatTime(),
@@ -298,6 +311,379 @@ class Doctor:
       
     
     return json.dumps(rspobj)
+  
+  
+
+  def update_hv_doctor(self,avars):
+    db = self.db
+    auth  = current.auth
+    rspobj = {}
+
+    logger.loggerpms2.info("Enter update HV Doctor")
+
+    try:
+      hv_doctorid = int(common.getkeyvalue(avars,'hv_doctorid',"0"))
+      ds = db((db.hv_doctor.id == hv_doctorid) & (db.hv_doctor.is_active == True)).select()
+      if(len(ds) != 1):
+        rspobj = {
+          "hv_doctorid":str(hv_doctorid),
+          "result":"fail",
+          "error_message":"Error Updating HV Doctor",
+          "error_code":""
+        }                
+        return json.dumps(rspobj)
+
+     
+        
+      dobstr = common.getstringfromdate(ds[0].hv_doc_dob, "%d/%m/%Y")
+      db(db.hv_doctor.id == hv_doctorid).update(\
+
+        hv_doc_ID=common.getkeyvalue(avars,"hv_doc_ID",ds[0].hv_doc_ID),
+        hv_doc_fname=common.getkeyvalue(avars,"hv_doc_fname",ds[0].hv_doc_fname),
+        hv_doc_lname=common.getkeyvalue(avars,"hv_doc_lname",ds[0].hv_doc_lname),
+        hv_doc_gender=common.getkeyvalue(avars,"hv_doc_gender",ds[0].hv_doc_gender),
+        hv_doc_dob=common.getkeyvalue(avars,"hv_doc_dob",dobstr),
+        hv_doc_email=common.getkeyvalue(avars,"hv_doc_email",ds[0].hv_doc_email),
+        hv_doc_cell=common.getkeyvalue(avars,"hv_doc_cell",ds[0].hv_doc_cell),
+        hv_doc_speciality=int(common.getkeyvalue(avars,"hv_doc_speciality",str(ds[0].hv_doc_speciality))),
+        hv_doc_role=int(common.getkeyvalue(avars,"hv_doc_role",str(ds[0].hv_doc_role))),
+        hv_doc_registration=common.getkeyvalue(avars,"hv_doc_registration",ds[0].hv_doc_registration),
+        hv_doc_certification=common.getkeyvalue(avars,"hv_doc_certification",ds[0].hv_doc_certification),
+        hv_doc_pan=common.getkeyvalue(avars,"hv_doc_pan",ds[0].hv_doc_pan),
+        hv_doc_aadhar=common.getkeyvalue(avars,"hv_doc_aadhar",ds[0].hv_doc_aadhar),
+        
+        hv_doc_address1=common.getkeyvalue(avars,"hv_doc_address1",ds[0].hv_doc_address1),
+        hv_doc_address2=common.getkeyvalue(avars,"hv_doc_address2",ds[0].hv_doc_address2),
+        hv_doc_address3=common.getkeyvalue(avars,"hv_doc_address3",ds[0].hv_doc_address3),
+        hv_doc_city=common.getkeyvalue(avars,"hv_doc_city",ds[0].hv_doc_city),
+        hv_doc_st=common.getkeyvalue(avars,"hv_doc_st",ds[0].hv_doc_st),
+        hv_doc_pin=common.getkeyvalue(avars,"hv_doc_pin",ds[0].hv_doc_pin),
+
+        hv_doc_profile_image=common.getkeyvalue(avars,"hv_doc_profile_image",ds[0].hv_doc_profile_image),
+        hv_doc_stafftype=common.getkeyvalue(avars,"hv_doc_stafftype",ds[0].hv_doc_stafftype),
+        
+        hv_doc_notes=common.getkeyvalue(avars,"hv_doc_notes",ds[0].hv_doc_notes),
+        
+        
+
+        modified_on=common.getISTFormatCurrentLocatTime(),
+        modified_by= 1 if(auth.user == None) else auth.user.id
+      )
+      rspobj = {
+        "hv_doctorid":str(hv_doctorid),
+        "result":"success",
+        "error_message":"",
+        "error_code":""
+      }              
+                        
+    except Exception as e:
+      mssg = "Update HV Doctor Exception:\n" + str(e)
+      logger.loggerpms2.info(mssg)      
+      excpobj = {}
+      excpobj["result"] = "fail"
+      excpobj["error_code"] = "MDP100"
+      excpobj["error_message"] = mssg
+      return json.dumps(excpobj)
+
+    return json.dumps(rspobj)
+  
+  
+ 
+
+  def get_hv_doctor(self,avars):
+    db = self.db
+    auth  = current.auth
+    rspobj = {}
+    
+
+    try:
+      hv_doctorid = int(common.getkeyvalue(avars,"hv_doctorid",0))
+     
+      
+      ds = db((db.hv_doctor.id == hv_doctorid) & (db.hv_doctor.is_active == True)).select()
+
+
+      if(len(ds) != 1):
+        rspobj = {
+
+          "hv_doctorid":str(hv_doctorid),
+          "result":"fail",
+          "error_message":"Error Getting HV Doctor Details - no or duplicate record",
+          "error_code":""
+        }                
+        return json.dumps(rspobj)
+
+
+        
+      hv_doc_speciality = ds[0].hv_doc_speciality
+      s = db((db.speciality_default.id == hv_doc_speciality) & (db.speciality_default.is_active == True)).select()
+      speciality_name = s[0].speciality if len(s) == 1 else ""
+      
+      hv_doc_role = ds[0].hv_doc_role
+      r = db((db.role_default.id == hv_doc_role) & (db.role_default.is_active == True)).select()
+      role_name = r[0].role if len(r) == 1 else ""
+      
+        
+      rspobj = {
+        
+        "hv_doctorid":str(hv_doctorid),
+        "doctorid":str(ds[0].doctorid),
+        
+        
+        "speciality_name":speciality_name,
+        "hv_doc_speciality":str(hv_doc_speciality),
+        
+        "hv_doc_role":str(ds[0].hv_doc_role),
+        "role_name":role_name,
+        
+        "hv_doc_ID":ds[0].hv_doc_ID,
+      
+        "hv_doc_fname":ds[0].hv_doc_fname,
+        "hv_doc_lname":ds[0].hv_doc_lname,
+        "hv_doc_gender":ds[0].hv_doc_gender,
+        "hv_doc_dob":common.getstringfromdate(ds[0].hv_doc_dob,"%d/%m/%Y"),
+        "hv_doc_cell":ds[0].hv_doc_cell,
+        "hv_doc_email":ds[0].hv_doc_email,
+        
+        "hv_doc_address1":ds[0].hv_doc_address1,
+        "hv_doc_address1":ds[0].hv_doc_address1,
+        "hv_doc_address1":ds[0].hv_doc_address1,
+        "hv_doc_city":ds[0].hv_doc_city,
+        "hv_doc_st":ds[0].hv_doc_st,
+        "hv_doc_pin":ds[0].hv_doc_pin,
+        
+        "hv_doc_aadhar":ds[0].hv_doc_aadhar,
+        "hv_doc_pan":ds[0].hv_doc_pan,
+        "hv_doc_registration":ds[0].hv_doc_registration,
+        "hv_doc_certification":ds[0].hv_doc_certification,
+        
+        "hv_doc_profile_image":ds[0].hv_doc_profile_image,
+
+        "hv_doc_stafftype":ds[0].hv_doc_stafftype,
+
+        "hv_doc_notes":ds[0].hv_doc_notes,
+
+        "result":"success",
+        "error_message":"",
+        "error_code":""          
+        
+      }
+
+    except Exception as e:
+      mssg = "Get HV Doctor Exception:\n" + str(e)
+      logger.loggerpms2.info(mssg)      
+      excpobj = {}
+      excpobj["result"] = "fail"
+      excpobj["error_code"] = "MDP100"
+      excpobj["error_message"] = mssg
+      return json.dumps(excpobj)
+
+    return json.dumps(rspobj)
+
+  
+    
+  #creates a new HV doctor and also refers to in doctor_ref table with rf_code = HVD
+  def new_hv_doctor(self,avars):
+      db = self.db
+      auth  = current.auth
+      rspobj = {}
+      
+      try:
+       
+        ref_code = "PRV"
+        
+        p = db(db.provider.provider == 'P0001').select(db.provider.id)
+        providerid = p[0].id if(len(p)==1) else 0
+        
+        practice_owner = False
+        
+        
+        hv_doctorid = db.hv_doctor.insert(\
+         
+          hv_doc_fname=common.getkeyvalue(avars,"hv_doc_fname",""),
+          hv_doc_lname=common.getkeyvalue(avars,"hv_doc_lname",""),
+          hv_doc_gender=common.getkeyvalue(avars,"hv_doc_gender","Male"),
+          hv_doc_dob=common.getdatefromstring(common.getkeyvalue(avars,"hv_doc_dob","01/01/1900"),"%d/%m/%Y"),
+          
+          hv_doc_address1=common.getkeyvalue(avars,"hv_doc_address1","331-332 Ganpat Plaza"),
+          hv_doc_address2=common.getkeyvalue(avars,"hv_doc_address2","MI Road"),
+          hv_doc_address3=common.getkeyvalue(avars,"hv_doc_address3",""),
+          hv_doc_city=common.getkeyvalue(avars,"hv_doc_city","Jaipur"),
+          hv_doc_st=common.getkeyvalue(avars,"hv_doc_st","Rajastha (RJ)"),
+          hv_doc_pin=common.getkeyvalue(avars,"hv_doc_pin","302001"),
+
+          hv_doc_aadhar=common.getkeyvalue(avars,"hv_doc_aadhar",""),
+          hv_doc_pan=common.getkeyvalue(avars,"hv_doc_pan",""),
+          hv_doc_registration=common.getkeyvalue(avars,"hv_doc_registration",""),
+          hv_doc_certification=common.getkeyvalue(avars,"hv_doc_certification",""),
+
+          hv_doc_speciality=common.getkeyvalue(avars,"hv_doc_speciality","1"),
+          hv_doc_role=common.getkeyvalue(avars,"hv_doc_role","1"),
+          
+          
+          hv_doc_cell=common.getkeyvalue(avars,"hv_doc_cell",""),
+          hv_doc_email=common.getkeyvalue(avars,"hv_doc_email",""),
+          
+          hv_doc_stafftype=common.getkeyvalue(avars,"hv_doc_stafftype",""),
+          hv_doc_notes=common.getkeyvalue(avars,"hv_doc_notes",""),
+          
+        
+          is_active = True,
+          created_on=common.getISTFormatCurrentLocatTime(),
+          modified_on=common.getISTFormatCurrentLocatTime(),
+          created_by = 1 if(auth.user == None) else auth.user.id,
+          modified_by= 1 if(auth.user == None) else auth.user.id        
+          
+        )
+        hv_doc_ID = common.getkeyvalue(avars,"hv_doc_ID","HV_DOC_ID_" + str(hv_doctorid))
+        db(db.hv_doctor.id == hv_doctorid).update(hv_doc_ID = hv_doc_ID)
+      
+        docobj  = {
+        "action":"new_doctor",
+        "ref_code":"PRV",
+        "ref_id":str(providerid),
+        "title":hv_doc_ID,
+        "name":common.getkeyvalue(avars,"hv_doc_fname","") + " " + common.getkeyvalue(avars,"hv_doc_lname",""),
+        "providerid":str(providerid),
+        "speciality":common.getkeyvalue(avars,"hv_doc_speciality","1"),
+        "role":common.getkeyvalue(avars,"hv_doc_role","1"),
+        "practice_owner":"False",
+        "email":common.getkeyvalue(avars,"hv_doc_email",""),
+        "cell":common.getkeyvalue(avars,"hv_doc_cell",""),
+        "registration":common.getkeyvalue(avars,"hv_doc_registration",""),
+        "state_registration":common.getkeyvalue(avars,"hv_doc_certification",""),
+        
+        "color":"red",
+        "stafftype":"Doctor",
+        "pan":common.getkeyvalue(avars,"hv_doc_pan",""),
+        "adhaar":common.getkeyvalue(avars,"hv_doc_aadhar",""),
+        
+        "notes":common.getkeyvalue(avars,"hv_doc_notes",""),
+        "docsms":"False",
+        "docemail":"False",
+        "groupsms":"Flase",
+        "groupemail":"False",
+        
+        "hv_doc":"True",
+        "hv_doc_address1":common.getkeyvalue(avars,"hv_doc_address1","331-332 Ganpat Plaza"),
+        "hv_doc_address2":common.getkeyvalue(avars,"hv_doc_address2","MI Road"),
+        "hv_doc_address3":common.getkeyvalue(avars,"hv_doc_address3",""),
+        "hv_doc_city":common.getkeyvalue(avars,"hv_doc_city","Jaipur"),
+        "hv_doc_st":common.getkeyvalue(avars,"hv_doc_st","Rajastha (RJ)"),
+        "hv_doc_pin":common.getkeyvalue(avars,"hv_doc_pin","302001"),
+        "hv_doc_gender":common.getkeyvalue(avars,"hv_doc_gender","Male"),
+        "hv_doc_dob":common.getdatefromstring(common.getkeyvalue(avars,"hv_doc_dob","01/01/1900"),"%d/%m/%Y"),
+        }  
+        
+        docrsp = json.loads(self.new_doctor(docobj))
+        if(docrsp["result"] == "success"):
+          doctorid = int(common.getid(docrsp["doctorid"]))
+          db(db.hv_doctor.id == hv_doctorid).update(doctorid = doctorid)
+          rspobj = {
+            "doctorid":docrsp["doctorid"],
+            "hv_doctorid":str(hv_doctorid),
+            "result":"success",
+            "error_message":"",
+            "error_code":""
+          } 
+        else:
+          rspobj = {
+            "result":"fail",
+            "error_message":"Error New HV Doctor",
+            "error_code":""
+          }
+          
+        
+       
+        
+      except Exception as e:
+        mssg = "New HV Doctor Exception:\n" + str(e)
+        logger.loggerpms2.info(mssg)      
+        excpobj = {}
+        excpobj["result"] = "fail"
+        excpobj["error_code"] = "MDP100"
+        excpobj["error_message"] = mssg
+        return json.dumps(excpobj)
+      
+      
+      dmp = json.dumps(rspobj)   
+      logger.loggerpms2.info("Exit new_hv_doctor " + dmp)
+      return dmp
+  
+  #this api returns a list of HV Doctor
+  #the HV doctors belong to MDP Default Provider P0001
+  def list_hv_doctor(self,avars):
+    
+    db = self.db
+    auth  = current.auth
+    
+    rspobj = {}
+    
+    try:
+      lst = []
+      obj = {}
+      ds = None
+      
+      ds = db((db.hv_doctor.hv_doc_stafftype == 'Doctor') & (db.hv_doctor.is_active == True)).select()
+      for d in ds:
+        s = db(db.speciality_default.id == d.hv_doc_speciality).select(db.speciality_default.speciality)
+        r = db(db.role_default.id == d.hv_doc_role).select(db.role_default.role)
+        
+        obj = {
+          "doctorid":d.doctorid,
+          
+          "hv_doctorid":d.id,
+          "hv_doc_ID":d.hv_doc_ID,
+          "hv_doc_fname":d.hv_doc_fname,
+          "hv_doc_lname":d.hv_doc_lname,
+          "hv_doc_cell":common.modify_cell(d.hv_doc_cell),
+          "hv_doc_email":d.hv_doc_email,
+       
+          "hv_doc_address1":d.hv_doc_address1,
+          "hv_doc_address2":d.hv_doc_address2,
+          "hv_doc_address3":d.hv_doc_address3,
+          "hv_doc_city":d.hv_doc_city,
+          "hv_doc_st":d.hv_doc_st,
+          "hv_doc_pin":d.hv_doc_pin,
+          
+          "hv_doc_aadhar":d.hv_doc_aadhar,
+          "hv_doc_pan":d.hv_doc_pan,
+          "hv_doc_registration":d.hv_doc_registration,
+          "hv_doc_certification":d.hv_doc_certification,
+          
+          "hv_doc_dob":common.getstringfromdate(d.hv_doc_dob,"%d/%m/%Y"),
+          "hv_doc_gender":d.hv_doc_gender,
+          "hv_doc_role":d.hv_doc_role,
+          
+          "hv_doc_stafftype":d.hv_doc_stafftype,
+          "hv_doc_notes":d.hv_doc_notes,
+
+          "hv_doc_speciality":d.hv_doc_speciality,
+          "speciality_name":s[0].speciality if(len(s) > 0) else "",
+          "role_name":r[0].role if(len(r) > 0) else ""
+          
+        }
+        lst.append(obj)
+      
+      
+      rspobj["result"]="success"
+      rspobj["error_code"]=""
+      rspobj["error_message"]=""
+      rspobj["count"] = len(lst)
+      rspobj["list"]=lst
+      
+    except Exception as e:
+      mssg = "List HV Doctor Exception:\n" + str(e)
+      logger.loggerpms2.info(mssg)      
+      excpobj = {}
+      excpobj["result"] = "fail"
+      excpobj["error_code"] = "MDP100"
+      excpobj["error_message"] = mssg
+      return json.dumps(excpobj)
+      
+    
+    return json.dumps(rspobj)
+  
   
   def list_doctor(self,avars):
     
@@ -754,6 +1140,39 @@ class Doctor:
   
       return json.dumps(rspobj)
       
+  def delete_hv_doctor(self,avars):
+    auth  = current.auth
+    db = self.db
+  
+    try:
+  
+      hv_doctorid = int(common.getkeyvalue(avars,"hv_doctorid",0))
+  
+      db(db.hv_doctor.id == hv_doctorid).update(\
+        is_active = False,
+        modified_on=common.getISTFormatCurrentLocatTime(),
+        modified_by= 1 if(auth.user == None) else auth.user.id
+  
+      )
+  
+      rspobj = {
+        'hv_doctorid': hv_doctorid,
+        'result' : 'success',
+        "error_code":"",
+        "error_message":""
+      }               
+  
+  
+    except Exception as e:
+      mssg = "DeleteHV  Doctor Exception:\n" + str(e)
+      logger.loggerpms2.info(mssg)      
+      excpobj = {}
+      excpobj["result"] = "fail"
+      excpobj["error_code"] = "MDP100"
+      excpobj["error_message"] = mssg
+      return json.dumps(excpobj)
+  
+    return json.dumps(rspobj)  
   
   
   def delete_doctor(self,avars):
@@ -823,3 +1242,50 @@ class Doctor:
       return json.dumps(excpobj)
   
     return json.dumps(rspobj)  
+  
+  
+  def new_hv_doc_appointment(self,avars):
+    auth  = current.auth
+    db = self.db
+    
+    rspobj = {}
+  
+    try:
+      #provider id = P0001
+      p = db((db.provider.provider == "P0001") & (db.provider.is_active == True)).select(db.provider.id)
+      providerid = p[0].id if (len(p) > 0) else 0
+      
+      #find the clinic id corr to this provider
+      c = db((db.clinic_ref.ref_code == "PRV") & (db.clinic_ref.ref_id == providerid)).select()
+      clinicid = c[0].clinic_id if(len(c) > 0) else 0
+  
+      hv_doctorid = int(common.getkeyvalue(avars,"hv_doctorid","0"))
+      
+      hvdoc = db((db.hv_doctor.id == hv_doctorid) & (db.hv_doctor.is_active == True)).select()
+      doctorid = hvdoc[0].doctorid if(len(hvdoc) > 0) else 0
+      
+      avars["providerid"] = str(providerid)
+      avars["clinicid"] = str(clinicid)
+      avars["doctorid"] = str(doctorid)
+      
+      apptObj = mdpappointment.Appointment(db, providerid)
+      apptrsp = apptObj.new_appointment(avars)
+      
+      if(apptrsp["result"] == "success"):
+        rspobj["result"] = "success"
+        rspobj["error_code"] = ""
+        rspobj["error_message"] = ""
+        
+        
+      
+    except Exception as e:
+      mssg = "New HV DOC Appointment Exception:\n" + str(e)
+      logger.loggerpms2.info(mssg)      
+      excpobj = {}
+      excpobj["result"] = "fail"
+      excpobj["error_code"] = ""
+      excpobj["error_message"] = mssg
+      return json.dumps(excpobj)
+  
+    
+    return json.dumps(rspobj)    

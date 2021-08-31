@@ -149,6 +149,45 @@ use_janrain(auth, filename='private/janrain.key')
 
 
 
+db.define_table('hv_doc_appointment',
+                Field('appointmentid','integer'),
+                Field('hv_doctorid','integer')
+                
+                )
+db.hv_doc_appointment._singular = "hv_doc_appointment"
+db.hv_doc_appointment._plural   = "hv_doc_appointment"                
+                
+db.define_table('hv_doctor',
+                Field('hv_doc_ID','string'),
+                Field('hv_doc_fname','string'),
+                Field('hv_doc_lname','string'),
+                Field('hv_doc_address1','string'),
+                Field('hv_doc_address2','string'),
+                Field('hv_doc_address3','string'),
+                Field('hv_doc_city','string'),
+                Field('hv_doc_st','string'),
+                Field('hv_doc_pin','string'),
+                Field('hv_doc_aadhar','string'),
+                Field('hv_doc_pan','string'),
+                Field('hv_doc_registration','string'),
+                Field('hv_doc_certification','string'),
+                Field('hv_doc_profile_image','string'),
+                Field('hv_doc_dob','date'),
+                Field('hv_doc_gender','string'),
+                Field('hv_doc_cell','string'),
+                Field('hv_doc_email','string'),
+                Field('hv_doc_stafftype','string'),
+                Field('hv_doc_notes','text'),
+                Field('hv_doc_speciality','integer'),
+                Field('hv_doc_role','integer'),
+                Field('doctorid','integer'),
+                Field('is_active','boolean',default=True),
+                auth.signature
+              )
+db.hv_doctor._singular = "hv_doctor"
+db.hv_doctor._plural   = "hv_doctor"
+
+
 db.define_table('benefit_member',
                 Field('member_id','integer'),
                 Field('member_code','string'),
@@ -1576,31 +1615,89 @@ db.define_table('shopsee_properties',
 db.shopsee_properties._singular = "shopsee_properties"
 db.shopsee_properties._plural = "shopsee_properties"
 
-db.define_table('shopsee_properties',
-                Field('shopsee_url', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'), default=''),
-                Field('shopsee_returnURL', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'), default=''),
-                Field('shopsee_stg_url', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'), default=''),
-                Field('shopsee_prod_url', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'), default=''),
-                Field('webhookUrl', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'), default=''),
-                Field('shopsee_api_token', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'), default=''),
-                Field('shopsee_response_key', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'), default=''),
-                Field('shopsee_axis_db_card', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'), default=''),
-                Field('shopsee_axis_cr_card', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'), default=''),
-                Field('shopsee_hdfc_db_card', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'), default=''),
-                Field('shopsee_axis_db_card_exp', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'), default=''),
-                Field('shopsee_axis_db_card_cvv', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'), default=''),
-                Field('shopsee_axis_db_card_otp', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'), default=''),
-                Field('shopsee_axis_cr_card_exp', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'), default=''),
-                Field('shopsee_axis_cr_card_cvv', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'), default=''),
-                Field('shopsee_axis_cr_card_otp', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'), default=''),
-                Field('shopsee_hdfc_db_card_exp', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'), default=''),
-                Field('shopsee_hdfc_db_card_cvv', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'), default=''),
-                Field('shopsee_hdfc_db_card_otp', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'), default=''),
-                Field('product_name', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'), default=''),
-                Field('product_id', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'), default=''),
-)
-db.shopsee_properties._singular = "shopsee_properties"
-db.shopsee_properties._plural = "shopsee_properties"
+db.define_table('urlproperties',
+                Field('callbackurl', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'), default=''),
+                Field('externalurl', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'), default=''),
+                Field('mydp_ipaddress', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'), default=''),
+                Field('mydp_port', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'), default='8001'),
+                Field('mydp_application', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'), default='my_dentalplan'),
+                Field('pms_ipaddress', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'), default=''),
+                Field('pms_port', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'), default='8001'),
+                Field('pms_application', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'), default='jaiminipms'),
+                Field('mailserver','string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'),default=''),
+                Field('mailserverport','string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'),default='25'),
+                Field('mailsender','string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'),default=''),
+                Field('mailcc','string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'),default=''),
+                Field('mailusername','string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'),default=''),
+                Field('mailpassword','string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'),default=''),
+                Field('servicetax','double',represent=lambda v, r: 0.00 if v is None else v,widget = lambda field, value:SQLFORM.widgets.double.widget(field, value, _class='form_details'),default=0.00),
+                Field('swipecharge','double',represent=lambda v, r: 0.00 if v is None else v,widget = lambda field, value:SQLFORM.widgets.double.widget(field, value, _class='form_details'),default=0.00),
+                Field('jasperreporturl','string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details')),
+                Field('jdomain','string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details')),
+                Field('jport','string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details')),
+                Field('j_username','string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details')),
+                Field('j_password','string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details')),
+                Field('renewalnoticeperiod','integer',represent=lambda v, r: 0 if v is None else v,widget = lambda field, value:SQLFORM.widgets.integer.widget(field, value, _class='form_details'),default=0, label='Renewal Notice Period'),
+                Field('renewalcallback','string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'),default=''),
+                Field('emailreceipt','string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'),default=''),
+                Field('upgradepolicycallback','string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'),default=''),
+                Field('smsusername','string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'),default=''),
+                Field('smsemail','string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'),default=''),
+
+                Field('fp_apikey', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'), default=''),
+                Field('fp_privatekey', 'text',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'), default=''),
+                Field('fp_id', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'), default=''),
+                Field('fp_merchantid', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'), default=''),
+                Field('fp_merchantdisplay', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'), default=''),
+                Field('fp_testurl', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'), default=''),
+                Field('fp_produrl', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'), default=''),
+                Field('fp_callbackurl', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'), default=''),
+                Field('fp_callbackfailureurl', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'), default=''),
+
+                Field('medi_percent','double',represent=lambda v, r: 0.00 if v is None else v,widget = lambda field, value:SQLFORM.widgets.double.widget(field, value, _class='form_details'),default=0.00),
+                Field('medi_mydp_percent','double',represent=lambda v, r: 0.00 if v is None else v,widget = lambda field, value:SQLFORM.widgets.double.widget(field, value, _class='form_details'),default=0.00),
+                Field('medi_email', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'), default=''),
+                Field('medi_mydp_email', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'), default=''),
+                Field('medi_mydp_cell', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'), default=''),
+
+                Field('autoemailreceipt', 'boolean'),
+                Field('providersms', 'boolean', default=False),
+                Field('docsms', 'boolean', default=False),
+                Field('groupsms', 'boolean', default=True),
+
+                Field('provideremail', 'boolean', default=False),
+                Field('docemail', 'boolean', default=False),
+                Field('groupemail', 'boolean', default=True),
+                Field('timeinterval', 'double', default=0),
+
+                Field('relgrprodurl', 'string', default=''),
+                Field('relgrstgurl', 'string', default=''),
+                Field('religare', 'boolean', default=False),
+                Field('relgrapikey', 'string', default=''),
+                Field('relgrpolicynumber', 'string', default=''),
+                Field('encryption', 'boolean', default=True),
+                Field('welcomekit', 'boolean', default=True),
+
+                Field('hdfc_merchantid','string',default=''),
+                Field('hdfc_account_name','string',default=''),
+                Field('hdfc_test_domain','string',default=''),
+                Field('hdfc_prod_domain','string',default=''),
+                Field('hdfc_access_code','string',default=''),
+                Field('hdfc_working_key','string',default=''),
+                Field('hdfc_return_url','string',default=''),
+                Field('hdfc_cancel_url','string',default=''),
+                Field('hdfc_getrsa_url','string',default=''),
+                Field('hdfc_transaction_url','string',default=''),
+                Field('hdfc_json_url','string',default=''),
+                Field('mydp_getrsa_url','string',default=''),
+
+                Field('pagination','integer',default=10),
+
+                auth.signature
+                )
+db.urlproperties._singular = "URL_Properties"
+db.urlproperties._plural = "URL_Properties"
+
 
 db.define_table('pinelab_properties',
                 Field('pl_url', 'string',default='https://uat.pinepg.in/api/v2/accept/payment') ,
@@ -2292,7 +2389,7 @@ db.define_table('payment',
                 Field('amount', 'double',represent=lambda v, r: 0.00 if v is None else v,widget = lambda field, value:SQLFORM.widgets.double.widget(field, value, _class='w3-input w3-border w3-small'), default=0, label='Payment Amount',length=50),
                 Field('companypays', 'double',represent=lambda v, r: 0.00 if v is None else v,widget = lambda field, value:SQLFORM.widgets.double.widget(field, value, _class='w3-input w3-border w3-small'), default=0, label='Company Pays Amount',length=50),
                 Field('paymenttype', 'string',represent=lambda v, r: '' if v is None else v, widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _style="width:100%;height:35px",_class='w3-input w3-border w3-small'), default='Treatment',label='Payment Type',length=10),
-                Field('paymentmode', 'string',represent=lambda v, r: '' if v is None else v, widget = lambda field, value:SQLFORM.widgets.options.widget(field, value, _style="width:100%;height:35px",_class='w3-input w3-border w3-small'), default='Cash',label='Payment Mode',requires=IS_IN_SET(('Cash','Credit','Cheque','Cashless','Shopse')),length=10),
+                Field('paymentmode', 'string',represent=lambda v, r: '' if v is None else v, widget = lambda field, value:SQLFORM.widgets.options.widget(field, value, _style="width:100%;height:35px",_class='w3-input w3-border w3-small'), default='Cash',label='Payment Mode',requires=IS_IN_SET(('Cash','Credit','Cheque','Cashless','Shopse','PineLabs')),length=10),
                 Field('payor', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='w3-input w3-border w3-small'), default='',label='Paid By'),
                 Field('notes', 'text', default='',label='Notesl'),
                 Field('patientmember',  widget = lambda field, value:SQLFORM.widgets.options.widget(field, value,_style="width:100%;height:35px",_class='w3-input w3-border w3-small'), requires=IS_IN_DB(db, 'patientmember.id', '%(fname)s (%(patientmember)s)')),
@@ -2730,35 +2827,7 @@ db.speciality_default._plural   = "speciality_default"
 
 
 
-#Columns:
-#id int(11) AI PK 
-# varchar(45) 
-# varchar(128) 
-# int(11) 
-# int(11) 
-# int(11) 
-# char(1) 
-# varchar(128) 
-# varchar(45) 
-# varchar(45) 
-# varchar(45) 
-# varchar(45) 
-# varchar(45) 
-# varchar(45) 
-# varchar(45) 
-# varchar(45) 
-#approval_date date 
-#doctorcol varchar(45) 
-# text 
-# char(1) 
-# char(1) 
-# char(1) 
-# char(1) 
-# char(1) 
-# int(11) 
-# datetime 
-# int(11) 
-# datetim
+
 
 db.define_table('doctor',
                 Field('title','string',represent=lambda v, r: '' if v is None else v,default=' ',label='Title',length=10,requires = IS_EMPTY_OR(IS_IN_SET(DOCTITLE))),
@@ -2789,6 +2858,17 @@ db.define_table('doctor',
                 
                 Field('approval_date','datetime'),
                 Field('IND_IS_SYNC','boolean'),
+                
+                Field('hv_doc','boolean', default=False),
+                Field('hv_doc_address1','string'),
+                Field('hv_doc_address2','string'),
+                Field('hv_doc_address3','string'),
+                Field('hv_doc_city','string'),
+                Field('hv_doc_st','string'),
+                Field('hv_doc_pin','string'),
+                Field('hv_doc_gender','string'),
+                Field('hv_doc_dob','date'),
+                Field('hv_doc_profile_image','string'),
                 
                 Field('is_active','boolean', default = True),
                 

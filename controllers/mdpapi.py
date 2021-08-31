@@ -1062,6 +1062,32 @@ def getdoctor(avars):
     odr = mdpdoctor.Doctor(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
     doctor = odr.doctor(int(common.getid(str(avars["doctorid"]))))
     return doctor
+
+def get_hv_doctor(avars):
+    odr = mdpdoctor.Doctor(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
+    rsp = odr.get_hv_doctor(avars)
+    return rsp
+
+def new_hv_doctor(avars):
+    odr = mdpdoctor.Doctor(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
+    rsp = odr.new_hv_doctor(avars)
+    return rsp
+
+def update_hv_doctor(avars):
+    odr = mdpdoctor.Doctor(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
+    rsp = odr.update_hv_doctor(avars)
+    return rsp
+
+def delete_hv_doctor(avars):
+    odr = mdpdoctor.Doctor(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
+    rsp = odr.delete_hv_doctor(avars)
+    return rsp
+
+def list_hv_doctor(avars):
+    odr = mdpdoctor.Doctor(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
+    rsp = odr.list_hv_doctor(avars)
+    return rsp
+
 ############################ APPOINTMENT API ##################################################
 
     
@@ -3137,13 +3163,35 @@ def pinelabs_encrypt(avars):
     obj = mdppinelabs.PineLabs(current.globalenv['db'])
     rsp = obj.pinelabs_encrypt(avars)
     return rsp
+
+def pinelabs_payment(avars):
+    logger.loggerpms2.info("Enter Pine Labs Payment API\n" + str(avars) )
+    obj = mdppinelabs.PineLabs(current.globalenv['db'])
+    rsp = obj.pinelabs_payment(avars)
+    return rsp
+
+
 ############################# END CF API  ###################################################
+
+
+
+
 def unknown(avars):
     return dict()
 
 
+hvdocAPI_switcher = {
+    "new_hv_doctor":new_hv_doctor,
+    "get_hv_doctor":get_hv_doctor,
+    "update_hv_doctor":update_hv_doctor,
+    "list_hv_doctor":list_hv_doctor,
+    "delete_hv_doctor":delete_hv_doctor
+}
+
+
 pinelabsAPI_switcher = {
-    "pinelabs_encrypt":pinelabs_encrypt
+    "pinelabs_encrypt":pinelabs_encrypt,
+    "pinelabs_payment":pinelabs_payment
 }
 
 
@@ -3993,4 +4041,49 @@ def pinelabsAPI():
 
     return locals()
 
-    
+@request.restful()
+def hvdocAPI():
+    response.view = 'generic' + request.extension
+    def GET(*args, **vars):
+	return
+
+    def POST(*args, **vars):
+	i = 0
+	try:
+	    logger.loggerpms2.info(">>Enter HV DOC API==>>")
+	    dsobj = datasecurity.DataSecurity()
+	    encryption = vars.has_key("req_data")
+	    if(encryption):
+		#logger.loggerpms2.info(">>Agent with Encryption")
+		encrypt_req = vars["req_data"]
+		vars = json.loads(dsobj.decrypts(encrypt_req))
+	    
+	    #decrypted request date
+	    if(vars.has_key("action") == True):
+		action = str(vars["action"])
+	    else:
+		action = "benefits"
+		
+	    logger.loggerpms2.info(">>HV DOC ACTION==>>" + action)
+	    
+	    #return json.dumps({"action":action})
+	    rsp = hvdocAPI_switcher.get(action,unknown)(vars)
+	    common.setcookies(response)
+	    if(encryption):
+		return json.dumps({"resp_data":dsobj.encrypts(rsp)})
+	    else:
+		return rsp
+	    
+	except Exception as e:
+	    mssg = "HV DOC API Exception Error =>>\n" + str(e)
+	    #logger.loggerpms2.info(mssg)
+	    raise HTTP(500)   
+
+    def PUT(*args, **vars):
+	return dict()
+
+    def DELETE(*args, **vars):
+	return dict()
+
+    return locals()
+

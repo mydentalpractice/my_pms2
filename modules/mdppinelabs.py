@@ -46,13 +46,13 @@ class PineLabs:
 
     def pinelabs_encrypt(self, avars):
 
-        logger.loggerpms2.info("Enter Pinelabs Encrypt " + json.dumps(avars)) 
+        #logger.loggerpms2.info("Enter Pinelabs Encrypt " + json.dumps(avars)) 
         rspobj = {}
 
         try:
 
-            key = self.key
-            message = common.getkeyvalue(avars,"message","")
+            key = self.pl_key
+            message = common.getkeyvalue(avars,"payment_request","")
             
             #base64 encoding
             message = message.encode()
@@ -64,6 +64,7 @@ class PineLabs:
             encryptmessage = hmac.new(byte_key, message, hashlib.sha256).hexdigest().upper()        
 
             rspobj["encrypt"] = encryptmessage
+            rspobj["encoded_message"] = message
             rspobj["result"] = "success"
             rspobj["error_code"] = ""
             rspobj["error_message"] = ""
@@ -77,115 +78,124 @@ class PineLabs:
             excpobj["error_message"] = mssg
             return json.dumps(excpobj)     
 
-        logger.loggerpms2.info("Exit Pine Labs Encryption " + json.dumps(rspobj))      
+        #logger.loggerpms2.info("Exit Pine Labs Encryption " + json.dumps(rspobj))      
 
         return(json.dumps(rspobj))
     
+  
     
-    def create_transaction(self,avars):
-        logger.loggerpms2.info("Enter Shopsee CreateTransaction API == >" + json.dumps(avars))
+    
+    def pinelabs_payment(self,avars):
+        logger.loggerpms2.info("Enter Pine Labs Payment API == >" + json.dumps(avars))
         db = self.db
    
         try:
-            
+            paymentid = int(common.getkeyvalue(avars,"paymentid",0))
             #create URL
-            url = self.shopsee_prod_url + "/merchant/api/v2/transactions" 
-            #shopsee_header = {"Content-Type":"application/json"}
-            shopsee_header = {"Content-Type":"application/json","Authorization":self.shopsee_api_token}
+            pl_url = self.pl_url
+
+            plObj = {
+                
+                "customer_data": {
+                    "first_name":common.getkeyvalue(avars,"firstname",""),
+                    "last_name":common.getkeyvalue(avars,"lastname",""),
+                    "mobile_no":common.getkeyvalue(avars,"cell",""),
+                    "email_id":common.getkeyvalue(avars,"email",""),
+                    "customer_id":common.getkeyvalue(avars,"memberid","")
+                    },
+
+                
+                "merchant_data": {
+                    "merchant_access_code": self.pl_ac,
+                    "merchant_id": self.pl_mid,
+                    "merchant_return_url": self.pl_callback,
+                    "unique_merchant_txn_id": common.getkeyvalue(avars,"treatment","") + "_" + str(paymentid),   #<treatment>_<paymentid> e.g. TRTMUM001XXXX_1234
+                    },
+                
+                "payment_data": {
+                    "amount_in_paisa": 100 * long(common.getkeyvalue(avars,"amount","0"))   # amount to be send to Pine Labs is in paise
+                    },
+                
+                "txn_data": {
+                    "navigation_mode": "2",
+                    "payment_mode": "1",
+                    "transaction_type": "1",
+                },                
+               
+               
+                "udf_data": {
+                    "udf_field_1": int(common.getkeyvalue(avars,"memberid",0)),
+                    "udf_field_2": int(common.getkeyvalue(avars,"providerid",0)),
+                    "udf_field_3": int(common.getkeyvalue(avars,"treatmentid",0)),
+                    "udf_field_4": paymentid
+                    
+                }
+            } 
             
-            
-            #get list of procedures for a treatment
-            treatment = common.getkeyvalue(avars,"treatment","")
-            trs= db((db.treatment.treatment == treatment) & (db.treatment.is_active  == True)).select(db.treatment.id)
-            treatmentid = trs[0].id if(len(trs)==1) else 0
-            procs = db((db.vw_treatmentprocedure.treatmentid  == treatmentid) & (db.vw_treatmentprocedure.is_active == True)).select()
-            
-            proclist = []
-            procobj = {}
-            providerid = 0
-            
-            for proc in procs:
-                providerid = proc.providerid
-                procobj={}
-                procobj["productId"] = proc.procedurecode
-                procobj["name"] = proc.altshortdescription
-                procobj["amount"] = proc.procedurefee
-                proclist.append(procobj)
-            
-            
-            customParams = avars["customParams"] if ("customParams" in avars) else {}
            
-            provdict = common.getproviderfromid(db,providerid)
-            customParams["salesPersonEmail"] = provdict["email"]
-            customParams["salesPersonMobile"] = provdict["cell"]
+            payment_request = json.dumps(plObj)
             
-            #Request CreateTransaction API
-            shopsee_request = {
-                "orderId":common.getkeyvalue(avars,"treatment","") + "_" + str(common.getkeyvalue(avars,"paymentid",0)),   #<treatment>_<paymentid> e.g. TRTMUM001XXXX_1234
-                "amount":float(common.getkeyvalue(avars,"amount","0")),
-                "mobile":common.getkeyvalue(avars,"mobile",""),
-                "email":common.getkeyvalue(avars,"email",""),
-                "returnUrl":self.shopsee_returnURL,
-                #"webhookUrl":self.webhookUrl,
-                "productName":treatment,
-                "productId":treatmentid,
-                "firstName":common.getkeyvalue(avars,"firstName",""),
-                "lastName":common.getkeyvalue(avars,"lastName",""),
-                "address":avars["address"],
-                "customParams":customParams,
-                "products":proclist
+            logger.loggerpms2.info("Pine Labs Raw Data==>" + payment_request)
+            
+            obj={"payment_request":payment_request}
+            rspobj = json.loads(self.pinelabs_encrypt(obj))
+            
+            #x-verify header
+            x_verify = ""
+            encoded_message = ""
+            
+            if (rspobj["result"]=="success"):
+                x_verify = rspobj["encrypt"]  
+                encoded_message = rspobj["encoded_message"]
+                
+            body ={
+                "request": encoded_message 
             }
-        
-            logger.loggerpms2.info("SHOPSEE REQUEST\n" + json.dumps(shopsee_request))
+            headers = {'content-type': 'application/json', 'X-VERIFY': x_verify}
+            
+            logger.loggerpms2.info("PineLabs " +  pl_url + " " +  json.dumps(headers) + " " + json.dumps(body))
+            
             
             #call API
-            resp = requests.post(url,headers=shopsee_header,json=shopsee_request)
+            resp = requests.post(pl_url, json = body, headers = headers)
+                
             jsonresp = {}
             if((resp.status_code == 200)|(resp.status_code == 201)|(resp.status_code == 202)|(resp.status_code == 203)):
                 respstr =   resp.text
                 jsonresp = json.loads(respstr)
-                jsonresp["result"] = "success"
-                jsonresp["error_message"] = ""
+                if(jsonresp["response_code"] == 1):
+                    jsonresp["result"] = "success"
+                    jsonresp["error_message"] = ""
+                else:
+                    jsonresp["result"] = "fail"
+                    jsonresp["error_message"] = "PineLabs Payment API Error :\n" + "(" + jsonresp["response_message"] + ")" 
                 
-                #complete the transaction, #orderid = <treatment>_<paymentid>
-                arr = common.getkeyvalue(jsonresp,"orderid","0_0")
-                arr = arr.split("_")
-               
-                paymentid = int(common.getid(arr[1])) if (len(arr) >= 2) else 0
-                treatment = common.getstring(arr[0]) if (len(arr) >= 1) else ""
-                x=db((db.treatment.treatment == treatment) & (db.treatment.is_active == True)).select(db.treatment.id)
-                treatmentid = int(common.getid(x[0].id)) if(len(x) > 0) else 0
-                amount = float(common.getkeyvalue(avars,"amount","0"))
-                
-                logger.loggerpms2.info("Shopsee createTransaction API Response \n" + json.dumps(jsonresp)) 
-                logger.loggerpms2.info("Shopsee Create Transaction API - amount=" + str(amount) + " paymentid " + str(paymentid)+" treatmentid " + str(treatmentid))
-                
+                #update payment table 
                 db(db.payment.id == paymentid).update(
-                    
-                                                      fp_paymentref = common.getkeyvalue(jsonresp,"OrderId",""),
-                                                      fp_invoice = treatment,
-                                                      fp_merchantid = "MDP",
-                                                      fp_paymenttype = "ShopSe",
-                                                      fp_paymentdetail = common.getkeyvalue(jsonresp,"shopSeTxnId",""),
-                                                      fp_merchantdisplay="MyDental Health Plan Pvt. Ltd.",
-                                                      precommitamount = amount,   #temporary storing the amount  to commit on callback 
-                                                      paymentcommit = False,
-                                                      paymentmode = "Online",
-                                                      fp_status = "Open"
-                                                    )
+            
+                    fp_paymentref = plObj["merchant_data"]["unique_merchant_txn_id"],
+                    fp_invoice = common.getkeyvalue(avars,"treatment",""),
+                    fp_merchantid = plObj["merchant_data"]["merchant_id"],
+                    fp_paymenttype = "Pine Labs",
+                    fp_paymentdetail = plObj["merchant_data"]["unique_merchant_txn_id"],
+                    fp_merchantdisplay=plObj["merchant_data"]["merchant_id"],
+                    precommitamount = long(plObj["payment_data"]["amount_in_paisa"]) / 100,        #temporary storing the amount  to commit on callback 
+                    paymentcommit = False,
+                    paymentmode = "Online",
+                    fp_status = 'S' if (jsonresp["response_code"] == 1) else 'F'
+                )                
 
+          
             else:
                 jsonresp={
                     "result" : "fail",
-                    "error_message":"Shopsee createTransaction API Error Response:\n" + "(" + str(resp.status_code) + ")",
-                    "orderId":common.getkeyvalue(avars,"orderId",""),
-                    "productName":common.getkeyvalue(avars,"productName",""),
-                    "productId":common.getkeyvalue(avars,"productId",""),
+                    "error_message":"PineLabs Payment API Error Response:\n" + "(" + str(resp.status_code) + ")" + " " + resp._content
+                    
                 }                
                 return json.dumps(jsonresp)
                 
         except Exception as e:
-            error_message = "Shopsee CreateTransaction API Exception " + str(e)
+            error_message = "PineLabs Payment API Exception " + str(e)
             logger.loggerpms2.info(error_message)      
             jsonresp = {
               "result":"fail",
@@ -193,45 +203,42 @@ class PineLabs:
             }
             return json.dumps(jsonresp)
         
-        logger.loggerpms2.info("Shopsee Exit createTransaction API \n" + json.dumps(jsonresp)) 
+        logger.loggerpms2.info("PineLabs Payment Exit createTransaction API \n" + json.dumps(jsonresp)) 
         return json.dumps(jsonresp)
     
-    #2021-07-06 09:22:02,321 - web2py.app.my_pms2 - INFO - Enter Shopsee callback_transaction API == >{"orderId": "TRCHAGSP13010001_2158", "status": "failed", "currentTime": "1625543519024", "shopSeTxnId": "S06072103513799343", "statusMessage": "We are observing technical issues with the Bank. Please try again after some time.", "statusCode": "53"}
-    #2021-07-06 09:22:02,321 - web2py.app.my_pms2 - INFO - Exit Shopsee callback_transaction API Exception 'message'
-    #import requests
-    
-    #x = requests.get('https://w3schools.com')
-    #print(x.status_code)    
+ 
     def callback_transaction(self,avars):
         
-        logger.loggerpms2.info("Enter Shopsee callback_transaction API == >" + json.dumps(avars))
+        logger.loggerpms2.info("Enter Pine Labs callback_transaction API == >" + json.dumps(avars))
         db = self.db
        
         try:
-            status = common.getkeyvalue(avars,"status","")
-            status = "failed" if(status == "") else status
             
-            orderid = common.getkeyvalue(avars,"orderid","") 
-            shopsetxnid = common.getkeyvalue(avars,"shopsetxnid","") 
+            status = common.getkeyvalue(avars,"txn_response_msg","FAILURE")
 
-            #temporary suspending shopSeTxId check
-            #p = db((db.payment.fp_paymentref == orderid) & (db.payment.fp_paymentdetail ==shopsetxnid )).select(db.payment.id,db.payment.precommitamount)
-            p = db((db.payment.fp_paymentref == orderid)).select() 
-            providerid = int(common.getid(p[0].provider)) if(len(p) != 0) else 0
-            amount = float(common.getvalue(p[0].precommitamount)) if(len(p) != 0) else 0
-            memberid = int(common.getid(p[0].patientmember)) if(len(p) != 0) else 0
+
+            memberid = int(common.getkeyvalue(avars,"udf_field_1","0"))
+            providerid = int(common.getkeyvalue(avars,"udf_field_2","0"))
+            treatmentid = int(common.getkeyvalue(avars,"udf_field_3","0"))
+            paymentid = int(common.getkeyvalue(avars,"udf_field_4","0"))
+
+            
+            unique_merchant_txn_id = common.getkeyvalue(avars,"unique_merchant_txn_id","") 
+            
+            p = db((db.payment.id == paymentid)).select() 
             tplanid = int(common.getid(p[0].treatmentplan)) if(len(p) != 0) else 0
-            paymentid = int(common.getid(p[0].id)) if(len(p) >= 1) else 0
+            amount = float(common.getvalue(p[0].precommitamount)) if(len(p) != 0) else 0
             
             patobj = mdppatient.Patient(db, providerid)
             rsp = json.loads(patobj.getMemberPolicy({"providerid":str(providerid),"memberid":str(memberid)}))
             policy = common.getkeyvalue(rsp,"plan","PREMWALKIN")
             
-            logger.loggerpms2.info("ShopSe Call Back Transaction API==>Amount " + str(amount) + " status " + status + " " + policy + " " + str(paymentid))
+            logger.loggerpms2.info("Pine Labs Call Back Transaction API==>Amount " + str(amount) + " status " + status + " " + policy + " " + str(paymentid))
             
             paymentdate = common.getISTFormatCurrentLocatTime()
             if((status.lower() == "success")|(status.lower() == "s")):
-                db((db.payment.fp_paymentref == orderid)).update(fp_status = status,
+                xsts = 'S'
+                db((db.payment.id == paymentid)).update(fp_status = xsts,
                                                                 paymentcommit = True,
                                                                 fp_paymentdate =paymentdate ,
                                                                 amount = amount,
@@ -253,7 +260,7 @@ class PineLabs:
                 
                 
             else:
-                db((db.payment.fp_paymentref == orderid)).update(fp_status = status,
+                db((db.payment.id == paymentid)).update(fp_status = status,
                                                                 paymentcommit = False,
                                                                 fp_paymentdate =paymentdate,
                                                                 amount = 0,
@@ -268,7 +275,7 @@ class PineLabs:
                 
                 
         except Exception as e:
-            error_message = "Exit Shopsee callback_transaction API Exception " + str(e)
+            error_message = "Exit PineLabs callback_transaction API Exception " + str(e)
             logger.loggerpms2.info(error_message)      
             jsonresp = {
               "result":"fail",
@@ -285,78 +292,4 @@ class PineLabs:
     
     
     
-    #This API is called from ShopSe
-    def mdp_shopse_webhook(self,avars):
-        
-        logger.loggerpms2.info("Enter mdp_shopse_webhook API == >" + json.dumps(avars))
-        db = self.db
-        jsonresp = {}
-        
-        try:
-            status = common.getkeyvalue(avars,"status","failed")
-            
-            if((status.lower() == "success")|(status.lower() == 's')):
-                orderid = common.getkeyvalue(avars,"orderid","") 
-                shopsetxnid = common.getkeyvalue(avars,"shopsetxnid","") 
-                
-                #generate encryption signature
-                sigobj = {}
-                sigobj["orderId"] = common.getkeyvalue(avars,"orderId","")
-                sigobj["shopSeTxnId"] = common.getkeyvalue(avars,"shopSeTxnId","")
-                sigobj["status"] = status
-                sigobj["statusCode"] = common.getkeyvalue(avars,"statusCode","")
-                sigobj["statusMessage"] = common.getkeyvalue(avars,"statusMessage","")
-                sigobj["currentTime"] = common.getkeyvalue(avars,"currentTime","")
-                sigobj = json.loads(self.encrypt_sha256_shopse(sigobj))
-                
-                gen_signature = sigobj["encrypt"]
-                signature = urllib.quote_plus(common.getkeyvalue(avars,"signature",""))
-                
-                #mismatch
-                #if(gen_signature != signature):
-                    #error_message = "Webhook Callback Failure - Signature Mismatch\n" + "Calculated Signature = " + gen_signature + "\n" + "Callback Signature = " + signature
-                    #logger.loggerpms2.info(error_message)
-                    #jsonresp = {
-                      #"result":"fail",
-                      #"error_message":error_message
-                    #}
-                    
-                    #return json.dumps(jsonresp)
-
-                logger.loggerpms2.info("Signatures Match")
-                
-                otherinfo = json.dumps(common.getkeyvalue(avars,"payment","")) + "\n" + json.dumps(common.getkeyvalue(avars,"charge",""))
-                strdt = common.getkeyvalue(avars,"timestamp",common.getstringfromdate(common.getISTFormatCurrentLocatTime(),"%Y-%m-%dT%H:%M:%S.000Z"))
-                paymentdate = common.getdatefromstring(strdt, "%Y-%m-%dT%H:%M:%S.%fZ")
-                
-                db((db.payment.fp_paymentref == orderid) & (db.payment.fp_paymentdetail ==shopsetxnid )).update(fp_status = status,
-                                                                                                                 paymentcommit = True,
-                                                                                                                 fp_paymentdate = paymentdate,
-                                                                                                                 fp_otherinfo = otherinfo
-                                                                                                                 )
-                
-                #need to send email to Patient
-                jsonresp = {}
-                jsonresp["orderid"] = common.getkeyvalue(avars,"orderid","") 
-                jsonresp["shopSeTxnId"] = common.getkeyvalue(avars,"shopSeTxnId","")
-                jsonresp["result"] = "success"
-                jsonresp["error_message"] = ""
-            else:
-                #need to send email to Patient
-                jsonresp = {}
-                jsonresp["result"] = "fail"
-                jsonresp["error_message"] = "The status of webhook callback is " + status
-                
-                
-        except Exception as e:
-            error_message = "Exit mdp_shopse_webhook API Exception " + str(e)
-            logger.loggerpms2.info(error_message)      
-            jsonresp = {
-              "result":"fail",
-              "error_message":error_message
-            }
-            return json.dumps(jsonresp)
-        
-        logger.loggerpms2.info("Exit Shopse Webhook = " + json.dumps(jsonresp))
-        return json.dumps(jsonresp)
     

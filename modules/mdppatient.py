@@ -54,7 +54,7 @@ class Patient:
       c = db((db.company.id == companyid) & (db.company.is_active == True)).select(db.company.company)
       companycode = c[0].company if (len(c) ==1) else ""
     
-    
+      
       #get hmoplan code
       hmoplanid = int(common.getid(members[0].hmoplan) if (len(members) == 1) else "0")  #members hmoplan assigned
       h = db((db.hmoplan.id == hmoplanid) & (db.hmoplan.is_active == True)).select()    
@@ -65,8 +65,16 @@ class Patient:
                (db.provider_region_plan.regioncode == regioncode) &\
                (db.provider_region_plan.plancode == hmoplancode) &\
                (db.provider_region_plan.is_active == True)).select() 
-    
-      policy = prp[0].policy if(len(prp) == 1) else "PREMWALKIN"  #get policy corr.
+      
+      if(len(prp) == 0):
+        #region code = "ALL"
+        prp = db((db.provider_region_plan.companycode == companycode) &\
+                 (db.provider_region_plan.regioncode == "ALL") &\
+                 (db.provider_region_plan.plancode == hmoplancode) &\
+                 (db.provider_region_plan.is_active == True)).select() 
+        
+      policy = prp[0].policy if(len(prp) == 1) else companycode  #get policy corr.
+      policy = "PREMWALKIN" if((policy == None) | (policy == "")) else policy
       
       rspobj = {}
       rspobj["memberid"] = str(memberid)

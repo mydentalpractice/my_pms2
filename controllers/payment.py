@@ -42,6 +42,7 @@ from applications.my_pms2.modules import mdputils
 from applications.my_pms2.modules import mdpbenefits
 from applications.my_pms2.modules import mdppayment
 from applications.my_pms2.modules import mdpshopse
+from applications.my_pms2.modules import mdppinelabs
 from applications.my_pms2.modules import logger
 
 #from gluon.contrib import common
@@ -1441,7 +1442,257 @@ def generateHashForShopSe(key, message):
 
     return signhex
 
+#{"rrn": "425847096720", 
+#"txn_response_msg": "SUCCESS", 
+#"dia_secret": "9D8079D62F7AC619DA6FB8D747CCB2CEAAA36DABADEB4ED1EBD91EC5D0FB456B", 
+#"captured_amount_in_paisa": "125035", 
+#"pine_pg_txn_status": "4", 
+#"salted_card_hash": "B6B6A7CE1E6E2AA0DD7C028385446A3BBADCEE026A283859C69F5D2B8CC645AD", 
+#"card_holder_name": "HDFC TEST", 
+#"parent_txn_status": "", 
+#"amount_in_paisa": "125035", 
+#"acquirer_name": "HDFC", 
+#"auth_code": "999999", 
 
+#"udf_field_4": "paymentid", 
+#"udf_field_1": "memberid", 
+#"udf_field_2": "providerid", 
+#"udf_field_3": "treatmentid", 
+#"dia_secret_type": "SHA256", 
+#"masked_card_number": "401200******1112", 
+#"payment_mode": "1", 
+#"merchant_id": "106598", 
+#"txn_response_code": "1", 
+#"parent_txn_response_code": "", 
+#"merchant_access_code": "4a39a6d4-46b7-474d-929d-21bf0e9ed607", 
+#"pine_pg_transaction_id": "7241669", 
+#"parent_txn_response_message": "", 
+#"txn_completion_date_time": "27/08/2021 07:27:16 AM", 
+#"refund_amount_in_paisa": "0", 
+#"unique_merchant_txn_id": "ORDER_XXX"}
+
+def pinelabs_payment_callback():
+    
+    logger.loggerpms2.info("Enter Pinelabs Payment Callback " + json.dumps(request.vars))
+    
+    reqobj = {}
+    params = request.vars
+    keys = params.keys()
+    for key in keys:
+        reqobj[key] = params[key]    
+    
+    
+    #unique_merchant_txn_id  will be the link between the payment record in MDP and in PineLabs
+    #payment.fp_paymentref  = unique_merchant_txn_id
+    
+    memberid = int(common.getid(request.vars.udf_field_1))
+    providerid = int(common.getid(request.vars.udf_field_2))
+    treatmentid = int(common.getid(request.vars.udf_field_3))
+    paymentid = int(common.getid(request.vars.udf_field_4))
+    providerinfo  = getproviderinformation(providerid)
+    
+    r = db(db.vw_fonepaise.paymentid == paymentid).select()
+    patientinfo = getpatientinformation(int(common.getid(r[0].patientid)),int(common.getid(r[0].memberid))) if(len(r) > 0) else None
+    
+    logger.loggerpms2.info("Enter Pinelabs Callback Transaction " + json.dumps(reqobj))
+
+
+    plbobj = mdppinelabs.PineLabs(db)
+    rsp = json.loads(plbobj.callback_transaction(reqobj))
+    logger.loggerpms2.info("Pinelabs-Return Callback Transaction=>>" + json.dumps(rsp) + " " + str(paymentid))
+    
+    
+    paymentobj = mdppayment.Payment(db, providerid)
+    receiptobj = json.loads(paymentobj.paymentreceipt(paymentid))
+    logger.loggerpms2.info("Pine Labs - Exit Payment Receipt " + json.dumps(receiptobj))
+    returnurl = URL("admin","logout") 
+    
+    
+    dttodaydate = common.getISTFormatCurrentLocatTime()
+    todaydate = dttodaydate.strftime("%d/%m/%Y")
+
+    
+      
+    doctortitle = ''
+    doctorname = ''
+    treatment = ''
+    chiefcomplaint = ''
+    description = ''
+    otherinfo = ''
+
+    providerid = 0
+    treatmentid = 0
+    tplanid = 0
+    patientinfo = None
+    hmopatientmember = False
+    
+    r = db(db.vw_fonepaise.paymentid == paymentid).select()
+    if(len(r)>0):
+        
+        treatmentid = int(common.getid(r[0].treatmentid))
+        tplanid = int(common.getid(r[0].tplanid))
+        providerid = int(common.getid(r[0].providerid))
+        patientinfo = getpatientinformation(int(common.getid(r[0].patientid)),int(common.getid(r[0].memberid)))
+        hmopatientmember = patientinfo["hmopatientmember"]
+        
+        doctortitle = common.getstring(r[0].doctortitle)
+        doctorname  = common.getstring(r[0].doctorname)
+
+
+        treatment = common.getstring(r[0].treatment)
+        description = common.getstring(r[0].description)
+        chiefcomplaint = common.getstring(r[0].chiefcomplaint)
+        otherinfo = chiefcomplaint
+
+
+    paymentref = ""
+    paymentdate = dttodaydate
+    paymenttype = ""
+    paymentdetail = ""
+    paymentmode = ""
+    cardtype = ""
+    merchantid = ""
+    merchantdisplay = ""
+    invoice = ""
+    invoiceamt = 0.00
+    amount = 0.00
+    fee = 0.00
+    status = "S"
+    chequeno = ""
+    bankname= ""
+    accountname = ""
+    accountno = ""
+    error = ""
+    errormssg = ""
+    
+    p = db(db.payment.id == paymentid).select()
+
+    
+    if(len(p)>0):
+        paymentref = p[0].fp_paymentref #order id
+        paymentdate = (p[0].fp_paymentdate).strftime("%d/%m/%Y") if((p[0].fp_paymentdate != None)) else todaydate
+        paymenttype = p[0].fp_paymenttype
+        paymentdetail = p[0].fp_paymentdetail  #shopseTxId
+        paymentmode = p[0].paymentmode
+        cardtype = p[0].fp_cardtype
+        merchantid = p[0].fp_merchantid
+        merchantdisplay = p[0].fp_merchantdisplay
+        invoice = p[0].fp_invoice
+        invoiceamt = float(common.getvalue(p[0].fp_invoiceamt))
+        amount = float(common.getvalue(p[0].fp_amount))
+        fee = float(common.getvalue(p[0].fp_fee))
+        status = p[0].fp_status
+        chequeno = common.getstring(p[0].chequeno)
+        bankname= common.getstring(p[0].bankname)
+        accountname = common.getstring(p[0].accountname)
+        accountno = common.getstring(p[0].accountno)
+        if(status == 'S'):
+            error = ""
+            errormsg = ""
+        else:
+            error  = common.getstring(p[0].fp_error)
+            errormsg = common.getstring(p[0].fp_errormsg)
+        
+    #Procedure Grid
+    query = ((db.vw_treatmentprocedure.treatmentid  == treatmentid) & (db.vw_treatmentprocedure.is_active == True))
+
+
+    fields=(db.vw_treatmentprocedure.altshortdescription, \
+               db.vw_treatmentprocedure.procedurefee,\
+               db.vw_treatmentprocedure.treatmentdate)
+ 
+ 
+    headers={
+        'vw_treatmentprocedure.altshortdescription':'Description',
+        'vw_treatmentprocedure.procedurefee':'Procedure Cost',
+        'vw_treatmentprocedure.treatmentdate':'Treatment Date'
+    }
+ 
+    links = None
+    maxtextlengths = {'vw_treatmentprocedure.altshortdescription':200}
+    
+    exportlist = dict( csv_with_hidden_cols=False, html=False,tsv_with_hidden_cols=False, tsv=False, json=False, csv=False, xml=False)
+       
+    formProcedure = SQLFORM.grid(query=query,
+                        headers=headers,
+                        fields=fields,
+                        links=links,
+                        paginate=10,
+                        maxtextlengths=maxtextlengths,
+                        orderby=None,
+                        exportclasses=exportlist,
+                        links_in_grid=True,
+                        searchable=False,
+                        create=False,
+                        deletable=False,
+                        editable=False,
+                        details=False,
+                        user_signature=True
+                       )  
+    
+             
+    totpaid = 0
+    tottreatmentcost  = 0
+    totinspays = 0    
+    totaldue = 0
+    
+    
+    if(status == 'S'):
+        paytm = calculatepayments(tplanid,providerid)
+        tottreatmentcost= paytm["totaltreatmentcost"]
+        totinspays= paytm["totalinspays"]
+        totpaid=paytm["totalpaid"] 
+        totaldue = paytm["totaldue"]
+
+    return dict(formProcedure=formProcedure,\
+                todaydate = todaydate,\
+                providerid = providerid,
+                practicename = providerinfo["practicename"],\
+                providername  = providerinfo["providername"],\
+                provideregnon = providerinfo["providerregno"],\
+                practiceaddress1 = providerinfo["practiceaddress1"],\
+                practiceaddress2 = providerinfo["practiceaddress2"],\
+                practicephone = providerinfo["practicephone"],\
+                practiceemail =providerinfo["practiceemail"],\
+                patientname = patientinfo["patientname"]  if(patientinfo != None) else "",\
+                patientmember = patientinfo["patientmember"]   if(patientinfo != None) else "",\
+                patientemail = patientinfo["patientemail"]  if(patientinfo != None) else "",\
+                patientcell = patientinfo["patientcell"]  if(patientinfo != None) else "",\
+                patientgender=  patientinfo["patientgender"]  if(patientinfo != None) else "",\
+                patientage =patientinfo["patientage"]  if(patientinfo != None) else "",\
+                patientaddress =patientinfo["patientaddress"]  if(patientinfo != None) else "",\
+                groupref = patientinfo["groupref"]  if(patientinfo != None) else "",\
+                companyname = patientinfo["companyname"]  if(patientinfo != None) else "",\
+                planname  = patientinfo["planname"]  if(patientinfo != None) else "",\
+                paymentref =paymentref,\
+                paymentdate = paymentdate,\
+                paymenttype = paymenttype,\
+                paymentdetail = paymentdetail,\
+                paymentmode = paymentmode,\
+                cardtype = cardtype,\
+                merchantid = merchantid,\
+                merchantdisplay = merchantdisplay,\
+                invoice = invoice,\
+                invoiceamt = invoiceamt,\
+                amount = amount,\
+                fee = fee,\
+                totaldue=totaldue,\
+                status = status,\
+                doctorname  = doctorname,\
+                treatment = treatment,\
+                description =description,\
+                chiefcomplaint = chiefcomplaint,\
+                otherinfo=otherinfo,\
+                chequeno = chequeno,\
+                bankname= bankname,\
+                accountname = accountname,\
+                accountno = accountno,\
+                error = error,\
+                errormsg=errormssg,\
+                returnurl=returnurl
+                )
+
+    
 #http://13.71.115.17/my_pms2/payment/shopse_payment_callback?
 #orderId=TRBLRGSP12710003_1748&shopSeTxnId=S22062112450579710&
 #status=success&statusCode=0&statusMessage=Transaction%20successful&
@@ -1732,6 +1983,51 @@ def shopse_payment_callback():
                 )
     
   
+
+def make_payment_pinelabs():
+    
+    logger.loggerpms2.info("Enter Pine Labs Payment " + json.dumps(request.vars))
+    providerid = int(common.getstring(request.vars.providerid))
+    
+    paymentid = int(common.getid(request.vars.paymentid))
+    paymentmode = common.getstring(request.vars.paymentmod)
+    paymentamount = float(common.getvalue(request.vars.invoiceamt))    #payment amount is in paise
+   
+
+    vwfp = db(db.vw_fonepaise.paymentid == paymentid).select()
+    treatmentid = int(common.getid(vwfp[0].treatmentid))
+    treatment = (common.getstring(vwfp[0].treatment)) if(len(vwfp) ==1 ) else "TR_" + common.getstringfromdate(common.getISTFormatCurrentLocatTime(),"%d/%m/%Y %H:%M:%S")
+    
+    memberid = int(common.getid(vwfp[0].memberid)) if(len(vwfp) == 1) else 0
+    pats = db(db.patientmember.id == memberid).select()
+
+    
+    
+    reqobj={
+       "action":"pinelabs_payment",
+       "treatment":treatment,
+       "amount":paymentamount,
+       "cell":str(pats[0].cell),
+       "email":str(pats[0].email),
+       "firstname":str(pats[0].fname) if(len(pats)==1) else "",
+       "lastname":str(pats[0].lname) if(len(pats)==1) else "",
+       "member":pats[0].patientmember,
+       "treatmentid":str(treatmentid),
+       "memberid":str(memberid),
+       "paymentid":str(paymentid),
+       "providerid":str(providerid)
+    }    
+    
+    #call pinelabs Payment API
+    obj = mdppinelabs.PineLabs(db)
+    rspobj = json.loads(obj.pinelabs_payment(reqobj))
+
+    if(rspobj["result"] == "success"):
+        redirect(rspobj["redirect_url"])
+
+
+
+    return dict(rspobj = json.dumps(rspobj))
 
 
 def make_payment_shopse():
@@ -2627,6 +2923,8 @@ def update_payment():
             redirect(URL('payment','cashpayment_success', vars=dict(paymentmode=paymentmode,paymentid=paymentid,providerid=providerid,returnurl=returnurl)))
         elif ((source=="create") & (paymentmode == "Shopse")):
             redirect(URL('payment','make_payment_shopse',vars=dict(providerid=providerid,paymentid=paymentid,paymentmode=paymentmode,invoiceamt=paymentamount,returnurl=returnurl)))
+        elif ((source=="create") & (paymentmode == "PineLabs")):
+            redirect(URL('payment','make_payment_pinelabs',vars=dict(providerid=providerid,paymentid=paymentid,paymentmode=paymentmode,invoiceamt=paymentamount,returnurl=returnurl)))
         else:
             redirect(URL('payment','make_payment_hdfc',vars=dict(paymentid=paymentid,paymentmode=paymentmode,invoiceamt=paymentamount,returnurl=returnurl)))
             
