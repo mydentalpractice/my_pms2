@@ -147,11 +147,31 @@ use_janrain(auth, filename='private/janrain.key')
 ## >>> for row in rows: print row.id, row.myfield
 #########################################################################
 
-
+db.define_table('hv_treatment',
+                Field('treatmentid','integer'),
+                Field('treatment','string'),
+                Field('hv_doctorid','integer'),
+                Field('hv_doc_appointmentid','integer'),
+                auth.signature
+                )
+db.hv_treatment._singular = "hv_treatment"
+db.hv_treatment._plural   = "hv_treatment"       
 
 db.define_table('hv_doc_appointment',
                 Field('appointmentid','integer'),
-                Field('hv_doctorid','integer')
+                Field('hv_doctorid','integer'),
+                Field('hv_appt_created_on','datetime'),
+                Field('hv_appt_created_by','string'),
+                Field('hv_appt_confirmed_on','datetime'),
+                Field('hv_appt_confirmed_by','string'),
+                Field('hv_appt_checkedin_on','datetime'),
+                Field('hv_appt_checkedin_by','string'),
+                Field('hv_appt_checkedout_on','datetime'),
+                Field('hv_appt_checkedout_by','string'),
+                Field('hv_appt_cancelled_on','datetime'),
+                Field('hv_appt_cancelled_by','string'),
+                Field('hv_appt_distance','double'),
+                Field('hv_appt_notes','text')
                 
                 )
 db.hv_doc_appointment._singular = "hv_doc_appointment"
@@ -181,6 +201,7 @@ db.define_table('hv_doctor',
                 Field('hv_doc_speciality','integer'),
                 Field('hv_doc_role','integer'),
                 Field('doctorid','integer'),
+                
                 Field('is_active','boolean',default=True),
                 auth.signature
               )

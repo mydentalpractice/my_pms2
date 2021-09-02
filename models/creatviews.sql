@@ -8782,15 +8782,33 @@ ADD COLUMN `precommitamount` DOUBLE NULL DEFAULT 0 AFTER `policy`;
 
 19/08/2021
 ==========
-1. Added tables for Home Visit Doctor ^ Customer
+1. YYYZZZAdded tables for Home Visit Doctor ^ Customer
 
    ZZZZ hv_doctor
    ALTER TABLE `mydp_prod`.`hv_doctor` 
 ADD COLUMN `doctorid` INT(11) NULL AFTER `modified_by`;
    
+YYYZZZALTER TABLE `mydp_prod`.`hv_doc_appointment` 
+ADD COLUMN `hv_appt_created_on` DATETIME NULL AFTER `hv_doctorid`,
+ADD COLUMN `hv_appt_created_by` VARCHAR(45) NULL AFTER `hv_appt_created_on`,
+ADD COLUMN `hv_appt_confirmed_on` DATETIME NULL AFTER `hv_appt_created_by`,
+ADD COLUMN `hv_appt_confirmed_by` VARCHAR(45) NULL AFTER `hv_appt_confirmed_on`,
+ADD COLUMN `hv_appt_checkedin_on` DATETIME NULL AFTER `hv_appt_confirmed_by`,
+ADD COLUMN `hv_appt_checkedin_by` VARCHAR(45) NULL AFTER `hv_appt_checkedin_on`,
+ADD COLUMN `hv_appt_checkedout_on` DATETIME NULL AFTER `hv_appt_checkedin_by`,
+ADD COLUMN `hv_appt_checkedout_by` VARCHAR(45) NULL AFTER `hv_appt_checkedout_on`;
+
+ALTER TABLE `mydp_prod`.`hv_doc_appointment` 
+ADD COLUMN `hv_appt_distance` FLOAT NULL AFTER `hv_appt_checkedout_by`;
+
+ALTER TABLE `mydp_prod`.`hv_doc_appointment` 
+ADD COLUMN `hv_appt_cancelled_on` DATETIME NULL DEFAULT NULL AFTER `hv_appt_distance`,
+ADD COLUMN `hv_appt_cancelled_by` VARCHAR(45) NULL DEFAULT NULL AFTER `hv_appt_cancelled_on`,
+ADD COLUMN `hv_appt_notes` MEDIUMTEXT NULL AFTER `hv_appt_cancelled_by`;
 
 
-2. ZZZAdded table pinelab_properties for pinelans fields
+
+2. YYYYZZZAdded table pinelab_properties for pinelans fields
 CREATE TABLE `mydp_prod`.`pinelab_properties` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
   `pl_url` VARCHAR(512) NULL DEFAULT 'https://uat.pinepg.in/api/v2/accept/payment',
@@ -8807,7 +8825,7 @@ CREATE TABLE `mydp_prod`.`pinelab_properties` (
 ALTER TABLE `mydp_prod`.`pinelabs` 
 ADD COLUMN `pl_callback` VARCHAR(1024) NULL AFTER `pl_cvv`;
 
-3. ZZZUpdate doctor table with fields for HV
+3. YYYZZZUpdate doctor table with fields for HV
 ALTER TABLE `mydp_prod`.`doctor` 
 ADD COLUMN `hv_doc` CHAR(1) NULL DEFAULT 'F' AFTER `imageid`,
 ADD COLUMN `hv_doc_address1` VARCHAR(45) NULL AFTER `hv_doc`,
@@ -8821,7 +8839,7 @@ ADD COLUMN `hv_doc_gender` VARCHAR(45) NULL AFTER `hv_doc_dob`,
 ADD COLUMN `hv_doc_profile_image` VARCHAR(1024) NULL AFTER `hv_doc_gender`;
 
 
-4. ZZZNew table hv_doc_appointment
+4. YYYZZZNew table hv_doc_appointment
 CREATE TABLE `mydp_prod`.`hv_doc_appointment` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
   `appointmentid` INT(11) NULL COMMENT 'This field refers to appointment in t_appointment table',
@@ -8833,6 +8851,15 @@ CREATE TABLE `mydp_prod`.`hv_doc_appointment` (
 ALTER TABLE `mydp_prod`.`hv_doc_appointment` 
 DROP COLUMN `hv_patientid`,
 DROP COLUMN `hv_memberid`;
+
+2/9/2018
+=========
+1. ZZZZAdded table hv_treatmentid
+ALTER TABLE `mydp_prod`.`hv_treatment` 
+CHANGE COLUMN `treatmentid` `treatmentid` INT(11) NULL DEFAULT NULL AFTER `id`,
+ADD COLUMN `hv_appointmentid` INT(11) NULL AFTER `hv_doctorid`;
+ALTER TABLE `mydp_prod`.`hv_treatment` 
+CHANGE COLUMN `hv_appointmentid` `hv_doc_appointmentid` INT(11) NULL DEFAULT NULL ;
 
 
 Script file to clear user for sign-up

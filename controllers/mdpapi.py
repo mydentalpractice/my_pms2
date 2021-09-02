@@ -1088,6 +1088,67 @@ def list_hv_doctor(avars):
     rsp = odr.list_hv_doctor(avars)
     return rsp
 
+def new_hv_doc_appointment(avars):
+    odr = mdpdoctor.Doctor(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
+    rsp = odr.new_hv_doc_appointment(avars)
+    return rsp
+
+def list_hv_doc_appointment(avars):
+    odr = mdpdoctor.Doctor(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
+    rsp = odr.list_hv_doc_appointment(avars)
+    return rsp
+
+def get_hv_doc_appointment(avars):
+    odr = mdpdoctor.Doctor(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
+    rsp = odr.get_hv_doc_appointment(avars)
+    return rsp
+
+def update_hv_doc_appointment(avars):
+    odr = mdpdoctor.Doctor(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
+    rsp = odr.update_hv_doc_appointment(avars)
+    return rsp
+
+def checkin_hv_doc_appointment(avars):
+    odr = mdpdoctor.Doctor(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
+    rsp = odr.checkin_hv_doc_appointment(avars)
+    return rsp
+
+def checkout_hv_doc_appointment(avars):
+    odr = mdpdoctor.Doctor(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
+    rsp = odr.checkout_hv_doc_appointment(avars)
+    return rsp
+
+def confirm_hv_doc_appointment(avars):
+    odr = mdpdoctor.Doctor(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
+    rsp = odr.confirm_hv_doc_appointment(avars)
+    return rsp
+
+def cancel_hv_doc_appointment(avars):
+    odr = mdpdoctor.Doctor(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
+    rsp = odr.cancel_hv_doc_appointment(avars)
+    return rsp
+
+def new_hv_treatment(avars):
+    odr = mdpdoctor.Doctor(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
+    rsp = odr.cancel_hv_doc_appointment(avars)
+    return rsp
+
+def update_hv_treatment(avars):
+    odr = mdpdoctor.Doctor(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
+    rsp = odr.cancel_hv_doc_appointment(avars)
+    return rsp
+
+def get_hv_treatment(avars):
+    odr = mdpdoctor.Doctor(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
+    rsp = odr.cancel_hv_doc_appointment(avars)
+    return rsp
+    
+def delete_hv_treatment(avars):
+    odr = mdpdoctor.Doctor(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
+    rsp = odr.cancel_hv_doc_appointment(avars)
+    return rsp
+    
+
 ############################ APPOINTMENT API ##################################################
 
     
@@ -3185,7 +3246,21 @@ hvdocAPI_switcher = {
     "get_hv_doctor":get_hv_doctor,
     "update_hv_doctor":update_hv_doctor,
     "list_hv_doctor":list_hv_doctor,
-    "delete_hv_doctor":delete_hv_doctor
+    "delete_hv_doctor":delete_hv_doctor,
+    "new_hv_doc_appointment":new_hv_doc_appointment,
+    "list_hv_doc_appointment":list_hv_doc_appointment,
+    "get_hv_doc_appointment":get_hv_doc_appointment,
+    "update_hv_doc_appointment":update_hv_doc_appointment,
+    "checkin_hv_doc_appointment":checkin_hv_doc_appointment,
+    "checkout_hv_doc_appointment":checkout_hv_doc_appointment,
+    "confirm_hv_doc_appointment":confirm_hv_doc_appointment,
+    "cancel_hv_doc_appointment":cancel_hv_doc_appointment,
+    "new_hv_treatment":new_hv_treatment,
+    "update_hv_treatment":update_hv_treatment,
+    "get_hv_treatment":get_hv_treatment,
+    "delete_hv_treatment":delete_hv_treatment
+    
+    
 }
 
 
