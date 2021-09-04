@@ -1246,7 +1246,17 @@ class Doctor:
   
     return json.dumps(rspobj)  
   
-
+  #{
+    #"action":"new_hv_doc_appointment",
+  
+    #"memberid":25720,
+    #"patientid":25720,
+    #"cell":"9137908350",
+    #"complaint":"Tooth Ache",
+    #"appointment_start":"01/07/2023 09:00",
+    #"duration":30,
+    #"notes":"This is the first visit"
+  #}
   def new_hv_doc_appointment(self,avars):
     
     auth  = current.auth
@@ -1255,23 +1265,33 @@ class Doctor:
     rspobj = {}
   
     try:
+      
+      
       #provider id = P0001
       p = db((db.provider.provider == "P0001") & (db.provider.is_active == True)).select(db.provider.id)
       providerid = p[0].id if (len(p) > 0) else 0
+      
       
       #find the clinic id corr to this provider
       c = db((db.clinic_ref.ref_code == "PRV") & (db.clinic_ref.ref_id == providerid)).select()
       clinicid = c[0].clinic_id if(len(c) > 0) else 0
   
+      #default doctor id (practice owner)
+      d = db((db.doctor.providerid == providerid) & (db.doctor.practice_owner == True)).select()
+      def_doctorid = d[0].id if len(d) > 0 else 0
       hv_doctorid = int(common.getkeyvalue(avars,"hv_doctorid","0"))
       
       hvdoc = db((db.hv_doctor.id == hv_doctorid) & (db.hv_doctor.is_active == True)).select()
-      doctorid = hvdoc[0].doctorid if(len(hvdoc) > 0) else 0
+      doctorid = hvdoc[0].doctorid if(len(hvdoc) > 0) else def_doctorid
+      
+      appointment_start_AMPM = common.getkeyvalue(avars,"appointment_start","")
+      appointment_start = common.convert12to24clock(appointment_start_AMPM)
       
       avars["providerid"] = str(providerid)
       avars["clinicid"] = str(clinicid)
       avars["doctorid"] = str(doctorid)
-      
+      del avars["appointment_start"]
+      avars["appointment_start"] = appointment_start
       apptObj = mdpappointment.Appointment(db, providerid)
       rspobj = json.loads(apptObj.new_appointment(avars))
       
@@ -1288,6 +1308,13 @@ class Doctor:
         
         rspobj["hv_appointmentid"] = str(refid)
         
+        memberid = common.getkeyvalue(avars,"memberid","0")
+        patientid = common.getkeyvalue(avars,"patientid","0")
+        r = db((db.patientmember.id == memberid)).select()
+        address = "" if(len(r)==0) else r[0].address1 + " " + r[0].address2 + " " + r[0].address3 + " " + r[0].city + " " + r[0].st + " " + r[0].pin
+        rspobj["hv_address"] = address
+        
+        
    
       
       
@@ -1303,6 +1330,148 @@ class Doctor:
     
     return json.dumps(rspobj)
   
+  def get_hv_doc_appointment(self,avars):
+
+    auth  = current.auth
+    db = self.db
+
+    rspobj = {}
+
+    try:
+      hv_doc_appointmentid = int(common.getkeyvalue(avars,"hv_doc_appointmentid","0"))
+
+      r = db(db.hv_doc_appointment.id == hv_doc_appointmentid ).select()
+
+      hv_doctorid = 0 if(len(r) <= 0) else int(r[0].hv_doctorid)
+
+      xobj = {"hv_doctorid":str(hv_doctorid)}
+      hv_doctor_obj = json.loads(self.get_hv_doctor(xobj))
+
+      apptid = 0 if(len(r) <= 0) else int(r[0].appointmentid)
+      apptobj = mdpappointment.Appointment(db, self.providerid)
+      xobj = {"appointmentid":str(apptid)}
+      apptobj = json.loads(apptobj.get_appointment(xobj))
+
+      rspobj["result"] = "success"
+      rspobj["hv_doctor"] = hv_doctor_obj
+      rspobj["appointment"] = apptobj
+
+
+
+
+      rspobj["hv_appt_created_on"] = common.getstringfromtime(r[0].hv_appt_created_on, "%d/%m/%Y %H:%M")
+      rspobj["hv_appt_created_by"] = r[0].hv_appt_created_by
+      rspobj["hv_appt_confirmed_on"] = common.getstringfromtime(r[0].hv_appt_confirmed_on, "%d/%m/%Y %H:%M")
+      rspobj["hv_appt_confirmed_by"] = r[0].hv_appt_confirmed_by
+      rspobj["hv_appt_checkedin_on"] = common.getstringfromtime(r[0].hv_appt_checkedin_on, "%d/%m/%Y %H:%M")
+      rspobj["hv_appt_checkedin_by"] = r[0].hv_appt_checkedin_by
+      rspobj["hv_appt_checkedout_on"] = common.getstringfromtime(r[0].hv_appt_checkedout_on, "%d/%m/%Y %H:%M")
+      rspobj["hv_appt_checkedout_by"] = r[0].hv_appt_checkedout_by
+      rspobj["hv_appt_cancelled_on"] = common.getstringfromtime(r[0].hv_appt_cancelled_on, "%d/%m/%Y %H:%M")
+      rspobj["hv_appt_cancelled_by"] = r[0].hv_appt_cancelled_by
+      rspobj["hv_appt_distance"] = r[0].hv_appt_distance
+      rspobj["hv_appt_notes"] =r[0].hv_appt_notes
+
+
+
+
+
+
+
+
+
+
+    except Exception as e:
+      mssg = "New HV DOC Appointment Exception:\n" + str(e)
+      logger.loggerpms2.info(mssg)      
+      excpobj = {}
+      excpobj["result"] = "fail"
+      excpobj["error_code"] = ""
+      excpobj["error_message"] = mssg
+      return json.dumps(excpobj)
+
+
+    return json.dumps(rspobj)  
+  
+  def xget_hv_doc_appointment(self,avars):
+    
+    auth  = current.auth
+    db = self.db
+    
+    rspobj = {}
+    
+    try:
+      #hv_doc_appointmentid
+      hv_doc_appointmentid = int(common.getid(common.getkeyvalue(avars,"hv_doc_appointmentid","0")))
+      
+      
+      qry = (db.hv_doc_appointment.id == hv_doc_appointmentid)
+      
+      appts = db(qry).select(db.hv_doc_appointment.ALL, db.t_appointment.ALL, left=db.t_appointment.on(db.t_appointment.id == db.hv_doc_appointment.appointmentid))
+
+      hv_apptlst = []
+      hv_apptobj = {}
+      
+      for appt in appts:
+        
+        hv_apptobj = {}
+        
+        hv_apptobj["hv_doc_appointmentid"] = appt.hv_doc_appointment.id
+        hv_apptobj["appointmentid"] = appt.hv_doc_appointment.appointmentid
+        hv_apptobj["hv_doctorid"] = appt.hv_doc_appointment.hv_doctorid
+
+        hv_apptobj["patient_name"] = appt.t_appointment.f_patientname
+        hv_apptobj["appointment_date"] = common.getstringfromtime(appt.t_appointment.f_start_time,"%d/%m/%Y %I:%M %p")
+        
+        memberid = appt.t_appointment.patientmember
+        patientid = appt.t_appointment.patient
+        
+        p = db((db.patientmember.id == memberid)).\
+          select(db.patientmember.address1,db.patientmember.address2,db.patientmember.address3,db.patientmember.city,\
+                 db.patientmember.st,db.patientmember.pin,db.patientmember.cell,db.patientmember.gender,db.patientmember.dob)
+        
+        address = "" if(len(p) <= 0) else p[0].address1 + " " + p[0].address2 + " " + p[0].address3 + " " + p[0].city + " " + p[0].st + " " + p[0].pin
+        hv_apptobj["patient_address"] = address
+        hv_apptobj["patient_cell"] = common.modify_cell("" if(len(p) <= 0) else p[0].cell )
+        hv_apptobj["patient_gender"] = "" if(len(p) <= 0) else p[0].gender 
+        
+        today = date.today()
+        year = today.year
+        dob =  "" if(len(p) <= 0) else p[0].dob 
+        age =0
+        if(dob != ""):
+          age = year - dob.year
+          
+        
+        hv_apptobj["patient_age"] = age
+
+        
+        hv_doctorid = appt.hv_doc_appointment.hv_doctorid
+        h = db(db.hv_doctor.id == hv_doctorid).select()
+        hv_apptobj["hv_doctor_name"] = "" if(len(h) <= 0) else h[0].hv_doc_fname + " " + h[0].hv_doc_lname
+        hv_apptobj["hv_doctor_address"] = "" if(len(h) <= 0) else h[0].hv_doc_address1 + " " + h[0].hv_doc_address2 + " " + h[0].hv_doc_address3 + " " + h[0].hv_doc_city + " " + h[0].hv_doc_st+ " " + h[0].hv_doc_pin
+        hv_apptobj["hv_doctor_cell"] = "" if(len(h) <= 0) else h[0].hv_doc_cell 
+        
+        hv_apptlst.append(hv_apptobj)
+      
+      rspobj["result"]="success"
+      rspobj["error_message"]=""
+      rspobj["hv_appointment"]=hv_apptobj
+        
+        
+      
+    except Exception as e:
+      mssg = "List HV DOC Appointment Exception:\n" + str(e)
+      logger.loggerpms2.info(mssg)      
+      excpobj = {}
+      excpobj["result"] = "fail"
+      excpobj["error_code"] = ""
+      excpobj["error_message"] = mssg
+      return json.dumps(excpobj)
+  
+    
+    return json.dumps(rspobj)    
+    
   #API to get a list of all home visit appointments for a HV Doctor
   #If HV_Doctor is 0, then return list of all hv appointments of all HV Doctors
   def list_hv_doc_appointment(self,avars):
@@ -1433,17 +1602,32 @@ class Doctor:
       db = self.db
       rspobj = {}
       try:
-       
+        hv_doc_appointmentid = int(common.getkeyvalue(avars,"hv_doc_appointmentid","0"))
+        h = db(db.hv_doc_appointment.id == hv_doc_appointmentid).select(db.hv_doc_appointment.appointmentid)
+        appointmentid = 0 if(len(h) <= 0) else h[0].appointmentid
+        avars["appointmentid"] = appointmentid
         apptobj = mdpappointment.Appointment(db,self.providerid)
         rspobj=json.loads(apptobj.checkIn(avars))
         if(rspobj["result"] == "success"):
           hv_doc_appointmentid = int(common.getkeyvalue(avars,"hv_doc_appointmentid","0"))
-          db((db.hv_doc_appointment.id == hv_doc_appointmentid) & (db.hv_doc_appointment.is_active == hv_doc_appointmentid)).update\
+          db(db.hv_doc_appointment.id == hv_doc_appointmentid).update\
              (
-               
+               hv_appt_notes = common.getkeyvalue(avars,"notes",""),
                hv_appt_checkedin_on = common.getISTFormatCurrentLocatTime(),
                hv_appt_checkedin_by = str(1) if(auth.user == None) else str(auth.user.id)
              )
+          rspobj={}
+          rspobj["result"] = "success"
+          rspobj["error_message"] = ""
+          rspobj["error_code"] = ""
+          rspobj["hv_doc_appointmentid"] = hv_doc_appointmentid
+          
+        else:
+          rspobj={}
+          rspobj["result"] = "fail"
+          rspobj["error_message"] = "Error Chech-In Appointment"
+          rspobj["error_code"] = ""
+          rspobj["hv_doc_appointmentid"] = hv_doc_appointmentid
           
         
       except Exception as e:
@@ -1463,18 +1647,33 @@ class Doctor:
       db = self.db
       rspobj = {}
       try:
-       
+        hv_doc_appointmentid = int(common.getkeyvalue(avars,"hv_doc_appointmentid","0"))
+        h = db(db.hv_doc_appointment.id == hv_doc_appointmentid).select(db.hv_doc_appointment.appointmentid)
+        appointmentid = 0 if(len(h) <= 0) else h[0].appointmentid
+        avars["appointmentid"] = appointmentid       
         apptobj = mdpappointment.Appointment(db,self.providerid)
         rspobj=json.loads(apptobj.checkOut(avars))
         if(rspobj["result"] == "success"):
           hv_doc_appointmentid = int(common.getkeyvalue(avars,"hv_doc_appointmentid","0"))
-          db((db.hv_doc_appointment.id == hv_doc_appointmentid) & (db.hv_doc_appointment.is_active == hv_doc_appointmentid)).update\
+          db((db.hv_doc_appointment.id == hv_doc_appointmentid)).update\
              (
+               hv_appt_notes = common.getkeyvalue(avars,"notes",""),
                
                hv_appt_checkedout_on = common.getISTFormatCurrentLocatTime(),
                hv_appt_checkedout_by = str(1) if(auth.user == None) else str(auth.user.id)
              )
-          
+          rspobj={}
+          rspobj["result"] = "success"
+          rspobj["error_message"] = ""
+          rspobj["error_code"] = ""
+          rspobj["hv_doc_appointmentid"] = hv_doc_appointmentid
+                  
+        else:
+          rspobj={}
+          rspobj["result"] = "fail"
+          rspobj["error_message"] = "Error Chech-Out Appointment"
+          rspobj["error_code"] = ""
+          rspobj["hv_doc_appointmentid"] = hv_doc_appointmentid          
         
       except Exception as e:
         mssg = "Checkedout HV DOC Appointment Exception:\n" + str(e)
@@ -1493,6 +1692,10 @@ class Doctor:
       db = self.db
       rspobj = {}
       try:
+        hv_doc_appointmentid = int(common.getkeyvalue(avars,"hv_doc_appointmentid","0"))
+        h = db(db.hv_doc_appointment.id == hv_doc_appointmentid).select(db.hv_doc_appointment.appointmentid)
+        appointmentid = 0 if(len(h) <= 0) else h[0].appointmentid
+        avars["appointmentid"] = appointmentid       
        
         apptobj = mdpappointment.Appointment(db,self.providerid)
         rspobj=json.loads(apptobj.confirm(avars))
@@ -1500,11 +1703,24 @@ class Doctor:
           hv_doc_appointmentid = int(common.getkeyvalue(avars,"hv_doc_appointmentid","0"))
           db((db.hv_doc_appointment.id == hv_doc_appointmentid) & (db.hv_doc_appointment.is_active == hv_doc_appointmentid)).update\
              (
+               hv_appt_notes = common.getkeyvalue(avars,"notes",""),
                
                hv_appt_confirmed_on = common.getISTFormatCurrentLocatTime(),
                hv_appt_confirmed_by = str(1) if(auth.user == None) else str(auth.user.id)
              )
           
+          rspobj={}
+          rspobj["result"] = "success"
+          rspobj["error_message"] = ""
+          rspobj["error_code"] = ""
+          rspobj["hv_doc_appointmentid"] = hv_doc_appointmentid
+                  
+        else:
+          rspobj={}
+          rspobj["result"] = "fail"
+          rspobj["error_message"] = "Error Confirm Appointment"
+          rspobj["error_code"] = ""
+          rspobj["hv_doc_appointmentid"] = hv_doc_appointmentid          
         
       except Exception as e:
         mssg = "Confirmed HV DOC Appointment Exception:\n" + str(e)
@@ -1523,6 +1739,10 @@ class Doctor:
       db = self.db
       rspobj = {}
       try:
+        hv_doc_appointmentid = int(common.getkeyvalue(avars,"hv_doc_appointmentid","0"))
+        h = db(db.hv_doc_appointment.id == hv_doc_appointmentid).select(db.hv_doc_appointment.appointmentid)
+        appointmentid = 0 if(len(h) <= 0) else h[0].appointmentid
+        avars["appointmentid"] = appointmentid       
      
         apptobj = mdpappointment.Appointment(db,self.providerid)
         rspobj=json.loads(apptobj.cancel_appointment(avars))
@@ -1531,10 +1751,22 @@ class Doctor:
           hv_doc_appointmentid = int(common.getkeyvalue(avars,"hv_doc_appointmentid","0"))
           db((db.hv_doc_appointment.id == hv_doc_appointmentid) & (db.hv_doc_appointment.is_active == hv_doc_appointmentid)).update\
              (
-               
+               hv_appt_notes = common.getkeyvalue(avars,"notes",""),
                hv_appt_cancelled_on = common.getISTFormatCurrentLocatTime(),
                hv_appt_cancelled_by = str(1) if(auth.user == None) else str(auth.user.id)
              )
+          rspobj={}
+          rspobj["result"] = "success"
+          rspobj["error_message"] = ""
+          rspobj["error_code"] = ""
+          rspobj["hv_doc_appointmentid"] = hv_doc_appointmentid
+                  
+        else:
+          rspobj={}
+          rspobj["result"] = "fail"
+          rspobj["error_message"] = "Error Cancel Appointment"
+          rspobj["error_code"] = ""
+          rspobj["hv_doc_appointmentid"] = hv_doc_appointmentid          
           
         
       except Exception as e:
@@ -1549,11 +1781,10 @@ class Doctor:
       
       return json.dumps(rspobj)
   
-  #new_hv_treatment  
-  #hv_doctorid
-  #memberid
-  #patientid
-  def new_hv_treatment(self,avars):
+ 
+ 
+  #API to update HV Treatment
+  def update_hv_treatment(self,avars):
       auth  = current.auth
       db = self.db
       rspobj = {}
@@ -1624,6 +1855,11 @@ class Doctor:
   #hv_treatmentid
   #memberid
   #patientid
+  #doctorid
+  #clinicid
+  #policy_name
+  #notes
+    
   def new_hv_treatment(self,avars):
       auth  = current.auth
       db = self.db
@@ -1634,15 +1870,18 @@ class Doctor:
         #provider id = P0001
         p = db((db.provider.provider == "P0001") & (db.provider.is_active == True)).select(db.provider.id)
         providerid = p[0].id if (len(p) > 0) else 0
+        avars["providerid"] = str(providerid)
         
         #find the clinic id corr to this provider
         c = db((db.clinic_ref.ref_code == "PRV") & (db.clinic_ref.ref_id == providerid)).select()
         clinicid = c[0].clinic_id if(len(c) > 0) else 0
+        avars["clinicid"] = str(clinicid)
   
         #dotorid  
         hv_doctorid = int(common.getkeyvalue(avars,"hv_doctorid","0"))
         d = db(db.hv_doctor.id == hv_doctorid).select()
         doctorid = 0 if(len(d) <= 0) else d[0].doctorid
+        avars["doctorid"] = str(doctorid)
   
         #create new treatment
         trobj = mdptreatment.Treatment(db, providerid)
@@ -1661,6 +1900,7 @@ class Doctor:
             #"remarks": "New Procedure to 3250"
           #}        
           #add procedure treatment
+          obj={}
           obj["providerid"] = str(providerid)
           obj["procedurecode"] = "G0100"
           obj["treatmentid"] = common.getkeyvalue(trobj,"treatmentid","0")
@@ -1677,23 +1917,28 @@ class Doctor:
                                                              obj["quadrant"], 
                                                              obj["remarks"]))
           #create new_hv_treatment
+          created_on = common.getISTFormatCurrentLocatTime()
           hv_treatmentid = db.hv_treatment.insert(
             hv_doctorid = doctorid,
             treatmentid = int(common.getid(trobj["treatmentid"])),
             treatment = trobj["treatment"],
             hv_doc_appointmentid = common.getkeyvalue(avars,"hv_doc_appointmentid","0"),
-            created_on = common.getISTFormatCurrentLocatTime(),
+            hv_treatment_status = trobj["status"],
+            created_on = created_on,
             created_by = 1 if(auth.user == None) else auth.user.id,
-            modified_on = common.getISTFormatCurrentLocatTime(),
+            modified_on = created_on,
             modified_by =1 if(auth.user == None) else auth.user.id
           )
           
           if(rspobj["result"]=="success"):
             rspobj={}
             rspobj["result"]="success"
-            rspobj["hv_treatmentid"]=str(hv_treatmentid)
             rspobj["error_message"] = ""
             rspobj["error_code"]=""
+            rspobj["hv_treatmentid"]=str(hv_treatmentid)
+            rspobj["hv_treatment_status"] =  trobj["status"]
+            rspobj["treatment"] =  trobj["treatment"]
+            rspobj["hv_treatment_date"] = common.getstringfromtime(created_on,"%d/%m/%Y %H:%M")
           else:
             rspobj={}
             rspobj["result"]="failure"
@@ -1721,31 +1966,54 @@ class Doctor:
       rspobj = {}
    
       try:
-        #id for provider = P0001
-        p = db((db.provider.provider == "P0001") & (db.provider.is_active == True)).select(db.provider.id)
-        providerid = p[0].id if (len(p) > 0) else 0        
-        self.providerid = providerid
         
         hv_treatmentid = int(common.getid(common.getkeyvalue(avars,"hv_treatmentid","0")))
         hvt = db(db.hv_treatment.id == hv_treatmentid).select()
-        treatment = "" if(len(hvt) <= 0) else hvt[0].treatment
-        treatmentid = 0 if(len(hvt) <= 0) else hvt[0].treatmentid
-        hv_doctorid = 0 if(len(hvt) <= 0) else hvt[0].hv_doctorid
-        hv_doc_appointmentid = 0 if(len(hvt) <= 0) else hvt[0].hv_doc_appointmentid
-        
-        travars["treatmentid"] = treatmentid
-        trobj = mdptreatment.Treatment(db, providerid)
-        trobj = json.loads(trobj.gettreatment(treatmentid))
-        
-        if(trobj["result"] == "success"):
-          trobj["hv_doctorid"] = str(hv_doctorid)
-          trobj["hv_doc_appointmentid"] = str(hv_doc_appointmentid)
-          trobj["treatmentid"] = str(treatmentid)
-          rspobj = trobj
+        rspobj={}
+        if(len(hvt)>0):
+          rspobj["treatment"] = hvt[0].treatment
+          rspobj["treatmentid"] = hvt[0].treatmentid
+          rspobj["hv_doctorid"] = hvt[0].hv_doctorid
+          rspobj["hv_doc_appointmentid"] = hvt[0].hv_doc_appointmentid
+          rspobj["hv_treatment_status"] = hvt[0].hv_treatment_status
+          rspobj["hv_treatment_date"] = common.getstringfromtime(hvt[0].created_on,"%d/%m/%Y %H:%M")
+          rspobj["result"]="success"
+          rspobj["error_message"] = ""
+          rspobj["error_code"]=""
           
         else:
+          rspobj={}
           rspobj["result"]="failure"
-          rspobj["error_message"]="Error:New HV Treatment"
+          rspobj["error_message"]="Error:Get HV Treatment "
+          
+        
+      except Exception as e:
+        mssg = "Get HV Treatment Exception:\n" + str(e)
+        logger.loggerpms2.info(mssg)      
+        excpobj = {}
+        excpobj["result"] = "fail"
+        excpobj["error_code"] = ""
+        excpobj["error_message"] = mssg
+        return json.dumps(excpobj)
+      
+      return json.dumps(rspobj)
+
+  #hv_appointmentid 
+  #this API returns hv_treatment associated with this hv_appointment
+  #avars {hv_doc_appointmentid}
+  def get_hv_treatment_by_appointment(self,avars):
+      auth  = current.auth
+      db = self.db
+      rspobj = {}
+   
+      try:
+        #get hv_appointmentid from avars
+        hv_doc_appointmentid = common.getkeyvalue(avars,"hv_doc_appointmentid","0")
+        hvt = db(db.hv_treatment.hv_doc_appointmentid == hv_doc_appointmentid).select()
+        hv_treatmentid = 0 if(len(hvt) <= 0) else hvt[0].id
+        xavars={}
+        xavars["hv_treatmentid"] = hv_treatmentid
+        rspobj = json.loads(self.get_hv_treatment(xavars))
         
       except Exception as e:
         mssg = "Get HV DOC Treatment Exception:\n" + str(e)
@@ -1757,4 +2025,138 @@ class Doctor:
         return json.dumps(excpobj)
       
       return json.dumps(rspobj)
+    
   
+  #get list of cities where home visit doctors are available
+  def list_hv_cities(self,avars):
+      auth  = current.auth
+      db = self.db
+      rspobj = {}
+   
+      try:
+        #get list of HV Cities. This is a list of cities where HV Doctors are availdle
+        
+        cities = db(db.cities.HV == True).select()
+        citylist = []
+        for i in xrange(0,len(cities)):
+          cityobj={}
+          cityobj["city_id"] = str(cities[i].id)
+          cityobj["city"] = cities[i].city
+          citylist.append(cityobj)
+        
+        rspobj={
+          
+          "result":"success",
+          "error_message":"",
+          "error_code":"",
+          "citylist":citylist
+        }
+        
+        
+      except Exception as e:
+        mssg = "List HV Cities Exception:\n" + str(e)
+        logger.loggerpms2.info(mssg)      
+        excpobj = {}
+        excpobj["result"] = "fail"
+        excpobj["error_code"] = ""
+        excpobj["error_message"] = mssg
+        return json.dumps(excpobj)
+      
+      return json.dumps(rspobj)
+
+
+  #this API lists open slots
+  #the slots can be for a specific appointment date
+  #avars={action, appointment_date}
+  def list_hv_open_slots_by_day(self,avars):
+      auth  = current.auth
+      db = self.db
+      rspobj = {}
+   
+      try:
+        #provider id = P0001
+        p = db((db.provider.provider == "P0001") & (db.provider.is_active == True)).select(db.provider.id)
+        providerid = p[0].id if (len(p) > 0) else 0
+        
+        #find the clinic id corr to this provider
+        c = db((db.clinic_ref.ref_code == "PRV") & (db.clinic_ref.ref_id == providerid)).select()
+        clinicid = c[0].clinic_id if(len(c) > 0) else 0
+        
+        
+        avars["providerid"] = str(providerid)
+        avars["clinicid"] = str(clinicid)
+        
+        apptObj = mdpappointment.Appointment(db, providerid)
+        rspobj = json.loads(apptObj.list_open_slots(avars))
+
+      except Exception as e:
+        mssg = "Day Open Slots Exception:\n" + str(e)
+        logger.loggerpms2.info(mssg)      
+        excpobj = {}
+        excpobj["result"] = "fail"
+        excpobj["error_code"] = ""
+        excpobj["error_message"] = mssg
+        return json.dumps(excpobj)
+      
+      return json.dumps(rspobj)
+      
+  #this API lists open slots
+  #the slots can be for a specific month
+  #avars={action, month,year}
+  def list_hv_open_slots_by_month(self,avars):
+      auth  = current.auth
+      db = self.db
+      rspobj = {}
+      slotobj = {}
+      slotlist = []
+      
+      try:
+        #provider id = P0001
+        p = db((db.provider.provider == "P0001") & (db.provider.is_active == True)).select(db.provider.id)
+        providerid = p[0].id if (len(p) > 0) else 0
+        
+        #find the clinic id corr to this provider
+        c = db((db.clinic_ref.ref_code == "PRV") & (db.clinic_ref.ref_id == providerid)).select()
+        clinicid = c[0].clinic_id if(len(c) > 0) else 0
+        
+        dt = datetime.date.today()
+        day = dt.day
+        year = dt.year
+        month = dt.month
+        
+        month = common.getkeyvalue(avars,"month", str(month))
+        monthstr = str(month).zfill(2)
+        year = common.getkeyvalue(avars,"year", str(year))
+        yearstr = str(year).zfill(4)
+        
+        
+        avars["providerid"] = str(providerid)
+        avars["clinicid"] = str(clinicid)
+        
+        for i in xrange(1,32):
+          slotobj = {}
+          apptdt = str(i).zfill(2) + "/" + monthstr + "/" + yearstr
+          avars["appointment_date"] = apptdt
+          apptObj = mdpappointment.Appointment(db, providerid)
+          slotobj = json.loads(apptObj.list_open_slots(avars))
+          del slotobj["result"]
+          del slotobj["error_message"]
+          del slotobj["error_code"]
+          slotlist.append(slotobj)
+        
+        rspobj["result"] = "success"
+        rspobj["error_message"] = ""
+        rspobj["slotlist"] = slotlist
+        
+
+      except Exception as e:
+        mssg = "Day Open Slots Exception:\n" + str(e)
+        logger.loggerpms2.info(mssg)      
+        excpobj = {}
+        excpobj["result"] = "fail"
+        excpobj["error_code"] = ""
+        excpobj["error_message"] = mssg
+        return json.dumps(excpobj)
+      
+      return json.dumps(rspobj)
+ 

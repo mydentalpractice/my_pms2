@@ -41,9 +41,15 @@ def getregionidfromcity(db,city):
         rgn = db((db.groupregion.region == city) & (db.groupregion.is_active == True)).select()
         return rgn[0].id if(len(rgn) != 0) else 0
 
-        
-def convert24to12clock(timestr):
+#this will convert %d/%m/%Y %I:%M %p  into %d/%m/%Y %H:%M
 
+def convert12to24clock(timestr):
+        d = getdatefromstring(timestr, "%d/%m/%Y %I:%M %p")
+        e = getstringfromdate(d,"%d/%m/%Y %H:%M")
+        return e
+
+def convert24to12clock(timestr):
+        
         if((timestr.upper().find("AM") == -1)|(timestr.upper().find("PM") == -1)):
                 return timestr
         

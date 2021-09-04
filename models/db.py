@@ -152,6 +152,7 @@ db.define_table('hv_treatment',
                 Field('treatment','string'),
                 Field('hv_doctorid','integer'),
                 Field('hv_doc_appointmentid','integer'),
+                Field('hv_treatment_status','string'),
                 auth.signature
                 )
 db.hv_treatment._singular = "hv_treatment"
@@ -312,7 +313,9 @@ db.mdpmessages._plural   = "mdpmessages"
 
 db.define_table('cities',
                 Field('city','string'),
-                Field('regioncode','string')
+                Field('regioncode','string'),
+                Field('HV','boolean'),
+                Field('VC','boolean'),
                 )
 db.cities._singular = "cities"
 db.cities._plural   = "cities"
@@ -3617,6 +3620,41 @@ db.define_table('vw_payments',
 db.vw_payments._singular = "vw_payments"
 db.vw_payments._plural   = "vw_payments"
 
+
+
+    
+db.define_table('vw_payments_fast',
+    Field('id','integer'),
+          
+    Field('treatment', 'string',represent=lambda v, r: '' if v is None else v),
+    Field('treatmentid', 'integer',represent=lambda v, r: 0 if v is None else v),
+    Field('treatmentdate', 'date',represent=lambda v, r: '' if v is None else v,requires=IS_DATE(format=T('%d/%m/%Y'))),
+    #Field('shortdescription', 'text',represent=lambda v, r: '' if v is None else v), 
+    Field('memberid', 'integer',represent=lambda v, r: 0 if v is None else v),
+    Field('patientid', 'integer',represent=lambda v, r: 0 if v is None else v),
+    Field('providerid','integer',represent=lambda v, r: 0 if v is None else v),
+    #Field('patientname', 'string',represent=lambda v, r: '' if v is None else v),
+    #Field('paymentscount', 'integer',represent=lambda v, r: 0 if v is None else v),
+    #Field('lastpayment', 'double',represent=lambda v, r: 0 if v is None else v),
+    Field('lastpaymentdate', 'date',represent=lambda v, r: '' if v is None else v,requires=IS_DATE(format=T('%d/%m/%Y'))),
+    Field('totaltreatmentcost', 'double',represent=lambda v, r: 0 if v is None else v),
+    Field('totalcopay','double',represent=lambda v, r: 0 if v is None else v),
+    Field('totalinspays', 'double',represent=lambda v, r: 0 if v is None else v),
+    #Field('totalmemberpays', 'double',represent=lambda v, r: 0 if v is None else v),
+    Field('totalpaid', 'double',represent=lambda v, r: 0 if v is None else v),
+    Field('totalcopaypaid', 'double',represent=lambda v, r: 0 if v is None else v),
+    Field('totalinspaid', 'double',represent=lambda v, r: 0 if v is None else v),
+    Field('totaldue', 'double',represent=lambda v, r: 0 if v is None else v),
+    Field('totalcompanypays', 'double',represent=lambda v, r: 0 if v is None else v),
+    Field('is_active', 'boolean',represent=lambda v, r: 0 if v is None else v)
+   
+
+
+
+    )
+
+db.vw_payments_fast._singular = "vw_payments_fast"
+db.vw_payments_fast._plural   = "vw_payments_fast"
 
 
 

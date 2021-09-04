@@ -2021,13 +2021,15 @@ def make_payment_pinelabs():
     #call pinelabs Payment API
     obj = mdppinelabs.PineLabs(db)
     rspobj = json.loads(obj.pinelabs_payment(reqobj))
-
+    message = "success"
     if(rspobj["result"] == "success"):
         redirect(rspobj["redirect_url"])
-
-
-
-    return dict(rspobj = json.dumps(rspobj))
+    else:
+        message = rspobj["error_message"]
+        
+        
+    
+    return dict(message = message)
 
 
 def make_payment_shopse():

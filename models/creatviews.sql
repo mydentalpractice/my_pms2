@@ -8854,12 +8854,24 @@ DROP COLUMN `hv_memberid`;
 
 2/9/2018
 =========
-1. ZZZZAdded table hv_treatmentid
+1. YYYZZZZAdded table hv_treatmentid
 ALTER TABLE `mydp_prod`.`hv_treatment` 
 CHANGE COLUMN `treatmentid` `treatmentid` INT(11) NULL DEFAULT NULL AFTER `id`,
 ADD COLUMN `hv_appointmentid` INT(11) NULL AFTER `hv_doctorid`;
 ALTER TABLE `mydp_prod`.`hv_treatment` 
 CHANGE COLUMN `hv_appointmentid` `hv_doc_appointmentid` INT(11) NULL DEFAULT NULL ;
+
+2. YYYZZZcreated a new vieww vw_payments_fast
+
+3. YYYZZZCities Population
+           ALTER TABLE `mydp_prod`.`cities` 
+           ADD COLUMN `HV` CHAR(1) NULL DEFAULT 'F' AFTER `regioncode`,
+           ADD COLUMN `VC` CHAR(1) NULL DEFAULT 'F' AFTER `HV`;
+
+           Populate cities with cities.xls
+
+           Moidified City table to add HV and VC flags
+
 
 
 Script file to clear user for sign-up

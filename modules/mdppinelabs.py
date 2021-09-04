@@ -121,7 +121,7 @@ class PineLabs:
                     "payment_mode": "1",
                     "transaction_type": "1",
                 },                
-               
+              
                
                 "udf_data": {
                     "udf_field_1": int(common.getkeyvalue(avars,"memberid",0)),
@@ -191,8 +191,10 @@ class PineLabs:
                     "result" : "fail",
                     "error_message":"PineLabs Payment API Error Response:\n" + "(" + str(resp.status_code) + ")" + " " + resp._content
                     
-                }                
-                return json.dumps(jsonresp)
+                } 
+                dmp = json.dumps(jsonresp)
+                logger.loggerpms2.info(json.dumps(dmp))
+                return json.dumps(dmp)
                 
         except Exception as e:
             error_message = "PineLabs Payment API Exception " + str(e)
