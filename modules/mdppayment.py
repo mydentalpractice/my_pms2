@@ -346,6 +346,71 @@ class Payment:
         dmp = json.dumps(listpaymentsrspobj)
         logger.loggerpms2.info("Exit List Payments " + dmp)
         return dmp
+
+    def listpayments_fast(self, memberid, patientid):
+        logger.loggerpms2.info("Enter List Payments =>" + str(memberid) + " " + str(patientid))
+        db = self.db
+        providerid = self.providerid
+        listpaymentsrspobj={}
+        try:
+            #this is list of treatment plans, since vw_payments.id is treatmentplan id
+            #all total payments from tplan reflects all payments of the treatment since 
+            #there is one treatment for one tplan
+            payments = db((db.vw_payments_fast.providerid == providerid) & \
+                          (db.vw_payments_fast.memberid == memberid) & \
+                          (db.vw_payments_fast.patientid == patientid) & \
+                          (db.vw_payments_fast.is_active == True)).select()
+            
+            payobj = {}
+            
+            paymentlist = []
+            
+            for payment in payments:
+                treatmentid = payment.treatmentid
+                ts = db(db.treatment_procedure.treatmentid == treatmentid).select(db.dentalprocedure.shortdescription,\
+                                                                                 left=(db.procedurepriceplan.on(db.procedurepriceplan.id == db.treatment_procedure.dentalprocedure),
+                                                                                      db.dentalprocedure.on(db.dentalprocedure.dentalprocedure == db.procedurepriceplan.procedurecode)))
+                
+                shortdesc = ""
+                for t in ts:
+                    shortdesc = shortdesc + t.shortdescription + ";"
+                
+                tp = db(db.treatmentplan.id == payment.id).select(db.treatmentplan.patientname)
+
+                payobj = {
+                    "paymentid":int(common.getid(payment.id)),  #this is treatmentplan id
+                    "memberid":memberid,
+                    "patientid":patientid,
+                    "patient": "" if(len(tp) <=0 ) else tp[0].patientname,
+                    "paymentdate":None if(payment.lastpaymentdate == None) else (payment.lastpaymentdate).strftime("%d/%m/%Y"),
+                    "treatmentid":int(common.getid(payment.treatmentid)),
+                    "treatment":payment.treatment,
+                    "treatmentdate":(payment.treatmentdate).strftime("%d/%m/%Y"),
+                    "procedures":shortdesc,
+                    "totaltreatmentcost":float(common.getvalue(payment.totaltreatmentcost)),
+                    "totalcopay":float(common.getvalue(payment.totalcopay)),
+                    "totalinspays":float(common.getvalue(payment.totalinspays)),
+                    "totalcompanypays":float(common.getvalue(payment.totalcompanypays)),
+                    "totaldiscount":float(common.getvalue(payment.totalcompanypays)),
+                    "totalpaid":float(common.getvalue(payment.totalpaid)),
+                    "totaldue":float(common.getvalue(payment.totaldue)),
+                }
+                paymentlist.append(payobj)
+                
+            listpaymentsrspobj = {"result":"success","error_message":"","paymentcount":len(payments), "paymentlist":paymentlist}
+            
+        except Exception as e:
+            mssg = "List Payments Exception:\n" + str(e)
+            logger.loggerpms2.info(mssg)      
+            excpobj = {}
+            excpobj["result"] = "fail"
+            excpobj["error_message"] = mssg
+            return json.dumps(excpobj)             
+        
+        dmp = json.dumps(listpaymentsrspobj)
+        logger.loggerpms2.info("Exit List Payments " + dmp)
+        return dmp
+
         
     #paymentid is actually treatmentplan id
     def getpayment(self,paymentid): 
@@ -525,6 +590,7 @@ class Payment:
         
         logger.loggerpms2.info("Exit getpayment list " + json.dumps(rspobj))
         return json.dumps(rspobj)
+    
     
     
     def getprocedurelist(self,memberid,patientid,treatmentid):

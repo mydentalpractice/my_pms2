@@ -123,15 +123,17 @@ class User:
     try:
       cell = common.getkeyvalue(avars,"cell","")
       usr = db(db.auth_user.cell == cell).select()
-      
+      #not login user
       if(len(usr) != 1):
         error_message = "OTP Login API Error: No User/Multiple users matching registered " + cell
         logger.loggerpms2.info(error_message)
         excpobj = {}
         excpobj["result"] = "fail"
+        excpobj["user_id"] = usr[0].id if(len(usr) != 0) else 0
         excpobj["error_message"] = error_message
         return json.dumps(excpobj)    
-
+      
+      #login user but not an agern
       user = auth.login_user(db.auth_user(int(usr[0].id)))
       cell = auth.user["cell"]
       r = db(db.agent.cell == cell).select()
@@ -139,15 +141,17 @@ class User:
         error_message = "Agent Login API Error: No Agent/Multiple agent matching registered " + cell
         logger.loggerpms2.info(error_message)
         excpobj = {}
+        excpobj["user_id"] = auth.user.id if(auth.user != None) else 0
         excpobj["result"] = "fail"
         excpobj["error_message"] = error_message
         return json.dumps(excpobj) 
       
-      
+      #login user and agent
       user_data = {}
       user_data={
         "result":"success",
         "error_message":"",
+        "user_id":auth.user.id if(auth.user != None) else 0,
         "usertype":"agent", 
         "agent":r[0].agent,
         "agentid":common.getid(r[0].id),
@@ -282,11 +286,13 @@ class User:
     try:
       cell = str(common.getkeyvalue(avars,"cell",""))
       usr = db(db.auth_user.cell == cell).select()
-    
+      user_id = usr[0].id if(len(usr)>0) else 0
+      
       if(len(usr) > 1):
         error_message = "OTP Login API Error: Multiple users matching registered " + cell
         logger.loggerpms2.info(error_message)
         excpobj = {}
+        excpobj["user_id"] = user_id
         excpobj["result"] = "fail"
         excpobj["error_message"] = error_message
         return json.dumps(excpobj)    
@@ -300,6 +306,7 @@ class User:
         #if cell is in provider then otp is for provider
         obj = mdpprovider.Provider(db,int(p[0].id))
         user_data = json.loads(obj.getprovider())
+        user_data["user_id"] = user_id
         user_data["usertype"] = "provider"
         user_data["result"] = "success"
         user_data["error_message"] = ""
@@ -313,12 +320,14 @@ class User:
             #user is a patientmemebr
             patobj = mdppatient.Patient(db, 0)
             user_data = patobj.getpatient(int(common.getid(pat[0].primarypatientid)), int(common.getid(pat[0].patientid)), "imageurl")
+            user_data["user_id"] = user_id
             user_data["usertype"] = "member"
           else:
             #multiple users with the same cell
             error_message = "OTP Login API Error: No User/Multiple Patient/Members matching registered " + cell
             logger.loggerpms2.info(error_message)
             excpobj = {}
+            excpobj["user_id"] = user_id
             excpobj["result"] = "fail"
             excpobj["error_message"] = error_message
             return json.dumps(excpobj)    
@@ -338,6 +347,7 @@ class User:
             
             user_data = json.loads(obj.get_prospect({"prospectid":str(p[0].id)}))
             logger.loggerpms2.info("After get_prospect")  
+            user_data["user_id"] = user_id
             user_data["usertype"] = "prospect"
             user_data["result"] = "success"
             user_data["error_message"] = ""
@@ -351,6 +361,7 @@ class User:
               crypt_pass = my_crypt(cell)[0]  
               db(db.auth_user.id == users[0].id).update(username=cell,password=crypt_pass)
               db.commit()
+              user_data["user_id"] = users[0].id if(len(users) > 0) else 0
               user_data["usertype"] = "prospect"
               user_data["prospectid"] = "0"
               user_data["result"] = "success"
@@ -366,7 +377,8 @@ class User:
                                          )
               db.commit()      
                         
-      
+                   
+              user_data["user_id"] = id_user
               user_data["usertype"] = "prospect"
               user_data["prospectid"] = "0"
               user_data["result"] = "success"
@@ -425,6 +437,7 @@ class User:
               user_data ={
                 "result" : 'success',
                 "error_message":"",
+                "user_id":auth.user.id if(auth.user != None) else 0,
                 "usertype":"webadmin",
                 "providerid":int(provdict["providerid"]),
                 "providername":provdict["providername"],
@@ -438,6 +451,7 @@ class User:
               user_data = {
                 "result" : "success",
                 "error_message":"",
+                "user_id":auth.user.id if(auth.user != None) else 0,
                 "usertype":"webmember",
                 "providerid":int(common.getid(webmems[0].provider)),
                 "webmemberid":int(common.getid(webmems[0].id)),
@@ -450,6 +464,7 @@ class User:
             else:
               user_data ={
                 "result" : "fail",
+                "user_id":auth.user.id if(auth.user != None) else 0,
                 "error_message":"Login Failure. Invalid Web Member"
               }
             
@@ -462,6 +477,7 @@ class User:
               user_data = {
                 "result" : "success",
                 "error_message":"",
+                "user_id":auth.user.id if(auth.user != None) else 0,
                 "usertype":"member",
                 "providerid":int(common.getid(mems[0].provider)),
                 "webmemberid":int(common.getid(mems[0].webmember)),
@@ -474,6 +490,7 @@ class User:
             elif(len(mems) > 1):
               user_data ={
                 "result" : "fail",
+                "user_id":auth.user.id if(auth.user != None) else 0,
                 "error_message":"Login Failure. Invalid Patient Member"
               }         
           else:
@@ -487,6 +504,7 @@ class User:
               user_data ={
                 "result" : "success",
                 "error_message":"",
+                "user_id":auth.user.id if(auth.user != None) else 0,
                 "usertype":"provider",
                 "webmemberid":0,
                 "memberid":0,
@@ -757,6 +775,9 @@ class User:
     
     cellno = common.modify_cell(cell)   #in standard with 91
     
+    a = db(db.auth_user.cell == cell).select(db.auth_user.id)
+    user_id = a[0].id if(len(a) > 0) else 0
+    
     #search for the cell number in patientmember
     pats = db((db.vw_memberpatientlist.cell == cell)|(db.vw_memberpatientlist.cell == cellno)).select()   #compare with 91 or without 91
     
@@ -766,6 +787,7 @@ class User:
     
     for pat in pats:
       patobj = {
+        "user_id":user_id,
         "member":common.getboolean(pat.hmopatientmember),  #False for walk in patient
         "patientmember" : pat.patientmember,
         "fname":pat.fname,
@@ -777,14 +799,11 @@ class User:
         "cell":pat.cell,
         "email":pat.email,
         "providerid":pat.providerid
-        
-        
       }
       patlist.append(patobj)   
       
       
       db.otplog.insert(\
-        
         memberid = int(common.getid(pat.primarypatientid)),
         patientid = int(common.getid(pat.patientid)),
         cell = cell,
@@ -796,36 +815,11 @@ class User:
         created_on = common.getISTFormatCurrentLocatTime(),
         modified_by = 1,
         modified_on = common.getISTFormatCurrentLocatTime()
-      
-      
       )
     message = "success" if(len(pats)>0) else "failure"
     return json.dumps({"patientcount":len(pats),"patientlist":patlist,"message":message,"result":message})
   
-  #status.py
-  #xSTATUS=('No_Attempt', 'Attempting','Completed','Enrolled', 'Revoked')
-  #xALLSTATUS=('ALL', 'No_Attempt', 'Attempting','Completed','Enrolled', 'Revoked')
-  #xTREATMENTPLANSTATUS=('Open', 'Sent for Authorization','Authorized','Completed','Cancelled')
-  #xTREATMENTSTATUS=('Started', 'Sent for Authorization', 'Authorized', 'Completed','Cancelled')
-  #xPRIORITY=('Emergency','High','Medium','Low')
-  #xOFFICESTAFF=('Doctor','Staff')
-  #xAPPTSTATUS=('Open','Confirmed','Checked-In', 'Checked-Out', 'Cancelled')
-  #xCUSTACTIVITY=('Scheduled','Pending','Enrolled','Cancelled')  
-
-  #gender.py
-  #xGENDER=('Male','Female')
-  #xPATTITLE = (' ', 'Mr.', 'Mrs.', 'Ms.', 'Miss')
-  #xDOCTITLE = (' ','Dr.','Mr.','Mrs.', 'Ms.', 'Miss')
   
-  #cycle.py
-  #xDURATION=('30','45','60')
-  
-  
-  #relations.py
-  #xRELATIONS=('Self',Spouse', 'Son', 'Daughter', 'Son_in_Law', 'Daughter_in_Law', 'Father', 'Mother', 'Father_in_Law', 'Mother_in_Law','Grandmother','Grandfather','Sibling','Relative','Dependant')
-  #PLANRELATIONS=('Self', 'Spouse', 'Son', 'Daughter', 'Son_in_Law', 'Daughter_in_Law', 'Father', 'Mother', 'Father_in_Law', 'Mother_in_Law','Grandmother','Grandfather','Sibling','Relative')
-  #xPLANRDEPENDANTS=('Self', 'Dependant_1', 'Dependant_2', 'Dependant_3', 'Dependant_4', 'Dependant_5', 'Dependant_6', 'Dependant_7')  
-
 
   def getcities(self):
     #cities
@@ -1185,6 +1179,86 @@ class User:
   
       return json.dumps(regobj)
     
+    
+  def hvdoc_registration(self, request, hvdoc, hvdocname,  email, cell, username, password):
+      logger.loggerpms2.info("Enter HVDOC registration")
+      db = self.db
+      
+      regobj = {}
+      auth = self.auth
+      sitekey = hvdoc
+      
+      try:
+     
+        
+        # create new user
+        users = db((db.auth_user.email==email) & (db.auth_user.cell == cell)).select()
+        if users:
+          #logger.loggerpms2.info("before CRYPT_1")
+          my_crypt = CRYPT(key=auth.settings.hmac_key)
+          #logger.loggerpms2.info("after CRYPT_1")
+          crypt_pass = my_crypt(str(password))[0]  
+          #logger.loggerpms2.info("after CRYPT_PASS_1")
+          db(db.auth_user.id == users[0].id).update(agent=hvdoc,first_name=hvdocname,username=username,password=crypt_pass)
+          db.commit()
+          #logger.loggerpms2.info("after UPDATE_1")      
+          
+       
+         
+         
+          regobj["result"] = "success"
+          regobj["error_message"] = ""
+          regobj["new"] = False
+          regobj["userid"] = str(users[0].id)
+          regobj["email"] = email
+          regobj["cell"] = cell
+          regobj["sitekey"] = sitekey
+             
+          
+        else:
+          #logger.loggerpms2.info("befor CRYPT_2")
+          
+          my_crypt = CRYPT(key=auth.settings.hmac_key)
+          #logger.loggerpms2.info("after CRYPT_2")
+          
+          crypt_pass = my_crypt(str(password))[0]
+          
+          #logger.loggerpms2.info("after CRYPT_PASS_2_" + " " + str(crypt_pass).encode("ASCII"))
+          id_user= db.auth_user.insert(
+                                     email = str(email),
+                                     cell = str(cell),
+                                     sitekey = str(hvdoc),
+                                   
+                                     username = str(username),
+                                    
+                                     password = str(crypt_pass) 
+                                     )
+          db.commit()      
+          #logger.loggerpms2.info("after INSERT_2")      
+              
+  
+       
+         
+          regobj["result"] = "success"
+          regobj["error_message"] = ""
+          regobj["new"] = True
+          regobj["userid"] = str(id_user)
+          regobj["email"] = email
+          regobj["cell"] = cell
+          regobj["sitekey"] = sitekey
+      
+      
+      except Exception as e:
+        excpobj = {}
+        
+        excpobj["result"] = "fail"
+        excpobj["new"] = False
+        excpobj["userid"] = ""
+        excpobj["error_message"] = "SPAT Registration Exception Error - " + str(e)
+        logger.loggerpms2.info("SPAT Registration Exception Error - " + str(e))
+        return json.dumps(excpobj)       
+  
+      return json.dumps(regobj)
     
   
   

@@ -2028,7 +2028,7 @@ def make_payment_pinelabs():
         message = rspobj["error_message"]
         
         
-    
+    logger.loggerpms2.info("Exit Pine Labs Payment " + json.dumps(rspobj))
     return dict(message = message)
 
 

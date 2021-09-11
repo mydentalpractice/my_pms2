@@ -24,6 +24,12 @@ class Patient:
   def __init__(self,db,providerid):
     self.db = db
     self.providerid = providerid
+    urlprops = db(db.urlproperties.id >0 ).select(db.urlproperties.pagination)
+
+
+    self.items_per_page = 10 if(len(urlprops) <= 0) else int(common.getvalue(urlprops[0].pagination))
+      
+    
     return 
 
   #returns the policy which the patient has subscribed to  
@@ -429,19 +435,16 @@ class Patient:
       
       result = False
       patlist = []
-      
-      
-     
-        
-        
+
       pats=None
-      
-      urlprops = db(db.urlproperties.id >0 ).select(db.urlproperties.pagination)
-      
       page = page -1
-      urlprops = db(db.urlproperties.id >0 ).select(db.urlproperties.pagination)
-      items_per_page = 10 if(len(urlprops) <= 0) else int(common.getvalue(urlprops[0].pagination))
-      limitby = None if page < 0 else ((page)*items_per_page,(page+1)*items_per_page)      
+      
+      #urlprops = db(db.urlproperties.id >0 ).select(db.urlproperties.pagination)
+      #items_per_page = 10 if(len(urlprops) <= 0) else int(common.getvalue(urlprops[0].pagination))
+      #limitby = None if page < 0 else ((page)*items_per_page,(page+1)*items_per_page)      
+
+      items_per_page = self.items_per_page
+      limitby = self.limitby
       memberset = set()
       
       #display all those patients who have seeked appointments with this provider. Appointment guarantees that these patient/members have 
@@ -620,6 +623,155 @@ class Patient:
         
     return json.dumps(rsp )
   
+  def searchpatient_fast(self,avars):    
+    #logger.loggerpms2.info("Enter Search Patient " + json.dumps(avars))
+
+    
+    try:
+      db = self.db
+
+      page = int(common.getkeyvalue(avars,"page","0"))
+      page = page -1
+      items_per_page = self.items_per_page
+      limitby = None if page < 0 else ((page)*items_per_page,(page+1)*items_per_page)  
+      
+      maxcount = common.getkeyvalue(avars,"maxcount","0")
+      
+      patientsearch = common.getkeyvalue(avars,"searchphrase","")
+
+      providerid = common.getkeyvalue(avars,"providerid","0")
+      
+      hmopatientmember = common.getkeyvalue(avars,"member","")
+      hmopatientmember = "" if((hmopatientmember==None)|(hmopatientmember=="")) else common.getboolean(hmopatientmember)  #default to walk-in members
+      
+      
+      result = False
+      patlist = []
+
+      pats=None
+      
+      memberset = set()
+      
+      #display all those patients who have seeked appointments with this provider. Appointment guarantees that these patient/members have 
+      #agreed to this provider.
+      memberset = set()
+    
+      appts = db((db.t_appointment.is_active == True)&\
+                 (db.t_appointment.f_status != 'Cancelled')&\
+                 (db.t_appointment.provider == providerid)).select(db.t_appointment.patientmember, db.t_appointment.patient)
+    
+      for appt in appts:
+        if(appt.patientmember in memberset):
+          continue
+        memberset.add(appt.patientmember)      
+
+
+      
+      qry = (1==1)
+
+      if(providerid > 0):
+        q = (qry) & ((db.vw_memberpatientlist_fast.hmopatientmember == True) & (db.vw_memberpatientlist_fast.providerid == providerid))
+        pats = db(q).select(db.vw_memberpatientlist_fast.primarypatientid)
+        for pat in pats:
+          if(pat.primarypatientid in memberset):
+            continue
+          memberset.add(pat.primarypatientid)
+      
+      if(hmopatientmember == True):
+        qry = (qry) & ((db.vw_memberpatientlist_fast.primarypatientid.belongs(memberset)) & (db.vw_memberpatientlist_fast.hmopatientmember == True))
+      elif(hmopatientmember==False):
+        #display all Walk-in Patients for this Provider
+        if(providerid > 0):
+          qry = (qry) & (db.vw_memberpatientlist_fast.hmopatientmember == False) & (db.vw_memberpatientlist_fast.providerid == providerid)
+        else:
+          qry = qry & ( 1 !=1 ) #display no walk in patients
+         
+      else:
+        if(providerid > 0):  #list of walk-in patients for this Provider + list of MDP Members matching the search phrase  (removed premenddt check)
+          qry = (qry) & (((db.vw_memberpatientlist_fast.hmopatientmember == False) & (db.vw_memberpatientlist_fast.providerid == providerid)) |\
+                         ((db.vw_memberpatientlist_fast.primarypatientid.belongs(memberset)) &  (db.vw_memberpatientlist_fast.hmopatientmember == True)))
+        else: # list of MDP Members matching the search phrase
+          qry = (qry) & ((db.vw_memberpatientlist_fast.primarypatientid.belongs(memberset)) &  (db.vw_memberpatientlist_fast.hmopatientmember == True))
+
+
+      #is it numeric only, then search on cell numbero
+      if(patientsearch.replace("+",'').replace(' ','').isdigit()):
+          pats=db((qry) & (db.vw_memberpatientlist_fast.cell.like("%" + patientsearch + "%")))\
+                  .select(vw_memberpatientlist_fast.ALL,
+                                limitby=limitby,orderby=db.vw_memberpatientlist_fast.patientmember)
+          maxcount = maxcount if (maxcount > 0 ) else db((qry) & (db.vw_memberpatientlist_fast.cell.like("%" + patientsearch + "%"))).count()
+      
+      #is it email only
+      elif(patientsearch.find("@") >= 0):
+        pats=db((qry) & (db.vw_memberpatientlist_fast.email.like("%" + patientsearch + "%")))\
+                .select(vw_memberpatientlist_fast.ALL,limitby=limitby,orderby=db.vw_memberpatientlist_fast.fname)
+        maxcount = maxcount if (maxcount > 0 ) else db((qry) & (db.vw_memberpatientlist_fast.email.like("%" + patientsearch + "%"))),count()
+        
+      #if pats is empty, then search for phrase in patient (fname lname:membercode)
+      else:
+        if(patientsearch != ""):
+          qry = ((qry) & (db.vw_memberpatientlist_fast.pattern.like("%" + patientsearch + "%")))
+        
+        
+        pats = db((qry))\
+          .select(db.vw_memberpatientlist_fast.ALL,
+                  limitby=limitby,orderby=db.vw_memberpatientlist_fast.pattern)
+        
+        maxcount = maxcount if (maxcount > 0) else db((qry)).count()
+      
+      
+      
+      for pat in pats:
+        
+        pattern = pat.pattern
+        patarr = pattern.split(" ")
+        
+        patobj = {
+          #"member":common.getboolean(p[0].hmopatientmember),  #False for walk in patient
+          "patientmember" : pat.patientmember,
+          "fname":patarr[1],
+          "lname":patarr[3],
+          #"memberid":int(common.getid(p[0].primarypatientid)),
+          #"patientid":int(common.getid(p[0].patientid)),
+          #"primary":True if(pat.patienttype == "P") else False,   #True if "P" False if "D"
+          #"relation":pat.relation,
+          "cell":patarr[5],
+          "email":patarr[6],
+          #"age":pat.age,
+          #"dob":common.getstringfromdate(pat.dob,"%d/%m/%Y"),
+          #"gender":pat.gender
+          
+        }
+        patlist.append(patobj)   
+      
+      xcount = ((page+1) * items_per_page) - (items_per_page - len(pats)) 
+      
+      bnext = True
+      bprev = True
+      
+      #first page
+      if((page+1) == 1):
+        bnext = True
+        bprev = False
+      
+      #last page
+      if(len(pats) < items_per_page):
+        bnext = False
+        bprev = True
+      
+      rsp = {"patientcount":len(pats),"page":page+1,"patientlist":patlist, "runningcount":xcount, "maxcount":maxcount, "next":bnext, "prev":bprev,\
+                         "patientsearch":patientsearch,"result":"success","error_message":"","error_code":""} 
+      
+      #logger.loggerpms2.info("Exit Search Patient " + json.dumps(rsp))
+    except Exception as e:
+      mssg = "Search Patient Exception:\n" + str(e)
+      logger.loggerpms2.info(mssg)
+      excpobj = {}
+      excpobj["result"] = "fail"
+      excpobj["error_message"] = mssg
+      return json.dumps(excpobj)  
+        
+    return json.dumps(rsp )
   
   def getcompanypatients(self,page,company,patientsearch,maxcount,patientmembersearch,hmopatientmember):
       

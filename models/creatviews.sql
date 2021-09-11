@@ -8872,6 +8872,63 @@ CHANGE COLUMN `hv_appointmentid` `hv_doc_appointmentid` INT(11) NULL DEFAULT NUL
 
            Moidified City table to add HV and VC flags
 
+4. YYYZZZAdded fields to hv_doc_appointment table
+ALTER TABLE `mydp_prod`.`hv_doc_appointment` 
+CHANGE COLUMN `hv_appt_distance` `hv_appt_distance` FLOAT NULL DEFAULT NULL AFTER `hv_appt_notes`,
+ADD COLUMN `hv_appt_address1` VARCHAR(45) NULL AFTER `hv_appt_distance`,
+ADD COLUMN `hv_appt_address2` VARCHAR(45) NULL AFTER `hv_appt_address1`,
+ADD COLUMN `hv_appt_address3` VARCHAR(45) NULL AFTER `hv_appt_address2`,
+ADD COLUMN `hv_appt_city` VARCHAR(45) NULL AFTER `hv_appt_address3`,
+ADD COLUMN `hv_appt_city_id` VARCHAR(45) NULL AFTER `hv_appt_city`,
+ADD COLUMN `hv_appt_st` VARCHAR(45) NULL AFTER `hv_appt_city_id`,
+ADD COLUMN `hv_appt_latitude` VARCHAR(45) NULL AFTER `hv_appt_st`,
+ADD COLUMN `hv_appt_longitude` VARCHAR(45) NULL AFTER `hv_appt_latitude`,
+ADD COLUMN `hv_appt_payment_txid` VARCHAR(45) NULL AFTER `hv_appt_longitude`,
+ADD COLUMN `hv_appt_payment_amount` FLOAT NULL AFTER `hv_appt_payment_txid`,
+ADD COLUMN `hv_appt_payment_date` DATE NULL AFTER `hv_appt_payment_amount`;
+ALTER TABLE `mydp_prod`.`hv_doc_appointment` 
+CHANGE COLUMN `hv_appt_st` `hv_appt_st` VARCHAR(45) NULL DEFAULT NULL AFTER `hv_appt_notes`,
+CHANGE COLUMN `hv_appt_payment_txid` `hv_appt_payment_txid` INT(11) NULL DEFAULT NULL ;
+
+ALTER TABLE `mydp_prod`.`hv_doc_appointment` 
+CHANGE COLUMN `hv_appt_st` `hv_appt_st` VARCHAR(45) NULL DEFAULT NULL AFTER `hv_appt_city`,
+ADD COLUMN `hv_appt_pin` VARCHAR(45) NULL AFTER `hv_appt_st`;
+
+ALTER TABLE `mydp_prod`.`hv_doc_appointment` 
+ADD COLUMN `hv_appt_feedback` VARCHAR(1024) NULL AFTER `hv_appt_payment_date`,
+ADD COLUMN `hv_appt_rating` VARCHAR(45) NULL AFTER `hv_appt_feedback`,
+ADD COLUMN `hv_appt_feedback_on` DATETIME NULL AFTER `hv_appt_rating`,
+ADD COLUMN `hv_appt_feedback_by` VARCHAR(45) NULL AFTER `hv_appt_feedback_on`;
+
+ALTER TABLE `mydp_prod`.`hv_doc_appointment` 
+CHANGE COLUMN `hv_appt_feedback_by` `hv_appt_feedback_by` INT(11) NULL DEFAULT NULL ;
+
+
+4. YYYZZZNew Device table
+CREATE TABLE `mydp_prod`.`hv_device_info` (
+  `id` INT(11) NOT NULL AUTO_INCREMENT,
+  `hv_doctor_id` INT(11) NULL,
+  `hv_device_id` VARCHAR(45) NULL,
+  `hv_device_type` VARCHAR(45) NULL,
+  `hv_device_fcm_token` VARCHAR(45) NULL,
+  PRIMARY KEY (`id`));
+
+5. YYYZZZZAdded phpurl in urlproperties
+ALTER TABLE `mydp_prod`.`urlproperties` 
+ADD COLUMN `php_url` TEXT NULL AFTER `pagination`;
+
+6. YYYZZZRenamce hv_device_info to device_info
+ALTER TABLE `mydp_prod`.`hv_device_info` 
+DROP COLUMN `hv_doctor_id`,
+CHANGE COLUMN `hv_device_id` `device_id` VARCHAR(45) NULL DEFAULT NULL ,
+CHANGE COLUMN `hv_device_type` `device_type` VARCHAR(45) NULL DEFAULT NULL ,
+CHANGE COLUMN `hv_device_fcm_token` `device_fcm_token` VARCHAR(45) NULL DEFAULT NULL , RENAME TO  `mydp_prod`.`device_info` ;
+
+6. Add user_id col. in device_info
+ALTER TABLE `mydp_prod`.`device_info` 
+ADD COLUMN `user_id` VARCHAR(45) NULL AFTER `id`;
+
+7. YYYYZZZ New view vw_treatmentlist_fast
 
 
 Script file to clear user for sign-up

@@ -399,7 +399,143 @@ class Treatment:
         
         return json.dumps(trtmntobj)        
     
+    #def gettreatments(self,page,memberid,patientid,searchphrase,maxcount,treatmentyear,clinicid):
+    def gettreatments_fast(self,avars):
+        logger.loggerpms2.info("Enter gettreatments_fast " + json.dumps(avars))
+        db = self.db
+        providerid = self.providerid
+        
+   
+        
+        memberid = int(common.getid(common.getkeyvalue(avars,"memberid","0")))
+        patientid = int(common.getid(common.getkeyvalue(avars,"patientid","0")))
+        page = int(common.getid(common.getkeyvalue(avars,"page","0")))
+        clinicid = int(common.getid(common.getkeyvalue(avars,"clinicid","0")))        
+        maxcount = int(common.getid(common.getkeyvalue(avars,"maxcount","0")))        
+        searchphrase = common.getkeyvalue(avars,"searchphrase","")
+        treatmentyear = (None if(avars["treatmentyear"] == "") else str(avars["treatmentyear"])   )  if "treatmentyear" in avars else None
+        
+            
+        page = page -1
+        urlprops = db(db.urlproperties.id >0 ).select(db.urlproperties.pagination)
+        items_per_page = 10 if(len(urlprops) <= 0) else int(common.getvalue(urlprops[0].pagination))
+        limitby = ((page)*items_per_page,(page+1)*items_per_page) 
+        
+        limitby = None if(items_per_page <= 0) else limitby
+        
+        #logger.loggerpms2.info("page = " + str(page) + " limitby=" + str(limitby))
+        trtmntobj  = {}
+        
+        try:
+            startdate = datetime.datetime.strptime("01/01/" + treatmentyear, "%d/%m/%Y")  if(treatmentyear != None) else None
+            enddate = datetime.datetime.strptime("31/12/" + treatmentyear, "%d/%m/%Y") if(treatmentyear != None) else None
+            
+            query = (1==1)
+            query = (db.vw_treatmentlist_fast.memberid == memberid) if(memberid > 0) else query
 
+            query = (query & (db.vw_treatmentlist_fast.patientid == patientid)) if(patientid > 0) else query
+            
+            query = (query & (db.vw_treatmentlist_fast.providerid == providerid)) if(providerid > 0) else query
+
+            query = (query & (db.vw_treatmentlist_fast.clinicid == clinicid)) if(clinicid > 0) else query
+
+            
+            query = (query & ((db.vw_treatmentlist_fast.startdate >= startdate) & (db.vw_treatmentlist_fast.startdate <= enddate))) if(treatmentyear != None) else query
+            
+            #query = query & (db.vw_treatmentlist.is_active == True)
+            #IB 31/01/2020 Sending all treatments - Cancelled, Started and Completed
+            query = query & ((db.vw_treatmentlist_fast.is_active == True) | ((db.vw_treatmentlist_fast.is_active == False) & (db.vw_treatmentlist_fast.status == "Cancelled" ))) 
+            
+            query =  (query)
+            
+            query = query if((searchphrase == "") | (searchphrase == None)) else query & (db.vw_treatmentlist_fast.pattern.like('%' + searchphrase + '%'))
+            
+            logger.loggerpms2.info("Query = " + str(query))
+            if(page >= 0):
+                treatments = db(query).select(db.vw_treatmentlist_fast.ALL,db.vw_treatment_procedure_group.shortdescription,db.patientmember.cell,\
+                                              left=[db.vw_treatment_procedure_group.on(db.vw_treatment_procedure_group.treatmentid==db.vw_treatmentlist_fast.id),\
+                                                    db.patientmember.on(db.patientmember.id == db.vw_treatmentlist_fast.memberid)],\
+                                              limitby=limitby, orderby=~db.vw_treatmentlist_fast.id)
+                if(maxcount == 0):
+                    maxcount = db(query).count()
+            else:
+                treatments = db(query).select(db.vw_treatmentlist_fast.ALL,db.vw_treatment_procedure_group.shortdescription,db.patientmember.cell,\
+                                              left=[db.vw_treatment_procedure_group.on(db.vw_treatment_procedure_group.treatmentid==db.vw_treatmentlist_fast.id),\
+                                                    db.patientmember.on(db.patientmember.id == db.vw_treatmentlist_fast.memberid)],\
+                                              orderby=~db.vw_treatmentlist_fast.id)
+                if(maxcount == 0):
+                    maxcount = db(query).count()
+                    
+          
+            logger.loggerpms2.info("Number of Treatments = " + str(len(treatments)))
+            
+            treatmentlist = []
+            treatmentobj = {}
+            
+            
+           
+              
+                   
+
+            
+            for treatment in treatments:
+                treatmentid = int(common.getid(treatment.vw_treatmentlist_fast.id))
+                tplanid = int(common.getid(treatment.vw_treatmentlist_fast.tplanid))
+                r= self.updatetreatmentcostandcopay(treatmentid, tplanid)
+                treatmentobj = {
+                    "treatmentid" : treatmentid,
+                    "treatment": common.getstring(treatment.vw_treatmentlist_fast.treatment),
+                    "treatmentdate"  : (treatment.vw_treatmentlist_fast.startdate).strftime("%d/%m/%Y"),
+                    "status": "Started" if(common.getstring(treatment.vw_treatmentlist_fast.status) == "") else common.getstring(treatment.vw_treatmentlist_fast.status),
+    
+                    "patientname" : common.getstring(treatment.vw_treatmentlist_fast.patientname),
+                    
+                    "patcell":str(treatment.patientmember.cell),
+                   
+                    "doctorname":treatment.vw_treatmentlist_fast.doctorname,
+                   
+                    
+                    "clinicname":treatment.vw_treatmentlist_fast.clinicname,
+
+                    "procedures":common.getstring(treatment.vw_treatment_procedure_group.shortdescription),
+                   
+                    "totaltreatmentcost":float(common.getstring(r["totaltreatmentcost"])),
+                    "totalcopay":float(common.getstring(r["totalcopay"])),
+                    "totalinspays":float(common.getstring(r["totalinspays"])),
+                    "totaldue":float(common.getstring(r["totaldue"])),
+                    "totalpaid":float(common.getstring(r["totaltreatmentcost"]))-float(common.getstring(r["totaldue"])),
+                   
+                    
+                }
+                treatmentlist.append(treatmentobj)        
+            
+            xcount = ((page+1) * items_per_page) - (items_per_page - len(treatments)) 
+            
+            bnext = True
+            bprev = True
+            
+            #first page
+            if((page+1) == 1):
+                bnext = True
+                bprev = False
+            
+            #last page
+            if(len(treatments) < items_per_page):
+                bnext = False
+                bprev = True  
+                
+            trtmntobj = {"result":"success","error_message":"","error_code":"",\
+                         "treatmentcount":len(treatments),"page":page+1, "treatmentyear":treatmentyear,"treatmentlist":treatmentlist,"runningcount":xcount,\
+                         "maxcount":maxcount, "next":bnext, "prev":bprev}
+        except Exception as e:
+            excpobj = {}
+            excpobj["result"] = "fail"
+            excpobj["error_message"] = "New Patient API Exception Error - " + str(e)
+            return json.dumps(excpobj)       
+            
+        
+        return json.dumps(trtmntobj)        
+        
     
         
     def xgettreatments(self,page,memberid,patientid,searchphrase,maxcount):

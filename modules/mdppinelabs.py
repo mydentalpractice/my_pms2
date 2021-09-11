@@ -118,7 +118,7 @@ class PineLabs:
                 
                 "txn_data": {
                     "navigation_mode": "2",
-                    "payment_mode": "1",
+                    "payment_mode": "1,4",
                     "transaction_type": "1",
                 },                
               

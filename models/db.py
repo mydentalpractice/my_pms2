@@ -158,6 +158,16 @@ db.define_table('hv_treatment',
 db.hv_treatment._singular = "hv_treatment"
 db.hv_treatment._plural   = "hv_treatment"       
 
+
+db.define_table('device_info',
+                Field('user_id','integer'),
+                Field('device_id','string'),
+                Field('device_type','string'),
+                Field('device_fcm_token','string')
+                )
+db.device_info._singular = "device_info"
+db.device_info._plural   = "device_info" 
+
 db.define_table('hv_doc_appointment',
                 Field('appointmentid','integer'),
                 Field('hv_doctorid','integer'),
@@ -172,9 +182,31 @@ db.define_table('hv_doc_appointment',
                 Field('hv_appt_cancelled_on','datetime'),
                 Field('hv_appt_cancelled_by','string'),
                 Field('hv_appt_distance','double'),
-                Field('hv_appt_notes','text')
+                Field('hv_appt_notes','text'),
+                Field('hv_appt_address1','string'),
+                Field('hv_appt_address2','string'),
+                Field('hv_appt_address3','string'),
+                Field('hv_appt_city','string'),
+                Field('hv_appt_st','string'),
+                Field('hv_appt_pin','string'),
+                Field('hv_appt_city_id','integer'),
+                Field('hv_appt_latitude','string'),
+                Field('hv_appt_longitude','string'),
+                Field('hv_appt_payment_txid','integer'),
+          
+                Field('hv_appt_payment_amount','float'),
+                Field('hv_appt_payment_date','date'),
+
+                Field('hv_appt_feedback','string'),
+                Field('hv_appt_rating','string'),
+                Field('hv_appt_feedback_on','date'),
+                Field('hv_appt_feedback_by','integer'),
                 
                 )
+
+
+
+
 db.hv_doc_appointment._singular = "hv_doc_appointment"
 db.hv_doc_appointment._plural   = "hv_doc_appointment"                
                 
@@ -1716,6 +1748,7 @@ db.define_table('urlproperties',
                 Field('mydp_getrsa_url','string',default=''),
 
                 Field('pagination','integer',default=10),
+                Field('php_url','text'),
 
                 auth.signature
                 )
@@ -2579,6 +2612,27 @@ db.define_table('vw_treatmentlist',
 db.vw_treatmentlist._singular = "vw_treatmentlist"
 db.vw_treatmentlist._plural   = "vw_treatmentlist"
 
+        
+db.define_table('vw_treatmentlist_fast',
+                Field('tplanid','integer'),     
+                Field('providerid','integer',represent=lambda v, r: 0 if v is None else v, label='Provider ID'),     
+                Field('treatment','string',represent=lambda v, r: '' if v is None else v, label='Treatment'),  
+                Field('startdate','date', label='Start Date',requires=IS_DATE(format=T('%d/%m/%Y'),error_message='must be d/m/Y!')),  
+                Field('enddate','date', label='End Date',requires=IS_DATE(format=T('%d/%m/%Y'),error_message='must be d/m/Y!')),  
+                Field('status','string',represent=lambda v, r: '' if v is None else v,label='Status'),  
+                Field('patientname','string',represent=lambda v, r: '' if v is None else v, label='Patient'),  
+                Field('memberid','integer',represent=lambda v, r: 0 if v is None else v, label='Member ID'),                  
+                Field('patientid','integer',represent=lambda v, r: 0 if v is None else v, label='Patient ID'),  
+                Field('doctorname','string'),  
+                Field('clinicid','integer',represent=lambda v, r: 0 if v is None else v, label='Clinic ID'),  
+                Field('clinicname','string'),  
+                Field('pattern','string'),  
+                Field('is_active','boolean', default=True)
+                )
+db.vw_treatmentlist_fast._singular = "vw_treatmentlist_fast"
+db.vw_treatmentlist_fast._plural   = "vw_treatmentlist_fast"
+
+
 db.define_table('vw_appointmentmemberlist',
                 Field('patientid','integer',represent=lambda v, r: 0 if v is None else v), 
                 Field('primarypatientid','integer',represent=lambda v, r: 0 if v is None else v), 
@@ -2637,6 +2691,20 @@ db.define_table('vw_memberpatientlist',
 db.vw_memberpatientlist._singular = "vw_memberpatientlist"
 db.vw_memberpatientlist._plural   = "vw_memberpatientlist"
 
+
+
+db.define_table('vw_memberpatientlist_fast',
+                Field('patientid','integer'), 
+                Field('primarypatientid','integer'), 
+                Field('providerid','integer'), 
+                Field('patientmember','string'),  
+                Field('cell','string'), 
+                Field('email','string'), 
+                Field('hmopatientmember','boolean'),
+                Field('pattern','string')
+                )
+db.vw_memberpatientlist_fast._singular = "vw_memberpatientlist_fast"
+db.vw_memberpatientlist_fast_plural   = "vw_memberpatientlist+fast"
 
 
 
@@ -3598,7 +3666,7 @@ db.define_table('vw_payments',
     Field('patientid', 'integer',represent=lambda v, r: 0 if v is None else v),
     Field('providerid','integer',represent=lambda v, r: 0 if v is None else v),
     Field('patientname', 'string',represent=lambda v, r: '' if v is None else v),
-    Field('paymentscount', 'integer',represent=lambda v, r: 0 if v is None else v),
+    
     Field('lastpayment', 'double',represent=lambda v, r: 0 if v is None else v),
     Field('lastpaymentdate', 'date',represent=lambda v, r: '' if v is None else v,requires=IS_DATE(format=T('%d/%m/%Y'))),
     Field('totaltreatmentcost', 'double',represent=lambda v, r: 0 if v is None else v),
@@ -3634,7 +3702,6 @@ db.define_table('vw_payments_fast',
     Field('patientid', 'integer',represent=lambda v, r: 0 if v is None else v),
     Field('providerid','integer',represent=lambda v, r: 0 if v is None else v),
     #Field('patientname', 'string',represent=lambda v, r: '' if v is None else v),
-    #Field('paymentscount', 'integer',represent=lambda v, r: 0 if v is None else v),
     #Field('lastpayment', 'double',represent=lambda v, r: 0 if v is None else v),
     Field('lastpaymentdate', 'date',represent=lambda v, r: '' if v is None else v,requires=IS_DATE(format=T('%d/%m/%Y'))),
     Field('totaltreatmentcost', 'double',represent=lambda v, r: 0 if v is None else v),

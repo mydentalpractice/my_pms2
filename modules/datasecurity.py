@@ -63,6 +63,9 @@ from applications.my_pms2.modules import logger
 
 class DataSecurity:
     def __init__(self):
+        db = current.globalenv['db']
+        urlprops = db(db.urlproperties.id > 0).select()
+        self.phpurl = urlprops[0].php_url if(len(urlprops) > 0) else "http://localhost:81"
         return 
 
 
@@ -127,7 +130,8 @@ class DataSecurity:
     def xencrypt_sha256_shopse(self,raw):
 
         #phpurl = "http://myphp.com/myphp.php"
-        phpurl = "http://myphp.com/encrypt_sha256_shopse.php"
+        #phpurl = "http://myphp.com/encrypt_sha256_shopse.php"
+        phpurl = self.phpurl + "/encrypt_sha256_shopse.php"
         dsobj = {"raw":raw}
 
         resp = requests.post(phpurl,json=dsobj)
@@ -175,8 +179,8 @@ class DataSecurity:
 
     #this method - encrypts  AES-256-CBC + base64 encode
     def encrypts(self,raw):
-
-        phpurl = "http://myphp.com/encrypt.php"
+        phpurl = self.phpurl + "/encrypt.php"
+        #phpurl = "http://myphp.com/encrypt.php"
         #phpurl = "http://localhost/encrypt.php"
 
         dsobj = {"raw":raw}
@@ -197,8 +201,8 @@ class DataSecurity:
 
     #this method - encrypts  AES-256-CBC + base64 encode
     def encrypt(self,raw):
-
-        phpurl = "http://myphp.com/encrypt.php"
+        phpurl = self.phpurl + "/encrypt.php"
+        #phpurl = "http://myphp.com/encrypt.php"
         #phpurl = "http://localhost/encrypt.php"
 
         dsobj = {"raw":raw}
@@ -217,8 +221,8 @@ class DataSecurity:
     #base64 Decode + Decrypt AES-256-CBC
     def decrypts(self,encrypt):
 
-
-        phpurl = "http://myphp.com/decrypt.php"
+        phpurl = self.phpurl + "/decrypt.php"
+        #phpurl = "http://myphp.com/decrypt.php"
         #phpurl = "http://localhost/decrypt.php"
 
         dsobj = {"encrypt":encrypt}
@@ -238,8 +242,8 @@ class DataSecurity:
 
     #base64 Decode + Decrypt AES-256-CBC
     def decrypt(self,encrypt):
-
-        phpurl = "http://myphp.com/decrypt.php"
+        phpurl = self.phpurl + "/decrypt.php"
+        #phpurl = "http://myphp.com/decrypt.php"
         #phpurl = "http://localhost/decrypt.php"
 
         dsobj = {"encrypt":encrypt}
