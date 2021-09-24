@@ -10,6 +10,8 @@ from applications.my_pms2.modules import common
 from applications.my_pms2.modules import mdpappointment
 from applications.my_pms2.modules import mdptreatment
 from applications.my_pms2.modules import mdpprocedure
+from applications.my_pms2.modules import mdputils
+
 from applications.my_pms2.modules import logger
 
 class Doctor:
@@ -363,6 +365,7 @@ class Doctor:
         hv_doc_pin=common.getkeyvalue(avars,"hv_doc_pin",ds[0].hv_doc_pin),
 
         hv_doc_profile_image=common.getkeyvalue(avars,"hv_doc_profile_image",ds[0].hv_doc_profile_image),
+        hv_doc_imageid=int(common.getkeyvalue(avars,"hv_doc_imageid",ds[0].hv_doc_imageid)),
         hv_doc_stafftype=common.getkeyvalue(avars,"hv_doc_stafftype",ds[0].hv_doc_stafftype),
         
         hv_doc_notes=common.getkeyvalue(avars,"hv_doc_notes",ds[0].hv_doc_notes),
@@ -469,7 +472,8 @@ class Doctor:
         "hv_doc_certification":ds[0].hv_doc_certification,
         
         "hv_doc_profile_image":ds[0].hv_doc_profile_image,
-
+        "hv_doc_imageid":ds[0].hv_doc_imageid,
+        
         "hv_doc_stafftype":ds[0].hv_doc_stafftype,
 
         "hv_doc_notes":ds[0].hv_doc_notes,
@@ -491,8 +495,45 @@ class Doctor:
 
     return json.dumps(rspobj)
 
-  
+  #assign hv_doctor to an appointment
+  #{
+  #   hv_doctorid
+  #   hv_appointmentid
+  #   city
+  # }
+  def assign_hv_doctor(self,avars):
+    logger.loggerpms2.info("Enter Assign HV Doctor " + json.dumps(avars))      
+    db = self.db
+    auth  = current.auth
+    rspobj = {}
     
+    try:
+      
+      hv_doctorid = common.getkeyvalue(avars,'hv_doctorid',0)
+      hv_appointmentid = common.getkeyvalue(avars,'hv_appointmentid',0)
+      db(db.hv_doc_appointment.id == hv_appointmentid).update(\
+        hv_doctorid = hv_doctorid
+      )
+      
+      rspobj["result"] = "success"
+      rspobj["error_message"] = ""
+      rspobj["error_code"] = ""
+      
+      
+    except Exception as e:
+        mssg = "Assign HV Doctor Exception:\n" + str(e)
+        logger.loggerpms2.info(mssg)      
+        excpobj = {}
+        excpobj["result"] = "fail"
+        excpobj["error_code"] = "MDP100"
+        excpobj["error_message"] = mssg
+        return json.dumps(excpobj)
+      
+      
+    dmp = json.dumps(rspobj)   
+    logger.loggerpms2.info("Exit assign_hv_doctor " + dmp)
+    return dmp
+
   #creates a new HV doctor and also refers to in doctor_ref table with rf_code = HVD
   def new_hv_doctor(self,avars):
       db = self.db
@@ -635,7 +676,10 @@ class Doctor:
       obj = {}
       ds = None
       
-      ds = db((db.hv_doctor.hv_doc_stafftype == 'Doctor') & (db.hv_doctor.is_active == True)).select()
+      city = common.getkeyvalue(avars,"city","")
+      qry = (db.hv_doctor.hv_doc_city == city) if(city != "") else (1==1)
+      
+      ds = db((qry)&(db.hv_doctor.hv_doc_stafftype == 'Doctor') & (db.hv_doctor.is_active == True)).select()
       for d in ds:
         s = db(db.speciality_default.id == d.hv_doc_speciality).select(db.speciality_default.speciality)
         r = db(db.role_default.id == d.hv_doc_role).select(db.role_default.role)
@@ -671,7 +715,12 @@ class Doctor:
 
           "hv_doc_speciality":d.hv_doc_speciality,
           "speciality_name":s[0].speciality if(len(s) > 0) else "",
-          "role_name":r[0].role if(len(r) > 0) else ""
+          "role_name":r[0].role if(len(r) > 0) else "",
+          
+          "hv_doc_profile_image":d.hv_doc_profile_image,
+          "hv_doc_imageid":d.hv_doc_imageid,
+
+
           
         }
         lst.append(obj)
@@ -1308,6 +1357,7 @@ class Doctor:
         #add to hv_doc_appointment
         refid = db.hv_doc_appointment.insert(appointmentid=rspobj["appointmentid"],
                                              hv_doctorid = hv_doctorid,
+                                             hv_appt_status="Open",
                                              hv_appt_address1 = common.getkeyvalue(avars,"hv_appt_address1","131-132 Ganpat Plaza MI Road"),
                                              hv_appt_address2 = common.getkeyvalue(avars,"hv_appt_address2",""),
                                              hv_appt_address3 = common.getkeyvalue(avars,"hv_appt_address3",""),
@@ -1330,8 +1380,14 @@ class Doctor:
         
         rspobj["hv_appointmentid"] = str(refid)
         
+        
+        
         memberid = common.getkeyvalue(avars,"memberid","0")
         patientid = common.getkeyvalue(avars,"patientid","0")
+        
+        #set the provider to default provider P0001 = 95
+        db(db.patientmember.id == memberid).update(provider = providerid)
+        
         r = db((db.patientmember.id == memberid)).select()
         addr = ""
         if(len(r)>0):
@@ -1343,7 +1399,51 @@ class Doctor:
           addr = addr + (" " + r[0].pin) if (common.getstring(r[0].pin) != "") else ""
         
         rspobj["hv_address"] = addr
+
+        #create a dummy treatment against this Appointment for the Home Visit Treatment
+        #"action":"new_hv_treatment",
+          #"memberid":25713,
+          #"patientid":25713,
+          #"hv_doctorid":10,
+          #"hv_doc_appointmentid":1        
+        xavars = {}
+        xavars["memberid"] = str(memberid)
+        xavars["patientid"] = str(patientid)
+        xavars["hv_doctorid"] = str(hv_doctorid)
+        xavars["hv_doc_appointmentid"] = str(refid)
+        trobj = json.loads(self.new_hv_treatment(xavars))
+        if(trobj["result"] == "success"):
+          hv_treatmentid = int(common.getid(trobj["hv_treatmentid"]))
+          
+          r = db(db.hv_treatment.id == hv_treatmentid).select(db.hv_treatment.treatmentid)
+          
+          treatmentid = r[0].treatmentid if(len(r) > 0) else 0
+          db(db.hv_doc_appointment.id == refid).update(\
+            hv_treatmentid = trobj["hv_treatmentid"],
+            treatmentid = treatmentid
+          )
+          rspobj["hv_treatmentid"] =trobj["hv_treatmentid"]
+          rspobj["treatmentid"] =treatmentid
+          rspobj["providerid"] = str(providerid)
       
+          #get cost hv_fees
+          #for now, we will get hv_fees from cities table.
+          m = db(db.patientmember.id == memberid).select(db.patientmember.city)
+          city = m[0].city if(len(m) > 0) else ""
+          c = db((db.cities.city == city) & (db.cities.HV == True)).select()
+          hv_fees = c[0].hv_fees if(len(c) > 0) else 0
+          rspobj["hv_fees"] = hv_fees
+          
+          #this is the actual way but requires corr. population of ProcedurePricePlan table
+          #tp = db(db.treatment.id == treatmentid).select(db.treatment.treatmentplan)
+          #tplanid = tp[0].treatmentplan if(len(tp)>0) else 0
+          #tobj = mdptreatment.Treatment(db,providerid)
+          #rsp = tobj.updatetreatmentcostandcopay(treatmentid, tplanid)
+          #if(rsp["result"] == "success"):
+            #rspobj["hv_fees"] = rsp["copay"]
+          #else:
+            #rspobj["hv_fees"] = 0
+            
     except Exception as e:
       mssg = "New HV DOC Appointment Exception:\n" + str(e)
       logger.loggerpms2.info(mssg)      
@@ -1371,6 +1471,15 @@ class Doctor:
       hv_doc_appointmentid = int(common.getkeyvalue(avars,"hv_doc_appointmentid","0"))
 
       r = db(db.hv_doc_appointment.id == hv_doc_appointmentid ).select()
+      
+      if(len(r) <= 0):
+        mssg = "No HV DOC Appointment for this id " + str(hv_doc_appointmentid)
+        logger.loggerpms2.info(mssg)      
+        excpobj = {}
+        excpobj["result"] = "fail"
+        excpobj["error_code"] = ""
+        excpobj["error_message"] = mssg
+        return json.dumps(excpobj)        
 
       hv_doctorid = 0 if(len(r) <= 0) else int(r[0].hv_doctorid)
 
@@ -1379,44 +1488,58 @@ class Doctor:
 
       apptid = 0 if(len(r) <= 0) else int(r[0].appointmentid)
       apptobj = mdpappointment.Appointment(db, self.providerid)
-      xobj = {"appointmentid":str(apptid)}
+      xobj = {"appointmentid":str(apptid),"showcancelled":True}
       apptobj = json.loads(apptobj.get_appointment(xobj))
+
+
 
       rspobj["result"] = "success"
       rspobj["hv_doctor"] = hv_doctor_obj
       rspobj["appointment"] = apptobj
 
-
-
+      
+      memberid = int(common.getid(common.getkeyvalue(apptobj,"memberid","0")))
+      patientid = int(common.getid(common.getkeyvalue(apptobj,"patientid","0")))
+      pats = db((db.patientmember.id == memberid) &\
+                (db.patientmember.is_active == True)).select()
+      
+      rspobj["hv_patient_profile"]= "" if(len(pats)<=0) else pats[0].image
+      rspobj["hv_patient_imageid"]= "" if(len(pats)<=0) else pats[0].imageid
 
       rspobj["hv_appt_created_on"] = common.getstringfromtime(r[0].hv_appt_created_on, "%d/%m/%Y %H:%M")
-      rspobj["hv_appt_created_by"] = r[0].hv_appt_created_by
+      rspobj["hv_appt_created_by"] = r[0].hv_appt_created_by 
       rspobj["hv_appt_confirmed_on"] = common.getstringfromtime(r[0].hv_appt_confirmed_on, "%d/%m/%Y %H:%M")
-      rspobj["hv_appt_confirmed_by"] = r[0].hv_appt_confirmed_by
+      rspobj["hv_appt_confirmed_by"] = r[0].hv_appt_confirmed_by 
       rspobj["hv_appt_checkedin_on"] = common.getstringfromtime(r[0].hv_appt_checkedin_on, "%d/%m/%Y %H:%M")
       rspobj["hv_appt_checkedin_by"] = r[0].hv_appt_checkedin_by
       rspobj["hv_appt_checkedout_on"] = common.getstringfromtime(r[0].hv_appt_checkedout_on, "%d/%m/%Y %H:%M")
       rspobj["hv_appt_checkedout_by"] = r[0].hv_appt_checkedout_by
       rspobj["hv_appt_cancelled_on"] = common.getstringfromtime(r[0].hv_appt_cancelled_on, "%d/%m/%Y %H:%M")
-      rspobj["hv_appt_cancelled_by"] = r[0].hv_appt_cancelled_by
-      rspobj["hv_appt_distance"] = r[0].hv_appt_distance
-      rspobj["hv_appt_notes"] =r[0].hv_appt_notes
+      rspobj["hv_appt_cancelled_by"] = r[0].hv_appt_cancelled_by 
+      
+      rspobj["hv_appt_feedback_on"] = common.getstringfromtime(r[0].hv_appt_feedback_on, "%d/%m/%Y %H:%M")
+      rspobj["hv_appt_feedback_by"] = r[0].hv_appt_feedback_by 
+      
+      rspobj["hv_appt_status"] = r[0].hv_appt_status 
+      
+      rspobj["hv_appt_distance"] = r[0].hv_appt_distance 
+      rspobj["hv_appt_notes"] =r[0].hv_appt_notes 
 
-      rspobj["hv_appt_address1"] =r[0].hv_appt_address1
+      rspobj["hv_appt_address1"] =r[0].hv_appt_address1  
       rspobj["hv_appt_address2"] =r[0].hv_appt_address2
-      rspobj["hv_appt_address3"] =r[0].hv_appt_address3
-      rspobj["hv_appt_city"] =r[0].hv_appt_city
-      rspobj["hv_appt_st"] =r[0].hv_appt_st
+      rspobj["hv_appt_address3"] =r[0].hv_appt_address3 
+      rspobj["hv_appt_city"] =r[0].hv_appt_city  
+      rspobj["hv_appt_st"] =r[0].hv_appt_st 
       rspobj["hv_appt_pin"] =r[0].hv_appt_pin
-      rspobj["hv_appt_city_id"] =r[0].hv_appt_city_id
-      rspobj["hv_appt_latitude"] =r[0].hv_appt_latitude
-      rspobj["hv_appt_longitude"] =r[0].hv_appt_longitude
+      rspobj["hv_appt_city_id"] =r[0].hv_appt_city_id  
+      rspobj["hv_appt_latitude"] =r[0].hv_appt_latitude 
+      rspobj["hv_appt_longitude"] =r[0].hv_appt_longitude 
        
       rspobj["hv_appt_payment_txid"] = str(r[0].hv_appt_payment_txid)
-      rspobj["hv_appt_payment_amount"] = r[0].hv_appt_payment_amount
+      rspobj["hv_appt_payment_amount"] = r[0].hv_appt_payment_amount 
       rspobj["hv_appt_payment_date"] =common.getstringfromdate(r[0].hv_appt_payment_date,"%d/%m/%Y")
 
-
+      rspobj["feedback_posted"] = True if int(common.getid(r[0].hv_appt_feedback_by) > 0) else False
 
 
 
@@ -1553,7 +1676,17 @@ class Doctor:
       for appt in appts:
         
         hv_apptobj = {}
+        hv_apptobj["hv_appt_address1"] = appt.hv_doc_appointment.hv_appt_address1
+        hv_apptobj["hv_appt_address2"] = appt.hv_doc_appointment.hv_appt_address2
+        hv_apptobj["hv_appt_address3"] = appt.hv_doc_appointment.hv_appt_address3
+        hv_apptobj["hv_appt_city"] = appt.hv_doc_appointment.hv_appt_city
+        hv_apptobj["hv_appt_st"] = appt.hv_doc_appointment.hv_appt_st
+        hv_apptobj["hv_appt_pin"] = appt.hv_doc_appointment.hv_appt_pin
+        hv_apptobj["hv_appt_longitude"] = appt.hv_doc_appointment.hv_appt_longitude
+        hv_apptobj["hv_appt_latitude"] = appt.hv_doc_appointment.hv_appt_latitude
+        hv_apptobj["hv_appt_city_id"] = appt.hv_doc_appointment.hv_appt_city_id
         
+        hv_apptobj["hv_appt_status"] = appt.t_appointment.f_status
         hv_apptobj["hv_doc_appointmentid"] = appt.hv_doc_appointment.id
         hv_apptobj["appointmentid"] = appt.hv_doc_appointment.appointmentid
         hv_apptobj["hv_doctorid"] = appt.hv_doc_appointment.hv_doctorid
@@ -1564,14 +1697,22 @@ class Doctor:
         memberid = appt.t_appointment.patientmember
         patientid = appt.t_appointment.patient
         
-        p = db((db.patientmember.id == memberid)).\
-          select(db.patientmember.address1,db.patientmember.address2,db.patientmember.address3,db.patientmember.city,\
-                 db.patientmember.st,db.patientmember.pin,db.patientmember.cell,db.patientmember.gender,db.patientmember.dob)
+        p = db((db.patientmember.id == memberid)).select()
         
         address = "" if(len(p) <= 0) else p[0].address1 + " " + p[0].address2 + " " + p[0].address3 + " " + p[0].city + " " + p[0].st + " " + p[0].pin
         hv_apptobj["patient_address"] = address
         hv_apptobj["patient_cell"] = common.modify_cell("" if(len(p) <= 0) else p[0].cell )
         hv_apptobj["patient_gender"] = "" if(len(p) <= 0) else p[0].gender 
+        hv_apptobj["patient_profile_image"] = "" if(len(p) <= 0) else p[0].image 
+        hv_apptobj["patient_imageid"] = 0 if(len(p) <= 0) else int(common.getid(p[0].imageid))
+        
+        hv_doc = db(db.hv_doctor.id == appt.hv_doc_appointment.hv_doctorid).select()
+        hv_apptobj["hv_doc_profile_image"] = "" if(len(hv_doc) <= 0) else hv_doc[0].hv_doc_profile_image
+        hv_apptobj["hv_doc_imageid"] = 0 if(len(hv_doc) <= 0) else int(common.getid(hv_doc[0].hv_doc_imageid))
+        hv_apptobj["hv_doctor_name"] = "" if(len(hv_doc) <= 0) else hv_doc[0].hv_doc_fname + " " + hv_doc[0].hv_doc_lname
+        hv_apptobj["hv_doctor_address"] = "" if(len(hv_doc) <= 0) else hv_doc[0].hv_doc_address1 + " " + hv_doc[0].hv_doc_address2 + " " +\
+          hv_doc[0].hv_doc_address3 + " " + hv_doc[0].hv_doc_city + " " +hv_doc[0].hv_doc_st+ " " + hv_doc[0].hv_doc_pin
+        hv_apptobj["hv_doctor_cell"] = "" if(len(hv_doc) <= 0) else hv_doc[0].hv_doc_cell 
         
         today = date.today()
         year = today.year
@@ -1584,11 +1725,7 @@ class Doctor:
         hv_apptobj["patient_age"] = age
 
         
-        hv_dotorid = appt.hv_doc_appointment.hv_doctorid
-        h = db(db.hv_doctor.id == hv_doctorid).select()
-        hv_apptobj["hv_doctor_name"] = "" if(len(h) <= 0) else h[0].hv_doc_fname + " " + h[0].hv_doc_lname
-        hv_apptobj["hv_doctor_address"] = "" if(len(h) <= 0) else h[0].hv_doc_address1 + " " + h[0].hv_doc_address2 + " " + h[0].hv_doc_address3 + " " + h[0].hv_doc_city + " " + h[0].hv_doc_st+ " " + h[0].hv_doc_pin
-        hv_apptobj["hv_doctor_cell"] = "" if(len(h) <= 0) else h[0].hv_doc_cell 
+       
         
         hv_apptlst.append(hv_apptobj)
       
@@ -1653,21 +1790,38 @@ class Doctor:
       try:
         hv_appointmentid = int(common.getkeyvalue(avars,"hv_appointmentid","0"))
         
+        r = db(db.hv_doc_appointment.id == hv_appointmentid).select()
+        if(len(r) <=0):
+          mssg = "No Appointment for appointment = "  + str(hv_appointmentid)
+          rspobj["result"] = "fail"
+          rspobj["error_code"] = ""
+          rspobj["error_message"] = mssg
+          logger.loggerpms2.info(mssg)
+          return json.dumps(rspobj)
+        
+        feedback_posted = True if int(common.getid(r[0].hv_appt_feedback_by) > 0) else False
+          
+                 
         hv_appt_feedback = (common.getkeyvalue(avars,"hv_appt_feedback",""))
         hv_appt_rating = (common.getkeyvalue(avars,"hv_appt_rating",""))
         hv_appt_user_id = common.getkeyvalue(avars,"hv_appt_user_id",1 if(auth.user == None) else auth.user.id)
         
-        db(db.hv_doc_appointment.id == hv_appointmentid).update(
+        db((db.hv_doc_appointment.id == hv_appointmentid) & (feedback_posted == False)).update(
         hv_appt_rating = hv_appt_rating,
         hv_appt_feedback= hv_appt_feedback,
         hv_appt_feedback_on = common.getISTFormatCurrentLocatTime(),
         hv_appt_feedback_by = hv_appt_user_id
         )
                 
-        
+        if(feedback_posted):
+          mssg = "Feedback was already provided earlier! No new feedbacks updated!"
+        else:
+          mssg = "New Feedback updated !"
+          
         rspobj["result"] = "success"
         rspobj["error_code"] = ""
-        rspobj["error_message"] = ""
+        rspobj["error_message"] = mssg
+        rspobj["feedback_posted"] = feedback_posted
         
       except Exception as e:
         mssg = "new_hv_appt_feedback  Exception:\n" + str(e)
@@ -1789,6 +1943,7 @@ class Doctor:
           db(db.hv_doc_appointment.id == hv_doc_appointmentid).update\
              (
                hv_appt_notes = common.getkeyvalue(avars,"notes",""),
+               hv_appt_status = "Checked-In",
                hv_appt_checkedin_on = common.getISTFormatCurrentLocatTime(),
                hv_appt_checkedin_by = str(1) if(auth.user == None) else str(auth.user.id)
              )
@@ -1834,7 +1989,7 @@ class Doctor:
           db((db.hv_doc_appointment.id == hv_doc_appointmentid)).update\
              (
                hv_appt_notes = common.getkeyvalue(avars,"notes",""),
-               
+               hv_appt_status = "Checked-Out",
                hv_appt_checkedout_on = common.getISTFormatCurrentLocatTime(),
                hv_appt_checkedout_by = str(1) if(auth.user == None) else str(auth.user.id)
              )
@@ -1877,10 +2032,10 @@ class Doctor:
         rspobj=json.loads(apptobj.confirm(avars))
         if(rspobj["result"] == "success"):
           hv_doc_appointmentid = int(common.getkeyvalue(avars,"hv_doc_appointmentid","0"))
-          db((db.hv_doc_appointment.id == hv_doc_appointmentid) & (db.hv_doc_appointment.is_active == hv_doc_appointmentid)).update\
+          db((db.hv_doc_appointment.id == hv_doc_appointmentid)).update\
              (
                hv_appt_notes = common.getkeyvalue(avars,"notes",""),
-               
+               hv_appt_status = "Confirmed",
                hv_appt_confirmed_on = common.getISTFormatCurrentLocatTime(),
                hv_appt_confirmed_by = str(1) if(auth.user == None) else str(auth.user.id)
              )
@@ -1925,9 +2080,10 @@ class Doctor:
         
         if(rspobj["result"] == "success"):
           hv_doc_appointmentid = int(common.getkeyvalue(avars,"hv_doc_appointmentid","0"))
-          db((db.hv_doc_appointment.id == hv_doc_appointmentid) & (db.hv_doc_appointment.is_active == hv_doc_appointmentid)).update\
+          db((db.hv_doc_appointment.id == hv_doc_appointmentid) ).update\
              (
                hv_appt_notes = common.getkeyvalue(avars,"notes",""),
+               hv_appt_status = "Cancelled",
                hv_appt_cancelled_on = common.getISTFormatCurrentLocatTime(),
                hv_appt_cancelled_by = str(1) if(auth.user == None) else str(auth.user.id)
              )
@@ -1998,7 +2154,7 @@ class Doctor:
           #}        
           #add procedure treatment
           obj["providerid"] = str(providerid)
-          obj["procedurecode"] = "G0100"
+          obj["procedurecode"] = "G0108"
           obj["treatmentid"] = common.getkeyvalue(trobj,"treatmentid","0")
           obj["plan"] = common.getkeyvalue(avars,"plan","PREMWALKIN")
           obj["tooth"] = common.getkeyvalue(avars,"tooth","")
@@ -2059,7 +2215,13 @@ class Doctor:
         doctorid = 0 if(len(d) <= 0) else d[0].doctorid
         avars["doctorid"] = str(doctorid)
   
+        #assign a plan based on  customer's region
+        
+        
+        
+        
         #create new treatment
+        avars["hv"] = True
         trobj = mdptreatment.Treatment(db, providerid)
         trobj = json.loads(trobj.newtreatment_clinic(avars))
         
@@ -2078,9 +2240,9 @@ class Doctor:
           #add procedure treatment
           obj={}
           obj["providerid"] = str(providerid)
-          obj["procedurecode"] = "G0100"
+          obj["procedurecode"] = "G0108"
           obj["treatmentid"] = common.getkeyvalue(trobj,"treatmentid","0")
-          obj["plan"] = common.getkeyvalue(avars,"plan","PREMWALKIN")
+          obj["plan"] = common.getkeyvalue(trobj,"plan","PREMWALKIN")
           obj["tooth"] = common.getkeyvalue(avars,"tooth","")
           obj["quadrant"] = common.getkeyvalue(avars,"quadrant","")
           obj["remarks"] = common.getkeyvalue(avars,"remarks","")
@@ -2092,6 +2254,8 @@ class Doctor:
                                                              obj["tooth"], 
                                                              obj["quadrant"], 
                                                              obj["remarks"]))
+          
+          
           #create new_hv_treatment
           created_on = common.getISTFormatCurrentLocatTime()
           hv_treatmentid = db.hv_treatment.insert(
@@ -2218,6 +2382,7 @@ class Doctor:
           cityobj={}
           cityobj["city_id"] = str(cities[i].id)
           cityobj["city"] = cities[i].city
+          cityobj["hv_fees"] = common.getvalue(cities[i].hv_fees)
           citylist.append(cityobj)
         
         rspobj={
@@ -2267,6 +2432,16 @@ class Doctor:
         city = common.getkeyvalue(avars,"city", cities[0].city if (len(cities) >0) else "Jaipur")
         drs = db(db.hv_doctor.hv_doc_city == city).select()
         slotlst = []
+        
+        if(len(drs) <= 0):
+          rspobj["result"] = "success"
+          rspobj["error_message"]="No Open Slots"
+          rspobj["error_code"] = ""
+          rspobj["city_id"] = city_id
+          rspobj["city"] = city
+          rspobj["list_open_slots"] = slotlst          
+          return json.dumps(rspobj)
+        
         for dr in drs:
           if((dr.doctorid == None) | (dr.doctorid == "")):
             continue

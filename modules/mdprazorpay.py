@@ -62,7 +62,7 @@ class Razorpay:
   
   def create_razorpay_order(self,amount,currency,receipt,payment_capture="1"):
 
-    #logger.loggerpms2.info("Enter New_razorpay_order")
+    logger.loggerpms2.info("Enter New_razorpay_order")
     
 
     paiseamount = int(amount * 100)
@@ -77,8 +77,8 @@ class Razorpay:
     
     jsonresp = {}
     try:
-      #logger.loggerpms2.info("POST Request==>\n")
-      #logger.loggerpms2.info(orderurl + " " + json.dumps(getrsaobj))
+      logger.loggerpms2.info("POST Request==>\n")
+      logger.loggerpms2.info(orderurl + " " + json.dumps(getrsaobj))
       
       resp = requests.post(orderurl,json=getrsaobj)
       
@@ -86,11 +86,8 @@ class Razorpay:
       if((resp.status_code == 200)|(resp.status_code == 201)|(resp.status_code == 202)|(resp.status_code == 203)):
 
         respobj = resp.json() 
-        
-        
-      
-
-        #logger.loggerpms2.info("new_razorpay_order  Response success: " + json.dumps(respobj))
+	
+	logger.loggerpms2.info("new_razorpay_order  Response success: " + json.dumps(respobj))
         
         jsonresp = {
           "order_id": respobj["id"],

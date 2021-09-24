@@ -91,6 +91,8 @@ class PineLabs:
    
         try:
             paymentid = int(common.getkeyvalue(avars,"paymentid",0))
+           
+            
             #create URL
             pl_url = self.pl_url
 
@@ -118,7 +120,7 @@ class PineLabs:
                 
                 "txn_data": {
                     "navigation_mode": "2",
-                    "payment_mode": "1,4",
+                    "payment_mode": "1,3,4,10,11",
                     "transaction_type": "1",
                 },                
               
@@ -129,7 +131,21 @@ class PineLabs:
                     "udf_field_3": int(common.getkeyvalue(avars,"treatmentid",0)),
                     "udf_field_4": paymentid
                     
-                }
+                },
+                
+                "product_details": [
+            
+                    {
+            
+                        "schemes": [
+                            ],
+            
+                        "product_code": common.getkeyvalue(avars,"treatment",""),
+                        "product_amount": 100 * long(common.getkeyvalue(avars,"amount","0"))
+                    }
+            
+                    ],                
+
             } 
             
            

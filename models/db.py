@@ -192,6 +192,7 @@ db.define_table('hv_doc_appointment',
                 Field('hv_appt_city_id','integer'),
                 Field('hv_appt_latitude','string'),
                 Field('hv_appt_longitude','string'),
+                Field('hv_appt_status','string'),
                 Field('hv_appt_payment_txid','integer'),
           
                 Field('hv_appt_payment_amount','float'),
@@ -201,6 +202,10 @@ db.define_table('hv_doc_appointment',
                 Field('hv_appt_rating','string'),
                 Field('hv_appt_feedback_on','date'),
                 Field('hv_appt_feedback_by','integer'),
+
+                Field('hv_treatmentid','integer'),
+                Field('treatmentid','integer'),
+                Field('paymentid','integer')
                 
                 )
 
@@ -225,6 +230,7 @@ db.define_table('hv_doctor',
                 Field('hv_doc_registration','string'),
                 Field('hv_doc_certification','string'),
                 Field('hv_doc_profile_image','string'),
+                Field('hv_doc_imageid','integer'),
                 Field('hv_doc_dob','date'),
                 Field('hv_doc_gender','string'),
                 Field('hv_doc_cell','string'),
@@ -348,6 +354,7 @@ db.define_table('cities',
                 Field('regioncode','string'),
                 Field('HV','boolean'),
                 Field('VC','boolean'),
+                Field('hv_fees','double'),
                 )
 db.cities._singular = "cities"
 db.cities._plural   = "cities"
@@ -705,7 +712,9 @@ db.agent._plural = "Agent"
 
 db.define_table('companypolicy',
                 Field('companycode','string'),
-                Field('policy','string')
+                Field('policy','string'),
+                Field('region','string'),
+                Field('premium','double'),
                 )
 db.companypolicy._singular = "companypolicy"
 db.companypolicy._plural = "companypolicy"
@@ -1108,6 +1117,7 @@ db.define_table('provider_region_plan',
                 Field('plancode', 'string'),
                 Field('procedurepriceplancode', 'string'),
                 Field('policy', 'string'),
+                Field('premium', 'double'),
                 auth.signature
                 )
 

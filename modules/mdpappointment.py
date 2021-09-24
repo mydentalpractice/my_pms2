@@ -1012,6 +1012,12 @@ class Appointment:
                                                             modified_by = 1 if(auth.user == None) else auth.user.id                                                        
                                                             )
         
+            db((db.hv_doc_appointment.appointmentid == appointmentid)).update(\
+                     hv_appt_cancelled_on = common.getISTFormatCurrentLocatTime(),
+                     hv_appt_cancelled_by = 1 if(auth.user == None) else auth.user.id   
+                 )        
+
+        
             if(providernotes != ""):
                 if(currnotes.strip().upper() != providernotes.strip().upper()):
                     common.logapptnotes(db,complaint,providernotes,appointmentid)
@@ -1048,6 +1054,10 @@ class Appointment:
                 modified_on = common.getISTFormatCurrentLocatTime(),
                 modified_by= 1 if(auth.user == None) else auth.user.id
             )  
+            db((db.hv_doc_appointment.appointmentid == apptid)).update(\
+                                   hv_appt_checkedin_on = common.getISTFormatCurrentLocatTime(),
+                                   hv_appt_checkedin_by = 1 if(auth.user == None) else auth.user.id   
+                               )                    
             retval = {"result":"success","error_message":""}
         except Exception as e:
             excpobj = {}
@@ -1702,6 +1712,11 @@ class Appointment:
                 modified_by= 1 if(auth.user == None) else auth.user.id
                 
             )
+            
+            db((db.hv_doc_appointment.appointmentid == appointmentid)).update(\
+                     hv_appt_cancelled_on = common.getISTFormatCurrentLocatTime(),
+                     hv_appt_cancelled_by = 1 if(auth.user == None) else auth.user.id   
+                 )        
             common.logapptnotes(db,cc,notes,appointmentid)
             apptobj= {"result":"success", "appointmentid":appointmentid,"error_message":"", "error_code":"", "message":"Appointment Cancelled successfully"}
             
@@ -1722,9 +1737,17 @@ class Appointment:
         db = self.db
         appointmentid= 0
         try:
+            showcancelled = bool(common.getboolean(common.getkeyvalue(avars,'showcancelled',False)))
             blockappt = common.getboolean(common.getkeyvalue(avars,"block","False"))
             appointmentid = int(common.getkeyvalue(avars,"appointmentid","0"))
-            appt = db((db.vw_appointments.id == appointmentid) &  (db.vw_appointments.blockappt == blockappt) &  (db.vw_appointments.is_active == True)).select()
+            
+            if(showcancelled == False):
+                appt = db((db.vw_appointments.id == appointmentid) &  (db.vw_appointments.blockappt == blockappt) &\
+                          (db.vw_appointments.is_active == True)).select()
+            else:
+                appt = db((db.vw_appointments.id == appointmentid) &  (db.vw_appointments.blockappt == blockappt)).select()
+                
+            
             providerid = appt[0].provider if(len(appt) == 1) else 0
             memberid = int(common.getid(appt[0].patientmember)) if(len(appt) == 1) else 0
             patientid = int(common.getid(appt[0].patient)) if(len(appt) == 1) else 0
@@ -2266,18 +2289,41 @@ class Appointment:
         return json.dumps(rsp)
 
     def checkIn(self,avars):
+        auth = current.auth
+        db = self.db
         avars["f_status"] = "Checked-In" 
         rsp =  json.loads(self.update_appointment(avars))
+        appointmentid = int(common.getkeyvalue(avars,"appointmentid","0"))
+        db((db.hv_doc_appointment.appointmentid == appointmentid)).update(\
+                        hv_appt_checkedin_on = common.getISTFormatCurrentLocatTime(),
+                        hv_appt_checkedin_by = 1 if(auth.user == None) else auth.user.id   
+                    )        
         return json.dumps(rsp)
 
     def checkOut(self,avars):
+        auth = current.auth
+        db = self.db
         avars["f_status"] = "Checked-Out" 
         rsp= json.loads(self.update_appointment(avars))
+        appointmentid = int(common.getkeyvalue(avars,"appointmentid","0"))
+        db((db.hv_doc_appointment.appointmentid == appointmentid)).update(\
+                        hv_appt_checkedout_on = common.getISTFormatCurrentLocatTime(),
+                        hv_appt_checkedout_by = 1 if(auth.user == None) else auth.user.id   
+                    )        
         return json.dumps(rsp)
 
     def confirm(self,avars):
+        auth = current.auth
+        db = self.db
+        
         avars["f_status"] = "Confirmed" 
         rsp = json.loads(self.update_appointment(avars))
+        appointmentid = int(common.getkeyvalue(avars,"appointmentid","0"))
+        db((db.hv_doc_appointment.appointmentid == appointmentid)).update(\
+                        hv_appt_confirmed_on = common.getISTFormatCurrentLocatTime(),
+                        hv_appt_confirmed_by = 1 if(auth.user == None) else auth.user.id   
+                    )        
+        
         return json.dumps(rsp)
     
     

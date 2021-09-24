@@ -13,6 +13,7 @@ from applications.my_pms2.modules import common
 from applications.my_pms2.modules import logger
 
 
+
 #THIS API is called to determine the member's procedure price plan code based on 
 #the provider's region, plan and policy
 def getprocedurepriceplancodeformember(db,providerid,memberid,patientid,policy_name=""):
@@ -64,6 +65,57 @@ def getprocedurepriceplancodeformember(db,providerid,memberid,patientid,policy_n
     except Exception as e:
         raise Exception(str(e))
     
+    
+#THIS API is called to determine the member's procedure price plan code based on 
+#the HV Regions
+def getprocedurepriceplancodeforHVmember(db,providerid,memberid,patientid,policy_name=""):
+    logger.loggerpms2.info("Enter getprocedurepriceplancodeformember = " + str(providerid) + " " + str(memberid) + " " + str(patientid) + " " + policy_name)
+    procedurepriceplancode = "PREMWALKIN"  #default it to PREMWALKIN
+    
+    try:   
+        
+        # get HV region via Member's Region
+        mems = db((db.patientmember.id == memberid) & (db.patientmember.is_active == True)).select(db.patientmember.groupregion)
+        regionid = int(common.getid(mems[0].groupregion)) if(len(mems) == 1) else 1
+        regions = db((db.groupregion.id == regionid) & (db.groupregion.is_active == True)).select(db.groupregion.groupregion)
+        regioncode = common.getstring(regions[0].groupregion) if(len(regions) == 1) else "ALL"
+	
+        
+        # get patient's company
+        pats = db((db.vw_memberpatientlist.primarypatientid == memberid) & (db.vw_memberpatientlist.patientid == patientid)).select(db.vw_memberpatientlist.company,db.vw_memberpatientlist.hmoplan)
+        companyid = int(common.getid(pats[0].company)) if(len(pats) == 1) else 0
+        companys = db((db.company.id == companyid) & (db.company.is_active == True)).select(db.company.company)
+        companycode = common.getstring(companys[0].company) if(len(companys) == 1) else "PREMWALKIN"
+
+        #for backward compatibility determine procedurepriceplancode from member's plan at the time of registration
+	def_planid = int(common.getid(pats[0].hmoplan)) if(len(pats) == 1) else 0  #this is the patient's previously assigned plan-typically at registration
+	def_plans = db((db.hmoplan.id == def_planid) & (db.hmoplan.is_active == True)).select(db.hmoplan.hmoplancode,db.hmoplan.procedurepriceplancode)
+	def_plancode = common.getstring(def_plans[0].hmoplancode) if(len(def_plans) == 1) else "PREMWALKIN"
+	def_procedurepriceplancode = common.getstring(def_plans[0].procedurepriceplancode) if(len(def_plans) == 1) else "PREMWALKIN"
+
+    
+	#by default policy = companycode
+	policy = companycode if policy_name == "" else policy_name 
+	ppc = getprocedurepriceplancode(db, policy, None, regioncode, companycode)
+	procedurepriceplancode = ppc["procedurepriceplancode"]
+	procedurepriceplancode = def_procedurepriceplancode if(common.getstring(procedurepriceplancode) == "") else procedurepriceplancode
+
+	
+	logger.loggerpms2.info("getprocedurepriceplancodeformember 2 = " + common.getstring(regioncode) + " " + common.getstring(companycode) + " " + str(ppc["planid"]) + " " + common.getstring(ppc["plancode"]) + " " + common.getstring(procedurepriceplancode))
+	
+	#if policy_name == None, means you are adding procedure from web app
+	#policy_name = None if(policy_name == "") else policy_name
+        #if(policy_name == None):
+	    #procedurepriceplancode = common.getstring(plans[0].procedurepriceplancode) if(len(plans) == 1) else "PREMWALKIN"
+ 	    #logger.loggerpms2.info("Enter getprocedurepriceplancodeformember 3 " + procedurepriceplancode)
+        #else:
+	    #policyname = plancode if(policy_name == "") else policy_name
+            #d = getprocedurepriceplancode(db,policyname,None,regioncode,companycode,plancode)
+            #procedurepriceplancode = d.get("procedurepriceplancode","PREMWALKIN")
+	    #logger.loggerpms2.info("Enter getprocedurepriceplancodeformember 4 " + procedurepriceplancode)
+    
+    except Exception as e:
+        raise Exception(str(e))
     
     
     

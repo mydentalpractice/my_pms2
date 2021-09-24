@@ -28,7 +28,7 @@ class Patient:
 
 
     self.items_per_page = 10 if(len(urlprops) <= 0) else int(common.getvalue(urlprops[0].pagination))
-      
+    
     
     return 
 
@@ -441,10 +441,10 @@ class Patient:
       
       #urlprops = db(db.urlproperties.id >0 ).select(db.urlproperties.pagination)
       #items_per_page = 10 if(len(urlprops) <= 0) else int(common.getvalue(urlprops[0].pagination))
-      #limitby = None if page < 0 else ((page)*items_per_page,(page+1)*items_per_page)      
+         
 
       items_per_page = self.items_per_page
-      limitby = self.limitby
+      limitby = None if page < 0 else ((page)*items_per_page,(page+1)*items_per_page)   
       memberset = set()
       
       #display all those patients who have seeked appointments with this provider. Appointment guarantees that these patient/members have 
@@ -962,7 +962,9 @@ class Patient:
           "status":common.getstring(mem[0].patientmember.status),
           "hmopatientmember":common.getboolean(mem[0].patientmember.hmopatientmember),
           "image":common.getstring(mem[0].patientmember.image),
-          "imageurl":imageurl + "/" + common.getstring(mem[0].patientmember.image),
+          "imageid":common.getid(mem[0].patientmember.imageid),
+          "imageurl":imageurl + "/" + common.getstring(mem[0].patientmember.image) if(imageurl != "") else\
+          common.getstring(mem[0].patientmember.image),
           "dcsid":int(common.getid(mem[0].patientmember.dcsid))
           }
       memobj["profile"] = memprofile
@@ -1471,7 +1473,7 @@ class Patient:
       
       
       dobstr = common.getkeyvalue(patobj,"dob","")
-      dob = common.getdatefromstring(dobstr,"%d/%m/%Y") if(dobstr != "") else (None if(len(pat) == 0) else pat[0].dob)
+      dob = common.getdatefromstring(dobstr,"%d/%m/%Y") if(dobstr != "") else (None if(len(pats) == 0) else pats[0].dob)
       
       db(db.patientmember.id == memberid).update(\
     
@@ -1490,6 +1492,9 @@ class Patient:
         st = common.getkeyvalue(patobj,'st', pats[0].st if(len(pats) > 0) else ""),
         pin = common.getkeyvalue(patobj,'pin', pats[0].pin if(len(pats) > 0) else ""),
         status = common.getkeyvalue(patobj,'status', pats[0].status if(len(pats) > 0) else ""),
+        image = common.getkeyvalue(patobj,'image', pats[0].image if(len(pats) > 0) else ""),
+        imageid = common.getkeyvalue(patobj,'imageid', pats[0].imageid if(len(pats) > 0) else 0),
+        
         modified_on = common.getISTFormatCurrentLocatTime(),
         modified_by = 1 if(auth.user == None) else auth.user.id     
         

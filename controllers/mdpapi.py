@@ -46,6 +46,7 @@ from applications.my_pms2.modules import mdpshopse
 from applications.my_pms2.modules import mdppinelabs
 from applications.my_pms2.modules import mdpbenefits
 from applications.my_pms2.modules import mdpdevice
+from applications.my_pms2.modules import mdpplan
 
 from applications.my_pms2.modules import logger
 
@@ -761,7 +762,11 @@ def getmailserverdetails(avars):
     
     return rsp
 
-
+def hv_doc_login(avars):
+    ouser = mdpuser.User(current.globalenv['db'],current.auth,"","")
+    rsp = ouser.hv_doc_login(common.getkeyvalue(avars,"username",""),common.getkeyvalue(avars,"password",""))
+    return rsp
+    
 ######################################################## PROVIDER APIS  ##################################    
 def updatememberprovider(avars):
     oprov = mdpprovider.Provider(db, 0)
@@ -887,9 +892,9 @@ def deletewalkinpatient(avars):
 #}
 def getpatient(avars):
     opat = mdppatient.Patient(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
-    urlprops = db(db.urlproperties.id > 0).select(db.urlproperties.mydp_ipaddress)
-    imageurl =urlprops[0].mydp_ipaddress + URL('dentalimage',"download")    
-    pat = opat.getpatient(str(avars['memberid']),str(avars['patientid']),imageurl)
+    #urlprops = db(db.urlproperties.id > 0).select(db.urlproperties.mydp_ipaddress)
+    #imageurl =urlprops[0].mydp_ipaddress + URL('dentalimage',"download")    
+    pat = opat.getpatient(str(avars['memberid']),str(avars['patientid']),"")
     
     
     return pat 
@@ -1494,7 +1499,7 @@ def gettreatment(avars):
     #logger.loggerpms2.info("Enter Get Treatment")
     
     otrtmnt = mdptreatment.Treatment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0 )
-    rsp = otrtmnt.gettreatment(int(common.getid(str(avars["treatmentid"])))  if "treatmentid" in avars else 0)
+    rsp = otrtmnt.gettreatment_fast(int(common.getid(str(avars["treatmentid"])))  if "treatmentid" in avars else 0)
     return rsp
 
 def sendforauthorization(avars):
@@ -3199,6 +3204,12 @@ def list_hv_doctor(avars):
     rsp = odr.list_hv_doctor(avars)
     return rsp
 
+def assign_hv_doctor(avars):
+    odr = mdpdoctor.Doctor(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
+    rsp = odr.assign_hv_doctor(avars)
+    return rsp
+
+
 def new_hv_doc_appointment(avars):
     odr = mdpdoctor.Doctor(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
     rsp = odr.new_hv_doc_appointment(avars)
@@ -3306,9 +3317,23 @@ def add_device_info(avars):
 
 ############################# END OF DEVICE API  ###################################################
 
+############################# START OF PLAN API  ###################################################
+def get_plan_premium(avars):
+    opln = mdpplan.Plan(db)
+    rsp = opln.get_plan_premium(avars)
+    return rsp
+
+############################# END OF PLAN API  ###################################################
 
 def unknown(avars):
     return dict()
+
+
+planAPI_switcher={
+    
+    "get_plan_premium":get_plan_premium
+}
+
 
 deviceAPI_switcher={
     
@@ -3339,8 +3364,8 @@ hvdocAPI_switcher = {
     "list_hv_open_slots_by_day":list_hv_open_slots_by_day,
     "list_hv_open_slots_by_month":list_hv_open_slots_by_month,
     "new_hv_appt_feedback":new_hv_appt_feedback,
-    "get_hv_appt_feedback":get_hv_appt_feedback
-    
+    "get_hv_appt_feedback":get_hv_appt_feedback,
+    "assign_hv_doctor":assign_hv_doctor
     
 }
 
@@ -3504,7 +3529,7 @@ mdpapi_switcher = {"listappointments":getappointments,"getappointmentsbymonth":g
                    "sendOTPCashless":sendOTPCashless,"validateOTPCashless":validateOTPCashless,\
                    "getOPDServicesCashless":getOPDServicesCashless,"getTransactionIDCashless":getTransactionIDCashless,\
                    "agent_otp_login":agent_otp_login,"otp_login":otp_login,"hvdoc_registration":hvdoc_registration,\
-                   "searchpatient_fast":searchpatient_fast,"gettreatments_fast":gettreatments_fast
+                   "searchpatient_fast":searchpatient_fast,"gettreatments_fast":gettreatments_fast,"hv_doc_login":hv_doc_login
                    
                    }
 
@@ -4279,6 +4304,52 @@ def deviceAPI():
 	    
 	except Exception as e:
 	    mssg = "DEVICE API Exception Error =>>\n" + str(e)
+	    #logger.loggerpms2.info(mssg)
+	    raise HTTP(500)   
+
+    def PUT(*args, **vars):
+	return dict()
+
+    def DELETE(*args, **vars):
+	return dict()
+
+    return locals()
+
+@request.restful()
+def planAPI():
+    response.view = 'generic' + request.extension
+    def GET(*args, **vars):
+	return
+
+    def POST(*args, **vars):
+	i = 0
+	try:
+	    logger.loggerpms2.info(">>Enter PLAN API==>>")
+	    dsobj = datasecurity.DataSecurity()
+	    encryption = vars.has_key("req_data")
+	    if(encryption):
+		#logger.loggerpms2.info(">>Device with Encryption")
+		encrypt_req = vars["req_data"]
+		vars = json.loads(dsobj.decrypts(encrypt_req))
+	    
+	    #decrypted request date
+	    if(vars.has_key("action") == True):
+		action = str(vars["action"])
+	    else:
+		action = "benefits"
+		
+	    logger.loggerpms2.info(">>PLAN ACTION==>>" + action)
+	    
+	    #return json.dumps({"action":action})
+	    rsp = planAPI_switcher.get(action,unknown)(vars)
+	    common.setcookies(response)
+	    if(encryption):
+		return json.dumps({"resp_data":dsobj.encrypts(rsp)})
+	    else:
+		return rsp
+	    
+	except Exception as e:
+	    mssg = "PLAN API Exception Error =>>\n" + str(e)
 	    #logger.loggerpms2.info(mssg)
 	    raise HTTP(500)   
 

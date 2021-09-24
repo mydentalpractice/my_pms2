@@ -92,6 +92,7 @@ class Treatment:
     def __init__(self,db,providerid):
         self.db = db
         self.providerid = providerid
+        self.hv = False
         return   
     
     def updatetreatmentcostandcopay(self,treatmentid,tplanid):
@@ -633,8 +634,6 @@ class Treatment:
     
         return json.dumps(trtmntobj)
         
-        
-
     def gettreatment(self,treatmentid):
         
         #logger.loggerpms2.info("Enter Get Treatment API")
@@ -643,6 +642,7 @@ class Treatment:
         providerid = self.providerid        
         treatmentobj = {}
         
+        hv = self.hv
         
         t = db((db.treatment.id == treatmentid) & (db.treatment.is_active == True)).select(db.treatment.provider)
         providerid =  int(common.getid(t[0].provider)) if(len(t) == 1) else 0
@@ -704,7 +704,11 @@ class Treatment:
                 
                 memberid = int(common.getid(treatment[0].vw_treatmentlist.memberid))
                 patientid = int(common.getid(treatment[0].vw_treatmentlist.patientid))
-                procedurepriceplancode = mdputils.getprocedurepriceplancodeformember(db,providerid,memberid,patientid)
+                
+                if(hv==False):
+                    procedurepriceplancode = mdputils.getprocedurepriceplancodeformember(db,providerid,memberid,patientid)
+                else:
+                    procedurepriceplancode = mdputils.getprocedurepriceplancodeforHVmember(db,providerid,memberid,patientid)
                 #logger.loggerpms2.info("Enter Get Treatment API - B")
                 
                
@@ -784,6 +788,293 @@ class Treatment:
                 procui = {}
                 
                 trstatus = common.getstring(treatment[0].vw_treatmentlist.status)
+                #logger.loggerpms2.info("Enter Get Treatment API - F")
+                if(hmopatientmember):
+                    if( trstatus == "Started"):
+                        trtmntui = {
+                        "chiefcomplaint":"w",
+                        "treatmentno":"r",
+                        "doctor":"w",
+                        "date":"r",
+                        "status":"r",
+                        "notes":"w",
+                        "cost":"r",
+                        "copay":"r",
+                        "inspays":"r",
+                        "addproc":"s"
+                        
+                        }
+                        
+                        procui={
+                            
+                            "proccode":"r",
+                            "procdesc":"r",
+                            "procfee":"r",
+                            "copay":"r",
+                            "inspays":"r",
+                            "tooth":"w",
+                            "quad":"w",
+                            "remarks":"w",
+                            "more":"s"
+                        
+                        }
+                        
+                    else:
+                        trtmntui = {
+                        "chiefcomplaint":"r",
+                        "treatmentno":"r",
+                        "doctor":"r",
+                        "date":"r",
+                        "status":"r",
+                        "notes":"w",
+                        "cost":"r",
+                        "copay":"r",
+                        "inspays":"r",
+                        "addproc":"h"
+                        
+                        }
+                        
+                        procui={
+                            
+                            "proccode":"r",
+                            "procdesc":"r",
+                            "procfee":"r",
+                            "copay":"r",
+                            "inspays":"r",
+                            "tooth":"r",
+                            "quad":"r",
+                            "remarks":"r",
+                            "more":"h"
+                        
+                        }
+                        
+                        
+                        
+                    
+                    
+                else:
+                    if( trstatus == "Started"):
+                        trtmntui = {
+                        "chiefcomplaint":"w",
+                        "treatmentno":"r",
+                        "doctor":"w",
+                        "date":"r",
+                        "status":"r",
+                        "notes":"w",
+                        "cost":"r",
+                        "copay":"h",
+                        "inspays":"h",
+                        "addproc":"s"
+                        
+                        }
+                        
+                        procui={
+                            
+                            "proccode":"r",
+                            "procdesc":"r",
+                            "procfee":"w",
+                            "copay":"h",
+                            "inspays":"h",
+                            "tooth":"w",
+                            "quad":"w",
+                            "remarks":"w",
+                            "more":"s"
+                        
+                        }
+                        
+             
+                    else:
+                        trtmntui = {
+                                      "chiefcomplaint":"w",
+                                      "treatmentno":"r",
+                                      "doctor":"w",
+                                      "date":"r",
+                                      "status":"r",
+                                      "notes":"w",
+                                      "cost":"r",
+                                      "copay":"h",
+                                      "inspays":"h",
+                                      "addproc":"s"
+                                      
+                                      }
+                                      
+                        procui={
+                            
+                            "proccode":"r",
+                            "procdesc":"r",
+                            "procfee":"w",
+                            "copay":"h",
+                            "inspays":"h",
+                            "tooth":"w",
+                            "quad":"w",
+                            "remarks":"w",
+                            "more":"h"
+                        
+                        }                
+                
+                #logger.loggerpms2.info("Enter Get Treatment API - G")
+                treatmentobj["treatmentui"] = trtmntui
+                treatmentobj["procedureui"] = procui
+                treatmentobj["result"] = "success"
+                treatmentobj["error_message"] = ""
+                treatmentobj["error_code"] = ""
+                
+            else:
+                treatmentobj["result"] = "fail"
+                treatmentobj["error_message"] = "Invalid Treatment"
+                treatmentobj["error_code"] = ""
+            
+        except Exception as e:
+            treatmentobj1 = {}
+            treatmentobj1["result"] = "fail"
+            treatmentobj1["error_message"] = "GetTreatment API Exception Error " + str(e)
+            treatmentobj["error_code"] = ""
+            return json.dumps(treatmentobj1)
+            
+        
+        return json.dumps(treatmentobj)
+    
+        
+
+    def gettreatment_fast(self,treatmentid):
+        
+        #logger.loggerpms2.info("Enter Get Treatment API")
+        
+        db = self.db
+             
+        
+        treatmentobj = {}
+        
+        
+       
+        
+        query = (1==1)
+        query1 = (1==1)
+        #query = (query & (db.vw_treatmentprocedure.providerid == providerid)) if(providerid > 0) else query
+        #query1 = (query1 & (db.vw_treatmentlist.providerid == providerid)) if(providerid > 0) else query1
+        
+        try:
+            
+            
+            treatment = db((db.vw_treatmentlist_fast.id == treatmentid) & \
+                           (db.vw_treatmentlist_fast.is_active == True)).select()
+
+            if(len(treatment) == 1):
+                
+                #logger.loggerpms2.info("Enter Get Treatment API - A")
+                #logger.loggerpms2.info("Enter Get Treatment API - A1 " + str(len(c)))
+                
+                tplanid = int(common.getid(treatment[0].tplanid))
+                r = self.updatetreatmentcostandcopay(treatmentid, tplanid)
+                #logger.loggerpms2.info("Enter Get Treatment API - A2 ")
+                
+                memberid = int(common.getid(treatment[0].memberid))
+                patientid = int(common.getid(treatment[0].patientid))
+                
+                tr = db((db.treatment.id == treatmentid) & (db.treatment.is_active == True)).select()
+                providerid =  int(common.getid(tr[0].provider)) if(len(r) == 1) else 0
+                self.providerid = providerid
+                
+                procedurepriceplancode = mdputils.getprocedurepriceplancodeformember(db,providerid,memberid,patientid)
+                
+                
+                #logger.loggerpms2.info("Enter Get Treatment API - B")
+                
+                procs = db((db.vw_treatmentprocedure.treatmentid == treatmentid) & (query) &\
+                           (db.vw_treatmentprocedure.is_active == True)).select()                
+                
+                
+                
+                p = db(db.patientmember.id == memberid).select()
+                
+                c = db(db.company.id == int(common.getid(p[0].company))).select(db.company.authorizationrequired)
+                
+            
+                treatmentobj = {
+                    
+                    "treatmentid":treatmentid,#
+                    "tplanid":tplanid,#
+                    "treatment": common.getstring(treatment[0].treatment),#
+                    "memberid":memberid,#
+                    "patientid":patientid,#
+                    "treatmentdate"  : (treatment[0].startdate).strftime("%d/%m/%Y"),#
+                    "patientname": common.getstring(treatment[0].patientname),#
+                    
+                    "patcell": int(common.getid(p[0].cell)),
+                    
+                    "chiefcomplaint" : common.getstring(tr[0].chiefcomplaint) if(len(tr) > 0) else "",
+                    "doctorid":int(common.getid(tr[0].doctor)) if(len(tr) > 0) else 0,
+                    "treatmentcost":float(common.getvalue(tr[0].treatmentcost)) if(len(tr) > 0) else 0,                    
+                    "description":common.getstring(tr[0].description) if(len(tr) > 0) else "",                    
+                    
+                    "status":"Started" if(common.getstring(treatment[0].status) == "") else common.getstring(treatment[0].status),#
+                    
+                    
+                    "doctorname":treatment[0].doctorname,#
+                    "clinicid":int(common.getid(treatment[0].clinicid)),#
+                    "clinicname":treatment[0].clinicname,#
+                    
+
+                    
+                    "plan":  procedurepriceplancode,   #IB:15-Mar-2020 common.getstring(treatment[0].vw_memberpatientlist.procedurepriceplancode),#
+                    
+                    "authorization": False if(len(c) <= 0) else ((len(procs)>0) & common.getboolean(c[0].authorizationrequired)),#
+                    "authorized": True if(common.getstring(treatment[0].status) == "Authorized") else False,#
+                    "totaltreatmentcost":float(common.getstring(r["totaltreatmentcost"])),#
+                    "totalcopay":float(common.getstring(r["totalcopay"])),#
+                    "totalinspays":float(common.getstring(r["totalinspays"])),#
+                    "totaldue":float(common.getstring(r["totaldue"])),#
+                    "totalpaid":float(common.getstring(r["totaltreatmentcost"])) - float(common.getstring(r["totaldue"])),#
+                    "showSendForAuthorization":showSendForAuthorization(\
+                                                                        "Started" if(common.getstring(treatment[0].status) == "") else common.getstring(treatment[0].status), \
+                                                                        False if(len(c) <= 0) else ((len(procs)>0) & common.getboolean(c[0].authorizationrequired)),\
+                                                                       True if(common.getstring(treatment[0].status) == "Authorized") else False\
+                                                                       )#
+                    
+                    
+                }        
+                
+                #logger.loggerpms2.info("Enter Get Treatment API - C")
+            
+                proclist = []
+                procobj = {}
+                uiobj  = {}
+                
+                   
+                for proc in procs:
+                    
+                    procobj = {
+                        "treatment_procedure_id":proc.id,
+                        "procedurecode":proc.procedurecode,
+                        "altshortdescription":common.getstring(proc.altshortdescription),
+                        "relgrproc":common.getboolean(proc.relgrproc),
+                        "relgrprocdesc":common.getstring(proc.relgrprocdesc),
+                        "relgrtransaction":True if(common.getstring(proc.relgrtransactionid) != "") else False,
+                        "procedurefee":float(common.getvalue(proc.procedurefee)),
+                        "inspays":float(common.getvalue(proc.inspays)),
+                        "copay":float(common.getvalue(proc.copay)),
+                        "status":common.getstring(proc.status),
+                        "tooth":common.getstring(proc.tooth),
+                        "quadrant":common.getstring(proc.quadrant),
+                        "remarks":common.getstring(proc.remarks)
+                    }
+                    proclist.append(procobj)   
+                
+                #logger.loggerpms2.info("Enter Get Treatment API - D")
+                treatmentobj["proccount"] = len(procs)
+                treatmentobj["proclist"] = proclist
+                
+                #memberid = 0 if (len(treatment) <= 0) else treatment[0].vw_treatmentlist.memberid
+                #patientid =  0 if (len(treatment) <= 0) else treatment[0].vw_treatmentlist.patientid
+                
+                pats = db((db.vw_memberpatientlist.primarypatientid == memberid) & (db.vw_memberpatientlist.patientid == patientid)).select(db.vw_memberpatientlist.hmopatientmember)
+                hmopatientmember = False if(len(pats) <= 0) else common.getboolean(pats[0].hmopatientmember)
+                #logger.loggerpms2.info("Enter Get Treatment API - E")
+                #W, R, H, S
+                trtmtnui = {}
+                procui = {}
+                
+                trstatus = common.getstring(treatment[0].status)
                 #logger.loggerpms2.info("Enter Get Treatment API - F")
                 if(hmopatientmember):
                     if( trstatus == "Started"):
@@ -1060,6 +1351,137 @@ class Treatment:
         
         return treatmentobj
     
+
+    def newtreatment_fast(self,avars):
+        
+        logger.loggerpms2.info("Enter New Treatment API " + json.dumps(avars))
+        
+        db = self.db
+        providerid = self.providerid        
+        auth = current.auth
+        treatmentobj = None
+        
+        #primary clinic id
+        clns = db((db.clinic_ref.ref_code == 'PRV') & (db.clinic_ref.ref_id == providerid) & (db.clinic.primary_clinic == True) &(db.clinic.is_active == True)).\
+            select(db.clinic_ref.clinic_id, left=db.clinic.on(db.clinic.id==db.clinic_ref.clinic_id))
+
+        prim_clinicid  = 0 if(len(clns) == 0) else clns[0].clinic_id            
+        memberid = common.getkeyvalue(avars,"memberid","0")
+        patientid = common.getkeyvalue(avars,"patientid","0")
+        policy_name = common.getkeyvalue(avars,"policy_name","")
+        clinicid = common.getkeyvalue(avars,"clinicid",str(prim_clinicid))
+        notes = common.getkeyvalue(avars,"notes","")
+        
+        try:
+            
+            #defatul doctor = provider (clinic owner)
+            r = db((db.doctor.providerid == providerid) & (db.doctor.practice_owner == True)  & (db.doctor.is_active == True) ).select()
+            doctorid = 0 if(len(r) == 0) else int(common.getid(r[0].id))
+            
+            
+            
+            
+            r = db((db.vw_memberpatientlist_fast.providerid == providerid) & (db.vw_memberpatientlist_fast.patientid == patientid)  & \
+                   (db.vw_memberpatientlist_fast.primarypatientid == memberid)).select()
+            
+            
+            
+            
+            newmember     = False
+            freetreatment = True
+            patienttype = 'P'
+            procedurepriceplancode = 'PREMWALKIN'
+            patientname = ""
+            fullname = ""
+            patientmember = ""
+            title = ""
+            if(len(r) > 0):
+                patientmember = r[0].patientmember
+                title = r[0].title
+                patientname = r[0].patient   #fname lname : patientmember
+                fullname = r[0].fullname     #fullname
+                newmember = common.getboolean(r[0].newmember)
+                freetreatment = common.getboolean(r[0].freetreatment)
+                patienttype = r[0].patienttype
+                procedurepriceplancode =  mdputils.getprocedurepriceplancodeformember(db,providerid,memberid,patientid,policy_name) #IB:15-Mar-2020 r[0].procedurepriceplancode        
+            
+            
+            #Create a new TreatmentPlan
+            timestr = datetime.datetime.today().strftime("%d-%m-%Y_%H:%M:%S")
+            tplan = "TP" + str(patientmember)  + "_" + timestr
+            tplanid = db.treatmentplan.insert(
+                        treatmentplan = tplan,
+                        startdate = datetime.date.today(),
+                        provider = providerid,
+                        primarypatient = memberid,
+                        patient = patientid,
+                        pattitle = title,
+                        patienttype = patienttype,
+                        patientname = fullname,
+                        status = 'Started',
+                        totaltreatmentcost = 0,
+                        totalcopay = 0,
+                        totalinspays = 0,
+                        totalpaid = 0,
+                        totaldue = 0,
+                        totalcopaypaid = 0,
+                        totalinspaid  = 0,             
+                        is_active = True,
+                        created_on = common.getISTFormatCurrentLocatTime(),
+                        created_by = 1 if(auth.user == None) else auth.user.id,
+                        modified_on = common.getISTFormatCurrentLocatTime(),
+                        modified_by =1 if(auth.user == None) else auth.user.id
+                
+                    )
+            
+            
+            #Treatment
+            count = db(db.treatment.provider == providerid).count()
+            treatment = "TR" + str(patientmember) + str(count).zfill(4)      
+            treatmentid = db.treatment.insert(
+                treatment = treatment,
+                description = notes,
+                startdate = datetime.date.today(),
+                status ='Started',
+                treatmentplan = tplanid,
+                provider = providerid,
+                dentalprocedure = 0,
+                doctor = doctorid,
+                clinicid =clinicid,
+                quadrant = 0,
+                tooth    = 0,
+                treatmentcost = 0,
+                actualtreatmentcost = 0,  #UCR cost
+                copay = 0,
+                inspay = 0,
+                companypay = 0,
+                is_active = True,
+                created_on =common.getISTFormatCurrentLocatTime(),
+                created_by = 1 if(auth.user == None) else auth.user.id,
+                modified_on = common.getISTFormatCurrentLocatTime(),
+                modified_by =1 if(auth.user == None) else auth.user.id
+            )        
+            db.treatmentplan_patient.insert(treatmentplan = tplanid, patientmember = memberid)
+            
+            #update treatment with new treatment cost
+            account.updatetreatmentcostandcopay(db,auth.user,treatmentid)
+            #update tplan with new treatment cost
+            account.calculatecost(db,tplanid)
+            account.calculatecopay(db, tplanid,memberid)
+            account.calculateinspays(db,tplanid)
+            account.calculatedue(db,tplanid)                
+            
+            treatmentobj = self.gettreatment(treatmentid)
+            
+            
+        except Exception as e:
+            treatmentobj1 = {}
+            treatmentobj1["result"] = "fail"
+            treatmentobj1["error_message"] = "NewTreatment API Error " + str(e)
+            return json.dumps(treatmentobj1)
+        
+        return treatmentobj
+    
     
     #int(common.getid(str(avars["memberid"]))),
     #int(common.getid(str(avars["patientid"]))),
@@ -1114,6 +1536,8 @@ class Treatment:
                 fullname = ""
                 patientmember = ""
                 title = ""
+                hv = common.getkeyvalue(avars,"hv",False)
+                
                 if(len(r) > 0):
                     patientmember = r[0].patientmember
                     title = r[0].title
@@ -1122,7 +1546,10 @@ class Treatment:
                     newmember = common.getboolean(r[0].newmember)
                     freetreatment = common.getboolean(r[0].freetreatment)
                     patienttype = r[0].patienttype
-                    procedurepriceplancode =  mdputils.getprocedurepriceplancodeformember(db,providerid,memberid,patientid,policy_name) #IB:15-Mar-2020 r[0].procedurepriceplancode        
+                    if(hv == False):
+                        procedurepriceplancode =  mdputils.getprocedurepriceplancodeformember(db,providerid,memberid,patientid,policy_name) #IB:15-Mar-2020 r[0].procedurepriceplancode
+                    else:
+                        procedurepriceplancode =  mdputils.getprocedurepriceplancodeforHVmember(db,providerid,memberid,patientid,policy_name) #IB:15-Mar-2020 r[0].procedurepriceplancode
                 
                 
                 #Create a new TreatmentPlan
@@ -1188,8 +1615,9 @@ class Treatment:
                 account.calculatecost(db,tplanid)
                 account.calculatecopay(db, tplanid,memberid)
                 account.calculateinspays(db,tplanid)
-                account.calculatedue(db,tplanid)                
+                account.calculatedue(db,tplanid) 
                 
+                self.hv = hv
                 treatmentobj = self.gettreatment(treatmentid)
                 
                 

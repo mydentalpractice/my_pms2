@@ -622,6 +622,7 @@ class Procedure:
             companypays = 0
             relgrproc = False
             memberid = 0
+            inspays = 0
             
             if(len(procs)>0):
                     ucrfee = float(common.getvalue(procs[0].ucrfee))

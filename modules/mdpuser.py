@@ -22,6 +22,7 @@ from applications.my_pms2.modules import mdpprospect
 from applications.my_pms2.modules import mdpprovider
 from applications.my_pms2.modules import mdpagent
 from applications.my_pms2.modules import mdppatient
+from applications.my_pms2.modules import mdpdoctor
 from applications.my_pms2.modules import logger
 
 
@@ -171,6 +172,7 @@ class User:
   
     return json.dumps(user_data)
 
+  
   def user_otp_login(self,avars):
       
       auth = self.auth
@@ -181,7 +183,7 @@ class User:
       
   
       user_data = {}
-      
+      user_id = 0
       
       try:
         cell = common.getkeyvalue(avars,"cell","")
@@ -197,6 +199,7 @@ class User:
   
         auth.login_user(db.auth_user(int(usr[0].id)))
         cell = auth.user["cell"]
+        user_id = usr[0].id
         user_data = {}
         #IF THE user cell is in provider then the user is a provider
         p = db((db.provider.cell == cell) & (db.provider.is_active == True)).select()
@@ -204,6 +207,7 @@ class User:
           #if cell is in provider then otp is for provider
           obj = mdpprovider.Provider(db,int(p[0].id))
           user_data = json.loads(obj.getprovider())
+          user_data["user_id"] = user_id
           user_data["usertype"] = "provider"
           user_data["result"] = "success"
           user_data["error_message"] = ""
@@ -218,6 +222,7 @@ class User:
               patobj = mdppatient.Patient(db, 0)
               user_data = patobj.getpatient(int(common.getid(pat[0].primarypatientid)), int(common.getid(pat[0].patientid)), "imageurl")
               user_data["usertype"] = "member"
+              user_data["user_id"] = user_id
             else:
               #multiple users with the same cell
               error_message = "OTP Login API Error: No User/Multiple Patient/Members matching registered " + cell
@@ -237,6 +242,7 @@ class User:
               user_data = json.loads(obj.get_prospect({"prospectid":str(p[0].id)}))
               user_data["usertype"] = "prospect"
               user_data["result"] = "success"
+              user_data["user_id"] = user_id
               user_data["error_message"] = ""
               user_data["error_code"] = ""
             else:
@@ -245,6 +251,7 @@ class User:
               user_data["result"] = "success"
               user_data["error_message"] = ""
               user_data["error_code"] = ""
+              user_data["user_id"] = user_id
               
         
         
@@ -319,7 +326,7 @@ class User:
           if(len(pat) == 1):
             #user is a patientmemebr
             patobj = mdppatient.Patient(db, 0)
-            user_data = patobj.getpatient(int(common.getid(pat[0].primarypatientid)), int(common.getid(pat[0].patientid)), "imageurl")
+            user_data = json.loads(patobj.getpatient(int(common.getid(pat[0].primarypatientid)), int(common.getid(pat[0].patientid)), "imageurl"))
             user_data["user_id"] = user_id
             user_data["usertype"] = "member"
           else:
@@ -398,6 +405,49 @@ class User:
   
     return json.dumps(user_data)
 
+  #authenticate HV Doctor
+  def hv_doc_login(self,username,password):
+      auth = self.auth
+      db = self.db
+      
+      logger.loggerpms2.info(">>HV DOC LOGIN API\n")
+      logger.loggerpms2.info("===Req_data=\n" + username + " " + password + "\n")
+      user_data = {}
+      try:
+        user = auth.login_bare(str(username), str(password))
+        #logger.loggerpms2.info(">>After user")
+        if(user==False):
+          user_data ={
+            "result" : "fail",
+            "error_message":"HV DOC Login Failure. Please re-enter correct your username and password"
+          }
+          return json.dumps(user_data)
+
+        rows = db((db.hv_doctor.hv_doc_cell == auth.user.cell)).select()
+        if(len(rows) <= 0):
+          logger.loggerpms2.info("No HV DOC with cell " + auth.user.cell)
+          user_data ={
+            "result" : "fail",
+            "user_id":auth.user.id if(auth.user != None) else 0,
+            "error_message":"Login Failure. Invalid Web Member"
+          }
+          return json.dumps(user_data)
+
+        avars={}
+        avars["hv_doctorid"] = rows[0].id
+        doc = mdpdoctor.Doctor(db, 0)
+        user_data = json.loads(doc.get_hv_doctor(avars))
+        logger.loggerpms2.info("===Rsp_data=\n" + json.dumps(user_data) + "\n")
+        
+      except Exception as e:
+        error_message = "Login Exception Error - " + str(e)
+        logger.loggerpms2.info(error_message)
+        excpobj = {}
+        excpobj["result"] = "fail"
+        excpobj["error_message"] = error_message
+        return json.dumps(excpobj)                
+      
+      return json.dumps(user_data)
   
   #Authenticate the user returning JSON data
   #If successful, return authenticate user data, provider data(if user is provider), web admin data (if user is admin), patient data (if user is patient - member or walkin)
@@ -817,7 +867,7 @@ class User:
         modified_on = common.getISTFormatCurrentLocatTime()
       )
     message = "success" if(len(pats)>0) else "failure"
-    return json.dumps({"patientcount":len(pats),"patientlist":patlist,"message":message,"result":message})
+    return json.dumps({"patientcount":len(pats),"patientlist":patlist,"user_id":user_id,"message":message,"result":message})
   
   
 
@@ -914,6 +964,7 @@ class User:
     regobj = {}
     auth = self.auth
     try:
+      user_id = 0
       
       #check for valid registration data
       regobj = self.member_registration_validation(email, cell, username)
@@ -925,6 +976,7 @@ class User:
       # create new user
       users = db((db.auth_user.email==email) & (db.auth_user.sitekey == sitekey)).select()
       if users:
+        user_id = users[0].id
         my_crypt = CRYPT(key=auth.settings.hmac_key)
         crypt_pass = my_crypt(password)[0]  
         db(db.auth_user.id == users[0].id).update(username=username,password=crypt_pass)
@@ -932,7 +984,7 @@ class User:
       else:
         my_crypt = CRYPT(key=auth.settings.hmac_key)
         crypt_pass = my_crypt(password)[0]        
-        id_user= db.auth_user.insert(
+        user_id= db.auth_user.insert(
                                    email = email,
                                    cell = cell,
                                    sitekey = sitekey,
@@ -967,6 +1019,7 @@ class User:
         regobj["email"] = email
         regobj["cell"] = cell
         regobj["sitekey"] = sitekey
+        regobj["user_id"] = user_id
       else:
         regobj["result"] = "fail"
         regobj["error_message"] = "Member Registration Error"
@@ -1209,7 +1262,7 @@ class User:
           regobj["result"] = "success"
           regobj["error_message"] = ""
           regobj["new"] = False
-          regobj["userid"] = str(users[0].id)
+          regobj["user_id"] = str(users[0].id)
           regobj["email"] = email
           regobj["cell"] = cell
           regobj["sitekey"] = sitekey
@@ -1242,7 +1295,7 @@ class User:
           regobj["result"] = "success"
           regobj["error_message"] = ""
           regobj["new"] = True
-          regobj["userid"] = str(id_user)
+          regobj["user_id"] = str(id_user)
           regobj["email"] = email
           regobj["cell"] = cell
           regobj["sitekey"] = sitekey

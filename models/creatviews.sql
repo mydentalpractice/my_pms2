@@ -8775,20 +8775,20 @@ ADD COLUMN `precommitamount` DOUBLE NULL DEFAULT 0 AFTER `policy`;
 
 18/08/2021
 ===========
-1.  ZZZAdded  regioncode fields in CITIES table
+1.  XXXYYYZZZAdded  regioncode fields in CITIES table
 
 2. Added 4 regions RG101, RG102, RG 103, RG104 in GroupRegion table
 
 
 19/08/2021
 ==========
-1. YYYZZZAdded tables for Home Visit Doctor ^ Customer
+1. XXXYYYZZZAdded tables for Home Visit Doctor ^ Customer
 
-   ZZZZ hv_doctor
+   XXXYYYZZZZ hv_doctor
    ALTER TABLE `mydp_prod`.`hv_doctor` 
 ADD COLUMN `doctorid` INT(11) NULL AFTER `modified_by`;
    
-YYYZZZALTER TABLE `mydp_prod`.`hv_doc_appointment` 
+XXXYYYZZZALTER TABLE `mydp_prod`.`hv_doc_appointment` 
 ADD COLUMN `hv_appt_created_on` DATETIME NULL AFTER `hv_doctorid`,
 ADD COLUMN `hv_appt_created_by` VARCHAR(45) NULL AFTER `hv_appt_created_on`,
 ADD COLUMN `hv_appt_confirmed_on` DATETIME NULL AFTER `hv_appt_created_by`,
@@ -8808,7 +8808,7 @@ ADD COLUMN `hv_appt_notes` MEDIUMTEXT NULL AFTER `hv_appt_cancelled_by`;
 
 
 
-2. YYYYZZZAdded table pinelab_properties for pinelans fields
+2. XXXYYYYZZZAdded table pinelab_properties for pinelans fields
 CREATE TABLE `mydp_prod`.`pinelab_properties` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
   `pl_url` VARCHAR(512) NULL DEFAULT 'https://uat.pinepg.in/api/v2/accept/payment',
@@ -8825,7 +8825,7 @@ CREATE TABLE `mydp_prod`.`pinelab_properties` (
 ALTER TABLE `mydp_prod`.`pinelabs` 
 ADD COLUMN `pl_callback` VARCHAR(1024) NULL AFTER `pl_cvv`;
 
-3. YYYZZZUpdate doctor table with fields for HV
+3. XXXYYYZZZUpdate doctor table with fields for HV
 ALTER TABLE `mydp_prod`.`doctor` 
 ADD COLUMN `hv_doc` CHAR(1) NULL DEFAULT 'F' AFTER `imageid`,
 ADD COLUMN `hv_doc_address1` VARCHAR(45) NULL AFTER `hv_doc`,
@@ -8839,7 +8839,7 @@ ADD COLUMN `hv_doc_gender` VARCHAR(45) NULL AFTER `hv_doc_dob`,
 ADD COLUMN `hv_doc_profile_image` VARCHAR(1024) NULL AFTER `hv_doc_gender`;
 
 
-4. YYYZZZNew table hv_doc_appointment
+4. XXXYYYZZZNew table hv_doc_appointment
 CREATE TABLE `mydp_prod`.`hv_doc_appointment` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
   `appointmentid` INT(11) NULL COMMENT 'This field refers to appointment in t_appointment table',
@@ -8854,7 +8854,7 @@ DROP COLUMN `hv_memberid`;
 
 2/9/2018
 =========
-1. YYYZZZZAdded table hv_treatmentid
+1. XXXYYYZZZZAdded table hv_treatmentid
 ALTER TABLE `mydp_prod`.`hv_treatment` 
 CHANGE COLUMN `treatmentid` `treatmentid` INT(11) NULL DEFAULT NULL AFTER `id`,
 ADD COLUMN `hv_appointmentid` INT(11) NULL AFTER `hv_doctorid`;
@@ -8863,7 +8863,7 @@ CHANGE COLUMN `hv_appointmentid` `hv_doc_appointmentid` INT(11) NULL DEFAULT NUL
 
 2. YYYZZZcreated a new vieww vw_payments_fast
 
-3. YYYZZZCities Population
+3. XXXXYYYZZZCities Population
            ALTER TABLE `mydp_prod`.`cities` 
            ADD COLUMN `HV` CHAR(1) NULL DEFAULT 'F' AFTER `regioncode`,
            ADD COLUMN `VC` CHAR(1) NULL DEFAULT 'F' AFTER `HV`;
@@ -8872,7 +8872,7 @@ CHANGE COLUMN `hv_appointmentid` `hv_doc_appointmentid` INT(11) NULL DEFAULT NUL
 
            Moidified City table to add HV and VC flags
 
-4. YYYZZZAdded fields to hv_doc_appointment table
+4. XXXYYYZZZAdded fields to hv_doc_appointment table
 ALTER TABLE `mydp_prod`.`hv_doc_appointment` 
 CHANGE COLUMN `hv_appt_distance` `hv_appt_distance` FLOAT NULL DEFAULT NULL AFTER `hv_appt_notes`,
 ADD COLUMN `hv_appt_address1` VARCHAR(45) NULL AFTER `hv_appt_distance`,
@@ -8904,7 +8904,7 @@ ALTER TABLE `mydp_prod`.`hv_doc_appointment`
 CHANGE COLUMN `hv_appt_feedback_by` `hv_appt_feedback_by` INT(11) NULL DEFAULT NULL ;
 
 
-4. YYYZZZNew Device table
+4. XXXYYYZZZNew Device table
 CREATE TABLE `mydp_prod`.`hv_device_info` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
   `hv_doctor_id` INT(11) NULL,
@@ -8913,22 +8913,56 @@ CREATE TABLE `mydp_prod`.`hv_device_info` (
   `hv_device_fcm_token` VARCHAR(45) NULL,
   PRIMARY KEY (`id`));
 
-5. YYYZZZZAdded phpurl in urlproperties
+5. XXXYYYZZZZAdded phpurl in urlproperties
 ALTER TABLE `mydp_prod`.`urlproperties` 
 ADD COLUMN `php_url` TEXT NULL AFTER `pagination`;
 
-6. YYYZZZRenamce hv_device_info to device_info
+6. XXXYYYZZZRenamce hv_device_info to device_info
 ALTER TABLE `mydp_prod`.`hv_device_info` 
 DROP COLUMN `hv_doctor_id`,
 CHANGE COLUMN `hv_device_id` `device_id` VARCHAR(45) NULL DEFAULT NULL ,
 CHANGE COLUMN `hv_device_type` `device_type` VARCHAR(45) NULL DEFAULT NULL ,
 CHANGE COLUMN `hv_device_fcm_token` `device_fcm_token` VARCHAR(45) NULL DEFAULT NULL , RENAME TO  `mydp_prod`.`device_info` ;
 
-6. Add user_id col. in device_info
+6. XXXYYYZZZAdd user_id col. in device_info
 ALTER TABLE `mydp_prod`.`device_info` 
 ADD COLUMN `user_id` VARCHAR(45) NULL AFTER `id`;
 
 7. YYYYZZZ New view vw_treatmentlist_fast
+
+8. XXXYYYZZZZModified hv_doc_appointment table.
+ALTER TABLE `mydp_prod`.`hv_doc_appointment` 
+ADD COLUMN `hv_treatmentid` INT(11) NULL COMMENT 'This points to the record in hv_treatment table' AFTER `hv_appt_feedback_by`,
+ADD COLUMN `trreatmentid` INT(11) NULL COMMENT 'This points to a record in \'treatment\' table' AFTER `hv_treatmentid`,
+ADD COLUMN `paymentid` INT(11) NULL COMMENT 'This points to a record in payment table' AFTER `trreatmentid`;
+
+10.  XXXXYYYZZRename trreatmentid to treatmentid in hv_doc_appointment
+
+11.  XXXYYYZZZ Modify table companypolicy
+ALTER TABLE `mydp_prod`.`companypolicy` 
+ADD COLUMN `premium` DOUBLE NULL AFTER `policy`;
+ALTER TABLE `mydp_prod`.`companypolicy` 
+ADD COLUMN `region` VARCHAR(45) NULL AFTER `policy`;
+
+12. XXXYYYZZZModify provider region plan
+ALTER TABLE `mydp_prod`.`provider_region_plan` 
+ADD COLUMN `premium` DOUBLE NULL AFTER `procedurepriceplancode`;
+
+13. XXXYYYZZZModify hv_doc_appointment to add apointment status field
+ALTER TABLE `mydp_prod`.`hv_doc_appointment` 
+ADD COLUMN `hv_appt_status` VARCHAR(45) NULL AFTER `paymentid`;
+
+14. YYYZZZModify vw_memberpatientlit, vw_memberpatientlist_fast
+
+15. XXXYYYZZZ Modified cities table with hv_fees
+ALTER TABLE `mydp_prod`.`cities` 
+ADD COLUMN `hv_fees` DOUBLE NULL AFTER `VC`;
+
+
+16. XXXYYYZZZZ Update cities with hv_fees
+UPDATE `mydp_prod`.`cities` SET `hv_fees`='299' WHERE `city`='Bengaluru';
+UPDATE `mydp_prod`.`cities` SET `hv_fees`='199' WHERE `id`='Jaipur';
+UPDATE `mydp_prod`.`cities` SET `hv_fees`='399' WHERE `id`='Mumbai';
 
 
 Script file to clear user for sign-up
