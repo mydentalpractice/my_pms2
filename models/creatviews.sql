@@ -8928,7 +8928,7 @@ CHANGE COLUMN `hv_device_fcm_token` `device_fcm_token` VARCHAR(45) NULL DEFAULT 
 ALTER TABLE `mydp_prod`.`device_info` 
 ADD COLUMN `user_id` VARCHAR(45) NULL AFTER `id`;
 
-7. YYYYZZZ New view vw_treatmentlist_fast
+7. XXXYYYYZZZ New view vw_treatmentlist_fast
 
 8. XXXYYYZZZZModified hv_doc_appointment table.
 ALTER TABLE `mydp_prod`.`hv_doc_appointment` 

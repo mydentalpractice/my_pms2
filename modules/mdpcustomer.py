@@ -991,7 +991,7 @@ class Customer:
    
 
     def get_customer(self,avars):
-        logger.loggerpms2.info("Enter get_customer " + json.dumps(avars))
+        logger.loggerpms2.info("Enter xget_customer " + json.dumps(avars))
         db = self.db        
         auth = current.auth
         
@@ -1003,7 +1003,7 @@ class Customer:
         try:
             customer_ref = common.getkeyvalue(avars,"customer_ref","")
             c = db((db.customer.customer_ref == customer_ref) & (db.customer.is_active == True)).select()
-            customerid = 0 if(len(c) != 1) else int(common.getid(c[0].id))
+            customerid = 0 if(len(c) == 0) else int(common.getid(c[0].id))
             
             jsonresp={
                 "result":"success",
@@ -1069,8 +1069,10 @@ class Customer:
             }
             
             #get customers
+            logger.loggerpms2.info("Dependents =" + str(customerid))
             deps = db((db.customerdependants.customer_id == customerid) & (db.customerdependants.is_active == True)).select()
             depcount = 0 if deps == None else len(deps)
+            logger.loggerpms2.info("Dependents Count =" + str(depcount))
             if(depcount>0):
                 for dep in deps:
                     depobj= {

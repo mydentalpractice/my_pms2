@@ -365,7 +365,14 @@ class Image:
     for image in images:
       
       imageobj = {
-        "imageid":int(common.getid(image.id))
+        "imageid":int(common.getid(image.id)),
+        "imageurl" : "",
+        "title"  : common.getstring(image.title),
+        "image"  : common.getstring(image.image),
+        "tooth"  : common.getstring(image.tooth),
+        "quadrant"  : common.getstring(image.quadrant),
+        "description"  : common.getstring(image.description),
+        "imagedate":(image.imagedate).strftime("%d/%m/%Y"),
       }
       imagelist.append(imageobj)
     

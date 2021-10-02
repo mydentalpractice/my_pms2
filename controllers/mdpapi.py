@@ -3209,6 +3209,10 @@ def assign_hv_doctor(avars):
     rsp = odr.assign_hv_doctor(avars)
     return rsp
 
+def update_hv_doc_payment(avars):
+    odr = mdpdoctor.Doctor(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
+    rsp = odr.update_hv_doc_payment(avars)
+    return rsp
 
 def new_hv_doc_appointment(avars):
     odr = mdpdoctor.Doctor(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
@@ -3365,7 +3369,8 @@ hvdocAPI_switcher = {
     "list_hv_open_slots_by_month":list_hv_open_slots_by_month,
     "new_hv_appt_feedback":new_hv_appt_feedback,
     "get_hv_appt_feedback":get_hv_appt_feedback,
-    "assign_hv_doctor":assign_hv_doctor
+    "assign_hv_doctor":assign_hv_doctor,
+    "update_hv_doc_payment":update_hv_doc_payment
     
 }
 

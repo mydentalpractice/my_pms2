@@ -120,7 +120,7 @@ class PineLabs:
                 
                 "txn_data": {
                     "navigation_mode": "2",
-                    "payment_mode": "1,3,4,10,11",
+                    "payment_mode": "1,3,4,7,10,11",
                     "transaction_type": "1",
                 },                
               

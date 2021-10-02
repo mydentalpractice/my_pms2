@@ -65,6 +65,8 @@ def getprocedurepriceplancodeformember(db,providerid,memberid,patientid,policy_n
     except Exception as e:
         raise Exception(str(e))
     
+    return procedurepriceplancode
+
     
 #THIS API is called to determine the member's procedure price plan code based on 
 #the HV Regions

@@ -1455,7 +1455,38 @@ class Doctor:
   
     
     return json.dumps(rspobj)
-  
+  #avars = "hv_doc_appointment"
+  def update_hv_doc_payment(self,avars):
+      
+      auth  = current.auth
+      db = self.db
+      
+      rspobj = {}
+    
+      try:
+        
+        hv_doc_appointmentid = int(common.getkeyvalue(avars,"hv_doc_appointmentid","0"))
+        paymentid = int(common.getkeyvalue(avars,"paymentid","0"))
+        
+        db(db.hv_doc_appointment.id == hv_doc_appointmentid).update(\
+          paymentid = paymentid
+        )
+        rspobj["result"] = "success"
+        rspobj["error_code"] = ""
+        rspobj["error_message"] = ""
+        
+              
+      except Exception as e:
+        mssg = "Update HV DOC Payment Exception:\n" + str(e)
+        logger.loggerpms2.info(mssg)      
+        excpobj = {}
+        excpobj["result"] = "fail"
+        excpobj["error_code"] = ""
+        excpobj["error_message"] = mssg
+        return json.dumps(excpobj)
+    
+      
+      return json.dumps(rspobj)
   
  
 
@@ -1482,6 +1513,10 @@ class Doctor:
         return json.dumps(excpobj)        
 
       hv_doctorid = 0 if(len(r) <= 0) else int(r[0].hv_doctorid)
+      paymentid = 0 if(len(r) <= 0) else int(common.getid(r[0].paymentid))
+      py = db(db.payment.id == paymentid).select()
+      fp_paymentref = "" if(len(py) <= 0) else common.getstring(py[0].fp_paymentref)
+      fp_status = "" if(len(py) <= 0) else common.getstring(py[0].fp_status)
 
       xobj = {"hv_doctorid":str(hv_doctorid)}
       hv_doctor_obj = json.loads(self.get_hv_doctor(xobj))
@@ -1500,6 +1535,7 @@ class Doctor:
       
       memberid = int(common.getid(common.getkeyvalue(apptobj,"memberid","0")))
       patientid = int(common.getid(common.getkeyvalue(apptobj,"patientid","0")))
+      
       pats = db((db.patientmember.id == memberid) &\
                 (db.patientmember.is_active == True)).select()
       
@@ -1518,9 +1554,13 @@ class Doctor:
       rspobj["hv_appt_cancelled_by"] = r[0].hv_appt_cancelled_by 
       
       rspobj["hv_appt_feedback_on"] = common.getstringfromtime(r[0].hv_appt_feedback_on, "%d/%m/%Y %H:%M")
-      rspobj["hv_appt_feedback_by"] = r[0].hv_appt_feedback_by 
+      rspobj["hv_appt_feedback_by"] = r[0].hv_appt_feedback_by
+      rspobj["hv_appt_rating"] = r[0].hv_appt_rating
+      rspobj["hv_appt_feedback"] = r[0].hv_appt_feedback
       
-      rspobj["hv_appt_status"] = r[0].hv_appt_status 
+      rspobj["hv_appt_status"] = r[0].hv_appt_status
+      rspobj["hv_appt_fp_status"] = fp_status
+      rspobj["hv_appt_fp_paymentref"] = fp_paymentref      
       
       rspobj["hv_appt_distance"] = r[0].hv_appt_distance 
       rspobj["hv_appt_notes"] =r[0].hv_appt_notes 
@@ -1669,7 +1709,9 @@ class Doctor:
         qry = qry & (db.t_appointment.f_status == status)
         
       
-      appts = db(qry).select(db.hv_doc_appointment.ALL, db.t_appointment.ALL, left=db.t_appointment.on(db.t_appointment.id == db.hv_doc_appointment.appointmentid))
+      appts = db(qry).select(db.hv_doc_appointment.ALL, db.t_appointment.ALL,db.payment.ALL,\
+                             left=[db.t_appointment.on(db.t_appointment.id == db.hv_doc_appointment.appointmentid),\
+                                   db.payment.on(db.payment.id == db.hv_doc_appointment.paymentid)])
       hv_apptlst = []
       hv_apptobj = {}
       
@@ -1687,6 +1729,9 @@ class Doctor:
         hv_apptobj["hv_appt_city_id"] = appt.hv_doc_appointment.hv_appt_city_id
         
         hv_apptobj["hv_appt_status"] = appt.t_appointment.f_status
+        hv_apptobj["hv_appt_fp_status"] = appt.payment.fp_status
+        hv_apptobj["hv_appt_fp_paymentref"] = appt.payment.fp_paymentref
+        
         hv_apptobj["hv_doc_appointmentid"] = appt.hv_doc_appointment.id
         hv_apptobj["appointmentid"] = appt.hv_doc_appointment.appointmentid
         hv_apptobj["hv_doctorid"] = appt.hv_doc_appointment.hv_doctorid
@@ -2411,6 +2456,9 @@ class Doctor:
   #avars={action, appointment_date}
   #
   def list_hv_open_slots_by_day(self,avars):
+    
+      logger.loggerpms2.info("Enter list_hv_open_slots_by_day " + json.dumps(avars))
+  
       auth  = current.auth
       db = self.db
       rspobj = {}
@@ -2447,6 +2495,7 @@ class Doctor:
             continue
           avars["providerid"] = str(providerid)
           avars["doctorid"] = str(dr.doctorid)
+          
           apptObj = mdpappointment.Appointment(db, providerid)
           slotobj = json.loads(apptObj.list_open_slots(avars))
           slotobj = slotobj["list_open_slots"]
