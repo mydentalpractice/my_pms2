@@ -1988,6 +1988,7 @@ def make_payment_pinelabs():
     
     logger.loggerpms2.info("Enter Pine Labs Payment " + json.dumps(request.vars))
     providerid = int(common.getstring(request.vars.providerid))
+    returnurl = URL('payment', 'list_payment', vars=dict(page=1, providerid=providerid))
     
     paymentid = int(common.getid(request.vars.paymentid))
     paymentmode = common.getstring(request.vars.paymentmod)
@@ -2027,9 +2028,9 @@ def make_payment_pinelabs():
     else:
         message = rspobj["error_message"]
         
-        
+         
     logger.loggerpms2.info("Exit Pine Labs Payment " + json.dumps(rspobj))
-    return dict(message = message)
+    return dict(message = message,returnurl=returnurl)
 
 
 def make_payment_shopse():
@@ -2037,6 +2038,8 @@ def make_payment_shopse():
     logger.loggerpms2.info("Enter Shopse Payment")
     
     providerid = int(common.getstring(request.vars.providerid))
+
+    returnurl = URL('payment', 'list_payment', vars=dict(page=1, providerid=providerid))
     
     #payment, member info
     paymentid = int(common.getid(request.vars.paymentid))
@@ -2100,9 +2103,8 @@ def make_payment_shopse():
 
 
     
-    
-    
-    return dict(message=message)
+     
+    return dict(message=message,returnurl=returnurl)
 
 
 #this method is called when Online Payment : create_payment->update_payment->make_payment_hdfc->HDFC site->payment_success (callback).

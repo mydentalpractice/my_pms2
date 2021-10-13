@@ -1,4 +1,7 @@
 from gluon import current
+
+db = current.globalenv['db']
+
 import os
 import base64
 import json
@@ -7,6 +10,9 @@ import uuid
 
 import datetime
 import time
+
+from urllib2 import HTTPError
+
 
 from applications.my_pms2.modules import common
 from applications.my_pms2.modules import mail
@@ -3046,7 +3052,7 @@ def encrypt_sha256_shopse(avars):
 	    rspstr = rspstr + "&" + str(keyname) + "=" + str(keyval)
 	
     	
-    obj = datasecurity.DataSecurity()
+    obj = datasecurity.DataSecurity(current.globalenv['db'])
     
     rsp = obj.encrypt_sha256_shopse(rspstr)
     
@@ -3551,36 +3557,29 @@ def mdpapi():
     def POST(*args, **vars):
 	i = 0
         try:
-	    #logger.loggerpms2.info(">>Enter MDP API==>>")
-	    #db = current.globalenv['db']
-	    #props = db(db.urlproperties.id > 0).select(db.urlproperties.encryption)
-	    #encryption = False if(len(props) == 0) else common.getboolean(props[0].encryption)
-	    orlgr = mdpreligare.Religare(current.globalenv['db'],0)
-	    #logger.loggerpms2.info(">>API==>>1")
-            
-            
+	    dsobj = datasecurity.DataSecurity(current.globalenv['db'])
             encryption = vars.has_key("req_data")
-	   
 	    
+	    avars = {
+	      "encryption" : encryption,
+	      "request":request
+	    }
+	    rspobj = json.loads(dsobj.authenticate_api(avars))
+	    if(rspobj["result"] == "fail"):
+		mssg = rspobj["error_message"]
+		
+		raise Exception(mssg)
+		
+
 	    if(encryption):
-		#logger.loggerpms2.info(">>Encryption API==>>2\n" + vars["req_data"])
-		
+		#logger.loggerpms2.info(">>MDP API with Encryption")
 		encrypt_req = vars["req_data"]
-		#logger.loggerpms2.info(">>API==>>3" )
-		
-		vars = json.loads(orlgr.decrypts(vars["req_data"]))
-		#ogger.loggerpms2.info(">>API==>>4 " + json.dumps(vars) )
-		
-	    #logger.loggerpms2.info(">>API==>>5 \n" + json.dumps(vars) )
-		
-	    action = str(vars["action"])
-	    
-	    #logger.loggerpms2.info(">>API ACTION==>>" + action)
-	    if(action == 'getreligareprocedures'):
-		logger.loggerpms2.info(">>Get Religare Procedures\n")
-		logger.loggerpms2.info("===Req_data=\n" + encrypt_req)
-		logger.loggerpms2.info("===Req_data=\n" + json.dumps(vars))
-	    
+		vars = json.loads(dsobj.decrypts(encrypt_req))		
+
+	    #decrypted request date
+	    action = common.getkeyvalue(vars,"action","") #str(vars["action"])
+	    #logger.loggerpms2.info(">>MEDIA API ACTION==>>" + action)
+       
 	    #return json.dumps({"action":action})
             rsp = mdpapi_switcher.get(action,unknown)(vars)
 	    common.setcookies(response)
@@ -3590,9 +3589,13 @@ def mdpapi():
 		return rsp
 	    
         except Exception as e:
-	    logger.loggerpms2.info("API Exception Error =>>\n")
-	    logger.loggerpms2.info(str(e))
-            raise HTTP(500)   
+	    mssg = "MDP API Exception Error =>>\n" + str(e)
+	    logger.loggerpms2.info(mssg)
+	    excpobj = {}
+	    excpobj["result"] = "fail"
+	    excpobj["error_code"] = "MDP404"
+	    excpobj["error_message"] = mssg
+	    return json.dumps(excpobj)    	    
 
     def PUT(*args, **vars):
         return dict()
@@ -3615,17 +3618,26 @@ def mediaAPI():
 	i = 0
 	try:
 	    #logger.loggerpms2.info(">>Enter MEDIA API==>>")
-	    dsobj = datasecurity.DataSecurity()
+	    dsobj = datasecurity.DataSecurity(current.globalenv['db'])
+            encryption = vars.has_key("req_data")
 	    
+	    avars = {
+	      "encryption" : encryption,
+	      "request":request
+	    }
+	    rspobj = json.loads(dsobj.authenticate_api(avars))
+	    if(rspobj["result"] == "fail"):
+		mssg = rspobj["error_message"]
+		
+		raise Exception(mssg)
 	    
-	    encryption = vars.has_key("req_data")
 	    if(encryption):
 		#logger.loggerpms2.info(">>MEIDA API with Encryption")
 		encrypt_req = vars["req_data"]
 		vars = json.loads(dsobj.decrypts(encrypt_req))
 	    
 	    #decrypted request date
-	    action = str(vars["action"])
+	    action = common.getkeyvalue(vars,"action","") #str(vars["action"])
 	    #logger.loggerpms2.info(">>MEDIA API ACTION==>>" + action)
 	    
 	    
@@ -3639,8 +3651,13 @@ def mediaAPI():
 	    
 	except Exception as e:
 	    mssg = "MEDIA API Exception Error =>>\n" + str(e)
-	    #logger.loggerpms2.info(mssg)
-	    raise HTTP(500)   
+	    logger.loggerpms2.info(mssg)
+	    excpobj = {}
+	    excpobj["result"] = "fail"
+	    excpobj["error_code"] = "MDP404"
+	    excpobj["error_message"] = mssg
+	    return json.dumps(excpobj)    	    
+	    
 
     def PUT(*args, **vars):
 	return dict()
@@ -3662,17 +3679,26 @@ def opsTimingAPI():
 	i = 0
 	try:
 	    #logger.loggerpms2.info(">>Enter OPS Timing API==>>")
-	    dsobj = datasecurity.DataSecurity()
+	    dsobj = datasecurity.DataSecurity(current.globalenv['db'])
+            encryption = vars.has_key("req_data")
 	    
+	    avars = {
+	      "encryption" : encryption,
+	      "request":request
+	    }
+	    rspobj = json.loads(dsobj.authenticate_api(avars))
+	    if(rspobj["result"] == "fail"):
+		mssg = rspobj["error_message"]
+		
+		raise Exception(mssg)
 	    
-	    encryption = vars.has_key("req_data")
 	    if(encryption):
 		#logger.loggerpms2.info(">>OPS Timing with Encryption")
 		encrypt_req = vars["req_data"]
 		vars = json.loads(dsobj.decrypts(encrypt_req))
 	    
 	    #decrypted request date
-	    action = str(vars["action"])
+	    action = common.getkeyvalue(vars,"action","") #str(vars["action"])
 	    #logger.loggerpms2.info(">>OPS Timing ACTION==>>" + action)
 	    
 	    
@@ -3686,8 +3712,12 @@ def opsTimingAPI():
 	    
 	except Exception as e:
 	    mssg = "OPS Timing Exception Error =>>\n" + str(e)
-	    #logger.loggerpms2.info(mssg)
-	    raise HTTP(500)   
+	    logger.loggerpms2.info(mssg)
+	    excpobj = {}
+	    excpobj["result"] = "fail"
+	    excpobj["error_code"] = "MDP404"
+	    excpobj["error_message"] = mssg
+	    return json.dumps(excpobj)    	    
 
     def PUT(*args, **vars):
 	return dict()
@@ -3709,17 +3739,26 @@ def accountAPI():
 	i = 0
 	try:
 	    #logger.loggerpms2.info(">>Enter Account API==>>")
-	    dsobj = datasecurity.DataSecurity()
+	    dsobj = datasecurity.DataSecurity(current.globalenv['db'])
+            encryption = vars.has_key("req_data")
 	    
+	    avars = {
+	      "encryption" : encryption,
+	      "request":request
+	    }
+	    rspobj = json.loads(dsobj.authenticate_api(avars))
+	    if(rspobj["result"] == "fail"):
+		mssg = rspobj["error_message"]
+		raise Exception(mssg)
+
 	    
-	    encryption = vars.has_key("req_data")
 	    if(encryption):
 		#logger.loggerpms2.info(">>Account with Encryption")
 		encrypt_req = vars["req_data"]
 		vars = json.loads(dsobj.decrypts(encrypt_req))
 	    
 	    #decrypted request date
-	    action = str(vars["action"])
+	    action = common.getkeyvalue(vars,"action","") #str(vars["action"])
 	    #logger.loggerpms2.info(">>Account ACTION==>>" + action)
 	    
 	    
@@ -3733,8 +3772,12 @@ def accountAPI():
 	    
 	except Exception as e:
 	    mssg = "OPS Timing Exception Error =>>\n" + str(e)
-	    #logger.loggerpms2.info(mssg)
-	    raise HTTP(500)   
+	    logger.loggerpms2.info(mssg)
+	    excpobj = {}
+	    excpobj["result"] = "fail"
+	    excpobj["error_code"] = "MDP404"
+	    excpobj["error_message"] = mssg
+	    return json.dumps(excpobj)    	    
 
     def PUT(*args, **vars):
 	return dict()
@@ -3754,15 +3797,24 @@ def clinicAPI():
 	i = 0
 	try:
 	    #logger.loggerpms2.info(">>Enter Account API==>>")
-	    dsobj = datasecurity.DataSecurity()
-	    encryption = vars.has_key("req_data")
+	    dsobj = datasecurity.DataSecurity(current.globalenv['db'])
+            encryption = vars.has_key("req_data")
+	    avars = {
+	      "encryption" : encryption,
+	      "request":request
+	    }
+	    rspobj = json.loads(dsobj.authenticate_api(avars))
+	    if(rspobj["result"] == "fail"):
+		mssg = rspobj["error_message"]
+		raise Exception(mssg)
+	    
 	    if(encryption):
 		#logger.loggerpms2.info(">>Account with Encryption")
 		encrypt_req = vars["req_data"]
 		vars = json.loads(dsobj.decrypts(encrypt_req))
 	    
 	    #decrypted request date
-	    action = str(vars["action"])
+	    action = common.getkeyvalue(vars,"action","") #str(vars["action"])
 	    #logger.loggerpms2.info(">>Account ACTION==>>" + action)
 	    
 	    #return json.dumps({"action":action})
@@ -3775,8 +3827,12 @@ def clinicAPI():
 	    
 	except Exception as e:
 	    mssg = "Clinic API Exception Error =>>\n" + str(e)
-	    #logger.loggerpms2.info(mssg)
-	    raise HTTP(500)   
+	    logger.loggerpms2.info(mssg)
+	    excpobj = {}
+	    excpobj["result"] = "fail"
+	    excpobj["error_code"] = "MDP404"
+	    excpobj["error_message"] = mssg
+	    return json.dumps(excpobj)    	    
 
     def PUT(*args, **vars):
 	return dict()
@@ -3796,15 +3852,24 @@ def doctorAPI():
 	i = 0
 	try:
 	    #logger.loggerpms2.info(">>Enter Doctor API==>>")
-	    dsobj = datasecurity.DataSecurity()
-	    encryption = vars.has_key("req_data")
+	    dsobj = datasecurity.DataSecurity(current.globalenv['db'])
+            encryption = vars.has_key("req_data")
+	    avars = {
+	      "encryption" : encryption,
+	      "request":request
+	    }
+	    rspobj = json.loads(dsobj.authenticate_api(avars))
+	    if(rspobj["result"] == "fail"):
+		mssg = rspobj["error_message"]
+		raise Exception(mssg)
+	    
 	    if(encryption):
 		#logger.loggerpms2.info(">>Doctor with Encryption")
 		encrypt_req = vars["req_data"]
 		vars = json.loads(dsobj.decrypts(encrypt_req))
 	    
 	    #decrypted request date
-	    action = str(vars["action"])
+	    action = common.getkeyvalue(vars,"action","") #str(vars["action"])
 	    #logger.loggerpms2.info(">>Doctor ACTION==>>" + action)
 	    
 	    #return json.dumps({"action":action})
@@ -3817,8 +3882,12 @@ def doctorAPI():
 	    
 	except Exception as e:
 	    mssg = "Clinic API Exception Error =>>\n" + str(e)
-	    #logger.loggerpms2.info(mssg)
-	    raise HTTP(500)   
+	    logger.loggerpms2.info(mssg)
+	    excpobj = {}
+	    excpobj["result"] = "fail"
+	    excpobj["error_code"] = "MDP404"
+	    excpobj["error_message"] = mssg
+	    return json.dumps(excpobj)    	    
 
     def PUT(*args, **vars):
 	return dict()
@@ -3838,15 +3907,24 @@ def prospectAPI():
 	i = 0
 	try:
 	    #logger.loggerpms2.info(">>Enter Prospect API==>>")
-	    dsobj = datasecurity.DataSecurity()
-	    encryption = vars.has_key("req_data")
+	    dsobj = datasecurity.DataSecurity(current.globalenv['db'])
+            encryption = vars.has_key("req_data")
+	    avars = {
+	      "encryption" : encryption,
+	      "request":request
+	    }
+	    rspobj = json.loads(dsobj.authenticate_api(avars))
+	    if(rspobj["result"] == "fail"):
+		mssg = rspobj["error_message"]
+		raise Exception(mssg)
+	    
 	    if(encryption):
 		#logger.loggerpms2.info(">>Prospedct with Encryption")
 		encrypt_req = vars["req_data"]
 		vars = json.loads(dsobj.decrypts(encrypt_req))
 	    
 	    #decrypted request date
-	    action = str(vars["action"])
+	    action = common.getkeyvalue(vars,"action","") #str(vars["action"])
 	    #logger.loggerpms2.info(">>Prospect ACTION==>>" + action)
 	    
 	    #return json.dumps({"action":action})
@@ -3859,8 +3937,12 @@ def prospectAPI():
 	    
 	except Exception as e:
 	    mssg = "Prospect API Exception Error =>>\n" + str(e)
-	    #logger.loggerpms2.info(mssg)
-	    raise HTTP(500)   
+	    logger.loggerpms2.info(mssg)
+	    excpobj = {}
+	    excpobj["result"] = "fail"
+	    excpobj["error_code"] = "MDP404"
+	    excpobj["error_message"] = mssg
+	    return json.dumps(excpobj)    	    
 
     def PUT(*args, **vars):
 	return dict()
@@ -3881,15 +3963,25 @@ def agentAPI():
 	i = 0
 	try:
 	    #logger.loggerpms2.info(">>Enter Agent API==>>")
-	    dsobj = datasecurity.DataSecurity()
-	    encryption = vars.has_key("req_data")
+	    dsobj = datasecurity.DataSecurity(current.globalenv['db'])
+            encryption = vars.has_key("req_data")
+	    avars = {
+	      "encryption" : encryption,
+	      "request":request
+	    }
+	    rspobj = json.loads(dsobj.authenticate_api(avars))
+	    if(rspobj["result"] == "fail"):
+		mssg = rspobj["error_message"]
+		raise Exception(mssg)
+	    	    
+	    
 	    if(encryption):
 		#logger.loggerpms2.info(">>Agent with Encryption")
 		encrypt_req = vars["req_data"]
 		vars = json.loads(dsobj.decrypts(encrypt_req))
 	    
 	    #decrypted request date
-	    action = str(vars["action"])
+	    action = common.getkeyvalue(vars,"action","") #str(vars["action"])
 	    #logger.loggerpms2.info(">>Agent ACTION==>>" + action)
 	    
 	    #return json.dumps({"action":action})
@@ -3902,8 +3994,12 @@ def agentAPI():
 	    
 	except Exception as e:
 	    mssg = "AGENT API Exception Error =>>\n" + str(e)
-	    #logger.loggerpms2.info(mssg)
-	    raise HTTP(500)   
+	    logger.loggerpms2.info(mssg)
+	    excpobj = {}
+	    excpobj["result"] = "fail"
+	    excpobj["error_code"] = "MDP404"
+	    excpobj["error_message"] = mssg
+	    return json.dumps(excpobj)    	    
 
     def PUT(*args, **vars):
 	return dict()
@@ -3924,15 +4020,25 @@ def appointmentAPI():
 	i = 0
 	try:
 	    #logger.loggerpms2.info(">>Enter Appointment API==>>")
-	    dsobj = datasecurity.DataSecurity()
-	    encryption = vars.has_key("req_data")
+	    dsobj = datasecurity.DataSecurity(current.globalenv['db'])
+            encryption = vars.has_key("req_data")
+	    avars = {
+	      "encryption" : encryption,
+	      "request":request
+	    }
+	    rspobj = json.loads(dsobj.authenticate_api(avars))
+	    if(rspobj["result"] == "fail"):
+		mssg = rspobj["error_message"]
+		raise Exception(mssg)
+	    	    
+	    	    
 	    if(encryption):
 		#logger.loggerpms2.info(">>Appointment with Encryption")
 		encrypt_req = vars["req_data"]
 		vars = json.loads(dsobj.decrypts(encrypt_req))
 	    
 	    #decrypted request date
-	    action = str(vars["action"])
+	    action = common.getkeyvalue(vars,"action","") #str(vars["action"])
 	    #logger.loggerpms2.info(">>Appointment ACTION==>>" + action)
 	    
 	    #return json.dumps({"action":action})
@@ -3945,8 +4051,12 @@ def appointmentAPI():
 	    
 	except Exception as e:
 	    mssg = "AGENT API Exception Error =>>\n" + str(e)
-	    #logger.loggerpms2.info(mssg)
-	    raise HTTP(500)   
+	    logger.loggerpms2.info(mssg)
+	    excpobj = {}
+	    excpobj["result"] = "fail"
+	    excpobj["error_code"] = "MDP404"
+	    excpobj["error_message"] = mssg
+	    return json.dumps(excpobj)    	    
 
     def PUT(*args, **vars):
 	return dict()
@@ -3965,9 +4075,18 @@ def userAPI():
     def POST(*args, **vars):
 	i = 0
 	try:
-	    logger.loggerpms2.info(">>Enter User API==>> " + json.dumps(vars))
-	    dsobj = datasecurity.DataSecurity()
-	    encryption = vars.has_key("req_data")
+	    #logger.loggerpms2.info(">>Enter User API==>> " + json.dumps(vars))
+	    dsobj = datasecurity.DataSecurity(current.globalenv['db'])
+            encryption = vars.has_key("req_data")
+	    avars = {
+	      "encryption" : encryption,
+	      "request":request
+	    }
+	    rspobj = json.loads(dsobj.authenticate_api(avars))
+	    if(rspobj["result"] == "fail"):
+		mssg = rspobj["error_message"]
+		raise Exception(mssg)
+	    
 	    if(encryption):
 		logger.loggerpms2.info(">>User with Encryption")
 		encrypt_req = vars["req_data"]
@@ -3975,7 +4094,7 @@ def userAPI():
 		logger.loggerpms2.info("UserAPI-Derypted data -==>" + json.dumps(vars))
 		
 	    #decrypted request date
-	    action = str(vars["action"])
+	    action = common.getkeyvalue(vars,"action","") #str(vars["action"])
 	    logger.loggerpms2.info(">>User ACTION==>>" + action)
 	    
 	    #return json.dumps({"action":action})
@@ -3990,7 +4109,11 @@ def userAPI():
 	except Exception as e:
 	    mssg = "User API Exception Error =>>\n" + str(e)
 	    logger.loggerpms2.info(mssg)
-	    raise HTTP(500)   
+	    excpobj = {}
+	    excpobj["result"] = "fail"
+	    excpobj["error_code"] = "MDP404"
+	    excpobj["error_message"] = mssg
+	    return json.dumps(excpobj)    	    
 
     def PUT(*args, **vars):
 	return dict()
@@ -4010,7 +4133,19 @@ def CFAPI():
 	i = 0
 	try:
 	    #logger.loggerpms2.info(">>Enter Agent API==>>")
-	    dsobj = datasecurity.DataSecurity()
+	    dsobj = datasecurity.DataSecurity(current.globalenv['db'])
+            encryption = vars.has_key("req_data")
+	    avars = {
+	      "encryption" : encryption,
+	      "request":request
+	    }
+	    rspobj = json.loads(dsobj.authenticate_api(avars))
+	    if(rspobj["result"] == "fail"):
+		mssg = rspobj["error_message"]
+		raise Exception(mssg)
+	    	    
+	    	    
+	    
 	    encryption = vars.has_key("req_data")
 	    if(encryption):
 		#logger.loggerpms2.info(">>Agent with Encryption")
@@ -4018,7 +4153,7 @@ def CFAPI():
 		vars = json.loads(dsobj.decrypts(encrypt_req))
 	    
 	    #decrypted request date
-	    action = str(vars["action"])
+	    action = common.getkeyvalue(vars,"action","") #str(vars["action"])
 	    #logger.loggerpms2.info(">>Agent ACTION==>>" + action)
 	    
 	    #return json.dumps({"action":action})
@@ -4031,8 +4166,12 @@ def CFAPI():
 	    
 	except Exception as e:
 	    mssg = "AGENT API Exception Error =>>\n" + str(e)
-	    #logger.loggerpms2.info(mssg)
-	    raise HTTP(500)   
+	    logger.loggerpms2.info(mssg)
+	    excpobj = {}
+	    excpobj["result"] = "fail"
+	    excpobj["error_code"] = "MDP404"
+	    excpobj["error_message"] = mssg
+	    return json.dumps(excpobj)    	    
 
     def PUT(*args, **vars):
 	return dict()
@@ -4052,21 +4191,27 @@ def shopseAPI():
     def POST(*args, **vars):
 	i = 0
 	try:
-	    logger.loggerpms2.info(">>Enter Shopse API==>>")
-	    dsobj = datasecurity.DataSecurity()
-	    encryption = vars.has_key("req_data")
+	    #logger.loggerpms2.info(">>Enter Shopse API==>>")
+	    dsobj = datasecurity.DataSecurity(current.globalenv['db'])
+            encryption = vars.has_key("req_data")
+	    avars = {
+	      "encryption" : encryption,
+	      "request":request
+	    }
+	    rspobj = json.loads(dsobj.authenticate_api(avars))
+	    if(rspobj["result"] == "fail"):
+		mssg = rspobj["error_message"]
+		raise Exception(mssg)
+	    	    
+	    		
 	    if(encryption):
 		#logger.loggerpms2.info(">>Agent with Encryption")
 		encrypt_req = vars["req_data"]
 		vars = json.loads(dsobj.decrypts(encrypt_req))
 	    
 	    #decrypted request date
-	    if(vars.has_key("action") == True):
-		action = str(vars["action"])
-	    else:
-		action = "shopSeTxnId"
-		
-	    logger.loggerpms2.info(">>ShopSe ACTION==>>" + action)
+	    action = common.getkeyvalue(vars,"action","") #str(vars["action"])
+	    #logger.loggerpms2.info(">>ShopSe ACTION==>>" + action)
 	    
 	    #return json.dumps({"action":action})
 	    rsp = shopseAPI_switcher.get(action,unknown)(vars)
@@ -4078,8 +4223,12 @@ def shopseAPI():
 	    
 	except Exception as e:
 	    mssg = "SHOPSEE API Exception Error =>>\n" + str(e)
-	    #logger.loggerpms2.info(mssg)
-	    raise HTTP(500)   
+	    logger.loggerpms2.info(mssg)
+	    excpobj = {}
+	    excpobj["result"] = "fail"
+	    excpobj["error_code"] = "MDP404"
+	    excpobj["error_message"] = mssg
+	    return json.dumps(excpobj)    	    
 
     def PUT(*args, **vars):
 	return dict()
@@ -4098,21 +4247,29 @@ def benefitsAPI():
     def POST(*args, **vars):
 	i = 0
 	try:
-	    logger.loggerpms2.info(">>Enter Benefits API==>>")
-	    dsobj = datasecurity.DataSecurity()
-	    encryption = vars.has_key("req_data")
+	    #logger.loggerpms2.info(">>Enter Benefits API==>>")
+	    dsobj = datasecurity.DataSecurity(current.globalenv['db'])
+            encryption = vars.has_key("req_data")
+	    avars = {
+	      "encryption" : encryption,
+	      "request":request
+	    }
+	    rspobj = json.loads(dsobj.authenticate_api(avars))
+	    if(rspobj["result"] == "fail"):
+		mssg = rspobj["error_message"]
+		raise Exception(mssg)
+	    	    
+	    	    
+	    
 	    if(encryption):
 		#logger.loggerpms2.info(">>Agent with Encryption")
 		encrypt_req = vars["req_data"]
 		vars = json.loads(dsobj.decrypts(encrypt_req))
 	    
 	    #decrypted request date
-	    if(vars.has_key("action") == True):
-		action = str(vars["action"])
-	    else:
-		action = "benefits"
+	    action = common.getkeyvalue(vars,"action","") #str(vars["action"])
 		
-	    logger.loggerpms2.info(">>Benefits ACTION==>>" + action)
+	    #logger.loggerpms2.info(">>Benefits ACTION==>>" + action)
 	    
 	    #return json.dumps({"action":action})
 	    rsp = benefitsAPI_switcher.get(action,unknown)(vars)
@@ -4124,8 +4281,12 @@ def benefitsAPI():
 	    
 	except Exception as e:
 	    mssg = "Benefits API Exception Error =>>\n" + str(e)
-	    #logger.loggerpms2.info(mssg)
-	    raise HTTP(500)   
+	    logger.loggerpms2.info(mssg)
+	    excpobj = {}
+	    excpobj["result"] = "fail"
+	    excpobj["error_code"] = "MDP404"
+	    excpobj["error_message"] = mssg
+	    return json.dumps(excpobj)    	    
 
     def PUT(*args, **vars):
 	return dict()
@@ -4145,21 +4306,28 @@ def customerAPI():
     def POST(*args, **vars):
 	i = 0
 	try:
-	    logger.loggerpms2.info(">>Enter Custoemr API==>>")
-	    dsobj = datasecurity.DataSecurity()
-	    encryption = vars.has_key("req_data")
+	    #logger.loggerpms2.info(">>Enter Custoemr API==>>")
+	    dsobj = datasecurity.DataSecurity(current.globalenv['db'])
+            encryption = vars.has_key("req_data")
+	    avars = {
+	      "encryption" : encryption,
+	      "request":request
+	    }
+	    rspobj = json.loads(dsobj.authenticate_api(avars))
+	    if(rspobj["result"] == "fail"):
+		mssg = rspobj["error_message"]
+		raise Exception(mssg)
+	    	    
+	    	    
+	    
 	    if(encryption):
 		#logger.loggerpms2.info(">>Agent with Encryption")
 		encrypt_req = vars["req_data"]
 		vars = json.loads(dsobj.decrypts(encrypt_req))
 	    
 	    #decrypted request date
-	    if(vars.has_key("action") == True):
-		action = str(vars["action"])
-	    else:
-		action = "benefits"
-		
-	    logger.loggerpms2.info(">>Customer ACTION==>>" + action)
+	    action = common.getkeyvalue(vars,"action","") #str(vars["action"])
+	    #logger.loggerpms2.info(">>Customer ACTION==>>" + action)
 	    
 	    #return json.dumps({"action":action})
 	    rsp = customerAPI_switcher.get(action,unknown)(vars)
@@ -4171,8 +4339,12 @@ def customerAPI():
 	    
 	except Exception as e:
 	    mssg = "Customer API Exception Error =>>\n" + str(e)
-	    #logger.loggerpms2.info(mssg)
-	    raise HTTP(500)   
+	    logger.loggerpms2.info(mssg)
+	    excpobj = {}
+	    excpobj["result"] = "fail"
+	    excpobj["error_code"] = "MDP404"
+	    excpobj["error_message"] = mssg
+	    return json.dumps(excpobj)    	    
 
     def PUT(*args, **vars):
 	return dict()
@@ -4191,21 +4363,27 @@ def pinelabsAPI():
     def POST(*args, **vars):
 	i = 0
 	try:
-	    logger.loggerpms2.info(">>Enter Pine Labs API==>>")
-	    dsobj = datasecurity.DataSecurity()
-	    encryption = vars.has_key("req_data")
+	    #logger.loggerpms2.info(">>Enter Pine Labs API==>>")
+	    dsobj = datasecurity.DataSecurity(current.globalenv['db'])
+            encryption = vars.has_key("req_data")
+	    avars = {
+	      "encryption" : encryption,
+	      "request":request
+	    }
+	    rspobj = json.loads(dsobj.authenticate_api(avars))
+	    if(rspobj["result"] == "fail"):
+		mssg = rspobj["error_message"]
+		raise Exception(mssg)
+	    	    
+	    	    
 	    if(encryption):
 		#logger.loggerpms2.info(">>Agent with Encryption")
 		encrypt_req = vars["req_data"]
 		vars = json.loads(dsobj.decrypts(encrypt_req))
 	    
 	    #decrypted request date
-	    if(vars.has_key("action") == True):
-		action = str(vars["action"])
-	    else:
-		action = "benefits"
-		
-	    logger.loggerpms2.info(">>Pine Labs ACTION==>>" + action)
+	    action = common.getkeyvalue(vars,"action","") #str(vars["action"])
+	    #logger.loggerpms2.info(">>Pine Labs ACTION==>>" + action)
 	    
 	    #return json.dumps({"action":action})
 	    rsp = pinelabsAPI_switcher.get(action,unknown)(vars)
@@ -4217,8 +4395,12 @@ def pinelabsAPI():
 	    
 	except Exception as e:
 	    mssg = "Pine Labs API Exception Error =>>\n" + str(e)
-	    #logger.loggerpms2.info(mssg)
-	    raise HTTP(500)   
+	    logger.loggerpms2.info(mssg)
+	    excpobj = {}
+	    excpobj["result"] = "fail"
+	    excpobj["error_code"] = "MDP404"
+	    excpobj["error_message"] = mssg
+	    return json.dumps(excpobj)    	    
 
     def PUT(*args, **vars):
 	return dict()
@@ -4237,21 +4419,27 @@ def hvdocAPI():
     def POST(*args, **vars):
 	i = 0
 	try:
-	    logger.loggerpms2.info(">>Enter HV DOC API==>>")
-	    dsobj = datasecurity.DataSecurity()
-	    encryption = vars.has_key("req_data")
+	    #logger.loggerpms2.info(">>Enter HV DOC API==>>")
+	    dsobj = datasecurity.DataSecurity(current.globalenv['db'])
+            encryption = vars.has_key("req_data")
+	    avars = {
+	      "encryption" : encryption,
+	      "request":request
+	    }
+	    rspobj = json.loads(dsobj.authenticate_api(avars))
+	    if(rspobj["result"] == "fail"):
+		mssg = rspobj["error_message"]
+		raise Exception(mssg)
+	    	    
+	    	    
 	    if(encryption):
 		#logger.loggerpms2.info(">>Agent with Encryption")
 		encrypt_req = vars["req_data"]
 		vars = json.loads(dsobj.decrypts(encrypt_req))
 	    
 	    #decrypted request date
-	    if(vars.has_key("action") == True):
-		action = str(vars["action"])
-	    else:
-		action = "benefits"
-		
-	    logger.loggerpms2.info(">>HV DOC ACTION==>>" + action)
+	    action = common.getkeyvalue(vars,"action","") #str(vars["action"])
+	    #logger.loggerpms2.info(">>HV DOC ACTION==>>" + action)
 	    
 	    #return json.dumps({"action":action})
 	    rsp = hvdocAPI_switcher.get(action,unknown)(vars)
@@ -4263,8 +4451,12 @@ def hvdocAPI():
 	    
 	except Exception as e:
 	    mssg = "HV DOC API Exception Error =>>\n" + str(e)
-	    #logger.loggerpms2.info(mssg)
-	    raise HTTP(500)   
+	    logger.loggerpms2.info(mssg)
+	    excpobj = {}
+	    excpobj["result"] = "fail"
+	    excpobj["error_code"] = "MDP404"
+	    excpobj["error_message"] = mssg
+	    return json.dumps(excpobj)    	    
 
     def PUT(*args, **vars):
 	return dict()
@@ -4283,21 +4475,27 @@ def deviceAPI():
     def POST(*args, **vars):
 	i = 0
 	try:
-	    logger.loggerpms2.info(">>Enter DEVICE API==>>")
-	    dsobj = datasecurity.DataSecurity()
-	    encryption = vars.has_key("req_data")
+	    #logger.loggerpms2.info(">>Enter DEVICE API==>>")
+	    dsobj = datasecurity.DataSecurity(current.globalenv['db'])
+            encryption = vars.has_key("req_data")
+	    avars = {
+	      "encryption" : encryption,
+	      "request":request
+	    }
+	    rspobj = json.loads(dsobj.authenticate_api(avars))
+	    if(rspobj["result"] == "fail"):
+		mssg = rspobj["error_message"]
+		raise Exception(mssg)
+	    	    
+	    	    
 	    if(encryption):
 		#logger.loggerpms2.info(">>Device with Encryption")
 		encrypt_req = vars["req_data"]
 		vars = json.loads(dsobj.decrypts(encrypt_req))
 	    
 	    #decrypted request date
-	    if(vars.has_key("action") == True):
-		action = str(vars["action"])
-	    else:
-		action = "benefits"
-		
-	    logger.loggerpms2.info(">>DEVICE ACTION==>>" + action)
+	    action = common.getkeyvalue(vars,"action","") #str(vars["action"])
+	    #logger.loggerpms2.info(">>DEVICE ACTION==>>" + action)
 	    
 	    #return json.dumps({"action":action})
 	    rsp = deviceAPI_switcher.get(action,unknown)(vars)
@@ -4309,8 +4507,12 @@ def deviceAPI():
 	    
 	except Exception as e:
 	    mssg = "DEVICE API Exception Error =>>\n" + str(e)
-	    #logger.loggerpms2.info(mssg)
-	    raise HTTP(500)   
+	    logger.loggerpms2.info(mssg)
+	    excpobj = {}
+	    excpobj["result"] = "fail"
+	    excpobj["error_code"] = "MDP404"
+	    excpobj["error_message"] = mssg
+	    return json.dumps(excpobj)    	    
 
     def PUT(*args, **vars):
 	return dict()
@@ -4329,21 +4531,28 @@ def planAPI():
     def POST(*args, **vars):
 	i = 0
 	try:
-	    logger.loggerpms2.info(">>Enter PLAN API==>>")
-	    dsobj = datasecurity.DataSecurity()
-	    encryption = vars.has_key("req_data")
+	    #logger.loggerpms2.info(">>Enter PLAN API==>>")
+	    dsobj = datasecurity.DataSecurity(current.globalenv['db'])
+            encryption = vars.has_key("req_data")
+	    avars = {
+	      "encryption" : encryption,
+	      "request":request
+	    }
+	    rspobj = json.loads(dsobj.authenticate_api(avars))
+	    if(rspobj["result"] == "fail"):
+		mssg = rspobj["error_message"]
+		raise Exception(mssg)
+	    	    
+	    	    
+	    
 	    if(encryption):
 		#logger.loggerpms2.info(">>Device with Encryption")
 		encrypt_req = vars["req_data"]
 		vars = json.loads(dsobj.decrypts(encrypt_req))
 	    
 	    #decrypted request date
-	    if(vars.has_key("action") == True):
-		action = str(vars["action"])
-	    else:
-		action = "benefits"
-		
-	    logger.loggerpms2.info(">>PLAN ACTION==>>" + action)
+	    action = common.getkeyvalue(vars,"action","") #str(vars["action"])
+	    #logger.loggerpms2.info(">>PLAN ACTION==>>" + action)
 	    
 	    #return json.dumps({"action":action})
 	    rsp = planAPI_switcher.get(action,unknown)(vars)
@@ -4355,8 +4564,12 @@ def planAPI():
 	    
 	except Exception as e:
 	    mssg = "PLAN API Exception Error =>>\n" + str(e)
-	    #logger.loggerpms2.info(mssg)
-	    raise HTTP(500)   
+	    logger.loggerpms2.info(mssg)
+	    excpobj = {}
+	    excpobj["result"] = "fail"
+	    excpobj["error_code"] = "MDP404"
+	    excpobj["error_message"] = mssg
+	    return json.dumps(excpobj)    	    
 
     def PUT(*args, **vars):
 	return dict()

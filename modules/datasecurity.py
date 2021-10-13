@@ -62,13 +62,49 @@ from applications.my_pms2.modules import logger
 
 
 class DataSecurity:
-    def __init__(self):
-        db = current.globalenv['db']
+    def __init__(self,db):
+        self.db = db
         urlprops = db(db.urlproperties.id > 0).select()
         self.phpurl = urlprops[0].php_url if(len(urlprops) > 0) else "http://localhost:81"
+        self.encryption = common.getboolean(urlprops[0].encryption if(len(urlprops) > 0) else True)
+        self.x_api_key = 'MYDP~mc3b1q2o'
         return 
 
+    def authenticate_api(self,avars):
+        db = self.db
+        request = avars["request"]
+        x_api_key = common.getstring(request.env.http_x_api_key)
+        x_api_key = "MYDP~mc3b1q2o" if(x_api_key == "") else x_api_key
+        xarr = x_api_key.split('~')
+        companycode = "" if(len(xarr) < 1) else xarr[0]
+        x_api_key = "" if(len(xarr)<2) else xarr[1]
+        
+        
+        
+        r = db((db.company.company == companycode) & (db.company.is_active == True)).select(db.company.groupkey)
+        
+        self.x_api_key = "" if(len(r) == 0) else r[0].groupkey
+        
+        encryption = avars["encryption"]
+        rspobj = {}
+        if((self.encryption == True) & (x_api_key != self.x_api_key)):
+            mssg = "Unauthorized API Call - Invalid API Key"
+            rspobj = {}
+            rspobj["result"] = "fail"
+            rspobj["error_message"] = mssg
+            return json.dumps(rspobj)
 
+        if(((self.encryption==True) & (encryption==False)) | ((self.encryption==False) & (encryption==True))):
+            mssg = "Unauthorized API Call - Invalid method"
+            rspobj = {}
+            rspobj["result"] = "fail"
+            rspobj["error_message"] = mssg
+            return json.dumps(rspobj)
+
+        rspobj["result"] = "success"
+        rspobj["error_message"] = ""
+        return json.dumps(rspobj)
+        
     def pinelabs_encrypt(self, key, message):
         
         logger.loggerpms2.info("Enter Pinelabs Encrypt " + message) 

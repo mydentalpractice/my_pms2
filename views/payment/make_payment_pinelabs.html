@@ -1,20 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>PineLabs Payment Error</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
-{{extend 'pms2_layoutw3.html'}}
+<link rel="stylesheet" href="../static/css/w3.css" />  
+<link rel="stylesheet" href="../static/css/font-awesome.css" />  
+<link rel="stylesheet" href="https://www.w3schools.com/lib/w3-theme-white.css">
+
+{{include 'web2py_ajax.html'}}   
+</head>
+
+<body>
 
 
-<header class="w3-container w3-dark-grey ">
-    
-    <div class="w3-container">
-      <strong>Make Payment Pinelabs Error</strong>
-    </div>
-     
-</header>
-
-<div class="w3-row-padding w3-container   ">
-       <div class="w3-container"> 
-       <h4>{{=message}}</h4>
-       </div>
-
+<div class="w3-container">
+<img src="../static/images/logo-my-dental-plan_color.png">
 </div>
 
+  <header class="w3-container w3-black">
+    <h3>PineLabs Payment Error</h3>
+  </header>
+  
 
+   <div class="w3-container">
+     <h5>{{=message}}</h5>
+    {{=A(T("Return"),_href=returnurl)}}
+   </div>
+  
+
+
+
+</body>
+
+
+</html> 

@@ -369,7 +369,7 @@ class User:
               db(db.auth_user.id == users[0].id).update(username=cell,password=crypt_pass)
               db.commit()
               user_data["user_id"] = users[0].id if(len(users) > 0) else 0
-              user_data["usertype"] = "prospect"
+              user_data["usertype"] = "user"
               user_data["prospectid"] = "0"
               user_data["result"] = "success"
               user_data["error_message"] = ""
@@ -386,7 +386,7 @@ class User:
                         
                    
               user_data["user_id"] = id_user
-              user_data["usertype"] = "prospect"
+              user_data["usertype"] = "user"
               user_data["prospectid"] = "0"
               user_data["result"] = "success"
               user_data["error_message"] = ""

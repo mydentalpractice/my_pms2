@@ -757,7 +757,7 @@ db.define_table('company',
                 Field('IND_IS_SYNC','boolean'),
                 Field('hmoplan', 'reference hmoplan'),
                 Field('agent', 'reference agent'),
-                Field('groupkey', 'string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'),default='', label='Group Key', length=20),
+                Field('groupkey', 'string', label='Group Key', length=20),
                 auth.signature,
                 format='%(name)s (%(company)s)')
 

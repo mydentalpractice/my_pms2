@@ -151,7 +151,7 @@ class Shopse:
                 "products":proclist
             }
         
-            logger.loggerpms2.info("SHOPSEE REQUEST\n" + json.dumps(shopsee_request))
+            logger.loggerpms2.info("SHOPSEE REQUEST\n" + json.dumps(shopsee_request) + "URL " + url + " Header " + json.dumps(shopsee_header))
             
             #call API
             resp = requests.post(url,headers=shopsee_header,json=shopsee_request)
