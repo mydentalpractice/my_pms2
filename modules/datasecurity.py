@@ -74,7 +74,7 @@ class DataSecurity:
         db = self.db
         request = avars["request"]
         x_api_key = common.getstring(request.env.http_x_api_key)
-        x_api_key = "MYDP~mc3b1q2o" if(x_api_key == "") else x_api_key
+        #x_api_key = "MYDP~mc3b1q2o" if(x_api_key == "") else x_api_key
         xarr = x_api_key.split('~')
         companycode = "" if(len(xarr) < 1) else xarr[0]
         x_api_key = "" if(len(xarr)<2) else xarr[1]
@@ -87,7 +87,7 @@ class DataSecurity:
         
         encryption = avars["encryption"]
         rspobj = {}
-        if((self.encryption == True) & (x_api_key != self.x_api_key)):
+        if((x_api_key != self.x_api_key) | (x_api_key == "") | (self.x_api_key == "")):
             mssg = "Unauthorized API Call - Invalid API Key"
             rspobj = {}
             rspobj["result"] = "fail"
