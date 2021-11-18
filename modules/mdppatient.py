@@ -1628,9 +1628,13 @@ class Patient:
       provcount = db(db.patientmember.provider == providerid).count()
       patientmember = provider + str(provcount).zfill(4)    
   
-  
-  
+      day = timedelta(days = 1)
+      year = timedelta(days = 365)
       todaydt = datetime.date.today()
+      if(company == "RPIP99"):
+        year = timedelta(days = 100 * 365)
+       
+     
       patid = db.patientmember.insert(\
         patientmember = patientmember,
         groupref = groupref,
@@ -1646,7 +1650,7 @@ class Patient:
         hmoplan = hmoplanid,
         enrollmentdate = todaydt,
         premstartdt = todaydt,
-        premenddt = todaydt,
+        premenddt = todaydt + year - day,
         startdate = todaydt,
         hmopatientmember = False,
         paid = False,
@@ -1693,7 +1697,7 @@ class Patient:
         "gender ":common.getstring(pat[0].gender), 
         "relation ":common.getstring(pat[0].relation), 
         
-        "regionid ":int(common.getid(pat[0].regionid)), 
+        "regionid":int(common.getid(pat[0].regionid)), 
         "providerid" :int(common.getid(pat[0].providerid)), 
   
         "hmopatientmember ":common.getstring(pat[0].hmopatientmember), 
@@ -1871,7 +1875,11 @@ class Patient:
         else:
           year            = timedelta(days=365)
       
-       
+        #for plan RPRIP 99, the end date is for lifetime (100 years from premstart dt)
+        c = db(db.company.company == 'RPIP99').count()
+        if(c==1):
+          year = timedelta(days = 365 * 100)
+        
         premenddt = (premstartdt + year) - day  
       
       patid = db.patientmember.insert(\

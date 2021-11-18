@@ -157,11 +157,15 @@ ul{font-size: 8px !important;}
                             </td>
                          </tr>
                          
-                         
                           <tr>
-                             <td><strong>Invoice Amount : </strong>Rs.{{=invoiceamt}}</td>
-                             <td><strong>Amount paid :</strong>  Rs.{{=amount}}   </td>
+                             <td colspan="2"><strong>Invoice Amount : </strong>Rs.{{=invoiceamt}}</td>
                           </tr>
+                          <tr>
+                           <td><strong>Amount paid :</strong>  Rs.{{=amount}}   </td>
+                           <td><strong>Amount Due : </strong>Rs.{{=totaldue}}</td>
+                          </tr>                         
+                         
+                         
                           {{if(paymentmode=="Cheque"):}}
                           <tr>
                              <td ><strong>Cheque No: </strong>{{=chequeno}}</td>

@@ -1,5 +1,6 @@
 from gluon import current
 
+import requests
 
 import haversine
 from haversine import haversine, Unit
@@ -23,9 +24,6 @@ class Location:
   
   def dummy(self):
     
-    
-     
-     
     db = self.db
     auth = current.auth
     
@@ -41,6 +39,78 @@ class Location:
         return json.dumps(excpobj)    
     
     return
+
+  def get_city_state_frompin(self,pin):
+    
+    db = self.db
+    auth = current.auth
+    rspobj = {}
+    
+    pin_url = "https://api.postalpincode.in/pincode/" + str(pin)
+    try:
+      
+      resp = requests.get(pin_url)
+      
+      obj = {}
+      if((resp.status_code == 200)|(resp.status_code == 201)|(resp.status_code == 202)|(resp.status_code == 203)):
+        obj = resp.json()
+        if(len(obj)>=1):
+          if(obj[0]["Status"] == "Success"):
+            po=obj[0]["PostOffice"]
+            if(len(po) >= 1):
+              st = po[0]["State"]
+              city = po[0]["District"]
+              rspobj["result"]="success"
+              rspobj["error_message"] = ""
+              rspobj["state"]=st
+              rspobj["city"]=city
+              
+              
+            else:
+              error_message = "Get City State from Pin API Error   - No valid Post Office object"
+              logger.loggerpms2.info(error_message)
+              excpobj = {}
+              excpobj["result"] = "fail"
+              excpobj["error_message"] = error_message
+              return json.dumps(excpobj)    
+              
+          else:
+            error_message = "Get City State from Pin API Error   - No valid response object"
+            logger.loggerpms2.info(error_message)
+            excpobj = {}
+            excpobj["result"] = "fail"
+            excpobj["error_message"] = error_message
+            return json.dumps(excpobj)    
+            
+        else:
+          error_message = "Get City State from Pin API Error   - " + obj["Status"]
+          logger.loggerpms2.info(error_message)
+          excpobj = {}
+          excpobj["result"] = "fail"
+          excpobj["error_message"] = error_message
+          return json.dumps(excpobj)    
+          
+        
+      else:
+        error_message = "Get City State from Pin API Error - " + str(resp.status_code)
+        logger.loggerpms2.info(error_message)
+        excpobj = {}
+        excpobj["result"] = "fail"
+        excpobj["error_message"] = error_message
+        return json.dumps(excpobj)    
+        
+      
+      
+    except Exception as e:
+        error_message = "Get City State from Pin API Exception Error - " + str(e)
+        logger.loggerpms2.info(error_message)
+        excpobj = {}
+        excpobj["result"] = "fail"
+        excpobj["error_message"] = error_message
+        return json.dumps(excpobj)    
+    
+    return json.dumps(rspobj)
+
 
   #Calculate the distance (in various units) between two points on Earth using their latitude(lat) and longitude(long).
   def getdistance(self,originlat, originlong, destlat,destlong, unit="km"):
@@ -103,7 +173,8 @@ class Location:
                                                           db.provider.telephone,
                                                           db.provider.pa_longitude,
                                                           db.provider.pa_latitude,
-                                                          db.provider.pa_locationurl)
+                                                          db.provider.pa_locationurl,
+                                                          db.provider.available)
 
         for prov in provs:
           
@@ -136,7 +207,9 @@ class Location:
               "telephone":prov.telephone,
               "latitude":prov.pa_latitude,
               "longitude":prov.pa_longitude,
-              "location":prov.pa_locationurl
+              "location":prov.pa_locationurl,
+              "available":common.getboolean(prov.available)
+              
             }
             
             provlist.append(provobj)
@@ -189,7 +262,8 @@ class Location:
                                                       db.provider.telephone,
                                                       db.provider.pa_longitude,
                                                       db.provider.pa_latitude,
-                                                      db.provider.pa_locationurl)
+                                                      db.provider.pa_locationurl,
+                                                      db.provider.available)
 
  
       for prov in provs:
@@ -207,7 +281,8 @@ class Location:
           "telephone":prov.telephone,
           "latitude":prov.pa_latitude,
           "longitude":prov.pa_longitude,
-          "location":prov.pa_locationurl
+          "location":prov.pa_locationurl,
+          "available":common.getboolean(prov.available)          
         }
         
         provlist.append(provobj)
@@ -262,6 +337,7 @@ class Location:
                                                           db.provider.pa_longitude,
                                                           db.provider.pa_latitude,
                                                           db.provider.pa_locationurl,
+                                                          db.provider.available,
                                                           db.vw_clinic.clinicid,
                                                           db.vw_clinic.name,
                                                           db.vw_clinic.city,
@@ -305,7 +381,8 @@ class Location:
               "primary_clinic":common.getboolean(cln.vw_clinic.primary_clinic),
               "latitude":cln.vw_clinic.latitude,
               "longitude":cln.vw_clinic.longitude,
-              "location":cln.vw_clinic.gps_location
+              "location":cln.vw_clinic.gps_location,
+              "available":common.getboolean(cln.provider.available)
             }
             
             clnlist.append(clnobj)

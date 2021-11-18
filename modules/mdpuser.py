@@ -871,6 +871,21 @@ class User:
   
   
 
+  def getcitydetails(self,avars):
+    #cities
+    cities = []
+    db = self.db
+    cc = db(db.cities.city == common.getkeyvalue(avars,"city","Jaipur")).select()
+    rspobj = {}
+    rspobj["result"] = "success"
+    rspobj["error_message"] = ""
+    rspobj["city_id"] = cc[0].id if(len(cc) == 1) else 0
+    rspobj["city"] = cc[0].city if(len(cc) == 1) else "Jaipur"
+    rspobj["regioncode"] = cc[0].regioncode if(len(cc) == 1) else "RLG101"
+    
+    
+    return json.dumps(rspobj)
+  
   def getcities(self):
     #cities
     cities = []

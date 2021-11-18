@@ -564,6 +564,9 @@ def loginblock(login, username):
 
 def login():
     
+    
+    
+    
     session.religare = False
     form = SQLFORM.factory(
                 Field('username', 'string',  label='User Name',requires=[IS_NOT_EMPTY(), IS_IN_DB(db,'auth_user.username','%(registration_id)s')]),
@@ -685,7 +688,7 @@ def reset_password():
 
 
 def select_clinic():
-
+    #logger.loggerpms2.info("Enter Select Clinic")
     formheader = "New Agent"
     username = ""
     returnurl = URL('admin','login')
@@ -693,7 +696,7 @@ def select_clinic():
     provdict = common.getprovider(auth,db)
     providerid = int(provdict["providerid"])
     if(providerid  < 0):
-        raise HTTP(400,"PMS-Error: There is no valid logged-in Provider: providerhome()")    
+        raise HTTP(400,"PMS-Error: There is no valid logged-in Provider: select clinic()")    
 
 
     #primary clinicid of this provider
@@ -1520,13 +1523,22 @@ def processNewTreatment(providerid, xphrase):
     patientid = 0
     memberid = 0
     
+    #since the business requirements have changed from member assigned to a provider,
+    #to a member can visit any provider. This provider will be assigned to the member for the period till the member
+    #visits another provider.
     r = db((db.vw_memberpatientlist.patient.like("%" + xphrase1 + "%")) & \
-           (db.vw_memberpatientlist.providerid == providerid) & \
            (db.vw_memberpatientlist.is_active == True)).select()
+    #r = db((db.vw_memberpatientlist.patient.like("%" + xphrase1 + "%")) & \
+              #(db.vw_memberpatientlist.providerid == providerid) & \
+              #(db.vw_memberpatientlist.is_active == True)).select()
+    
     
     if(len(r)==1):  #exact patietn match
         memberid = int(common.getid(r[0].primarypatientid))
         patientid = int(common.getid(r[0].patientid))
+        #assign the provider to this member   
+        db((db.patientmember.id == memberid) & (db.patientmember.is_active == True)).update(provider = providerid)
+        db.commit()
         
         redirect(URL('treatment','new_treatment',vars=dict(page=1,providerid=providerid,memberid=memberid,patientid=patientid,treatmentid=0,tplanid=0)))
         
@@ -1546,10 +1558,16 @@ def processNewPayment(providerid, xphrase):
     memberid = 0
     fullname = ""
     
+    #since the business requirements have changed from member assigned to a provider,
+    #to a member can visit any provider. This provider will be assigned to the member for the period till the member
+    #visits another provider.
     r = db((db.vw_memberpatientlist.patient.like("%" + xphrase1 + "%")) & \
-           (db.vw_memberpatientlist.providerid == providerid) & \
            (db.vw_memberpatientlist.is_active == True)).select()
     
+    #r = db((db.vw_memberpatientlist.patient.like("%" + xphrase1 + "%")) & \
+              #(db.vw_memberpatientlist.providerid == providerid) & \
+              #(db.vw_memberpatientlist.is_active == True)).select()    
+            
     if(len(r)==1):  #exact patietn match
         memberid = int(common.getid(r[0].primarypatientid))
         patientid = int(common.getid(r[0].patientid))
@@ -1572,10 +1590,16 @@ def processNewImage(providerid, xphrase):
     patientmember = ""
     patient = ""
     
+    #since the business requirements have changed from member assigned to a provider,
+    #to a member can visit any provider. This provider will be assigned to the member for the period till the member
+    #visits another provider.
     r = db((db.vw_memberpatientlist.patient.like("%" + xphrase1 + "%")) & \
-           (db.vw_memberpatientlist.providerid == providerid) & \
            (db.vw_memberpatientlist.is_active == True)).select()
     
+    #r = db((db.vw_memberpatientlist.patient.like("%" + xphrase1 + "%")) & \
+              #(db.vw_memberpatientlist.providerid == providerid) & \
+              #(db.vw_memberpatientlist.is_active == True)).select()    
+              
     if(len(r)==1):  #exact patietn match
         memberid = int(common.getid(r[0].primarypatientid))
         patientid = int(common.getid(r[0].patientid))
@@ -1596,9 +1620,14 @@ def processNewMedia(providerid, xphrase):
     patientmember = ""
     patient = ""
     
+    #since the business requirements have changed from member assigned to a provider,
+    #to a member can visit any provider. This provider will be assigned to the member for the period till the member
+    #visits another provider.
     r = db((db.vw_memberpatientlist.patient.like("%" + xphrase1 + "%")) & \
-           (db.vw_memberpatientlist.providerid == providerid) & \
            (db.vw_memberpatientlist.is_active == True)).select()
+    #r = db((db.vw_memberpatientlist.patient.like("%" + xphrase1 + "%")) & \
+              #(db.vw_memberpatientlist.providerid == providerid) & \
+              #(db.vw_memberpatientlist.is_active == True)).select()    
     
     if(len(r)==1):  #exact patietn match
         memberid = int(common.getid(r[0].primarypatientid))
@@ -1658,13 +1687,15 @@ def secondsFormat(datestr):
 
 @auth.requires_login()    
 def providerhome():
-  
+    #logger.loggerpms2.info("Enter Provider Home")
     clinicid = session.clinicid
     clinicname = session.clinicname
     
     
     provdict = common.getprovider(auth,db)
+    
     providerid = int(provdict["providerid"])
+    #logger.loggerpms2.info("Provider ID "+str(providerid))
     if(providerid  < 0):
         raise HTTP(400,"PMS-Error: There is no valid logged-in Provider: providerhome()")    
 

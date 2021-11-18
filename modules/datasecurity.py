@@ -94,7 +94,7 @@ class DataSecurity:
             rspobj["error_message"] = mssg
             return json.dumps(rspobj)
 
-        if(((self.encryption==True) & (encryption==False)) | ((self.encryption==False) & (encryption==True))):
+        if((self.encryption==True) & (encryption==False)):
             mssg = "Unauthorized API Call - Invalid method"
             rspobj = {}
             rspobj["result"] = "fail"

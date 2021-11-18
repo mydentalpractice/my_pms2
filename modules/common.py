@@ -11,6 +11,7 @@ import random
 
 import pytz
 from pytz import timezone
+from applications.my_pms2.modules import logger
 
 getdt    = lambda dt:dt if(dt != None) else datetime.date.today()
 getnulldt = lambda dt:dt if(dt != None) else ""
@@ -61,7 +62,9 @@ def convert24to12clock(timestr):
         
 def getkeyvalue(jobj, key1, defval):
         
-
+        if(len(jobj) == 0):
+                return defval;
+        
         keys = jobj.keys()
 
         for key in keys:
@@ -325,7 +328,7 @@ def getplans(db):
 #@auth.requires(auth.has_membership('provider') or auth.has_membership('webadmin')) 
 #@auth.requires_login()
 def getprovider(auth,db):
-        
+    #logger.loggerpms2.info("Enter getprovider")
     providerid = -1
     
     #determine if logged in user is a provider or webadmin
@@ -347,7 +350,12 @@ def getprovider(auth,db):
     
     
     if(auth.has_membership('provider')):
+        #logger.loggerpms2.info("Provider is member of Provider")
+            
         rows = db((db.provider.sitekey == auth.user.sitekey) & (db.provider.is_active == True)).select()
+        #logger.loggerpms2.info("Rows Lentgh " + str(len(rows)))
+        
+        
         if(len(rows)==1):
             providerid = int(getid(rows[0].id))
             if(providerid == 0):
@@ -375,6 +383,8 @@ def getprovider(auth,db):
             providerid = -1
             
     if(auth.has_membership('webadmin')):
+        #logger.loggerpms2.info("Provider is member of WebAdmin")
+            
         providerid = 0
         provider = ''
         providername = getstring(auth.user.first_name)  + " " + getstring(auth.user.last_name)
@@ -745,6 +755,8 @@ def addyears(dt,yrs):
         
 
 
+
+
 def isfloat(value):
         try:
                 x = float(value)
@@ -765,3 +777,8 @@ def getmessage(db,message_code):
         
         return "" if(len(mssgs) != 1) else mssgs[0].mdpmessage
         
+def getdefaultprovider(db):
+        
+        p = db(db.provider.provider == 'P0001').select(db.provider.id)
+        providerid = p[0].id if(len(p) > 0) else 0
+        return providerid

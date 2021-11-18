@@ -17,6 +17,7 @@ from applications.my_pms2.modules import account
 from applications.my_pms2.modules import mdppatient
 from applications.my_pms2.modules import account
 from applications.my_pms2.modules import mdppayment
+from applications.my_pms2.modules import mdpbenefits
 
 from applications.my_pms2.modules import datasecurity
 
@@ -82,7 +83,7 @@ class Shopse:
             
             rspstr1 = urllib.quote_plus(rspstr.encode('utf-8'))
             logger.loggerpms2.info("Signature (URL Encode) String to Encrypt " + rspstr1)
-            obj = datasecurity.DataSecurity()
+            obj = datasecurity.DataSecurity(self.db)
             rsp = json.loads(obj.encrypt_sha256_shopse(rspstr1,self.shopsee_response_key))
 
         except Exception as e:
@@ -256,9 +257,57 @@ class Shopse:
                                                                 )
                 
                 
+                
+                #here need to update treatmentplan tables
+                account._updatetreatmentpayment(db, tplanid, paymentid)
+                db.commit()                
+            
+                #Call Voucder success
+                vcobj = mdpbenefits.Benefit(db)
+                reqobj = {"paymentid" : paymentid}
+                rspobj = json.loads(vcobj.voucher_success(reqobj))                 
+            
                 #here need to update treatmentplan tables
                 account._updatetreatmentpayment(db, tplanid, paymentid)
                 db.commit()
+            
+                trtmnt = db((db.treatment.id == treatmentid) & (db.treatment.is_active == True)).select()
+                discount_amount = trtmnt[0].companypay if(len(trtmnt) > 0) else 0
+            
+                pmnt = db((db.payment.id == paymentid) & (db.payment.is_active == True)).select()
+                policy = pmnt[0].policy if(len(pmnt) > 0) else ""
+                obj={
+                    "paymentid":str(paymentid),
+                    "plan":policy,
+                    "discount_amount":str(discount_amount),
+                    "memberid":str(memberid),
+                    "treatmentid":str(treatmentid)
+                }
+                bnftobj = mdpbenefits.Benefit(db)
+                rspObj = json.loads(bnftobj.benefit_success(obj))
+                if(rspObj['result'] == "success"):
+                    #update totalcompanypays (we are saving discount_amount as companypays )
+                    db(db.treatment.id == treatmentid).update(companypay = discount_amount)    
+                    #update treatmentplan assuming there is one treatment per tplan
+                    db(db.treatmentplan.id==tplanid).update(totalcompanypays = discount_amount) 
+                    db.commit()                      
+            
+                #here need to update treatmentplan tables
+                account._updatetreatmentpayment(db, tplanid, paymentid)
+                db.commit()
+            
+                paytm = json.loads(account._calculatepayments(db, tplanid))
+                               
+   
+                jsonresp = avars
+                jsonresp["paytm"] = paytm
+                jsonresp["paymentid"] = paymentid
+                jsonresp["result"] = "success"
+                jsonresp["error_message"] = ""
+                
+
+                
+               
    
                 jsonresp = avars
                 jsonresp["paymentid"] = paymentid

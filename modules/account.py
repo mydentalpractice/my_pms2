@@ -816,15 +816,73 @@ def updatetreatmentcostandcopay(db,user,treatmentid):
     
     return dict()
 
-def _calculatepayments(db,tplanid,policy=None):
-  
- 
+
+def calculatepayments(tplanid,providerid,policy=None):
     treatmentcost = 0
     copay = 0
     inspays = 0
     companypays = 0
     precopay = 0
+    walletamount = 0
+    discountamount = 0
+    
+    totaltreatmentcost = 0
+    totalcopay = 0
+    totalprecopay = 0
+    totalinspays = 0
+    totaldue = 0
+    totalpaid = 0
+    totalcompanypays = 0   
+    totalwalletamount = 0
+    totaldiscountamount = 0
+    
+        
+    tplan = db(db.treatmentplan.id == tplanid).select()
+    if(len(tplan) > 0):
+        treatmentcost = float(common.getvalue(tplan[0].totaltreatmentcost))
+        companypays = float(common.getvalue(tplan[0].totalcompanypays))
+        walletamount = float(common.getvalue(tplan[0].totalwalletamount))        
+        
+        precopay =float(common.getvalue(tplan[0].totalcopay))
+        copay = float(common.getvalue(tplan[0].totalcopay)) - companypays
+        inspays = float(common.getvalue(tplan[0].totalinspays))
+        
+        memberid = int(common.getid(tplan[0].primarypatient))
+        
+        
+        
+        
+            
+        
+        r = db((db.vw_treatmentplansummarybytreatment.provider==providerid) & (db.vw_treatmentplansummarybytreatment.id == tplanid)).select()
+        if(len(r)>0):
+            totaltreatmentcost = float(common.getvalue(r[0].totalcost))
+            totalinspays = float(common.getvalue(r[0].totalinspays))
+            totalcompanypays = float(common.getvalue(r[0].totalcompanypays))
+            totalwalletamount = 0 #float(common.getvalue(r[0].totalwalletamount))
+            totalprecopay = float(common.getvalue(r[0].totalcopay))
+            totalcopay = float(common.getvalue(r[0].totalcopay)) - totalcompanypays
+            totalpaid = float(common.getvalue(r[0].totalpaid))
+            totaldue = totalcopay - totalpaid
+        
+        
+    return dict(treatmentcost=treatmentcost,copay=copay,precopay=precopay,inspays=inspays,companypays=companypays, walletamount=walletamount,
+                totaltreatmentcost=totaltreatmentcost,totalinspays=totalinspays,\
+                totalprecopay=totalprecopay,totalcopay=totalcopay,\
+                totalpaid=totalpaid,totaldue=totaldue,totalcompanypays=totalcompanypays,totalwalletamount=totalwalletamount)
 
+
+def _calculatepayments(db,tplanid,policy=None):
+    respobj = {}
+
+    treatmentcost = 0
+    copay = 0
+    inspays = 0
+    companypays = 0
+    precopay = 0
+    walletamount = 0 
+    discount_amount = 0
+    
     totaltreatmentcost = 0
     totalcopay = 0
     totalprecopay = 0
@@ -832,14 +890,18 @@ def _calculatepayments(db,tplanid,policy=None):
     totaldue = 0
     totalpaid = 0
     totalcompanypays = 0
-
+    totalwalletamount = 0
+    totaldiscount_amount = 0
+    
     r = None
     tplan = db(db.treatmentplan.id == tplanid).select()
     if(len(tplan) > 0):
         treatmentcost = float(common.getvalue(tplan[0].totaltreatmentcost))
         companypays = float(common.getvalue(tplan[0].totalcompanypays))
+        walletamount = float(common.getvalue(tplan[0].totalwalletamount))  
+        discount_amount = float(common.getvalue(tplan[0].totaldiscount_amount))  
         precopay =float(common.getvalue(tplan[0].totalcopay))
-        copay = float(common.getvalue(tplan[0].totalcopay)) - companypays
+        copay = float(common.getvalue(tplan[0].totalcopay)) - (discount_amount + companypays + walletamount)
         inspays = float(common.getvalue(tplan[0].totalinspays))
         memberid = int(common.getid(tplan[0].primarypatient))
 
@@ -848,8 +910,10 @@ def _calculatepayments(db,tplanid,policy=None):
             totaltreatmentcost = float(common.getvalue(r[0].totalcost))
             totalinspays = float(common.getvalue(r[0].totalinspays))
             totalcompanypays = float(common.getvalue(r[0].totalcompanypays))
+            totalwalletamount = float(common.getvalue(r[0].totalwalletamount))           
+            totaldiscount_amount = float(common.getvalue(r[0].totaldiscount_amount))           
             totalprecopay = float(common.getvalue(r[0].totalcopay))
-            totalcopay = float(common.getvalue(r[0].totalcopay)) - totalcompanypays
+            totalcopay = float(common.getvalue(r[0].totalcopay)) - (totaldiscount_amount + totalcompanypays + totalwalletamount)
             totalpaid = float(common.getvalue(r[0].totalpaid))
             totaldue = totalcopay - totalpaid
 
@@ -857,6 +921,8 @@ def _calculatepayments(db,tplanid,policy=None):
             respobj["totaltreatmentcost"]=totaltreatmentcost
             respobj["totalinspays"]=totalinspays
             respobj["totalcompanypays"]=totalcompanypays
+            respobj["totalwalletamount"]=totalwalletamount
+            respobj["totaldiscount_amount"]=totaldiscount_amount
             respobj["totalprecopay"]=totalprecopay
             respobj["totalcopay"]=totalcopay
             respobj["totalpaid"]=totalpaid
@@ -867,6 +933,8 @@ def _calculatepayments(db,tplanid,policy=None):
             respobj["precopay"]=precopay
             respobj["inspays"]=inspays
             respobj["companypays"]=companypays
+            respobj["walletamount"]=walletamount
+            respobj["discount_amount"]=discount_amount
 
             respobj["result"] = "success"
             respobj["error_message"] = ""
@@ -877,10 +945,10 @@ def _calculatepayments(db,tplanid,policy=None):
             respobj["error_message"] = msg
 
 
-
     return json.dumps(respobj)
 
 def _updatetreatmentpayment(db,tplanid,paymentid,policy="PREMWALKIN"):
+    
     logger.loggerpms2.info("Enter Update Treatment Payment " + str(tplanid) + " " + str(paymentid))
     
     user = None
@@ -888,41 +956,82 @@ def _updatetreatmentpayment(db,tplanid,paymentid,policy="PREMWALKIN"):
     tp = db((db.treatment.treatmentplan == tplanid) & (db.treatment.is_active == True)).select(db.treatment.id)
     treatmentid = int(common.getid(tp[0].id))  if(len(tp) == 1) else 0
     
+    #calculate
+    totalactualtreatmentcost = 0   #UCR Cost
+    totaltreatmentcost = 0         #treatment cost as per the plan
+    totalprecopay = 0              #total pre-copay by the patient prior to discount and wallet amounts
+    totalcopay = 0                 #total copay by the patient after discount and wallet amounts
+    totalinspays = 0               #total amount paid by the insurance
+    totalcompanypays = 0           #total amount paid by the company - benefit amount as per the plan
+    totalpaid = 0                  #total amount paid
+    totaldue = 0                   #total due
+    totaldiscount_amount = 0
+    totalwallet_amount = 0
+    
+    
+    #get the previously set totalpaid, totalcompanypays, totalinspays
+    r = db((db.treatment.id == treatmentid) & (db.treatment.is_active == True)).select(db.treatment.treatmentplan)
+    tplanid = int(common.getvalue(r[0].treatmentplan)) if len(r) > 0 else 0
+    r = db((db.treatmentplan.id == tplanid) & (db.treatmentplan.is_active == True)).select()
+    
+    totalinspays = float(common.getvalue(r[0].totalinspays)) if len(r) > 0 else 0
+    totalcompanypays = float(common.getvalue(r[0].totalcompanypays)) if len(r) > 0 else 0
+    totalpaid = float(common.getvalue(r[0].totalpaid)) if len(r) > 0 else 0
+    
+    procs = db(db.treatment_procedure.treatmentid == treatmentid).select()
+    
+    for proc in procs:
+        totalactualtreatmentcost = totalactualtreatmentcost + float(common.getvalue(proc.ucr))
+        totaltreatmentcost = totaltreatmentcost + float(common.getvalue(proc.procedurefee))
+        totalprecopay = totalprecopay + float(common.getvalue(proc.copay))
+        totalcopay = totalcopay + float(common.getvalue(proc.copay))
+        totalinspays = totalinspays + float(common.getvalue(proc.inspays))
+        totalcompanypays = totalcompanypays + float(common.getvalue(proc.companypays))
+    
+    db(db.treatment.id == treatmentid).update(actualtreatmentcost = totalactualtreatmentcost, treatmentcost=totaltreatmentcost, \
+                                              copay=totalcopay, inspay=totalinspays, companypay= totalcompanypays,
+                                              modified_on = datetime.datetime.today(),modified_by = 1 if(user == None) else user.id)    
+
+    
+    
+    
+    tr = db((db.treatment.id == treatmentid) & (db.treatment.is_active == True)).select()
+    
+    totaldiscount_amount = tr[0].discount_amount if(len(tr) > 0) else 0
+    totalwallet_amount = tr[0].walletamount if(len(tr) > 0) else 0
+    voucher_code  = tr[0].voucher_code if(len(tr) > 0) else 0
+    
+  
+    ps = db((db.payment.treatmentplan == tplanid) & (db.payment.is_active == True)).select()
+    for p in ps:
+        totalpaid = totalpaid + float(common.getvalue(p.amount))
+        
+  
+    db(db.treatmentplan.id == tplanid).update(
+        totaltreatmentcost = totaltreatmentcost,
+        totalcopay = totalcopay,
+        totalinspays = totalinspays,
+        totalcompanypays = totalcompanypays,
+        totalwalletamount = totalwallet_amount,
+        totaldiscount_amount  = totaldiscount_amount,
+        totalpaid = totalpaid,
+        totaldue = (totalcopay - (totalcompanypays + totaldiscount_amount + totalwallet_amount)) - totalpaid
+
+    )    
+
+    
     paytm = json.loads(_calculatepayments(db, tplanid,policy))
     logger.loggerpms2.info("Paytm Update Treatment Payment " + json.dumps(paytm))
     
-    totalactualtreatmentcost = 0   #UCR Cost
-    totaltreatmentcost = 0  #Cost charged to the client which is equal to UCR fee by default
-    totalcopay = 0
-    totalinspays = 0
-    totalcompanypays = 0
-   
-    #update Treatment   
-    rows = db((db.vw_treatmentprocedure.treatmentid == treatmentid) & (db.vw_treatmentprocedure.is_active == True)).select()
-    for r in rows:
-        totalactualtreatmentcost = totalactualtreatmentcost + float(common.getvalue(r.ucrfee))
-        totaltreatmentcost = totaltreatmentcost + float(common.getvalue(r.procedurefee))
-        totalcopay = totalcopay + float(common.getvalue(r.copay))
-        totalinspays = totalinspays + float(common.getvalue(r.inspays)) 
-        totalcompanypays = totalcompanypays + float(common.getvalue(r.companypays))     
-       
     
+    #update Treatment   
     db(db.treatment.id == treatmentid).update(actualtreatmentcost = totalactualtreatmentcost, treatmentcost=totaltreatmentcost, \
                                               copay=totalcopay, inspay=totalinspays, companypay= totalcompanypays,
                                               modified_on = datetime.datetime.today(),modified_by = 1 if(user == None) else user.id)    
     
     
     
-    db(db.treatmentplan.id == tplanid).update(
-        totaltreatmentcost =paytm["totaltreatmentcost"],
-        totalcopay = paytm["totalcopay"],
-        totalinspays = paytm["totalinspays"],
-        totalpaid = paytm["totalpaid"],
-        totaldue = paytm["totaldue"],
-        totalcompanypays = paytm["totalcompanypays"],
-        modified_on = common.getISTCurrentLocatTime(),modified_by = 1 if(user == None) else user.id
-    
-    
-    )
+   
     logger.loggerpms2.info("Exit Update Treamtnet Payment")
     return json.dumps({"result":"success"})
+

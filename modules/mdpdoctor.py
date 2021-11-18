@@ -2495,9 +2495,10 @@ class Doctor:
             continue
           avars["providerid"] = str(providerid)
           avars["doctorid"] = str(dr.doctorid)
+          avars["clinicid"] = str(clinicid)
           
           apptObj = mdpappointment.Appointment(db, providerid)
-          slotobj = json.loads(apptObj.list_open_slots(avars))
+          slotobj = json.loads(apptObj.list_hv_open_slots(avars))
           slotobj = slotobj["list_open_slots"]
           for i in xrange(0,len(slotobj)):
             if(slotobj[i] in slotlst):
@@ -2511,7 +2512,8 @@ class Doctor:
           rspobj["city_id"] = city_id
           rspobj["city"] = city
           rspobj["list_open_slots"] = slotlst
-          
+          rspobj["open_time"] = "9:00 AM"
+          rspobj["close_time"] = "6:30 PM"
       except Exception as e:
         mssg = "Day Open Slots Exception:\n" + str(e)
         logger.loggerpms2.info(mssg)      
@@ -2570,8 +2572,8 @@ class Doctor:
         rspobj["result"] = "success"
         rspobj["error_message"] = ""
         rspobj["slotlist"] = slotlist
-        
-
+        rspobj["open_time"] = "9:00 AM"
+        rspobj["close_time"] = "6:30 PM"
       except Exception as e:
         mssg = "Day Open Slots Exception:\n" + str(e)
         logger.loggerpms2.info(mssg)      

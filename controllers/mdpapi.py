@@ -696,10 +696,21 @@ def getcities(avars):
     
     return rsp
 
+def getcitydetails(avars):
+    ouser = mdpuser.User(current.globalenv['db'],None,"","")
+    rsp = ouser.getcitydetails(avars)
+    return rsp
+
+
 def getstates(avars):
     ouser = mdpuser.User(current.globalenv['db'],None,"","")
     rsp = ouser.getstates()
     
+    return rsp
+
+def get_city_state_frompin(avars):
+    locobj = mdplocation.Location(current.globalenv['db'])
+    rsp = locobj.get_city_state_frompin(common.getkeyvalue(avars,"pin","000000"))
     return rsp
 
 
@@ -1026,6 +1037,13 @@ def cities(avars):
     rsp = opat.cities()
     
     return rsp
+
+def cities(avars):
+    opat = mdppatient.Patient(current.globalenv['db'],0)
+    rsp = opat.cities()
+    
+    return rsp
+
 
 def states(avars):
     opat = mdppatient.Patient(current.globalenv['db'],0)
@@ -3083,6 +3101,12 @@ def get_customer(avars):
     
     return rsp
 
+def getKYTC(avars):
+    obj = mdpcustomer.Customer(current.globalenv['db'])
+    rsp = obj.getKYTC(avars)
+    return rsp
+    
+    
 def enroll_customer(avars):
     
     obj = mdpcustomer.Customer(current.globalenv['db'])
@@ -3116,6 +3140,21 @@ def get_benefits(avars):
     
     return rsp
 
+def get_benefits_kytc(avars):
+    
+    obj = mdpbenefits.Benefit(current.globalenv['db'])
+    rsp = obj.get_benefits_kytc(avars)
+    
+    return rsp
+
+def voucher_success(avars):
+    
+    obj = mdpbenefits.Benefit(current.globalenv['db'])
+    rsp = obj.voucher_success(avars)
+    
+    return rsp
+
+
 def benefit_success(avars):
     
     obj = mdpbenefits.Benefit(current.globalenv['db'])
@@ -3135,6 +3174,37 @@ def map_member_benefit(avars):
     obj = mdpbenefits.Benefit(current.globalenv['db'])
     rsp = obj.map_member_benefit(avars)
     
+    return rsp
+
+def calculateVoucher(avars):
+    obj = mdpbenefits.Benefit(current.globalenv['db'])
+    rsp = obj.calculateVoucher(avars)
+    return rsp
+    
+def getVoucherList(avars):
+    obj = mdpbenefits.Benefit(current.globalenv['db'])
+    rsp = obj.getVoucherList(avars)
+    return rsp
+
+def apply_voucher(avars):
+    obj = mdpbenefits.Benefit(current.globalenv['db'])
+    rsp = obj.apply_voucher(avars)
+    return rsp
+
+def create_wallet(avars):
+    obj = mdpbenefits.Benefit(current.globalenv['db'])
+    rsp = obj.create_wallet(avars)
+    return rsp
+
+def credit_wallet(avars):
+    obj = mdpbenefits.Benefit(current.globalenv['db'])
+    rsp = obj.credit_wallet(avars)
+    return rsp
+
+
+def getwallet_balance(avars):
+    obj = mdpbenefits.Benefit(current.globalenv['db'])
+    rsp = obj.getwallet_balance(avars)
     return rsp
 
 
@@ -3169,6 +3239,13 @@ def consentforms(avars):
 
 
 ############################# START PineLabs API  ###################################################
+def callback_transaction(avars):
+    obj = mdppinelabs.PineLabs(current.globalenv['db'])
+    rsp = obj.callback_transaction(avars)
+    return rsp
+    
+
+
 def pinelabs_encrypt(avars):
     logger.loggerpms2.info("Enter Pine Labs Encrypt\n" + str(avars) )
     obj = mdppinelabs.PineLabs(current.globalenv['db'])
@@ -3383,7 +3460,8 @@ hvdocAPI_switcher = {
 
 pinelabsAPI_switcher = {
     "pinelabs_encrypt":pinelabs_encrypt,
-    "pinelabs_payment":pinelabs_payment
+    "pinelabs_payment":pinelabs_payment,
+    "callback_transaction":callback_transaction
 }
 
 
@@ -3394,15 +3472,25 @@ customerAPI_switcher = {
     "get_customer":get_customer,
     "enroll_customer":enroll_customer,
     "map_member_benefit":map_member_benefit,
-    "customer_check_registration":customer_check_registration
+    "customer_check_registration":customer_check_registration,
+    "getKYTC":getKYTC
+    
 
 }
 
 
 benefitsAPI_switcher = {
     "get_benefits":get_benefits,
+    "get_benefits_kytc":get_benefits_kytc,
     "benefit_success":benefit_success,
-    "benefit_failure":benefit_failure
+    "benefit_failure":benefit_failure,
+    "calculateVoucher":calculateVoucher,
+    "getVoucherList":getVoucherList,
+    "voucher_success":voucher_success,
+    "apply_voucher":apply_voucher,
+    "create_wallet":create_wallet,
+    "getwallet_balance":getwallet_balance,
+    "credit_wallet":credit_wallet
 
 }
 
@@ -3497,7 +3585,7 @@ mdpapi_switcher = {"listappointments":getappointments,"getappointmentsbymonth":g
                    "getpatientnotes":getpatientnotes,"addpatientnotes":addpatientnotes,"addSPLproceduretotreatment":addSPLproceduretotreatment,"addpatientimage":addpatientimage,\
                    "uploadimage":uploadimage,"xuploadimage":xuploadimage,"downloadimage":downloadimage,"getimages":getimages,"deleteimage":deleteimage,"updateimage":updateimage,\
                    "genders":genders,"cities":cities,"states":states,"regions":regions,"regionswithid":regionswithid,"status":status,"otpvalidation":otpvalidation,"appointmentstatus":appointmentstatus,\
-                   "appointmentduration":appointmentduration,"pattitles":pattitles,"doctitles":doctitles, "getallconstants":getallconstants,"getcities":getcities,"getstates":getstates,\
+                   "appointmentduration":appointmentduration,"pattitles":pattitles,"doctitles":doctitles, "getallconstants":getallconstants,"getcities":getcities,"getstates":getstates,"getcitydetails":getcitydetails,\
                    "encrypt":encrypt,"decrypt":decrypt,"decrypts128":decrypts128,"encrypts128":encrypts128,"uploadDocument":uploadDocument,"sendOTP":sendOTP,"validateOTP":validateOTP,\
                    "uploadDocument":uploadDocument,"addProcedure":addProcedure,"getTransactionID":getTransactionID,"getReligarePatient":getReligarePatient,\
                    "addRlgProcedureToTreatment":addRlgProcedureToTreatment,"voidTransaction":voidTransaction,"settleTransaction":settleTransaction,\
@@ -3540,7 +3628,8 @@ mdpapi_switcher = {"listappointments":getappointments,"getappointmentsbymonth":g
                    "sendOTPCashless":sendOTPCashless,"validateOTPCashless":validateOTPCashless,\
                    "getOPDServicesCashless":getOPDServicesCashless,"getTransactionIDCashless":getTransactionIDCashless,\
                    "agent_otp_login":agent_otp_login,"otp_login":otp_login,"hvdoc_registration":hvdoc_registration,\
-                   "searchpatient_fast":searchpatient_fast,"gettreatments_fast":gettreatments_fast,"hv_doc_login":hv_doc_login
+                   "searchpatient_fast":searchpatient_fast,"gettreatments_fast":gettreatments_fast,"hv_doc_login":hv_doc_login,\
+                   "get_city_state_frompin":get_city_state_frompin
                    
                    }
 
@@ -3584,7 +3673,7 @@ def mdpapi():
             rsp = mdpapi_switcher.get(action,unknown)(vars)
 	    common.setcookies(response)
 	    if(encryption):
-		return json.dumps({"resp_data":orlgr.encrypts(rsp)})
+		return json.dumps({"resp_data":dsobj.encrypts(rsp)})
 	    else:
 		return rsp
 	    

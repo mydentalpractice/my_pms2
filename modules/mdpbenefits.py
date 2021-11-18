@@ -5,14 +5,699 @@ import datetime
 import time
 from datetime import timedelta
 
+import requests
+
 from applications.my_pms2.modules import common
+from applications.my_pms2.modules import account
 from applications.my_pms2.modules import logger
 
 class Benefit:
   def __init__(self,db):
     self.db = db
     return 
+
+  def tempWallet(self,avars):
+    db = self.db
+    rspobj = {}
+    
+    try:
+      i = 0
+    
+    except Exception as e:
+      mssg = "" + str(e)
+      logger.loggerpms2.info(mssg)      
+      rspobj = {}
+      rspobj["result"] = "fail"
+      rspobj["error_message"] = mssg
+      return json.dumps(rspobj)     
+    
+
+    return json.dumps(rspobj)
+
+
+  def credit_wallet(self,avars):
+    logger.loggerpms2.info("Enter Credit Wallet " + json.dumps(avars))
+    
+    db = self.db
+    rspobj = {}
+    reqobj = {}
+    
+    try:
+      member_id = int(common.getkeyvalue(avars,"member_id", "0"))
+      wallet_type = common.getkeyvalue(avars,"wallet_type", "super_wallet")
+      wallet_amount = float(common.getkeyvalue(avars,"wallet_amount", "0"))
+      
+      
+     
+      reqobj["member_id"] = member_id
+      reqobj["wallet_type"] = wallet_type
+      reqobj["transaction_type"] = "CR"
+      reqobj["amount"] = wallet_amount
+      
+      urlprops = db(db.urlproperties.id > 0).select(db.urlproperties.vw_url)
+      vw_url = urlprops[0].vw_url if(len(urlprops) > 0) else ""
+      vw_url = vw_url + "WalletCrDr"
+      resp = requests.post(vw_url,json=reqobj)
+      if((resp.status_code == 200)|(resp.status_code == 201)|(resp.status_code == 202)|(resp.status_code == 203)):
+            rspobj = resp.json()
+
+            if(rspobj["RETURN_CODE"] != 1):
+              mssg = "Credit Wallet API - Wallet Response Error: " + common.getkeyvalue(rspobj,"RETURN_MESSAGE", "")
+              rspobj = {}
+              rspobj["result"] = "fail"
+              rspobj["error_message"] = mssg
+            
+            #success API
+            rspobj["result"] = "success"
+            rspobj["error_message"] = ""
+      else:
+        #response error
+        mssg = "Credit Wallet API -  HTTP Response Error: " + str(resp.status_code)
+        logger.loggerpms2.info(mssg)      
+        rspobj = {}
+        rspobj["result"] = "fail"
+        rspobj["error_message"] = mssg
+        return json.dumps(rspobj)          
+    
+    except Exception as e:
+      
+      mssg = "Credit Wallet API Exception " + str(e)
+      logger.loggerpms2.info(mssg)      
+      rspobj = {}
+      rspobj["result"] = "fail"
+      rspobj["error_message"] = mssg
+      return json.dumps(rspobj)     
+    
+
+    return json.dumps(rspobj)  
+  #this api is called with 
+  #treatment id, wallet type and wallet to apply
+  #def apply_wallet(self,avars):
+    
+    #logger.loggerpms2.info("Enter Apply Voucher API" + json.dumps(avars))
+      
+    #db = self.db
+    #rspobj = {}
+    
+    #try:
+
+      ##wallet type
+      #wallet_type = common.getkeyvalue(avars,"wallet_type","supper_wallet")
+      
+      ##wallet_amount
+      #wallet_amount = float(common.getkeyvalue(avars,"wallet_amount","0"))
+      
+      ##treatment
+      #treatmentid = int(common.getkeyvalue(avars,"treatmentid","0"))
+      #tr = db((db.treatment.id == treatmentid) & (db.treatment.is_active == True)).select(db.treatment.id, db.treatment.copay,db.treatment.treatmentplan)
+      
+      ##tplanid
+      #tplanid = tr[0].treatmentplan if(len(tr) > 0) else 0
+      #tp = db((db.treatmentplan.id == tplanid) & (db.treatmentplan.is_active == True)).select()    
   
+    
+      ##get default provider 'P0001'
+      #p = db((db.provider.provider == 'P0001') & (db.provider.is_active == True)).select(db.provider.id)
+      #defproviderid = p[0].id if(len(p) > 0) else 0
+      #providerid = tp[0].provider if (len(tp) > 0) else defproviderid
+    
+      #treatment_amount = tr[0].copay if (len(tr) > 0) else 0
+    
+      #memberid = tp[0].primarypatient if (len(tp) > 0) else 0
+      #mems = db((db.patientmember.id == memberid) & (db.patientmember.is_active == True)).select(db.patientmember.city,\
+                                                                                                 #db.patientmember.st,db.patientmember.company)
+      #city = mems[0].city if(len(mems)>0) else "Jaipur"
+      #state = mems[0].st if(len(mems)>0) else "Rajastan (RJ)"
+      #c = db(db.cities.city == city).select(db.cities.id)
+      #cityid = c[0].id if(len(c) > 0) else 0
+
+      ##get plan
+      #companyid = mems[0].company if(len(mems) > 0) else 0
+      #c = db((db.company.id == companyid) & (db.company.is_active == True)).select(db.company.company)
+      #companycode = c[0].company if (len(c) ==1) else "RPIP599"
+      #cp = db(db.companypolicy.companycode == companycode).select()
+      #plan = cp[0].policy if(len(cp) != 0) else "RPIP599"  
+
+      ##apply wallet
+      
+    
+    #except Exception as e:
+      #mssg = "" + str(e)
+      #logger.loggerpms2.info(mssg)      
+      #rspobj = {}
+      #rspobj["result"] = "fail"
+      #rspobj["error_message"] = mssg
+      #return json.dumps(rspobj)     
+    
+
+    #return json.dumps(rspobj)
+
+
+  def create_wallet(self,avars):
+    db = self.db
+    rspobj = {}
+    reqobj = {}
+    
+    try:
+      #make a POST Call
+      reqobj = {}
+      reqobj["member_id"] = int(common.getid(common.getkeyvalue(avars,"member_id","0")))
+      
+      urlprops = db(db.urlproperties.id > 0).select(db.urlproperties.vw_url)
+      vw_url = urlprops[0].vw_url if(len(urlprops) > 0) else ""
+      
+      vw_url = vw_url + "createWallet"
+      resp = requests.post(vw_url,json=reqobj)
+      if((resp.status_code == 200)|(resp.status_code == 201)|(resp.status_code == 202)|(resp.status_code == 203)):
+            rspobj = resp.json()
+            
+            if(rspobj["RETURN_CODE"] != 1):
+              mssg = "Create Wall API - Wallet Response Error: " + common.getkeyvalue(rspobj,"RETURN_MESSAGE", "")
+              rspobj = {}
+              rspobj["result"] = "fail"
+              rspobj["error_message"] = mssg
+            
+            #success API
+            rspobj["result"] = "success"
+            rspobj["error_message"] = ""
+      else:
+        #response error
+        mssg = "Create Wallet API -  HTTP Response Error: " + str(resp.status_code)
+        logger.loggerpms2.info(mssg)      
+        rspobj = {}
+        rspobj["result"] = "fail"
+        rspobj["error_message"] = mssg
+        return json.dumps(rspobj)             
+    except Exception as e:
+      mssg = "Create Wallet API Exception" + str(e)
+      logger.loggerpms2.info(mssg)      
+      rspobj = {}
+      rspobj["result"] = "fail"
+      rspobj["error_message"] = mssg
+      return json.dumps(rspobj)     
+    
+    mssg = json.dumps(rspobj)
+    logger.loggerpms2.info(mssg)
+    return mssg    
+
+  def getwallet_balance(self,avars):
+    db = self.db
+    rspobj = {}
+    reqobj = {}
+    
+    try:
+      
+      member_id = int(common.getid(common.getkeyvalue(avars,"member_id","0")))
+      amount = float(common.getvalue(common.getkeyvalue(avars,"amount","0")))
+      
+      #make a POST Call
+      reqobj = {}
+      reqobj["member_id"] = member_id
+      
+      urlprops = db(db.urlproperties.id > 0).select(db.urlproperties.vw_url)
+      vw_url = urlprops[0].vw_url if(len(urlprops) > 0) else ""
+      
+      vw_url = vw_url + "getWalletBalance"
+      resp = requests.post(vw_url,json=reqobj)
+      if((resp.status_code == 200)|(resp.status_code == 201)|(resp.status_code == 202)|(resp.status_code == 203)):
+            rspobj = resp.json()
+            
+            if(rspobj["RETURN_CODE"] != 1):
+              mssg = "Get Wallet Balance API - Wallet Response Error: " + common.getkeyvalue(rspobj,"RETURN_MESSAGE", "")
+              rspobj = {}
+              rspobj["result"] = "fail"
+              rspobj["error_message"] = mssg
+              return json.dumps(rspobj)
+            
+            mdp_wallet_usage = int((common.getkeyvalue(rspobj,"MDP_WALLET_USASE ","0")).replace("%",""))
+                        
+            
+            balobj = rspobj["WALLET_BALANCE"]
+            super_wallet_amount = float(common.getkeyvalue(balobj,"super_wallet_amount","0"))
+            mdp_wallet_amount = float(common.getkeyvalue(balobj,"mdp_wallet_amount","0"))
+            
+            #min of mdp wallet amount and % of total treatment amount to Pay
+            mdp_wallet_usage_amount = min(mdp_wallet_amount,float((amount * mdp_wallet_usage)/100))  
+            
+            #rspobj["super_wallet_amount"] = super_wallet_amount
+            #rspobj["mdp_wallet_amount"] = mdp_wallet_usage_amount
+            
+            rspobj["super_wallet_message"] = "Available Balance Rs." + str(super_wallet_amount)
+            rspobj["mdp_wallet_message"] = "Available Balance Rs." + str(mdp_wallet_usage_amount) + ". " + \
+              "This is minimum of " + str(mdp_wallet_amount) + " and " + str(mdp_wallet_usage) + " percentage of Rs." + str(amount) + "(" + str(mdp_wallet_usage_amount) + ")"
+            
+            rspobj["result"] = "success"
+            rspobj["error_message"] = ""
+            
+            wallet_list = []
+            lstobj = {}
+            lstobj["wallet_amount"] = super_wallet_amount
+            lstobj["wallet_type"]  = "SUPER_WALLET"
+            lstobj["wallet_message"] = rspobj["super_wallet_message"]
+            wallet_list.append(lstobj)
+            lstobj = {}
+            lstobj["wallet_amount"] = mdp_wallet_usage_amount
+            lstobj["wallet_type"]  = "MDP_WALLET"
+            lstobj["wallet_message"] = rspobj["mdp_wallet_message"]
+            wallet_list.append(lstobj)
+            rspobj["wallet_list"] = wallet_list
+            
+      else:
+        #response error
+        mssg = "Get Wallet Balance API -  HTTP Response Error: " + str(resp.status_code)
+        logger.loggerpms2.info(mssg)      
+        rspobj = {}
+        rspobj["result"] = "fail"
+        rspobj["error_message"] = mssg
+        return json.dumps(rspobj)
+      
+    except Exception as e:
+      mssg = "Get Wallet Balance API Exception" + str(e)
+      logger.loggerpms2.info(mssg)      
+      rspobj = {}
+      rspobj["result"] = "fail"
+      rspobj["error_message"] = mssg
+      return json.dumps(rspobj)     
+    
+    mssg = json.dumps(rspobj)
+    logger.loggerpms2.info(mssg)
+    return mssg    
+
+  # This API is called to reverse voucher application
+  def reverse_voucher(self,avars):
+    logger.loggerpms2.info("Enter Reverse Voucher API" + json.dumps(avars))
+    
+    db=self.db
+    
+    voucher_code = common.getkeyvalue(avars,"voucher_code","")
+    
+    #treatment
+    treatmentid = int(common.getkeyvalue(avars,"treatmentid","0"))
+    tr = db((db.treatment.id == treatmentid) & (db.treatment.is_active == True)).select(db.treatment.id, db.treatment.copay,db.treatment.treatmentplan)
+    
+    #tplanid
+    tplanid = tr[0].treatmentplan if(len(tr) > 0) else 0
+    tp = db((db.treatmentplan.id == tplanid) & (db.treatmentplan.is_active == True)).select()    
+
+  
+    #get default provider 'P0001'
+    p = db((db.provider.provider == 'P0001') & (db.provider.is_active == True)).select(db.provider.id)
+    defproviderid = p[0].id if(len(p) > 0) else 0
+    providerid = tp[0].provider if (len(tp) > 0) else defproviderid
+  
+    treatment_amount = tr[0].copay if (len(tr) > 0) else 0
+  
+    memberid = tp[0].primarypatient if (len(tp) > 0) else 0
+    mems = db((db.patientmember.id == memberid) & (db.patientmember.is_active == True)).select(db.patientmember.city,\
+                                                                                               db.patientmember.st,db.patientmember.company)
+    city = mems[0].city if(len(mems)>0) else "Jaipur"
+    state = mems[0].st if(len(mems)>0) else "Rajastan (RJ)"
+    c = db(db.cities.city == city).select(db.cities.id)
+    cityid = c[0].id if(len(c) > 0) else 0
+  
+  
+    #get plan
+    companyid = mems[0].company if(len(mems) > 0) else 0
+    c = db((db.company.id == companyid) & (db.company.is_active == True)).select(db.company.company)
+    companycode = c[0].company if (len(c) ==1) else "RPIP599"
+    cp = db(db.companypolicy.companycode == companycode).select()
+    plan = cp[0].policy if(len(cp) != 0) else "RPIP599"  
+    
+    #payment id
+    p = db(db.payment.treatmenplan == tplanid)&(db.payment.is_active == True == tplanid).select(db.payment.id)
+    
+    #Apply Voucher
+    reqobj  = {}
+    reqobj["treatment_id"] = int(treatmentid)
+    reqobj["member_id"] = int(memberid)
+    reqobj["plan_code"] = plan
+    reqobj["state"] = state
+    reqobj["city_id"] = int(cityid)
+  
+    #calculate voucher
+    reqobj  = {}
+    for v in vlist:
+      if(v["voucher_code"] == voucher_code):
+        reqobj["voucher_code"] = voucher_code
+        reqobj["member_id"] = int(memberid)
+        reqobj["plan_code"] = plan
+        reqobj["state"] = state
+        reqobj["city_id"] = int(cityid)
+        reqobj["treatment_id"] = treatmentid
+        reqobj["order_amount"] = treatment_amount
+        break;
+      
+    
+            
+    rspobj = json.loads(self.calculateVoucher(reqobj))
+    rspobj["voucher_list"] = vlist
+    
+    #update discount_amount, voucher_code in treatment, treatmentplan, treatment_procedure 
+    #discount_amount = float(common.getkeyvalue(rspobj,"discount_amount","0"))
+    #totaldiscount_amount = float(common.getkeyvalue(rspobj,"totaldiscount_amount","0"))
+    #voucher_code = common.getkeyvalue(rspobj,"voucher_code","")
+    
+    #db((db.treatment.id == treatmentid) & (db.treatment.is_active == True)).update(discount_amount = discount_amount,voucher_code=voucher_code )
+    #db((db.treatmentplan.id == tplanid) & (db.treatmentplan.is_active == True)).update(totaldiscount_amount = totaldiscount_amount, voucher_code=voucher_code)
+    #db.commit()
+    
+    
+    displaymssg = ""
+    if(rspobj["result"] == "fail"):
+      mssg = "Error Apply Voucher - Calculate Voucher API " +  " " + json.dumps(rspobj)
+      logger.loggerpms2.info(mssg)
+      displaymssg = rspobj["voucher_message"]
+      discount_amount = 0   
+    else:
+      mssg = "Success Apply Voucher - Calculate Voucher API " + json.dumps(rspobj)
+      logger.loggerpms2.info(mssg)
+      displaymssg = rspobj["voucher_message"]
+      discount_amount = float(rspobj["discount_amount"])    
+    
+    return json.dumps(rspobj) 
+    
+    
+  
+  def apply_voucher(self,avars):
+    logger.loggerpms2.info("Enter Apply Voucher API" + json.dumps(avars))
+    
+    db=self.db
+    
+    voucher_code = common.getkeyvalue(avars,"voucher_code","")
+    
+    #treatment
+    treatmentid = int(common.getkeyvalue(avars,"treatmentid","0"))
+    tr = db((db.treatment.id == treatmentid) & (db.treatment.is_active == True)).select(db.treatment.id, db.treatment.copay,db.treatment.treatmentplan)
+    
+    #tplanid
+    tplanid = tr[0].treatmentplan if(len(tr) > 0) else 0
+    tp = db((db.treatmentplan.id == tplanid) & (db.treatmentplan.is_active == True)).select()    
+
+  
+    #get default provider 'P0001'
+    p = db((db.provider.provider == 'P0001') & (db.provider.is_active == True)).select(db.provider.id)
+    defproviderid = p[0].id if(len(p) > 0) else 0
+    providerid = tp[0].provider if (len(tp) > 0) else defproviderid
+  
+    treatment_amount = tr[0].copay if (len(tr) > 0) else 0
+  
+    memberid = tp[0].primarypatient if (len(tp) > 0) else 0
+    mems = db((db.patientmember.id == memberid) & (db.patientmember.is_active == True)).select(db.patientmember.city,\
+                                                                                               db.patientmember.st,db.patientmember.company)
+    city = mems[0].city if(len(mems)>0) else "Jaipur"
+    state = mems[0].st if(len(mems)>0) else "Rajastan (RJ)"
+    c = db(db.cities.city == city).select(db.cities.id)
+    cityid = c[0].id if(len(c) > 0) else 0
+  
+  
+    #get plan
+    companyid = mems[0].company if(len(mems) > 0) else 0
+    c = db((db.company.id == companyid) & (db.company.is_active == True)).select(db.company.company)
+    companycode = c[0].company if (len(c) ==1) else "RPIP599"
+    cp = db(db.companypolicy.companycode == companycode).select()
+    plan = cp[0].policy if(len(cp) != 0) else "RPIP599"  
+    
+    
+    #Apply Voucher
+    reqobj  = {}
+    reqobj["treatment_id"] = int(treatmentid)
+    reqobj["member_id"] = int(memberid)
+    reqobj["plan_code"] = plan
+    reqobj["state"] = state
+    reqobj["city_id"] = int(cityid)
+  
+    #the following reqobj is test data. It has to be commented 
+    #reqobj["treatment_id"] = 2
+    #reqobj["member_id"] = 44
+    #reqobj["plan_code"] = ""
+    #reqobj["state"] = "Andaman and Nicobar Islands(AN)"
+    #reqobj["city_id"] = 2
+  
+    vlist = []
+  
+       
+    rspobj = json.loads(self.getVoucherList(reqobj))
+    if(rspobj["result"] == "fail"):
+      vlist = []
+    else:
+      vlist = rspobj["voucher_list"]    
+  
+    #calculate voucher
+    reqobj  = {}
+    for v in vlist:
+      if(v["voucher_code"] == voucher_code):
+        reqobj["voucher_code"] = voucher_code
+        reqobj["member_id"] = int(memberid)
+        reqobj["plan_code"] = plan
+        reqobj["state"] = state
+        reqobj["city_id"] = int(cityid)
+        reqobj["treatment_id"] = treatmentid
+        reqobj["order_amount"] = treatment_amount
+        break;
+      
+        
+    rspobj = json.loads(self.calculateVoucher(reqobj))
+    rspobj["voucher_list"] = vlist
+    
+    #update discount_amount, voucher_code in treatment, treatmentplan, treatment_procedure 
+    #discount_amount = float(common.getkeyvalue(rspobj,"discount_amount","0"))
+    #totaldiscount_amount = float(common.getkeyvalue(rspobj,"totaldiscount_amount","0"))
+    #voucher_code = common.getkeyvalue(rspobj,"voucher_code","")
+    
+    #db((db.treatment.id == treatmentid) & (db.treatment.is_active == True)).update(discount_amount = discount_amount,voucher_code=voucher_code )
+    #db((db.treatmentplan.id == tplanid) & (db.treatmentplan.is_active == True)).update(totaldiscount_amount = totaldiscount_amount, voucher_code=voucher_code)
+    #db.commit()
+    
+    
+    displaymssg = ""
+    if(rspobj["result"] == "fail"):
+      mssg = "Error Apply Voucher - Calculate Voucher API " +  " " + json.dumps(rspobj)
+      logger.loggerpms2.info(mssg)
+      displaymssg = rspobj["voucher_message"]
+      discount_amount = 0   
+    else:
+      mssg = "Success Apply Voucher - Calculate Voucher API " + json.dumps(rspobj)
+      logger.loggerpms2.info(mssg)
+      displaymssg = rspobj["voucher_message"]
+      discount_amount = float(rspobj["discount_amount"])    
+    
+    return json.dumps(rspobj) 
+  
+  #treament_id, member_id, plan_code, state, city_id
+  def getVoucherList(self,avars):
+    logger.loggerpms2.info("Enter Get Voucher List " + json.dumps(avars))
+    db = self.db
+    rspobj = {}
+    reqobj = {}
+
+    try:
+     
+      reqobj["treatment_ids"] = int(common.getkeyvalue(avars,"treatment_id","0"))   #<id> field of the treatment table
+      reqobj["customer_id"] = int(common.getkeyvalue(avars,"member_id",""))         #<id> field of the patientmember table
+      reqobj["plan_code"] = common.getkeyvalue(avars,"plan_code","")                #<plancode> offered to a patient
+      reqobj["region"] = common.getkeyvalue(avars,"state","")                       #<memberis state
+      reqobj["city"] = int(common.getkeyvalue(avars,"city_id","0"))                 #<members> city ID <id> of the cities table
+    
+      
+      #make a POST Call
+      urlprops = db(db.urlproperties.id > 0).select(db.urlproperties.vw_url)
+      vw_url = urlprops[0].vw_url if(len(urlprops) > 0) else ""
+      
+      vw_url = vw_url + "getVoucher"
+      resp = requests.post(vw_url,json=reqobj)
+      
+      voucher_code = ""
+      voucher_message = ""  
+      vclist = []
+      
+      if((resp.status_code == 200)|(resp.status_code == 201)|(resp.status_code == 202)|(resp.status_code == 203)):
+        rspobj = resp.json()    
+
+        vcobj = common.getkeyvalue(rspobj,"VOUCHER_DATA", [])
+        
+        #error voucher list
+        if(rspobj["RETURN_CODE"] != 1):
+          mssg = "Get Voucher List Error: " + json.dumps(rspobj)
+          logger.loggerpms2.info(mssg)  
+          voucher_message = common.getkeyvalue(rspobj,"RETURN_MESSAGE","Get Voucher List Error")
+          rspobj = {}
+          
+          rspobj["voucher_code"] = ""
+          rspobj["voucher_message"] = voucher_message
+          rspobj["voucher_list"] = []
+          rspobj["result"] = "fail"
+          rspobj["error_message"] = mssg
+          return json.dumps(rspobj)     
+        
+        #success get voucher list
+        for vc in vcobj:
+          voucher_code = common.getkeyvalue(vc,"voucher_code","")
+          if(common.getkeyvalue(vc,"discount_type","Percentage")):
+            voucher_message = "You will get cashback of " +str(common.getstring(common.getkeyvalue(vc,"discount",0))) + "% on treatment. Applicable to treatment above certain value"
+          else:
+            voucher_message = "You will get cashback of " + str(common.getstring(common.getkeyvalue(vc,"discount",0)))+ " on treatment cost. Applicable to treatment above certain value"
+          vco = {}
+          vco["voucher_code"] = voucher_code
+          vco["voucher_message"] = voucher_message
+          vclist.append(vco)
+        
+        rspobj={}  
+        rspobj["result"] = "success"
+        rspobj["error_message"]  = ""
+        rspobj["voucher_list"] = vclist
+        
+      else:
+        mssg = "Get Voucher List Response Error:\n" + str(resp.status_code)
+        logger.loggerpms2.info(mssg)      
+        rspobj = {}
+        rspobj["voucher_code"] = ""
+        rspobj["voucher_message"] = mssg
+        rspobj["voucher_list"] = []
+        rspobj["result"] = "fail"
+        rspobj["error_message"] = mssg
+        return json.dumps(rspobj)
+      
+    except Exception as e:
+      mssg = "Get Voucher List  Exception:\n" + str(e)
+      logger.loggerpms2.info(mssg)      
+      rspobj = {}
+      rspobj["voucher_code"] = ""
+      rspobj["voucher_message"] = mssg
+      rspobj["voucher_list"] = []
+      rspobj["result"] = "fail"
+      rspobj["error_message"] = mssg
+      return json.dumps(rspobj)     
+  
+    return json.dumps(rspobj)
+
+
+  #avars
+  #treatment_id, order_amount, voucher_code, member_id, state, city_code, city_id,plan_code
+  def calculateVoucher(self,avars):
+    logger.loggerpms2.info("Enter Calculate Voucher " + json.dumps(avars))
+    db = self.db
+    rspobj = {}
+    reqobj = {}
+
+    try:
+      reqobj["action"] = "getdiscount"
+      reqobj["voucherCode"] = common.getkeyvalue(avars,"voucher_code","")
+      reqobj["customerId"] = common.getkeyvalue(avars,"member_id","")
+      reqobj["planCode"] = common.getkeyvalue(avars,"plan_code","")
+      reqobj["region"] = common.getkeyvalue(avars,"state","")
+      reqobj["city"] = int(common.getkeyvalue(avars,"city_id","0"))
+    
+      lst = []
+    
+      trobj = {}
+      trobj["id"] = int(common.getkeyvalue(avars,"treatment_id","0"))
+      trobj["orderAmount"] = float(common.getkeyvalue(avars,"order_amount","0"))
+      lst.append(trobj)
+      reqobj["treatment_ids"] = lst
+      
+      treatmentid = int(common.getkeyvalue(avars,"treatment_id","0"))
+      t = db(db.treatment.id == treatmentid).select(db.treatment.treatmentplan)
+      tplanid = int(t[0].treatmentplan) if(len(t) > 0) else 0
+      
+      
+      
+      #make a POST Call
+      urlprops = db(db.urlproperties.id > 0).select(db.urlproperties.vw_url)
+      vw_url = urlprops[0].vw_url if(len(urlprops) > 0) else ""
+      
+      vw_url = vw_url + "calculateVoucher"
+      resp = requests.post(vw_url,json=reqobj)
+      voucher_message = ""
+      if((resp.status_code == 200)|(resp.status_code == 201)|(resp.status_code == 202)|(resp.status_code == 203)):
+        rspobj1 = resp.json()    
+        if(int(common.getkeyvalue(rspobj1,"RETURN_CODE","1")) == 1):
+          rspobj["result"] = "success"
+          rspobj["error_message"]  = ""
+          rspobj["discount_amount"] = rspobj1["discountAmount"]
+          rspobj["voucher_code"] = common.getkeyvalue(avars,"voucher_code","")
+          if(rspobj1["discountAmount"] > 0):
+            rspobj["voucher_message"] = "Voucher Discount = " + str(rspobj["discount_amount"])
+          else:
+            rspobj["voucher_message"] = "Voucher Discount is cashback into SUPER and MDP wallets"
+            
+          
+          
+          
+          #sql = "UPDATE Treatment SET companypay = companypay + " + str(rspobj["discount_amount"])  + " WHERE is_active = 'T' AND id = " + str(treatmentid)
+          #db.executesql(sql)
+          #db.commit()
+        
+          #sql = "UPDATE treatment_procedure SET companypays = companypays + " + str(rspobj["discount_amount"])  + " WHERE is_active = 'T' AND treatmentid = " + str(treatmentid)
+          #db.executesql(sql)
+          #db.commit()
+        
+          #sql = "UPDATE treatmentplan SET totalcompanypays = totalcompanypays + " + str(rspobj["discount_amount"])  + " WHERE is_active = 'T' AND id = " + str(tplanid)
+          #db.executesql(sql)
+          #db.commit()
+          
+          #update discount_amount, voucher_code in treatment, treatmentplan, treatment_procedure 
+          discount_amount = float(common.getkeyvalue(rspobj,"discount_amount","0"))
+          voucher_code = common.getkeyvalue(rspobj,"voucher_code","")
+          totaldiscount_amount = discount_amount
+          
+          db((db.treatment.id == treatmentid) & (db.treatment.is_active == True)).update(discount_amount = discount_amount,voucher_code=voucher_code )
+          db((db.treatmentplan.id == tplanid) & (db.treatmentplan.is_active == True)).update(totaldiscount_amount = totaldiscount_amount, voucher_code=voucher_code)
+          db.commit()          
+          
+        else:
+          mssg = "Error Calculate Voucher - Invalid Voucher " + json.dumps(rspobj)
+          voucher_message =  "Error Calculate Voucher - Invalid Voucher "
+          rspobj["voucher_code"] = common.getkeyvalue(avars,"voucher_code","")
+          rspobj["voucher_message"] = voucher_message
+          rspobj["discount_amount"] = 0
+          rspobj["result"] = "fail"
+          rspobj["error_message"] = mssg
+          
+      else:
+        mssg = "Calculate Voucher Response Error:\n" + str(resp.status_code)
+        logger.loggerpms2.info(mssg)      
+        rspobj = {}
+        rspobj["voucher_code"] = common.getkeyvalue(avars,"voucher_code","")
+        rspobj["voucher_message"] = mssg
+        rspobj["discount_amount"] = 0
+        rspobj["result"] = "fail"
+        rspobj["error_message"] = mssg
+            
+    except Exception as e:
+      mssg = "Calculate Voucher  Exception:\n" + str(e)
+      logger.loggerpms2.info(mssg)      
+      rspobj = {}
+      rspobj["voucher_code"] = common.getkeyvalue(avars,"voucher_code","")
+      rspobj["voucher_message"] = mssg
+      rspobj["discount_amount"] = 0
+      rspobj["result"] = "fail"
+      rspobj["error_message"] = mssg
+    
+    paymentid = 0 #payment id is not required in _updatetreatmentpayment
+    account._updatetreatmentpayment(db, tplanid, 0)  
+    paytm = json.loads(account._calculatepayments(db, tplanid,common.getkeyvalue(avars,"plan_code","") ) )
+    
+    
+    rspobj["treatmentcost"]=common.getkeyvalue(paytm,"treatmentcost",0)
+    rspobj["copay"]=common.getkeyvalue(paytm,"copay",0)
+    rspobj["inspays"]=common.getkeyvalue(paytm,"inspays",0)
+    rspobj["companypays"]=common.getkeyvalue(paytm,"companypays",0)
+    rspobj["walletamount"]=common.getkeyvalue(paytm,"walletamount",0)
+    rspobj["discount_amount"]=common.getkeyvalue(paytm,"discount_amount",0)
+    rspobj["totaltreatmentcost"]=common.getkeyvalue(paytm,"totaltreatmentcost",0)
+    rspobj["totalinspays"]=common.getkeyvalue(paytm,"totalinspays",0)
+    rspobj["totalcopay"]=common.getkeyvalue(paytm,"totalcopay",0)
+    rspobj["totalpaid"]=common.getkeyvalue(paytm,"totalpaid",0)
+    rspobj["totaldue"]=common.getkeyvalue(paytm,"totaldue",0)
+    rspobj["totalcompanypays"]=common.getkeyvalue(paytm,"totalcompanypays",0)
+    rspobj["precopay"]=common.getkeyvalue(paytm,"precopay",0)
+    rspobj["totalprecopay"]=common.getkeyvalue(paytm,"totalprecopay",0)
+    rspobj["totalwalletamount"]=common.getkeyvalue(paytm,"totalwalletamount",0)
+    rspobj["totaldiscount_amount"]=common.getkeyvalue(paytm,"totaldiscount_amount",0)
+    
+    mssg = json.dumps(rspobj)
+    logger.loggerpms2.info("Exit Calculate Voucher " + mssg)
+    return mssg
   
   
   #this method maps member to benefit
@@ -31,12 +716,19 @@ class Benefit:
       memberid = int(common.getkeyvalue(avars,"memberid","0"))
       p = db((db.benefit_master.benefit_code == policy) & (db.benefit_master.is_active == True)).select()
       benefit_master_id = int(common.getid(p[0].id)) if(len(p)>0) else 0
-      db.benefit_master_x_member.insert(\
-        member_id = memberid,
-        benefit_master_id = benefit_master_id,
-        plan_code = policy,
-        plan_id = planid
+      if(benefit_master_id == 0):
+        rspobj = {}
+        rspobj["result"] = "success"
+        rspobj["error_message"] = ""
+        return json.dumps(rspobj)
       
+      db.benefit_master_x_member.update_or_insert((db.benefit_master_x_member.member_id == memberid) & \
+                                                  (db.benefit_master_x_member.benefit_master_id == benefit_master_id) &\
+                                                  (db.benefit_master_x_member.plan_code == policy),
+                                                  member_id = memberid,
+                                                  benefit_master_id = benefit_master_id,
+                                                  plan_code = policy,
+                                                  plan_id = planid
       )
 
       rspobj = {}
@@ -92,8 +784,12 @@ class Benefit:
       #get policy from provider-region-plan corr to companycode, regioncode and hmoplancode
       prp = db((db.provider_region_plan.companycode == companycode) &\
                      (db.provider_region_plan.regioncode == regioncode) &\
-                     (db.provider_region_plan.plancode == hmoplancode) &\
                      (db.provider_region_plan.is_active == True)).select() 
+      
+      #prp = db((db.provider_region_plan.companycode == companycode) &\
+                     #(db.provider_region_plan.regioncode == regioncode) &\
+                     #(db.provider_region_plan.plancode == hmoplancode) &\
+                     #(db.provider_region_plan.is_active == True)).select() 
       
       
       policy = prp[0].policy if(len(prp) == 1) else "PREMWALKIN"  #get policy corr.
@@ -135,6 +831,49 @@ class Benefit:
     
     return json.dumps(rspobj)
   
+  def get_benefits_kytc(self,avars):
+      logger.loggerpms2.info("Enter get_benefits for KYTC " + json.dumps(avars))
+      db = self.db
+      rspobj = {}
+      
+      try:
+        m = db((db.patientmember.groupref == "KYTC")&(db.patientmember.is_active == True)).select(db.patientmember.id)
+        avars["memberid"] = m[0].id if(len(m) > 0) else 0
+        plan = common.getkeyvalue(avars,"plan","RPIP599")
+        if(plan == "RPIP599"):
+          rspobj = json.loads(self.RPIP599_kytc(avars))
+        else:
+          mssg = "Get Benefits:Invalid benefit KYTC Policy"
+          rspobj = {}
+          rspobj["result"] = "success"
+          rspobj["error_message"] = mssg
+          rspobj["redeem_code"] = "BNFT_INVALID"
+          rspobj["redeem_value"] = 0
+          rspobj["redeem_date"] = common.getstringfromdate(datetime.date.today(), "%d/%m/%Y")
+          rspobj["redeem_message"] = common.getmessage(db,"BNFT_INVALID")
+          rspobj["memberid"] = str(memberid)
+          rspobj["plan"] = plan
+       
+          rspobj["total_redeemed_benefits"] = 0
+          rspobj["benefit_code"] = ""
+          rspobj["benefit_name"] = ""
+          rspobj["benefit_value"] = str(0)
+          rspobj["discount_amount"] = str(0)
+     
+          
+        
+      except Exception as e:
+        mssg = "Get Bnefits  Exception:\n" + str(e)
+        logger.loggerpms2.info(mssg)      
+        excpobj = {}
+        excpobj["result"] = "fail"
+        excpobj["error_message"] = mssg
+        return json.dumps(excpobj)     
+      
+      logger.loggerpms2.info("Exit get_benefits KYTC " + json.dumps(rspobj))
+      
+      return json.dumps(rspobj)
+
 
   def RPIP599Success(self,avars):
     
@@ -159,7 +898,7 @@ class Benefit:
       
     
       #update benefit_member table on successful payment 
-      if(discount_amount > 0):
+      if(discount_amount >= 0):
         benefit_member_id = db.benefit_member.insert(\
           
           member_id = memberid,
@@ -255,6 +994,178 @@ class Benefit:
     logger.loggerpms2.info("Exit from RPIP599 Failure " + json.dumps(rspobj))
     return json.dumps(rspobj)
 
+  #call with paymentid
+  def voucher_success(self, avars):
+    logger.loggerpms2.info("Enter Voucher Success " + json.dumps(avars))
+    
+    db = self.db
+    reqobj = {}
+    
+    rspobj = {}
+    
+    try:
+      paymentid = int(common.getkeyvalue(avars,"paymentid","0"))
+      p = db((db.payment.id == paymentid) & (db.payment.is_active == True)).select()
+      voucher = p[0].voucher_code if(len(p) > 0) else ""
+      memberid = int(p[0].patientmember) if(len(p)>0) else 0
+      tplanid = int(p[0].treatmentplan) if(len(p)>0) else 0
+      tp = db(db.treatmentplan.id == tplanid).select()
+      totalcopay = (tp[0].totalcopay-tp[0].totaldiscount_amount - tp[0].totalwalletamount) if (len(tp) > 0 ) else 0
+      
+      tr = db((db.treatment.treatmentplan == tplanid) & (db.treatment.is_active == True)).select()
+      treatmentid = int(tr[0].id) if(len(tr)>0) else 0
+      amount = (tr[0].copay - tr[0].discount_amount - tr[0].companypay-tr[0].walletamount) if (len(tr) > 0) else 0
+      
+      members = db((db.patientmember.id == memberid) & (db.patientmember.is_active == True)).select(db.patientmember.company,db.patientmember.city,db.patientmember.st)
+      companyid = common.getid(members[0].company) if (len(members) == 1) else "0"
+      c = db((db.company.id == companyid) & (db.company.is_active == True)).select(db.company.company)
+      companycode = c[0].company if (len(c) ==1) else ""
+  
+      cp = db(db.companypolicy.companycode == companycode).select()
+      plan = cp[0].policy if(len(cp) != 0) else ""      
+      
+      #determine member's city & state
+      city = members[0].city if(len(members)>0) else "Jaipur"
+      st = members[0].st if(len(members)>0) else "Rajasthan (RJ)"
+      c = db(db.cities.city == city).select(db.cities.id)
+      cityid = c[0].id if(len(c) > 0) else 0 
+      
+      
+      ##reset discount_amount in treatment, treatmentplan, treatment_procedure, payment
+      db.redeem_voucher_wallet.insert(
+        treatmentid = treatmentid,
+        treatmentdate = tr[0].startdate if (len(tr) > 0) else datetime.datetime.now(),
+        paymentid = paymentid,
+        paymentdate = p[0].paymentdate if (len(p) > 0) else datetime.datetime.now(),
+        discount_amount = tr[0].discount_amount if (len(tr) > 0) else 0,
+        voucher_code = tr[0].voucher_code if (len(tr) > 0) else 0,
+        wallet_amount = tr[0].walletamount if (len(tr) > 0) else 0
+      )
+      
+      #db((db.treatment.id == treatmentid)&(db.treatment.is_active == True)).update(copay=amount,discount_amount = 0,voucher_code="")
+      #db((db.treatmentplan.id == tplanid)&(db.treatmentplan.is_active == True)).update(totalcopay=totalcopay,totaldiscount_amount = 0,voucher_code = "")
+      #db((db.payment.id == paymentid)&(db.payment.is_active == True)).update(discount_amount = 0, voucher_code = "")
+      #db.commit()
+      
+      lst = []
+    
+      trobj = {}
+      trobj["id"] = int(treatmentid)
+      trobj["orderAmount"] = amount
+      lst = lst.append(trobj)
+      
+
+      reqobj["action"] = "calculatediscount"
+      reqobj["treatment_ids"] = lst
+      reqobj["voucherCode"] = voucher
+      reqobj["customerId"] = int(memberid)
+      reqobj["region"] = st
+      reqobj["city"] = int(cityid)
+      reqobj["plan_code"] = plan
+      reqobj["wallet_usase"] ={}
+
+      #make a POST Call
+      urlprops = db(db.urlproperties.id > 0).select(db.urlproperties.vw_url)
+      vw_url = urlprops[0].vw_url if(len(urlprops) > 0) else ""
+      
+      vw_url = vw_url + "calculateVoucher"
+      resp = requests.post(vw_url,json=reqobj)
+
+      if((resp.status_code == 200)|(resp.status_code == 201)|(resp.status_code == 202)|(resp.status_code == 203)):
+        rspobj = resp.json()    
+        
+        if(rspobj["RETURN_CODE"] != 1):
+          mssg = "Redeem Voucher Error: " + json.dumps(rspobj)
+          logger.loggerpms2.info(mssg)      
+          rspobj = {}
+          rspobj["voucher_code"] = voucher
+          rspobj["voucher_message"] = rspobj["RETURN_MESSAGE"]
+          rspobj["result"] = "fail"
+          rspobj["error_message"] = mssg
+          return json.dumps(rspobj)     
+        
+        rspobj["result"] = "success"
+        rspobj["error_message"]  = ""
+        
+        rspobj["voucher_code"] = voucher
+        rspobj["voucher_message"] = rspobj["RETURN_MESSAGE"]
+        
+        
+        
+        
+      else:
+        mssg = "Redeem Voucher Response Error:\n" + str(resp.status_code)
+        logger.loggerpms2.info(mssg)      
+        rspobj = {}
+        
+        rspobj["voucher_code"] = voucher
+        rspobj["voucher_message"] = mssg
+        rspobj["result"] = "fail"
+        rspobj["error_message"] = mssg
+        return json.dumps(rspobj)
+
+    except Exception as e:
+        mssg = "Voucher Success Exception:\n" + str(e)
+        logger.loggerpms2.info(mssg)      
+        excpobj = {}
+        excpobj["result"] = "fail"
+        excpobj["error_message"] = mssg
+        return json.dumps(excpobj)     
+      
+    logger.loggerpms2.info("Exit Voucher Success " + json.dumps(avars))
+    return json.dumps(rspobj)    
+  
+  #call with paymentid
+  def voucher_failure(self, avars):
+    logger.loggerpms2.info("Enter Voucher Failure " + json.dumps(avars))
+    db = self.db
+    reqobj = {}
+    rspobj = {}
+    
+    try:
+      paymentid = int(common.getkeyvalue(avars,"paymentid","0"))
+      p = db((db.payment.id == paymentid) & (db.payment.is_active == True)).select()
+      voucher = p[0].payor if(len(p) > 0) else ""
+      memberid = int(p[0].patientmember) if(len(p)>0) else 0
+      tplanid = int(p[0].treatmentplan) if(len(p)>0) else 0
+      tr = db((db.treatment.treatmentplan == tplanid) & (db.treatment.is_active == True)).select(db.treatment.id, db.treatment.copay)
+      treatmentid = int(tr[0].id) if(len(tr)>0) else 0
+      amount = tr[0].copay if (len(tr) > 0) else 0
+        
+      members = db((db.patientmember.id == memberid) & (db.patientmember.is_active == True)).select(db.patientmember.company,db.patientmember.city,db.patientmember.st)
+      companyid = common.getid(members[0].company) if (len(members) == 1) else "0"
+      c = db((db.company.id == companyid) & (db.company.is_active == True)).select(db.company.company)
+      companycode = c[0].company if (len(c) ==1) else ""
+  
+      cp = db(db.companypolicy.companycode == companycode).select()
+      plan = cp[0].policy if(len(cp) != 0) else ""      
+      
+      #determine member's city & state
+      city = members[0].city if(len(members)>0) else "Jaipur"
+      st = members[0].st if(len(members)>0) else "Rajasthan (RJ)"
+      c = db(db.cities.city == city).select(db.cities.id)
+      cityid = c[0].id if(len(c) > 0) else 0 
+      
+      #Reset companypays = 0 in treatment & treatment plans
+      t = db((db.treatment.id == treatmentid) & (db.treatment.is_active == True)).select()
+      tplanid = int(common.getid(t[0].treatmentplan)) if(len(t) > 0) else 0
+      db((db.treatment.id == treatmentid) & (db.treatment.is_active == True)).update(discount_amount = 0,voucher_code = "")
+      db((db.treatmentplan.id == tplanid) & (db.treatmentplan.is_active == True)).update(totalcompanypays=0, voucher_code = 0)
+      db((db.payment.id == paymentid) & (db.payment.is_active == True)).update(discount_amount = 0,voucher_code = "")
+
+      rspobj["result"] = "success"
+      rspobj["error_message"]  = ""
+
+    except Exception as e:
+        mssg = "Voucher Failure Exception:\n" + str(e)
+        logger.loggerpms2.info(mssg)      
+        excpobj = {}
+        excpobj["result"] = "fail"
+        excpobj["error_message"] = mssg
+        return json.dumps(excpobj)     
+      
+    logger.loggerpms2.info("Exit Voucher Failure " + json.dumps(avars))
+    return json.dumps(rspobj)    
   
   def benefit_success(self, avars):
     logger.loggerpms2.info("Enter Benefit Success " + json.dumps(avars))
@@ -391,8 +1302,10 @@ class Benefit:
 
       #determine total benefit redeemed for this plan & period
       total_redeemed_benefits = 0
+      #rbs = db((db.benefit_member.member_id == memberid) & (db.benefit_member.plan_code==policy)&\
+               #((db.benefit_member.redeem_date >= benefit_start_date) & (db.benefit_member.redeem_date <= benefit_end_date)) &\
+               #(db.benefit_member.is_active == True)).select()
       rbs = db((db.benefit_member.member_id == memberid) & (db.benefit_member.plan_code==policy)&\
-               ((db.benefit_member.redeem_date >= benefit_start_date) & (db.benefit_member.redeem_date <= benefit_end_date)) &\
                (db.benefit_member.is_active == True)).select()
       
       for rb in rbs:
@@ -413,7 +1326,7 @@ class Benefit:
         rspobj["benefit_start_date"] = common.getstringfromdate(benefit_start_date,"%d/%m/%Y")
         rspobj["benefit_end_date"] = common.getstringfromdate(benefit_end_date,"%d/%m/%Y")
         rspobj["discount_code"] = "BNFT_VAL_MAX"
-        rspobj["discount_value"] = "0"
+        rspobj["discount_amount"] = "0"
         rspobj["discount_date"] = common.getstringfromdate(datetime.date.today(), "%d/%m/%Y")
         rspobj["discount_message"] = common.getmessage(db,"BNFT_VAL_MAX")
         
@@ -514,3 +1427,116 @@ class Benefit:
   
     logger.loggerpms2.info("Exit from RPIP599 Benefit " + json.dumps(benefit_obj))
     return json.dumps(benefit_obj)
+  
+  def RPIP599_kytc(self, avars):
+    
+    logger.loggerpms2.info("Enter RPIP599_KYTC ==>>" + str(avars))
+    
+    db = self.db
+    benefit_obj = {}
+    auth = current.auth
+    
+    
+    try:
+      plan = common.getkeyvalue(avars,"plan","")   #this is the plan passed from get_benefits
+      memberid = int(common.getkeyvalue(avars,"memberid","0"))
+      amount = float(common.getkeyvalue(avars,"amount","0"))
+    
+ 
+    
+      bms = db((db.benefit_master_x_member.member_id == memberid) & (db.benefit_master_x_member.plan_code == plan) &\
+             (db.benefit_master.is_valid == True) & (db.benefit_master.is_active == True)).select(db.benefit_master.ALL,\
+                                                                                                  left=db.benefit_master.on(db.benefit_master.id == db.benefit_master_x_member.benefit_master_id))
+      bmid = bms[0].id if(len(bms)==1) else 0
+      logger.loggerpms2.info("Enter RPIP599 KYTC  3==>>" + str(len(bms)))
+      
+    
+
+      #select benefit_master_slabs.* from benefit_master_x_slabs
+      #left join benefit_master_slabs  on benefit_master_slabs.id = benefit_master_x_slabs.benefit_master_slabs_id
+      #where benefit_master_x_slabs.benefit_master_id = 1 and benefit_master_x_slabs.benefit_master_code = 'RPIP599'
+      slbs = db((db.benefit_master_x_slabs.benefit_master_id == bmid)&(db.benefit_master_x_slabs.benefit_master_code==plan)).\
+        select(db.benefit_master_slabs.ALL,left=db.benefit_master_slabs.on(db.benefit_master_slabs.id == db.benefit_master_x_slabs.benefit_master_slabs_id))
+      
+      
+      #benefit start date & benefit end date
+      benefit_start_date = bms[0].benefit_start_date if(len(bms)==1) else common.getISTCurrentLocatTime()
+      benefit_end_date = bms[0].benefit_end_date if(len(bms)==1) else common.getISTCurrentLocatTime()
+      
+      #benefit value of the Plan 
+      benefit_value = common.getvalue(bms[0].benefit_value if (len(bms) == 1) else 0)
+
+      #determine total benefit redeemed for this plan & period
+      total_redeemed_benefits = 0
+      
+      rbs = db((db.benefit_member.member_id == memberid) & (db.benefit_member.plan_code==plan)&\
+               (db.benefit_member.is_active == True)).select()
+      
+      for rb in rbs:
+        total_redeemed_benefits += rb.redeem_amount
+        
+      #if total redeemed value = max benefit amount, then return
+      if(total_redeemed_benefits >= benefit_value):
+        
+        rspobj = {}
+        rspobj["result"] = "success"
+        rspobj["error_message"] = ""
+        rspobj["total_redeemed_benefits"] = str(total_redeemed_benefits)
+        rspobj["benefit_code"] = (bms[0].benefit_code if (len(bms) == 1) else "")
+        rspobj["benefit_name"] = (bms[0].benefit_name if (len(bms) == 1) else "")
+        rspobj["benefit_value"] = str(benefit_value)
+        rspobj["benefit_start_date"] = common.getstringfromdate(benefit_start_date,"%d/%m/%Y")
+        rspobj["benefit_end_date"] = common.getstringfromdate(benefit_end_date,"%d/%m/%Y")
+        rspobj["benefit_error_code"] = "BNFT_VAL_MAX"
+        rspobj["benefit_amount"] = "0"
+        rspobj["benefit_date"] = common.getstringfromdate(datetime.date.today(), "%d/%m/%Y")
+        rspobj["benefit_message"] = common.getmessage(db,"BNFT_VAL_MAX")
+        
+        logger.loggerpms2.info("Maximum Benefit Reached (KYTC) " + json.dumps(rspobj))
+        return json.dumps(rspobj)
+      
+      
+   
+      totalamountforbenefit = amount
+      
+      #determine the total benefit amount
+      redeem_value = 0
+      for slb in slbs:
+        if(slb.redeem_mode == 'S'):
+          #slab mode and not percentage mod
+          if((totalamountforbenefit >= slb.redeem_lower_limit) & (totalamountforbenefit <= slb.redeem_upper_limit)):
+            redeem_value = slb.redeem_value
+            break
+        
+      benefit_amount = abs(redeem_value - total_redeemed_benefits)
+      
+      if((benefit_amount + total_redeemed_benefits) >= benefit_value):
+        benefit_amount = abs(benefit_value-total_redeemed_benefits)
+    
+      balance_benefit_amount = benefit_value - (benefit_amount + total_redeemed_benefits)
+     
+      
+      
+      #return rspobj
+      benefit_obj = {}
+      benefit_obj["result"] = "success"
+      benefit_obj["error_message"] = ""
+     
+      
+      benefit_obj["benefit_value"] = str(benefit_value)
+ 
+      benefit_obj["benefit_code"] = "BNFT_OK"
+      benefit_obj["benefit_amount"] = str(benefit_amount)
+      benefit_obj["benefit_date"] = common.getstringfromdate(datetime.date.today(), "%d/%m/%Y")
+      benefit_obj["benefit_message"] = common.getmessage(db,"BNFT_OK")
+
+    except Exception as e:
+      mssg = "RPIP599 KYTC  Exception:\n" + str(e)
+      logger.loggerpms2.info(mssg)      
+      excpobj = {}
+      excpobj["result"] = "fail"
+      excpobj["error_message"] = mssg
+      return json.dumps(excpobj)     
+  
+    logger.loggerpms2.info("Exit from RPIP599 KYTC Benefit " + json.dumps(benefit_obj))
+    return json.dumps(benefit_obj)  

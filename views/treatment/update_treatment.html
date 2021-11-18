@@ -17,32 +17,10 @@
 </style>
         
         
-    <!-- jQuery UI -->
-<!--<script type="text/javascript" src="../static/wspaint/lib/jquery.ui.core.1.10.3.min.js"></script>-->
-<!--<script type="text/javascript" src="../static/wspaint/lib/jquery.ui.widget.1.10.3.min.js"></script>-->
-<!--<script type="text/javascript" src="../static/wspaint/lib/jquery.ui.mouse.1.10.3.min.js"></script>-->
-<!--<script type="text/javascript" src="../static/wspaint/lib/jquery.ui.draggable.1.10.3.min.js"></script>-->
-
-<!-- wColorPicker -->
-<!--<link rel="Stylesheet" type="text/css" href="../static/wspaint/lib/wColorPicker.min.css" />-->
-<!--<script type="text/javascript" src="../static/wspaint/lib/wColorPicker.min.js"></script>-->
-
-<!-- wPaint -->
-<!--<link rel="Stylesheet" type="text/css" href="../static/wspaint/src/wPaint.css" />-->
-<!--<script type="text/javascript" src="../static/wspaint/wPaint.min.js"></script>-->
-<!--<script type="text/javascript" src="../static/wspaint/plugins/main/src/wPaint.menu.main.js"></script>-->
-<!--<script type="text/javascript" src="../static/wspaint/plugins/text/src/wPaint.menu.text.js"></script>-->
-<!--<script type="text/javascript" src="../static/wspaint/plugins/shapes/src/wPaint.menu.main.shapes.js"></script>-->
-<!--<script type="text/javascript" src="../static/wspaint/plugins/file/src/wPaint.menu.main.file.js"></script>-->
-
-<!--<link rel="Stylesheet" type="text/css" href="../static/wspaint/wPaint.min.css"/>-->
-<!--<script type="text/javascript" src="../static/wspaint/wPaint.min.js"></script>-->
-<!--<script type="text/javascript" src="../static/wspaint/plugins/main/wPaint.menu.main.min.js"></script>-->
-<!--<script type="text/javascript" src="../static/wspaint/plugins/text/wPaint.menu.text.min.js"></script>-->
-<!--<script type="text/javascript" src="../static/wspaint/plugins/shapes/wPaint.menu.main.shapes.min.js"></script>-->
-<!--<script type="text/javascript" src="../static/wspaint/plugins/file/wPaint.menu.main.file.min.js"></script>-->
-
+ 
+		        <!--- A-->
                         <div class="row">
+			    <!--- B-->
                             <div class="col-md-12">
                                 <!-- BEGIN EXAMPLE TABLE PORTLET-->
                                 <div class="portlet light bordered">
@@ -121,65 +99,108 @@
                                                 <div class="tab-pane active" id="tab_15_1">
 						    {{=formTreatment.custom.begin}} 
 					
-     						    <div style="display:none">{{=formTreatment.custom.widget.patientmember}}</div>
+     						    <div style="display:none">
+						      {{=formTreatment.custom.widget.patientmember}}
+						    </div>
 						    <form enctype="multipart/form-data" action="" method="post">
 						    {{=formTreatment.hidden_fields()}}
 						    <div class="portlet-title mem_details">
-                                                            <div class="caption"><i class="fa fa-user"></i>&nbsp;Treatment for <strong>{{=patientname}} ({{=patientmember}})</strong></div>
+							<div class="caption"><i class="fa fa-user"></i>&nbsp;Treatment for <strong>{{=patientname}} ({{=patientmember}})</strong></div>
 						    </div>
+        
                             <div class="col-sm-12 md_r">
                                        <div class="col-sm-12 np borbt">
-			                                <div class="col-sm-12">							
-			                                    <div class="col-md-4" style="margin-bottom:10px"> <label class="m_title">Chief Complaint</label><br/>
-						                                 {{=formTreatment.custom.widget.chiefcomplaint}}
+			                                        <div class="col-sm-12">							
+			                                                <div class="col-md-4" style="margin-bottom:10px"> <label class="m_title">Chief Complaint</label><br/>
+									  {{=formTreatment.custom.widget.chiefcomplaint}}
 						                        </div>
-			                                    <div class="col-md-4">
-			                                    	<label class="m_title">Treatment No.</label>
-													<br/>{{=formTreatment.custom.widget.treatment}}
-					                            </div>
-												<div class="col-md-4">
-												  	<label class="m_title">Attending Doctor</label><br/> {{=formTreatment.custom.widget.doctor}}
-					                            </div>
-				                            </div>
-									        <div class="col-sm-12">							
-			                                     <div class="col-md-4" >
-			                                         <label class="m_title">Treatment Date</label><br/>
-			                                             {{=formTreatment.custom.widget.startdate}}    
-			                                                              
-			                                     </div> 
-										         <div class="col-md-4">
-			                                         <label class="m_title">Treatment Status</label><br/>
-			                                               {{=formTreatment.custom.widget.status}}    
-			                                     </div> 						       
-										         <div class="col-md-4">
-			                                          <label class="m_title">Treatment End Date</label><br/>
-			                                                 {{=formTreatment.custom.widget.enddate}}    
-			                                                              
-			                                     </div> 						       
-			                                 </div>
-										     <div class="col-sm-12">	
-														<div class="col-md-4" style="display:none">
-														    <label class="m_title">Total UCR Fee</label>
-														    <p><strong>{{=formTreatment.custom.widget.ucrfee}}</strong></p>
-														</div>
+			                                                <div class="col-md-4">
+			                                    	           <label class="m_title">Treatment No.</label></br>
+									     {{=formTreatment.custom.widget.treatment}}
+									</div>
+									<div class="col-md-4">
+									  <label class="m_title">Attending Doctor</label><br/> 
+									  {{=formTreatment.custom.widget.doctor}}
+					                                </div>
+								</div>
+								<div class="col-sm-12">							
+									<div class="col-md-4" >
+									    <label class="m_title">Treatment Date</label><br/>
+									    {{=formTreatment.custom.widget.startdate}}    
+									</div> 
+									<div class="col-md-4">
+									    <label class="m_title">Treatment Status</label><br/>
+									    {{=formTreatment.custom.widget.status}}    
+									</div> 						       
+									<div class="col-md-4">
+									    <label class="m_title">Treatment End Date</label><br/>
+									    {{=formTreatment.custom.widget.enddate}}    
+			                                                </div> 						       
+			                                        </div>
+								<div class="col-sm-12">	
+								    <div class="col-md-4" style="display:none">
+									<label class="m_title">Total UCR Fee</label>
+									<p><strong>{{=formTreatment.custom.widget.ucrfee}}</strong></p>
+								    </div>
+								    <div class="col-md-4">
+									<label class="m_title">Total Treatment Cost</label><br/>
+									{{=formTreatment.custom.widget.treatmentcost}}
+								    </div>
+								    {{if(hmopatientmember == True):}}
+									<div class="col-md-4">
+									    <label class="m_title">Patient Pays(pre-discount) (Taxes Included)</label><br/>
+									    {{=formTreatment.custom.widget.precopay}}
+									</div>
+									<div class="col-md-4">
+									    <label class="m_title">Total Authorized Pay</label><br/>
+									    {{=formTreatment.custom.widget.inspay}}
+									</div>
+									{{if(booking == True):}}
+									    <div class="col-md-4" >
+										<label style="color:red" class="m_title">Total Patient Pays includes (Treatment Cost - Booking Amount + Tax) </label><br/>
+									    </div>
+									{{pass}}
+								    {{else:}}
+									<div class="col-md-4" style="display:none">
+									    <label class="m_title">Total Patient Pays (Taxes Extra)</label><br/>
+									    {{=formTreatment.custom.widget.copay}}
+									</div>
+									<div class="col-md-4" style="display:none">
+									    <label class="m_title">Total Authorized Pay</label><br/>
+									    {{=formTreatment.custom.widget.inspay}}
+									</div>
+								    {{pass}}
+								</div>
+					</div>
+
+                                        <!----New Row-->
+ <div class="col-sm-12">	
 														<div class="col-md-4">
-														    <label class="m_title">Total Treatment Cost</label><br/>
-														    {{=formTreatment.custom.widget.treatmentcost}}
+														    <label class="m_title">Plan Benefit</label><br/>
+														    {{=formTreatment.custom.widget.companypay}}
+														</div>
+														
+														<div class="col-md-4">
+														    <label class="m_title">Discount Amount</label><br/>
+														    {{=formTreatment.custom.widget.discount_amount}}
 														</div>
 														{{if(hmopatientmember == True):}}
 														<div class="col-md-4">
-														    <label class="m_title">Total Patient Pays (Inclusive of Taxes)</label><br/>
+														    <label class="m_title">Patient Pays(post-discount) (Taxes Included)</label><br/>
 														    {{=formTreatment.custom.widget.copay}}
 														</div>
-														<div class="col-md-4">
-														    <label class="m_title">Total Authorized Pay</label><br/>
-														    {{=formTreatment.custom.widget.inspay}}
-														</div>
-														    {{if(booking == True):}}
+														    
 														    <div class="col-md-4" >
-															<label style="color:red" class="m_title">Total Patient Pays includes (Treatment Cost - Booking Amount + Tax) </label><br/>
 														    </div>
-														    {{pass}}
+														<div class="col-md-4">
+														    <label class="m_title">Total Paid</label><br/>
+														    {{=formTreatment.custom.widget.totalpaid}}
+														</div>
+														    <div class="col-md-4" >
+															<label style="color:red" class="m_title">Total Due</label><br/>
+															{{=formTreatment.custom.widget.totaldue}}
+														    </div>
+														    
 														{{else:}}
 														<div class="col-md-4" style="display:none">
 														    <label class="m_title">Total Patient Pays (Taxes Extra)</label><br/>
@@ -190,12 +211,10 @@
 														    {{=formTreatment.custom.widget.inspay}}
 														</div>
 														{{pass}}
-										      </div>
-                                          </div>
+										      </div>                                        <!-- End of new Row-->-
 
 
-                         <div class="col-sm-12 np borbt">
-
+                                        <div class="col-sm-12 np borbt">
 						  <div style="display:none">
 						  {{=formTreatment.custom.widget.xaction}}
 						  </div>
@@ -204,8 +223,8 @@
 						     <p style="color:red"><strong>Patient is allergic to some medicine and may be suffering from either High BP or Diabetes or Heart Problem. Please consult patient's Medical History for more details</strong></p>
 						     {{pass}}
 						  </div>
-					    {{if((preauthorized==False)& (authorized==False)):}}
-					    <div class="col-sm-12"> 
+					          {{if((preauthorized==False)& (authorized==False)):}}
+					           <div class="col-sm-12"> 
 					    
 					    <div class="col-md-6">
                                                    <div class="form-group">
@@ -274,9 +293,9 @@
 				          
 					   			   
 					   
-				    </div>
-					    {{pass}}
-						    <div class="btn-group">
+				            </div>
+						  {{pass}}
+						   <div class="btn-group">
 							<span > 
 							{{if((preauthorized == False)&(authorized == False)):}}
 							
@@ -306,15 +325,15 @@
 						       
 						       </span>
 						    </div>
-						    {{if(showprocgrid == True):}}
+						   {{if(showprocgrid == True):}}
 						    <div class="col-md-12">
 						        	<div class="col-md-12">
 						        	{{=formProcedure}}
 						            </div>
 						     </div>
-						     {{pass}}
+						   {{pass}}
 
-                       </div>
+                                       </div>
 
 			            						
                                                         <div class="col-md-12" style="margin-bottom:30px">
@@ -356,7 +375,7 @@
 						    </div>
 									  
                                                     <!--</div>-->
-                                                   </div><!---col-sm-12 md_r-->
+			    </div><!---col-sm-12 md_r-->
 						    					   
 						    </form >  
 						    
@@ -405,10 +424,6 @@
 						</div>
 						<!--- END PRESCRIPTION FORM TAB-->
                                                 
-                                                
-                                                <!-- START OF PRESCRIPTION TAB-->
-                                                <!-- END OF PRESCRIPTION TAB-->
-                                                
                                                 <!-- START OF MEDICAL TEST-->
 						<div class="tab-pane " id="tab_15_4">
 						<div class="col-sm-12">  
@@ -422,8 +437,6 @@
                                                 <!-- END OF MEDICAL TEST-->
                                                 
                                                 <!-- START OF DENTAL IMAGES-->
-						
-						
                                                 <div class="tab-pane" id="tab_15_5">
 						
 						<div class="col-sm-12">  
@@ -444,29 +457,29 @@
 						 </div>  
 						 <br/>
 						</div>
-
-
-
-
-
+                                                <!-- END OF DENTAL CHART-->
 						<!-- START OF PAYMENT-->
-						 <div class="tab-pane" id="tab_15_7">
+						<div class="tab-pane" id="tab_15_7">
 						<div class="col-sm-12">  
 						 <a  style="color:#fff;" class="btn bold green pull-left" onclick="location.href='{{=URL('dentalchart','dentalchart',vars=dict(page=1,providerid=providerid,memberid=memberid,patientid=patientid,treatmentid=treatmentid,doctorid=doctorid,source='treatment'))}}'" target="_blank"><i class="fa fa-folder"></i>&nbsp;&nbsp;Dental Chart</a>  
-
 						 </div>  
 						 <br/>
 						</div>
                                                 <!-- END OF PAYMENT -->
-                                        </div><!--- XXXX-->
+                                        </div>
                                        
                                     </div>
                                 </div>
                  
 
 
+                                </div>
+				<!-- END EXAMPLE TABLE PORTLET-->
+                             </div>
+			     <!--- B-->
+		        </div>
+			<!----A-->
  <!-- Modal -->
-  
   <form enctype="multipart/form-data" method="post" id="image_form" action="{{=URL('treatment','image_update')}}">
     <div class="modal fade" id="myModal" role="dialog">
       <div class="modal-dialog modal-md">
@@ -483,7 +496,6 @@
               
             </div>
              <div class="col-md-12">
-
 		<div class="col-md-12">
                    <div class="form-group">
                     <label class="m_title">Patient </label>
@@ -496,9 +508,9 @@
                    <div class="form-group">
                     <label class="m_title">Date </label>
                     <input class="input-group form-control form-control-inline date date-picker" id="form_imagedate" name="form_imagedate" size="16" type="text" value="" data-date-format="dd/mm/yyyy">
+                   </div>
                 </div>
-
-                </div>
+		
                 <div class="col-md-4">
                    <div class="form-group">
                     <label class="m_title">Tooth </label>
@@ -506,13 +518,13 @@
                     <p><strong></strong></p>
                 </div>
                </div>
+	       
                 <div class="col-md-4">
                    <div class="form-group">
                     <label class="m_title">Quadrant </label>
                     <input type="text" class="form-control" placeholder="Quadrant" id="form_quadrant" name="form_quadrant" value="" > 
                     <p><strong></strong></p>
                    </div>
-
                 </div>
                 
             </div>
@@ -527,7 +539,7 @@
 
                 </div>
                 <div class="col-md-4">
-                   <label class="mt-checkbox">
+                      <label class="mt-checkbox">
                         <input type="checkbox" id="form_delete" name="form_delete" > Delete
                         <span></span>
                     </label>
@@ -537,14 +549,12 @@
             </div>
 
 
-          <div class="col-md-12" style="margin-bottom:30px">
-	   
+            <div class="col-md-12" style="margin-bottom:30px">
             <!--<a href="javascript: submitform()">Search</a>-->
 	    <button class="btn blue uppercase bold" id="IMGS" onclick="loader(this.id)" name="submit" form="image_form" type="submit">Save <i class="fa fa-spinner fa-spin" id="loaderDIVIMGS" style="display:none"></i></button>
-	    
-        </div>
+           </div>
 
-</div>
+	</div>
     
       </div>
     </div>
@@ -571,10 +581,7 @@
   </div>
 </form>
   <!-- Modal -->
-
-                 
-       
-       
+     
 <script>
 
 function submitform(){

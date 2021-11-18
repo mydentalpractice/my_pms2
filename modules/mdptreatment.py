@@ -95,6 +95,7 @@ class Treatment:
         self.hv = False
         return   
     
+    
     def updatetreatmentcostandcopay(self,treatmentid,tplanid):
         db = self.db
         providerid = self.providerid
@@ -400,6 +401,19 @@ class Treatment:
         
         return json.dumps(trtmntobj)        
     
+    
+    def getproceduresfromtreatment(self,treatmentid):
+        db = self.db
+        procs = ""
+        tps = db(db.treatment_procedure.treatmentid == treatmentid).select()
+        for tp in tps:
+            proc = db(db.procedurepriceplan.id == tp.dentalprocedure).select(db.dentalprocedure.shortdescription,
+                                                                             left=db.dentalprocedure.on(db.dentalprocedure.dentalprocedure == db.procedurepriceplan.procedurecode ))
+            procs = procs + (proc[0].shortdescription + ";" if(len(proc) >= 1) else "")
+        
+        return procs
+    
+        
     #def gettreatments(self,page,memberid,patientid,searchphrase,maxcount,treatmentyear,clinicid):
     def gettreatments_fast(self,avars):
         logger.loggerpms2.info("Enter gettreatments_fast " + json.dumps(avars))
@@ -453,17 +467,26 @@ class Treatment:
             
             logger.loggerpms2.info("Query = " + str(query))
             if(page >= 0):
-                treatments = db(query).select(db.vw_treatmentlist_fast.ALL,db.vw_treatment_procedure_group.shortdescription,db.patientmember.cell,\
-                                              left=[db.vw_treatment_procedure_group.on(db.vw_treatment_procedure_group.treatmentid==db.vw_treatmentlist_fast.id),\
+                #treatments = db(query).select(db.vw_treatmentlist_fast.ALL,db.vw_treatment_procedure_group.shortdescription,db.patientmember.cell,\
+                                              #left=[db.vw_treatment_procedure_group.on(db.vw_treatment_procedure_group.treatmentid==db.vw_treatmentlist_fast.id),\
+                                                    #db.patientmember.on(db.patientmember.id == db.vw_treatmentlist_fast.memberid)],\
+                                              #limitby=limitby, orderby=~db.vw_treatmentlist_fast.id)
+                treatments = db(query).select(db.vw_treatmentlist_fast.ALL,db.patientmember.cell,\
+                                              left=[
                                                     db.patientmember.on(db.patientmember.id == db.vw_treatmentlist_fast.memberid)],\
                                               limitby=limitby, orderby=~db.vw_treatmentlist_fast.id)
                 if(maxcount == 0):
                     maxcount = db(query).count()
             else:
-                treatments = db(query).select(db.vw_treatmentlist_fast.ALL,db.vw_treatment_procedure_group.shortdescription,db.patientmember.cell,\
-                                              left=[db.vw_treatment_procedure_group.on(db.vw_treatment_procedure_group.treatmentid==db.vw_treatmentlist_fast.id),\
+                #treatments = db(query).select(db.vw_treatmentlist_fast.ALL,db.vw_treatment_procedure_group.shortdescription,db.patientmember.cell,\
+                                              #left=[db.vw_treatment_procedure_group.on(db.vw_treatment_procedure_group.treatmentid==db.vw_treatmentlist_fast.id),\
+                                                    #db.patientmember.on(db.patientmember.id == db.vw_treatmentlist_fast.memberid)],\
+                                              #orderby=~db.vw_treatmentlist_fast.id)
+                treatments = db(query).select(db.vw_treatmentlist_fast.ALL,db.patientmember.cell,\
+                                              left=[
                                                     db.patientmember.on(db.patientmember.id == db.vw_treatmentlist_fast.memberid)],\
                                               orderby=~db.vw_treatmentlist_fast.id)
+
                 if(maxcount == 0):
                     maxcount = db(query).count()
                     
@@ -498,7 +521,7 @@ class Treatment:
                     
                     "clinicname":treatment.vw_treatmentlist_fast.clinicname,
 
-                    "procedures":common.getstring(treatment.vw_treatment_procedure_group.shortdescription),
+                    "procedures": self.getproceduresfromtreatment(treatmentid), #common.getstring(treatment.vw_treatment_procedure_group.shortdescription),
                    
                     "totaltreatmentcost":float(common.getstring(r["totaltreatmentcost"])),
                     "totalcopay":float(common.getstring(r["totalcopay"])),
@@ -1471,7 +1494,7 @@ class Treatment:
             account.calculateinspays(db,tplanid)
             account.calculatedue(db,tplanid)                
             
-            treatmentobj = self.gettreatment(treatmentid)
+            treatmentobj = self.gettreatment_fast(treatmentid)
             
             
         except Exception as e:

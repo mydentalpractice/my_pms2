@@ -65,6 +65,55 @@ class Customer:
         self.providerid = providerid
         auth = current.auth
     
+    def getKYTC(self,avars):
+        logger.loggerpms2.info("Enter Get KYTC " + json.dumps(avars))
+        db = self.db
+        
+        rspobj = {}
+        
+        try:
+            plan  = common.getkeyvalue(avars,"plan","RPIP599")
+            procedurecode  = common.getkeyvalue(avars,"procedurecode","G0101")
+            city  = common.getkeyvalue(avars,"city","JAI")
+            regioncode = common.getregioncodefromcity(db, city)
+            
+            prps = db((db.provider_region_plan.companycode == plan) &\
+                (db.provider_region_plan.regioncode == regioncode) &\
+                (db.provider_region_plan.policy == plan)).select()
+            
+            pppcode = prps[0].procedurepriceplancode if(len(prps) > 0) else ""
+            
+            ppp = db((db.procedurepriceplan.procedurepriceplancode == pppcode) &\
+                (db.procedurepriceplan.procedurecode == procedurecode) & (db.procedurepriceplan.is_active == True)).select()
+
+
+            if(len(ppp) > 0):
+                rspobj["result"] = "success"
+                rspobj["error_message"] = ""
+                
+                rspobj["ucrfee"] = float(ppp[0].ucrfee)
+                rspobj["procedurefee"] = float(ppp[0].procedurefee)
+                rspobj["copay"] = float(ppp[0].copay)
+                rspobj["inspays"] = float(ppp[0].inspays)
+                
+            else:
+                mssg = "Get KYTC Error Invalide Procedure Price Plan"
+                rspobj["result"] = "fail"
+                rspobj["error_message"] = mssg
+    
+        except Exception as e:
+    
+            mssg = "Get KYTC API Exception: " + str(e) 
+            logger.loggerpms2.info(mssg)
+            rspobj = {
+                "result":"fail",
+                "error_message":mssg,
+            }
+
+
+        return json.dumps(rspobj)
+            
+    
     def customer_check_registration(self, avars):
         logger.loggerpms2.info("Enter Check Customer Registration " + json.dumps(avars))
         

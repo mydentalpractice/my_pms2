@@ -9,6 +9,7 @@ from shutil import copyfile
 
 import os
 from base64 import decodestring
+import json
 
 import datetime
 import time
@@ -2475,8 +2476,12 @@ def update_treatment():
    
     #treatmentid,treatment, memberid,patientid,patientmember,membername, patientname, patienttype
     treatmentid = int(common.getid(request.vars.treatmentid))
-    treatments = db(db.treatment.id == treatmentid).select()
+    treatments = db((db.treatment.id == treatmentid) & (db.treatment.is_active == True)).select()
     authorizationurl = URL('reports', 'treatmentreport', vars=dict(page=page, providerid=providerid,treatmentid=treatmentid))
+
+    tplanid = treatments[0].treatmentplan if(len(treatments) > 0) else 0
+    r = account._updatetreatmentpayment(db,tplanid,0)
+    paytm = json.loads(account._calculatepayments(db,tplanid,None))
     
     totaltreatmentcost = 0
     totalactualtreatmentcost = 0
@@ -2500,7 +2505,8 @@ def update_treatment():
         currnotes = common.getstring(treatments[0].description)
         
         docs=db(db.doctor.id == doctorid).select(db.doctor.name)
-        totaltreatmentcost = float(common.getvalue(treatments[0].treatmentcost)) #this is the actual treatment cost = total treatment cost unless it is changed by provider
+        
+        #totaltreatmentcost = float(common.getvalue(treatments[0].treatmentcost)) #this is the actual treatment cost = total treatment cost unless it is changed by provider
         totalactualtreatmentcost = float(common.getvalue(treatments[0].actualtreatmentcost))   #this is total UCRR
         authorized = common.getboolean(treatments[0].authorized) & (webadmin == True)
     
@@ -2571,6 +2577,16 @@ def update_treatment():
         writablflag = (not authorization) | (((not preauthorized) & (not authorized)&(not webadmin))|((webadmin)))
          
         enddate = common.getdt(treatments[0].enddate)
+        
+        precopay = paytm["precopay"]
+        discount_amount = paytm["discount_amount"]
+        netcopay = paytm["copay"]
+        treatmentcost = paytm["treatmentcost"]
+        inspay = paytm["inspays"]
+        totalpaid = paytm["totalpaid"]
+        totaldue = paytm["totaldue"]
+        companypay = paytm["companypays"]
+        
         formTreatment = SQLFORM.factory(
            Field('patientmember', 'string',  label='Patient', default = fullname,\
                  requires=[IS_NOT_EMPTY(),IS_IN_DB(db(db.vw_memberpatientlist.providerid == providerid), 'vw_memberpatientlist.fullname','%(fullname)s')],writable=False),
@@ -2584,9 +2600,14 @@ def update_treatment():
            Field('enddate', 'date', label='To Date',default=enddate, requires=IS_EMPTY_OR(IS_DATE(format=('%d/%m/%Y'))),writable=writablflag),
            Field('status', 'string', widget = lambda field, value:SQLFORM.widgets.options.widget(field, value, _style="width:100%;height:35px",_class='w3-input w3-border ',_onchange='onstatuschange()'),label='Status',default=defsts, requires = IS_IN_SET(status.TREATMENTSTATUS),writable=True,readable=True),  
            Field('ucrfee', 'double', label='Total UCR',default=totalactualtreatmentcost,writable=False),  
-           Field('treatmentcost', 'double', label='Total Treament Cost',default=totaltreatmentcost,writable=False),  
-           Field('copay', 'double', label='Total Copay',default=treatments[0].copay, writable = False),  
-           Field('inspay', 'double', label='Total Ins. Pays',default=treatments[0].inspay, writable=False),  
+           Field('treatmentcost', 'double', label='Total Treament Cost',default=treatmentcost,writable=False),  
+           Field('precopay', 'double', label='Total Copay',default=precopay, writable = False),  
+           Field('companypay', 'double', label='Benefit Amount',default=companypay, writable = False),  
+           Field('discount_amount', 'double', label='Discount Amount',default=discount_amount, writable = False),  
+           Field('copay', 'double', label='Total Copay',default=netcopay, writable = False),  
+           Field('inspay', 'double', label='Total Ins. Pays',default=inspay, writable=False),  
+           Field('totalpaid', 'double', label='Total Paid',default=totalpaid, writable=False),  
+           Field('totaldue', 'double', label='Total Due',default=totaldue, writable=False),  
            Field('doctor', widget = lambda field, value:SQLFORM.widgets.options.widget(field, value, _class='form_details'), default=doctorid, label='Doctor',requires=IS_IN_DB(db((db.doctor.providerid==providerid)&(db.doctor.stafftype == 'Doctor')&(db.doctor.is_active==True)), 'doctor.id', '%(name)s')),
            Field('vwdentalprocedure', 'string',   label='Procedure ID'),
            Field('vwdentalprocedurecode', 'string',   label='Procedure Code'),

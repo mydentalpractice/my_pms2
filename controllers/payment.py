@@ -247,26 +247,15 @@ def cashpayment_success():
     
     error = ""
     errormsg = ""
-    
-   
-    
-    
-    
-
-    
     doctortitle = ''
     doctorname = ''
     treatment = ''
     chiefcomplaint = ''
     description = ''
-    
-
-   
-    
-
+    memberid = 0
     r = db(db.vw_fonepaise.paymentid == paymentid).select()
     if(len(r)>0):
-        
+        memberid = int(common.getid(r[0].memberid))
         treatmentid = int(common.getid(r[0].treatmentid))
         tplanid = int(common.getid(r[0].tplanid))
         providerid = int(common.getid(r[0].providerid))
@@ -351,36 +340,50 @@ def cashpayment_success():
         tottreatmentcost  = 0
         totinspays = 0    
         totaldue = 0
-
         
-        paytm = calculatepayments(tplanid,providerid)
+        #here need to update treatmentplan tables
+        account._updatetreatmentpayment(db, tplanid, paymentid)
+        db.commit()                
+    
+        #Call Voucder success
+        vcobj = mdpbenefits.Benefit(db)
+        reqobj = {"paymentid" : paymentid}
+        rspobj = json.loads(vcobj.voucher_success(reqobj))                 
+    
+        #here need to update treatmentplan tables
+        account._updatetreatmentpayment(db, tplanid, paymentid)
+        db.commit()
+    
+        trtmnt = db((db.treatment.id == treatmentid) & (db.treatment.is_active == True)).select()
+        discount_amount = trtmnt[0].companypay if(len(trtmnt) > 0) else 0
+    
+        pmnt = db((db.payment.id == paymentid) & (db.payment.is_active == True)).select()
+        policy = pmnt[0].policy if(len(pmnt) > 0) else ""
+        obj={
+            "paymentid":str(paymentid),
+            "plan":policy,
+            "discount_amount":str(discount_amount),
+            "memberid":str(memberid),
+            "treatmentid":str(treatmentid)
+        }
+        bnftobj = mdpbenefits.Benefit(db)
+        rspObj = json.loads(bnftobj.benefit_success(obj))
+        if(rspObj['result'] == "success"):
+            #update totalcompanypays (we are saving discount_amount as companypays )
+            db(db.treatment.id == treatmentid).update(companypay = discount_amount)    
+            #update treatmentplan assuming there is one treatment per tplan
+            db(db.treatmentplan.id==tplanid).update(totalcompanypays = discount_amount) 
+            db.commit()                      
+    
+        #here need to update treatmentplan tables
+        account._updatetreatmentpayment(db, tplanid, paymentid)
+        db.commit()
+    
+        paytm = json.loads(account._calculatepayments(db, tplanid))
         tottreatmentcost= paytm["totaltreatmentcost"]
         totinspays= paytm["totalinspays"]
         totpaid=paytm["totalpaid"] 
-        totaldue = paytm["totaldue"] 
-        
-        db(db.treatmentplan.id == tplanid).update(totalpaid = totpaid + float(amount),totaldue  = totaldue - float(amount))        
-          
-        paytm = calculatepayments(tplanid,providerid)
-        tottreatmentcost= paytm["totaltreatmentcost"]
-        totinspays= paytm["totalinspays"]
-        totpaid=paytm["totalpaid"] 
-        totaldue = paytm["totaldue"]         
-        
-        #tp = db(db.treatmentplan.id == tplanid).select()
-        #if(len(tp)>0):
-            #totpaid = float(common.getstring(tp[0].totalpaid))
-            #tottreatmentcost = float(common.getstring(tp[0].totaltreatmentcost))
-            #totinspays = float(common.getstring(tp[0].totalinspays))
-            #totaldue = tottreatmentcost - (totpaid + float(amount) + totinspays)
-        #db(db.treatmentplan.id == tplanid).update(
-            #totalpaid = totpaid + float(amount),
-            #totaldue  = totaldue
-        #)
-                      
-        
-        
-        
+        totaldue = paytm["totaldue"]  
         
         return dict(formProcedure=formProcedure,\
                        todaydate = todaydate,\
@@ -803,27 +806,38 @@ def payment_success():
     totaldue = 0
 
     
-    paytm = calculatepayments(tplanid,providerid)
-    tottreatmentcost= paytm["totaltreatmentcost"]
-    totinspays= paytm["totalinspays"]
-    totpaid=paytm["totalpaid"] 
-    totaldue = paytm["totaldue"] 
-    
-   
-          
-    if(status == 'S'):
-        db(db.treatmentplan.id == tplanid).update(totalpaid = totpaid + float(amount),totaldue  = totaldue - float(amount))        
-      
-        paytm = calculatepayments(tplanid,providerid)
-        tottreatmentcost= paytm["totaltreatmentcost"]
-        totinspays= paytm["totalinspays"]
-        totpaid=paytm["totalpaid"] 
-        totaldue = paytm["totaldue"]        
+    #paytm = calculatepayments(tplanid,providerid)
+    #tottreatmentcost= paytm["totaltreatmentcost"]
+    #totinspays= paytm["totalinspays"]
+    #totpaid=paytm["totalpaid"] 
+    #totaldue = paytm["totaldue"] 
 
-        #Call Benefit Success
+    if(status == 'S'):
+        
+        #db(db.treatmentplan.id == tplanid).update(totalpaid = totpaid + float(amount),totaldue  = totaldue - float(amount))        
+      
+        #paytm = calculatepayments(tplanid,providerid)
+        #tottreatmentcost= paytm["totaltreatmentcost"]
+        #totinspays= paytm["totalinspays"]
+        #totpaid=paytm["totalpaid"] 
+        #totaldue = paytm["totaldue"]
+        
+        #here need to update treatmentplan tables
+        account._updatetreatmentpayment(db, tplanid, paymentid)
+        db.commit()                
+    
+        #Call Voucder success
+        vcobj = mdpbenefits.Benefit(db)
+        reqobj = {"paymentid" : paymentid}
+        rspobj = json.loads(vcobj.voucher_success(reqobj))                 
+    
+        #here need to update treatmentplan tables
+        account._updatetreatmentpayment(db, tplanid, paymentid)
+        db.commit()
+    
         trtmnt = db((db.treatment.id == treatmentid) & (db.treatment.is_active == True)).select()
         discount_amount = trtmnt[0].companypay if(len(trtmnt) > 0) else 0
-        
+    
         pmnt = db((db.payment.id == paymentid) & (db.payment.is_active == True)).select()
         policy = pmnt[0].policy if(len(pmnt) > 0) else ""
         obj={
@@ -834,8 +848,39 @@ def payment_success():
             "treatmentid":str(treatmentid)
         }
         bnftobj = mdpbenefits.Benefit(db)
-        rspObj = bnftobj.benefit_success(obj)
+        rspObj = json.loads(bnftobj.benefit_success(obj))
+        if(rspObj['result'] == "success"):
+            #update totalcompanypays (we are saving discount_amount as companypays )
+            db(db.treatment.id == treatmentid).update(companypay = discount_amount)    
+            #update treatmentplan assuming there is one treatment per tplan
+            db(db.treatmentplan.id==tplanid).update(totalcompanypays = discount_amount) 
+            db.commit()                      
+    
+        #here need to update treatmentplan tables
+        account._updatetreatmentpayment(db, tplanid, paymentid)
+        db.commit()
+    
+        paytm = json.loads(account._calculatepayments(db, tplanid))
+        tottreatmentcost= paytm["totaltreatmentcost"]
+        totinspays= paytm["totalinspays"]
+        totpaid=paytm["totalpaid"] 
+        totaldue = paytm["totaldue"]  
     else:
+        
+        #here need to update treatmentplan tables
+        account._updatetreatmentpayment(db, tplanid, paymentid)
+        db.commit()
+        
+        #call Voucher Failure
+        obj = {"paymentid":paymentid}
+        bnftobj = mdpbenefits.Benefit(db)
+        rspObj = bnftobj.voucher_failure(obj)                
+
+        #here need to update treatmentplan tables
+        account._updatetreatmentpayment(db, tplanid, paymentid)
+        db.commit()
+
+        
         #Call Benefit Failure
         trtmnt = db((db.treatment.id == treatmentid) & (db.treatment.is_active == True)).select()
         discount_amount = trtmnt[0].companypay if(len(trtmnt) > 0) else 0
@@ -854,7 +899,15 @@ def payment_success():
         }
         bnftobj = mdpbenefits.Benefit(db)
         rspObj = bnftobj.benefit_failure(obj)
-    
+
+        #here need to update treatmentplan tables
+        account._updatetreatmentpayment(db, tplanid, paymentid)
+        db.commit()
+        paytm = json.loads(account._calculatepayments(db, tplanid))
+        tottreatmentcost= paytm["totaltreatmentcost"]
+        totinspays= paytm["totalinspays"]
+        totpaid=paytm["totalpaid"] 
+        totaldue = paytm["totaldue"]      
     
     return dict(formProcedure=formProcedure,\
                 todaydate = todaydate,\
@@ -1049,35 +1102,28 @@ def payment_success_hdfc():
                         user_signature=True
                        )  
       
-    
- 
     totpaid = 0
     tottreatmentcost  = 0
     totinspays = 0    
     totaldue = 0
-
-    
-    paytm = calculatepayments(tplanid,providerid)
-    tottreatmentcost= paytm["totaltreatmentcost"]
-    totinspays= paytm["totalinspays"]
-    totpaid=paytm["totalpaid"] 
-    totaldue = paytm["totaldue"] 
-    
-   
           
     if(status == 'S'):
-        db(db.treatmentplan.id == tplanid).update(totalpaid = totpaid + float(amount),totaldue  = totaldue - float(amount))        
-      
-        paytm = calculatepayments(tplanid,providerid)
-        tottreatmentcost= paytm["totaltreatmentcost"]
-        totinspays= paytm["totalinspays"]
-        totpaid=paytm["totalpaid"] 
-        totaldue = paytm["totaldue"]  
-        
-        #Call Benefit Success
+        #here need to update treatmentplan tables
+        account._updatetreatmentpayment(db, tplanid, paymentid)
+        db.commit()                
+    
+        #Call Voucder success
+        vcobj = mdpbenefits.Benefit(db)
+        reqobj = {"paymentid" : paymentid}
+        rspobj = json.loads(vcobj.voucher_success(reqobj))                 
+    
+        #here need to update treatmentplan tables
+        account._updatetreatmentpayment(db, tplanid, paymentid)
+        db.commit()
+             
         trtmnt = db((db.treatment.id == treatmentid) & (db.treatment.is_active == True)).select()
         discount_amount = trtmnt[0].companypay if(len(trtmnt) > 0) else 0
-        
+
         pmnt = db((db.payment.id == paymentid) & (db.payment.is_active == True)).select()
         policy = pmnt[0].policy if(len(pmnt) > 0) else ""
         obj={
@@ -1090,14 +1136,37 @@ def payment_success_hdfc():
         bnftobj = mdpbenefits.Benefit(db)
         rspObj = json.loads(bnftobj.benefit_success(obj))
         if(rspObj['result'] == "success"):
-            
             #update totalcompanypays (we are saving discount_amount as companypays )
             db(db.treatment.id == treatmentid).update(companypay = discount_amount)    
             #update treatmentplan assuming there is one treatment per tplan
             db(db.treatmentplan.id==tplanid).update(totalcompanypays = discount_amount) 
-            db.commit()             
+            db.commit()                      
+
+        #here need to update treatmentplan tables
+        account._updatetreatmentpayment(db, tplanid, paymentid)
+        db.commit()
+      
+        paytm = json.loads(account._calculatepayments(db, tplanid))
+        tottreatmentcost= paytm["totaltreatmentcost"]
+        totinspays= paytm["totalinspays"]
+        totpaid=paytm["totalpaid"] 
+        totaldue = paytm["totaldue"]  
     
     else:
+
+        #here need to update treatmentplan tables
+        account._updatetreatmentpayment(db, tplanid, paymentid)
+        db.commit()
+        
+        #call Voucher Failure
+        obj = {"paymentid":paymentid}
+        bnftobj = mdpbenefits.Benefit(db)
+        rspObj = bnftobj.voucher_failure(obj)                
+
+        #here need to update treatmentplan tables
+        account._updatetreatmentpayment(db, tplanid, paymentid)
+        db.commit()
+
         
         #Call Benefit Failure
         trtmnt = db((db.treatment.id == treatmentid) & (db.treatment.is_active == True)).select()
@@ -1118,8 +1187,16 @@ def payment_success_hdfc():
         bnftobj = mdpbenefits.Benefit(db)
         rspObj = bnftobj.benefit_failure(obj)
 
-        
-    
+        #here need to update treatmentplan tables
+        account._updatetreatmentpayment(db, tplanid, paymentid)
+        db.commit()
+
+        paytm = json.loads(account._calculatepayments(db, tplanid))
+        tottreatmentcost= paytm["totaltreatmentcost"]
+        totinspays= paytm["totalinspays"]
+        totpaid=paytm["totalpaid"] 
+        totaldue = paytm["totaldue"]        
+
     
     return dict(formProcedure=formProcedure,\
                 todaydate = todaydate,\
@@ -1470,6 +1547,10 @@ def generateHashForShopSe(key, message):
 #"txn_completion_date_time": "27/08/2021 07:27:16 AM", 
 #"refund_amount_in_paisa": "0", 
 #"unique_merchant_txn_id": "ORDER_XXX"}
+def test_callback():
+    i = 0
+    
+    return dict()
 
 def pinelabs_payment_callback():
     
@@ -1478,23 +1559,38 @@ def pinelabs_payment_callback():
     reqobj = {}
     params = request.vars
     keys = params.keys()
+    pvars = ""
+    
     for key in keys:
-        reqobj[key] = params[key]    
+        if(key == 'signature'):
+            continue
+        reqobj[key] = params[key]
+            
+    #first = True
+    #for key in keys:
+        #reqobj[key] = params[key]
+        #if(first):
+            #pvars = pvars + key + "="+params[key] 
+            #first = False
+        #else:
+            #pvars = pvars + "&" + key + "="+params[key] 
     
-    
+    #redirecturl = "http://127.0.0.1:8001/my_pms2/payment/test_callback" + "?" + pvars
+    #rsp = requests.get(redirecturl)
+   
     #unique_merchant_txn_id  will be the link between the payment record in MDP and in PineLabs
     #payment.fp_paymentref  = unique_merchant_txn_id
     
-    memberid = int(common.getid(request.vars.udf_field_1))
-    providerid = int(common.getid(request.vars.udf_field_2))
-    treatmentid = int(common.getid(request.vars.udf_field_3))
-    paymentid = int(common.getid(request.vars.udf_field_4))
+    #get paymentid
+    unique_merchant_txn_id = common.getkeyvalue(request.vars,"unique_merchant_txn_id","") 
+    strarr = unique_merchant_txn_id.split('_')
+    paymentid = 0 if(len(strarr)<=1) else int(common.getid(strarr[1]))
+    p = db((db.payment.id == paymentid)).select() 
+    tplanid = int(common.getid(p[0].treatmentplan)) if(len(p) != 0) else 0
+    memberid = int(common.getid(p[0].patientmember)) if(len(p) != 0) else 0
+    providerid = int(common.getid(p[0].provider)) if(len(p) != 0) else 0 
     providerinfo  = getproviderinformation(providerid)
     
-    r = db(db.vw_fonepaise.paymentid == paymentid).select()
-    patientinfo = getpatientinformation(int(common.getid(r[0].patientid)),int(common.getid(r[0].memberid))) if(len(r) > 0) else None
-    
-    logger.loggerpms2.info("Enter Pinelabs Callback Transaction " + json.dumps(reqobj))
 
 
     plbobj = mdppinelabs.PineLabs(db)
@@ -1638,7 +1734,7 @@ def pinelabs_payment_callback():
     
     
     if(status == 'S'):
-        paytm = calculatepayments(tplanid,providerid)
+        paytm = json.loads(account._calculatepayments(db,tplanid))
         tottreatmentcost= paytm["totaltreatmentcost"]
         totinspays= paytm["totalinspays"]
         totpaid=paytm["totalpaid"] 
@@ -1745,6 +1841,7 @@ def shopse_payment_callback():
         shopseobj = mdpshopse.Shopse(db)
         rsp = json.loads(shopseobj.callback_transaction(reqobj))
         logger.loggerpms2.info("ShopSe-Return Callback Transaction=>>" + json.dumps(rsp) + " " + str(paymentid))
+        
         
         paymentobj = mdppayment.Payment(db, providerid)
         receiptobj = json.loads(paymentobj.paymentreceipt(paymentid))
@@ -1883,7 +1980,7 @@ def shopse_payment_callback():
         
         
         if(status == 'S'):
-            paytm = calculatepayments(tplanid,providerid)
+            paytm = json.loads(account._calculatepayments(db, tplanid))
             tottreatmentcost= paytm["totaltreatmentcost"]
             totinspays= paytm["totalinspays"]
             totpaid=paytm["totalpaid"] 
@@ -2721,6 +2818,51 @@ def list_payment():
            
                 )
 
+def apply_voucher():
+    logger.loggerpms2.info("Enter Apply Voucher")
+    
+    #voucher
+    voucher = common.getkeyvalue(request.vars,"voucher_code","")
+    
+    #tplanid
+    tplanid = int(common.getkeyvalue(request.vars,"treatmentplan","0"))
+    tr = db((db.treatment.treatmentplan == tplanid) & (db.treatment.is_active == True)).select(db.treatment.id, db.treatment.copay)
+    treatmentid = tr[0].id if (len(tr) > 0) else 0    
+    
+    reqobj = {}
+    reqobj["treatmentid"] = treatmentid
+    reqobj["voucher_code"] = voucher
+    bnft = mdpbenefits.Benefit(db)
+    rspobj = json.loads(bnft.apply_voucher(reqobj))
+    vlist = rspobj["voucher_list"]
+    displaymssg = rspobj["voucher_message"]
+    
+    
+   
+    paytm=rspobj
+    
+    return dict( 
+                treatmentcost=paytm["treatmentcost"],
+                copay=paytm["copay"],
+                inspays=paytm["inspays"],
+                companypays=paytm["companypays"],
+                walletamount=paytm["walletamount"],
+                discount_amount=paytm["discount_amount"],
+                totaltreatmentcost=paytm["totaltreatmentcost"],
+                totalinspays=paytm["totalinspays"],
+                totalcopay=paytm["totalcopay"],
+                totalpaid=paytm["totalpaid"],
+                totaldue=paytm["totaldue"],
+                totalcompanypays=paytm["totalcompanypays"],
+                precopay=paytm["precopay"],
+                totalprecopay=paytm["totalprecopay"],
+                totalwalletamount=paytm["totalwalletamount"],
+                totaldiscount_amount=paytm["totaldiscount_amount"],
+                vlist=vlist,displaymssg=displaymssg,voucher=voucher
+                )    
+    
+ 
+
 
 #These two lines are commented because create_payment is also called from mobile browser, hence no check to require
 #@auth.requires(auth.has_membership('provider') or auth.has_membership('webadmin')) 
@@ -2749,17 +2891,23 @@ def create_payment():
 
     prov = db((db.provider.id == providerid) & (db.provider.is_active == True)).select()
     city = prov[0].city if(len(prov) != 0) else "Jaipur"
+    
     regionid = common.getregionidfromcity(db,city)
     regioncode =  common.getregioncodefromcity(db,city)
     
-    members = db((db.patientmember.id == memberid) & (db.patientmember.is_active == True)).select(db.patientmember.company)
-
+    members = db((db.patientmember.id == memberid) & (db.patientmember.is_active == True)).select(db.patientmember.company,db.patientmember.city,db.patientmember.st)
     companyid = common.getid(members[0].company) if (len(members) == 1) else "0"
     c = db((db.company.id == companyid) & (db.company.is_active == True)).select(db.company.company)
     companycode = c[0].company if (len(c) ==1) else ""
 
     cp = db(db.companypolicy.companycode == companycode).select()
     policy = cp[0].policy if(len(cp) != 0) else ""
+    
+    #determine member's city & state
+    city = members[0].city if(len(members)>0) else "Jaipur"
+    st = members[0].st if(len(members)>0) else "Rajasthan (RJ)"
+    c = db(db.cities.city == city).select(db.cities.id)
+    cityid = c[0].id if(len(c) > 0) else 0    
     
     #calculate the discount for this member 
     #update the treatment, treatmentplan. 
@@ -2792,7 +2940,31 @@ def create_payment():
     
     )
 
+    #Apply Voucher
+    reqobj  = {}
+    reqobj["treatment_id"] = int(treatmentid) 
+    reqobj["member_id"] = int(memberid)
+    reqobj["plan_code"] = policy
+    reqobj["state"] = st
+    reqobj["city_id"] = int(cityid)
 
+    #reqobj["treatment_id"] = 2
+    #reqobj["member_id"] = 44
+    #reqobj["plan_code"] = ""
+    #reqobj["state"] = "Andaman and Nicobar Islands(AN)"
+    #reqobj["city_id"] = 2
+
+    vlist = []
+
+    bnftobj = mdpbenefits.Benefit(db)    
+    rspobj = json.loads(bnftobj.getVoucherList(reqobj))
+    if(rspobj["result"] == "fail"):
+        vlist = []
+    else:
+        vlist = rspobj["voucher_list"]    
+
+    
+  
     
     #payment modes are dependant on the company
     online = True
@@ -2815,7 +2987,7 @@ def create_payment():
         returnurl = URL('payment','list_payment',vars=dict(page=page,providerid=providerid))
     
     creattreturnurl = URL('payment', 'create_payment', vars=dict(page=page,patientname=patient,tplanid=tplanid,treatmentid=treatmentid,\
-                                                                 patientid=patientid,memberid=memberid,providerid=providerid,policy=policy))
+                                                                 patientid=patientid,memberid=memberid,providerid=providerid,plan=policy))
     
     db.payment.treatmentplan.default=tplanid
     db.payment.patientmember.default=memberid
@@ -2861,26 +3033,38 @@ def create_payment():
     if(len(tps)>0):
         treatment = tps[0].treatment
     
+    #get wallet amount for this member (this is the API that Indeses is developing)
+    walletamount = 0     
+    #paytm = calculatepayments(tplanid,providerid,policy)
     
-    paytm = calculatepayments(tplanid,providerid,policy)
-
-    members = db((db.vw_memberpatientlist.is_active == True) & (db.vw_memberpatientlist.providerid == providerid) & \
-                (db.vw_memberpatientlist.primarypatientid == db.vw_memberpatientlist.patientid)).select(db.vw_memberpatientlist.ALL, orderby=db.vw_memberpatientlist.fullname)
-    
+    paytm = json.loads(account._calculatepayments(db, tplanid,policy))
+    paytm["totalwalletamount"]  = paytm["totalwalletamount"] + walletamount
+    paytm["walletamount"]  = paytm["walletamount"] + walletamount
     db.payment.amount.requires = paytm["totaldue"]
+    db.payment.amount.default  = paytm["totaldue"]
+    db.payment.discount_amount.default = paytm["discount_amount"]
+
     
-    
-    if formA.accepted:
-        i =0
+    #get available wallet balance
+    reqobj = {}
+    reqobj["action"] = "getwallet_balance"
+    reqobj["member_id"] = memberid
+    reqobj["amount"] = paytm["totalcopay"]
+    rspobj = json.loads(bnftobj.getwallet_balance(reqobj))
+    if(rspobj["result"] == "success"):
+        wlist = rspobj["wallet_list"]
     else:
-        str1 = str(formA.errors)
-  
+        wlist = []
+    
     return dict(formA=formA,formB=formB,formC=formC, patient=patient,fullname=fullname,hmopatientmember=hmopatientmember,providername=provdict["providername"],
                 providerid=provdict["providerid"],page=page,returnurl=returnurl,memberid=memberid,tplanid=tplanid,treatment=treatment,
                 treatmentcost=paytm["treatmentcost"],copay=paytm["copay"],inspays=paytm["inspays"],companypays=paytm["companypays"],
+                walletamount=paytm["walletamount"],discount_amount = paytm["discount_amount"],
                 totaltreatmentcost=paytm["totaltreatmentcost"],totalinspays=paytm["totalinspays"],totalcopay=paytm["totalcopay"],
                                 totalpaid=paytm["totalpaid"],totaldue=paytm["totaldue"],online=online,cashless=cashless,cash=cash,cheque=cheque,
-                                totalcompanypays=paytm["totalcompanypays"],precopay=paytm["precopay"],totalprecopay=paytm["totalprecopay"],policy=policy
+                                totalcompanypays=paytm["totalcompanypays"],precopay=paytm["precopay"],totalprecopay=paytm["totalprecopay"],
+                                totalwalletamount=paytm["totalwalletamount"],totaldiscount_amount=paytm["totaldiscount_amount"],policy=policy,
+                                vlist=vlist,wlist=wlist
                         )    
     
 
@@ -2919,13 +3103,13 @@ def update_payment():
     providerid = common.getid(provdict["providerid"])
     providername = common.getstring(provdict["providername"])
 
-    #returnurl = common.getstring(request.vars.returnurl)
-    returnurl = URL('payment', 'create_payment', vars=dict(page=page,patientname=patient,tplanid=tplanid,treatmentid=treatmentid,\
-                                                                 patientid=patientid,memberid=memberid,providerid=providerid,policy=policy))
     
     
-    if(returnurl == ""):
-        returnurl = URL('payment','list_payment',vars=dict(page=page,providerid=providerid,treatmentid=treatmentid))
+    #return url to treatment
+    returnurl = URL('treatment', 'update_treatment', vars=dict(page=page,imagepage=0,tplanid=tplanid,treatmentid=treatmentid,\
+                                                                 providerid=providerid))
+    
+    
     
     if(common.getstring(request.vars.mode) != "update"):
         if((source == "create") & ((paymentmode == 'Cash') | (paymentmode == 'Cashless') | (paymentmode == 'Cheque'))):
@@ -3136,6 +3320,7 @@ def calculatepayments(tplanid,providerid,policy=None):
     inspays = 0
     companypays = 0
     precopay = 0
+    walletamount = 0
     
     totaltreatmentcost = 0
     totalcopay = 0
@@ -3144,11 +3329,13 @@ def calculatepayments(tplanid,providerid,policy=None):
     totaldue = 0
     totalpaid = 0
     totalcompanypays = 0
-    
+    totalwalletamount = 0
+        
     tplan = db(db.treatmentplan.id == tplanid).select()
     if(len(tplan) > 0):
         treatmentcost = float(common.getvalue(tplan[0].totaltreatmentcost))
         companypays = float(common.getvalue(tplan[0].totalcompanypays))
+        walletamount = 0 #float(common.getvalue(tplan[0].totalwalletamount))        
         precopay =float(common.getvalue(tplan[0].totalcopay))
         copay = float(common.getvalue(tplan[0].totalcopay)) - companypays
         inspays = float(common.getvalue(tplan[0].totalinspays))
@@ -3164,15 +3351,17 @@ def calculatepayments(tplanid,providerid,policy=None):
             totaltreatmentcost = float(common.getvalue(r[0].totalcost))
             totalinspays = float(common.getvalue(r[0].totalinspays))
             totalcompanypays = float(common.getvalue(r[0].totalcompanypays))
+            totalwalletamount = 0 #float(common.getvalue(r[0].totalwalletamount))
             totalprecopay = float(common.getvalue(r[0].totalcopay))
             totalcopay = float(common.getvalue(r[0].totalcopay)) - totalcompanypays
             totalpaid = float(common.getvalue(r[0].totalpaid))
             totaldue = totalcopay - totalpaid
         
         
-    return dict(treatmentcost=treatmentcost,copay=copay,precopay=precopay,inspays=inspays,companypays=companypays, totaltreatmentcost=totaltreatmentcost,totalinspays=totalinspays,\
+    return dict(treatmentcost=treatmentcost,copay=copay,precopay=precopay,inspays=inspays,companypays=companypays, walletamount=walletamount,
+                totaltreatmentcost=totaltreatmentcost,totalinspays=totalinspays,\
                 totalprecopay=totalprecopay,totalcopay=totalcopay,\
-                totalpaid=totalpaid,totaldue=totaldue,totalcompanypays=totalcompanypays)
+                totalpaid=totalpaid,totaldue=totaldue,totalcompanypays=totalcompanypays,totalwalletamount=totalwalletamount)
 
 def paymentsummary():
     

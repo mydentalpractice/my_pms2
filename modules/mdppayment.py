@@ -14,6 +14,7 @@ from OpenSSL import SSL
 from OpenSSL import crypto
 
 from applications.my_pms2.modules import common
+from applications.my_pms2.modules import account
 from applications.my_pms2.modules import mdpbenefits
 from applications.my_pms2.modules import mdppatient
 from applications.my_pms2.modules import logger
@@ -171,84 +172,90 @@ class Payment:
         return
     
     
-    def _calculatepayments(self,tplanid,policy=None):
-        logger.loggerpms2.info("Enter _calulate payment + " + str(tplanid))
-        db  = self.db
-        providerid = self.providerid
-        treatmentcost = 0
-        copay = 0
-        inspays = 0
-        companypays = 0
-        precopay = 0
+    #def _calculatepayments(self,tplanid,policy=None):
+        #logger.loggerpms2.info("Enter _calulate payment + " + str(tplanid))
+        #db  = self.db
+        #providerid = self.providerid
+        #treatmentcost = 0
+        #copay = 0
+        #inspays = 0
+        #companypays = 0
+        #precopay = 0
+        #walletamount = 0
         
-        totaltreatmentcost = 0
-        totalcopay = 0
-        totalprecopay = 0
-        totalinspays = 0
-        totaldue = 0
-        totalpaid = 0
-        totalcompanypays = 0
-        respobj = {}
-        r = None
-        tplan = db(db.treatmentplan.id == tplanid).select()
-        try:
-            if(len(tplan) > 0):
-                treatmentcost = float(common.getvalue(tplan[0].totaltreatmentcost))
-                companypays = float(common.getvalue(tplan[0].totalcompanypays))
-                precopay =float(common.getvalue(tplan[0].totalcopay))
-                copay = float(common.getvalue(tplan[0].totalcopay)) - companypays
-                inspays = float(common.getvalue(tplan[0].totalinspays))
-                memberid = int(common.getid(tplan[0].primarypatient))
+        #totaltreatmentcost = 0
+        #totalcopay = 0
+        #totalprecopay = 0
+        #totalinspays = 0
+        #totaldue = 0
+        #totalpaid = 0
+        #totalcompanypays = 0
+        #totalwalletamount = 0
+        
+        #respobj = {}
+        #r = None
+        #tplan = db(db.treatmentplan.id == tplanid).select()
+        #try:
+            #if(len(tplan) > 0):
+                #treatmentcost = float(common.getvalue(tplan[0].totaltreatmentcost))
+                #companypays = float(common.getvalue(tplan[0].totalcompanypays))
+                #walletamount = float(common.getvalue(tplan[0].totalwalletamount))
+                #precopay =float(common.getvalue(tplan[0].totalcopay))
+                #copay = float(common.getvalue(tplan[0].totalcopay)) - companypays
+                #inspays = float(common.getvalue(tplan[0].totalinspays))
+                #memberid = int(common.getid(tplan[0].primarypatient))
                 
-                r = db((db.vw_treatmentplansummarybytreatment.id == tplanid)).select()
-                if(len(r)>0):
-                    totaltreatmentcost = float(common.getvalue(r[0].totalcost))
-                    totalinspays = float(common.getvalue(r[0].totalinspays))
-                    totalcompanypays = float(common.getvalue(r[0].totalcompanypays))
-                    totalprecopay = float(common.getvalue(r[0].totalcopay))
-                    totalcopay = float(common.getvalue(r[0].totalcopay)) - totalcompanypays
-                    totalpaid = float(common.getvalue(r[0].totalpaid))
-                    totaldue = totalcopay - totalpaid
+                #r = db((db.vw_treatmentplansummarybytreatment.id == tplanid)).select()
+                #if(len(r)>0):
+                    #totaltreatmentcost = float(common.getvalue(r[0].totalcost))
+                    #totalinspays = float(common.getvalue(r[0].totalinspays))
+                    #totalcompanypays = float(common.getvalue(r[0].totalcompanypays))
+                    #totalwalletamount = float(common.getvalue(r[0].totalwalletamount))
+                    #totalprecopay = float(common.getvalue(r[0].totalcopay))
+                    #totalcopay = float(common.getvalue(r[0].totalcopay)) - totalcompanypays - totalwalletamount
+                    #totalpaid = float(common.getvalue(r[0].totalpaid))
+                    #totaldue = totalcopay - totalpaid
                     
                  
-                    respobj["totaltreatmentcost"]=totaltreatmentcost
-                    respobj["totalinspays"]=totalinspays
-                    respobj["totalcompanypays"]=totalcompanypays
-                    respobj["totalprecopay"]=totalprecopay
-                    respobj["totalcopay"]=totalcopay
-                    respobj["totalpaid"]=totalpaid
-                    respobj["totaldue"]=totaldue
+                    #respobj["totaltreatmentcost"]=totaltreatmentcost
+                    #respobj["totalinspays"]=totalinspays
+                    #respobj["totalcompanypays"]=totalcompanypays
+                    #respobj["totalwalletamount"]=totalwalletamount
+                    #respobj["totalprecopay"]=totalprecopay
+                    #respobj["totalcopay"]=totalcopay
+                    #respobj["totalpaid"]=totalpaid
+                    #respobj["totaldue"]=totaldue
                     
-                    respobj["treatmentcost"]=treatmentcost
-                    respobj["copay"]=copay
-                    respobj["precopay"]=precopay
-                    respobj["inspays"]=inspays
-                    respobj["companypays"]=companypays
+                    #respobj["treatmentcost"]=treatmentcost
+                    #respobj["copay"]=copay
+                    #respobj["precopay"]=precopay
+                    #respobj["inspays"]=inspays
+                    #respobj["companypays"]=companypays
                     
-                    respobj["result"] = "success"
-                    respobj["error_message"] = ""
+                    #respobj["result"] = "success"
+                    #respobj["error_message"] = ""
                     
-                else:
-                    msg = "A_calculatepayments error for " + str(tplanid)
-                    respobj["result"] = "fail"
-                    respobj["error_message"] = msg
-            else:
-                msg = "B_calculatepayments error for " + str(tplanid)
-                respobj["result"] = "fail"
-                respobj["error_message"] = msg
+                #else:
+                    #msg = "A_calculatepayments error for " + str(tplanid)
+                    #respobj["result"] = "fail"
+                    #respobj["error_message"] = msg
+            #else:
+                #msg = "B_calculatepayments error for " + str(tplanid)
+                #respobj["result"] = "fail"
+                #respobj["error_message"] = msg
                 
                     
-        except Exception as e:
-            mssg = "_caluclatepayments Exception:\n" + str(e)
-            logger.loggerpms2.info(mssg)      
-            excpobj = {}
-            excpobj["result"] = "fail"
-            excpobj["error_message"] = mssg
-            return json.dumps(excpobj)             
+        #except Exception as e:
+            #mssg = "_caluclatepayments Exception:\n" + str(e)
+            #logger.loggerpms2.info(mssg)      
+            #excpobj = {}
+            #excpobj["result"] = "fail"
+            #excpobj["error_message"] = mssg
+            #return json.dumps(excpobj)             
                 
                 
-        logger.loggerpms2.info("Exit _calulatepayment " + json.dumps(respobj))
-        return json.dumps(respobj)
+        #logger.loggerpms2.info("Exit _calulatepayment " + json.dumps(respobj))
+        #return json.dumps(respobj)
         
 
     
@@ -453,7 +460,7 @@ class Payment:
                 db(db.treatmentplan.id==tplanid).update(totalcompanypays = discount_amount) 
                 db.commit()               
             
-            paytm = json.loads(self._calculatepayments(paymentid)) #paymentid is tplan id
+            paytm = json.loads(account._calculatepayments(db,tplanid)) 
             
             if(paytm["result"] == "fail"):
                 mssg = paytm["error_message"]
@@ -563,7 +570,7 @@ class Payment:
         tplanid = int(common.getid(trtmnt[0].treatmentplan))
         
         #paytm = calculatepayments(db, tplanid, providerid)
-        paytm = json.loads(self._calculatepayments(tplanid))
+        paytm = json.loads(account._calculatepayments(db,tplanid))
         
         if(paytm["result"] == "success" )        :
             paymentsummary = {
@@ -737,9 +744,12 @@ class Payment:
                 }
                 paymentlist.append(paymentobj)
                 
-            
+            #get wallet amount for this member (this is the API that Indeses is developing)
+            walletamount = 0            
+
             #paytm = calculatepayments(db,tplanid,providerid)
-            paytm = json.loads(self._calculatepayments(tplanid))
+            paytm = json.loads(account._calculatepayments(db,tplanid))
+            paytm["totalwalletamount"]  = paytm["totalwalletamount"] + walletamount
             
             #get list of procedures for this treatment
             procobj = {}
@@ -772,6 +782,9 @@ class Payment:
            
             addln_info = {"paymentid":paymentid,"paymentdate":dttodaydate.strftime("%d/%m/%Y"),"invoiceamt":float(common.getvalue(paytm["treatmentcost"]))}
             
+            
+            
+            
             paymentdata={
                 
                 "id": common.getstring(r[0].fp_id) if(len(r) > 0) else "",
@@ -800,6 +813,7 @@ class Payment:
                 "totalcopay":float(common.getvalue(paytm["totalcopay"])),
                 "totalpaid":float(common.getvalue(paytm["totalpaid"])),
                 "totalcompanypays":float(common.getvalue(paytm["totalcompanypays"])),
+                "totalwalletamount":float(common.getvalue(paytm["totalwalletamount"])),
                 "totalprecopay":float(common.getvalue(paytm["totalprecopay"])),
                 "totaldue":float(common.getvalue(paytm["totaldue"])),
                 
@@ -1015,9 +1029,6 @@ class Payment:
             memberid = int(common.getid(tp[0].primarypatient)) if(len(tp) >= 1) else 0
             if(status == 'S'):
                 if(len(tp)>0):
-                    
-                    
-                    
                     totcompanypays = float(common.getstring(tp[0].totalcompanypays))
                     totpaid = float(common.getstring(tp[0].totalpaid))
                     tottreatmentcost = float(common.getstring(tp[0].totaltreatmentcost))
@@ -1028,6 +1039,11 @@ class Payment:
                         totaldue  = totaldue
                     )
                     
+                    #Call Voucder success
+                    vcobj = mdpbenefits.Benefit(db)
+                    reqobj = {"paymentid" : paymentid}
+                    rspobj = json.loads(vcobj.voucher_success(reqobj))                    
+
                     #Call Benefit Success
                     trtmnt = db((db.treatment.id == treatmentid) & (db.treatment.is_active == True)).select()
                     discount_amount = trtmnt[0].companypay if(len(trtmnt) > 0) else 0
@@ -1043,7 +1059,13 @@ class Payment:
                     }
                     bnftobj = mdpbenefits.Benefit(db)
                     rspObj = bnftobj.benefit_success(obj)                
-            else:           
+            else:    
+                
+                #call Voucher Failure
+                obj = {"paymentid":paymentid}
+                bnftobj = mdpbenefits.Benefit(db)
+                rspObj = bnftobj.voucher_failure(obj)                
+                
                 #Call Benefit Failure
                 trtmnt = db((db.treatment.id == treatmentid) & (db.treatment.is_active == True)).select()
                 discount_amount = trtmnt[0].companypay if(len(trtmnt) > 0) else 0
@@ -1278,26 +1300,33 @@ class Payment:
                     proclist.append(procobj)         
     
             
-            totalpaid = 0        
-            totpaid = 0
-            tottreatmentcost  = 0
-            totinspays = 0    
-            totaldue = 0
-            totcompanypays = 0
-            logger.loggerpms2.info("Enter Payment Receipt ==>B " + str(tplanid))
+            #totalpaid = 0        
+            #totpaid = 0
+            #tottreatmentcost  = 0
+            #totinspays = 0    
+            #totaldue = 0
+            #totcompanypays = 0
+            #totaldiscount_amount = 0
+            #totalwallet_amount = 0
+            #totalcopay  = 0
             
-            tp = db(db.treatmentplan.id == tplanid).select()
+            #logger.loggerpms2.info("Enter Payment Receipt ==>B " + str(tplanid))
             
-            if(len(tp)>0):
-                totcompanypays = float(common.getstring(tp[0].totalcompanypays))
-                totpaid = float(common.getstring(tp[0].totalpaid))
-                tottreatmentcost = float(common.getstring(tp[0].totaltreatmentcost))
-                totinspays = float(common.getstring(tp[0].totalinspays))
-                totaldue = tottreatmentcost - (totpaid + float(amount) + totinspays + totcompanypays)
+            #tp = db(db.treatmentplan.id == tplanid).select()
+            
+            #if(len(tp)>0):
+                #totcompanypays = float(common.getstring(tp[0].totalcompanypays))
+                #totpaid = float(common.getstring(tp[0].totalpaid))
+                #tottreatmentcost = float(common.getstring(tp[0].totaltreatmentcost))
+                #totinspays = float(common.getstring(tp[0].totalinspays))
+                #totaldue = tottreatmentcost - (totpaid + float(amount) + totinspays + totcompanypays)
         
-            trtmnt = db((db.treatment.id == treatmentid) & (db.treatment.is_active == True)).select()
-            discount_amount = trtmnt[0].companypay if(len(trtmnt) > 0) else 0            
-            logger.loggerpms2.info("Enter Payment Receipt ==>C " )
+            #trtmnt = db((db.treatment.id == treatmentid) & (db.treatment.is_active == True)).select()
+            #discount_amount = trtmnt[0].companypay if(len(trtmnt) > 0) else 0            
+            #logger.loggerpms2.info("Enter Payment Receipt ==>C " )
+            
+            paytm = json.loads(account._calculatepayments(db,tplanid))
+            
             paymentcallbackobj = {
                 "todaydate":common.getstringfromdate(dttodaydate, "%d/%m/%Y"),
                 "providerid":providerid,
@@ -1342,12 +1371,12 @@ class Payment:
                 "acctno":acctno,
                 "acctname":acctname,
                 "bankname":bankname,
-                "totalpaid":totpaid,
-                "tottreatmentcost":tottreatmentcost,
-                "totinspays":totinspays,
-                "totaldue":totaldue,
-                "totcompanypays":totcompanypays,
-                "totdiscountamount":discount_amount,
+                "totalpaid":paytm["totalpaid"],
+                "tottreatmentcost":paytm["totaltreatmentcost"],
+                "totinspays":paytm["totalinspays"],
+                "totaldue":paytm["totaldue"],
+                "totcompanypays":paytm["totalcompanypays"],
+                "totdiscountamount":paytm["totaldiscount_amount"],
                 "procedurelist":{"count":len(procs),"procedurelist":proclist}
                 
             }

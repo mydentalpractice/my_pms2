@@ -8861,7 +8861,7 @@ ADD COLUMN `hv_appointmentid` INT(11) NULL AFTER `hv_doctorid`;
 ALTER TABLE `mydp_prod`.`hv_treatment` 
 CHANGE COLUMN `hv_appointmentid` `hv_doc_appointmentid` INT(11) NULL DEFAULT NULL ;
 
-2. YYYZZZcreated a new vieww vw_payments_fast
+2. XXXYYYZZZcreated a new vieww vw_payments_fast
 
 3. XXXXYYYZZZCities Population
            ALTER TABLE `mydp_prod`.`cities` 
@@ -8952,7 +8952,7 @@ ADD COLUMN `premium` DOUBLE NULL AFTER `procedurepriceplancode`;
 ALTER TABLE `mydp_prod`.`hv_doc_appointment` 
 ADD COLUMN `hv_appt_status` VARCHAR(45) NULL AFTER `paymentid`;
 
-14. YYYZZZModify vw_memberpatientlit, vw_memberpatientlist_fast
+14. XXXYYYZZZModify vw_memberpatientlit, vw_memberpatientlist_fast
 
 15. XXXYYYZZZ Modified cities table with hv_fees
 ALTER TABLE `mydp_prod`.`cities` 
@@ -8963,6 +8963,85 @@ ADD COLUMN `hv_fees` DOUBLE NULL AFTER `VC`;
 UPDATE `mydp_prod`.`cities` SET `hv_fees`='299' WHERE `city`='Bengaluru';
 UPDATE `mydp_prod`.`cities` SET `hv_fees`='199' WHERE `id`='Jaipur';
 UPDATE `mydp_prod`.`cities` SET `hv_fees`='399' WHERE `id`='Mumbai';
+
+
+17/10/2021
+==========
+1. YYYZZ Modify payment table, add walletamount
+ALTER TABLE `mydp_prod`.`payment` 
+ADD COLUMN `walletamount` DOUBLE NULL AFTER `precommitamount`;
+ADD COLUMN `discount_amount` DOUBLE NULL AFTER `walletamount`;
+ADD COLUMN `voucher_code` DOUBLE NULL AFTER `discount_amount`;
+
+2. YYYZZ Modify treatment table, add walletamount
+ALTER TABLE `mydp_prod`.`treatment` 
+ADD COLUMN `walletamount` DOUBLE NULL DEFAULT 0 AFTER `companypay`;
+ADD COLUMN `discount_amount` DOUBLE NULL AFTER `walletamount`;
+ADD COLUMN `voucher_code` DOUBLE NULL AFTER `discount_amount`;
+
+
+3. YYYZZZ Modify treatment_procedure table, add walletamount
+ALTER TABLE `mydp_prod`.`treatment_procedure` 
+ADD COLUMN `walletamount` DOUBLE NULL DEFAULT 0 AFTER `companypays`;
+ADD COLUMN `discount_amount` DOUBLE NULL AFTER `walletamount`;
+ADD COLUMN `voucher_code` DOUBLE NULL AFTER `discount_amount`;
+
+4. YYYZZZ Modify treatmentplan, add totalwalletamount
+ALTER TABLE `mydp_prod`.`treatmentplan` 
+ADD COLUMN `totalwalletamount` DOUBLE NULL DEFAULT 0 AFTER `totalcompanypays`;
+ADD COLUMN `totaldiscount_amount` DOUBLE NULL AFTER `totalwalletamount`;
+ADD COLUMN `voucher_code` DOUBLE NULL AFTER `totaldiscount_amount`;
+
+5. ZZZ Modidy vw_paymentlist, add totalwalletamount,totaldiscount_amount, discount_amount, voucher_code 
+
+6. ZZZ Modidy vw_payments, add totalwalletamount,totaldiscount_amount, voucher_code 
+
+7. ZZZ Modidy vw_payments_fast, add totalwalletamount,totaldiscount_amount, voucher_code
+
+8. YYYZZZ Modify procedurepriceplan, add walletamount,discount_amount,voucher_code
+ALTER TABLE `mydp_prod`.`procedurepriceplan` 
+ADD COLUMN `walletamount` DOUBLE NULL AFTER `relgrinspays`,
+ADD COLUMN `discount_amount` DOUBLE NULL AFTER `walletamount`,
+ADD COLUMN `voucher_code` VARCHAR(45) NULL AFTER `discount_amount`;
+
+9. ZZZ Modify vw_procedurepriceplan, add walletamount,discount_amount,voucher_code
+
+10. ZZZ Modify vw_procedurepriceplan_relgr, add walletamount,discount_amount,voucher_code
+
+11. ZZZ Modify vw_procedurepriceplan_x999, add walletamount,discount_amount,voucher_code
+
+12. ZZZ Modify vw_treatmentplancost, add walletamount,totaldiscount_amount, voucher_code
+
+13. ZZZ Modify vw_treatmentplansummarybytreatment, add totalwalletamount,totaldiscount_amount
+
+13. ZZZ Modify vw_treatmentplansummarybypatient, add totalwalletamount,totaldiscount_amount
+
+14. XXXYYYZZZ Modify provider table, add available flag
+ALTER TABLE `mydp_prod`.`provider` 
+ADD COLUMN `available` CHAR(1) NULL DEFAULT 'T' AFTER `IND_VC`;
+
+15. XXXYYZZZ Modify APIs mdplocation module 
+
+16. YYYZZZZ Modify URL Properties added vw_url, vw_stg_url, vw_prod_url
+ALTER TABLE `mydp_prod`.`urlproperties` 
+ADD COLUMN `vw_url` TEXT NULL DEFAULT NULL AFTER `php_url`,
+ADD COLUMN `vw_stg_url` TEXT NULL DEFAULT NULL AFTER `vw_url`,
+ADD COLUMN `vw_prod_url` TEXT NULL DEFAULT NULL AFTER `vw_stg_url`;
+
+17. XXXZZZ reate new table redeem_voucher_walle
+CREATE TABLE `mydp_prod`.`redeem_voucher_wallet` (
+  `id` INT(11) NOT NULL,
+  `paymentid` INT(11) NULL,
+  `paymentdate` DATE NULL,
+  `treatmentid` INT(11) NULL,
+  `treatment` VARCHAR(45) NULL,
+  `treatmentdate` DATE NULL,
+  `discount_amount` DOUBLE NULL,
+  `voucher_code` VARCHAR(45) NULL,
+  `wallet_amount` DOUBLE NULL,
+  PRIMARY KEY (`id`));
+ALTER TABLE `mydp_prod`.`redeem_voucher_wallet` 
+CHANGE COLUMN `id` `id` INT(11) NOT NULL AUTO_INCREMENT ;
 
 
 Script file to clear user for sign-up

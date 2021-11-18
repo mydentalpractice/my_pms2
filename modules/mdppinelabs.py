@@ -18,6 +18,7 @@ from applications.my_pms2.modules import account
 from applications.my_pms2.modules import mdppatient
 from applications.my_pms2.modules import account
 from applications.my_pms2.modules import mdppayment
+from applications.my_pms2.modules import mdpbenefits
 
 from applications.my_pms2.modules import datasecurity
 
@@ -46,7 +47,7 @@ class PineLabs:
 
     def pinelabs_encrypt(self, avars):
 
-        #logger.loggerpms2.info("Enter Pinelabs Encrypt " + json.dumps(avars)) 
+        logger.loggerpms2.info("Enter Pinelabs Encrypt " + json.dumps(avars)) 
         rspobj = {}
 
         try:
@@ -78,7 +79,7 @@ class PineLabs:
             excpobj["error_message"] = mssg
             return json.dumps(excpobj)     
 
-        #logger.loggerpms2.info("Exit Pine Labs Encryption " + json.dumps(rspobj))      
+        logger.loggerpms2.info("Exit Pine Labs Encryption " + json.dumps(rspobj))      
 
         return(json.dumps(rspobj))
     
@@ -234,17 +235,24 @@ class PineLabs:
             
             status = common.getkeyvalue(avars,"txn_response_msg","FAILURE")
 
+            #get paymentid
+            unique_merchant_txn_id = common.getkeyvalue(avars,"unique_merchant_txn_id","") 
+            strarr = unique_merchant_txn_id.split('_')
+            paymentid = 0 if(len(strarr)<=1) else int(common.getid(strarr[1]))
 
-            memberid = int(common.getkeyvalue(avars,"udf_field_1","0"))
-            providerid = int(common.getkeyvalue(avars,"udf_field_2","0"))
-            treatmentid = int(common.getkeyvalue(avars,"udf_field_3","0"))
-            paymentid = int(common.getkeyvalue(avars,"udf_field_4","0"))
+            #memberid = int(common.getkeyvalue(avars,"udf_field_1","0"))
+            #providerid = int(common.getkeyvalue(avars,"udf_field_2","0"))
+            #treatmentid = int(common.getkeyvalue(avars,"udf_field_3","0"))
+            #paymentid = int(common.getkeyvalue(avars,"udf_field_4","0"))
 
             
-            unique_merchant_txn_id = common.getkeyvalue(avars,"unique_merchant_txn_id","") 
+
             
             p = db((db.payment.id == paymentid)).select() 
             tplanid = int(common.getid(p[0].treatmentplan)) if(len(p) != 0) else 0
+            memberid = int(common.getid(p[0].patientmember)) if(len(p) != 0) else 0
+            providerid = int(common.getid(p[0].provider)) if(len(p) != 0) else 0
+            
             amount = float(common.getvalue(p[0].precommitamount)) if(len(p) != 0) else 0
             
             patobj = mdppatient.Patient(db, providerid)
@@ -268,9 +276,50 @@ class PineLabs:
                 
                 #here need to update treatmentplan tables
                 account._updatetreatmentpayment(db, tplanid, paymentid)
+                db.commit()                
+            
+                #Call Voucder success
+                vcobj = mdpbenefits.Benefit(db)
+                reqobj = {"paymentid" : paymentid}
+                rspobj = json.loads(vcobj.voucher_success(reqobj))                 
+            
+                #here need to update treatmentplan tables
+                account._updatetreatmentpayment(db, tplanid, paymentid)
                 db.commit()
+            
+                trtmnt = db((db.treatment.id == treatmentid) & (db.treatment.is_active == True)).select()
+                discount_amount = trtmnt[0].companypay if(len(trtmnt) > 0) else 0
+            
+                pmnt = db((db.payment.id == paymentid) & (db.payment.is_active == True)).select()
+                policy = pmnt[0].policy if(len(pmnt) > 0) else ""
+                obj={
+                    "paymentid":str(paymentid),
+                    "plan":policy,
+                    "discount_amount":str(discount_amount),
+                    "memberid":str(memberid),
+                    "treatmentid":str(treatmentid)
+                }
+                bnftobj = mdpbenefits.Benefit(db)
+                rspObj = json.loads(bnftobj.benefit_success(obj))
+                if(rspObj['result'] == "success"):
+                    #update totalcompanypays (we are saving discount_amount as companypays )
+                    db(db.treatment.id == treatmentid).update(companypay = discount_amount)    
+                    #update treatmentplan assuming there is one treatment per tplan
+                    db(db.treatmentplan.id==tplanid).update(totalcompanypays = discount_amount) 
+                    db.commit()                      
+            
+                #here need to update treatmentplan tables
+                account._updatetreatmentpayment(db, tplanid, paymentid)
+                db.commit()
+            
+                paytm = json.loads(account._calculatepayments(db, tplanid))
+                tottreatmentcost= paytm["totaltreatmentcost"]
+                totinspays= paytm["totalinspays"]
+                totpaid=paytm["totalpaid"] 
+                totaldue = paytm["totaldue"]                  
    
                 jsonresp = avars
+                jsonresp["paytm"] = paytm
                 jsonresp["paymentid"] = paymentid
                 jsonresp["result"] = "success"
                 jsonresp["error_message"] = ""
