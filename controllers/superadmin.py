@@ -67,7 +67,7 @@ def smsservice():
           #timeinterval
           r = db(db.urlproperties.id >0).select(db.urlproperties.timeinterval)
           timeinterval = float(common.getvalue(r[0].timeinterval)) if(len(r) ==1 ) else 3600000
-          
+        
           if(groupapptsms == "1"):
                message = "Re-Enter Loop"  + " " + (common.getISTFormatCurrentLocatTime()).strftime(datetimefmt)
                logger.loggerpms2.info(message)

@@ -225,6 +225,147 @@ class PineLabs:
         logger.loggerpms2.info("PineLabs Payment Exit createTransaction API \n" + json.dumps(jsonresp)) 
         return json.dumps(jsonresp)
     
+    def pinelabs_payment_prem(self,avars):
+        logger.loggerpms2.info("Enter Pine Labs Payment API == >" + json.dumps(avars))
+        db = self.db
+   
+        try:
+            dttodaydate = common.getISTCurrentLocatTime()
+            
+            paymentid = db.payment.insert(paymentdate=dttodaydate,paymentmode="OnLinr",patientmember=0,treatmentplan=0,\
+                                          provider=0,is_active=True,chequeno="0000",bankname="XXXX",accountname="XXXX",accountno="0000",policy="")
+
+            #create URL
+            pl_url = self.pl_url
+
+            plObj = {
+                
+                "customer_data": {
+                    "first_name":common.getkeyvalue(avars,"firstname",""),
+                    "last_name":common.getkeyvalue(avars,"lastname",""),
+                    "mobile_no":common.getkeyvalue(avars,"cell",""),
+                    "email_id":common.getkeyvalue(avars,"email",""),
+                    "customer_id":common.getkeyvalue(avars,"memberid","")
+                    },
+
+                
+                "merchant_data": {
+                    "merchant_access_code": self.pl_ac,
+                    "merchant_id": self.pl_mid,
+                    "merchant_return_url": common.getkeyvalue(avars,"callback",""),
+                    "unique_merchant_txn_id": common.getstringfromtime(dttodaydate,"%d%m%Y%H%M") + "_" + str(paymentid),   
+                    
+                    },
+                
+                "payment_data": {
+                    "amount_in_paisa": 100 * long(common.getkeyvalue(avars,"amount","0"))   # amount to be send to Pine Labs is in paise
+                    },
+                
+                "txn_data": {
+                    "navigation_mode": "2",
+                    "payment_mode": "1,3,4,7,10,11",
+                    "transaction_type": "1",
+                },                
+              
+               
+                "udf_data": {
+                    "udf_field_1": common.getkeyvalue(avars,"firstname",""),
+                    "udf_field_2": common.getkeyvalue(avars,"lastname",""),
+                    "udf_field_3": common.getkeyvalue(avars,"cell",""),
+                    "udf_field_4": common.getkeyvalue(avars,"email","")
+                    
+                },
+                
+                "product_details": [
+            
+                    {
+            
+                        "schemes": [
+                            ],
+            
+                        "product_code": common.getkeyvalue(avars,"treatment",""),
+                        "product_amount": 100 * long(common.getkeyvalue(avars,"amount","0"))
+                    }
+            
+                    ],                
+
+            } 
+            
+           
+            payment_request = json.dumps(plObj)
+            
+            logger.loggerpms2.info("Pine Labs Raw Data==>" + payment_request)
+            
+            obj={"payment_request":payment_request}
+            rspobj = json.loads(self.pinelabs_encrypt(obj))
+            
+            #x-verify header
+            x_verify = ""
+            encoded_message = ""
+            
+            if (rspobj["result"]=="success"):
+                x_verify = rspobj["encrypt"]  
+                encoded_message = rspobj["encoded_message"]
+                
+            body ={
+                "request": encoded_message 
+            }
+            headers = {'content-type': 'application/json', 'X-VERIFY': x_verify}
+            
+            logger.loggerpms2.info("PineLabs " +  pl_url + " " +  json.dumps(headers) + " " + json.dumps(body))
+            
+            
+            #call API
+            resp = requests.post(pl_url, json = body, headers = headers)
+                
+            jsonresp = {}
+            if((resp.status_code == 200)|(resp.status_code == 201)|(resp.status_code == 202)|(resp.status_code == 203)):
+                respstr =   resp.text
+                jsonresp = json.loads(respstr)
+                if(jsonresp["response_code"] == 1):
+                    jsonresp["result"] = "success"
+                    jsonresp["error_message"] = ""
+                else:
+                    jsonresp["result"] = "fail"
+                    jsonresp["error_message"] = "PineLabs Payment API Error :\n" + "(" + jsonresp["response_message"] + ")" 
+                
+                #update payment table 
+                db(db.payment.id == paymentid).update(
+            
+                    fp_paymentref = plObj["merchant_data"]["unique_merchant_txn_id"],
+                    fp_invoice = common.getkeyvalue(avars,"treatment",""),
+                    fp_merchantid = plObj["merchant_data"]["merchant_id"],
+                    fp_paymenttype = "Pine Labs",
+                    fp_paymentdetail = plObj["merchant_data"]["unique_merchant_txn_id"],
+                    fp_merchantdisplay=plObj["merchant_data"]["merchant_id"],
+                    precommitamount = long(plObj["payment_data"]["amount_in_paisa"]) / 100,        #temporary storing the amount  to commit on callback 
+                    paymentcommit = False,
+                    paymentmode = "Online",
+                    fp_status = 'S' if (jsonresp["response_code"] == 1) else 'F'
+                )                
+
+          
+            else:
+                jsonresp={
+                    "result" : "fail",
+                    "error_message":"PineLabs Payment API Error Response:\n" + "(" + str(resp.status_code) + ")" + " " + resp._content
+                    
+                } 
+                dmp = json.dumps(jsonresp)
+                logger.loggerpms2.info(json.dumps(dmp))
+                return json.dumps(dmp)
+                
+        except Exception as e:
+            error_message = "PineLabs Payment API Exception " + str(e)
+            logger.loggerpms2.info(error_message)      
+            jsonresp = {
+              "result":"fail",
+              "error_message":error_message
+            }
+            return json.dumps(jsonresp)
+        
+        logger.loggerpms2.info("PineLabs Payment Exit createTransaction API \n" + json.dumps(jsonresp)) 
+        return json.dumps(jsonresp)    
  
     def callback_transaction(self,avars):
         
@@ -252,6 +393,9 @@ class PineLabs:
             tplanid = int(common.getid(p[0].treatmentplan)) if(len(p) != 0) else 0
             memberid = int(common.getid(p[0].patientmember)) if(len(p) != 0) else 0
             providerid = int(common.getid(p[0].provider)) if(len(p) != 0) else 0
+            
+            tr = db((db.treatment.treatmentplan == tplanid) & (db.treatment.is_active == True)).select()
+            treatmentid = int(tr[0].id) if(len(tr) > 0) else 0
             
             amount = float(common.getvalue(p[0].precommitamount)) if(len(p) != 0) else 0
             
@@ -287,6 +431,16 @@ class PineLabs:
                 account._updatetreatmentpayment(db, tplanid, paymentid)
                 db.commit()
             
+                #wallet_success
+                reqobj = {}
+                reqobj = {"paymentid" : paymentid}
+                rspobj = json.loads(vcobj.wallet_success(reqobj))                 
+                #here need to update treatmentplan tables
+                account._updatetreatmentpayment(db, tplanid, paymentid)
+                db.commit()                
+                
+                
+                
                 trtmnt = db((db.treatment.id == treatmentid) & (db.treatment.is_active == True)).select()
                 discount_amount = trtmnt[0].companypay if(len(trtmnt) > 0) else 0
             
@@ -336,9 +490,17 @@ class PineLabs:
                                                                 precommitamount = 0
                                                                 
                                                                 )
+                
+                #Call Voucher Failure
+                vcobj = mdpbenefits.Benefit(db)
+                reqobj = {"paymentid" : paymentid}
+                rspobj = json.loads(vcobj.voucher_failure(reqobj))
+                
+                account._updatetreatmentpayment(db, tplanid,paymentid)
+
                 jsonresp = avars
                 jsonresp["result"] = "fail"
-                jsonresp["error_message"] = avars["message"]
+                jsonresp["error_message"] = common.getkeyvalue(avars,"message","Error in PineLabs Payment")
                 
                 
         except Exception as e:
@@ -354,7 +516,114 @@ class PineLabs:
         logger.loggerpms2.info("Exit Callback Transaction==>>" + dmp)
         return dmp
     
+    def callback_transaction_prem(self,avars):
+            logger.loggerpms2.info("Enter Pine Labs  callback_transaction_prem API == >" + json.dumps(avars))
+            db = self.db
+           
+            try:
+                
+                
+                status = common.getkeyvalue(avars,"txn_response_msg","FAILURE")
+                status_code =  common.getkeyvalue(avars,"txn_response_code","-1")
+                
+                #get unique merchant txn id <datetime>_paymentid
+                unique_merchant_txn_id = common.getkeyvalue(avars,"unique_merchant_txn_id","") 
+                strarr = unique_merchant_txn_id.split('_')
+                paymentid = 0 if(len(strarr)<=1) else int(common.getid(strarr[1]))
+                
+                merchant_id = common.getkeyvalue(avars,"merchant_id","") 
+                
+                amount = float(common.getvalue(common.getkeyvalue(avars,"amount_in_paisa",0)))/100
+                
+                txn_completion_date_time = common.getkeyvalue(avars,"txn_completion_date_time",common.getISTFormatCurrentLocatTime())
+                
+                paymentdate = common.getISTFormatCurrentLocatTime()
+                
+                #first,last,cell,email
+                firstname = common.getkeyvalue(avars,"firstname","") 
+                lastname = common.getkeyvalue(avars,"lastname","") 
+                cell = common.getkeyvalue(avars,"cell","") 
+                email = common.getkeyvalue(avars,"email","") 
+                
+                if((status.lower() == "success")|(status.lower() == "s")):
+                    xsts = 'S'
+                    db((db.payment.id == paymentid)).update(fp_status = xsts,
+                                                            paymentcommit = True,
+                                                            
+                                                            paymentdate = paymentdate,
+                                                            fp_paymentdate =paymentdate ,
+                                                            
+                                                            amount = amount,
+                                                            fp_invoiceamt = amount,
+                                                            fp_amount = amount, 
+                                                            fp_invoice = common.getkeyvalue(avars,"rrn",""),
+                                                            paymenttype = "Premium",
+                                                            paymentmode = "PineLabs",
+
+                                                            fp_paymentref = unique_merchant_txn_id,
+                                                            fp_paymenttype = "Premium",
+                                                            fp_paymentdetail = "Pine Labs Payment",
+                                                            fp_cardtype = common.getkeyvalue(avars,"acquirer_name",""),
+                                                            fp_merchantid =  merchant_id,
+                                                            fp_otherinfo =common.getkeyvalue(avars,"udf_field_1","") + " " + common.getkeyvalue(avars,"udf_field_2",""),
+                                                            precommitamount = 0
+                                                            )
+                    
+                    
+                   
+                    
+                    
+                    
+       
+                    jsonresp = {}
+                    jsonresp["result"] = "success"
+                    jsonresp["error_message"] = ""
+                    
+                    jsonresp["payment_ref"] = unique_merchant_txn_id
+                    jsonresp["payment_date"] = common.getstringfromtime(paymentdate,"%d/%m/%Y %H:%M:%S")
+                    jsonresp["payment_amount"] = str(amount)
+                    jsonresp["payment_status"] = status
+                    jsonresp["payment_status_code"] = status_code
+                    jsonresp["payment_type"] = "Premium"
+                    jsonresp["payment_details"] = "Pine Labs"
+                    jsonresp["payment_merchant_id"] = merchant_id
+                    jsonresp["payment_card"] = common.getkeyvalue(avars,"acquirer_name","")
+                    jsonresp["payment_firstname"] = common.getkeyvalue(avars,"udf_field_1","")
+                    jsonresp["payment_lastname"] = common.getkeyvalue(avars,"udf_field_2","")
+                    jsonresp["payment_mobile"] = common.getkeyvalue(avars,"mobile_no","")
+                    jsonresp["payment_email"] = common.getkeyvalue(avars,"email","")
+                else:
+                    db((db.payment.id == paymentid)).update(fp_status = status,
+                                                                    paymentcommit = False,
+                                                                    fp_paymentdate =paymentdate,
+                                                                    amount = 0,
+                                                                    
+                                                                    fp_amount = 0,  
+                                                                    precommitamount = 0
+                                                                    
+                                                                    )
     
+                    jsonresp = avars
+                    jsonresp["result"] = "fail"
+                    jsonresp["error_message"] = common.getkeyvalue(avars,"txn_response_msg","Error in PineLabs Payment")
+                    jsonresp["payment_status"] = status
+                    jsonresp["payment_status_code"] = status_code
+                    jsonresp["payment_ref"] = unique_merchant_txn_id
+                    jsonresp["payment_date"] = common.getstringfromtime(paymentdate,"%d/%m/%Y %H:%M:%S")
+                    
+                    
+            except Exception as e:
+                error_message = "Exit PineLabs callback_transaction_prem API Exception " + str(e)
+                logger.loggerpms2.info(error_message)      
+                jsonresp = {
+                  "result":"fail",
+                  "error_message":error_message
+                }
+                return json.dumps(jsonresp)
+            
+            dmp = json.dumps(jsonresp)
+            logger.loggerpms2.info("Exit Callback Transaction Prem ==>>" + dmp)
+            return dmp
     
     
     

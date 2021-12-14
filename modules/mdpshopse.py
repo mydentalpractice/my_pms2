@@ -271,6 +271,14 @@ class Shopse:
                 account._updatetreatmentpayment(db, tplanid, paymentid)
                 db.commit()
             
+                #wallet_success
+                reqobj = {}
+                reqobj = {"paymentid" : paymentid}
+                rspobj = json.loads(vcobj.wallet_success(reqobj))                 
+                #here need to update treatmentplan tables
+                account._updatetreatmentpayment(db, tplanid, paymentid)
+                db.commit()                
+
                 trtmnt = db((db.treatment.id == treatmentid) & (db.treatment.is_active == True)).select()
                 discount_amount = trtmnt[0].companypay if(len(trtmnt) > 0) else 0
             
@@ -297,24 +305,16 @@ class Shopse:
                 db.commit()
             
                 paytm = json.loads(account._calculatepayments(db, tplanid))
-                               
-   
+                tottreatmentcost= paytm["totaltreatmentcost"]
+                totinspays= paytm["totalinspays"]
+                totpaid=paytm["totalpaid"] 
+                totaldue = paytm["totaldue"]                  
+        
                 jsonresp = avars
                 jsonresp["paytm"] = paytm
                 jsonresp["paymentid"] = paymentid
                 jsonresp["result"] = "success"
                 jsonresp["error_message"] = ""
-                
-
-                
-               
-   
-                jsonresp = avars
-                jsonresp["paymentid"] = paymentid
-                jsonresp["result"] = "success"
-                jsonresp["error_message"] = ""
-                
-                
                 
             else:
                 db((db.payment.fp_paymentref == orderid)).update(fp_status = status,
@@ -326,9 +326,17 @@ class Shopse:
                                                                 precommitamount = 0
                                                                 
                                                                 )
+                
+                #Call Voucher Failure
+                vcobj = mdpbenefits.Benefit(db)
+                reqobj = {"paymentid" : paymentid}
+                rspobj = json.loads(vcobj.voucher_failure(reqobj))
+            
+                account._updatetreatmentpayment(db, tplanid,paymentid)  
+                
                 jsonresp = avars
                 jsonresp["result"] = "fail"
-                jsonresp["error_message"] = avars["message"]
+                jsonresp["error_message"] = common.getkeyvalue(avars,"message","Error in ShopSe Payment")
                 
                 
         except Exception as e:

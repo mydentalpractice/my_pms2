@@ -289,44 +289,76 @@ class Payment:
             #this is list of treatment plans, since vw_payments.id is treatmentplan id
             #all total payments from tplan reflects all payments of the treatment since 
             #there is one treatment for one tplan
-            payments = db((db.vw_payments.providerid == providerid) & \
-                          (db.vw_payments.memberid == memberid) & \
-                          (db.vw_payments.patientid == patientid) & \
-                          (db.vw_payments.is_active == True)).select(\
-                              db.vw_payments.id,\
-                              db.vw_payments.treatment,\
-                              db.vw_payments.treatmentid,\
-                              db.vw_payments.treatmentdate,\
-                              db.vw_payments.shortdescription,\
-                              db.vw_payments.memberid,\
-                              db.vw_payments.patientid,\
-                              db.vw_payments.providerid,\
-                              db.vw_payments.patientname,\
-                              db.vw_payments.lastpaymentdate,\
-                              db.vw_payments.totaltreatmentcost,\
-                              db.vw_payments.totalcopay,\
-                              db.vw_payments.totalinspays,\
-                              db.vw_payments.totalpaid,\
-                              db.vw_payments.totalcopaypaid,\
-                              db.vw_payments.totalcompanypays,\
-                              db.vw_payments.totalinspaid,\
-                              db.vw_payments.totaldue,\
-                              db.vw_payments.is_active\
-                          )
-            
+            if(providerid > 0):
+                payments = db((db.vw_payments.providerid == providerid) & \
+                              (db.vw_payments.memberid == memberid) & \
+                              (db.vw_payments.patientid == patientid) & \
+                              (db.vw_payments.is_active == True)).select(\
+                                  db.vw_payments.id,\
+                                  db.vw_payments.treatment,\
+                                  db.vw_payments.treatmentid,\
+                                  db.vw_payments.treatmentdate,\
+                                  db.vw_payments.shortdescription,\
+                                  db.vw_payments.memberid,\
+                                  db.vw_payments.patientid,\
+                                  db.vw_payments.providerid,\
+                                  db.vw_payments.patientname,\
+                                  db.vw_payments.lastpaymentdate,\
+                                  db.vw_payments.totaltreatmentcost,\
+                                  db.vw_payments.totalcopay,\
+                                  db.vw_payments.totalinspays,\
+                                  db.vw_payments.totalpaid,\
+                                  db.vw_payments.totalcopaypaid,\
+                                  db.vw_payments.totalcompanypays,\
+                                  db.vw_payments.totalinspaid,\
+                                  db.vw_payments.totaldue,\
+                                  db.vw_payments.is_active\
+                              )
+            else:
+                payments = db(\
+                              (db.vw_payments.memberid == memberid) & \
+                              (db.vw_payments.patientid == patientid) & \
+                              (db.vw_payments.is_active == True)).select(\
+                                  db.vw_payments.id,\
+                                  db.vw_payments.treatment,\
+                                  db.vw_payments.treatmentid,\
+                                  db.vw_payments.treatmentdate,\
+                                  db.vw_payments.shortdescription,\
+                                  db.vw_payments.memberid,\
+                                  db.vw_payments.patientid,\
+                                  db.vw_payments.providerid,\
+                                  db.vw_payments.patientname,\
+                                  db.vw_payments.lastpaymentdate,\
+                                  db.vw_payments.totaltreatmentcost,\
+                                  db.vw_payments.totalcopay,\
+                                  db.vw_payments.totalinspays,\
+                                  db.vw_payments.totalpaid,\
+                                  db.vw_payments.totalcopaypaid,\
+                                  db.vw_payments.totalcompanypays,\
+                                  db.vw_payments.totalinspaid,\
+                                  db.vw_payments.totaldue,\
+                                  db.vw_payments.is_active\
+                              )
+                
+                
             payobj = {}
             
             paymentlist = []
             
             for payment in payments:
+                treatmentid = int(common.getid(payment.treatmentid))
+                providerid = int(common.getid(payment.providerid))
+                hv = db(db.hv_treatment.treatmentid == treatmentid).count()
                 
                 payobj = {
+            
                     "paymentid":int(common.getid(payment.id)),  #this is treatmentplan id
                     "memberid":memberid,
                     "patientid":patientid,
                     "patient":payment.patientname,
                     "paymentdate":None if(payment.lastpaymentdate == None) else (payment.lastpaymentdate).strftime("%d/%m/%Y"),
                     "treatmentid":int(common.getid(payment.treatmentid)),
+                    "providerid":providerid,
                     "treatment":payment.treatment,
                     "treatmentdate":(payment.treatmentdate).strftime("%d/%m/%Y"),
                     "procedures":payment.shortdescription,
@@ -337,6 +369,7 @@ class Payment:
                     "totaldiscount":float(common.getvalue(payment.totalcompanypays)),
                     "totalpaid":float(common.getvalue(payment.totalpaid)),
                     "totaldue":float(common.getvalue(payment.totaldue)),
+                    "hv":False if(hv == 0) else True
                 }
                 paymentlist.append(payobj)
                 
@@ -363,10 +396,17 @@ class Payment:
             #this is list of treatment plans, since vw_payments.id is treatmentplan id
             #all total payments from tplan reflects all payments of the treatment since 
             #there is one treatment for one tplan
-            payments = db((db.vw_payments_fast.providerid == providerid) & \
-                          (db.vw_payments_fast.memberid == memberid) & \
-                          (db.vw_payments_fast.patientid == patientid) & \
-                          (db.vw_payments_fast.is_active == True)).select()
+            if(providerid > 0):
+                payments = db((db.vw_payments_fast.providerid == providerid) & \
+                              (db.vw_payments_fast.memberid == memberid) & \
+                              (db.vw_payments_fast.patientid == patientid) & \
+                              (db.vw_payments_fast.is_active == True)).select()
+            else:
+                payments = db(\
+                              (db.vw_payments_fast.memberid == memberid) & \
+                              (db.vw_payments_fast.patientid == patientid) & \
+                              (db.vw_payments_fast.is_active == True)).select()
+                
             
             payobj = {}
             
@@ -374,6 +414,7 @@ class Payment:
             
             for payment in payments:
                 treatmentid = payment.treatmentid
+                providerid = payment.providerid
                 ts = db(db.treatment_procedure.treatmentid == treatmentid).select(db.dentalprocedure.shortdescription,\
                                                                                  left=(db.procedurepriceplan.on(db.procedurepriceplan.id == db.treatment_procedure.dentalprocedure),
                                                                                       db.dentalprocedure.on(db.dentalprocedure.dentalprocedure == db.procedurepriceplan.procedurecode)))
@@ -383,7 +424,9 @@ class Payment:
                     shortdesc = shortdesc + t.shortdescription + ";"
                 
                 tp = db(db.treatmentplan.id == payment.id).select(db.treatmentplan.patientname)
-
+                
+                hv = db(db.hv_treatment.treatmentid == treatmentid).count()
+                
                 payobj = {
                     "paymentid":int(common.getid(payment.id)),  #this is treatmentplan id
                     "memberid":memberid,
@@ -391,6 +434,8 @@ class Payment:
                     "patient": "" if(len(tp) <=0 ) else tp[0].patientname,
                     "paymentdate":None if(payment.lastpaymentdate == None) else (payment.lastpaymentdate).strftime("%d/%m/%Y"),
                     "treatmentid":int(common.getid(payment.treatmentid)),
+                    "providerid":int(common.getid(payment.providerid)),
+                    
                     "treatment":payment.treatment,
                     "treatmentdate":(payment.treatmentdate).strftime("%d/%m/%Y"),
                     "procedures":shortdesc,
@@ -401,6 +446,7 @@ class Payment:
                     "totaldiscount":float(common.getvalue(payment.totalcompanypays)),
                     "totalpaid":float(common.getvalue(payment.totalpaid)),
                     "totaldue":float(common.getvalue(payment.totaldue)),
+                    "hv":False if(hv == 0) else True
                 }
                 paymentlist.append(payobj)
                 
@@ -438,7 +484,7 @@ class Payment:
             r = db(db.vw_payments_fast.id == tplanid).select()
             memberid = int(common.getid(r[0].memberid if(len(r)>=1 ) else 0))
             treatmentid = int(common.getid(r[0].treatmentid if(len(r)>=1 ) else 0))
-          
+           
             
     
             #calculate the discount for this member 
@@ -493,6 +539,9 @@ class Payment:
             logger.loggerpms2.info("getpayme for payments loop " + str(len(payments)))
             for payment in payments:
                 treatmentid = payment.treatmentid
+                providerid = payment.providerid
+                
+                hv = db(db.hv_treatment.treatmentid == treatmentid).count()
                 ts = db(db.treatment_procedure.treatmentid == treatmentid).select(db.dentalprocedure.shortdescription,\
                                                                                  left=(db.procedurepriceplan.on(db.procedurepriceplan.id == db.treatment_procedure.dentalprocedure),
                                                                                       db.dentalprocedure.on(db.dentalprocedure.dentalprocedure == db.procedurepriceplan.procedurecode)))
@@ -506,6 +555,7 @@ class Payment:
                 
                 payobj = {}
                 payobj = {
+                    "providerid":providerid,
                     "memberid":payment.memberid,
                     "patientid":payment.patientid,
                     "patient":"" if(len(tp) <=0 ) else tp[0].patientname,
@@ -520,7 +570,8 @@ class Payment:
                     "totalpaid":float(common.getvalue(payment.totalpaid)),
                     "totaldue":float(common.getvalue(payment.totaldue)),
                     "totalcompanypays":float(common.getvalue(payment.totalcompanypays)),
-                    "totaldiscount":float(common.getvalue(payment.totalcompanypays))
+                    "totaldiscount":float(common.getvalue(payment.totalcompanypays)),
+                    "hv": False if(hv == 0) else True
                    
                 
                 }
@@ -554,13 +605,17 @@ class Payment:
         payobj = {}
         
         for payment in payments:
+            hv = db(db.hv_treatment.treatmentid == treatmentid).count()
+            providerid = payment.providerid
             payobj = {
                 "paymentdate": common.getISTFormatCurrentLocatTime().strftime("%d/%m/%Y") if(payment.paymentdate == None) else (payment.paymentdate).strftime("%d/%m/%Y"),
                 "paymentid":int(common.getid(payment.id)),
                 "amount":float(common.getvalue(payment.amount)),
                 "mode":common.getstring(payment.paymentmode),
                 "treatment":common.getstring(payment.treatment),
-                "patient":common.getstring(payment.patientname)
+                "patient":common.getstring(payment.patientname),
+                "providerid":providerid,
+                "hv": False if(hv == 0) else True
             }
             
             paylist.append(payobj)
@@ -656,6 +711,7 @@ class Payment:
     def newpayment(self,memberid,patientid,treatmentid):
      
         logger.loggerpms2.info("Enter New Payment ==>" + str(memberid) + " "  + str(patientid) + " "+str(treatmentid))
+        
         db = self.db
         providerid = self.providerid
         paymentdata = {}
@@ -674,8 +730,13 @@ class Payment:
             #dttodaydate = datetime.datetime.strptime(localcurrdate.strftime("%d") + "/" + localcurrdate.strftime("%m") + "/" + localcurrdate.strftime("%Y"), "%d/%m/%Y")
             dttodaydate = common.getISTFormatCurrentLocatDate()
             
-            trtmnt = db(db.treatment.id == treatmentid).select(db.treatment.treatment,db.treatment.treatmentplan,db.treatment.startdate)
+            trtmnt = db(db.treatment.id == treatmentid).select()
             tplanid = int(common.getid(trtmnt[0].treatmentplan)) if(len(trtmnt) > 0) else 0
+            
+            voucher_code = trtmnt[0].voucher_code if(len(trtmnt) > 0) else ""
+            discount_amount = float(common.getvalue(trtmnt[0].discount_amount)) if(len(trtmnt) > 0) else 0
+            
+            
             
             pats = db((db.vw_memberpatientlist.patientid==patientid)&(db.vw_memberpatientlist.primarypatientid==memberid)&(db.vw_memberpatientlist.is_active==True)).select(\
             db.vw_memberpatientlist.patient, db.vw_memberpatientlist.fullname, db.vw_memberpatientlist.hmopatientmember, \
@@ -744,12 +805,9 @@ class Payment:
                 }
                 paymentlist.append(paymentobj)
                 
-            #get wallet amount for this member (this is the API that Indeses is developing)
-            walletamount = 0            
-
-            #paytm = calculatepayments(db,tplanid,providerid)
+           
             paytm = json.loads(account._calculatepayments(db,tplanid))
-            paytm["totalwalletamount"]  = paytm["totalwalletamount"] + walletamount
+            #logger.loggerpms2.info("New Payment paytm " + json.dumps(paytm))
             
             #get list of procedures for this treatment
             procobj = {}
@@ -779,12 +837,12 @@ class Payment:
                                                    db.urlproperties.fp_merchantdisplay,db.urlproperties.fp_apikey,\
                                                    db.urlproperties.fp_produrl,db.urlproperties.fp_testurl
                                                    )
-           
-            addln_info = {"paymentid":paymentid,"paymentdate":dttodaydate.strftime("%d/%m/%Y"),"invoiceamt":float(common.getvalue(paytm["treatmentcost"]))}
             
-            
-            
-            
+            addln_info = {"paymentid":paymentid,"paymentdate":dttodaydate.strftime("%d/%m/%Y"),"invoiceamt":float(common.getvalue(common.getkeyvalue(paytm,"treatmentcost",0)))}
+
+            #Is there a payment made against this Voucher Code
+            pid = db((db.payment.treatmentplan == tplanid) & (db.payment.is_active == True)).select(db.payment.ALL, orderby=~db.payment.id)
+            paymentcommit = bool(common.getboolean(pid[0].paymentcommit)) if(len(pid) > 0) else False
             paymentdata={
                 
                 "id": common.getstring(r[0].fp_id) if(len(r) > 0) else "",
@@ -802,21 +860,23 @@ class Payment:
                 "payment_types":"",
                 "fp_produrl": common.getstring(r[0].fp_produrl) if(len(r) > 0) else "",
                 "fp_testurl": common.getstring(r[0].fp_testurl) if(len(r) > 0) else "",
-                "treatmentcost":float(common.getvalue(paytm["treatmentcost"])),
-                "treatmentocost":float(common.getvalue(paytm["treatmentcost"])),
-                "treatment":common.getstring(trtmnt[0].treatment),
-                "treatmentdate":common.getstring(trtmnt[0].startdate).strftime("%d/%m/%Y"),
-                "copay":float(common.getvalue(paytm["copay"])),
-                "inspays":float(common.getvalue(paytm["inspays"])),
-                "totaltreatmentcost":float(common.getvalue(paytm["totaltreatmentcost"])),
-                "totalinspays":float(common.getvalue(paytm["totalinspays"])),
-                "totalcopay":float(common.getvalue(paytm["totalcopay"])),
-                "totalpaid":float(common.getvalue(paytm["totalpaid"])),
-                "totalcompanypays":float(common.getvalue(paytm["totalcompanypays"])),
-                "totalwalletamount":float(common.getvalue(paytm["totalwalletamount"])),
-                "totalprecopay":float(common.getvalue(paytm["totalprecopay"])),
-                "totaldue":float(common.getvalue(paytm["totaldue"])),
-                
+                "treatmentcost":float(common.getvalue(common.getkeyvalue(paytm,"treatmentcost",0))),
+                "treatmentocost":float(common.getvalue(common.getkeyvalue(paytm,"treatmentcost",0))),
+                "treatment":common.getstring(trtmnt[0].treatment) if(len(trtmnt) >0) else "",
+                "treatmentdate":common.getstring(trtmnt[0].startdate).strftime("%d/%m/%Y") if(len(trtmnt) >0) else common.getISTFormatCurrentLocatTime().strftime("%d/%m/%Y %H:%M"),
+                "copay":float(common.getvalue(common.getkeyvalue(paytm,"copay",0))),
+                "inspays":float(common.getvalue(common.getkeyvalue(paytm,"inspays",0))),
+                "totaltreatmentcost":float(common.getvalue(common.getkeyvalue(paytm,"totaltreatmentcost",0))),
+                "totalinspays":float(common.getvalue(common.getkeyvalue(paytm,"totalinspays",0))),
+                "totalcopay":float(common.getvalue(common.getkeyvalue(paytm,"totalcopay",0))),
+                "totalpaid":float(common.getvalue(common.getkeyvalue(paytm,"totalpaid",0))),
+                "totalcompanypays":float(common.getvalue(common.getkeyvalue(paytm,"totalcompanypays",0))),
+                "totalwalletamount":float(common.getvalue(common.getkeyvalue(paytm,"totalwalletamount",0))),
+                "totalprecopay":float(common.getvalue(common.getkeyvalue(paytm,"totalprecopay",0))),
+                "totaldue":float(common.getvalue(common.getkeyvalue(paytm,"totaldue",0))),
+                "voucher_code":voucher_code,
+                "discount_amount":discount_amount,
+                "paymentcommit":paymentcommit,
                 "addln_info":addln_info
             } 
             
@@ -1027,22 +1087,43 @@ class Payment:
             
             tp = db(db.treatmentplan.id == tplanid).select()
             memberid = int(common.getid(tp[0].primarypatient)) if(len(tp) >= 1) else 0
-            if(status == 'S'):
-                if(len(tp)>0):
-                    totcompanypays = float(common.getstring(tp[0].totalcompanypays))
-                    totpaid = float(common.getstring(tp[0].totalpaid))
-                    tottreatmentcost = float(common.getstring(tp[0].totaltreatmentcost))
-                    totinspays = float(common.getstring(tp[0].totalinspays))
-                    totaldue = tottreatmentcost - (totpaid + float(amount) + totinspays + totcompanypays)
-                    db(db.treatmentplan.id == tplanid).update(
-                        totalpaid = totpaid + float(amount),
-                        totaldue  = totaldue
-                    )
+            if((status.lower() == "success")|(status.lower() == "s")):
+                
+                #if(len(tp)>0):
+                    #totcompanypays = float(common.getstring(tp[0].totalcompanypays))
+                    #totpaid = float(common.getstring(tp[0].totalpaid))
+                    #tottreatmentcost = float(common.getstring(tp[0].totaltreatmentcost))
+                    #totinspays = float(common.getstring(tp[0].totalinspays))
+                    #totaldue = tottreatmentcost - (totpaid + float(amount) + totinspays + totcompanypays)
+                    #db(db.treatmentplan.id == tplanid).update(
+                        #totalpaid = totpaid + float(amount),
+                        #totaldue  = totaldue
+                    #)
                     
+                    
+                    #here need to update treatmentplan tables
+                    account._updatetreatmentpayment(db, tplanid, paymentid)
+                    db.commit()                
+                
                     #Call Voucder success
                     vcobj = mdpbenefits.Benefit(db)
                     reqobj = {"paymentid" : paymentid}
-                    rspobj = json.loads(vcobj.voucher_success(reqobj))                    
+                    rspobj = json.loads(vcobj.voucher_success(reqobj))                 
+                
+                    #here need to update treatmentplan tables
+                    account._updatetreatmentpayment(db, tplanid, paymentid)
+                    db.commit()
+                
+                    #wallet_success
+                    reqobj = {}
+                    reqobj = {"paymentid" : paymentid}
+                    rspobj = json.loads(vcobj.wallet_success(reqobj))                 
+                    #here need to update treatmentplan tables
+                    account._updatetreatmentpayment(db, tplanid, paymentid)
+                    db.commit()                
+
+
+
 
                     #Call Benefit Success
                     trtmnt = db((db.treatment.id == treatmentid) & (db.treatment.is_active == True)).select()
@@ -1084,6 +1165,8 @@ class Payment:
                 }
                 bnftobj = mdpbenefits.Benefit(db)
                 rspObj = bnftobj.benefit_failure(obj)
+            
+            paytm = json.loads(account._calculatepayments(db, tplanid))
             
             paymentcallbackobj = {
                 "todaydate":common.getstringfromdate(dttodaydate,"%d/%m/%Y"),
@@ -1129,12 +1212,13 @@ class Payment:
                 "acctno":acctno,
                 "acctname":acctname,
                 "bankname":bankname,
-                "totalpaid":totalpaid,
-                "tottreatmentcost":tottreatmentcost,
-                "totcompanypays":totcompanypays,
-                "totinspays":totinspays,
-                "totaldue":totaldue,
-                "discount_amount":discount_amount
+                "totalpaid":paytm["totalpaid"],
+                "tottreatmentcost":paytm["totaltreatmentcost"],
+                "totcompanypays":paytm["totalcompanypays"],
+                "totinspays":paytm["totalinspays"],
+                "totaldue":paytm["totaldue"],
+                "discount_amount":paytm["discount_amount"],
+                "walletamount":paytm["walletamount"]
                 
             }
             

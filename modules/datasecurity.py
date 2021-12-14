@@ -63,6 +63,7 @@ from applications.my_pms2.modules import logger
 
 class DataSecurity:
     def __init__(self,db):
+        #logger.loggerpms2.info("Enter Data Security")
         self.db = db
         urlprops = db(db.urlproperties.id > 0).select()
         self.phpurl = urlprops[0].php_url if(len(urlprops) > 0) else "http://localhost:81"
@@ -71,6 +72,7 @@ class DataSecurity:
         return 
 
     def authenticate_api(self,avars):
+        #logger.loggerpms2.info("Enter Authenticate API - " + json.dumps(avars))
         db = self.db
         request = avars["request"]
         x_api_key = common.getstring(request.env.http_x_api_key)
@@ -87,6 +89,8 @@ class DataSecurity:
         
         encryption = avars["encryption"]
         rspobj = {}
+        
+        #logger.loggerpms2.info("x-API_KEY " + x_api_key + " " + self.x_api_key)
         if((x_api_key != self.x_api_key) | (x_api_key == "") | (self.x_api_key == "")):
             mssg = "Unauthorized API Call - Invalid API Key"
             rspobj = {}
@@ -94,8 +98,9 @@ class DataSecurity:
             rspobj["error_message"] = mssg
             return json.dumps(rspobj)
 
+        #logger.loggerpms2.info("Encryption Flags - " + str(common.getboolean(self.encryption)) + " " + str(common.getboolean(encryption)))
         if((self.encryption==True) & (encryption==False)):
-            mssg = "Unauthorized API Call - Invalid method"
+            mssg = "A Unauthorized API Call - Invalid method"
             rspobj = {}
             rspobj["result"] = "fail"
             rspobj["error_message"] = mssg

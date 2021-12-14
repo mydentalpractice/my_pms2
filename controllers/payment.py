@@ -834,6 +834,18 @@ def payment_success():
         #here need to update treatmentplan tables
         account._updatetreatmentpayment(db, tplanid, paymentid)
         db.commit()
+        
+        #here need to update treatmentplan tables
+        account._updatetreatmentpayment(db, tplanid, paymentid)
+        db.commit()
+    
+        #wallet_success
+        reqobj = {}
+        reqobj = {"paymentid" : paymentid}
+        rspobj = json.loads(vcobj.wallet_success(reqobj))                 
+        #here need to update treatmentplan tables
+        account._updatetreatmentpayment(db, tplanid, paymentid)
+        db.commit()                 
     
         trtmnt = db((db.treatment.id == treatmentid) & (db.treatment.is_active == True)).select()
         discount_amount = trtmnt[0].companypay if(len(trtmnt) > 0) else 0
@@ -2824,6 +2836,15 @@ def apply_voucher():
     #voucher
     voucher = common.getkeyvalue(request.vars,"voucher_code","")
     
+    #wallet type
+    wallet_type = common.getkeyvalue(request.vars,"wallet_type","SUPER_WALLET")
+    
+    #wallet amount
+    walletamount = float(common.getvalue(common.getkeyvalue(request.vars,"walletamount",0)))
+    
+    #memberid
+    memberid = int(common.getkeyvalue(request.vars,'patientmember',0))
+    
     #tplanid
     tplanid = int(common.getkeyvalue(request.vars,"treatmentplan","0"))
     tr = db((db.treatment.treatmentplan == tplanid) & (db.treatment.is_active == True)).select(db.treatment.id, db.treatment.copay)
@@ -2836,10 +2857,24 @@ def apply_voucher():
     rspobj = json.loads(bnft.apply_voucher(reqobj))
     vlist = rspobj["voucher_list"]
     displaymssg = rspobj["voucher_message"]
-    
-    
-   
     paytm=rspobj
+    
+    wlist = []
+    wallet_type = ""
+    
+    #get available wallet balance
+    reqobj = {}
+    reqobj["action"] = "getwallet_balance"
+    reqobj["member_id"] = memberid
+    reqobj["amount"] = paytm["totalcopay"]
+    bnftobj = mdpbenefits.Benefit(db)
+    rspobj = json.loads(bnftobj.getwallet_balance(reqobj))
+    if(rspobj["result"] == "success"):
+        wlist = rspobj["wallet_list"]
+    else:
+        wlist = []
+
+   
     
     return dict( 
                 treatmentcost=paytm["treatmentcost"],
@@ -2858,11 +2893,118 @@ def apply_voucher():
                 totalprecopay=paytm["totalprecopay"],
                 totalwalletamount=paytm["totalwalletamount"],
                 totaldiscount_amount=paytm["totaldiscount_amount"],
-                vlist=vlist,displaymssg=displaymssg,voucher=voucher
+                vlist=vlist,displaymssg=displaymssg,voucher=voucher,
+                wallet_type = wallet_type,wlist=wlist
                 )    
     
  
+def apply_wallet():
+    logger.loggerpms2.info("Enter Apply Wallet")
+    
+    
+    #wallet type
+    wallet_type = common.getkeyvalue(request.vars,"wallet_type","SUPER_WALLET")
 
+    #wallet type
+    walletamount = float(common.getvalue(common.getkeyvalue(request.vars,"walletamount",0)))
+
+    #voucher
+    voucher = common.getkeyvalue(request.vars,"voucher_code","")
+    
+    #voucher discount
+    discount_amount = float(common.getvalue(common.getkeyvalue(request.vars,"discount_amount",0)))
+    
+    #memberid
+    memberid = int(common.getkeyvalue(request.vars,'patientmember',0))
+    
+    #memberid
+    providerid = int(common.getkeyvalue(request.vars,'provider',0))
+    
+    #tplanid
+    tplanid = int(common.getkeyvalue(request.vars,"treatmentplan","0"))
+    tr = db((db.treatment.treatmentplan == tplanid) & (db.treatment.is_active == True)).select(db.treatment.id, db.treatment.copay)
+    treatmentid = tr[0].id if (len(tr) > 0) else 0    
+ 
+    reqobj = {}
+    reqobj["treatmentid"] = treatmentid
+    reqobj["wallet_type"] = wallet_type
+    reqobj["walletamount"] = walletamount
+    
+    bnft = mdpbenefits.Benefit(db)
+    rspobj = json.loads(bnft.apply_wallet(reqobj))
+    
+    if(rspobj["result"] == "success"):
+        wlist = rspobj["wlist"]
+    else:
+        wlist=[]
+    displaymssg = ""
+   
+    prov = db((db.provider.id == providerid) & (db.provider.is_active == True)).select()
+    city = prov[0].city if(len(prov) != 0) else "Jaipur"
+
+    regionid = common.getregionidfromcity(db,city)
+    regioncode =  common.getregioncodefromcity(db,city)
+
+    members = db((db.patientmember.id == memberid) & (db.patientmember.is_active == True)).select(db.patientmember.company,db.patientmember.city,db.patientmember.st)
+    companyid = common.getid(members[0].company) if (len(members) == 1) else "0"
+    c = db((db.company.id == companyid) & (db.company.is_active == True)).select(db.company.company)
+    companycode = c[0].company if (len(c) ==1) else ""
+
+    cp = db(db.companypolicy.companycode == companycode).select()
+    policy = cp[0].policy if(len(cp) != 0) else ""
+
+    #determine member's city & state
+    city = members[0].city if(len(members)>0) else "Jaipur"
+    st = members[0].st if(len(members)>0) else "Rajasthan (RJ)"
+    c = db(db.cities.city == city).select(db.cities.id)
+    cityid = c[0].id if(len(c) > 0) else 0       
+    
+    reqobj  = {}
+    reqobj["treatment_id"] = int(treatmentid) 
+    reqobj["member_id"] = int(memberid)
+    reqobj["plan_code"] = policy
+    reqobj["state"] = st
+    reqobj["city_id"] = int(cityid)
+
+
+    vlist = []
+    
+    displaymssg = ""
+
+    bnftobj = mdpbenefits.Benefit(db)    
+    rspobj = json.loads(bnftobj.getVoucherList(reqobj))
+    if(rspobj["result"] == "fail"):
+        vlist = []
+    else:
+        vlist = rspobj["voucher_list"]    
+
+   
+   
+    
+    paytm=json.loads(account._calculatepayments(db,tplanid))
+    
+    return dict( 
+                treatmentcost=paytm["treatmentcost"],
+                copay=paytm["copay"],
+                inspays=paytm["inspays"],
+                companypays=paytm["companypays"],
+                walletamount=walletamount,
+                discount_amount=paytm["discount_amount"],
+                totaltreatmentcost=paytm["totaltreatmentcost"],
+                totalinspays=paytm["totalinspays"],
+                totalcopay=paytm["totalcopay"],
+                totalpaid=paytm["totalpaid"],
+                totaldue=paytm["totaldue"],
+                totalcompanypays=paytm["totalcompanypays"],
+                precopay=paytm["precopay"],
+                totalprecopay=paytm["totalprecopay"],
+                totalwalletamount=paytm["totalwalletamount"],
+                totaldiscount_amount=paytm["totaldiscount_amount"],
+                vlist=vlist,wlist=wlist,displaymssg=displaymssg,voucher=voucher,
+                wallet_type = wallet_type
+                )    
+    
+ 
 
 #These two lines are commented because create_payment is also called from mobile browser, hence no check to require
 #@auth.requires(auth.has_membership('provider') or auth.has_membership('webadmin')) 
@@ -2885,9 +3027,6 @@ def create_payment():
     patient = ""
     fullname = ""
     hmopatientmember = True
-    
-   
-    
 
     prov = db((db.provider.id == providerid) & (db.provider.is_active == True)).select()
     city = prov[0].city if(len(prov) != 0) else "Jaipur"
@@ -2962,10 +3101,8 @@ def create_payment():
         vlist = []
     else:
         vlist = rspobj["voucher_list"]    
+    
 
-    
-  
-    
     #payment modes are dependant on the company
     online = True
     cashless = True
@@ -3055,7 +3192,8 @@ def create_payment():
         wlist = rspobj["wallet_list"]
     else:
         wlist = []
-    
+
+        
     return dict(formA=formA,formB=formB,formC=formC, patient=patient,fullname=fullname,hmopatientmember=hmopatientmember,providername=provdict["providername"],
                 providerid=provdict["providerid"],page=page,returnurl=returnurl,memberid=memberid,tplanid=tplanid,treatment=treatment,
                 treatmentcost=paytm["treatmentcost"],copay=paytm["copay"],inspays=paytm["inspays"],companypays=paytm["companypays"],

@@ -25,7 +25,7 @@ from applications.my_pms2.modules import mdpappointment
 from applications.my_pms2.modules import account
 from applications.my_pms2.modules import mdpreligare
 from applications.my_pms2.modules import mdpprocedure
-
+from applications.my_pms2.modules import mdprules
 from mdpreligare import Religare
 
 
@@ -573,6 +573,51 @@ class Customer:
         return json.dumps(jsonresp)
 
     
+    #def customer_dependant(self,avars):
+        #logger.loggerpms2.info("Enter customer dependant " + json.dumps(avars))
+        #db = self.db
+        #customer_ref = common.getkeyvalue(avars, "customer_ref", "")
+        #customer_ref = customer_ref if(customer_ref != "") else common.getkeyvalue(avars,"cell","")
+        
+        #c = db((db.customer.customer_ref == customer_ref) & (db.customer.is_active == True)).select()
+        #customer_id = c[0].id if(len(c) == 1) else 0
+        
+        #respobj = {}
+        #if(customer_id == 0):
+            #logger.loggerpms2.info("Customer Dependant Error - Invalid Customer " )
+            #respobj["result"] = "fail"
+            #respobj["error_message"] = "Customer Dependant Error - Invalid Customer "
+            #return json.dumps(respobj)
+        
+          
+
+        #deps = avar["dependant_list"]
+        #depcount = 0
+        #for dep in deps:
+            #depcount++
+            #depid = db.customerdependants.insert(
+                #customer_id = customer_id,
+                #fname = dep.fname,
+                #lname = dep.lname,
+                #mname = dep.mname,
+                #dob = common.getdatefromstring(dep.dob,"%d/%m/%Y"),
+                #gender = dep.gender,
+                #relation = dep.relation,
+                #dependant_ref = customer_ref + "_" + str(depcount),
+                #is_active = True,
+                #created_by = 1,
+                #created_on = common.getISTCurrentLocatTime(),
+                #modified_by = 1,
+                #modified_on = common.getISTCurrentLocatTime()
+            #)
+            
+
+        #respobj = {}
+        #logger.loggerpms2.info("Customer Dependant Success  " + str(depcount))
+        #respobj["result"] = "success"
+        #respobj["error_message"] = ""
+        #return json.dumps(respobj)
+        
     def customer(self,avars):
         logger.loggerpms2.info("Enter customer " + json.dumps(avars))
         db = self.db
@@ -591,10 +636,12 @@ class Customer:
         jsonresp={}
         if(customer_ref != ""):
             c = db((db.customer.customer_ref == customer_ref) & (db.customer.is_active == True)).select(db.customer.id, db.customer.customer_ref)
+            
             if(len(c) == 0):
                 #new custoemr
                 jsonresp = json.loads(self.new_customer(avars))
                 jsonresp["new_customer"] = True
+                
             else:
                 #update customer
                 jsonresp = json.loads(self.update_customer(avars))
@@ -1426,7 +1473,25 @@ class Customer:
                 
                 )
                 
-            
+                #if a customer/member is successfully enrolled, then we have to create a wallet and credit it with voucher amount
+                plan_id = int(common.getkeyvalue(jsonresp,"hmoplan","0"))
+                company_id = int(common.getkeyvalue(jsonresp,"company","0"))
+                member_id = int(common.getkeyvalue(jsonresp,"primarypatientid","0"))
+                
+                plans = db((db.hmoplan.id == plan_id) & (db.hmoplan.is_active == True)).select(db.hmoplan.hmoplancode)
+                cos = db((db.company.id == company_id) & (db.company.is_active == True)).select(db.company.company)
+                
+                avars={}
+                avars["plan_code"] = plans[0].hmoplancode if(len(plans) == 1) else "PREMWALKIN"
+                avars["company_code"] = cos[0].company if(len(plans) == 1) else "MDP"                            
+                avars["member_id"] = member_id
+                avars["rule_event"] = "enroll_customer"
+                rulesobj = mdprules.Plan_Rules(db)
+                rspobj = json.loads(rulesobj.Get_Plan_Rules(avars))
+                if(rspobj["result"] == "fail"):
+                    jsonresp["result"] = "fail"
+                    jsonresp["error_message"] = "Error Enrolling a Customer "
+                    
             elif(count == 1):
                 #patient member is already enrolled
                 logger.loggerpms2.info("Enroll_Custoemr - Count = 1")

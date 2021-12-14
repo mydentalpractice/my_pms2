@@ -349,8 +349,13 @@ class Treatment:
             for treatment in treatments:
                 treatmentid = int(common.getid(treatment.vw_treatmentlist.id))
                 tplanid = int(common.getid(treatment.vw_treatmentlist.tplanid))
-                r= self.updatetreatmentcostandcopay(treatmentid, tplanid)
+                r = json.load(account._calculatepayments(db,tplanid))
+                #r= self.updatetreatmentcostandcopay(treatmentid, tplanid)
+                
+                          
+
                 treatmentobj = {
+                    "providerid":int(common.getid(treatment.vw_treatmentlist.providerid)),
                     "treatmentid" : treatmentid,
                     "treatment": common.getstring(treatment.vw_treatmentlist.treatment),
                     "treatmentdate"  : (treatment.vw_treatmentlist.startdate).strftime("%d/%m/%Y"),
@@ -368,7 +373,7 @@ class Treatment:
                     "totalcopay":float(common.getstring(r["totalcopay"])),
                     "totalinspays":float(common.getstring(r["totalinspays"])),
                     "totaldue":float(common.getstring(r["totaldue"])),
-                    "totalpaid":float(common.getstring(r["totaltreatmentcost"]))-float(common.getstring(r["totaldue"])),
+                    "totalpaid":float(common.getstring(r["totalpaid"]))
                    
                     
                 }
@@ -409,7 +414,7 @@ class Treatment:
         for tp in tps:
             proc = db(db.procedurepriceplan.id == tp.dentalprocedure).select(db.dentalprocedure.shortdescription,
                                                                              left=db.dentalprocedure.on(db.dentalprocedure.dentalprocedure == db.procedurepriceplan.procedurecode ))
-            procs = procs + (proc[0].shortdescription + ";" if(len(proc) >= 1) else "")
+            procs = procs + (common.getstring(proc[0].shortdescription) + ";" if(len(proc) >= 1) else "")
         
         return procs
     
@@ -505,8 +510,39 @@ class Treatment:
             for treatment in treatments:
                 treatmentid = int(common.getid(treatment.vw_treatmentlist_fast.id))
                 tplanid = int(common.getid(treatment.vw_treatmentlist_fast.tplanid))
-                r= self.updatetreatmentcostandcopay(treatmentid, tplanid)
+                hv = db(db.hv_treatment.treatmentid == treatmentid).count()
+                hv = False if(hv == 0) else True
+                #r= self.updatetreatmentcostandcopay(treatmentid, tplanid)
+                r = json.loads(account._calculatepayments(db,tplanid))
+                #logger.loggerpms2.info("TPLAN ID Treatment id = " + str(tplanid) + " " + str(treatmentid))
+                #logger.loggerpms2.info("r = " + json.dumps(r))
+                
+                
+                #providerid=int(common.getid(treatment.vw_treatmentlist_fast.providerid))
+                #treatmentid =treatmentid
+                #xtreatment= common.getstring(treatment.vw_treatmentlist_fast.treatment)
+                #treatmentdate  = (treatment.vw_treatmentlist_fast.startdate).strftime("%d/%m/%Y")
+                #status="Started" if(common.getstring(treatment.vw_treatmentlist_fast.status) == "") else common.getstring(treatment.vw_treatmentlist_fast.status)
+
+                #patientname = common.getstring(treatment.vw_treatmentlist_fast.patientname)
+                
+                #patcell=str(treatment.patientmember.cell)
+               
+                #doctorname=treatment.vw_treatmentlist_fast.doctorname
+               
+                
+                #clinicname=treatment.vw_treatmentlist_fast.clinicname
+
+                #procedures= self.getproceduresfromtreatment(treatmentid) #common.getstring(treatment.vw_treatment_procedure_group.shortdescription),
+               
+                #totaltreatmentcost=float(common.getstring(r["totaltreatmentcost"]))
+                #totalcopay=float(common.getstring(r["totalcopay"]))
+                #totalinspays=float(common.getstring(r["totalinspays"]))
+                #totaldue=float(common.getstring(r["totaldue"]))
+                #totalpaid=float(common.getstring(r["totalpaid"]))                
+
                 treatmentobj = {
+                    "providerid":int(common.getid(treatment.vw_treatmentlist_fast.providerid)),
                     "treatmentid" : treatmentid,
                     "treatment": common.getstring(treatment.vw_treatmentlist_fast.treatment),
                     "treatmentdate"  : (treatment.vw_treatmentlist_fast.startdate).strftime("%d/%m/%Y"),
@@ -527,7 +563,8 @@ class Treatment:
                     "totalcopay":float(common.getstring(r["totalcopay"])),
                     "totalinspays":float(common.getstring(r["totalinspays"])),
                     "totaldue":float(common.getstring(r["totaldue"])),
-                    "totalpaid":float(common.getstring(r["totaltreatmentcost"]))-float(common.getstring(r["totaldue"])),
+                    "totalpaid":float(common.getstring(r["totalpaid"])),
+                    "hv":hv
                    
                     
                 }
@@ -722,7 +759,8 @@ class Treatment:
                 #logger.loggerpms2.info("Enter Get Treatment API - A1 " + str(len(c)))
                 
                 tplanid = int(common.getid(treatment[0].vw_treatmentlist.tplanid))
-                r = self.updatetreatmentcostandcopay(treatmentid, tplanid)
+                #r = self.updatetreatmentcostandcopay(treatmentid, tplanid)
+                r = json.loads(account._calculatepayments(db,tplanid))
                 #logger.loggerpms2.info("Enter Get Treatment API - A2 ")
                 
                 memberid = int(common.getid(treatment[0].vw_treatmentlist.memberid))
@@ -737,7 +775,7 @@ class Treatment:
                
                 
                 treatmentobj = {
-                    
+                    "providerid":providerid,
                     "treatmentid":treatmentid,
                     "tplanid":tplanid,
                     "treatment": common.getstring(treatment[0].vw_treatmentlist.treatment),
@@ -761,7 +799,7 @@ class Treatment:
                     "totalcopay":float(common.getstring(r["totalcopay"])),
                     "totalinspays":float(common.getstring(r["totalinspays"])),
                     "totaldue":float(common.getstring(r["totaldue"])),
-                    "totalpaid":float(common.getstring(r["totaltreatmentcost"])) - float(common.getstring(r["totaldue"])),
+                    "totalpaid":float(common.getstring(r["totalpaid"])),
                     "showSendForAuthorization":showSendForAuthorization(\
                                                                         "Started" if(common.getstring(treatment[0].vw_treatmentlist.status) == "") else common.getstring(treatment[0].vw_treatmentlist.status), \
                                                                         False if(len(c) <= 0) else ((len(procs)>0) & common.getboolean(c[0].authorizationrequired)),\
@@ -967,7 +1005,7 @@ class Treatment:
              
         
         treatmentobj = {}
-        
+        hv = self.hv
         
        
         
@@ -988,7 +1026,8 @@ class Treatment:
                 #logger.loggerpms2.info("Enter Get Treatment API - A1 " + str(len(c)))
                 
                 tplanid = int(common.getid(treatment[0].tplanid))
-                r = self.updatetreatmentcostandcopay(treatmentid, tplanid)
+                #r = self.updatetreatmentcostandcopay(treatmentid, tplanid)
+                r = json.loads(account._calculatepayments(db,tplanid))
                 #logger.loggerpms2.info("Enter Get Treatment API - A2 ")
                 
                 memberid = int(common.getid(treatment[0].memberid))
@@ -998,7 +1037,16 @@ class Treatment:
                 providerid =  int(common.getid(tr[0].provider)) if(len(r) == 1) else 0
                 self.providerid = providerid
                 
-                procedurepriceplancode = mdputils.getprocedurepriceplancodeformember(db,providerid,memberid,patientid)
+                
+                hv = db(db.hv_treatment.treatmentid == treatmentid).count()
+                hv = False if(hv == 0) else True
+                
+                if(hv==False):
+                    procedurepriceplancode = mdputils.getprocedurepriceplancodeformember(db,providerid,memberid,patientid)
+                else:
+                    procedurepriceplancode = mdputils.getprocedurepriceplancodeforHVmember(db,providerid,memberid,patientid)                
+
+                
                 
                 
                 #logger.loggerpms2.info("Enter Get Treatment API - B")
@@ -1015,6 +1063,7 @@ class Treatment:
             
                 treatmentobj = {
                     
+                    "providerid":providerid,
                     "treatmentid":treatmentid,#
                     "tplanid":tplanid,#
                     "treatment": common.getstring(treatment[0].treatment),#
@@ -1040,7 +1089,7 @@ class Treatment:
 
                     
                     "plan":  procedurepriceplancode,   #IB:15-Mar-2020 common.getstring(treatment[0].vw_memberpatientlist.procedurepriceplancode),#
-                    
+                    "hv":hv,
                     "authorization": False if(len(c) <= 0) else ((len(procs)>0) & common.getboolean(c[0].authorizationrequired)),#
                     "authorized": True if(common.getstring(treatment[0].status) == "Authorized") else False,#
                     "totaltreatmentcost":float(common.getstring(r["totaltreatmentcost"])),#

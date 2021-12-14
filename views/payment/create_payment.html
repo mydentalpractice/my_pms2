@@ -77,57 +77,28 @@
 						{{=precopay}}
 						</td>
 					     </tr>
-					      <tr>
-						<td>
-						<label class="m_title">Wallet Amount</label>
-						</td>
-						
-						<td>
-						{{=walletamount}}
-						</td>
-					     </tr>
+					    
 					     
-					      <tr>
-					      <td>
+					      <!--<tr>-->
+					      <!--<td>-->
                                               
 					      
 						      
-							<label class="m_title">Voucher</label>
-							      <div class="input-group" style="width:100%">
-								<select  class="form-control" id="vouchers" name="vouchers">
-		       {{ for i in xrange(0, len(vlist)): }}
-			 <option id="optvoucher" value={{=vlist[i]["voucher_code"]}}>{{=vlist[i]["voucher_code"]}} ({{=vlist[i]["voucher_message"]}})</option>
-			{{pass}}
-		      </select>
+							<!--<label class="m_title">Voucher</label>-->
+							      <!--<div class="input-group" style="width:100%">-->
+								<!--<select  class="form-control" id="vouchers" name="vouchers">-->
+		       <!--{ for i in xrange(0, len(vlist)): }}-->
+			 <!--<option id="optvoucher" value={=vlist[i]["voucher_code"]}}>{=vlist[i]["voucher_code"]}} ({=vlist[i]["voucher_message"]}})</option>-->
+			<!--{pass}}-->
+		      <!--</select>-->
 				    
-							      </div>
+							      <!--</div>-->
 						       				      
-					      </td>
-					      <td>
-					       <button id="VC" style="margin: 8px 3px;float:left"  type="button"  onclick="loader(this.id),applyVoucher()" class="btn green" >Apply Voucher<i class="fa fa-spinner fa-spin" id="loaderDIVVC" style="display:none"></i></button>
-					      </td>
-					      </tr>
-					      <tr>
-					      <td>
-					      
-					      
-						      
-							<label class="m_title">Wallet</label>
-							      <div class="input-group" style="width:100%">
-								<select  class="form-control" id="wallets" name="wallets">
-		       {{ for i in xrange(0, len(wlist)): }}
-			 <option id="optwallet" value={{=wlist[i]["wallet_amount"]}}>{{=wlist[i]["wallet_amount"]}}:{{=wlist["wallet_type"]}} ({{=wlist[i]["wallet_message"]}})</option>
-			{{pass}}
-		      </select>
-				    
-							      </div>
-										      
-					      </td>
-					      <td>
-					       <button id="VC" style="margin: 8px 3px;float:left"  type="button"  onclick="loader(this.id),applyVoucher()" class="btn green" >Apply Voucher<i class="fa fa-spinner fa-spin" id="loaderDIVVC" style="display:none"></i></button>
-					      </td>
-					      </tr>
-					      
+					      <!--</td>-->
+					      <!--<td>-->
+					       <!--<button id="VC" style="margin: 8px 3px;float:left"  type="button"  onclick="loader(this.id),applyVoucher()" class="btn green" >Apply Voucher<i class="fa fa-spinner fa-spin" id="loaderDIVVC" style="display:none"></i></button>-->
+					      <!--</td>-->
+					      <!--</tr>-->
 					      <tr>
 						<td>
 						<label class="m_title">Discount</label>
@@ -138,9 +109,41 @@
 						{{=discount_amount}}
 						</td>
 					     </tr>
+					      
+					      
+					      <!--<tr>-->
+					      <!--<td>-->
+					      
+					      
+						      
+							<!--<label class="m_title">Wallet</label>-->
+							      <!--<div class="input-group" style="width:100%">-->
+								<!--<select  class="form-control" id="wallets" name="wallets">-->
+		       <!--{ for i in xrange(0, len(wlist)): }}-->
+			 <!--<option id="optwallet" value={=wlist[i]["wallet_amount"]}}:{=wlist[i]["wallet_type"]}}>{=wlist[i]["wallet_amount"]}}:{=wlist[i]["wallet_type"]}} ({=wlist[i]["wallet_message"]}})</option>-->
+			<!--{{pass}}-->
+		      <!--</select>-->
+				    
+							      <!--</div>-->
+										      
+					      <!--</td>-->
+					      <!--<td>-->
+					       <!--<button id="WL" style="margin: 8px 3px;float:left"  type="button"  onclick="loader(this.id),applyWallet()" class="btn green" >Apply Wallet<i class="fa fa-spinner fa-spin" id="loaderDIVWL" style="display:none"></i></button>-->
+					      <!--</td>-->
+					      <!--</tr>-->
+					      
 					      <tr>
 						<td>
-						<label class="m_title">Company Pays</label>
+						<label class="m_title">Wallet Amount</label>
+						</td>
+						
+						<td>
+						{{=walletamount}}
+						</td>
+					     </tr>					    
+					     <tr>
+						<td>
+						<label class="m_title">Plan Benefits</label>
 
 						</td>
 						
@@ -346,8 +349,8 @@
 {{=formA.custom.widget.bankname}}
 {{=formA.custom.widget.policy}}
 {{=formA.custom.widget.voucher_code}}
-
-
+{{=formA.custom.widget.walletamount}}
+{{=formA.custom.widget.wallet_type}}
 </div> 
                         
 
@@ -510,6 +513,7 @@ function makeChequePayment(){
 function applyVoucher(){
     alert("Enter Apply Voucher")
     
+    //Voucher Code
     var vcopts = document.getElementById("vouchers");
     var vc = vcopts.options[vcopts.selectedIndex].value;
     alert("Voucher ID = " + vc)
@@ -517,12 +521,38 @@ function applyVoucher(){
     x.value = vc;    
     alert("XVC " + x.value)
     
-    ajax('{{=URL('payment','apply_voucher')}}', ['voucher_code','treatmentplan'], 'vcdiv');
+    ajax('{{=URL('payment','apply_voucher')}}', ['voucher_code','discount_amount','wallet_type','walletamount','patientmember','treatmentplan'], 'vcdiv');
 
    
 
 }
 
+
+function applyWallet(){
+    alert("Enter Apply Wallet")
+    
+    var wlopts = document.getElementById("wallets");
+    var wl = wlopts.options[wlopts.selectedIndex].value;
+    alert("Wllaet  = " + wl)
+    
+    var arr = wl.split(":")
+    alert("Arr[0] " + arr[0] + " arr[1]" + arr["1"])
+    
+    var x = document.getElementById("payment_walletamount")
+    x.value = arr[0];    
+    alert("Wall-0 " + x.value)
+    var y = document.getElementById("payment_wallet_type")
+    y.value = arr[1];    
+    alert("Wall-1 " + y.value)
+    
+    
+    
+
+    ajax('{{=URL('payment','apply_wallet')}}', ['voucher_code','discount_amount','wallet_type','walletamount','patientmember','treatmentplan','provider'], 'vcdiv');
+
+   
+
+}
 
 
 </script>

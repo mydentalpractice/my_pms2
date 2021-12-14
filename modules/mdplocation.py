@@ -319,7 +319,8 @@ class Location:
     
   #Returns list of clinics within a radius of the origin location
   def getclinicswithinradius(self,originlat,originlong,radius,unit):
-        
+      
+      logger.loggerpms2.info("Enter getclinicwithinradius" + str(originlat) + " " + str(originlong) + " " + str(radius))
       db = self.db
       auth = current.auth
       
@@ -327,8 +328,9 @@ class Location:
         
         clnlist = []
         clnobj = {}
+        dlist = []
         
-        clns = db((db.vw_clinic.id > 0 ) &\
+        clns = db((db.vw_clinic.id > 0 ) & (db.provider.available == True) &\
                    db.vw_clinic.is_active == True).select(db.provider.id,
                                                           db.provider.provider,
                                                           db.provider.providername,
@@ -352,6 +354,10 @@ class Location:
 
         for cln in clns:
           if((common.isfloat(common.getvalue(cln.vw_clinic.latitude)) == False) | (common.isfloat(common.getvalue(cln.vw_clinic.longitude)) == False)):
+            
+            #logger.loggerpms2.info("GetClinics within radius Clinics Loop - Null Lat Long\n")
+            #logger.loggerpms2.info(str(cln.vw_clinic.clinicid) + " " + common.getstring(cln.vw_clinic.name) + " " + \
+            #common.getstring(cln.vw_clinic.city) + " " + common.getstring(cln.vw_clinic.pin))
             continue
         
           
@@ -363,10 +369,11 @@ class Location:
           dist = round(float(common.getstring(jsonobj.get("distance","0.0"))),2)
           
           #if provider distance is within radius, then add to the list
-          if(dist <= radius):
-            logger.loggerpms2.info("Radius="+ str(radius) + "-Long/Lat:" + cln.vw_clinic.name + ":" + str(cln.vw_clinic.longitude) + ":" + str(cln.vw_clinic.latitude))
+          if((dist <= radius) & (common.getboolean(cln.provider.available == True))):
+            #logger.loggerpms2.info("Distance="+ str(dist) + "-Long/Lat:" + cln.vw_clinic.name + ":" + str(cln.vw_clinic.longitude) + ":" + str(cln.vw_clinic.latitude))
+            dlist.append(dist)
             clnobj={
-            
+              "distance":str(dist),
               "providerid":int(common.getid(cln.provider.id)),
               "provider":common.getstring(cln.provider.provider),
               "providername":common.getstring(cln.provider.providername),
@@ -387,6 +394,16 @@ class Location:
             
             clnlist.append(clnobj)
         
+        
+        dlist.sort()
+        clnlist1 = []
+        
+        for d in dlist:
+          for c in clnlist:
+            if(float(c["distance"]) == float(d)):
+              clnlist1.append(c)
+              continue
+          
         clnobj = {
         
           "result":"success",
@@ -396,7 +413,7 @@ class Location:
            
            "originlat":originlat,
            "originlong":originlong,
-           "clnlist":clnlist,
+           "clnlist":clnlist1,
         } 
         
         return json.dumps(clnobj)

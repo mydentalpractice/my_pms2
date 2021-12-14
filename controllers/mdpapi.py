@@ -53,6 +53,7 @@ from applications.my_pms2.modules import mdppinelabs
 from applications.my_pms2.modules import mdpbenefits
 from applications.my_pms2.modules import mdpdevice
 from applications.my_pms2.modules import mdpplan
+from applications.my_pms2.modules import mdprules
 
 from applications.my_pms2.modules import logger
 
@@ -2296,7 +2297,7 @@ def getproviderswithinradius(avars):
     return rsp
 
 def getclinicswithinradius(avars):
-    
+    logger.loggerpms2.info("Enter getclinics within radius " + json.dumps(avars))
     oloc = mdplocation.Location(current.globalenv['db'])
     rsp = oloc.getclinicswithinradius(float(common.getstring(avars["originlat"])) if "originlat" in avars else 0,
                                            float(common.getstring(avars["originlong"])) if "originlong" in avars else 0,                                           
@@ -3032,6 +3033,7 @@ def callback_transaction(avars):
     rsp = obj.callback_transaction(avars)
     return rsp
 
+
 def mdp_shopse_webhook(avars):
     
     obj = mdpshopse.Shopse(current.globalenv['db'])
@@ -3154,6 +3156,12 @@ def voucher_success(avars):
     
     return rsp
 
+def wallet_success(avars):
+    
+    obj = mdpbenefits.Benefit(current.globalenv['db'])
+    rsp = obj.wallet_success(avars)
+    
+    return rsp
 
 def benefit_success(avars):
     
@@ -3189,6 +3197,17 @@ def getVoucherList(avars):
 def apply_voucher(avars):
     obj = mdpbenefits.Benefit(current.globalenv['db'])
     rsp = obj.apply_voucher(avars)
+    return rsp
+
+def apply_wallet(avars):
+    obj = mdpbenefits.Benefit(current.globalenv['db'])
+    rsp = obj.apply_wallet(avars)
+    return rsp
+
+
+def reverse_voucher(avars):
+    obj = mdpbenefits.Benefit(current.globalenv['db'])
+    rsp = obj.reverse_voucher(avars)
     return rsp
 
 def create_wallet(avars):
@@ -3244,6 +3263,10 @@ def callback_transaction(avars):
     rsp = obj.callback_transaction(avars)
     return rsp
     
+def callback_transaction_prem(avars):
+    obj = mdppinelabs.PineLabs(current.globalenv['db'])
+    rsp = obj.callback_transaction_prem(avars)
+    return rsp
 
 
 def pinelabs_encrypt(avars):
@@ -3258,6 +3281,11 @@ def pinelabs_payment(avars):
     rsp = obj.pinelabs_payment(avars)
     return rsp
 
+def pinelabs_payment_prem(avars):
+    logger.loggerpms2.info("Enter Pine Labs Payment API\n" + str(avars) )
+    obj = mdppinelabs.PineLabs(current.globalenv['db'])
+    rsp = obj.pinelabs_payment_prem(avars)
+    return rsp
 
 ############################# END CF API  ###################################################
 
@@ -3412,9 +3440,23 @@ def get_plan_premium(avars):
 
 ############################# END OF PLAN API  ###################################################
 
+############################# START OF PRICING API  ###################################################
+def get_procedure_fees(avars):
+    oprc = mdprules.Pricing(db)
+    rsp = oprc.Get_Procedure_Fees(avars)
+    return rsp
+
+############################# END OF PRICING API  ###################################################
+
+
 def unknown(avars):
     return dict()
 
+
+rulesAPI_switcher={
+    
+    "get_procedure_fees":get_procedure_fees
+}
 
 planAPI_switcher={
     
@@ -3461,7 +3503,9 @@ hvdocAPI_switcher = {
 pinelabsAPI_switcher = {
     "pinelabs_encrypt":pinelabs_encrypt,
     "pinelabs_payment":pinelabs_payment,
-    "callback_transaction":callback_transaction
+    "pinelabs_payment_prem":pinelabs_payment_prem,
+    "callback_transaction":callback_transaction,
+    "callback_transaction_prem":callback_transaction_prem,
 }
 
 
@@ -3487,7 +3531,10 @@ benefitsAPI_switcher = {
     "calculateVoucher":calculateVoucher,
     "getVoucherList":getVoucherList,
     "voucher_success":voucher_success,
+    "wallet_success":wallet_success,
     "apply_voucher":apply_voucher,
+    "apply_wallet":apply_wallet,
+    "reverse_voucher":reverse_voucher,
     "create_wallet":create_wallet,
     "getwallet_balance":getwallet_balance,
     "credit_wallet":credit_wallet
@@ -3646,7 +3693,9 @@ def mdpapi():
     def POST(*args, **vars):
 	i = 0
         try:
+	    #logger.loggerpms2.info(">>Enter MDP API==>>")
 	    dsobj = datasecurity.DataSecurity(current.globalenv['db'])
+	    #logger.loggerpms2.info(">>Exit Data Security MDP API==>>")
             encryption = vars.has_key("req_data")
 	    
 	    avars = {
@@ -3656,18 +3705,18 @@ def mdpapi():
 	    rspobj = json.loads(dsobj.authenticate_api(avars))
 	    if(rspobj["result"] == "fail"):
 		mssg = rspobj["error_message"]
-		
+		logger.loggerpms2.info(">>MDP API A ==>>" + mssg)
 		raise Exception(mssg)
 		
 
 	    if(encryption):
-		#logger.loggerpms2.info(">>MDP API with Encryption")
+		logger.loggerpms2.info(">>MDP API with Encryption")
 		encrypt_req = vars["req_data"]
 		vars = json.loads(dsobj.decrypts(encrypt_req))		
 
 	    #decrypted request date
 	    action = common.getkeyvalue(vars,"action","") #str(vars["action"])
-	    #logger.loggerpms2.info(">>MEDIA API ACTION==>>" + action)
+	    logger.loggerpms2.info(">>MEDIA API ACTION==>>" + action)
        
 	    #return json.dumps({"action":action})
             rsp = mdpapi_switcher.get(action,unknown)(vars)
@@ -4653,6 +4702,64 @@ def planAPI():
 	    
 	except Exception as e:
 	    mssg = "PLAN API Exception Error =>>\n" + str(e)
+	    logger.loggerpms2.info(mssg)
+	    excpobj = {}
+	    excpobj["result"] = "fail"
+	    excpobj["error_code"] = "MDP404"
+	    excpobj["error_message"] = mssg
+	    return json.dumps(excpobj)    	    
+
+    def PUT(*args, **vars):
+	return dict()
+
+    def DELETE(*args, **vars):
+	return dict()
+
+    return locals()
+
+
+@request.restful()
+def rulesAPI():
+    response.view = 'generic' + request.extension
+    def GET(*args, **vars):
+	return
+
+    def POST(*args, **vars):
+	i = 0
+	try:
+	    #logger.loggerpms2.info(">>Enter Pricing API==>>")
+	    dsobj = datasecurity.DataSecurity(current.globalenv['db'])
+	    encryption = vars.has_key("req_data")
+	    avars = {
+	      "encryption" : encryption,
+	      "request":request
+	    }
+	    rspobj = json.loads(dsobj.authenticate_api(avars))
+	    if(rspobj["result"] == "fail"):
+		mssg = rspobj["error_message"]
+		raise Exception(mssg)
+		    
+		    
+	    
+	    if(encryption):
+		#logger.loggerpms2.info(">>Device with Encryption")
+		encrypt_req = vars["req_data"]
+		vars = json.loads(dsobj.decrypts(encrypt_req))
+	    
+	    #decrypted request date
+	    action = common.getkeyvalue(vars,"action","") #str(vars["action"])
+	    #logger.loggerpms2.info(">>PLAN ACTION==>>" + action)
+	    
+	    #return json.dumps({"action":action})
+	    rsp = rulesAPI_switcher.get(action,unknown)(vars)
+	    common.setcookies(response)
+	    if(encryption):
+		return json.dumps({"resp_data":dsobj.encrypts(rsp)})
+	    else:
+		return rsp
+	    
+	except Exception as e:
+	    mssg = "PRICING API Exception Error =>>\n" + str(e)
 	    logger.loggerpms2.info(mssg)
 	    excpobj = {}
 	    excpobj["result"] = "fail"

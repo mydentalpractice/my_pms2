@@ -507,7 +507,7 @@ class Patient:
       #if(patientsearch != ""):
         #qry = ((qry) & ((db.vw_memberpatientlist.patient.like("%" + patientsearch + "%")) | (db.vw_memberpatientlist.patientmember.like("%" + patientmembersearch + "%"))))
         
-      logger.loggerpms2.info("Search Query = " + str(qry))
+      #logger.loggerpms2.info("Search Query = " + str(qry))
       
       
       #is it numeric only, then search on cell numbero
@@ -1876,8 +1876,7 @@ class Patient:
           year            = timedelta(days=365)
       
         #for plan RPRIP 99, the end date is for lifetime (100 years from premstart dt)
-        c = db(db.company.company == 'RPIP99').count()
-        if(c==1):
+        if(companycode == "RPIP99"):
           year = timedelta(days = 365 * 100)
         
         premenddt = (premstartdt + year) - day  

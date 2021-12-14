@@ -62,29 +62,31 @@ class Razorpay:
   
   def create_razorpay_order(self,amount,currency,receipt,payment_capture="1"):
 
-    logger.loggerpms2.info("Enter New_razorpay_order")
+    logger.loggerpms2.info("Enter New_razorpay_order " + "AMT::" + str(amount) + "CUR::"+str(currency) + "RCPT::" + str(receipt) + "PayCapt::" + str(payment_capture))
     
 
     paiseamount = int(amount * 100)
     orderurl =   self.fp_produrl + "/orders"
     
+    #as per latest documentation, payment_capture key is no longer required.
+    #getrsaobj = {
+      #"amount":paiseamount,
+      #"currency":currency,
+      #"receipt":receipt,
+      #"payment_capture":payment_capture
+    #}
     getrsaobj = {
       "amount":paiseamount,
       "currency":currency,
-      "receipt":receipt,
-      "payment_capture":payment_capture
+      "receipt":receipt
     }
     
     jsonresp = {}
     try:
-      logger.loggerpms2.info("POST Request==>\n")
-      logger.loggerpms2.info(orderurl + " " + json.dumps(getrsaobj))
-      
+      logger.loggerpms2.info("create_razorpay_order POST Request URL::" + orderurl + " " + json.dumps(getrsaobj))
       resp = requests.post(orderurl,json=getrsaobj)
-      
-      
-      if((resp.status_code == 200)|(resp.status_code == 201)|(resp.status_code == 202)|(resp.status_code == 203)):
 
+      if((resp.status_code == 200)|(resp.status_code == 201)|(resp.status_code == 202)|(resp.status_code == 203)):
         respobj = resp.json() 
 	
 	logger.loggerpms2.info("new_razorpay_order  Response success: " + json.dumps(respobj))
@@ -112,7 +114,7 @@ class Razorpay:
       else:
 	
 	respobj = resp.json() 
-	error_message = "Create Razorpay Order Error==>\n" + respobj.get("error","").get("code","") + ":" + respobj.get("error","").get("description","") + "\n" + str(resp.status_code)
+	error_message = "Create Razorpay Order Response Error==>\n" + respobj.get("error","").get("code","") + ":" + respobj.get("error","").get("description","") + "\n" + str(resp.status_code)
 	logger.loggerpms2.info(error_message)
 	jsonresp = {"result":"fail", "error_message":error_message}
 			
@@ -139,23 +141,20 @@ class Razorpay:
     orderurl =   self.fp_produrl + "/payments/" + razorpay_id  +"/capture"
     paiseamount = int(amount * 100)
     getrsaobj = {
-      "amount":paiseamount
+      "amount":paiseamount,
+      "currency":"INR"
     }
     
     jsonresp = {}
     resp = {}
     try:
-      #logger.loggerpms2.info("POST Request==>\n")
-      #logger.loggerpms2.info(orderurl + " " + json.dumps(getrsaobj))
+      logger.loggerpms2.info("capture_razorpay_payment POST Request URL::" + orderurl  + "Request::" + json.dumps(getrsaobj))
       
       resp = requests.post(orderurl,json=getrsaobj)
-      
-      
       if((resp.status_code == 200)|(resp.status_code == 201)|(resp.status_code == 202)|(resp.status_code == 203)):
-  
         respobj = resp.json() 
   
-        #logger.loggerpms2.info("capture_razorpay_payment  Response success: " + json.dumps(respobj))
+        logger.loggerpms2.info("capture_razorpay_payment  Response success: " + json.dumps(respobj))
         
         respobj["result"] = "success"
         respobj["error_message"] = ""
@@ -236,7 +235,7 @@ class Razorpay:
         jsonresp = json.loads(jsondump)
       else:
 	respobj = resp.json() 
-	error_message = "Capture Razorpay  Payment Error==>\n" + respobj.get("error").get("code","") + ":" + respobj.get("error").get("description","") + "\n" + str(resp.status_code)
+	error_message = "Capture Razorpay  Payment Response Error==>\n" + respobj.get("error").get("code","") + ":" + respobj.get("error").get("description","") + "\n" + str(resp.status_code)
         logger.loggerpms2.info(error_message)
         
         jsonresp = {"result":"fail", "error_message":error_message}

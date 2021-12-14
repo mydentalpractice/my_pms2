@@ -8967,68 +8967,68 @@ UPDATE `mydp_prod`.`cities` SET `hv_fees`='399' WHERE `id`='Mumbai';
 
 17/10/2021
 ==========
-1. YYYZZ Modify payment table, add walletamount
+1. XXXYYYZZ Modify payment table, add walletamount
 ALTER TABLE `mydp_prod`.`payment` 
 ADD COLUMN `walletamount` DOUBLE NULL AFTER `precommitamount`;
 ADD COLUMN `discount_amount` DOUBLE NULL AFTER `walletamount`;
 ADD COLUMN `voucher_code` DOUBLE NULL AFTER `discount_amount`;
 
-2. YYYZZ Modify treatment table, add walletamount
+2. XXXYYYZZ Modify treatment table, add walletamount
 ALTER TABLE `mydp_prod`.`treatment` 
 ADD COLUMN `walletamount` DOUBLE NULL DEFAULT 0 AFTER `companypay`;
 ADD COLUMN `discount_amount` DOUBLE NULL AFTER `walletamount`;
 ADD COLUMN `voucher_code` DOUBLE NULL AFTER `discount_amount`;
 
 
-3. YYYZZZ Modify treatment_procedure table, add walletamount
+3. XXXYYYZZZ Modify treatment_procedure table, add walletamount
 ALTER TABLE `mydp_prod`.`treatment_procedure` 
 ADD COLUMN `walletamount` DOUBLE NULL DEFAULT 0 AFTER `companypays`;
 ADD COLUMN `discount_amount` DOUBLE NULL AFTER `walletamount`;
 ADD COLUMN `voucher_code` DOUBLE NULL AFTER `discount_amount`;
 
-4. YYYZZZ Modify treatmentplan, add totalwalletamount
+4.XXXYYYZZZ Modify treatmentplan, add totalwalletamount
 ALTER TABLE `mydp_prod`.`treatmentplan` 
 ADD COLUMN `totalwalletamount` DOUBLE NULL DEFAULT 0 AFTER `totalcompanypays`;
 ADD COLUMN `totaldiscount_amount` DOUBLE NULL AFTER `totalwalletamount`;
 ADD COLUMN `voucher_code` DOUBLE NULL AFTER `totaldiscount_amount`;
 
-5. ZZZ Modidy vw_paymentlist, add totalwalletamount,totaldiscount_amount, discount_amount, voucher_code 
+5. YYYZZZ Modidy vw_paymentlist, add totalwalletamount,totaldiscount_amount, discount_amount, voucher_code 
 
-6. ZZZ Modidy vw_payments, add totalwalletamount,totaldiscount_amount, voucher_code 
+6. YYYZZZ Modidy vw_payments, add totalwalletamount,totaldiscount_amount, voucher_code 
 
-7. ZZZ Modidy vw_payments_fast, add totalwalletamount,totaldiscount_amount, voucher_code
+7. YYYZZZ Modidy vw_payments_fast, add totalwalletamount,totaldiscount_amount, voucher_code
 
-8. YYYZZZ Modify procedurepriceplan, add walletamount,discount_amount,voucher_code
+8. XXXYYYZZZ Modify procedurepriceplan, add walletamount,discount_amount,voucher_code
 ALTER TABLE `mydp_prod`.`procedurepriceplan` 
 ADD COLUMN `walletamount` DOUBLE NULL AFTER `relgrinspays`,
 ADD COLUMN `discount_amount` DOUBLE NULL AFTER `walletamount`,
 ADD COLUMN `voucher_code` VARCHAR(45) NULL AFTER `discount_amount`;
 
-9. ZZZ Modify vw_procedurepriceplan, add walletamount,discount_amount,voucher_code
+9. XXYYYZZZ Modify vw_procedurepriceplan, add walletamount,discount_amount,voucher_code
 
-10. ZZZ Modify vw_procedurepriceplan_relgr, add walletamount,discount_amount,voucher_code
+10. XXXYYYZZZ Modify vw_procedurepriceplan_relgr, add walletamount,discount_amount,voucher_code
 
-11. ZZZ Modify vw_procedurepriceplan_x999, add walletamount,discount_amount,voucher_code
+11. XXXYYYZZZ Modify vw_procedurepriceplan_x999, add walletamount,discount_amount,voucher_code
 
-12. ZZZ Modify vw_treatmentplancost, add walletamount,totaldiscount_amount, voucher_code
+12. XXXYYYZZZ Modify vw_treatmentplancost, add walletamount,totaldiscount_amount, voucher_code
 
-13. ZZZ Modify vw_treatmentplansummarybytreatment, add totalwalletamount,totaldiscount_amount
+13. XXXYYYZZZ Modify vw_treatmentplansummarybytreatment, add totalwalletamount,totaldiscount_amount
 
-13. ZZZ Modify vw_treatmentplansummarybypatient, add totalwalletamount,totaldiscount_amount
+13. XXXYYYZZZ Modify vw_treatmentplansummarybypatient, add totalwalletamount,totaldiscount_amount
 
 14. XXXYYYZZZ Modify provider table, add available flag
 ALTER TABLE `mydp_prod`.`provider` 
 ADD COLUMN `available` CHAR(1) NULL DEFAULT 'T' AFTER `IND_VC`;
 
-15. XXXYYZZZ Modify APIs mdplocation module 
+15. XXYYZZZ Modify APIs mdplocation module 
 
-16. YYYZZZZ Modify URL Properties added vw_url, vw_stg_url, vw_prod_url
+16. XXXYYYZZZZ Modify URL Properties added vw_url, vw_stg_url, vw_prod_url
 ALTER TABLE `mydp_prod`.`urlproperties` 
 ADD COLUMN `vw_url` TEXT NULL DEFAULT NULL AFTER `php_url`,
 ADD COLUMN `vw_stg_url` TEXT NULL DEFAULT NULL AFTER `vw_url`,
 ADD COLUMN `vw_prod_url` TEXT NULL DEFAULT NULL AFTER `vw_stg_url`;
 
-17. XXXZZZ reate new table redeem_voucher_walle
+17. XXXYYYZZZ reate new table redeem_voucher_walle
 CREATE TABLE `mydp_prod`.`redeem_voucher_wallet` (
   `id` INT(11) NOT NULL,
   `paymentid` INT(11) NULL,
@@ -9042,6 +9042,96 @@ CREATE TABLE `mydp_prod`.`redeem_voucher_wallet` (
   PRIMARY KEY (`id`));
 ALTER TABLE `mydp_prod`.`redeem_voucher_wallet` 
 CHANGE COLUMN `id` `id` INT(11) NOT NULL AUTO_INCREMENT ;
+
+18. XXXYYZZZAdd wallet type
+ALTER TABLE `mydp_prod`.`treatment` 
+ADD COLUMN `wallet_type` VARCHAR(45) NULL AFTER `walletamount`;
+
+19. XXXYYZZZAdd wallet_type
+ALTER TABLE `mydp_prod`.`treatmentplan` 
+ADD COLUMN `wallet_type` VARCHAR(45) NULL AFTER `voucher_code`;
+
+20. XXXYYYZZZAdd wallet_type
+ALTER TABLE `mydp_prod`.`payment` 
+ADD COLUMN `wallet_type` VARCHAR(45) NULL AFTER `voucher_code`;
+
+21. XXXYYYZZZ Modify table payment
+    Set paymentcommit default to False in db.py
+
+22. XXXYYYZZZ Add kytc_category, kytc_procedure,kytc_tack_log
+CREATE TABLE `kytc_category` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(150) NOT NULL,
+  `parent_id` int(11) NOT NULL DEFAULT '0',
+  `child_id` tinyint(1) DEFAULT NULL COMMENT '0 = category not have any child',
+  `status` tinyint(1) NOT NULL DEFAULT '1',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=128 DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `kytc_procedure` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `tcat_id` int(11) NOT NULL,
+  `code` varchar(50) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `rg101_ucr` int(11) NOT NULL COMMENT 'region-101 ucr price',
+  `rg101_copay` int(11) NOT NULL COMMENT 'region-101 co-pay price',
+  `rg102_ucr` int(11) NOT NULL COMMENT 'region 102 ucr price',
+  `rg102_copay` int(11) NOT NULL COMMENT 'region-102 co-pay price',
+  `rg103_ucr` int(11) NOT NULL COMMENT 'rg-103 ucr price',
+  `rg103_copay` int(11) NOT NULL COMMENT 'rg-103 co-pay price',
+  `rg104_ucr` int(11) NOT NULL COMMENT 'rg-104 ucr price',
+  `rg104_copay` int(11) NOT NULL COMMENT 'rg-104 co-pay price',
+  `status` tinyint(1) NOT NULL DEFAULT '1' COMMENT '1=active, 0=inactive',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=316 DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `kytc_track_log` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) DEFAULT NULL,
+  `city` varchar(100) DEFAULT NULL,
+  `mobile` varchar(12) DEFAULT NULL,
+  `log_data` text,
+  `created` datetime DEFAULT NULL,
+  `updated` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=utf8mb4;
+
+12/8/2021
+==========
+1. YYYYZZZAdd table 'price_rules'
+
+2. ZZZModified procedurepriceplan definition in db.py
+
+3. YYYZZZPopulated price_rules table with pricing rules for each procedure for a plan for a company
+
+4. YYYZZZZModify hmoplan with 4 fields voucher_code, discount_amount, wallet_amount, authorizationrequired
+ALTER TABLE `mydp_prod`.`hmoplan` 
+ADD COLUMN `voucher_code` VARCHAR(45) NULL DEFAULT NULL AFTER `welcomeletter`,
+ADD COLUMN `discount_amount` DOUBLE NULL DEFAULT 0 AFTER `voucher_code`,
+ADD COLUMN `walletamount` DOUBLE NULL DEFAULT 0 AFTER `discount_amount`,
+ADD COLUMN `authorizationrequired` CHAR(1) NULL DEFAULT 'F' AFTER `walletamount`;
+
+5. YYYZZZZModify ProcedurPricePlan added 'authorizationrequired'
+
+6. YYYZZZModified imporprocedurepriceplan
+
+7. YYYZZZ Modified importplan
+
+8. YYYZZZZ Modified hmoplan - added company code table
+ALTER TABLE `mydp_prod`.`hmoplan` 
+ADD COLUMN `company_code` VARCHAR(45) NULL DEFAULT NULL AFTER `authorizationrequired`;
+
+9. YYYZZZModify ImportPlan
+ALTER TABLE `mydp_prod`.`importplan` 
+ADD COLUMN `company_code` VARCHAR(45) NULL DEFAULT NULL AFTER `authorizationrequired`;
+
+10. ZZZModify pricing_rules table add 'rule_event'
+
+11. ZZZRename pricing_rules table to rules table
+    ALTER TABLE `mydp_prod`.`price_rules` 
+RENAME TO  `mydp_prod`.`rules` ;
+
+12. ZZZ Modify importcustomers table - added P_D & relation fields
 
 
 Script file to clear user for sign-up

@@ -116,6 +116,21 @@ from applications.my_pms2.modules import logger
     
     #return retVal1
 
+
+#ccs = email1,email2..
+#cc1 = ['email1','email2']
+def createMailCC(ccs):
+    cc1 = []
+    if((ccs == "") | (ccs==None)):
+        return cc1
+    
+    arr = ccs.split(',')
+    for i in xrange(0,len(arr)):
+        cc1.append(arr[i])
+    
+    return cc1
+    
+    
 def emailAssignedMembers(db,request,providercode, provideremail, pdffile):
 
     props = db(db.urlproperties.id>0).select()
@@ -637,7 +652,8 @@ def emailPaymentReceipt(db,request,memberid,paymentid,
     sender = None
     login = None
  
-    mailcc = None
+    mailcc = ""
+   
 
     props = db(db.urlproperties.id>0).select()
 
@@ -659,6 +675,7 @@ def emailPaymentReceipt(db,request,memberid,paymentid,
         retVal = False
         raise HTTP(400,"Mail attributes not found")
 
+    
     #server =  'smtp.live.com:587'
     #sender =  'imtiazbengali@hotmail.com'
     #login  =  'imtiazbengali@hotmail.com:sahil27@'
@@ -666,6 +683,7 @@ def emailPaymentReceipt(db,request,memberid,paymentid,
     #server =  '68.178.232.62:25'
     #sender =  'imtiazbengali@hotmail.com'
     #login  =  None
+
 
 
     name = ''
@@ -747,7 +765,7 @@ def emailPaymentReceipt(db,request,memberid,paymentid,
     if((mailcc==None)|(mailcc=='')):
         retVal = mail.send(to,subject,result)
     else:
-        retVal = mail.send(to,subject,result,cc=[mailcc])
+        retVal = mail.send(to,subject,result,cc=createMailCC(mailcc))
 
     return retVal
 
@@ -1759,7 +1777,7 @@ def sendSMS2Email_format2(db, cellnos, message):
     #get email details from urlProperties
     props = db(db.urlproperties.id == 1).select()
     
-
+    mailcc = ""
     if(len(props)>0):
         
         server = props[0].mailserver + ":"  + props[0].mailserverport
@@ -1791,7 +1809,7 @@ def sendSMS2Email_format2(db, cellnos, message):
     if((mailcc==None)|(mailcc=='')):
         retVal = email.send(smsemail,subject,body)
     else:
-        retVal = email.send(smsemail,subject,body,cc=[mailcc])
+        retVal = email.send(smsemail,subject,body,cc=createMailCC(mailcc))
     
     return retVal
 
@@ -1825,7 +1843,7 @@ def groupEmail(db,emails,ccs, subject,message):
         message = message
         
         #logger.loggerpms2.info("GropuEmail:Before Send Email " + message)
-        retVal = mail.send(to,subject,message,cc=[ccs])
+        retVal = mail.send(to,subject,message,cc=createMailCC(ccs))
         #logger.loggerpms2.info("GropuEmail:After Send Email " + message)
         
 
@@ -1843,6 +1861,8 @@ def _groupEmail(db,mail,emails,ccs, subject,message):
     tls = True
     props = db(db.urlproperties.id>0).select()
 
+  
+        
     if(len(props)>0):
         server = props[0].mailserver + ":"  + props[0].mailserverport
         sender = props[0].mailsender
@@ -1864,7 +1884,7 @@ def _groupEmail(db,mail,emails,ccs, subject,message):
         message = message
         
         #logger.loggerpms2.info("GropuEmail:Before Send Email " + message)
-        retVal = mail.send(to,subject,message,cc=[ccs])
+        retVal = mail.send(to,subject,message,cc=createMailCC(ccs))
         #logger.loggerpms2.info("GropuEmail:After Send Email " + message)
         
 
@@ -2033,9 +2053,22 @@ def emailPreAuthorization(db,appPath,treatmentid):
     mail.settings.tls = tls
    
     to      =  medi_mydp_email 
-    subject = "Pre-Authorization for " + patient   
-    cc = provemail + ";" + mailcc
+    subject = "Pre-Authorization for " + patient
     
+    cc = ""
+    if(provemail == ""):
+        if(mailcc == ""):
+            cc = ""
+        else:
+            cc = mailcc
+    else:
+        if(mailcc == ""):
+            cc = provemail
+        else:
+            cc = provemail + "," + mailcc
+        
+    
+  
     
     htmlfile = os.path.join(appPath, 'templates','preauthorizationemail.html')
 
@@ -2061,7 +2094,7 @@ def emailPreAuthorization(db,appPath,treatmentid):
   
     
     #sending preauthorization email to provider, medi assist contact, mydp contact
-    retVal = mail.send(to,subject,result,cc=[cc]) 
+    retVal = mail.send(to,subject,result,cc=createMailCC(cc)) 
 
     return retVal
 
@@ -2169,8 +2202,20 @@ def emailAuthorizedTreatment(db,appPath,treatmentid):
 
     to      =  medi_mydp_email
     subject = "Authorized Treatment for " + patient   
-    cc =  provemail +";" + mailcc
     
+    cc = ""
+    if(provemail == ""):
+        if(mailcc == ""):
+            cc = ""
+        else:
+            cc = mailcc
+    else:
+        if(mailcc == ""):
+            cc = provemail
+        else:
+            cc = provemail + "," + mailcc
+                
+       
   
     htmlfile = os.path.join(appPath, 'templates','authorizedemail.html')
 
@@ -2192,7 +2237,7 @@ def emailAuthorizedTreatment(db,appPath,treatmentid):
         #retVal1 = sendSMS2Email(db,patcell,patmessage)  
 
 
-    retVal = mail.send(to,subject,result,cc=[cc])       
+    retVal = mail.send(to,subject,result,cc=createMailCC(cc))       
 
     return retVal
     

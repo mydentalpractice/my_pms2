@@ -28,7 +28,10 @@ from applications.my_pms2.modules import logger
 
 from applications.my_pms2.modules import mdppatient
 from applications.my_pms2.modules import mdpreligare
+from applications.my_pms2.modules import mdppricing
+
 from applications.my_pms2.modules import mdputils
+
 
 #from gluon.contrib import common
 #from gluon.contrib import mail
@@ -336,42 +339,52 @@ def updatetreatmentcostandcopay(treatmentid,tplanid):
     
     #strsql = "select sum(ucrfee) as totalactualtreatmentcost, sum(procedurefee) as totaltreatmentcost, sum(copay) as copay, sum(inspays) as inspays, sum(companypays) as companypays"
     #strsql = strsql + " from  vw_treatmentprocedure where treatmentid =" +  str(treatmentid) + " and is_active = 'T'  group by treatmentid "   
+    #strsql = "select * from vw_treatmentprocedure where treatmentid = " + str(treatmentid)
     #ds = db.executesql(strsql)
     
     rows = db((db.vw_treatmentprocedure.treatmentid == treatmentid) & (db.vw_treatmentprocedure.is_active == True)).select(\
     
-        db.vw_treatmentprocedure.ucrfee.sum(),\
-        db.vw_treatmentprocedure.procedurefee.sum(),\
-        db.vw_treatmentprocedure.copay.sum(),\
-        db.vw_treatmentprocedure.inspays.sum(),\
-        db.vw_treatmentprocedure.companypays.sum(),\
-        orderby=db.vw_treatmentprocedure.treatmentid,\
-        groupby=db.vw_treatmentprocedure.treatmentid\
-        
+        db.vw_treatmentprocedure.ucrfee,
+        db.vw_treatmentprocedure.procedurefee,
+        db.vw_treatmentprocedure.copay,
+        db.vw_treatmentprocedure.inspays,\
+        db.vw_treatmentprocedure.companypays
     )
     
-    totalactualtreatmentcost = float(common.getvalue(rows.response[0][0])) if(len(rows) == 1) else 0
-    totaltreatmentcost = float(common.getvalue(rows.response[0][1])) if(len(rows) == 1) else 0
-    totalcopay = float(common.getvalue(rows.response[0][2])) if(len(rows) == 1) else 0
-    totalinspays = float(common.getvalue(rows.response[0][3])) if(len(rows) == 1) else 0
-    totalcompanypays = float(common.getvalue(rows.response[0][4])) if(len(rows) == 1) else 0  
+    for row in rows:
+        totalactualtreatmentcost = totalactualtreatmentcost + float(common.getvalue(row.ucrfee)) if(len(rows) == 1) else 0
+        totaltreatmentcost =totaltreatmentcost+ float(common.getvalue(row.procedurefee)) if(len(rows) == 1) else 0
+        totalcopay = totalcopay + float(common.getvalue(row.copay)) if(len(rows) == 1) else 0
+        totalinspays =totalinspays + float(common.getvalue(row.inspays)) if(len(rows) == 1) else 0
+        totalcompanypays = totalcompanypays + float(common.getvalue(row.companypays)) if(len(rows) == 1) else 0  
+        
+    #totalactualtreatmentcost = float(common.getvalue(rows.response[0][0])) if(len(rows) == 1) else 0
+    #totaltreatmentcost = float(common.getvalue(rows.response[0][1])) if(len(rows) == 1) else 0
+    #totalcopay = float(common.getvalue(rows.response[0][2])) if(len(rows) == 1) else 0
+    #totalinspays = float(common.getvalue(rows.response[0][3])) if(len(rows) == 1) else 0
+    #totalcompanypays = float(common.getvalue(rows.response[0][4])) if(len(rows) == 1) else 0  
     
-    totaldue     = 0
-    tp = db((db.treatmentplan.id == tplanid) & (db.treatmentplan.is_active == True)).select(db.treatmentplan.totaltreatmentcost,\
-                                                                                                db.treatmentplan.totalpaid,\
-                                                                                                db.treatmentplan.totalcopaypaid,\
-                                                                                                db.treatmentplan.totalcompanypays,\
-                                                                                                db.treatmentplan.totalinspaid)
-    
-    if(len(tp) == 1):
-        totaldue = float(common.getvalue(tp[0].totaltreatmentcost)) - float(common.getvalue(tp[0].totalpaid)) - \
-            float(common.getvalue(tp[0].totalcopaypaid)) - float(common.getvalue(tp[0].totalinspaid) - float(common.getvalue(tp[0].totalcompanypays)))
     
     
     db(db.treatment.id == treatmentid).update(actualtreatmentcost = totalactualtreatmentcost, treatmentcost=totaltreatmentcost, copay=totalcopay, inspay=totalinspays, companypay= totalcompanypays)
     
     #update treatmentplan assuming there is one treatment per tplan
-    db(db.treatmentplan.id==tplanid).update(totaltreatmentcost = totaltreatmentcost, totalcopay=totalcopay,totalinspays=totalinspays,totaldue=totaldue)
+    db(db.treatmentplan.id==tplanid).update(totaltreatmentcost = totaltreatmentcost, totalcopay=totalcopay,totalinspays=totalinspays)
+
+    totaldue     = 0
+    tp = db((db.treatmentplan.id == tplanid) & (db.treatmentplan.is_active == True)).select(db.treatmentplan.totaltreatmentcost,\
+                                                                                            db.treatmentplan.totalpaid,\
+                                                                                            db.treatmentplan.totalcopaypaid,\
+                                                                                            db.treatmentplan.totalcompanypays,\
+                                                                                            db.treatmentplan.totalinspaid)
+
+    if(len(tp) == 1):
+        totaldue = float(common.getvalue(tp[0].totaltreatmentcost)) - float(common.getvalue(tp[0].totalpaid)) - \
+            float(common.getvalue(tp[0].totalcopaypaid)) - float(common.getvalue(tp[0].totalinspaid) - float(common.getvalue(tp[0].totalcompanypays)))
+
+
+    db(db.treatmentplan.id==tplanid).update(totaldue=totaldue)
+
     
     db.commit()
     
@@ -803,12 +816,8 @@ def delete_procedure():
         
         db(db.treatment_procedure.id == treatmentprocedureid).update(is_active = False)
         #calcualte all the costs and update tplan, treatment, treatmentnotes (prescription)
-        updatetreatmentcostandcopay(treatmentid,tplanid)
-        #calculatecost(tplanid)
-        #calculatecopay(db, tplanid,memberid)
-        #calculateinspays(tplanid) 
-        #calculatedue(tplanid)            
-        #common.dashboard(db,session,providerid)
+        updatetreatmentcostandcopay(treatmentid, tplanid)
+     
         redirect(returnurl)
     
     return dict(form=form,returnurl=returnurl,providerid=providerid,providername=providername,page=page,patientid=patientid,memberid=memberid,treatmentid=treatmentid,tplanid=tplanid,treatment=treatment)
@@ -2480,7 +2489,9 @@ def update_treatment():
     authorizationurl = URL('reports', 'treatmentreport', vars=dict(page=page, providerid=providerid,treatmentid=treatmentid))
 
     tplanid = treatments[0].treatmentplan if(len(treatments) > 0) else 0
-    r = account._updatetreatmentpayment(db,tplanid,0)
+    #logger.loggerpms2.info("Enter updatetreatmentpayment from update treatment")
+    r = json.loads(account._updatetreatmentpayment(db,tplanid,0))
+    #logger.loggerpms2.info("After updatetreatmentpayment from update treatment " + json.dumps(r))
     paytm = json.loads(account._calculatepayments(db,tplanid,None))
     
     totaltreatmentcost = 0
@@ -3919,6 +3930,7 @@ def add_proceduregrid():
     tooth = common.getstring(request.vars.tooth)
     quadrant = common.getstring(request.vars.quadrant)
     
+    procedurcode = common.getstring(request.vars.vwdentalprocedurecode)
     #treatmentid
     treatmentid = int(common.getid(request.vars.treatmentid))
     treatment = db((db.treatment.id == treatmentid) & (db.treatment.is_active == True)).select(\
@@ -3954,23 +3966,61 @@ def add_proceduregrid():
                 db.vw_procedurepriceplan.remarks\
                )
  
-    ucrfee = 0
-    procedurefee = 0
-    inspays = 0
-    copay = 0
-    companypays = 0
-    remarks = 0
-    procedurepriceplanid = 0
+    procedurepriceplanid = int(common.getid(procs[0].id))  if(len(procs) >= 1) else 0
+    
    
+    #get provider from treatment
+    t = db((db.treatment.id == treatmentid) & (db.treatment.is_active == True)).select(db.treatment.provider)
+    providerid = int(common.getid(t[0].provider if (len(t)>0) else 0 ))
+    #get region code
+    provs = db((db.provider.id == providerid) & (db.provider.is_active == True)).select(db.provider.groupregion)
+    regionid = int(common.getid(provs[0].groupregion)) if(len(provs) == 1) else 1
+    regions = db((db.groupregion.id == regionid) & (db.groupregion.is_active == True)).select(db.groupregion.groupregion)
+    regioncode = common.getstring(regions[0].groupregion) if(len(regions) == 1) else "ALL"
+        
+    # get patient's company
+    pats = db((db.vw_memberpatientlist.primarypatientid == memberid) & (db.vw_memberpatientlist.patientid == patientid)).select(db.vw_memberpatientlist.company,db.vw_memberpatientlist.hmoplan)
+    companyid = int(common.getid(pats[0].company)) if(len(pats) == 1) else 0
+    companys = db((db.company.id == companyid) & (db.company.is_active == True)).select(db.company.company)
+    companycode = common.getstring(companys[0].company) if(len(companys) == 1) else "PREMWALKIN"
+    
+    
+    #for backward compatibility determine procedurepriceplancode from member's plan at the time of registration
+    hmoplanid = int(common.getid(pats[0].hmoplan)) if(len(pats) == 1) else 0  #this is the patient's previously assigned plan-typically at registration
+    hmoplans = db((db.hmoplan.id == hmoplanid) & (db.hmoplan.is_active == True)).select(db.hmoplan.hmoplancode,db.hmoplan.procedurepriceplancode)
+    hmoplancode = common.getstring(hmoplans[0].hmoplancode) if(len(hmoplans) == 1) else "PREMWALKIN"
+    r = db((db.provider_region_plan.companycode == companycode) & (db.provider_region_plan.plancode == hmoplancode)).select()
+    plancode = r[0].policy if(len(r) == 1) else "PREMWALKIN"
+    
+    
+    
+    #Using new pricing engine  12/10/2021
+    avars = {}
+    avars["region_code"] = regioncode
+    avars["treatment_id"] = treatmentid
+    avars["company_code"] = companycode
+    avars["procedure_code"] = procedurcode
+    avars["plan_code"] = plancode
+    
+    pricingObj = mdppricing.Pricing(db)
+    rspobj = json.loads(pricingObj.Get_Procedure_Fees(avars))
+    
+    ucrfee = float(common.getkeyvalue(rspobj,"ucrfee",0))
+    procedurefee = float(common.getkeyvalue(rspobj,"procedurefee",0))
+    copay = float(common.getkeyvalue(rspobj,"copay",0))
+    inspays = float(common.getkeyvalue(rspobj,"inspays",0))
+    companypays = float(common.getkeyvalue(rspobj,"companypays",0))
+    walletamount = float(common.getkeyvalue(rspobj,"walletamount",0))
+    discount_amount = float(common.getkeyvalue(rspobj,"discount_amount",0))
+    is_free = bool(common.getkeyvalue(rspobj,"is_free",False))
+    active = bool(common.getkeyvalue(rspobj,"active",True))
+    authorizationrequired = bool(common.getkeyvalue(rspobj,"authorizationrequired",False))
+    
+    voucher_code = common.getkeyvalue(rspobj,"voucher_code","")
+    remarks = common.getkeyvalue(rspobj,"remarks","")
     
     if(len(procs)>0):
         procedurepriceplanid = int(common.getid(procs[0].id))
-        ucrfee = float(common.getvalue(procs[0].ucrfee))
-        procedurefee = ucrfee if(float(common.getvalue(procs[0].procedurefee))  == 0) else float(common.getvalue(procs[0].procedurefee))
-        inspays = float(common.getvalue(procs[0].inspays))
-        copay = float(common.getvalue(procs[0].copay))
-        companypays = float(common.getvalue(procs[0].companypays)) 
-        remarks = common.getstring(procs[0].remarks)
         balance = 0
         trxamount = 0        
         if((session.religare == True) & (common.getboolean(procs[0].relgrproc)==True)):
@@ -3979,872 +4029,32 @@ def add_proceduregrid():
             copay = copay + abs(inspays - trxamount)
             inspays = trxamount
             session.religarebalance = abs(balance - trxamount)
-            
-            
     
-    #x  = datetime.datetime.now()
-    #logger.logger.info("===================Start Insert=======================================" + datetime.datetime.strftime(x, "%Y-%m-%d %H:%M:%S:%f"))
-    tpid = db.treatment_procedure.insert(treatmentid = treatmentid, dentalprocedure = procedurepriceplanid,status=status,\
-                                    ucr = ucrfee, procedurefee=procedurefee, copay=copay,inspays=inspays,companypays=companypays,\
-                                    tooth=tooth,quadrant=quadrant,remarks=remarks) 
+    tpid = 0
+    if(active == True):
+        tpid = db.treatment_procedure.insert(treatmentid = treatmentid, dentalprocedure = procedurepriceplanid,status=status,\
+                                        ucr = ucrfee, procedurefee=procedurefee, copay=copay,inspays=inspays,companypays=companypays,\
+                                        tooth=tooth,quadrant=quadrant,remarks=remarks,voucher_code=voucher_code,\
+                                        walletamount=walletamount,discount_amount=discount_amount)
+        db.commit() 
+        session.flash = "New Procedure Added!"
     
-    
-    
-    db.commit() 
+    else:
+        session.flash = "Procedure not added!"
     
     booking_amount = account.get_booking_amount(db, treatmentid)
     tax = account.get_tax_amount(db, copay)
     if(booking_amount > 0):
-        ##db(db.treatment.id == treatmentid).update(companypay = companypays+booking_amount)
-        ##db(db.treatmentplan.id == tplanid).update(totalpaid = booking_amount)
         db(db.treatment_procedure.id == tpid).update(copay = float(common.getvalue(tax["posttaxamount"])))
         db.commit()
-    
-    
    
-  
-  
-   
-    #x  = datetime.datetime.now()
-    #logger.logger.info("===================Exit1 Insert=======================================" + datetime.datetime.strftime(x, "%Y-%m-%d %H:%M:%S:%f"))    
-    
     updatetreatmentcostandcopay(treatmentid,tplanid)
-    #calculatecost(tplanid)
-    #calculatecopay(db, tplanid,memberid)
-    #calculateinspays(tplanid)
-    #calculatedue(tplanid)        
-    #common.dashboard(db,session,providerid)   
-    
-    #x  = datetime.datetime.now()
-    #logger.logger.info("===================Exit Insert=======================================" + datetime.datetime.strftime(x, "%Y-%m-%d %H:%M:%S:%f"))
-
-
     redirecturl = URL("treatment","update_treatment",vars=dict(providerid=providerid,treatmentid=treatmentid,page=page,imagepage=imagepage))
     
-    #x  = datetime.datetime.now()
-    #logger.logger.info("===================Exit Add_procedure=======================================" + datetime.datetime.strftime(x, "%Y-%m-%d %H:%M:%S:%f"))
-
-    
     redirect(redirecturl)
-    
-    
-    
-    #dob = ""
-    #cell = ""
-    #email = ""
-    #telephone = ""
-    #address1 = ""
-    #address2 = ""
-    #address3 = ""
-    #city = ""
-    #st = ""
-    #pin = ""
-    #defsts = ""
-    
-    #ucrfee = 0
-    #procedurefee = 0
-    #copay = 0
-    #inspays = 0
-    #companypays = 0
-    #procedureid = 0    
-    #patientpays = 0
-    #balance = 0
-    
-    #medicalalert = False
-    
-    #authorization = common.getboolean(request.vars.authorization)
-    #preauthorized = common.getboolean(request.vars.preauthorization)
-    #authorized =  common.getboolean(request.vars.authorized)
-    #authorizeerror = False
-    #preauthorizeerror = False
-    #webadmin = common.getboolean(request.vars.webadmin)
-       
-    
-    #rows = None
-    
-    #patienttype = 'P'
-    #procedurepriceplancode = 'PREM103'
-    #hmopatientmember = common.getboolean(request.vars.hmopatientmember)    
-      
-    ##treatmentid,treatment, memberid,patientid,patientmember,membername, patientname, patienttype
-    #treatmentid = int(common.getid(request.vars.treatmentid))
-    #treatments = db(db.treatment.id == treatmentid).select()
-    
-    
-    #authorizationurl = URL('reports', 'treatmentreport', vars=dict(page=page, providerid=providerid,treatmentid=treatmentid))
-    
-    #totaltreatmentcost = 0
-    #totalactualtreatmentcost = 0
-    #freetreatment = True
-    #newmember = False
-    
-    #procedurepriceplancode = "PREMWALKIN"
-    #remarks = ""
-    #patienttype = 'P'
-    #treatment = common.getstring(treatments[0].treatment)
-    #tplanid = int(common.getid(treatments[0].treatmentplan))
-    #procedureid = int(common.getid(treatments[0].dentalprocedure))
-    #doctorid = int(common.getid(treatments[0].doctor))
-    #docs=db(db.doctor.id == doctorid).select(db.doctor.name)
-    #totaltreatmentcost = float(common.getvalue(treatments[0].treatmentcost)) #this is the actual treatment cost = total treatment cost unless it is changed by provider
-    #totalactualtreatmentcost = float(common.getvalue(treatments[0].actualtreatmentcost))   #this is total UCRR
-   
-    #tplans = db((db.treatmentplan.id == tplanid) & (db.treatmentplan.provider==providerid) & (db.treatmentplan.is_active == True)).select()
-    
-    #if(len(tplans) > 0):
-        #memberid = tplans[0].primarypatient
-        #patientid = tplans[0].patient
-       
-    ##determine treatment status   
-    #if(authorized==True):
-        #defsts = 'Authorized'
-        #db(db.treatment.id == treatmentid).update(status = defsts)
-        #db(db.treatment_procedure.treatmentid == treatmentid).update(status=defsts)
-    #else:
-        #defsts = common.getstring(treatments[0].status)
-        #defsts = defsts if((defsts != None) & (defsts != "")) else 'Started'
-       
-    #xsts = defsts       
-   
-    
-    
-    
-    #rows = db((db.vw_memberpatientlist.primarypatientid == memberid)&\
-              #(db.vw_memberpatientlist.patientid == patientid)&\
-              #(db.vw_memberpatientlist.providerid == providerid)&\
-              #(db.vw_memberpatientlist.is_active == True)).select()
-    
-    
-    
-    #cos = None
-    
-    #if(len(rows)>0):
-        #title = rows[0].title
-        #fullname = rows[0].fullname.strip()
-        #patientmember = rows[0].patientmember.strip()
-        #patientname = rows[0].patient.strip()
-        #membername = rows[0].fullname.strip()
-        #procedurepriceplancode = rows[0].procedurepriceplancode
-        #newmember = common.getboolean(rows[0].newmember)          
-        #freetreatment = common.getboolean(rows[0].freetreatment)
-        #patienttype = rows[0].patienttype
-        #procedurepriceplancode = rows[0].procedurepriceplancode
-        #hmopatientmember = rows[0].hmopatientmember  
-        #companyid = int(common.getid(rows[0].company))
-        #cos = db(db.company.id == companyid).select()
-        
-    #procs = db((db.vw_procedurepriceplan.procedurepriceplancode == procedurepriceplancode) & (db.vw_procedurepriceplan.procedurecode == request.vars.vwdentalprocedurecode)).select()
-    #if(len(procs)>0):
-        #ucrfee = float(common.getvalue(procs[0].ucrfee))
-        #procedurefee = float(common.getvalue(procs[0].procedurefee))
-        #if(procedurefee == 0):
-            #procedurefee = ucrfee
-        #inspays = float(common.getvalue(procs[0].inspays))
-        #copay = float(common.getvalue(procs[0].copay))
-        
-        #companypays = float(common.getvalue(procs[0].companypays))
-        
-        #if((session.religare != None) & (common.getboolean(procs[0].relgrproc)==True)):
-            #balance = float(common.getvalue(session.religare["balance"]))
-            #trxamount = min(inspays,balance)
-           
-            #copay = copay + abs(inspays - trxamount)
-            #inspays = trxamount
-            #session.religare["balance"] = abs(balance - trxamount)
-            
-            
-        #remarks = common.getstring(procs[0].remarks)
-        #procedureid = int(common.getid(procs[0].id))
-        #altshortdescription = common.getstring(procs[0].altshortdescription)
-        #remarks =  common.getstring(procs[0].remarks)                
-    
-        
-    #db.treatment_procedure.insert(treatmentid = treatmentid, dentalprocedure = procedureid,status=xsts,\
-                                    #ucr = ucrfee, procedurefee=procedurefee, copay=copay,inspays=inspays,companypays=companypays,\
-                                    #tooth=0,quadrant=0,remarks=remarks)   
-    #db.commit()  
-              
-    #p1 = db((db.treatment_procedure.treatmentid == treatmentid)&(db.treatment_procedure.is_active==True)).count()                
-    #authorization = common.getboolean(cos[0].authorizationrequired) & (p1>0)        
-    
-    ##medical alerts
-    #medicalalerts = False
-    #alerts = db((db.medicalnotes.patientid == patientid) & (db.medicalnotes.memberid == memberid)).select()
-    #if(len(alerts)>0):
-        #medicalalerts = medicalalerts | common.getboolean(alerts[0].allergic)
-        #medicalalerts = medicalalerts | common.getboolean(alerts[0].bp)
-        #medicalalerts = medicalalerts | common.getboolean(alerts[0].heart)
-        #medicalalerts = medicalalerts | common.getboolean(alerts[0].cardiac)
-        #medicalalerts = medicalalerts | common.getboolean(alerts[0].diabetes)
-        #medicalalerts = medicalalerts | common.getboolean(alerts[0].anyother)
-        
-
-    #enddate = common.getdt(treatments[0].enddate)
-
-    #writablflag = (not authorization) | (((not preauthorized) & (not authorized)&(not webadmin))|((webadmin)))
-    
-   
-    
-   
-        
-  
-        
-  
-    
-   
-
-    #if(freetreatment == False):
-        #if(patienttype == 'P'):
-            #db(db.patientmember.id == patientid).update(newmember = False, freetreatment = True)
-        #else:
-            #db(db.patientmemberdependants.id == patientid).update(newmember = False, freetreatment = True)
-
-    
-    #updatetreatmentcostandcopay(treatmentid,tplanid)
-    #calculatecost(tplanid)
-    #calculatecopay(db, tplanid,memberid)
-    #calculateinspays(tplanid)
-    #calculatedue(tplanid)        
-    #common.dashboard(db,session,providerid)
-    
-    #treatments = db(db.treatment.id == treatmentid).select()
-    #totaltreatmentcost = float(common.getvalue(treatments[0].treatmentcost)) #this is the actual treatment cost = total treatment cost unless it is changed by provider
-    #totalactualtreatmentcost = float(common.getvalue(treatments[0].actualtreatmentcost))   #this is total UCRR
-    
-    
-    #formTreatment = SQLFORM.factory(
-          #Field('patientmember', 'string',  label='Patient', default = fullname,\
-                #requires=[IS_NOT_EMPTY(),IS_IN_DB(db(db.vw_memberpatientlist.providerid == providerid), 'vw_memberpatientlist.fullname','%(fullname)s')],writable=False),
-          #Field('xmemberid', 'string',  label='Member',default=memberid),
-          #Field('treatment','string',label='Treatment No.', default=treatments[0].treatment,writable=writablflag),
-          #Field('chiefcomplaint','string',label='Chief Complaint', default=treatments[0].chiefcomplaint,writable=writablflag),
-          #Field('description','text', label='Description', default=treatments[0].description, writable=writablflag),
-          #Field('quadrant','string', label='Quadrant(s)', default=treatments[0].quadrant),
-          #Field('tooth','string', label='Tooth/Teeth', default=treatments[0].tooth),
-          #Field('startdate', 'date', label='From Date',default=treatments[0].startdate, requires=IS_EMPTY_OR(IS_DATE(format=('%d/%m/%Y'))), writable=writablflag),
-          #Field('enddate', 'date', label='To Date',default=enddate, requires=IS_EMPTY_OR(IS_DATE(format=('%d/%m/%Y'))),writable=writablflag),
-          #Field('status', 'string', widget = lambda field, value:SQLFORM.widgets.options.widget(field, value, _style="width:100%;height:35px",_class='w3-input w3-border ',_onchange='onstatuschange()'),label='Status',default=defsts, requires = IS_IN_SET(status.TREATMENTSTATUS), writable=writablflag),  
-          #Field('ucrfee', 'double', label='Total UCR',default=totalactualtreatmentcost,writable=False),  
-          #Field('treatmentcost', 'double', label='Total Treament Cost',default=totaltreatmentcost,writable=False),  
-          #Field('copay', 'double', label='Total Copay',default=treatments[0].copay, writable = False),  
-          #Field('inspay', 'double', label='Total Ins. Pays',default=treatments[0].inspay, writable=False),  
-          #Field('doctor', widget = lambda field, value:SQLFORM.widgets.options.widget(field, value, _class='form_details'), default=doctorid, label='Doctor',requires=IS_IN_DB(db((db.doctor.providerid==providerid)&(db.doctor.stafftype == 'Doctor')&(db.doctor.is_active==True)), 'doctor.id', '%(name)s')),
-          #Field('remarks', 'string', default = remarks, writable=writablflag),
-          #Field('vwdentalprocedure', 'string',  default='', label='Procedure ID'),
-          #Field('vwdentalprocedurecode', 'string',  default='', label='Procedure Code'), 
-          #Field('xaction', 'string', default = 'UpdateTreatment')
-          
-          #)    
-       
-   
-   
-    #doc = formTreatment.element('#no_table_doctor')
-    #doc['_class'] = 'form-control'
-    #doc['_style'] = 'width:100%'
-    
-    #xtreatment = formTreatment.element('input',_id='no_table_treatment')
-    #xtreatment['_class'] =  'form-control'
-    #xtreatment['_type'] =  'text'
-    #xtreatment['_autocomplete'] = 'off'     
-    #xtreatment['_readonly'] = 'true'
-
-    #xvwdentalprocedurecode = formTreatment.element('input',_id='no_table_vwdentalprocedurecode')
-    #xvwdentalprocedurecode['_class'] =  'form-control '
-    #xvwdentalprocedurecode['_placeholder'] = 'Enter Dental Procedure Code' 
-    #xvwdentalprocedurecode['_autocomplete'] = 'off'         
-    #xvwdentalprocedurecode['_style'] = 'width:100%'
-    
-    #xvwdentalprocedure = formTreatment.element('input',_id='no_table_vwdentalprocedure')
-    #xvwdentalprocedure['_class'] =  'form-control '
-    #xvwdentalprocedure['_placeholder'] = 'Enter Dental Procedure Name' 
-    #xvwdentalprocedure['_autocomplete'] = 'off'         
-    #xvwdentalprocedure['_style'] = 'width:100%'   
-
-    #xtooth = formTreatment.element('input',_id='no_table_tooth')
-    #xtooth['_class'] =  'form-control '
-    #xtooth['_placeholder'] = 'Enter Tooth Number' 
-    #xtooth['_autocomplete'] = 'off'         
-    #xtooth['_style'] = 'width:100%'
-
-    #xquad = formTreatment.element('input',_id='no_table_quadrant')
-    #xquad['_class'] =  'form-control '
-    #xquad['_placeholder'] = 'Enter Quadrant' 
-    #xquad['_autocomplete'] = 'off'         
-    #xquad['_style'] = 'width:100%'    
-
-    #if(writablflag):
-        #formTreatment.element('textarea[name=description]')['_style'] = 'height:100px;line-height:1.0;'
-        #formTreatment.element('textarea[name=description]')['_rows'] = 5
-        #formTreatment.element('textarea[name=description]')['_class'] = 'form-control'        
-
-       
-    
-       
-        
-        #xstartdate = formTreatment.element('input',_id='no_table_startdate')
-        #xstartdate['_class'] =  'input-group form-control form-control-inline date-picker'
-        #xstartdate['_data-date-format'] = 'dd/mm/yyyy'
-        #xstartdate['_autocomplete'] = 'off' 
-    
-    
-        #xenddate = formTreatment.element('input',_id='no_table_enddate')
-        #xenddate['_class'] =  'input-group form-control form-control-inline date-picker'
-        #xenddate['_data-date-format'] = 'dd/mm/yyyy'
-        #xenddate['_autocomplete'] = 'off' 
-
-        #xtreatment = formTreatment.element('input',_id='no_table_treatment')
-        #xtreatment['_class'] =  'form-control'
-        #xtreatment['_type'] =  'text'
-        #xtreatment['_autocomplete'] = 'off' 
-
-        #cc = formTreatment.element('input', _id='no_table_chiefcomplaint')
-        #cc['_class'] = 'form-control'
-        #cc['_style'] = 'width:100%'
-        #cc['_type'] =  'text'
- 
- 
-    ## procedures grid
-    #authorization = False
-    #authorized = False
-    #preauthorized = False
-
-    #webadmin = auth.user.impersonated
-    #formProcedure = getproceduregrid(providerid,tplanid,treatmentid,memberid,patientid,authorization,authorized,preauthorized,page,hmopatientmember,writablflag,webadmin)    
-    
-    ##query = ((db.vw_treatmentprocedure.treatmentid  == treatmentid) & (db.vw_treatmentprocedure.is_active == True))
-    ##fields=(db.vw_treatmentprocedure.procedurecode,db.vw_treatmentprocedure.altshortdescription, db.vw_treatmentprocedure.relgrprocdesc,\
-               ##db.vw_treatmentprocedure.procedurefee,db.vw_treatmentprocedure.copay,db.vw_treatmentprocedure.inspays,db.vw_treatmentprocedure.status,\
-               ##db.vw_treatmentprocedure.treatmentdate)
-            
-
-    ##headers={
-        ##'vw_treatmentprocedure.procedurecode':'Code',
-        ##'vw_treatmentprocedure.altshortdescription':'Description',
-        ##'vw_treatmentprocedure.relgrprocdesc':'Procedure Group',
-        ##'vw_treatmentprocedure.procedurefee':'Procedure Cost',
-        ##'vw_treatmentprocedure.copay':'Co-Pay',
-        ##'vw_treatmentprocedure.inspays':'Authorized',
-        ##'vw_treatmentprocedure.status':'Status',
-        ##'vw_treatmentprocedure.treatmentdate':'Treatment Date'
-    ##}
-    
-    ##links = [\
-        ##dict(header=CENTER('Edit'),body=lambda row: CENTER(A(IMG(_src="/my_pms2/static/img/edit.png",_width=30, _height=30),\
-                                                           ##_href=URL("treatment","update_procedure",vars=dict(page=page,providerid=providerid,treatmentprocedureid=row.id,patientid=patientid,memberid=memberid,tplanid=tplanid,treatmentid=treatmentid,authorization=authorization,preauthorized=preauthorized,authorized=authorized,webadmin=webadmin,hmopatientmember=hmopatientmember))))),
-        ##dict(header=CENTER('Delete'),body=lambda row: CENTER(A(IMG(_src="/my_pms2/static/img/delete.png",_width=30, _height=30),\
-                                                                  ##_href=URL("treatment","delete_procedure",vars=dict(page=page,providerid=providerid,treatmentprocedureid=row.id,patientid=patientid,memberid=memberid,tplanid=tplanid,treatmentid=treatmentid)))))
-    ##]
-
-    ##maxtextlengths = {'vw_treatmentprocedure.altshortdescription':100}
-    
-    ##exportlist = dict( csv_with_hidden_cols=False, html=False,tsv_with_hidden_cols=False, tsv=False, json=False, csv=False, xml=False)
-       
-    ##formProcedure = SQLFORM.grid(query=query,
-                        ##headers=headers,
-                        ##fields=fields,
-                        ##links=links,
-                        ##paginate=10,
-                        ##maxtextlengths=maxtextlengths,
-                        ##orderby=None,
-                        ##exportclasses=exportlist,
-                        ##links_in_grid=True,
-                        ##searchable=False,
-                        ##create=False,
-                        ##deletable=False,
-                        ##editable=False,
-                        ##details=False,
-                        ##user_signature=True
-                       ##)  
-    
-    #returnurl = URL('treatment','list_treatments',vars=dict(page=page,providerid=providerid,memberid=memberid,patientid=patientid))
-    
-    #if formTreatment.accepts(request,session=session,formname='formtreatment',keepvalues=True):
-        #treatmentcost = float(common.getvalue(formTreatment.vars.treatmentcost))
-        #doctorid = int(common.getid(formTreatment.vars.doctor))
-        #docs = db(db.doctor.id == doctorid).select()
-        #doctorname = docs[0].name
-        
-        #if(formTreatment.vars.status == 'Authorized'):
-            #authorized = True
-        #else:
-            #authorized = False
-        
-        #db(db.treatment.id == treatmentid).update(\
-            #treatment = formTreatment.vars.treatment,
-            #chiefcomplaint = formTreatment.vars.chiefcomplaint,
-            #description  = formTreatment.vars.description,
-            #startdate = formTreatment.vars.startdate,
-            #enddate = formTreatment.vars.enddate,
-            #status = formTreatment.vars.status,
-            #authorized = authorized,
-            #actualtreatmentcost = 0,
-            #treatmentcost = treatmentcost,
-            #quadrant = '',
-            #tooth = '',
-            #dentalprocedure = 0, 
-            #doctor = doctorid,
-            #modified_on = datetime.date.today(),
-            #modified_by = providerid,
-        
-        #)    
-        
-        
-        #updatetreatmentcostandcopay(treatmentid,tplanid)
-        #calculatecost(tplanid)
-        #calculatecopay(db, tplanid,memberid)
-        #calculateinspays(tplanid)
-        #calculatedue(tplanid)
-        
-        #db.commit()                
-    
-        #db.treatmentnotes.update_or_insert(db.treatmentnotes.treatment == treatmentid, treatment = treatmentid, notes = formTreatment.vars.prescription)   
- 
-        #csrdate = (request.now).strftime('%d/%m/%Y %H:%M:%S')
-        #csr = csrdate + " : " + "CSR:"  + treatment + "\r\n" + "Doctor: " + doctorname + "\r\n" + formTreatment.vars.description
-        #csrid = db.casereport.insert(patientid = patientid, providerid=providerid, doctorid=doctorid, casereport = csr, is_active=True,\
-                                      #created_on = request.now, created_by = providerid, modified_on = request.now, modified_by = providerid)
-        
-        #session.flash = "Treatment Details Updated!"
-        
-       
-        #redirect(returnurl)
-
-    #elif formTreatment.errors:
-        #session.flash = "Error - Updating Treatment Report!" + str(formTreatment.errors)
-        ##redirect(returnurl)    
-    #return dict(formTreatment=formTreatment,\
-                    #formProcedure=formProcedure,\
-                    #page=page, memberpage=0, imagepage=imagepage,procedureid=procedureid,\
-                    #providerid=providerid, providername=providername,doctorid=doctorid,doctorname=docs[0].name,\
-                    #patientmember=patientmember, memberid=memberid,membername=membername, patientid=patientid,patientname=patientname,hmopatientmember=hmopatientmember,
-                    #treatment=treatment,treatmentid=treatmentid,tplanid=tplanid,medicalalerts=medicalalerts,\
-                    #authorization=authorization,authorizationurl=authorizationurl,writablflag=writablflag,
-                    #preauthorized=preauthorized,preauthorizeerror=preauthorizeerror,authorizeerror=authorizeerror,authorized=authorized,webadmin=webadmin,returnurl=returnurl,
-                    #freetreatment=freetreatment,newmember=newmember
-                    #)        
 
     return dict()
 
-#def xadd_proceduregrid():
-    
-    ##check whether webadmin login
-    #impersonated = auth.user.impersonated
-    
-    
-    #memberid = 0
-    #patientid = 0
-    #procedureid = 0
-    #ucrfee = 0    
-    #tplanid = 0
-    #doctorid = 0
-    #companyid = 0
-    
-    #patienttype = 'P'
-    #patientmember = ''
-    #membername = ''
-    #patientname = ''
-    #fullname = ''
-    #patient = ''
-    #doctorname = ''
-    #altshortdescription = ''
-    #title = ''
-    
-    ##provider : logged in
-    #providerid = int(common.getid(request.vars.providerid))
-    #provdict = common.getprovider(auth, db)
-    #providername  = provdict["providername"]
-    
-    #treatment = ""
-    
-    ##page
-    #page       = int(common.getpage(request.vars.page)) 
-    #imagepage  = int(common.getpage(request.vars.imagepage))
- 
-    #dob = ""
-    #cell = ""
-    #email = ""
-    #telephone = ""
-    #address1 = ""
-    #address2 = ""
-    #address3 = ""
-    #city = ""
-    #st = ""
-    #pin = ""
-    #defsts = ""
-    
-    #ucrfee = 0
-    #procedurefee = 0
-    #copay = 0
-    #inspays = 0
-    #companypays = 0
-    #procedureid = 0    
-    #patientpays = 0
-    #balance = 0
-    
-    #medicalalert = False
-    
-    #authorization = common.getboolean(request.vars.authorization)
-    #preauthorized = common.getboolean(request.vars.preauthorization)
-    #authorized =  common.getboolean(request.vars.authorized)
-    #authorizeerror = False
-    #preauthorizeerror = False
-    #webadmin = common.getboolean(request.vars.webadmin)
-       
-    
-    #rows = None
-    
-    #patienttype = 'P'
-    #procedurepriceplancode = 'PREM103'
-    #hmopatientmember = common.getboolean(request.vars.hmopatientmember)    
-      
-    ##treatmentid,treatment, memberid,patientid,patientmember,membername, patientname, patienttype
-    #treatmentid = int(common.getid(request.vars.treatmentid))
-    #treatments = db(db.treatment.id == treatmentid).select()
-    #authorizationurl = URL('reports', 'treatmentreport', vars=dict(page=page, providerid=providerid,treatmentid=treatmentid))
-    
-    #totaltreatmentcost = 0
-    #totalactualtreatmentcost = 0
-    #freetreatment = True
-    #newmember = False
-    
-    #procedurepriceplancode = "PREMWALKIN"
-    #remarks = ""
-    #patienttype = 'P'
-    #treatment = common.getstring(treatments[0].treatment)
-    #tplanid = int(common.getid(treatments[0].treatmentplan))
-    #procedureid = int(common.getid(treatments[0].dentalprocedure))
-    #doctorid = int(common.getid(treatments[0].doctor))
-    #docs=db(db.doctor.id == doctorid).select(db.doctor.name)
-    #totaltreatmentcost = float(common.getvalue(treatments[0].treatmentcost)) #this is the actual treatment cost = total treatment cost unless it is changed by provider
-    #totalactualtreatmentcost = float(common.getvalue(treatments[0].actualtreatmentcost))   #this is total UCRR
-   
-    #tplans = db((db.treatmentplan.id == tplanid) & (db.treatmentplan.provider==providerid) & (db.treatmentplan.is_active == True)).select()
-    
-    #if(len(tplans) > 0):
-        #memberid = tplans[0].primarypatient
-        #patientid = tplans[0].patient
-       
-    ##determine treatment status   
-    #if(authorized==True):
-        #defsts = 'Authorized'
-        #db(db.treatment.id == treatmentid).update(status = defsts)
-        #db(db.treatment_procedure.treatmentid == treatmentid).update(status=defsts)
-    #else:
-        #defsts = common.getstring(treatments[0].status)
-        #defsts = defsts if((defsts != None) & (defsts != "")) else 'Started'
-       
-    #xsts = defsts       
-   
-
-    #rows = db((db.vw_memberpatientlist.primarypatientid == memberid)&(db.vw_memberpatientlist.patientid == patientid)&(db.vw_memberpatientlist.providerid == providerid) & (db.vw_memberpatientlist.is_active == True)).\
-        #select()
-    
-    #cos = None
-    
-    #if(len(rows)>0):
-        #title = rows[0].title
-        #fullname = rows[0].fullname.strip()
-        #patientmember = rows[0].patientmember.strip()
-        #patientname = rows[0].patient.strip()
-        #membername = rows[0].fullname.strip()
-        #procedurepriceplancode = rows[0].procedurepriceplancode
-        #newmember = common.getboolean(rows[0].newmember)          
-        #freetreatment = common.getboolean(rows[0].freetreatment)
-        #patienttype = rows[0].patienttype
-        #procedurepriceplancode = rows[0].procedurepriceplancode
-        #hmopatientmember = rows[0].hmopatientmember  
-        #companyid = int(common.getid(rows[0].company))
-        #cos = db(db.company.id == companyid).select()
-        
-    #procs = db((db.vw_procedurepriceplan.procedurepriceplancode == procedurepriceplancode) & (db.vw_procedurepriceplan.procedurecode == request.vars.vwdentalprocedurecode)).select()
-    #if(len(procs)>0):
-        #ucrfee = float(common.getvalue(procs[0].ucrfee))
-        #procedurefee = float(common.getvalue(procs[0].procedurefee))
-        #if(procedurefee == 0):
-            #procedurefee = ucrfee
-        #inspays = float(common.getvalue(procs[0].inspays))
-        #copay = float(common.getvalue(procs[0].copay))
-        
-        #companypays = float(common.getvalue(procs[0].companypays))
-        
-        #if((session.religare != None) & (common.getboolean(procs[0].relgrproc)==True)):
-            #balance = float(common.getvalue(session.religare["balance"]))
-            #trxamount = min(inspays,balance)
-           
-            #copay = copay + abs(inspays - trxamount)
-            #inspays = trxamount
-            #session.religare["balance"] = abs(balance - trxamount)
-            
-            
-        #remarks = common.getstring(procs[0].remarks)
-        #procedureid = int(common.getid(procs[0].id))
-        #altshortdescription = common.getstring(procs[0].altshortdescription)
-        #remarks =  common.getstring(procs[0].remarks)                
-    
-        
-    #db.treatment_procedure.insert(treatmentid = treatmentid, dentalprocedure = procedureid,status=xsts,\
-                                    #ucr = ucrfee, procedurefee=procedurefee, copay=copay,inspays=inspays,companypays=companypays,\
-                                    #tooth=0,quadrant=0,remarks=remarks)   
-    #db.commit()  
-              
-    #p1 = db((db.treatment_procedure.treatmentid == treatmentid)&(db.treatment_procedure.is_active==True)).count()                
-    #authorization = common.getboolean(cos[0].authorizationrequired) & (p1>0)        
-    
-    ##medical alerts
-    #medicalalerts = False
-    #alerts = db((db.medicalnotes.patientid == patientid) & (db.medicalnotes.memberid == memberid)).select()
-    #if(len(alerts)>0):
-        #medicalalerts = medicalalerts | common.getboolean(alerts[0].allergic)
-        #medicalalerts = medicalalerts | common.getboolean(alerts[0].bp)
-        #medicalalerts = medicalalerts | common.getboolean(alerts[0].heart)
-        #medicalalerts = medicalalerts | common.getboolean(alerts[0].cardiac)
-        #medicalalerts = medicalalerts | common.getboolean(alerts[0].diabetes)
-        #medicalalerts = medicalalerts | common.getboolean(alerts[0].anyother)
-        
-
-    #enddate = common.getdt(treatments[0].enddate)
-
-    #writablflag = (not authorization) | (((not preauthorized) & (not authorized)&(not webadmin))|((webadmin)))
-    
-   
-    
-   
-        
-  
-        
-  
-    
-   
-
-    #if(freetreatment == False):
-        #if(patienttype == 'P'):
-            #db(db.patientmember.id == patientid).update(newmember = False, freetreatment = True)
-        #else:
-            #db(db.patientmemberdependants.id == patientid).update(newmember = False, freetreatment = True)
-
-    
-    #updatetreatmentcostandcopay(treatmentid,tplanid)
-    #calculatecost(tplanid)
-    #calculatecopay(db, tplanid,memberid)
-    #calculateinspays(tplanid)
-    #calculatedue(tplanid)        
-    #common.dashboard(db,session,providerid)
-    
-    #treatments = db(db.treatment.id == treatmentid).select()
-    #totaltreatmentcost = float(common.getvalue(treatments[0].treatmentcost)) #this is the actual treatment cost = total treatment cost unless it is changed by provider
-    #totalactualtreatmentcost = float(common.getvalue(treatments[0].actualtreatmentcost))   #this is total UCRR
-    
-    
-    #formTreatment = SQLFORM.factory(
-          #Field('patientmember', 'string',  label='Patient', default = fullname,\
-                #requires=[IS_NOT_EMPTY(),IS_IN_DB(db(db.vw_memberpatientlist.providerid == providerid), 'vw_memberpatientlist.fullname','%(fullname)s')],writable=False),
-          #Field('xmemberid', 'string',  label='Member',default=memberid),
-          #Field('treatment','string',label='Treatment No.', default=treatments[0].treatment,writable=writablflag),
-          #Field('chiefcomplaint','string',label='Chief Complaint', default=treatments[0].chiefcomplaint,writable=writablflag),
-          #Field('description','text', label='Description', default=treatments[0].description, writable=writablflag),
-          #Field('quadrant','string', label='Quadrant(s)', default=treatments[0].quadrant),
-          #Field('tooth','string', label='Tooth/Teeth', default=treatments[0].tooth),
-          #Field('startdate', 'date', label='From Date',default=treatments[0].startdate, requires=IS_EMPTY_OR(IS_DATE(format=('%d/%m/%Y'))), writable=writablflag),
-          #Field('enddate', 'date', label='To Date',default=enddate, requires=IS_EMPTY_OR(IS_DATE(format=('%d/%m/%Y'))),writable=writablflag),
-          #Field('status', 'string', widget = lambda field, value:SQLFORM.widgets.options.widget(field, value, _style="width:100%;height:35px",_class='w3-input w3-border ',_onchange='onstatuschange()'),label='Status',default=defsts, requires = IS_IN_SET(status.TREATMENTSTATUS), writable=writablflag),  
-          #Field('ucrfee', 'double', label='Total UCR',default=totalactualtreatmentcost,writable=False),  
-          #Field('treatmentcost', 'double', label='Total Treament Cost',default=totaltreatmentcost,writable=False),  
-          #Field('copay', 'double', label='Total Copay',default=treatments[0].copay, writable = False),  
-          #Field('inspay', 'double', label='Total Ins. Pays',default=treatments[0].inspay, writable=False),  
-          #Field('doctor', widget = lambda field, value:SQLFORM.widgets.options.widget(field, value, _class='form_details'), default=doctorid, label='Doctor',requires=IS_IN_DB(db((db.doctor.providerid==providerid)&(db.doctor.stafftype == 'Doctor')&(db.doctor.is_active==True)), 'doctor.id', '%(name)s')),
-          #Field('remarks', 'string', default = remarks, writable=writablflag),
-          #Field('vwdentalprocedure', 'string',  default='', label='Procedure ID'),
-          #Field('vwdentalprocedurecode', 'string',  default='', label='Procedure Code'), 
-          #Field('xaction', 'string', default = 'UpdateTreatment')
-          
-          #)    
-       
-   
-   
-    #doc = formTreatment.element('#no_table_doctor')
-    #doc['_class'] = 'form-control'
-    #doc['_style'] = 'width:100%'
-    
-    #xtreatment = formTreatment.element('input',_id='no_table_treatment')
-    #xtreatment['_class'] =  'form-control'
-    #xtreatment['_type'] =  'text'
-    #xtreatment['_autocomplete'] = 'off'     
-    #xtreatment['_readonly'] = 'true'
-
-    #xvwdentalprocedurecode = formTreatment.element('input',_id='no_table_vwdentalprocedurecode')
-    #xvwdentalprocedurecode['_class'] =  'form-control '
-    #xvwdentalprocedurecode['_placeholder'] = 'Enter Dental Procedure Code' 
-    #xvwdentalprocedurecode['_autocomplete'] = 'off'         
-    #xvwdentalprocedurecode['_style'] = 'width:100%'
-    
-    #xvwdentalprocedure = formTreatment.element('input',_id='no_table_vwdentalprocedure')
-    #xvwdentalprocedure['_class'] =  'form-control '
-    #xvwdentalprocedure['_placeholder'] = 'Enter Dental Procedure Name' 
-    #xvwdentalprocedure['_autocomplete'] = 'off'         
-    #xvwdentalprocedure['_style'] = 'width:100%'   
-
-    #xtooth = formTreatment.element('input',_id='no_table_tooth')
-    #xtooth['_class'] =  'form-control '
-    #xtooth['_placeholder'] = 'Enter Tooth Number' 
-    #xtooth['_autocomplete'] = 'off'         
-    #xtooth['_style'] = 'width:100%'
-
-    #xquad = formTreatment.element('input',_id='no_table_quadrant')
-    #xquad['_class'] =  'form-control '
-    #xquad['_placeholder'] = 'Enter Quadrant' 
-    #xquad['_autocomplete'] = 'off'         
-    #xquad['_style'] = 'width:100%'    
-
-    #if(writablflag):
-        #formTreatment.element('textarea[name=description]')['_style'] = 'height:100px;line-height:1.0;'
-        #formTreatment.element('textarea[name=description]')['_rows'] = 5
-        #formTreatment.element('textarea[name=description]')['_class'] = 'form-control'        
-
-       
-    
-       
-        
-        #xstartdate = formTreatment.element('input',_id='no_table_startdate')
-        #xstartdate['_class'] =  'input-group form-control form-control-inline date-picker'
-        #xstartdate['_data-date-format'] = 'dd/mm/yyyy'
-        #xstartdate['_autocomplete'] = 'off' 
-    
-    
-        #xenddate = formTreatment.element('input',_id='no_table_enddate')
-        #xenddate['_class'] =  'input-group form-control form-control-inline date-picker'
-        #xenddate['_data-date-format'] = 'dd/mm/yyyy'
-        #xenddate['_autocomplete'] = 'off' 
-
-        #xtreatment = formTreatment.element('input',_id='no_table_treatment')
-        #xtreatment['_class'] =  'form-control'
-        #xtreatment['_type'] =  'text'
-        #xtreatment['_autocomplete'] = 'off' 
-
-        #cc = formTreatment.element('input', _id='no_table_chiefcomplaint')
-        #cc['_class'] = 'form-control'
-        #cc['_style'] = 'width:100%'
-        #cc['_type'] =  'text'
- 
- 
-    ## procedures grid
-    #authorization = False
-    #authorized = False
-    #preauthorized = False
-
-    #webadmin = auth.user.impersonated
-    #formProcedure = getproceduregrid(providerid,tplanid,treatmentid,memberid,patientid,authorization,authorized,preauthorized,page,hmopatientmember,writablflag,webadmin)    
-    
-    ##query = ((db.vw_treatmentprocedure.treatmentid  == treatmentid) & (db.vw_treatmentprocedure.is_active == True))
-    ##fields=(db.vw_treatmentprocedure.procedurecode,db.vw_treatmentprocedure.altshortdescription, db.vw_treatmentprocedure.relgrprocdesc,\
-               ##db.vw_treatmentprocedure.procedurefee,db.vw_treatmentprocedure.copay,db.vw_treatmentprocedure.inspays,db.vw_treatmentprocedure.status,\
-               ##db.vw_treatmentprocedure.treatmentdate)
-            
-
-    ##headers={
-        ##'vw_treatmentprocedure.procedurecode':'Code',
-        ##'vw_treatmentprocedure.altshortdescription':'Description',
-        ##'vw_treatmentprocedure.relgrprocdesc':'Procedure Group',
-        ##'vw_treatmentprocedure.procedurefee':'Procedure Cost',
-        ##'vw_treatmentprocedure.copay':'Co-Pay',
-        ##'vw_treatmentprocedure.inspays':'Authorized',
-        ##'vw_treatmentprocedure.status':'Status',
-        ##'vw_treatmentprocedure.treatmentdate':'Treatment Date'
-    ##}
-    
-    ##links = [\
-        ##dict(header=CENTER('Edit'),body=lambda row: CENTER(A(IMG(_src="/my_pms2/static/img/edit.png",_width=30, _height=30),\
-                                                           ##_href=URL("treatment","update_procedure",vars=dict(page=page,providerid=providerid,treatmentprocedureid=row.id,patientid=patientid,memberid=memberid,tplanid=tplanid,treatmentid=treatmentid,authorization=authorization,preauthorized=preauthorized,authorized=authorized,webadmin=webadmin,hmopatientmember=hmopatientmember))))),
-        ##dict(header=CENTER('Delete'),body=lambda row: CENTER(A(IMG(_src="/my_pms2/static/img/delete.png",_width=30, _height=30),\
-                                                                  ##_href=URL("treatment","delete_procedure",vars=dict(page=page,providerid=providerid,treatmentprocedureid=row.id,patientid=patientid,memberid=memberid,tplanid=tplanid,treatmentid=treatmentid)))))
-    ##]
-
-    ##maxtextlengths = {'vw_treatmentprocedure.altshortdescription':100}
-    
-    ##exportlist = dict( csv_with_hidden_cols=False, html=False,tsv_with_hidden_cols=False, tsv=False, json=False, csv=False, xml=False)
-       
-    ##formProcedure = SQLFORM.grid(query=query,
-                        ##headers=headers,
-                        ##fields=fields,
-                        ##links=links,
-                        ##paginate=10,
-                        ##maxtextlengths=maxtextlengths,
-                        ##orderby=None,
-                        ##exportclasses=exportlist,
-                        ##links_in_grid=True,
-                        ##searchable=False,
-                        ##create=False,
-                        ##deletable=False,
-                        ##editable=False,
-                        ##details=False,
-                        ##user_signature=True
-                       ##)  
-    
-    #returnurl = URL('treatment','list_treatments',vars=dict(page=page,providerid=providerid,memberid=memberid,patientid=patientid))
-    
-    #if formTreatment.accepts(request,session=session,formname='formtreatment',keepvalues=True):
-        #treatmentcost = float(common.getvalue(formTreatment.vars.treatmentcost))
-        #doctorid = int(common.getid(formTreatment.vars.doctor))
-        #docs = db(db.doctor.id == doctorid).select()
-        #doctorname = docs[0].name
-        
-        #if(formTreatment.vars.status == 'Authorized'):
-            #authorized = True
-        #else:
-            #authorized = False
-        
-        #db(db.treatment.id == treatmentid).update(\
-            #treatment = formTreatment.vars.treatment,
-            #chiefcomplaint = formTreatment.vars.chiefcomplaint,
-            #description  = formTreatment.vars.description,
-            #startdate = formTreatment.vars.startdate,
-            #enddate = formTreatment.vars.enddate,
-            #status = formTreatment.vars.status,
-            #authorized = authorized,
-            #actualtreatmentcost = 0,
-            #treatmentcost = treatmentcost,
-            #quadrant = '',
-            #tooth = '',
-            #dentalprocedure = 0, 
-            #doctor = doctorid,
-            #modified_on = datetime.date.today(),
-            #modified_by = providerid,
-        
-        #)    
-        
-        
-        #updatetreatmentcostandcopay(treatmentid,tplanid)
-        #calculatecost(tplanid)
-        #calculatecopay(db, tplanid,memberid)
-        #calculateinspays(tplanid)
-        #calculatedue(tplanid)
-        
-        #db.commit()                
-    
-        #db.treatmentnotes.update_or_insert(db.treatmentnotes.treatment == treatmentid, treatment = treatmentid, notes = formTreatment.vars.prescription)   
- 
-        #csrdate = (request.now).strftime('%d/%m/%Y %H:%M:%S')
-        #csr = csrdate + " : " + "CSR:"  + treatment + "\r\n" + "Doctor: " + doctorname + "\r\n" + formTreatment.vars.description
-        #csrid = db.casereport.insert(patientid = patientid, providerid=providerid, doctorid=doctorid, casereport = csr, is_active=True,\
-                                      #created_on = request.now, created_by = providerid, modified_on = request.now, modified_by = providerid)
-        
-        #session.flash = "Treatment Details Updated!"
-        
-       
-        #redirect(returnurl)
-
-    #elif formTreatment.errors:
-        #session.flash = "Error - Updating Treatment Report!" + str(formTreatment.errors)
-        ##redirect(returnurl)    
-    #return dict(formTreatment=formTreatment,\
-                    #formProcedure=formProcedure,\
-                    #page=page, memberpage=0, imagepage=imagepage,procedureid=procedureid,\
-                    #providerid=providerid, providername=providername,doctorid=doctorid,doctorname=docs[0].name,\
-                    #patientmember=patientmember, memberid=memberid,membername=membername, patientid=patientid,patientname=patientname,hmopatientmember=hmopatientmember,
-                    #treatment=treatment,treatmentid=treatmentid,tplanid=tplanid,medicalalerts=medicalalerts,\
-                    #authorization=authorization,authorizationurl=authorizationurl,writablflag=writablflag,
-                    #preauthorized=preauthorized,preauthorizeerror=preauthorizeerror,authorizeerror=authorizeerror,authorized=authorized,webadmin=webadmin,returnurl=returnurl,
-                    #freetreatment=freetreatment,newmember=newmember
-                    #)        
 
 @auth.requires(auth.has_membership('provider') or auth.has_membership('webadmin')) 
 @auth.requires_login()
