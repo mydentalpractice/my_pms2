@@ -9,7 +9,9 @@ import requests
 
 from applications.my_pms2.modules import common
 from applications.my_pms2.modules import account
+
 from applications.my_pms2.modules import logger
+
 
 class Benefit:
   def __init__(self,db):
@@ -46,16 +48,21 @@ class Benefit:
       member_id = int(common.getkeyvalue(avars,"member_id", "0"))
       wallet_type = common.getkeyvalue(avars,"wallet_type", "SUPER_WALLET")
       walletamount = float(common.getkeyvalue(avars,"walletamount", "0"))
+      discount_amount = float(common.getkeyvalue(avars,"discount_amount", "0"))
      
       reqobj["member_id"] = member_id
       reqobj["wallet_type"] = wallet_type
       reqobj["transaction_type"] = "CR"
       reqobj["amount"] = walletamount
+      reqobj["head_name"] = "CASHBACK"
+      reqobj["head_id"] = str(member_id)
       
       urlprops = db(db.urlproperties.id > 0).select(db.urlproperties.vw_url)
       vw_url = urlprops[0].vw_url if(len(urlprops) > 0) else ""
       vw_url = vw_url + "WalletCrDr"
+      logger.loggerpms2.info("Credit Wallet Request " + vw_url + " " + json.dumps(reqobj))
       resp = requests.post(vw_url,json=reqobj)
+      logger.loggerpms2.info("Credit Wallet Respones " + vw_url + " " + json.dumps(resp.json()))
       if((resp.status_code == 200)|(resp.status_code == 201)|(resp.status_code == 202)|(resp.status_code == 203)):
             rspobj = resp.json()
 
@@ -86,10 +93,147 @@ class Benefit:
       rspobj["error_message"] = mssg
       return json.dumps(rspobj)     
     
-
+    logger.loggerpms2.info("Exit Credit Wallet (Benefits) " + json.dumps(rspobj))
     return json.dumps(rspobj)  
   
+  def debit_wallet(self,avars):
+      logger.loggerpms2.info("Enter Debit Wallet " + json.dumps(avars))
+      
+      db = self.db
+      rspobj = {}
+      reqobj = {}
+      
+      try:
+        member_id = int(common.getkeyvalue(avars,"member_id", "0"))
+        wallet_type = common.getkeyvalue(avars,"wallet_type", "SUPER_WALLET")
+        walletamount = float(common.getkeyvalue(avars,"walletamount", "0"))
+       
+        reqobj["member_id"] = member_id
+        reqobj["wallet_type"] = wallet_type
+        reqobj["transaction_type"] = "DR"
+        reqobj["amount"] = walletamount
+        reqobj["head_name"] = "CASHBACK"
+        reqobj["head_id"] = str(member_id)
+        
+        urlprops = db(db.urlproperties.id > 0).select(db.urlproperties.vw_url)
+        vw_url = urlprops[0].vw_url if(len(urlprops) > 0) else ""
+        vw_url = vw_url + "WalletCrDr"
+        logger.loggerpms2.info("Debit Wallet Request " + vw_url + " " + json.dumps(reqobj))
+        resp = requests.post(vw_url,json=reqobj)
+        logger.loggerpms2.info("Debit Wallet Respones " + vw_url + " " + json.dumps(resp.json()))
+      
+        if((resp.status_code == 200)|(resp.status_code == 201)|(resp.status_code == 202)|(resp.status_code == 203)):
+              rspobj = resp.json()
   
+              if(rspobj["RETURN_CODE"] != 1):
+                mssg = "Debit Wallet API - Wallet Response Error: " + common.getkeyvalue(rspobj,"RETURN_MESSAGE", "")
+                rspobj = {}
+                rspobj["result"] = "fail"
+                rspobj["error_message"] = mssg
+              
+              #success API
+              rspobj["result"] = "success"
+              rspobj["error_message"] = ""
+        else:
+          #response error
+          mssg = "Debit Wallet API -  HTTP Response Error: " + str(resp.status_code)
+          logger.loggerpms2.info(mssg)      
+          rspobj = {}
+          rspobj["result"] = "fail"
+          rspobj["error_message"] = mssg
+          return json.dumps(rspobj)          
+      
+      except Exception as e:
+        
+        mssg = "Debit Wallet API Exception " + str(e)
+        logger.loggerpms2.info(mssg)      
+        rspobj = {}
+        rspobj["result"] = "fail"
+        rspobj["error_message"] = mssg
+        return json.dumps(rspobj)     
+      
+      logger.loggerpms2.info("Exit Debit Wallet (Benefits) " + json.dumps(rspobj))
+      return json.dumps(rspobj)  
+      
+  
+  #This API will debit wallet of the amount used from the wallet in the 
+  #payment
+  def ywallet_success(self,avars):
+    logger.loggerpms2.info("Enter Wallet Success API - " + json.dumps(avars))
+
+    db = self.db
+    rspobj = {}
+    reqobj = {}  
+    try:
+      paymentid = int(common.getkeyvalue(avars,"paymentid","0"))
+      p = db((db.payment.id == paymentid) & (db.payment.is_active == True)).select()
+      precommitamount = float(p[0].amount) if(len(p)>0) else 0
+      amount = float(p[0].amount) if(len(p)>0) else 0
+      amount = precommitamount if (precommitamoun > 0) else amount
+      
+      memberid = int(p[0].patientmember) if(len(p)>0) else 0
+      providerid = int(p[0].provider) if(len(p)>0) else 0
+      tplanid = int(p[0].treatmentplan) if(len(p)>0) else 0
+      tr = db((db.treatment.treatmentplan == tplanid) & (db.treatment.is_active == True)).select()
+      treatmentid = int(tr[0].id) if(len(tr)>0) else 0      
+      wallet_type  = tr[0].wallet_type if(len(tr) > 0) else ""
+      walletamount = amount
+      super_wallet_amount = walletamount if wallet_type == "SUPER_WALLET" else 0
+      mdp_wallet_amount = walletamount if wallet_type == "MDP_WALLET" else 0
+      
+      #get provider's region
+      #get region code
+      provs = db((db.provider.id == providerid) & (db.provider.is_active == True)).select(db.provider.groupregion)
+      regionid = int(common.getid(provs[0].groupregion)) if(len(provs) == 1) else 1
+      regions = db((db.groupregion.id == regionid) & (db.groupregion.is_active == True)).select(db.groupregion.groupregion)
+      regioncode = common.getstring(regions[0].groupregion) if(len(regions) == 1) else "ALL"
+    
+      #get companycode
+      pats = db((db.vw_memberpatientlist.primarypatientid == memberid) & (db.vw_memberpatientlist.patientid == memberid)).select(db.vw_memberpatientlist.company,db.vw_memberpatientlist.hmoplan)
+      companyid = int(common.getid(pats[0].company)) if(len(pats) == 1) else 0
+      companys = db((db.company.id == companyid) & (db.company.is_active == True)).select(db.company.company)
+      companycode = common.getstring(companys[0].company) if(len(companys) == 1) else "PREMWALKIN"
+    
+      ##for backward compatibility determine procedurepriceplancode from member's plan at the time of registration
+      hmoplanid = int(common.getid(pats[0].hmoplan)) if(len(pats) == 1) else 0  #this is the patient's previously assigned plan-typically at registration
+      hmoplans = db((db.hmoplan.id == hmoplanid) & (db.hmoplan.is_active == True)).select(db.hmoplan.hmoplancode,db.hmoplan.procedurepriceplancode)
+      hmoplancode = common.getstring(hmoplans[0].hmoplancode) if(len(hmoplans) == 1) else "PREMWALKIN"
+      r = db(
+        (db.provider_region_plan.companycode == companycode) &\
+        (db.provider_region_plan.plancode == hmoplancode) &\
+        ((db.provider_region_plan.regioncode == regioncode)|(db.provider_region_plan.regioncode == 'ALL'))).select()
+      plancode = r[0].policy if(len(r) == 1) else "PREMWALKIN"    
+      
+      avars={}
+      avars["plan_code"] =plancode
+      avars["company_code"] = companycode                          
+      avars["member_id"] = memberid
+      avars["rule_event"] = "rules_payment"
+      avars["mdp_wallet_usase"] = 0
+      avars["super_wallet_amount"] = super_wallet_amount 
+      avars["mdp_wallet_amount"] = mdp_wallet_amount
+  
+      rulesobj = None #mdprules.Plan_Rules(db)
+      rspobj = None #json.loads(rulesobj.Get_Plan_Rules(avars))
+      
+      if(rspobj["result"] == "fail"):
+        mssg = "Wallet Success API - Wallet Response Error: " + common.getkeyvalue(rspobj,"RETURN_MESSAGE", "")
+        rspobj["error_message"] = mssg
+      else:
+        db(db.payment.id == paymentid).update(wallet_type = wallet_type,walletamount=walletamount,
+                                              modified_on=common.getISTCurrentLocatTime())
+    
+    except Exception as e:
+      mssg = "Wallet Success API Exception " + str(e)
+      rspobj = {}
+      rspobj["result"] = "fail"
+      rspobj["error_message"] = mssg
+        
+    
+    mssg = json.dumps(rspobj)
+    logger.loggerpms2.info(mssg)
+    return mssg
+
   #This API will debit wallet of the amount used from the wallet in the 
   #payment
   def wallet_success(self,avars):
@@ -239,20 +383,23 @@ class Benefit:
 
 
   def create_wallet(self,avars):
+    logger.loggerpms2.info("Enter Create_Wallet (Benefits) " + json.dumps(avars))
     db = self.db
     rspobj = {}
     reqobj = {}
     
     try:
       #make a POST Call
-      reqobj = {}
-      reqobj["member_id"] = int(common.getid(common.getkeyvalue(avars,"member_id","0")))
+      reqobj = avars
+      #reqobj["member_id"] = int(common.getid(common.getkeyvalue(avars,"member_id","0")))
       
       urlprops = db(db.urlproperties.id > 0).select(db.urlproperties.vw_url)
       vw_url = urlprops[0].vw_url if(len(urlprops) > 0) else ""
       
       vw_url = vw_url + "createWallet"
+      logger.loggerpms2.info("Create Wallet Request " + vw_url + " " + json.dumps(reqobj))
       resp = requests.post(vw_url,json=reqobj)
+      logger.loggerpms2.info("Create Wallet Respones " + vw_url + " " + json.dumps(resp.json()))
       if((resp.status_code == 200)|(resp.status_code == 201)|(resp.status_code == 202)|(resp.status_code == 203)):
             rspobj = resp.json()
             
@@ -286,6 +433,95 @@ class Benefit:
     return mssg    
 
   def getwallet_balance(self,avars):
+    
+    logger.loggerpms2.info("Enter Get Wallet Balance " + json.dumps(avars))
+    
+    db = self.db
+    rspobj = {}
+    reqobj = {}
+    
+    try:
+      
+      member_id = int(common.getid(common.getkeyvalue(avars,"member_id","0")))
+      amount = float(common.getvalue(common.getkeyvalue(avars,"amount","0")))
+      
+      #make a POST Call
+      reqobj = {}
+      reqobj["member_id"] = member_id
+      reqobj["plan_code"] = common.getkeyvalue(avars,"plan_code","PREMWALKIN")
+      
+      urlprops = db(db.urlproperties.id > 0).select(db.urlproperties.vw_url)
+      vw_url = urlprops[0].vw_url if(len(urlprops) > 0) else ""
+      
+      vw_url = vw_url + "getWalletBalance"
+      resp = requests.post(vw_url,json=reqobj)
+      if((resp.status_code == 200)|(resp.status_code == 201)|(resp.status_code == 202)|(resp.status_code == 203)):
+            rspobj = resp.json()
+            
+            if(rspobj["RETURN_CODE"] != 1):
+              mssg = "Get Wallet Balance API - Wallet Response Error: " + common.getkeyvalue(rspobj,"RETURN_MESSAGE", "")
+              rspobj = {}
+              rspobj["result"] = "fail"
+              rspobj["error_message"] = mssg
+              return json.dumps(rspobj)
+            
+            mdp_wallet_usage = int((common.getkeyvalue(rspobj,"MDP_WALLET_USASE","0")))
+            mdp_wallet_usage_for_plan = int((common.getkeyvalue(rspobj,"MDP_WALLET_USASE_FOR_PLAN","0")))
+                        
+            
+            balobj = rspobj["WALLET_BALANCE"]
+            super_wallet_amount = float(common.getkeyvalue(balobj,"super_wallet_amount","0"))
+            mdp_wallet_amount = float(common.getkeyvalue(balobj,"mdp_wallet_amount","0"))
+            
+            #min of mdp wallet amount and % of total treatment amount to Pay
+            percentamount = float((amount * mdp_wallet_usage_for_plan)/100)
+            mdp_wallet_usage_amount = min(mdp_wallet_amount,percentamount)  
+            
+            #rspobj["super_wallet_amount"] = super_wallet_amount
+            #rspobj["mdp_wallet_amount"] = mdp_wallet_usage_amount
+            
+            rspobj["super_wallet_message"] = "Available Balance Rs." + str(super_wallet_amount)
+            rspobj["mdp_wallet_message"] = "Available Balance Rs." + str(mdp_wallet_usage_amount) + ". " + \
+              "This is minimum of " + str(mdp_wallet_amount) + " and " + str(mdp_wallet_usage) + " percentage of Rs." + str(amount) + "(" + str(percentamount) + ")"
+            
+            rspobj["result"] = "success"
+            rspobj["error_message"] = ""
+            
+            wallet_list = []
+            lstobj = {}
+            lstobj["wallet_amount"] = super_wallet_amount
+            lstobj["wallet_type"]  = "SUPER_WALLET"
+            lstobj["wallet_message"] = rspobj["super_wallet_message"]
+            wallet_list.append(lstobj)
+            lstobj = {}
+            lstobj["wallet_amount"] = mdp_wallet_usage_amount
+            lstobj["wallet_type"]  = "MDP_WALLET"
+            lstobj["wallet_message"] = rspobj["mdp_wallet_message"]
+            wallet_list.append(lstobj)
+            rspobj["wallet_list"] = wallet_list
+            
+      else:
+        #response error
+        mssg = "Get Wallet Balance API -  HTTP Response Error: " + str(resp.status_code)
+        logger.loggerpms2.info(mssg)      
+        rspobj = {}
+        rspobj["result"] = "fail"
+        rspobj["error_message"] = mssg
+        return json.dumps(rspobj)
+      
+    except Exception as e:
+      mssg = "Get Wallet Balance API Exception" + str(e)
+      logger.loggerpms2.info(mssg)      
+      rspobj = {}
+      rspobj["result"] = "fail"
+      rspobj["error_message"] = mssg
+      return json.dumps(rspobj)     
+    
+    mssg = json.dumps(rspobj)
+    logger.loggerpms2.info(mssg)
+    return mssg    
+
+  def xgetwallet_balance(self,avars):
     
     logger.loggerpms2.info("Enter Get Wallet Balance " + json.dumps(avars))
     
@@ -371,6 +607,7 @@ class Benefit:
     mssg = json.dumps(rspobj)
     logger.loggerpms2.info(mssg)
     return mssg    
+
 
   # This API is called to reverse voucher application
   def reverse_voucher(self,avars):

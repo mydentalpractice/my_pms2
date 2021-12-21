@@ -9125,14 +9125,21 @@ ADD COLUMN `company_code` VARCHAR(45) NULL DEFAULT NULL AFTER `authorizationrequ
 ALTER TABLE `mydp_prod`.`importplan` 
 ADD COLUMN `company_code` VARCHAR(45) NULL DEFAULT NULL AFTER `authorizationrequired`;
 
-10. ZZZModify pricing_rules table add 'rule_event'
+10. YYYZZZModify pricing_rules table add 'rule_event'
 
-11. ZZZRename pricing_rules table to rules table
+11. YYYYZZZRename pricing_rules table to rules table
     ALTER TABLE `mydp_prod`.`price_rules` 
 RENAME TO  `mydp_prod`.`rules` ;
 
-12. ZZZ Modify importcustomers table - added P_D & relation fields
+12. YYYZZZ Modify importcustomers table - added P_D & relation fields
 
+13. YYYZZZ Modify treatmentplan voucher_code is varchar
+
+14. YYYZZZZPopulate Rules table 
+
+15. Populate CompanyCode in HMOPLAN table
+
+16. procedurefee=ucrfee in procedurepriceplan table
 
 Script file to clear user for sign-up
 =====================================

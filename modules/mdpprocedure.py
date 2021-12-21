@@ -12,6 +12,7 @@ from applications.my_pms2.modules import status
 from applications.my_pms2.modules import common
 from applications.my_pms2.modules import mail
 from applications.my_pms2.modules import tasks
+from applications.my_pms2.modules import mdprules
 from applications.my_pms2.modules import logger
 
 datefmt = "%d/%m/%Y"
@@ -486,27 +487,43 @@ class Procedure:
         
         logger.loggerpms2.info("Enter getprocedures API " + str(treatmentid) + " " + searchphrase)
         db = self.db
-        providerid = self.providerid
         
         page = page -1
-            
-        urlprops = db(db.urlproperties.id >0 ).select(db.urlproperties.pagination)
-        items_per_page = 10 if(len(urlprops) <= 0) else int(common.getvalue(urlprops[0].pagination))
-        limitby = ((page)*items_per_page,(page+1)*items_per_page)             
-
         
+        providerid = self.providerid
+        #get provider's region
+        #get region code
+        provs = db((db.provider.id == providerid) & (db.provider.is_active == True)).select(db.provider.groupregion)
+        regionid = int(common.getid(provs[0].groupregion)) if(len(provs) == 1) else 1
+        regions = db((db.groupregion.id == regionid) & (db.groupregion.is_active == True)).select(db.groupregion.groupregion)
+        regioncode = common.getstring(regions[0].groupregion) if(len(regions) == 1) else "ALL"
+
+        #get memberid and patientid
         rows = db((db.vw_treatmentlist.id == treatmentid) & (db.vw_treatmentlist.is_active == True)).\
             select(db.vw_treatmentlist.memberid,db.vw_treatmentlist.patientid)
         patientid = int(common.getid(rows[0].patientid)) if(len(rows) == 1) else 0
-        memberid = int(common.getid(rows[0].memberid)) if(len(rows) == 1) else 0
+        memberid = int(common.getid(rows[0].memberid)) if(len(rows) == 1) else 0 
         
+        #get companycode
+        pats = db((db.vw_memberpatientlist.primarypatientid == memberid) & (db.vw_memberpatientlist.patientid == patientid)).select(db.vw_memberpatientlist.company,db.vw_memberpatientlist.hmoplan)
+        companyid = int(common.getid(pats[0].company)) if(len(pats) == 1) else 0
+        companys = db((db.company.id == companyid) & (db.company.is_active == True)).select(db.company.company)
+        companycode = common.getstring(companys[0].company) if(len(companys) == 1) else "PREMWALKIN"
         
-        rows = db((db.vw_memberpatientlist.patientid ==patientid)&(db.vw_memberpatientlist.primarypatientid == memberid)).\
-            select(db.vw_memberpatientlist.hmoplan)
-
+        ##for backward compatibility determine procedurepriceplancode from member's plan at the time of registration
+        hmoplanid = int(common.getid(pats[0].hmoplan)) if(len(pats) == 1) else 0  #this is the patient's previously assigned plan-typically at registration
+        hmoplans = db((db.hmoplan.id == hmoplanid) & (db.hmoplan.is_active == True)).select(db.hmoplan.hmoplancode,db.hmoplan.procedurepriceplancode)
+        hmoplancode = common.getstring(hmoplans[0].hmoplancode) if(len(hmoplans) == 1) else "PREMWALKIN"
+        r = db(
+            (db.provider_region_plan.companycode == companycode) &\
+            (db.provider_region_plan.plancode == hmoplancode) &\
+            ((db.provider_region_plan.regioncode == regioncode)|(db.provider_region_plan.regioncode == 'ALL'))).select()
+        plancode = r[0].policy if(len(r) == 1) else "PREMWALKIN"    
+        procedurepriceplancode = r[0].procedurepriceplancode if(len(r) == 1) else "PREMWALKIN" 
         
-        procedurepriceplancode = rows[0].hmoplan.procedurepriceplancode if(len(rows) > 0) else 'PREMWALKIN' 
-           
+        urlprops = db(db.urlproperties.id >0 ).select(db.urlproperties.pagination)
+        items_per_page = 10 if(len(urlprops) <= 0) else int(common.getvalue(urlprops[0].pagination))
+        limitby = ((page)*items_per_page,(page+1)*items_per_page)             
         
         if((searchphrase == "") | (searchphrase == None)):
             query = ( \
@@ -539,14 +556,33 @@ class Procedure:
         proclist = []
         procobj = {}        
         
+        
+        logger.loggerpms2.info("Get Procedures " + regioncode + " " + str(treatmentid) + " " + companycode + " " + plancode)
         for proc in procs:
+            #Using new pricing engine  12/10/2021
+            avars = {}
+            avars["region_code"] = regioncode
+            avars["treatment_id"] = treatmentid
+            avars["company_code"] = companycode
+            avars["procedure_code"] = proc.procedurecode
+            avars["plan_code"] = plancode
+        
+            pricingObj = mdprules.Pricing(db)
+            rspobj = json.loads(pricingObj.Get_Procedure_Fees(avars))            
             procobj = {
                 "plan":procedurepriceplancode,
-                "procedurecode":proc.procedurecode,
+                "ucrfee":float(common.getkeyvalue(rspobj,"ucrfee",0)),
+                "procedurecode":common.getstring(proc.procedurecode),
                 "altshortdescription":common.getstring(proc.altshortdescription),
-                "procedurefee":float(common.getvalue(proc.procedurefee)),
-                "inspays":float(common.getvalue(proc.inspays)),
-                "copay":float(common.getvalue(proc.copay)),
+                "procedurefee":float(common.getkeyvalue(rspobj,"procedurefee",0)),
+                "inspays":float(common.getkeyvalue(rspobj,"inspays",0)),
+                "copay":float(common.getkeyvalue(rspobj,"copay",0)),
+                "companypays":float(common.getkeyvalue(rspobj,"companypays",0)),
+                "walletamount":float(common.getkeyvalue(rspobj,"walletamount",0)),
+                "discount_amount":float(common.getkeyvalue(rspobj,"discount_amount",0)),
+                "is_free":bool(common.getkeyvalue(rspobj,"is_free",False)),
+                "active":bool(common.getkeyvalue(rspobj,"active",True)),
+                "authorizationrequired":bool(common.getkeyvalue(rspobj,"authorizationrequired",False)) 
             }
             proclist.append(procobj)          
 
@@ -566,7 +602,7 @@ class Procedure:
             bnext = False
             bprev = True  
         
-        obj1= {"count":len(procs), "proclist":proclist,"page":page+1,"runningcount":xcount, "maxcount":maxcount, "next":bnext, "prev":bprev}
+        obj1= {"result":"success","count":len(procs), "proclist":proclist,"page":page+1,"runningcount":xcount, "maxcount":maxcount, "next":bnext, "prev":bprev}
         rsp = json.dumps(obj1)
         logger.loggerpms2.info("Exit 'getprocedures " + rsp)
         return rsp
@@ -583,6 +619,7 @@ class Procedure:
         procobj = {}
         
         for proc in procs:
+            
             procobj = {
                 "treatmentid":treatmentid,
                 "trtmntprocid":int(common.getid(proc.id)),
@@ -598,7 +635,8 @@ class Procedure:
                 "treatment":common.getstring(proc.treatment),
                 "remarks":common.getstring(proc.remarks),
                 "authorized":common.getboolean(proc.authorized),
-                "treatmentdate"  : (proc.treatmentdate).strftime("%d/%m/%Y")
+                "treatmentdate"  : (proc.treatmentdate).strftime("%d/%m/%Y"),
+                "active":True
             }
             proclist.append(procobj)          
 

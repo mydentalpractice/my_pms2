@@ -28,7 +28,7 @@ from applications.my_pms2.modules import logger
 
 from applications.my_pms2.modules import mdppatient
 from applications.my_pms2.modules import mdpreligare
-from applications.my_pms2.modules import mdppricing
+from applications.my_pms2.modules import mdprules
 
 from applications.my_pms2.modules import mdputils
 
@@ -3653,92 +3653,80 @@ def new_treatment():
         freetreatment = common.getboolean(r[0].freetreatment)
         patienttype = r[0].patienttype
         
+
     #treatment, tplan details
-    treatmentid = int(common.getid(request.vars.treatmentid))
-    tplanid     = int(common.getid(request.vars.tplanid))
-   
-    treatmentcost = 0
-    actualtreatmentcost = 0
-    
+    #treatmentid = int(common.getid(request.vars.treatmentid))
+    #tplanid     = int(common.getid(request.vars.tplanid))
+
     #Create a new TreatmentPlan
     timestr = datetime.datetime.today().strftime("%d-%m-%Y_%H:%M:%S")
-    if(treatmentid == 0):
-        tplan = "TP" + str(patientmember)  + "_" + timestr
-        tplanid = db.treatmentplan.insert(
-            treatmentplan = tplan,
-            startdate = datetime.date.today(),
-            provider = providerid,
-            primarypatient = memberid,
-            patient = patientid,
-            pattitle = title,
-            patienttype = patienttype,
-            patientname = fullname,
-            
-            status = 'Started',
-            totaltreatmentcost = 0,
-            totalcopay = 0,
-            totalinspays = 0,
-            totalpaid = 0,
-            totaldue = 0,
-            totalcopaypaid = 0,
-            totalinspaid  = 0,             
-            is_active = True,
-            created_on = common.getISTFormatCurrentLocatTime(),
-            created_by = 1,
-            modified_on = common.getISTFormatCurrentLocatTime(),
-            modified_by =1 
+    tplan = "TP" + str(patientmember)  + "_" + timestr
+    tplanid = db.treatmentplan.insert(
+        treatmentplan = tplan,
+        startdate = datetime.date.today(),
+        provider = providerid,
+        primarypatient = memberid,
+        patient = patientid,
+        pattitle = title,
+        patienttype = patienttype,
+        patientname = fullname,
+        
+        status = 'Started',
+        totaltreatmentcost = 0,
+        totalcopay = 0,
+        totalinspays = 0,
+        totalpaid = 0,
+        totaldue = 0,
+        totalcopaypaid = 0,
+        totalinspaid  = 0,             
+        is_active = True,
+        created_on = common.getISTFormatCurrentLocatTime(),
+        created_by = 1,
+        modified_on = common.getISTFormatCurrentLocatTime(),
+        modified_by =1 
+
+    )
+
     
-        )
-   
+    
+    #Treatment
+    count = db(db.treatment.provider == providerid).count()
+    treatment = "TR" + str(patientmember) + str(count).zfill(4)      # + "_" + timestr
+    treatmentid = db.treatment.insert(
         
+        treatment = treatment,
+        description = '',
+        startdate = datetime.date.today(),
+        status ='Started',
+        treatmentplan = tplanid,
+        provider = providerid,
+        clinicid = clinicid,
+        dentalprocedure = 0,
+        doctor = doctorid,
+        quadrant = 0,
+        tooth    = 0,
+        treatmentcost = 0,
+        actualtreatmentcost = 0,  #UCR cost
+        copay = 0,
+        inspay = 0,
+        companypay = 0,
+        is_active = True,
+        created_on = common.getISTFormatCurrentLocatTime(),
+        created_by = 1,
+        modified_on = common.getISTFormatCurrentLocatTime(),
+        modified_by =1 
         
-        #Treatment
-        count = db(db.treatment.provider == providerid).count()
-        treatment = "TR" + str(patientmember) + str(count).zfill(4)      # + "_" + timestr
-        treatmentid = db.treatment.insert(
-            
-            treatment = treatment,
-            description = '',
-            startdate = datetime.date.today(),
-            status ='Started',
-            treatmentplan = tplanid,
-            provider = providerid,
-            clinicid = clinicid,
-            dentalprocedure = 0,
-            doctor = doctorid,
-            quadrant = 0,
-            tooth    = 0,
-            treatmentcost = 0,
-            actualtreatmentcost = 0,  #UCR cost
-            copay = 0,
-            inspay = 0,
-            companypay = 0,
-            is_active = True,
-            created_on = common.getISTFormatCurrentLocatTime(),
-            created_by = 1,
-            modified_on = common.getISTFormatCurrentLocatTime(),
-            modified_by =1 
-            
-        
-        )
-        
-        db.treatmentplan_patient.insert(treatmentplan = tplanid, patientmember = memberid)
-        
-        
-        #update treatment with increased treatment cost
-        updatetreatmentcostandcopay(treatmentid,tplanid)
-        #update tplan with increased treatment cost
-        #calculatecost(tplanid)
-        #calculatecopay(db, tplanid,memberid)
-        #calculateinspays(tplanid)
-        #calculatedue(tplanid)        
-        common.dashboard(db,session,providerid)
-        
-        session.flash = "New Treatment Added!"
-        redirect(URL('treatment','update_treatment',vars=dict(page=page,providerid=providerid,treatmentid=treatmentid)))
-    else:
-        session.flash = "Error - Adding New Treatment!"
-        redirect(URL('treatment','list_treatments',vars=dict(page=page,providerid=providerid,patientid=patientid,memberid=memberid)))
+    
+    )
+    
+    db.treatmentplan_patient.insert(treatmentplan = tplanid, patientmember = memberid)
+    
+    
+    #update treatment with increased treatment cost
+    updatetreatmentcostandcopay(treatmentid,tplanid)
+    common.dashboard(db,session,providerid)
+    session.flash = "New Treatment Added!"
+    redirect(URL('treatment','update_treatment',vars=dict(page=page,providerid=providerid,treatmentid=treatmentid)))
     
     return dict()
 
@@ -3930,7 +3918,7 @@ def add_proceduregrid():
     tooth = common.getstring(request.vars.tooth)
     quadrant = common.getstring(request.vars.quadrant)
     
-    procedurcode = common.getstring(request.vars.vwdentalprocedurecode)
+    procedurecode = common.getstring(request.vars.vwdentalprocedurecode)
     #treatmentid
     treatmentid = int(common.getid(request.vars.treatmentid))
     treatment = db((db.treatment.id == treatmentid) & (db.treatment.is_active == True)).select(\
@@ -3947,29 +3935,23 @@ def add_proceduregrid():
     memberid = int(common.getid(treatment[0].treatmentplan.primarypatient)) if(len(treatment) == 1) else 0
     patientid = int(common.getid(treatment[0].treatmentplan.patient)) if(len(treatment) == 1) else 0
     #procedurepriceplancode = treatment[0].vw_memberpatientlist.procedurepriceplancode if(len(treatment) == 1) else "PREMWALKIN"
-    procedurepriceplancode = mdputils.getprocedurepriceplancodeformember(db,providerid, memberid, patientid) 
+    #procedurepriceplancode = mdputils.getprocedurepriceplancodeformember(db,providerid, memberid, patientid) 
     status = common.getstring(treatment[0].treatment.status)
     status = status if(status != "") else "Started"    
-    
-      
+    #procs = db((db.vw_procedurepriceplan.procedurepriceplancode == procedurepriceplancode) &\
+               #(db.vw_procedurepriceplan.procedurecode == request.vars.vwdentalprocedurecode)).select(\
+                #db.vw_procedurepriceplan.id,\
+                #db.vw_procedurepriceplan.ucrfee,\
+                #db.vw_procedurepriceplan.procedurefee,\
+                #db.vw_procedurepriceplan.inspays,\
+                #db.vw_procedurepriceplan.copay,\
+                #db.vw_procedurepriceplan.companypays,\
+                #db.vw_procedurepriceplan.relgrproc,\
+                #db.vw_procedurepriceplan.remarks\
+               #)
  
-           
-    procs = db((db.vw_procedurepriceplan.procedurepriceplancode == procedurepriceplancode) &\
-               (db.vw_procedurepriceplan.procedurecode == request.vars.vwdentalprocedurecode)).select(\
-                db.vw_procedurepriceplan.id,\
-                db.vw_procedurepriceplan.ucrfee,\
-                db.vw_procedurepriceplan.procedurefee,\
-                db.vw_procedurepriceplan.inspays,\
-                db.vw_procedurepriceplan.copay,\
-                db.vw_procedurepriceplan.companypays,\
-                db.vw_procedurepriceplan.relgrproc,\
-                db.vw_procedurepriceplan.remarks\
-               )
- 
-    procedurepriceplanid = int(common.getid(procs[0].id))  if(len(procs) >= 1) else 0
-    
-   
-    #get provider from treatment
+    #procedurepriceplanid = int(common.getid(procs[0].id))  if(len(procs) >= 1) else 0
+    ##get provider from treatment
     t = db((db.treatment.id == treatmentid) & (db.treatment.is_active == True)).select(db.treatment.provider)
     providerid = int(common.getid(t[0].provider if (len(t)>0) else 0 ))
     #get region code
@@ -3978,32 +3960,34 @@ def add_proceduregrid():
     regions = db((db.groupregion.id == regionid) & (db.groupregion.is_active == True)).select(db.groupregion.groupregion)
     regioncode = common.getstring(regions[0].groupregion) if(len(regions) == 1) else "ALL"
         
-    # get patient's company
+    ## get patient's company
     pats = db((db.vw_memberpatientlist.primarypatientid == memberid) & (db.vw_memberpatientlist.patientid == patientid)).select(db.vw_memberpatientlist.company,db.vw_memberpatientlist.hmoplan)
     companyid = int(common.getid(pats[0].company)) if(len(pats) == 1) else 0
     companys = db((db.company.id == companyid) & (db.company.is_active == True)).select(db.company.company)
     companycode = common.getstring(companys[0].company) if(len(companys) == 1) else "PREMWALKIN"
     
     
-    #for backward compatibility determine procedurepriceplancode from member's plan at the time of registration
+    ##for backward compatibility determine procedurepriceplancode from member's plan at the time of registration
     hmoplanid = int(common.getid(pats[0].hmoplan)) if(len(pats) == 1) else 0  #this is the patient's previously assigned plan-typically at registration
     hmoplans = db((db.hmoplan.id == hmoplanid) & (db.hmoplan.is_active == True)).select(db.hmoplan.hmoplancode,db.hmoplan.procedurepriceplancode)
     hmoplancode = common.getstring(hmoplans[0].hmoplancode) if(len(hmoplans) == 1) else "PREMWALKIN"
-    r = db((db.provider_region_plan.companycode == companycode) & (db.provider_region_plan.plancode == hmoplancode)).select()
+    r = db(
+           (db.provider_region_plan.companycode == companycode) &\
+           (db.provider_region_plan.plancode == hmoplancode) &\
+           ((db.provider_region_plan.regioncode == regioncode)|(db.provider_region_plan.regioncode == 'ALL'))).select()
     plancode = r[0].policy if(len(r) == 1) else "PREMWALKIN"
-    
-    
     
     #Using new pricing engine  12/10/2021
     avars = {}
     avars["region_code"] = regioncode
     avars["treatment_id"] = treatmentid
     avars["company_code"] = companycode
-    avars["procedure_code"] = procedurcode
+    avars["procedure_code"] = procedurecode
     avars["plan_code"] = plancode
     
-    pricingObj = mdppricing.Pricing(db)
+    pricingObj = mdprules.Pricing(db)
     rspobj = json.loads(pricingObj.Get_Procedure_Fees(avars))
+    
     
     ucrfee = float(common.getkeyvalue(rspobj,"ucrfee",0))
     procedurefee = float(common.getkeyvalue(rspobj,"procedurefee",0))
@@ -4018,7 +4002,14 @@ def add_proceduregrid():
     
     voucher_code = common.getkeyvalue(rspobj,"voucher_code","")
     remarks = common.getkeyvalue(rspobj,"remarks","")
+    procedurepriceplancode = common.getkeyvalue(rspobj,"procedurepriceplancode","")
     
+    procs = db((db.vw_procedurepriceplan.procedurepriceplancode == procedurepriceplancode) &\
+               (db.vw_procedurepriceplan.procedurecode == procedurecode)).select(\
+                   db.vw_procedurepriceplan.id,\
+                   db.vw_procedurepriceplan.relgrproc\
+               )
+
     if(len(procs)>0):
         procedurepriceplanid = int(common.getid(procs[0].id))
         balance = 0

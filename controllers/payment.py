@@ -43,6 +43,7 @@ from applications.my_pms2.modules import mdpbenefits
 from applications.my_pms2.modules import mdppayment
 from applications.my_pms2.modules import mdpshopse
 from applications.my_pms2.modules import mdppinelabs
+from applications.my_pms2.modules import mdprules
 from applications.my_pms2.modules import logger
 
 #from gluon.contrib import common
@@ -1577,21 +1578,6 @@ def pinelabs_payment_callback():
         if(key == 'signature'):
             continue
         reqobj[key] = params[key]
-            
-    #first = True
-    #for key in keys:
-        #reqobj[key] = params[key]
-        #if(first):
-            #pvars = pvars + key + "="+params[key] 
-            #first = False
-        #else:
-            #pvars = pvars + "&" + key + "="+params[key] 
-    
-    #redirecturl = "http://127.0.0.1:8001/my_pms2/payment/test_callback" + "?" + pvars
-    #rsp = requests.get(redirecturl)
-   
-    #unique_merchant_txn_id  will be the link between the payment record in MDP and in PineLabs
-    #payment.fp_paymentref  = unique_merchant_txn_id
     
     #get paymentid
     unique_merchant_txn_id = common.getkeyvalue(request.vars,"unique_merchant_txn_id","") 
@@ -2901,7 +2887,6 @@ def apply_voucher():
 def apply_wallet():
     logger.loggerpms2.info("Enter Apply Wallet")
     
-    
     #wallet type
     wallet_type = common.getkeyvalue(request.vars,"wallet_type","SUPER_WALLET")
 
@@ -2925,10 +2910,51 @@ def apply_wallet():
     tr = db((db.treatment.treatmentplan == tplanid) & (db.treatment.is_active == True)).select(db.treatment.id, db.treatment.copay)
     treatmentid = tr[0].id if (len(tr) > 0) else 0    
  
+    
+   
+    #plan_code = common.getkeyvalue(avars,"plan_code","PREMWALKIN")
+    #company_code = common.getkeyvalue(avars,"company_code","")
+    #event_code = common.getkeyvalue(avars,"event_code","create_payment")
+    #region_code = common.getkeyvalue(avars,"region_code","ALL")
+    #treatment_id = int(common.id(avars,"treatment_id","0"))
+
+    #get region code
+    provs = db((db.provider.id == providerid) & (db.provider.is_active == True)).select(db.provider.groupregion)
+    regionid = int(common.getid(provs[0].groupregion)) if(len(provs) == 1) else 1
+    regions = db((db.groupregion.id == regionid) & (db.groupregion.is_active == True)).select(db.groupregion.groupregion)
+    regioncode = common.getstring(regions[0].groupregion) if(len(regions) == 1) else "ALL"    
+     
+    ## get patient's company
+    pats = db((db.vw_memberpatientlist.primarypatientid == memberid) & (db.vw_memberpatientlist.patientid == memberid)).select(db.vw_memberpatientlist.company,db.vw_memberpatientlist.hmoplan)
+    companyid = int(common.getid(pats[0].company)) if(len(pats) == 1) else 0
+    companys = db((db.company.id == companyid) & (db.company.is_active == True)).select(db.company.company)
+    companycode = common.getstring(companys[0].company) if(len(companys) == 1) else "PREMWALKIN"
+    ##for backward compatibility determine procedurepriceplancode from member's plan at the time of registration
+    hmoplanid = int(common.getid(pats[0].hmoplan)) if(len(pats) == 1) else 0  #this is the patient's previously assigned plan-typically at registration
+    hmoplans = db((db.hmoplan.id == hmoplanid) & (db.hmoplan.is_active == True)).select(db.hmoplan.hmoplancode,db.hmoplan.procedurepriceplancode)
+    hmoplancode = common.getstring(hmoplans[0].hmoplancode) if(len(hmoplans) == 1) else "PREMWALKIN"
+    r = db(
+        (db.provider_region_plan.companycode == companycode) &\
+        (db.provider_region_plan.plancode == hmoplancode) &\
+        ((db.provider_region_plan.regioncode == regioncode)|(db.provider_region_plan.regioncode == 'ALL'))).select()
+    plancode = r[0].policy if(len(r) == 1) else "PREMWALKIN"
+    
+    
+    avars={}
+    avars["plan_code"] = plancode
+    avars["company_code"] =companycode
+    avars["rule_event"] ="apply_wallet"
+    avars["region_code"] =regioncode
+    avars["treatment_id"] =treatmentid
+    ruleObj = mdprules.Plan_Rules(db)
+    rspobj = json.loads(ruleObj.Get_Plan_Rules(avars))
+
+    walletamount = float(common.getkeyvalue(rspobj,"cashback",0))
     reqobj = {}
     reqobj["treatmentid"] = treatmentid
     reqobj["wallet_type"] = wallet_type
     reqobj["walletamount"] = walletamount
+
     
     bnft = mdpbenefits.Benefit(db)
     rspobj = json.loads(bnft.apply_wallet(reqobj))
@@ -2950,8 +2976,13 @@ def apply_wallet():
     c = db((db.company.id == companyid) & (db.company.is_active == True)).select(db.company.company)
     companycode = c[0].company if (len(c) ==1) else ""
 
-    cp = db(db.companypolicy.companycode == companycode).select()
+    cp = db((db.provider_region_plan.companycode == companycode) &\
+            (db.provider_region_plan.regioncode == regioncode) &\
+            (db.provider_region_plan.is_active == True)).select()
     policy = cp[0].policy if(len(cp) != 0) else ""
+        
+    #cp = db(db.companypolicy.companycode == companycode).select()
+    #policy = cp[0].policy if(len(cp) != 0) else ""
 
     #determine member's city & state
     city = members[0].city if(len(members)>0) else "Jaipur"
@@ -3039,7 +3070,10 @@ def create_payment():
     c = db((db.company.id == companyid) & (db.company.is_active == True)).select(db.company.company)
     companycode = c[0].company if (len(c) ==1) else ""
 
-    cp = db(db.companypolicy.companycode == companycode).select()
+
+    cp = db((db.provider_region_plan.companycode == companycode) &\
+            (db.provider_region_plan.regioncode == regioncode) &\
+            (db.provider_region_plan.is_active == True)).select()
     policy = cp[0].policy if(len(cp) != 0) else ""
     
     #determine member's city & state
@@ -3172,8 +3206,6 @@ def create_payment():
     
     #get wallet amount for this member (this is the API that Indeses is developing)
     walletamount = 0     
-    #paytm = calculatepayments(tplanid,providerid,policy)
-    
     paytm = json.loads(account._calculatepayments(db, tplanid,policy))
     paytm["totalwalletamount"]  = paytm["totalwalletamount"] + walletamount
     paytm["walletamount"]  = paytm["walletamount"] + walletamount
@@ -3181,19 +3213,18 @@ def create_payment():
     db.payment.amount.default  = paytm["totaldue"]
     db.payment.discount_amount.default = paytm["discount_amount"]
 
-    
-    #get available wallet balance
+    #get available wallet list
     reqobj = {}
     reqobj["action"] = "getwallet_balance"
     reqobj["member_id"] = memberid
+    reqobj["plan_code"] = policy
     reqobj["amount"] = paytm["totalcopay"]
     rspobj = json.loads(bnftobj.getwallet_balance(reqobj))
     if(rspobj["result"] == "success"):
         wlist = rspobj["wallet_list"]
     else:
         wlist = []
-
-        
+     
     return dict(formA=formA,formB=formB,formC=formC, patient=patient,fullname=fullname,hmopatientmember=hmopatientmember,providername=provdict["providername"],
                 providerid=provdict["providerid"],page=page,returnurl=returnurl,memberid=memberid,tplanid=tplanid,treatment=treatment,
                 treatmentcost=paytm["treatmentcost"],copay=paytm["copay"],inspays=paytm["inspays"],companypays=paytm["companypays"],

@@ -1003,9 +1003,9 @@ def _updatetreatmentpayment(db,tplanid,paymentid,policy="PREMWALKIN"):
     
     tr = db((db.treatment.id == treatmentid) & (db.treatment.is_active == True)).select()
     
-    totaldiscount_amount = tr[0].discount_amount if(len(tr) > 0) else 0
-    totalwalletamount = tr[0].walletamount if(len(tr) > 0) else 0
-    voucher_code  = tr[0].voucher_code if(len(tr) > 0) else 0
+    totaldiscount_amount = float(common.getvalue(tr[0].discount_amount)) if(len(tr) > 0) else 0
+    totalwalletamount = float(common.getvalue(tr[0].walletamount)) if(len(tr) > 0) else 0
+    voucher_code  = common.getstring(tr[0].voucher_code) if(len(tr) > 0) else 0
     
   
     ps = db((db.payment.treatmentplan == tplanid) & (db.payment.is_active == True)).select()

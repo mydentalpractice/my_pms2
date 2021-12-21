@@ -1371,6 +1371,8 @@ class Customer:
         return json.dumps(jsonresp) 
     
     def enroll_customer(self,avars):
+        logger.loggerpms2.info("Enter enroll_customer " + json.dumps(avars) ) 
+        
         db = self.db
         auth = current.auth
         
@@ -1379,9 +1381,6 @@ class Customer:
         
         jsonresp = {}
 
-        
-        logger.loggerpms2.info("Enter enroll_customer " + json.dumps(avars) )    
-        
         try:
             
             #determine if customer is already enrolled in MDP
@@ -1478,7 +1477,7 @@ class Customer:
                 company_id = int(common.getkeyvalue(jsonresp,"company","0"))
                 member_id = int(common.getkeyvalue(jsonresp,"primarypatientid","0"))
                 
-                plans = db((db.hmoplan.id == plan_id) & (db.hmoplan.is_active == True)).select(db.hmoplan.hmoplancode)
+                plans = db((db.hmoplan.id == plan_id) & (db.hmoplan.is_active == True)).select()
                 cos = db((db.company.id == company_id) & (db.company.is_active == True)).select(db.company.company)
                 
                 avars={}
@@ -1486,6 +1485,10 @@ class Customer:
                 avars["company_code"] = cos[0].company if(len(plans) == 1) else "MDP"                            
                 avars["member_id"] = member_id
                 avars["rule_event"] = "enroll_customer"
+                avars["mdp_wallet_usase"] = float(common.getvalue(plans[0].walletamount)) if(len(plans) == 1) else 0
+                avars["super_wallet_amount"] = float(common.getvalue(plans[0].discount_amount)) if(len(plans) == 1) else 0
+                avars["mdp_wallet_amount"] = 0
+                
                 rulesobj = mdprules.Plan_Rules(db)
                 rspobj = json.loads(rulesobj.Get_Plan_Rules(avars))
                 if(rspobj["result"] == "fail"):
@@ -1509,7 +1512,7 @@ class Customer:
                 logger.loggerpms2.info("Enroll_Custoemr - Count > 1")
                 
                 error_code = "ENROLL_CUST_002"
-                mssg = error_code + ":" + "Error Enroll Member"
+                mssg = error_code + ":" + "Error Enroll Customer"
                 logger.loggerpms2.info(mssg)
                 jsonresp = {
                     "result":"fail",
@@ -1519,7 +1522,7 @@ class Customer:
                 
         except Exception as e:
             error_code = "ENROLL_CUST_001"
-            mssg = error_code + ":" + "Exception Enroll Member:\n" + "(" + str(e) + ")"
+            mssg = error_code + ":" + "Exception Enroll Customer:\n" + "(" + str(e) + ")"
             logger.loggerpms2.info(mssg)
             jsonresp = {
                 "result":"fail",

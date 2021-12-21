@@ -31,7 +31,8 @@ class Plan_Rules:
         rspobj = {}
         
         try:
-            rspobj = json.loads(getattr(self, common.getkeyvalue(avars,"plan_code","premwalkin").lower())(avars))
+            #rspobj = json.loads(getattr(self, common.getkeyvalue(avars,"plan_code","premwalkin").lower())(avars))
+            rspobj = json.loads(getattr(self, "all")(avars))
         except Exception as e:
             mssg = "Get_Plan_Rule API Exception " + str(e)
             rspobj["result"] = "fail"
@@ -40,6 +41,51 @@ class Plan_Rules:
         mssg = json.dumps(rspobj)
         logger.loggerpms2.info("Exit Get Plan Rul " + mssg)
         return mssg    
+
+    def all(self,avars):
+        logger.loggerpms2.info("Enter  ALL Plan Rules " + json.dumps(avars))
+        
+        db = self.db
+        rspobj = {}
+        
+        try:
+            procedure_code = common.getkeyvalue(avars,"procedure_code","")
+            plan_code = common.getkeyvalue(avars,"plan_code","")
+            company_code = common.getkeyvalue(avars,"company_code","")
+            member_id = int(common.getkeyvalue(avars,"member_id","0"))
+            event = common.getkeyvalue(avars,"rule_event","")
+            mdp_wallet_usase = float(common.getkeyvalue(avars,"mdp_wallet_usase",0))
+
+            #apply pricing rules
+            rules = None
+            event_ALL = "all"
+            event_OTHERS = "others"
+            rules = db((db.rules.plan_code == plan_code) &\
+                       (db.rules.company_code == company_code) &\
+                       ((db.rules.rule_event == event)|(db.rules.rule_event == event_ALL)|(db.rules.rule_event == event_OTHERS)) &\
+                       (db.rules.is_active == True)).select(db.rules.ALL, orderby=db.rules.rule_order)
+            
+            
+            rspobj = {}
+            rspobj["result"] = "success"
+            rspobj["error_message"] = ""
+            rspobj["error_code"] = ""
+            for rule in rules:
+                if(rule.is_active == True):
+                    rspobj = json.loads(getattr(self, (rule.rule_code).lower())(avars))
+                    if(rspobj["result"] == "fail"):
+                        rspobj = rspobj["error_message"] + " " + "Error in executing " + event
+                        break;
+        except Exception as e:
+            rspobj = {}
+            mssg = " Exception All Plan Rule API" + str(e)
+            rspobj["result"] = "fail"
+            rspobj["error_message"] = mssg
+            
+        mssg = json.dumps(rspobj)
+        logger.loggerpms2.info("Exit All Plan rule " + mssg)
+        return mssg
+
    
     def vit_ap002(self,avars):
         logger.loggerpms2.info("Enter  AP002 " + json.dumps(avars))
@@ -118,10 +164,12 @@ class Plan_Rules:
         logger.loggerpms2.info("Exit Plan_Rules rule_voucher" + mssg)
         return mssg
     
-    #this rule is to be called when cashback has to be debited from MDP_Wallet
-    #towards payment of a treatment cost. This is called at the time of payment
-    #{plancode, companycode, event=enroll, makepayment, completetreatment}
-    def rule_cashback(self,avars):
+    #The cashback rule 
+    #cashback = wallet cashback amount - payment amount
+    #if(payment amount <= wallet cahsback) then payment = 0
+    #if(payment amount > wallet casback) then payment = payment amount - wallet cashback
+    #if(payment amount = wallet cashback) then payment = 0
+    def rule_vit_ap002_cashback(self,avars):
         logger.loggerpms2.info("Enter Plan Rules - rule_cashback " + json.dumps(avars))
         db = self.db
         rspobj = {}
@@ -130,48 +178,68 @@ class Plan_Rules:
             #get plan details from HMO Plan table
             plan_code = common.getkeyvalue(avars,"plan_code","PREMWALKIN")
             company_code = common.getkeyvalue(avars,"company_code","")
-            event_code = common.getkeyvalue(avars,"event_code","payment")
+            event_code = common.getkeyvalue(avars,"event_code","create_payment")
             region_code = common.getkeyvalue(avars,"region_code","ALL")
-            treatment_id = int(common.id(avars,"treatment_id","0"))
+            treatment_id = int(common.getid(common.getkeyvalue(avars,"treatment_id",0)))
+            tw = db((db.vw_treatmentlist_fast.id == treatment_id) & (db.vw_treatmentlist_fast.is_active == True)).select()
+            memberid = int(common.getid(tw[0].memberid)) if(len(tw) > 0) else 0
+            patientid = int(common.getid(tw[0].memberid)) if(len(tw) > 0) else 0
+            tplanid = int(common.getid(tw[0].tplanid)) if(len(tw) > 0) else 0
+            avars["member_id"] = memberid
             
             plans = db((db.hmoplan.hmoplancode == plan_code) & (db.hmoplan.is_active == True)).select()
             
+            
             cashback = 0
+            rspobj={}
             for plan in plans:
-                walletamount = float(common.getvalue(plan.walletamount))  #this is the % value of the treatmentcost to be given as cashback
-                tr = db((db.treatment.id == treatment_id) & (db.treatment.is_active == True)).select()
-                tplanid = int(common.getid(tr[0].treatmentplan)) if(len(tr)==1) else 0
-                paytm = account._calculatepayments(db, tplanid)
-                #call wallet API to debit MDP Wallet with the cashback amount
-                cashback = (walletamount/100 ) * paytm["totaltreatmentcost"]
-                rspobj["casback"] = cashback
-                rspobj["totaltreatmentcost"] = paytm["totaltreatmentcost"]
-
-            rspobj["result"] = "success"
-            rspobj["error_message"] = ""
-            rspobj["error_code"] = ""
+                bnftObj = mdpbenefits.Benefit(db)
+                rspobj = json.loads(bnftObj.getwallet_balance(avars))
+                if(rspobj["result"] == "success"):
+                    super_wallet_balance = rspobj["WALLET_BALANCE"]
+                    super_wallet_cashback_balance = float(common.getvalue(super_wallet_balance["super_wallet_amount"]))
+                    paytm = json.loads(account._calculatepayments(db,tplanid))
+                    treatment_amount = paytm["totalcopay"]
+                    cashback = 0
+                    if(super_wallet_cashback_balance >= treatment_amount):
+                        cashback = treatment_amount
+                        super_wallet_cashback_balance = super_wallet_cashback_balance - treatment_amount
+                    elif (super_wallet_cashback_balance < treatment_amount):
+                        cashback = super_wallet_cashback_balance
+                        super_wallet_cashback_balance = treatment_amount - cashback
+                    else:
+                        cashback = 0
+                    
+                    rspobj["cashback"] = cashback
+                    rspobj["super_wallet_cashback_balance"] = super_wallet_cashback_balance
+                        
+                    rspobj["result"] = "success"
+                    rspobj["error_message"] = ""
+                    break;
+                else:
+                    mssg = "Error in rule_vit_ap002_cashback " + rspobj["error_message"]
+                    rspobj["error_message"] = mssg
+                    logger.loggerpms2.info(mssg)
+                    break;
+                
         except Exception as e:
-            mssg = " Exception Plan Rules rule_cashback " + str(e)
+            mssg = " Exception Plan Rules rule_vit_ap002_cashback " + str(e)
             rspobj["result"] = "fail"
             rspobj["error_message"] = mssg
             
         mssg = json.dumps(rspobj)
-        logger.loggerpms2.info("Exit Plan_Rules rule_voucher" + mssg)
+        logger.loggerpms2.info("Exit Plan_Rules rule_vit_ap002_cashback" + mssg)
         return mssg
 
-    #this rule is to be called when MDP_Wallet & SUPER_Wallet & Wallet0 have to be 
+    #this rule is to be called when MDP_Wallet & SUPER_Wallet have to be 
     #created for a member with 0 amount
-    #towards payment of a treatment cost. This is called at the time of payment
-    #{plancode, companycode, event=createwallet, memberid}
+    #{member_id,plan_code,mdp_wallet_usase}
     def rule_createwallet(self,avars):
         logger.loggerpms2.info("Enter Plan Rules - rule_createwallet " + json.dumps(avars))
         db = self.db
         rspobj = {}
         
         try:    
-            member_id = int(common.getkeyvalue(avars,"member_id","0"))
-            avars={}
-            avars["member_id"] = member_id
             bnftobj = mdpbenefits.Benefit(db)
             rspobj = json.loads(bnftobj.create_wallet(avars))
 
@@ -181,13 +249,12 @@ class Plan_Rules:
             rspobj["error_message"] = mssg
             
         mssg = json.dumps(rspobj)
-        logger.loggerpms2.info("Exit Plan_Rules rule_createwaller" + mssg)
+        logger.loggerpms2.info("Exit Plan_Rules rule_createwallet" + mssg)
         return mssg
 
     #this rule is called to credir a member's wallet with the cashback amount
-    #this rule is called at tjhe 
-    def rule_creditwallet(self,avars):
-        logger.loggerpms2.info("Enter Plan Rules - rule_creditwallet " + json.dumps(avars))
+    def rule_credit_super_wallet(self,avars):
+        logger.loggerpms2.info("Enter Plan Rules - rule_creditsuperwallet " + json.dumps(avars))
         db = self.db
         rspobj = {}
         
@@ -196,27 +263,110 @@ class Plan_Rules:
             plan_code = common.getkeyvalue(avars,"plan_code","PREMWALKIN")
             company_code = common.getkeyvalue(avars,"company_code","")
             member_id = int(common.getkeyvalue(avars,"member_id","0"))
-            
-            plans = db((db.hmoplan.hmoplancode == plan_code) & (db.hmoplan.company_code == company_code) & (db.hmoplan.is_active == True)).select()
-            
-            discount_amount = float(common.getvalue(plans[0].discount_amount)) if(len(plans) == 1) else 0
-            
+            super_wallet_amount = float(common.getkeyvalue(avars,"super_wallet_amount",0))
+          
             avars={}
             avars["member_id"] = member_id
-            avars["wallet_type"] = "MDP_Wallet"
-            avars["walletamount"] = discount_amount # this is the discount voucher to be credited to the wallet
+            avars["wallet_type"] = "SUPER_WALLET"
+            avars["walletamount"] = super_wallet_amount # this is the discount voucher to be credited to the wallet
             bnftobj = mdpbenefits.Benefit(db)
             rspobj = json.loads(bnftobj.credit_wallet(avars))
-            
+
         except Exception as e:
-            mssg = " Exception Plan Rules rule_cashback " + str(e)
+            mssg = " Exception Plan Rules rule_creditsuperwallet " + str(e)
             rspobj["result"] = "fail"
             rspobj["error_message"] = mssg
             
         mssg = json.dumps(rspobj)
-        logger.loggerpms2.info("Exit Plan_Rules rule_voucher" + mssg)
+        logger.loggerpms2.info("Exit Plan_Rules rule_credit_super_wallet" + mssg)
         return mssg
+
+    def rule_credit_mdp_wallet(self,avars):
+        logger.loggerpms2.info("Enter Plan Rules - rule_credit_mdp_wallet " + json.dumps(avars))
+        db = self.db
+        rspobj = {}
         
+        try:    
+            #get plan details from HMO Plan table
+            plan_code = common.getkeyvalue(avars,"plan_code","PREMWALKIN")
+            company_code = common.getkeyvalue(avars,"company_code","")
+            member_id = int(common.getkeyvalue(avars,"member_id","0"))
+            mdp_wallet_amount = float(common.getkeyvalue(avars,"mdp_wallet_amount",0))
+         
+            
+            avars={}
+            avars["member_id"] = member_id
+            avars["wallet_type"] = "MDP_WALLET"
+            avars["walletamount"] = mdp_wallet_amount # this is the discount voucher to be credited to the wallet
+            bnftobj = mdpbenefits.Benefit(db)
+            rspobj = json.loads(bnftobj.credit_wallet(avars))
+
+        except Exception as e:
+            mssg = " Exception Plan Rules rule_credit_mdp_wallet " + str(e)
+            rspobj["result"] = "fail"
+            rspobj["error_message"] = mssg
+            
+        mssg = json.dumps(rspobj)
+        logger.loggerpms2.info("Exit Plan_Rules rule_credit_mdp_wallet" + mssg)
+        return mssg
+     
+    #this rule is called to debit a member's wallet with the cashback amount
+    def rule_debit_super_wallet(self,avars):
+        logger.loggerpms2.info("Enter Plan Rules - rule_debit_super_wallet " + json.dumps(avars))
+        db = self.db
+        rspobj = {}
+        
+        try:    
+            #get plan details from HMO Plan table
+            plan_code = common.getkeyvalue(avars,"plan_code","PREMWALKIN")
+            company_code = common.getkeyvalue(avars,"company_code","")
+            member_id = int(common.getkeyvalue(avars,"member_id","0"))
+            super_wallet_amount = float(common.getkeyvalue(avars,"super_wallet_amount",0))
+            
+            avars={}
+            avars["member_id"] = member_id
+            avars["wallet_type"] = "SUPER_WALLET"
+            avars["walletamount"] = super_wallet_amount # this is the discount voucher to be credited to the wallet
+            bnftobj = mdpbenefits.Benefit(db)
+            rspobj = json.loads(bnftobj.debit_wallet(avars))
+            
+        except Exception as e:
+            mssg = " Exception Plan Rules rule_debit_super_wallet " + str(e)
+            rspobj["result"] = "fail"
+            rspobj["error_message"] = mssg
+            
+        mssg = json.dumps(rspobj)
+        logger.loggerpms2.info("Exit Plan_Rules rule_debit_super_wallet" + mssg)
+        return mssg       
+
+    #this rule is called to debit a member's wallet with the cashback amount
+    def rule_debit_mdp_wallet(self,avars):
+        logger.loggerpms2.info("Enter Plan Rules - rule_debit_mdp_wallet " + json.dumps(avars))
+        db = self.db
+        rspobj = {}
+        
+        try:    
+            #get plan details from HMO Plan table
+            plan_code = common.getkeyvalue(avars,"plan_code","PREMWALKIN")
+            company_code = common.getkeyvalue(avars,"company_code","")
+            member_id = int(common.getkeyvalue(avars,"member_id","0"))
+            mdp_wallet_amount = float(common.getkeyvalue(avars,"super_wallet_amount",0))
+            
+            avars={}
+            avars["member_id"] = member_id
+            avars["wallet_type"] = "MDP_WALLET"
+            avars["walletamount"] = mdp_wallet_amount # this is the discount voucher to be credited to the wallet
+            bnftobj = mdpbenefits.Benefit(db)
+            rspobj = json.loads(bnftobj.debit_wallet(avars))
+            
+        except Exception as e:
+            mssg = " Exception Plan Rules rule_debit_super_wallet " + str(e)
+            rspobj["result"] = "fail"
+            rspobj["error_message"] = mssg
+            
+        mssg = json.dumps(rspobj)
+        logger.loggerpms2.info("Exit Plan_Rules rule_debit_super_wallet" + mssg)
+        return mssg       
 
 class Pricing:
     def __init__(self,db):
@@ -233,7 +383,7 @@ class Pricing:
         rspobj = {}
         
         try:
-            rspobj = json.loads(getattr(self, common.getkeyvalue(avars,"plan_code","premwalkin").lower())(avars))
+            rspobj = json.loads(getattr(self, "all")(avars))
         except Exception as e:
             mssg = "Get_Procedure_Fees API Exception " + str(e)
             rspobj["result"] = "fail"
@@ -242,6 +392,96 @@ class Pricing:
         mssg = json.dumps(rspobj)
         logger.loggerpms2.info("Exit Get Procedure Fees " + mssg)
         return mssg
+    
+    def all(self,avars):
+        logger.loggerpms2.info("Enter  all " + json.dumps(avars))
+        
+        db = self.db
+        rspobj = {}
+        
+        try:
+            procedure_code = common.getkeyvalue(avars,"procedure_code","")
+            plan_code = common.getkeyvalue(avars,"plan_code","")
+            company_code = common.getkeyvalue(avars,"company_code","")
+
+            #apply pricing rules
+            rules = None
+            procedure_ALL = "all"
+            procedure_OTHERS = "others"
+            rules = db(((db.rules.plan_code == plan_code)|(db.rules.procedure_code == procedure_ALL)|(db.rules.procedure_code == procedure_OTHERS)) &\
+                       (db.rules.company_code == company_code) &\
+                       ((db.rules.procedure_code == procedure_code)|(db.rules.procedure_code == procedure_ALL)|(db.rules.procedure_code == procedure_OTHERS)) &\
+                       (db.rules.is_active == True)).select(db.rules.ALL, orderby=db.rules.rule_order)
+            
+            
+            rspobj = {}
+            rspobj["result"] = "success"
+            rspobj["error_message"] = ""
+            rspobj["error_code"] = ""
+            for rule in rules:
+                if(rule.is_active == True):
+                    rspobj = json.loads(getattr(self, (rule.rule_code).lower())(avars))
+                    if(rspobj["result"] == "fail"):
+                        break;
+                    if(rspobj["active"] == False):
+                        break;
+                       
+        except Exception as e:
+            rspobj = {}
+            mssg = " Exception ALL API" + str(e)
+            rspobj["result"] = "fail"
+            rspobj["error_message"] = mssg
+            
+        mssg = json.dumps(rspobj)
+        logger.loggerpms2.info("Exit All " + mssg)
+        return mssg
+
+
+
+
+    def vit_ap002(self,avars):
+        logger.loggerpms2.info("Enter  vit_ap002 " + json.dumps(avars))
+        
+        db = self.db
+        rspobj = {}
+        
+        try:
+            procedure_code = common.getkeyvalue(avars,"procedure_code","")
+            plan_code = common.getkeyvalue(avars,"plan_code","")
+            company_code = common.getkeyvalue(avars,"company_code","")
+
+            #apply pricing rules
+            rules = None
+            procedure_ALL = "all"
+            procedure_OTHERS = "others"
+            rules = db((db.rules.plan_code == plan_code) &\
+                       (db.rules.company_code == company_code) &\
+                       ((db.rules.procedure_code == procedure_code)|(db.rules.procedure_code == procedure_ALL)|(db.rules.procedure_code == procedure_OTHERS)) &\
+                       (db.rules.is_active == True)).select(db.rules.ALL, orderby=db.rules.rule_order)
+            
+            
+            rspobj = {}
+            rspobj["result"] = "fail"
+            rspobj["error_message"] = "vit_ap002 No Rule"
+            rspobj["error_code"] = ""
+            for rule in rules:
+                if(rule.is_active == True):
+                    rspobj = json.loads(getattr(self, (rule.rule_code).lower())(avars))
+                    if(rspobj["result"] == "fail"):
+                        break;
+                    if(rspobj["active"] == False):
+                        break;
+                       
+        except Exception as e:
+            rspobj = {}
+            mssg = " Exception VIT AP002 API" + str(e)
+            rspobj["result"] = "fail"
+            rspobj["error_message"] = mssg
+            
+        mssg = json.dumps(rspobj)
+        logger.loggerpms2.info("Exit VIT AP002 " + mssg)
+        return mssg
+
     
     def rpip99(self,avars):
         logger.loggerpms2.info("Enter  RPIP99 " + json.dumps(avars))
@@ -333,13 +573,17 @@ class Pricing:
     
     #This is a generic rule for all procedures for all plans for all procedurepriceplancodes
     #Bring all the fields
+    #All procedures are valid for the plan validity for that member
     def rule0(self,avars):
-        logger.loggerpms2.info("Enter RPIP599 Rule 0 API " + json.dumps(avars))
+        logger.loggerpms2.info("Enter Rule 0 API " + json.dumps(avars))
         
         db = self.db
         rspobj = {}
         
         try:
+            procedure_ALL = "all"
+            procedure_OTHERS = "others"            
+
             procedure_code = common.getkeyvalue(avars,"procedure_code","")
             region_code = common.getkeyvalue(avars,"region_code","")
             plan_code = common.getkeyvalue(avars,"plan_code","")
@@ -366,8 +610,8 @@ class Pricing:
             
             
             prp = db((db.provider_region_plan.companycode == company_code) & \
-                     (db.provider_region_plan.regioncode == region_code) & \
-                     ((db.provider_region_plan.policy == plan_code)|(db.provider_region_plan.plancode == plan_code))).select()
+                     ((db.provider_region_plan.regioncode == region_code) | (db.provider_region_plan.regioncode==procedure_ALL)) & \
+                     ((db.provider_region_plan.policy == plan_code)|(db.provider_region_plan.plancode == procedure_ALL))).select()
         
             ppc = prp[0].procedurepriceplancode if(len(prp) == 1) else "PREMWALKIN"
         
@@ -380,7 +624,8 @@ class Pricing:
             rspobj["result"] = "success"
             rspobj["error_message"] = ""
             rspobj["error_code"] = ""
-            if(len(ppp) == 1):
+            if(len(ppp) >=1):
+                rspobj["procedurepriceplancode"] = ppc
                 rspobj["ucrfee"] = float(common.getvalue(ppp[0].ucrfee))
                 rspobj["procedurefee"] = float(common.getvalue(ppp[0].procedurefee))
                 rspobj["copay"] = float(common.getvalue(ppp[0].copay))
@@ -404,6 +649,79 @@ class Pricing:
         mssg = json.dumps(rspobj)
         logger.loggerpms2.info("Exit Pricing rule0 " + mssg)
         return mssg
+    
+    #There is not validity check for WALKIN Patient
+    def rule_walkin(self,avars):
+        logger.loggerpms2.info("Enter Rule WALKIN API " + json.dumps(avars))
+        
+        db = self.db
+        rspobj = {}
+        
+        try:
+            procedure_ALL = "all"
+            procedure_OTHERS = "others"            
+
+            procedure_code = common.getkeyvalue(avars,"procedure_code","")
+            region_code = common.getkeyvalue(avars,"region_code","")
+            plan_code = common.getkeyvalue(avars,"plan_code","")
+            company_code = common.getkeyvalue(avars,"company_code","")
+            treatment_id = int(common.getid(common.getkeyvalue(avars,"treatment_id",0)))
+        
+            #check whether the plan is valid for this member or not
+            tr = db((db.vw_treatmentlist_fast.id == treatment_id) & (db.vw_treatmentlist_fast.is_active == True)).select(db.vw_treatmentlist_fast.memberid,db.vw_treatmentlist_fast.startdate)
+            
+          
+            memberid = int(common.getid(tr[0].memberid)) if(len(tr) == 1)  else 0
+            members = db((db.patientmember.id == memberid) & (db.patientmember.is_active == True)).select(db.patientmember.premstartdt,db.patientmember.premenddt)
+            premenddt = members[0].premenddt if(len(members) == 1) else common.getdatefromstring("01/01/1900","%d/%m/%Y")
+            premstartdt = members[0].premstartdt if(len(members) == 1) else common.getdatefromstring("01/01/1900","%d/%m/%Y")
+            tr_startdate = tr[0].startdate if(len(tr) == 1) else common.getdatefromstring("01/01/2200","%d/%m/%Y")
+            
+            is_valid = True
+          
+            
+            
+            
+            prp = db((db.provider_region_plan.companycode == company_code) & \
+                     ((db.provider_region_plan.regioncode == region_code) | (db.provider_region_plan.regioncode==procedure_ALL)) & \
+                     ((db.provider_region_plan.policy == plan_code)|(db.provider_region_plan.plancode == procedure_ALL))).select()
+        
+            ppc = prp[0].procedurepriceplancode if(len(prp) == 1) else "PREMWALKIN"
+        
+            ppp = db((db.procedurepriceplan.procedurecode == procedure_code) &\
+                     (db.procedurepriceplan.procedurepriceplancode == ppc)  &\
+                     (db.procedurepriceplan.is_active == True)).select()
+        
+            #ppp JSON Object
+            rspobj["active"] = True 
+            rspobj["result"] = "success"
+            rspobj["error_message"] = ""
+            rspobj["error_code"] = ""
+            if(len(ppp) >=1):
+                rspobj["procedurepriceplancode"] = ppc
+                rspobj["ucrfee"] = float(common.getvalue(ppp[0].ucrfee))
+                rspobj["procedurefee"] = float(common.getvalue(ppp[0].procedurefee))
+                rspobj["copay"] = float(common.getvalue(ppp[0].copay))
+                rspobj["inspays"] = float(common.getvalue(ppp[0].inspays))
+                rspobj["companypays"] = float(common.getvalue(ppp[0].companypays))
+                rspobj["walletamount"] = float(common.getvalue(ppp[0].walletamount))
+                rspobj["discount_amount"] = float(common.getvalue(ppp[0].discount_amount))
+                rspobj["is_free"] = common.getboolean(ppp[0].is_free)
+                rspobj["voucher_code"] = common.getstring(ppp[0].voucher_code)
+                rspobj["active"] = is_valid 
+                rspobj["remarks"] = common.getstring(ppp[0].remarks)
+                c = db(db.company.company == company_code).select()
+                rspobj["authorizationrequired"] = False if (len(c) <= 0) else common.getboolean(c[0].authorizationrequired)
+                
+        except Exception as e:
+            rspobj = {}
+            mssg = "RPIP599 Rule WALK API Exception " + str(e)
+            rspobj["result"] = "fail"
+            rspobj["error_message"] = mssg
+            
+        mssg = json.dumps(rspobj)
+        logger.loggerpms2.info("Exit Pricing rule0 " + mssg)
+        return mssg    
     
     #This rule - Consultation can only be used once in every four months - three in total.
     def rpip599_consultancy_validity(self,avars):
