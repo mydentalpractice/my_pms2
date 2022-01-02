@@ -7,6 +7,8 @@ crud = Crud(db)
 
 #import sys
 #sys.path.append('/my_pms2/modules')
+import os
+import json
 
 from applications.my_pms2.modules import common
 from applications.my_pms2.modules import mail
@@ -14,6 +16,7 @@ from applications.my_pms2.modules import cycle
 from applications.my_pms2.modules import logger
 
 from applications.my_pms2.modules import mdpuser
+from applications.my_pms2.modules import mdprules
 
 #from gluon.contrib import common
 #from gluon.contrib import mail
@@ -1212,7 +1215,7 @@ def vwdentalprocedure_selector():
 
     patientid = int(common.getid(request.vars.patientid))
     memberid  = int(common.getid(request.vars.memberid))
-
+    treatmentid  = int(common.getid(request.vars.treatmentid))
     
     #get provider's region
     #get region code
@@ -1241,18 +1244,43 @@ def vwdentalprocedure_selector():
     freetreatment = common.getboolean(request.vars.freetreatment)
     newmember = common.getboolean(request.vars.newmember)
 
+    
+    
     if(request.vars.vwdentalprocedure == ""):
         pattern = '%'
     else:
         pattern = '%' + request.vars.vwdentalprocedure.capitalize() + '%'
+
+    procs = db((db.vw_procedurepriceplan.is_active == True)  &  \
+               (db.vw_procedurepriceplan.procedurepriceplancode == procedurepriceplancode) & \
+               (db.vw_procedurepriceplan.shortdescription.like(pattern))).select(db.vw_procedurepriceplan.procedurecode)    
+
+    #Using new pricing engine  12/10/2021
+    procodes = []
     
+    for proc in procs:
+        avars = {}
+        avars["region_code"] = regioncode
+        avars["treatment_id"] = treatmentid
+        avars["company_code"] = companycode
+        avars["procedure_code"] = proc.procedurecode
+        avars["plan_code"] = plancode
+        
+        pricingObj = mdprules.Pricing(db)
+        rspobj = json.loads(pricingObj.Get_Procedure_Fees(avars))
+        if((rspobj["result"]=="success") & (rspobj["active"]==True)):
+            procodes.append(proc.procedurecode)
+        
+
     if((freetreatment == True) | (newmember == False)):
         selected = [row.shortdescription for row in db((db.vw_procedurepriceplan.is_active == True)  &  \
                                                        (db.vw_procedurepriceplan.procedurepriceplancode == procedurepriceplancode) & \
+                                                       (db.vw_procedurepriceplan.procedurecode.belongs(procodes)) &\
                                                        (db.vw_procedurepriceplan.shortdescription.like(pattern))).select(db.vw_procedurepriceplan.shortdescription)]
     else:
         selected = [row.shortdescription for row in db((db.vw_procedurepriceplan_x999.is_active == True)  &  \
                                                        (db.vw_procedurepriceplan_x999.procedurepriceplancode == procedurepriceplancode) & \
+                                                       (db.vw_procedurepriceplan.procedurecode.belongs(procodes)) &\
                                                        (db.vw_procedurepriceplan_x999.shortdescription.like(pattern))).select(db.vw_procedurepriceplan_x999.shortdescription)]
         
     return ''.join([DIV(k,

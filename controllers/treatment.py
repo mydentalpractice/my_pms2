@@ -3904,7 +3904,7 @@ def update_procedure():
 def add_proceduregrid():
     #x  = datetime.datetime.now()
     logger.loggerpms2.info("===================Enter Add_procedure=======================================")
-    
+    auth = current.auth
     #check whether webadmin login
     impersonated = auth.user.impersonated
    
@@ -4010,6 +4010,7 @@ def add_proceduregrid():
                    db.vw_procedurepriceplan.relgrproc\
                )
 
+    procedurepriceplanid = 0
     if(len(procs)>0):
         procedurepriceplanid = int(common.getid(procs[0].id))
         balance = 0
@@ -4039,7 +4040,8 @@ def add_proceduregrid():
         db(db.treatment_procedure.id == tpid).update(copay = float(common.getvalue(tax["posttaxamount"])))
         db.commit()
    
-    updatetreatmentcostandcopay(treatmentid,tplanid)
+  
+    account.updatetreatmentcostandcopay(db,auth.user,treatmentid)
     redirecturl = URL("treatment","update_treatment",vars=dict(providerid=providerid,treatmentid=treatmentid,page=page,imagepage=imagepage))
     
     redirect(redirecturl)

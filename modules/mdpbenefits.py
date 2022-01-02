@@ -326,22 +326,46 @@ class Benefit:
       defproviderid = p[0].id if(len(p) > 0) else 0
       providerid = tp[0].provider if (len(tp) > 0) else defproviderid
     
-      treatment_amount = tr[0].copay if (len(tr) > 0) else 0
+      #treatment_amount = tr[0].copay if (len(tr) > 0) else 0
     
       memberid = tp[0].primarypatient if (len(tp) > 0) else 0
-      mems = db((db.patientmember.id == memberid) & (db.patientmember.is_active == True)).select(db.patientmember.city,\
-                                                                                                 db.patientmember.st,db.patientmember.company)
-      city = mems[0].city if(len(mems)>0) else "Jaipur"
-      state = mems[0].st if(len(mems)>0) else "Rajastan (RJ)"
-      c = db(db.cities.city == city).select(db.cities.id)
-      cityid = c[0].id if(len(c) > 0) else 0
+      patientid = tp[0].patient if (len(tp) > 0) else 0
+      #mems = db((db.patientmember.id == memberid) & (db.patientmember.is_active == True)).select(db.patientmember.city,\
+                                                                                                 #db.patientmember.st,db.patientmember.company)
+      #city = mems[0].city if(len(mems)>0) else "Jaipur"
+      #state = mems[0].st if(len(mems)>0) else "Rajastan (RJ)"
+      #c = db(db.cities.city == city).select(db.cities.id)
+      #cityid = c[0].id if(len(c) > 0) else 0
 
       #get plan
-      companyid = mems[0].company if(len(mems) > 0) else 0
-      c = db((db.company.id == companyid) & (db.company.is_active == True)).select(db.company.company)
-      companycode = c[0].company if (len(c) ==1) else "RPIP599"
-      cp = db(db.companypolicy.companycode == companycode).select()
-      plan = cp[0].policy if(len(cp) != 0) else "RPIP599"  
+      #companyid = mems[0].company if(len(mems) > 0) else 0
+      #c = db((db.company.id == companyid) & (db.company.is_active == True)).select(db.company.company)
+      #companycode = c[0].company if (len(c) ==1) else "RPIP599"
+      #cp = db(db.companypolicy.companycode == companycode).select()
+      #plan = cp[0].policy if(len(cp) != 0) else "RPIP599"  
+
+      #get region code
+      provs = db((db.provider.id == providerid) & (db.provider.is_active == True)).select(db.provider.groupregion)
+      regionid = int(common.getid(provs[0].groupregion)) if(len(provs) == 1) else 1
+      regions = db((db.groupregion.id == regionid) & (db.groupregion.is_active == True)).select(db.groupregion.groupregion)
+      regioncode = common.getstring(regions[0].groupregion) if(len(regions) == 1) else "ALL"
+          
+      ## get patient's company
+      pats = db((db.vw_memberpatientlist.primarypatientid == memberid) & (db.vw_memberpatientlist.patientid == patientid)).select(db.vw_memberpatientlist.company,db.vw_memberpatientlist.hmoplan)
+      companyid = int(common.getid(pats[0].company)) if(len(pats) == 1) else 0
+      companys = db((db.company.id == companyid) & (db.company.is_active == True)).select(db.company.company)
+      companycode = common.getstring(companys[0].company) if(len(companys) == 1) else "PREMWALKIN"
+      
+      
+      ##for backward compatibility determine procedurepriceplancode from member's plan at the time of registration
+      hmoplanid = int(common.getid(pats[0].hmoplan)) if(len(pats) == 1) else 0  #this is the patient's previously assigned plan-typically at registration
+      hmoplans = db((db.hmoplan.id == hmoplanid) & (db.hmoplan.is_active == True)).select(db.hmoplan.hmoplancode,db.hmoplan.procedurepriceplancode)
+      hmoplancode = common.getstring(hmoplans[0].hmoplancode) if(len(hmoplans) == 1) else "PREMWALKIN"
+      r = db(
+             (db.provider_region_plan.companycode == companycode) &\
+             (db.provider_region_plan.plancode == hmoplancode) &\
+             ((db.provider_region_plan.regioncode == regioncode)|(db.provider_region_plan.regioncode == 'ALL'))).select()
+      plancode = r[0].policy if(len(r) == 1) else "PREMWALKIN"
 
       
       #get wallet list
@@ -350,6 +374,7 @@ class Benefit:
       reqobj = {}
       reqobj["action"] = "getwallet_balance"
       reqobj["member_id"] = memberid
+      reqobj["plan_code"] = plancode
       reqobj["amount"] = paytm["totalcopay"]
   
       rspobj = json.loads(self.getwallet_balance(reqobj))
@@ -443,12 +468,13 @@ class Benefit:
     try:
       
       member_id = int(common.getid(common.getkeyvalue(avars,"member_id","0")))
+      plan_code = common.getkeyvalue(avars,"plan_code","PREMWALKIN")
       amount = float(common.getvalue(common.getkeyvalue(avars,"amount","0")))
       
       #make a POST Call
       reqobj = {}
       reqobj["member_id"] = member_id
-      reqobj["plan_code"] = common.getkeyvalue(avars,"plan_code","PREMWALKIN")
+      reqobj["plan_code"] = plan_code
       
       urlprops = db(db.urlproperties.id > 0).select(db.urlproperties.vw_url)
       vw_url = urlprops[0].vw_url if(len(urlprops) > 0) else ""
@@ -465,8 +491,8 @@ class Benefit:
               rspobj["error_message"] = mssg
               return json.dumps(rspobj)
             
-            mdp_wallet_usage = int((common.getkeyvalue(rspobj,"MDP_WALLET_USASE","0")))
-            mdp_wallet_usage_for_plan = int((common.getkeyvalue(rspobj,"MDP_WALLET_USASE_FOR_PLAN","0")))
+            mdp_wallet_usage = float((common.getkeyvalue(rspobj,"MDP_WALLET_USASE","0")))
+            mdp_wallet_usage_for_plan = float((common.getkeyvalue(rspobj,"MDP_WALLET_USASE_FOR_PLAN","0")))
                         
             
             balobj = rspobj["WALLET_BALANCE"]
@@ -1005,6 +1031,162 @@ class Benefit:
   
     
   def get_benefits(self,avars):
+
+    logger.loggerpms2.info("Enter get_benefits API " + json.dumps(avars))
+    db = self.db
+    rspobj = {}
+    
+    try:
+
+      plancode = common.getkeyvalue(avars,"plan_code","")
+      
+      #region regiond code      
+      providerid = int(common.getid(common.getkeyvalue(avars,"provider_id","0")))
+      prov = db((db.provider.id == providerid) & (db.provider.is_active == True)).select(db.provider.city)
+      regionid = int(common.getid(provs[0].groupregion)) if(len(provs) == 1) else 1
+      regions = db((db.groupregion.id == regionid) & (db.groupregion.is_active == True)).select(db.groupregion.groupregion)
+      regioncode = common.getstring(regions[0].groupregion) if(len(regions) == 1) else "ALL"     
+
+      #get company code
+      memberid = int(common.getid(common.getkeyvalue(avars,"member_id","0")))
+      pats = db((db.vw_memberpatientlist.primarypatientid == memberid) & (db.vw_memberpatientlist.patientid == memberid)).\
+        select(db.vw_memberpatientlist.company,db.vw_memberpatientlist.hmoplan,db.vw_memberpatientlist.premstartdt,\
+               db.vw_memberpatientlist.premenddt)
+      
+      #companyid = int(common.getid(pats[0].company)) if(len(pats) == 1) else 0
+      #companys = db((db.company.id == companyid) & (db.company.is_active == True)).select(db.company.company)
+      #companycode = common.getstring(companys[0].company) if(len(companys) == 1) else "PREMWALKIN"
+      
+      #get hmoplan code
+      #hmoplanid = int(common.getid(pats[0].hmoplan)) if(len(pats) == 1) else 0  #this is the patient's previously assigned plan-typically at registration
+      #hmoplans = db((db.hmoplan.id == hmoplanid) & (db.hmoplan.is_active == True)).select(db.hmoplan.hmoplancode,db.hmoplan.procedurepriceplancode)
+      #hmoplancode = common.getstring(hmoplans[0].hmoplancode) if(len(hmoplans) == 1) else "PREMWALKIN"
+      #r = db(
+             #(db.provider_region_plan.companycode == companycode) &\
+             #(db.provider_region_plan.plancode == plancode) &\
+             #((db.provider_region_plan.regioncode == regioncode)|(db.provider_region_plan.regioncode == 'ALL'))).select()
+      #policy = r[0].policy if(len(r) == 1) else "PREMWALKIN"
+  
+      bms = db((db.benefit_master_x_member.member_id == memberid) & (db.benefit_master_x_member.plan_code == plancode) &\
+             (db.benefit_master.is_valid == True) & (db.benefit_master.is_active == True)).select(db.benefit_master.ALL,\
+                                                                                                  left=db.benefit_master.on(db.benefit_master.id == db.benefit_master_x_member.benefit_master_id))
+      bmid = bms[0].id if(len(bms)==1) else 0
+      logger.loggerpms2.info("Enter Get Benefits 1==>>" + str(len(bms)))
+
+      #select benefit_master_slabs.* from benefit_master_x_slabs
+      #left join benefit_master_slabs  on benefit_master_slabs.id = benefit_master_x_slabs.benefit_master_slabs_id
+      #where benefit_master_x_slabs.benefit_master_id = 1 and benefit_master_x_slabs.benefit_master_code = 'RPIP599'
+      slbs = db((db.benefit_master_x_slabs.benefit_master_id == bmid)&(db.benefit_master_x_slabs.benefit_master_code==policy)).\
+        select(db.benefit_master_slabs.ALL,left=db.benefit_master_slabs.on(db.benefit_master_slabs.id == db.benefit_master_x_slabs.benefit_master_slabs_id))
+      
+      
+      #benefit start date & benefit end date
+      benefit_start_date = pats[0].premstartdt if(len(pats)==1) else common.getISTCurrentLocatTime()
+      benefit_end_date = pats[0].benefit_end_date if(len(pats)==1) else common.getISTCurrentLocatTime()
+      
+      #benefit value of the Plan 
+      benefit_value = common.getvalue(bms[0].benefit_value if (len(bms) == 1) else 0)
+
+      #determine total benefit redeemed for this plan & period
+      total_redeemed_benefits = 0
+      rbs = db((db.benefit_member.member_id == memberid) & (db.benefit_member.plan_code==policy)&\
+               (db.benefit_member.is_active == True)).select()
+      
+      for rb in rbs:
+        total_redeemed_benefits += rb.redeem_amount
+        
+      #if total redeemed value = max benefit amount, then return
+      if(total_redeemed_benefits >= benefit_value):
+        rspobj = {}
+        rspobj["result"] = "success"
+        rspobj["error_message"] = ""
+        rspobj["memberid"] = memberid
+        rspobj["plan"] = policy
+        rspobj["total_redeemed_benefits"] = str(total_redeemed_benefits)
+        rspobj["benefit_code"] = (bms[0].benefit_code if (len(bms) == 1) else "")
+        rspobj["benefit_name"] = (bms[0].benefit_name if (len(bms) == 1) else "")
+        rspobj["benefit_value"] = str(benefit_value)
+        rspobj["benefit_start_date"] = common.getstringfromdate(benefit_start_date,"%d/%m/%Y")
+        rspobj["benefit_end_date"] = common.getstringfromdate(benefit_end_date,"%d/%m/%Y")
+        rspobj["discount_code"] = "BNFT_VAL_MAX"
+        rspobj["discount_amount"] = "0"
+        rspobj["discount_date"] = common.getstringfromdate(datetime.date.today(), "%d/%m/%Y")
+        rspobj["discount_message"] = common.getmessage(db,"BNFT_VAL_MAX")
+        
+        logger.loggerpms2.info("Maximum Benefit Reached " + json.dumps(rspobj))
+        return json.dumps(rspobj)
+      
+      
+      #for each of the treatment,determing total treatment cost, total UCR, total inspays, total company pays
+      #determine for this member -- total treatment cost, total inspays, total patient pays, total company pasy
+      totalactualtreatmentcost = 0   #UCR Cost
+      totaltreatmentcost = 0  #Cost charged to the client which is equal to UCR fee by default
+      totalcopay = 0
+      totalinspays = 0
+      totalcompanypays = 0
+      
+      rows = db((db.vw_treatmentprocedure.primarypatient == memberid) &\
+                (db.vw_treatmentprocedure.treatmentdate >= benefit_start_date) &\
+                (db.vw_treatmentprocedure.treatmentdate <= benefit_end_date) &\
+                (db.vw_treatmentprocedure.is_active == True)).select()
+      
+      
+      for r in rows:
+        totalactualtreatmentcost = totalactualtreatmentcost + float(common.getvalue(r.ucrfee))
+        totaltreatmentcost = totaltreatmentcost + float(common.getvalue(r.procedurefee))
+        totalcopay = totalcopay + float(common.getvalue(r.copay))
+        totalinspays = totalinspays + float(common.getvalue(r.inspays)) 
+        totalcompanypays = totalcompanypays + float(common.getvalue(r.companypays))         
+      
+      totalamountforbenefit = totaltreatmentcost - totalinspays
+      
+      #determine the total benefit amount
+      redeem_value = 0
+      for slb in slbs:
+        if(slb.redeem_mode == 'S'):
+          #slab mode and not percentage mod
+          if((totalamountforbenefit >= slb.redeem_lower_limit) & (totalamountforbenefit <= slb.redeem_upper_limit)):
+            redeem_value = slb.redeem_value
+            break
+        
+      benefit_amount = abs(redeem_value - total_redeemed_benefits)
+      
+      if((benefit_amount + total_redeemed_benefits) >= benefit_value):
+        benefit_amount = abs(benefit_value-total_redeemed_benefits)
+    
+      balance_benefit_amount = benefit_value - (benefit_amount + total_redeemed_benefits)
+
+      #return rspobj
+      benefit_obj = {}
+      benefit_obj["result"] = "success"
+      benefit_obj["error_message"] = ""
+      benefit_obj["memberid"] = memberid
+      benefit_obj["plan"] = policy
+   
+      benefit_obj["total_redeemed_benefits"] = str(benefit_amount + total_redeemed_benefits)   #this should only be updated by the benefit amount on payment success
+      benefit_obj["benefit_code"] = (bms[0].benefit_code if (len(bms) == 1) else "")
+      benefit_obj["benefit_name"] = (bms[0].benefit_name if (len(bms) == 1) else "")
+      benefit_obj["benefit_value"] = str(benefit_value)
+      benefit_obj["benefit_start_date"] = common.getstringfromdate(benefit_start_date,"%d/%m/%Y")
+      benefit_obj["benefit_end_date"] = common.getstringfromdate(benefit_end_date,"%d/%m/%Y")
+      benefit_obj["redeen_code"] = "BNFT_OK"
+      benefit_obj["discount_amount"] = str(benefit_amount)
+      benefit_obj["discount_date"] = common.getstringfromdate(datetime.date.today(), "%d/%m/%Y")
+      benefit_obj["discount_message"] = common.getmessage(db,"BNFT_OK")
+      
+    except Exception as e:
+      mssg = "Get Bnefits  Exception:\n" + str(e)
+      logger.loggerpms2.info(mssg)      
+      excpobj = {}
+      excpobj["result"] = "fail"
+      excpobj["error_message"] = mssg
+      return json.dumps(excpobj)     
+    
+    logger.loggerpms2.info("Exit get_benefits " + json.dumps(rspobj))
+    
+    return json.dumps(rspobj)
+
+  def xget_benefits(self,avars):
     logger.loggerpms2.info("Enter get_benefits " + json.dumps(avars))
     db = self.db
     rspobj = {}
@@ -1086,6 +1268,7 @@ class Benefit:
     logger.loggerpms2.info("Exit get_benefits " + json.dumps(rspobj))
     
     return json.dumps(rspobj)
+
   
   def get_benefits_kytc(self,avars):
       logger.loggerpms2.info("Enter get_benefits for KYTC " + json.dumps(avars))

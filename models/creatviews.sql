@@ -9100,7 +9100,7 @@ CREATE TABLE `kytc_track_log` (
 ==========
 1. YYYYZZZAdd table 'price_rules'
 
-2. ZZZModified procedurepriceplan definition in db.py
+2. YYYZZZModified procedurepriceplan definition in db.py
 
 3. YYYZZZPopulated price_rules table with pricing rules for each procedure for a plan for a company
 
@@ -9137,9 +9137,16 @@ RENAME TO  `mydp_prod`.`rules` ;
 
 14. YYYZZZZPopulate Rules table 
 
-15. Populate CompanyCode in HMOPLAN table
+15. ZZZZPopulate CompanyCode in HMOPLAN table
 
-16. procedurefee=ucrfee in procedurepriceplan table
+16. ZZZprocedurefee=ucrfee in procedurepriceplan table
+
+17. ZZZZRules table modified for MDP/PCP002/PCP001
+
+18. ZZZZHMOPlan table modified for PCP002,PCP001
+
+19. ZZZ Rules and PPP tables modified for MYDP company instead of MDP
+
 
 Script file to clear user for sign-up
 =====================================

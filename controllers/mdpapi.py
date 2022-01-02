@@ -3200,7 +3200,9 @@ def apply_voucher(avars):
     return rsp
 
 def apply_wallet(avars):
-    obj = mdpbenefits.Benefit(current.globalenv['db'])
+    #obj = mdpbenefits.Benefit(current.globalenv['db'])
+    #rsp = obj.apply_wallet(avars)
+    obj = mdppayment.Payment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
     rsp = obj.apply_wallet(avars)
     return rsp
 

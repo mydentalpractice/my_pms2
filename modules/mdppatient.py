@@ -7,15 +7,12 @@ from datetime import timedelta
 
 import json
 
-
-
-
-
 from applications.my_pms2.modules import common
 from applications.my_pms2.modules import gender
 from applications.my_pms2.modules import states
 from applications.my_pms2.modules import status
 from applications.my_pms2.modules import relations
+from applications.my_pms2.modules import mdputils
 from applications.my_pms2.modules import mdpmedia
 from applications.my_pms2.modules import mdpbenefits
 from applications.my_pms2.modules import logger
@@ -919,8 +916,11 @@ class Patient:
     db = self.db
     providerid = self.providerid
     memobj = {}
-    
+    planObj = {}
     try:
+      
+      planObj = json.loads(mdputils.getplandetailsformember(db, providerid,memberid, patientid))
+      
       mem = db(db.patientmember.id == memberid).select(db.patientmember.ALL, db.groupregion.groupregion,db.groupregion.id,db.company.name,
                                                        db.hmoplan.name,db.hmoplan.id,db.hmoplan.hmoplancode,db.hmoplan.procedurepriceplancode,
                                                        left=[db.groupregion.on(db.groupregion.id == db.patientmember.groupregion),
@@ -984,13 +984,16 @@ class Patient:
         }
       memobj["contact"] = memcontact
       
+      
+          
+
       if(common.getboolean(mem[0].patientmember.hmopatientmember) == True):
         memplan = {
-            "company":common.getstring(mem[0].company.name),
-            "plan":common.getstring(mem[0].hmoplan.name),
-            "plancode":common.getstring(mem[0].hmoplan.hmoplancode),
-            "planid": int(common.getid(mem[0].hmoplan.id)),
-            'procedurepriceplancode':common.getstring(mem[0].hmoplan.procedurepriceplancode),
+            "company":common.getstring(planObj["companycode"]),
+            "plan":common.getstring(planObj["planname"]),
+            "plancode":common.getstring(planObj["plancode"]),
+            "planid": int(common.getid(planObj["planid"])),
+            'procedurepriceplancode':common.getstring(planObj["procedurepriceplancode"]),
             "enrollment":mem[0].patientmember.enrollmentdate.strftime("%d/%m/%Y"),
             "premenddate":mem[0].patientmember.premenddt.strftime("%d/%m/%Y")
         }

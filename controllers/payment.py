@@ -2946,6 +2946,8 @@ def apply_wallet():
     avars["rule_event"] ="apply_wallet"
     avars["region_code"] =regioncode
     avars["treatment_id"] =treatmentid
+    avars["member_id"] =memberid
+    
     ruleObj = mdprules.Plan_Rules(db)
     rspobj = json.loads(ruleObj.Get_Plan_Rules(avars))
 
@@ -3059,46 +3061,49 @@ def create_payment():
     fullname = ""
     hmopatientmember = True
 
-    prov = db((db.provider.id == providerid) & (db.provider.is_active == True)).select()
-    city = prov[0].city if(len(prov) != 0) else "Jaipur"
-    
-    regionid = common.getregionidfromcity(db,city)
-    regioncode =  common.getregioncodefromcity(db,city)
-    
-    members = db((db.patientmember.id == memberid) & (db.patientmember.is_active == True)).select(db.patientmember.company,db.patientmember.city,db.patientmember.st)
-    companyid = common.getid(members[0].company) if (len(members) == 1) else "0"
-    c = db((db.company.id == companyid) & (db.company.is_active == True)).select(db.company.company)
-    companycode = c[0].company if (len(c) ==1) else ""
+    provs = db((db.provider.id == providerid) & (db.provider.is_active == True)).select()
+    regionid = int(common.getid(provs[0].groupregion)) if(len(provs) == 1) else 1
+    regions = db((db.groupregion.id == regionid) & (db.groupregion.is_active == True)).select(db.groupregion.groupregion)
+    regioncode = common.getstring(regions[0].groupregion) if(len(regions) == 1) else "ALL"   
 
+    pats = db((db.vw_memberpatientlist.patientid==patientid)&(db.vw_memberpatientlist.primarypatientid==memberid)&(db.vw_memberpatientlist.is_active==True)).select(\
+        db.vw_memberpatientlist.ALL, db.company.ALL,\
+        left=db.company.on(db.company.id==db.vw_memberpatientlist.company))
 
-    cp = db((db.provider_region_plan.companycode == companycode) &\
-            (db.provider_region_plan.regioncode == regioncode) &\
-            (db.provider_region_plan.is_active == True)).select()
-    policy = cp[0].policy if(len(cp) != 0) else ""
-    
-    #determine member's city & state
-    city = members[0].city if(len(members)>0) else "Jaipur"
-    st = members[0].st if(len(members)>0) else "Rajasthan (RJ)"
-    c = db(db.cities.city == city).select(db.cities.id)
-    cityid = c[0].id if(len(c) > 0) else 0    
+   
+    companycode = pats[0].company.company if (len(pats) ==1) else ""
+    st = pats[0].company.st if(len(pats)>0) else "Rajasthan (RJ)"
+    cityid = pats[0].company.id if(len(pats) > 0) else 0        
+    hmoplanid = int(common.getid(pats[0].vw_memberpatientlist.hmoplan)) if(len(pats) == 1) else 0  #this is the patient's previously assigned plan-typically at registration
+    hmoplans = db((db.hmoplan.id == hmoplanid) & (db.hmoplan.is_active == True)).select(db.hmoplan.hmoplancode,db.hmoplan.procedurepriceplancode)
+    hmoplancode = common.getstring(hmoplans[0].hmoplancode) if(len(hmoplans) == 1) else "PREMWALKIN"
+    r = db(
+        (db.provider_region_plan.companycode == companycode) &\
+        (db.provider_region_plan.plancode == hmoplancode) &\
+        ((db.provider_region_plan.regioncode == regioncode)|(db.provider_region_plan.regioncode == 'ALL'))).select()
+    policy = r[0].policy if(len(r) == 1) else "PREMWALKIN"
     
     #calculate the discount for this member 
     #update the treatment, treatmentplan. 
     #There is an assumption that there will be no companypay from Plans 
     benefit_amount = 0
-    reqobj = {
+    avars = {
         "action": "get_benefit",
-        "memberid":str(memberid),
-        "providerid":str(providerid),
-        "plan":policy
+        "member_id":str(memberid),
+        "provider_id":str(providerid),
+        "plan_code":policy,
+        "company_code":companycode,
+        "rule_event":"rules_get_benefits"
     }
 
-    bnftobj  = mdpbenefits.Benefit(db)
+    ruleObj = mdprules.Plan_Rules(db)
+    benefit = json.loads(ruleObj.Get_Plan_Rules(avars))
 
-    benefit = json.loads(bnftobj.get_benefits(reqobj))
+    #bnftobj  = mdpbenefits.Benefit(db)
+
+    #benefit = json.loads(bnftobj.get_benefits(reqobj))
     if(benefit["result"]=="success"):
-        discount_amount = float(common.getvalue(benefit["discount_amount"]))
-        
+        discount_amount = float(common.getkeyvalue(benefit, "discount_amount",0))
         #update totalcompanypays (we are saving discount_amount as companypays )
         db(db.treatment.id == treatmentid).update(companypay = discount_amount)    
         #update treatmentplan assuming there is one treatment per tplan
@@ -3106,12 +3111,9 @@ def create_payment():
         db.commit()
         
 
-    pats = db((db.vw_memberpatientlist.patientid==patientid)&(db.vw_memberpatientlist.primarypatientid==memberid)&(db.vw_memberpatientlist.is_active==True)).select(\
-        db.vw_memberpatientlist.ALL, db.company.ALL,\
-        left=db.company.on(db.company.id==db.vw_memberpatientlist.company)
-    
-    
-    )
+    #pats = db((db.vw_memberpatientlist.patientid==patientid)&(db.vw_memberpatientlist.primarypatientid==memberid)&(db.vw_memberpatientlist.is_active==True)).select(\
+        #db.vw_memberpatientlist.ALL, db.company.ALL,\
+        #left=db.company.on(db.company.id==db.vw_memberpatientlist.company))
 
     #Apply Voucher
     reqobj  = {}

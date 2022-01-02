@@ -767,8 +767,10 @@ class Treatment:
                 patientid = int(common.getid(treatment[0].vw_treatmentlist.patientid))
                 
                 if(hv==False):
+                    logger.loggerpms2.info("Enter Get Treatment API - A3 " + str(providerid))
                     procedurepriceplancode = mdputils.getprocedurepriceplancodeformember(db,providerid,memberid,patientid)
                 else:
+                    logger.loggerpms2.info("Enter Get Treatment API - A3 " + str(providerid))
                     procedurepriceplancode = mdputils.getprocedurepriceplancodeforHVmember(db,providerid,memberid,patientid)
                 #logger.loggerpms2.info("Enter Get Treatment API - B")
                 
@@ -1034,7 +1036,7 @@ class Treatment:
                 patientid = int(common.getid(treatment[0].patientid))
                 
                 tr = db((db.treatment.id == treatmentid) & (db.treatment.is_active == True)).select()
-                providerid =  int(common.getid(tr[0].provider)) if(len(r) == 1) else 0
+                providerid =  int(common.getid(tr[0].provider)) if(len(tr) == 1) else 0
                 self.providerid = providerid
                 
                 
