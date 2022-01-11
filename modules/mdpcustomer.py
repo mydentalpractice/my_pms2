@@ -1471,6 +1471,7 @@ class Customer:
                          
                 
                 )
+                db.commit()
                 
                 #if a customer/member is successfully enrolled, then we have to create a wallet and credit it with voucher amount
                 plan_id = int(common.getkeyvalue(jsonresp,"hmoplan","0"))
@@ -1489,11 +1490,19 @@ class Customer:
                 avars["super_wallet_amount"] = float(common.getvalue(plans[0].discount_amount)) if(len(plans) == 1) else 0
                 avars["mdp_wallet_amount"] = 0
                 
+                
+                rspobj = {}
                 rulesobj = mdprules.Plan_Rules(db)
-                rspobj = json.loads(rulesobj.Get_Plan_Rules(avars))
+                rspobj  = json.loads(rulesobj.Get_Plan_Rules(avars))
+               
+                #logger.loggerpms2.info("Create Wallet After Get_Plan_Rules " + json.dumps(rspobj))
                 if(rspobj["result"] == "fail"):
+                    #logger.loggerpms2.info("Create Wallet After Get_Plan_Rules B " + json.dumps(rspobj))
+                    #logger.loggerpms2.info("Create Wallet After Get_Plan_Rules C " + json.dumps(jsonresp))
                     jsonresp["result"] = "fail"
                     jsonresp["error_message"] = "Error Enrolling a Customer "
+                    #logger.loggerpms2.info("Create Wallet After Get_Plan_Rules  - fail " + json.dumps(jsonresp))
+                    return json.dumps(rspobj)
                     
             elif(count == 1):
                 #patient member is already enrolled

@@ -9137,17 +9137,19 @@ RENAME TO  `mydp_prod`.`rules` ;
 
 14. YYYZZZZPopulate Rules table 
 
-15. ZZZZPopulate CompanyCode in HMOPLAN table
+15. YYYZZZZPopulate CompanyCode in HMOPLAN table
 
 16. ZZZprocedurefee=ucrfee in procedurepriceplan table
 
-17. ZZZZRules table modified for MDP/PCP002/PCP001
+17. YYYZZZZRules table modified for MDP/PCP002/PCP001
 
-18. ZZZZHMOPlan table modified for PCP002,PCP001
+18. YYYZZZZHMOPlan table modified for PCP002,PCP001
 
-19. ZZZ Rules and PPP tables modified for MYDP company instead of MDP
+19. YYYYZZZ Rules and PPP tables modified for MYDP company instead of MDP
 
+20. YYYZZZ Modify treatment, treatmentplan to add new fields - promo_code, promo_amount
 
+21. ZZZ Alter vw_treatmentplansummary, vw_treatmentplansummarybypatient, vw_treatmentplansummarybytreatment
 Script file to clear user for sign-up
 =====================================
 

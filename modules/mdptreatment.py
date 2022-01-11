@@ -373,7 +373,11 @@ class Treatment:
                     "totalcopay":float(common.getstring(r["totalcopay"])),
                     "totalinspays":float(common.getstring(r["totalinspays"])),
                     "totaldue":float(common.getstring(r["totaldue"])),
-                    "totalpaid":float(common.getstring(r["totalpaid"]))
+                    "totalpaid":float(common.getstring(r["totalpaid"])),
+                    "wallet_type":"SUPER_WALLET",
+                    "totalwalletamount":float(common.getvalue(r["totalwalletamount"])),
+                    "totaldiscount_amount":float(common.getvalue(r["totaldiscount_amount"]))
+                    
                    
                     
                 }
@@ -501,12 +505,6 @@ class Treatment:
             treatmentlist = []
             treatmentobj = {}
             
-            
-           
-              
-                   
-
-            
             for treatment in treatments:
                 treatmentid = int(common.getid(treatment.vw_treatmentlist_fast.id))
                 tplanid = int(common.getid(treatment.vw_treatmentlist_fast.tplanid))
@@ -514,33 +512,10 @@ class Treatment:
                 hv = False if(hv == 0) else True
                 #r= self.updatetreatmentcostandcopay(treatmentid, tplanid)
                 r = json.loads(account._calculatepayments(db,tplanid))
-                #logger.loggerpms2.info("TPLAN ID Treatment id = " + str(tplanid) + " " + str(treatmentid))
-                #logger.loggerpms2.info("r = " + json.dumps(r))
-                
-                
-                #providerid=int(common.getid(treatment.vw_treatmentlist_fast.providerid))
-                #treatmentid =treatmentid
-                #xtreatment= common.getstring(treatment.vw_treatmentlist_fast.treatment)
-                #treatmentdate  = (treatment.vw_treatmentlist_fast.startdate).strftime("%d/%m/%Y")
-                #status="Started" if(common.getstring(treatment.vw_treatmentlist_fast.status) == "") else common.getstring(treatment.vw_treatmentlist_fast.status)
-
-                #patientname = common.getstring(treatment.vw_treatmentlist_fast.patientname)
-                
-                #patcell=str(treatment.patientmember.cell)
+                             
                
-                #doctorname=treatment.vw_treatmentlist_fast.doctorname
                
                 
-                #clinicname=treatment.vw_treatmentlist_fast.clinicname
-
-                #procedures= self.getproceduresfromtreatment(treatmentid) #common.getstring(treatment.vw_treatment_procedure_group.shortdescription),
-               
-                #totaltreatmentcost=float(common.getstring(r["totaltreatmentcost"]))
-                #totalcopay=float(common.getstring(r["totalcopay"]))
-                #totalinspays=float(common.getstring(r["totalinspays"]))
-                #totaldue=float(common.getstring(r["totaldue"]))
-                #totalpaid=float(common.getstring(r["totalpaid"]))                
-
                 treatmentobj = {
                     "providerid":int(common.getid(treatment.vw_treatmentlist_fast.providerid)),
                     "treatmentid" : treatmentid,
@@ -560,10 +535,25 @@ class Treatment:
                     "procedures": self.getproceduresfromtreatment(treatmentid), #common.getstring(treatment.vw_treatment_procedure_group.shortdescription),
                    
                     "totaltreatmentcost":float(common.getstring(r["totaltreatmentcost"])),
-                    "totalcopay":float(common.getstring(r["totalcopay"])),
+                    "totalprecopay":float(common.getstring(r["totalprecopay"])),
                     "totalinspays":float(common.getstring(r["totalinspays"])),
-                    "totaldue":float(common.getstring(r["totaldue"])),
+                    "totalcompanypays":float(common.getstring(r["totalcompanypays"])),
+                    "totalwalletamount":float(common.getstring(r["totalwalletamount"])),
+                    "totaldiscount_amount":float(common.getstring(r["totaldiscount_amount"])),
+                    "totalcopay":float(common.getstring(r["totalcopay"])),
                     "totalpaid":float(common.getstring(r["totalpaid"])),
+                    "totaldue":float(common.getstring(r["totaldue"])),
+
+                    "treatmentcost":float(common.getstring(r["treatmentcost"])),
+                    "precopay":float(common.getstring(r["precopay"])),
+                    "companypays":float(common.getstring(r["companypays"])),
+                    "inspays":float(common.getstring(r["inspays"])),
+                    "walletamount":float(common.getstring(r["walletamount"])),
+                    "discount_amount":float(common.getstring(r["discount_amount"])),
+                    "copay":float(common.getstring(r["copay"])),
+                    "wallet_type":"SUPER_WALLET",
+                    "totalwalletamount":float(common.getvalue(r["totalwalletamount"])),
+                    "totaldiscount_amount":float(common.getvalue(r["totaldiscount_amount"])),
                     "hv":hv
                    
                     
@@ -802,6 +792,11 @@ class Treatment:
                     "totalinspays":float(common.getstring(r["totalinspays"])),
                     "totaldue":float(common.getstring(r["totaldue"])),
                     "totalpaid":float(common.getstring(r["totalpaid"])),
+                    
+                    "wallet_type":"SUPER_WALLET",
+                    "totalwalletamount":float(common.getvalue(r["totalwalletamount"])),
+                    "totaldiscount_amount":float(common.getvalue(r["totaldiscount_amount"])),
+                    
                     "showSendForAuthorization":showSendForAuthorization(\
                                                                         "Started" if(common.getstring(treatment[0].vw_treatmentlist.status) == "") else common.getstring(treatment[0].vw_treatmentlist.status), \
                                                                         False if(len(c) <= 0) else ((len(procs)>0) & common.getboolean(c[0].authorizationrequired)),\
@@ -1099,6 +1094,11 @@ class Treatment:
                     "totalinspays":float(common.getstring(r["totalinspays"])),#
                     "totaldue":float(common.getstring(r["totaldue"])),#
                     "totalpaid":float(common.getstring(r["totaltreatmentcost"])) - float(common.getstring(r["totaldue"])),#
+
+                    "wallet_type":"SUPER_WALLET",
+                    "totalwalletamount":float(common.getvalue(r["totalwalletamount"])),
+                    "totaldiscount_amount":float(common.getvalue(r["totaldiscount_amount"])),
+                    
                     "showSendForAuthorization":showSendForAuthorization(\
                                                                         "Started" if(common.getstring(treatment[0].status) == "") else common.getstring(treatment[0].status), \
                                                                         False if(len(c) <= 0) else ((len(procs)>0) & common.getboolean(c[0].authorizationrequired)),\

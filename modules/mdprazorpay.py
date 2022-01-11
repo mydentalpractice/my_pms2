@@ -231,8 +231,12 @@ class Razorpay:
         payobj["error_message"] = ""
         
         obj = mdppayment.Payment(self.db, self.providerid)
-        jsondump = obj.paymentcallback(payobj)
+	jsondump = obj.paymentcallback(payobj)
+	#avars={}
+	#avars["paymentid"] = 0
+	#avars["status"] = status
         jsonresp = json.loads(jsondump)
+	
       else:
 	respobj = resp.json() 
 	error_message = "Capture Razorpay  Payment Response Error==>\n" + respobj.get("error").get("code","") + ":" + respobj.get("error").get("description","") + "\n" + str(resp.status_code)

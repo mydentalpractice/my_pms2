@@ -26,8 +26,8 @@ class Plan:
     
             r = db((db.provider_region_plan.companycode == companycode) & 
                    (db.provider_region_plan.plancode == plancode) &
-                   (db.provider_region_plan.regioncode == regioncode)
-                   ).select()
+                   (db.provider_region_plan.regioncode == regioncode)&\
+                   (db.provider_region_plan.is_active == True)).select()
     
             premium = float(common.getvalue(r[0].premium)) if(len(r)>0) else 0
     

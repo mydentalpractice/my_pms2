@@ -2590,7 +2590,8 @@ def update_treatment():
         enddate = common.getdt(treatments[0].enddate)
         
         precopay = paytm["precopay"]
-        discount_amount = paytm["discount_amount"]
+        discount_amount = paytm["discount_amount"] + paytm["walletamount"]
+        walletamount = paytm["walletamount"]
         netcopay = paytm["copay"]
         treatmentcost = paytm["treatmentcost"]
         inspay = paytm["inspays"]
@@ -3663,7 +3664,8 @@ def new_treatment():
     tplan = "TP" + str(patientmember)  + "_" + timestr
     tplanid = db.treatmentplan.insert(
         treatmentplan = tplan,
-        startdate = datetime.date.today(),
+        startdate = common.getISTFormatCurrentLocatTime(),
+        enddate = common.getISTFormatCurrentLocatTime(),
         provider = providerid,
         primarypatient = memberid,
         patient = patientid,
@@ -3696,7 +3698,8 @@ def new_treatment():
         
         treatment = treatment,
         description = '',
-        startdate = datetime.date.today(),
+        startdate = common.getISTFormatCurrentLocatTime(),
+        enddate = common.getISTFormatCurrentLocatTime(),
         status ='Started',
         treatmentplan = tplanid,
         provider = providerid,
@@ -3952,8 +3955,10 @@ def add_proceduregrid():
  
     #procedurepriceplanid = int(common.getid(procs[0].id))  if(len(procs) >= 1) else 0
     ##get provider from treatment
-    t = db((db.treatment.id == treatmentid) & (db.treatment.is_active == True)).select(db.treatment.provider)
+    t = db((db.treatment.id == treatmentid) & (db.treatment.is_active == True)).select()
     providerid = int(common.getid(t[0].provider if (len(t)>0) else 0 ))
+    treatmentdate = t[0].startdate if (len(t)>0) else common.getISTFormatCurrentLocatDate()
+    
     #get region code
     provs = db((db.provider.id == providerid) & (db.provider.is_active == True)).select(db.provider.groupregion)
     regionid = int(common.getid(provs[0].groupregion)) if(len(provs) == 1) else 1
@@ -3974,7 +3979,8 @@ def add_proceduregrid():
     r = db(
            (db.provider_region_plan.companycode == companycode) &\
            (db.provider_region_plan.plancode == hmoplancode) &\
-           ((db.provider_region_plan.regioncode == regioncode)|(db.provider_region_plan.regioncode == 'ALL'))).select()
+           ((db.provider_region_plan.regioncode == regioncode)|(db.provider_region_plan.regioncode == 'ALL')) &\
+           (db.provider_region_plan.is_active == True)).select()
     plancode = r[0].policy if(len(r) == 1) else "PREMWALKIN"
     
     #Using new pricing engine  12/10/2021
@@ -4027,7 +4033,7 @@ def add_proceduregrid():
         tpid = db.treatment_procedure.insert(treatmentid = treatmentid, dentalprocedure = procedurepriceplanid,status=status,\
                                         ucr = ucrfee, procedurefee=procedurefee, copay=copay,inspays=inspays,companypays=companypays,\
                                         tooth=tooth,quadrant=quadrant,remarks=remarks,voucher_code=voucher_code,\
-                                        walletamount=walletamount,discount_amount=discount_amount)
+                                        walletamount=walletamount,discount_amount=discount_amount,treatmentdate = treatmentdate)
         db.commit() 
         session.flash = "New Procedure Added!"
     

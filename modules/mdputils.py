@@ -42,7 +42,8 @@ def getplandetailsformember(db,providerid,memberid,patientid):
 	r = db(
 	    (db.provider_region_plan.companycode == companycode) &\
 	    (db.provider_region_plan.plancode == hmoplancode) &\
-	    ((db.provider_region_plan.regioncode == regioncode)|(db.provider_region_plan.regioncode == 'ALL'))).select()
+	    ((db.provider_region_plan.regioncode == regioncode)|(db.provider_region_plan.regioncode == 'ALL')) &\
+	    (db.provider_region_plan.is_active == True)).select()
 	plancode = r[0].plancode if(len(r) == 1) else "PREMWALKIN"    
 	procedurepriceplancode = r[0].procedurepriceplancode if(len(r) == 1) else "PREMWALKIN"
 	
@@ -97,7 +98,8 @@ def getprocedurepriceplancodeformember(db,providerid,memberid,patientid,policy_n
 	r = db(
 	    (db.provider_region_plan.companycode == companycode) &\
 	    (db.provider_region_plan.plancode == hmoplancode) &\
-	    ((db.provider_region_plan.regioncode == regioncode)|(db.provider_region_plan.regioncode == 'ALL'))).select()
+	    ((db.provider_region_plan.regioncode == regioncode)|(db.provider_region_plan.regioncode == 'ALL'))&\
+	    (db.provider_region_plan.is_active == True)).select()
 	plancode = r[0].plancode if(len(r) == 1) else "PREMWALKIN"    
 	procedurepriceplancode = r[0].procedurepriceplancode if(len(r) == 1) else "PREMWALKIN"
 

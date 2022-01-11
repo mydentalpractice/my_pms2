@@ -37,6 +37,74 @@ class Patient:
     
     try:
       
+      p = db((db.provider.provider == "P0001") & (db.provider.is_active == True)).select(db.provider.id)
+      defproviderid = int(common.getid(p[0].id if(len(p) >=1) else 0))
+      providerid = int(common.getid(common.getkeyvalue(avars,"providerid",str(defproviderid))))      
+      
+      memberid = int(common.getid(common.getkeyvalue(avars,"memberid","0")))
+      patientid = memberid
+      
+      #get region code
+      provs = db((db.provider.id == providerid) & (db.provider.is_active == True)).select(db.provider.groupregion)
+      regionid = int(common.getid(provs[0].groupregion)) if(len(provs) == 1) else 1
+      regions = db((db.groupregion.id == regionid) & (db.groupregion.is_active == True)).select(db.groupregion.groupregion)
+      regioncode = common.getstring(regions[0].groupregion) if(len(regions) == 1) else "ALL"
+    
+      ## get patient's company
+      pats = db((db.vw_memberpatientlist.primarypatientid == memberid) & (db.vw_memberpatientlist.patientid == patientid)).select(db.vw_memberpatientlist.company,db.vw_memberpatientlist.hmoplan)
+      companyid = int(common.getid(pats[0].company)) if(len(pats) == 1) else 0
+      companys = db((db.company.id == companyid) & (db.company.is_active == True)).select(db.company.company)
+      companycode = common.getstring(companys[0].company) if(len(companys) == 1) else "PREMWALKIN"
+
+      ##for backward compatibility determine procedurepriceplancode from member's plan at the time of registration
+      hmoplanid = int(common.getid(pats[0].hmoplan)) if(len(pats) == 1) else 0  #this is the patient's previously assigned plan-typically at registration
+      hmoplans = db((db.hmoplan.id == hmoplanid) & (db.hmoplan.is_active == True)).select(db.hmoplan.hmoplancode,db.hmoplan.procedurepriceplancode)
+      hmoplancode = common.getstring(hmoplans[0].hmoplancode) if(len(hmoplans) == 1) else "PREMWALKIN"
+
+      #get policy from provider-region-plan corr to companycode, regioncode and hmoplancode
+      prp = db((db.provider_region_plan.companycode == companycode) &\
+               (db.provider_region_plan.regioncode == regioncode) &\
+               (db.provider_region_plan.plancode == hmoplancode) &\
+               (db.provider_region_plan.is_active == True)).select() 
+      
+      if(len(prp) == 0):
+        #region code = "ALL"
+        prp = db((db.provider_region_plan.companycode == companycode) &\
+                 (db.provider_region_plan.regioncode == "ALL") &\
+                 (db.provider_region_plan.plancode == hmoplancode) &\
+                 (db.provider_region_plan.is_active == True)).select() 
+      
+      
+      policy = prp[0].policy if(len(prp) == 1) else companycode  #get policy corr.
+      policy = "PREMWALKIN" if((policy == None) | (policy == "")) else policy
+      plancode = policy      
+      
+      rspobj = {}
+      rspobj["memberid"] = str(memberid)
+      rspobj["providerid"] = str(providerid)
+      rspobj["plan"] = policy
+      rspobj["companycode"] = companycode
+      
+
+    except Exception as e:
+      mssg = "Get Member Policy Exception:\n" + str(e)
+      logger.loggerpms2.info(mssg)      
+      excpobj = {}
+      excpobj["result"] = "fail"
+      excpobj["error_message"] = mssg
+      return json.dumps(excpobj)     
+    
+    logger.loggerpms2.info("Exit getMemberPolicy==> " + json.dumps(rspobj))
+    return json.dumps(rspobj)
+  
+  #returns the policy which the patient has subscribed to  
+  def xgetMemberPolicy(self,avars):
+    logger.loggerpms2.info("Enter getMemberPolicy==> " + str(avars))
+    db = self.db
+    rspobj={}
+    
+    try:
+      
       
       p = db((db.provider.provider == "P0001") & (db.provider.is_active == True)).select(db.provider.id)
       defproviderid = int(common.getid(p[0].id if(len(p) >=1) else 0))
@@ -94,7 +162,7 @@ class Patient:
       return json.dumps(excpobj)     
     
     logger.loggerpms2.info("Exit getMemberPolicy==> " + json.dumps(rspobj))
-    return json.dumps(rspobj)
+    return json.dumps(rspobj)  
   
   def relations(self):
     return json.dumps(relations.RELATIONS)
@@ -1840,7 +1908,8 @@ class Patient:
       
       c = db(db.company.id == companyid).select(db.company.company)
       companycode = c[0].company if(len(c)==1) else "MYDP"
-      
+      h = db((db.hmoplan.id == planid) & (db.hmoplan.is_active == True)).select()
+      plan_code = h[0].hmoplancode if(len(h) > 0) else "PREMWALKIN"
       
       
       xrows = db(db.membercount.company == companyid).select()
@@ -1879,7 +1948,7 @@ class Patient:
           year            = timedelta(days=365)
       
         #for plan RPRIP 99, the end date is for lifetime (100 years from premstart dt)
-        if(companycode == "RPIP99"):
+        if(plan_code == "RPIP99"):
           year = timedelta(days = 365 * 100)
         
         premenddt = (premstartdt + year) - day  
@@ -1946,7 +2015,7 @@ class Patient:
           )
      
       obj={
-        "plan":companycode,
+        "plan":plan_code,
         "memberid":patid
       }
       

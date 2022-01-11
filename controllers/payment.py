@@ -2936,7 +2936,8 @@ def apply_wallet():
     r = db(
         (db.provider_region_plan.companycode == companycode) &\
         (db.provider_region_plan.plancode == hmoplancode) &\
-        ((db.provider_region_plan.regioncode == regioncode)|(db.provider_region_plan.regioncode == 'ALL'))).select()
+        ((db.provider_region_plan.regioncode == regioncode)|(db.provider_region_plan.regioncode == 'ALL')) &\
+        (db.provider_region_plan.is_active == True)).select()
     plancode = r[0].policy if(len(r) == 1) else "PREMWALKIN"
     
     
@@ -3016,6 +3017,8 @@ def apply_wallet():
     
     paytm=json.loads(account._calculatepayments(db,tplanid))
     
+
+    
     return dict( 
                 treatmentcost=paytm["treatmentcost"],
                 copay=paytm["copay"],
@@ -3080,7 +3083,8 @@ def create_payment():
     r = db(
         (db.provider_region_plan.companycode == companycode) &\
         (db.provider_region_plan.plancode == hmoplancode) &\
-        ((db.provider_region_plan.regioncode == regioncode)|(db.provider_region_plan.regioncode == 'ALL'))).select()
+        ((db.provider_region_plan.regioncode == regioncode)|(db.provider_region_plan.regioncode == 'ALL')) &\
+        (db.provider_region_plan.is_active == True)).select()
     policy = r[0].policy if(len(r) == 1) else "PREMWALKIN"
     
     #calculate the discount for this member 
@@ -3093,7 +3097,7 @@ def create_payment():
         "provider_id":str(providerid),
         "plan_code":policy,
         "company_code":companycode,
-        "rule_event":"rules_get_benefits"
+        "rule_event":"get_plan_benefits"
     }
 
     ruleObj = mdprules.Plan_Rules(db)
@@ -3242,6 +3246,7 @@ def create_payment():
 @auth.requires(auth.has_membership('provider') or auth.has_membership('webadmin')) 
 @auth.requires_login()
 def update_payment():
+    logger.loggerpms2.info("Enter Update Payment " + json.dumps(request.vars))
     tplanid = 0
     
     source = common.getstring(request.vars.source)
@@ -3274,7 +3279,24 @@ def update_payment():
     providerid = common.getid(provdict["providerid"])
     providername = common.getstring(provdict["providername"])
 
+    paytm = json.loads(account._calculatepayments(db, tplanid))
+    if((paytm["totaldue"] == 0) & (paytm["totalwalletamount"] > 0)):
+        logger.loggerpms2.info("Call PaymentCallback_0")
+        avars = {}
+        avars["paymentid"] = paymentid
+        avars["amount"] = paytm["copay"]
+        payObj = mdppayment.Payment(db, providerid)
+        rspobj = json.loads(payObj.paymentcallback_0(avars))
+        logger.loggerpms2.info("Exit Update Payment - paymentcallback_0 " + json.dumps(rspobj))
+        paymentobj = mdppayment.Payment(db, providerid)
+        receiptobj = json.loads(paymentobj.paymentreceipt(paymentid))
+        logger.loggerpms2.info("Pine  - Exit Payment Receipt " + json.dumps(receiptobj))
+        returnurl = URL("admin","logout") 
     
+             
+        redirect(returnurl)
+        return json.dumps(rspobj)
+        
     
     #return url to treatment
     returnurl = URL('treatment', 'update_treatment', vars=dict(page=page,imagepage=0,tplanid=tplanid,treatmentid=treatmentid,\

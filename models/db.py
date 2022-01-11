@@ -1436,6 +1436,10 @@ db.define_table('treatmentplan',
                 Field('totaldiscount_amount','double',represent=lambda v, r: 0.00 if v is None else v,widget = lambda field, value:SQLFORM.widgets.double.widget(field, value, _class='form_details'), default=0.00,label='Total Discount Amount'),
                 Field('voucher_code','string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'), default=''),
                 Field('wallet_type','string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'), default=''),
+                Field('totalpromo_amount','double',represent=lambda v, r: 0.00 if v is None else v,widget = lambda field, value:SQLFORM.widgets.double.widget(field, value, _class='form_details'), default=0.00,label='Total Insurance Pays'),
+                Field('promo_amount','double',represent=lambda v, r: 0.00 if v is None else v,widget = lambda field, value:SQLFORM.widgets.double.widget(field, value, _class='form_details'), default=0.00,label='Total Insurance Pays'),
+                Field('promo_code','string',represent=lambda v, r: '' if v is None else v,widget = lambda field, value:SQLFORM.widgets.string.widget(field, value, _class='form_details'), default='P'),
+                
                 auth.signature
                 )
 db.treatmentplan._singular = "Treatment_Plan"
@@ -1532,7 +1536,9 @@ db.define_table('treatment',
                 Field('companypay','double',represent=lambda v, r: 0.00 if v is None else v,widget = lambda field, value:SQLFORM.widgets.double.widget(field, value, _class='form_details'), default=0.00,label='Co. Pays'),
                 Field('walletamount','double',represent=lambda v, r: 0.00 if v is None else v,widget = lambda field, value:SQLFORM.widgets.double.widget(field, value, _class='form_details'),default=0.00,label='Wallet Amount'),
                 Field('discount_amount','double',represent=lambda v, r: 0.00 if v is None else v,widget = lambda field, value:SQLFORM.widgets.double.widget(field, value, _class='form_details'),default=0.00,label='Discount Amount'),
+                Field('promo_amount','double',represent=lambda v, r: 0.00 if v is None else v,widget = lambda field, value:SQLFORM.widgets.double.widget(field, value, _class='form_details'),default=0.00,label='Discount Amount'),
                 Field('voucher_code','string'),
+                Field('promo_code','string'),
                 Field('wallet_type', 'string' ),                
                 Field('authorized', 'boolean'),
                 Field('treatmentplan','reference treatmentplan',label='Member/Patient'),
@@ -2902,7 +2908,9 @@ db.define_table('vw_treatmentplansummarybytreatment',
                 Field('totalpaid','double'),
                 Field('totaldue','double'),
                 Field('totalcopaypaid','double'),
-                Field('totalinspaid','double')
+                Field('totalinspaid','double'),
+                Field('totalpromo_amount','double')
+                
                 
                 )
 db.vw_treatmentplansummarybytreatment._singular = "vw_treatmentplansummarybytreatment"
@@ -2923,7 +2931,8 @@ db.define_table('vw_treatmentplansummarybypatient',
                 Field('totalpaid','double'),
                 Field('totaldue','double'),
                 Field('totalcopaypaid','double'),
-                Field('totalinspaid','double')
+                Field('totalinspaid','double'),
+                Field('totalpromo_amount','double')
                 
                 )
 db.vw_treatmentplansummarybypatient._singular = "vw_treatmentplansummarybypatient"

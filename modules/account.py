@@ -882,6 +882,7 @@ def _calculatepayments(db,tplanid,policy=None):
     precopay = 0
     walletamount = 0 
     discount_amount = 0
+    promo_amount = 0
     
     totaltreatmentcost = 0
     totalcopay = 0
@@ -892,6 +893,10 @@ def _calculatepayments(db,tplanid,policy=None):
     totalcompanypays = 0
     totalwalletamount = 0
     totaldiscount_amount = 0
+    totalpromo_amount = 0
+    wallet_type = ""
+    voucher_code = ""
+    promo_code = ""
     
     r = None
     tplan = db((db.treatmentplan.id == tplanid) & (db.treatmentplan.is_active == True)).select()
@@ -904,7 +909,11 @@ def _calculatepayments(db,tplanid,policy=None):
         copay = float(common.getvalue(tplan[0].totalcopay)) - (discount_amount + companypays + walletamount)
         inspays = float(common.getvalue(tplan[0].totalinspays))
         memberid = int(common.getid(tplan[0].primarypatient))
-
+        promo_amount = float(common.getvalue(tplan[0].totalpromo_amount))  
+        promo_code = common.getstring(tplan[0].promo_code)
+        wallet_type = common.getstring(tplan[0].wallet_type)
+        voucher_code = common.getstring(tplan[0].voucher_code)
+        
         r = db((db.vw_treatmentplansummarybytreatment.id == tplanid) & (db.vw_treatmentplansummarybytreatment.is_active  == True)).select()
         if(len(r)>0):
             totaltreatmentcost = float(common.getvalue(r[0].totalcost))
@@ -912,6 +921,7 @@ def _calculatepayments(db,tplanid,policy=None):
             totalcompanypays = float(common.getvalue(r[0].totalcompanypays))
             totalwalletamount = float(common.getvalue(r[0].totalwalletamount))           
             totaldiscount_amount = float(common.getvalue(r[0].totaldiscount_amount))           
+            totalpromo_amount = float(common.getvalue(r[0].totalpromo_amount))           
             totalprecopay = float(common.getvalue(r[0].totalcopay))
             totalcopay = float(common.getvalue(r[0].totalcopay)) - (totaldiscount_amount + totalcompanypays + totalwalletamount)
             totalpaid = float(common.getvalue(r[0].totalpaid))
@@ -923,6 +933,7 @@ def _calculatepayments(db,tplanid,policy=None):
             respobj["totalcompanypays"]=totalcompanypays
             respobj["totalwalletamount"]=totalwalletamount
             respobj["totaldiscount_amount"]=totaldiscount_amount
+            respobj["totalpromo_amount"]=totalpromo_amount
             respobj["totalprecopay"]=totalprecopay
             respobj["totalcopay"]=totalcopay
             respobj["totalpaid"]=totalpaid
@@ -935,7 +946,12 @@ def _calculatepayments(db,tplanid,policy=None):
             respobj["companypays"]=companypays
             respobj["walletamount"]=walletamount
             respobj["discount_amount"]=discount_amount
-
+            respobj["promo_amount"]=promo_amount
+            respobj["wallet_type"] = wallet_type
+            respobj["voucher_code"] = voucher_code
+            respobj["promo_code"] = promo_code
+            
+            
             respobj["result"] = "success"
             respobj["error_message"] = ""
 
@@ -967,6 +983,7 @@ def _updatetreatmentpayment(db,tplanid,paymentid,policy="PREMWALKIN"):
     totaldue = 0                   #total due
     totaldiscount_amount = 0
     totalwallet_amount = 0
+    totalpromo_amount = 0
     
     
     #get the previously set totalpaid, totalcompanypays, totalinspays
@@ -1005,6 +1022,7 @@ def _updatetreatmentpayment(db,tplanid,paymentid,policy="PREMWALKIN"):
     
     totaldiscount_amount = float(common.getvalue(tr[0].discount_amount)) if(len(tr) > 0) else 0
     totalwalletamount = float(common.getvalue(tr[0].walletamount)) if(len(tr) > 0) else 0
+    totalpromo_amount = float(common.getvalue(tr[0].promo_amount)) if(len(tr) > 0) else 0
     voucher_code  = common.getstring(tr[0].voucher_code) if(len(tr) > 0) else 0
     
   
@@ -1035,8 +1053,9 @@ def _updatetreatmentpayment(db,tplanid,paymentid,policy="PREMWALKIN"):
         totalcompanypays = totalcompanypays,
         totalwalletamount = totalwalletamount,
         totaldiscount_amount  = totaldiscount_amount,
+        totalpromo_amount  = totalpromo_amount,
         totalpaid = totalpaid,
-        totaldue = totalcopay - totalcompanypays - totaldiscount_amount - totalwalletamount - totalpaid
+        totaldue = totalcopay - totalcompanypays - totaldiscount_amount - totalwalletamount - totalpromo_amount - totalpaid
 
     )    
 
@@ -1053,6 +1072,6 @@ def _updatetreatmentpayment(db,tplanid,paymentid,policy="PREMWALKIN"):
     
     
    
-    logger.loggerpms2.info("Exit Update Treamtnet Payment")
+    logger.loggerpms2.info("Exit Update Treamtnet Payment " + json.dumps(paytm))
     return json.dumps({"result":"success"})
 

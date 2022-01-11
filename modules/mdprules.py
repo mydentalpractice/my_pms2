@@ -74,7 +74,7 @@ class Plan_Rules:
                 if(rule.is_active == True):
                     rspobj = json.loads(getattr(self, (rule.rule_code).lower())(avars))
                     if(rspobj["result"] == "fail"):
-                        rspobj = rspobj["error_message"] + " " + "Error in executing " + event
+                        rspobj["error_message"] = rspobj["error_message"] + " " + "Error in executing " + event
                         break;
         except Exception as e:
             rspobj = {}
@@ -199,14 +199,14 @@ class Plan_Rules:
                     super_wallet_balance = rspobj["WALLET_BALANCE"]
                     super_wallet_cashback_balance = float(common.getvalue(super_wallet_balance["super_wallet_amount"]))
                     paytm = json.loads(account._calculatepayments(db,tplanid))
-                    treatment_amount = paytm["totalcopay"]
+                    treatment_amount = paytm["totaldue"]   #earlier it was paytm["totalcopay"]
                     cashback = 0
                     if(super_wallet_cashback_balance >= treatment_amount):
                         cashback = treatment_amount
                         super_wallet_cashback_balance = super_wallet_cashback_balance - treatment_amount
                     elif (super_wallet_cashback_balance < treatment_amount):
                         cashback = super_wallet_cashback_balance
-                        super_wallet_cashback_balance = treatment_amount - cashback
+                        super_wallet_cashback_balance = super_wallet_cashback_balance - cashback
                     else:
                         cashback = 0
                     
@@ -319,6 +319,28 @@ class Plan_Rules:
         mssg = json.dumps(rspobj)
         logger.loggerpms2.info("Exit Plan_Rules rule_createwallet" + mssg)
         return mssg
+
+    #this rule is to be called when MDP_Wallet & SUPER_Wallet have to be 
+    #created for a member with 0 amount
+    #{member_id,plan_code,mdp_wallet_usase}
+    def rule_createwallet_1(self,avars):
+        logger.loggerpms2.info("Enter Plan Rules - rule_createwallet_1 " + json.dumps(avars))
+        db = self.db
+        rspobj = {}
+        
+        try:    
+            bnftobj = mdpbenefits.Benefit(db)
+            rspobj = json.loads(bnftobj.create_wallet_1(avars))
+
+        except Exception as e:
+            mssg = " Exception Plan Rules rule_createwallet_1 " + str(e)
+            rspobj["result"] = "fail"
+            rspobj["error_message"] = mssg
+            
+        mssg = json.dumps(rspobj)
+        logger.loggerpms2.info("Exit Plan_Rules rule_createwallet_1" + mssg)
+        return mssg
+
 
     #this rule is called to credir a member's wallet with the cashback amount
     def rule_credit_super_wallet(self,avars):
@@ -1217,6 +1239,11 @@ class Pricing:
         mssg = json.dumps(rspobj)
         logger.loggerpms2.info("Exit Pricing rule3_consultancy_validity "  + mssg)
         return mssg
+
+
+   
+
+
 
     def Template(self,avars):
         logger.loggerpms2.info("Enter  " + json.dumps(avars))

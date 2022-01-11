@@ -1442,6 +1442,11 @@ def getpayment(avars):
     logger.loggerpms2.info("Exit Get Payment API ")
     return rsp
 
+def paymentcallback_0(avars):
+    opaymnt = mdppayment.Payment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
+    rsp = opaymnt.paymentcallback_0(avars)
+    return rsp
+
 
 def paymentcallback(avars):
     opaymnt = mdppayment.Payment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
@@ -3212,6 +3217,12 @@ def reverse_voucher(avars):
     rsp = obj.reverse_voucher(avars)
     return rsp
 
+def reverse_wallet(avars):
+    obj = mdpbenefits.Benefit(current.globalenv['db'])
+    rsp = obj.reverse_wallet(avars)
+    return rsp
+
+
 def create_wallet(avars):
     obj = mdpbenefits.Benefit(current.globalenv['db'])
     rsp = obj.create_wallet(avars)
@@ -3537,6 +3548,7 @@ benefitsAPI_switcher = {
     "apply_voucher":apply_voucher,
     "apply_wallet":apply_wallet,
     "reverse_voucher":reverse_voucher,
+    "reverse_wallet":reverse_wallet,
     "create_wallet":create_wallet,
     "getwallet_balance":getwallet_balance,
     "credit_wallet":credit_wallet
@@ -3625,7 +3637,7 @@ mdpapi_switcher = {"listappointments":getappointments,"getappointmentsbymonth":g
                    "resetpassword":resetpassword,"searchpatient":searchpatient,"newpatient":newpatient,"getpatient":getpatient,\
                    "newalkinpatient":newalkinpatient,"updatewalkinpatient":updatewalkinpatient,"registerVCPatient":registerVCPatient,\
                    "doctorlist":doctorlist,"doctor":getdoctor,"rolelist":rolelist,"specialitylist":specialitylist,"newpayment":newpayment,\
-                   "listpayments":listpayments,"getpayment":getpayment,"paymentcallback":paymentcallback,"groupsmsmessage":groupsmsmessage,"paymentreceipt":paymentreceipt,\
+                   "listpayments":listpayments,"getpayment":getpayment,"paymentcallback":paymentcallback,"paymentcallback_0":paymentcallback_0,"groupsmsmessage":groupsmsmessage,"paymentreceipt":paymentreceipt,\
                    "getpaymentlist":getpaymentlist, "getsignedkey":getsignedkey,"getopentreatments":getopentreatments,\
                    "gettreatments":gettreatments,"gettreatment":gettreatment, "newtreatment":newtreatment, "updatetreatment":updatetreatment,"newtreatment_clinic":newtreatment_clinic,\
                    "treatmentstatus":treatmentstatus,"getprocedure":getprocedure,"getprocedures":getprocedures,"addproceduretotreatment":addproceduretotreatment,"gettreatmentprocedure":gettreatmentprocedure,\
