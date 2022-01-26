@@ -1268,7 +1268,7 @@ def vwdentalprocedure_selector():
         
         pricingObj = mdprules.Pricing(db)
         rspobj = json.loads(pricingObj.Get_Procedure_Fees(avars))
-        if((rspobj["result"]=="success") & (rspobj["active"]==True)):
+        if((rspobj["result"]=="success") & (common.getkeyvalue(rspobj,"active",False)==True)):
             procodes.append(proc.procedurecode)
         
 

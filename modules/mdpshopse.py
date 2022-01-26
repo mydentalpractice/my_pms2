@@ -18,6 +18,7 @@ from applications.my_pms2.modules import mdppatient
 from applications.my_pms2.modules import account
 from applications.my_pms2.modules import mdppayment
 from applications.my_pms2.modules import mdpbenefits
+from applications.my_pms2.modules import mdputils
 
 from applications.my_pms2.modules import datasecurity
 
@@ -216,6 +217,10 @@ class Shopse:
     #2021-07-06 09:22:02,321 - web2py.app.my_pms2 - INFO - Exit Shopsee callback_transaction API Exception 'message'
     #import requests
     
+    
+   
+    
+    
     #x = requests.get('https://w3schools.com')
     #print(x.status_code)    
     def callback_transaction(self,avars):
@@ -230,22 +235,32 @@ class Shopse:
             orderid = common.getkeyvalue(avars,"orderid","") 
             shopsetxnid = common.getkeyvalue(avars,"shopsetxnid","") 
 
-            #temporary suspending shopSeTxId check
-            #p = db((db.payment.fp_paymentref == orderid) & (db.payment.fp_paymentdetail ==shopsetxnid )).select(db.payment.id,db.payment.precommitamount)
             p = db((db.payment.fp_paymentref == orderid)).select() 
             providerid = int(common.getid(p[0].provider)) if(len(p) != 0) else 0
             amount = float(common.getvalue(p[0].precommitamount)) if(len(p) != 0) else 0
             memberid = int(common.getid(p[0].patientmember)) if(len(p) != 0) else 0
+            patientid = memberid
             tplanid = int(common.getid(p[0].treatmentplan)) if(len(p) != 0) else 0
             paymentid = int(common.getid(p[0].id)) if(len(p) >= 1) else 0
+            amount = float(common.getvalue(p[0].precommitamount)) if(len(p) != 0) else 0
             
             patobj = mdppatient.Patient(db, providerid)
-            rsp = json.loads(patobj.getMemberPolicy({"providerid":str(providerid),"memberid":str(memberid)}))
-            policy = common.getkeyvalue(rsp,"plan","PREMWALKIN")
+            companyid = int(common.getid(pats[0].company)) if(len(pats) != 0) else 0
+            c = db((db.company.id == companyid) & (db.company.is_active == True)).select()
+            company_code = common.getstring(c[0].company) if(len(c) >0 ) else ""            
+
+            tr = db((db.treatment.treatmentplan == tplanid) & (db.treatment.is_active == True)).select()
+            treatmentid = int(tr[0].id) if(len(tr) > 0) else 0
+
+            rsp = json.loads(mdputils.getplandetailsformember(db,providerid,memberid,patientid))
+            #rsp = json.loads(patobj.getMemberPolicy({"providerid":str(providerid),"memberid":str(memberid)}))
+            policy = common.getkeyvalue(rsp,"plancode","PREMWALKIN")
             
             logger.loggerpms2.info("ShopSe Call Back Transaction API==>Amount " + str(amount) + " status " + status + " " + policy + " " + str(paymentid))
             
             paymentdate = common.getISTFormatCurrentLocatTime()
+            
+            
             if((status.lower() == "success")|(status.lower() == "s")):
                 db((db.payment.fp_paymentref == orderid)).update(fp_status = status,
                                                                 paymentcommit = True,
@@ -271,34 +286,51 @@ class Shopse:
                 account._updatetreatmentpayment(db, tplanid, paymentid)
                 db.commit()
             
-                #wallet_success
-                reqobj = {}
-                reqobj = {"paymentid" : paymentid}
-                rspobj = json.loads(vcobj.wallet_success(reqobj))                 
-                #here need to update treatmentplan tables
-                account._updatetreatmentpayment(db, tplanid, paymentid)
-                db.commit()                
+                ##wallet_success
+                #reqobj = {}
+                #reqobj = {"paymentid" : paymentid}
+                #rspobj = json.loads(vcobj.wallet_success(reqobj))                 
+                ##here need to update treatmentplan tables
+                #account._updatetreatmentpayment(db, tplanid, paymentid)
+                #db.commit()                
 
                 trtmnt = db((db.treatment.id == treatmentid) & (db.treatment.is_active == True)).select()
                 discount_amount = trtmnt[0].companypay if(len(trtmnt) > 0) else 0
             
-                pmnt = db((db.payment.id == paymentid) & (db.payment.is_active == True)).select()
-                policy = pmnt[0].policy if(len(pmnt) > 0) else ""
+                
                 obj={
+                    "action":"benefit_success",
                     "paymentid":str(paymentid),
-                    "plan":policy,
+                    "plan_code":policy,
+                    "company_code":company_code,
                     "discount_amount":str(discount_amount),
-                    "memberid":str(memberid),
-                    "treatmentid":str(treatmentid)
+                    "member_id":str(memberid),
+                    "treatmentid":str(treatmentid),
+                    "rule_event":"benefit_success"
                 }
-                bnftobj = mdpbenefits.Benefit(db)
-                rspObj = json.loads(bnftobj.benefit_success(obj))
+                ruleObj = mdprules.Plan_Rules(db)
+                rspObj = json.loads(ruleObj.Get_Plan_Rules(obj))                   
+                
+                
                 if(rspObj['result'] == "success"):
                     #update totalcompanypays (we are saving discount_amount as companypays )
                     db(db.treatment.id == treatmentid).update(companypay = discount_amount)    
                     #update treatmentplan assuming there is one treatment per tplan
                     db(db.treatmentplan.id==tplanid).update(totalcompanypays = discount_amount) 
-                    db.commit()                      
+                    db.commit()          
+                else:
+                    obj={
+                        "action":"benefit_failure",
+                        "paymentid":str(paymentid),
+                        "plan_code":policy,
+                        "company_code":company_code,
+                        "discount_amount":str(discount_amount),
+                        "member_id":str(memberid),
+                        "treatmentid":str(treatmentid),
+                        "rule_event":"benefit_failure"
+                    }
+                    ruleObj = mdprules.Plan_Rules(db)
+                    rspObj = json.loads(ruleObj.Get_Plan_Rules(obj))                     
             
                 #here need to update treatmentplan tables
                 account._updatetreatmentpayment(db, tplanid, paymentid)
@@ -334,6 +366,21 @@ class Shopse:
             
                 account._updatetreatmentpayment(db, tplanid,paymentid)  
                 
+                #reset 
+                obj={
+                    "action":"benefit_failure",
+                    "paymentid":str(paymentid),
+                    "plan_code":policy,
+                    "company_code":company_code,
+                    "discount_amount":str(discount_amount),
+                    "member_id":str(memberid),
+                    "treatmentid":str(treatmentid),
+                    "rule_event":"benefit_failure"
+                }
+                ruleObj = mdprules.Plan_Rules(db)
+                rspObj = json.loads(ruleObj.Get_Plan_Rules(obj))                    
+                account._updatetreatmentpayment(db, tplanid,paymentid) 
+                 
                 jsonresp = avars
                 jsonresp["result"] = "fail"
                 jsonresp["error_message"] = common.getkeyvalue(avars,"message","Error in ShopSe Payment")

@@ -1009,6 +1009,13 @@ def payment_success_hdfc():
     providerid = int(common.getid(r[0].providerid)) if(len(r) == 1) else 0
     memberid = int(common.getid(r[0].memberid)) if(len(r) == 1) else 0
     patientid = int(common.getid(r[0].patientid)) if(len(r) == 1) else 0
+    
+    pats = db((db.patientmember.id == memberid) & (db.patientmember.is_active == True)).select()
+    companyid = int(common.getid(pats[0].company)) if(len(pats) != 0) else 0
+    c = db((db.company.id == companyid) & (db.company.is_active == True)).select()
+    company_code = common.getstring(c[0].company) if(len(c) >0 ) else ""
+    rsp = json.loads(patobj.getMemberPolicy({"providerid":str(providerid),"memberid":str(memberid)}))
+    policy = common.getkeyvalue(rsp,"plan","PREMWALKIN")
 
     providerinfo  = getproviderinformation(providerid)
     patientinfo = getpatientinformation(patientid, memberid)
@@ -1134,20 +1141,41 @@ def payment_success_hdfc():
         account._updatetreatmentpayment(db, tplanid, paymentid)
         db.commit()
              
+        #trtmnt = db((db.treatment.id == treatmentid) & (db.treatment.is_active == True)).select()
+        #discount_amount = trtmnt[0].companypay if(len(trtmnt) > 0) else 0
+
+        #pmnt = db((db.payment.id == paymentid) & (db.payment.is_active == True)).select()
+        #policy = pmnt[0].policy if(len(pmnt) > 0) else ""
+
+
+        #obj={
+            #"paymentid":str(paymentid),
+            #"plan":policy,
+            #"discount_amount":str(discount_amount),
+            #"memberid":str(memberid),
+            #"treatmentid":str(treatmentid)
+        #}
+        #bnftobj = mdpbenefits.Benefit(db)
+        #rspObj = json.loads(bnftobj.benefit_success(obj))
+
         trtmnt = db((db.treatment.id == treatmentid) & (db.treatment.is_active == True)).select()
         discount_amount = trtmnt[0].companypay if(len(trtmnt) > 0) else 0
 
-        pmnt = db((db.payment.id == paymentid) & (db.payment.is_active == True)).select()
-        policy = pmnt[0].policy if(len(pmnt) > 0) else ""
+
+
         obj={
+            "action":"benefit_success",
             "paymentid":str(paymentid),
-            "plan":policy,
+            "plan_code":policy,
+            "company_code":company_code,
             "discount_amount":str(discount_amount),
-            "memberid":str(memberid),
-            "treatmentid":str(treatmentid)
+            "member_id":str(memberid),
+            "treatmentid":str(treatmentid),
+            "rule_event":"benefit_success"
         }
-        bnftobj = mdpbenefits.Benefit(db)
-        rspObj = json.loads(bnftobj.benefit_success(obj))
+        ruleObj = mdprules.Plan_Rules(db)
+        rspObj = json.loads(ruleObj.Get_Plan_Rules(obj))          
+    
         if(rspObj['result'] == "success"):
             #update totalcompanypays (we are saving discount_amount as companypays )
             db(db.treatment.id == treatmentid).update(companypay = discount_amount)    
@@ -3063,7 +3091,8 @@ def create_payment():
     patient = ""
     fullname = ""
     hmopatientmember = True
-
+    
+    #
     provs = db((db.provider.id == providerid) & (db.provider.is_active == True)).select()
     regionid = int(common.getid(provs[0].groupregion)) if(len(provs) == 1) else 1
     regions = db((db.groupregion.id == regionid) & (db.groupregion.is_active == True)).select(db.groupregion.groupregion)
@@ -3086,32 +3115,47 @@ def create_payment():
         ((db.provider_region_plan.regioncode == regioncode)|(db.provider_region_plan.regioncode == 'ALL')) &\
         (db.provider_region_plan.is_active == True)).select()
     policy = r[0].policy if(len(r) == 1) else "PREMWALKIN"
+    plancode =  r[0].plancode if(len(r) == 1) else "PREMWALKIN"
     
     #calculate the discount for this member 
     #update the treatment, treatmentplan. 
     #There is an assumption that there will be no companypay from Plans 
-    benefit_amount = 0
     avars = {
         "action": "get_benefit",
         "member_id":str(memberid),
         "provider_id":str(providerid),
-        "plan_code":policy,
+        "plan_code":plancode,
         "company_code":companycode,
+        "treatmentid" : str(treatmentid),
+        "tplanid" : str(tplanid),
         "rule_event":"get_plan_benefits"
     }
 
     ruleObj = mdprules.Plan_Rules(db)
     benefit = json.loads(ruleObj.Get_Plan_Rules(avars))
 
-    #bnftobj  = mdpbenefits.Benefit(db)
-
-    #benefit = json.loads(bnftobj.get_benefits(reqobj))
+   
     if(benefit["result"]=="success"):
-        discount_amount = float(common.getkeyvalue(benefit, "discount_amount",0))
+        #mdp_wallet_cashback
+        walletobj = common.getkeyvalue(benefit,"wallet", None)
+        discount_amount = 0 if (walletobj == None) else float(common.getkeyvalue(walletobj,"mdp_wallet_amount_usable",0))
+        
+        #Super Wallet Cashback
+        walletamount = 0 if (walletobj == None) else float(common.getkeyvalue(walletobj,"super_wallet_amount_usable",0))
+        
+        #planbenefit
+        planbenefitobj = common.getkeyvalue(benefit,"planBenefits", None)
+        companypays = 0 if ((planbenefitobj == None)|(len(planbenefitobj)==0)) else float(common.getkeyvalue(planbenefitobj[0],"discount_benefit_amount_usable",0))
+        
+        
         #update totalcompanypays (we are saving discount_amount as companypays )
-        db(db.treatment.id == treatmentid).update(companypay = discount_amount)    
+        db(db.treatment.id == treatmentid).update(companypay = companypays, walletamount=walletamount,wallet_type = "SUPER_WALLET",
+                                                  discount_amount=discount_amount,WPBA_response = json.dumps(benefit))    
+        
         #update treatmentplan assuming there is one treatment per tplan
-        db(db.treatmentplan.id==tplanid).update(totalcompanypays = discount_amount) 
+        db(db.treatmentplan.id==tplanid).update(totalcompanypays = companypays, totalwalletamount=walletamount,wallet_type = "SUPER_WALLET",
+                                                  totaldiscount_amount=discount_amount) 
+        
         db.commit()
         
 
@@ -3120,27 +3164,19 @@ def create_payment():
         #left=db.company.on(db.company.id==db.vw_memberpatientlist.company))
 
     #Apply Voucher
-    reqobj  = {}
-    reqobj["treatment_id"] = int(treatmentid) 
-    reqobj["member_id"] = int(memberid)
-    reqobj["plan_code"] = policy
-    reqobj["state"] = st
-    reqobj["city_id"] = int(cityid)
-
-    #reqobj["treatment_id"] = 2
-    #reqobj["member_id"] = 44
-    #reqobj["plan_code"] = ""
-    #reqobj["state"] = "Andaman and Nicobar Islands(AN)"
-    #reqobj["city_id"] = 2
-
     vlist = []
-
-    bnftobj = mdpbenefits.Benefit(db)    
-    rspobj = json.loads(bnftobj.getVoucherList(reqobj))
-    if(rspobj["result"] == "fail"):
-        vlist = []
-    else:
-        vlist = rspobj["voucher_list"]    
+    #reqobj  = {}
+    #reqobj["treatment_id"] = int(treatmentid) 
+    #reqobj["member_id"] = int(memberid)
+    #reqobj["plan_code"] = policy
+    #reqobj["state"] = st
+    #reqobj["city_id"] = int(cityid)
+    #bnftobj = mdpbenefits.Benefit(db)    
+    #rspobj = json.loads(bnftobj.getVoucherList(reqobj))
+    #if(rspobj["result"] == "fail"):
+        #vlist = []
+    #else:
+        #vlist = rspobj["voucher_list"]    
     
 
     #payment modes are dependant on the company
@@ -3210,37 +3246,50 @@ def create_payment():
     if(len(tps)>0):
         treatment = tps[0].treatment
     
-    #get wallet amount for this member (this is the API that Indeses is developing)
+    
     walletamount = 0     
+    
     paytm = json.loads(account._calculatepayments(db, tplanid,policy))
+    
     paytm["totalwalletamount"]  = paytm["totalwalletamount"] + walletamount
     paytm["walletamount"]  = paytm["walletamount"] + walletamount
+    
     db.payment.amount.requires = paytm["totaldue"]
     db.payment.amount.default  = paytm["totaldue"]
     db.payment.discount_amount.default = paytm["discount_amount"]
 
     #get available wallet list
-    reqobj = {}
-    reqobj["action"] = "getwallet_balance"
-    reqobj["member_id"] = memberid
-    reqobj["plan_code"] = policy
-    reqobj["amount"] = paytm["totalcopay"]
-    rspobj = json.loads(bnftobj.getwallet_balance(reqobj))
-    if(rspobj["result"] == "success"):
-        wlist = rspobj["wallet_list"]
-    else:
-        wlist = []
+    wlist=[]
+    #reqobj = {}
+    #reqobj["action"] = "getwallet_balance"
+    #reqobj["member_id"] = memberid
+    #reqobj["plan_code"] = policy
+    #reqobj["amount"] = paytm["totalcopay"]
+    #rspobj = json.loads(bnftobj.getwallet_balance_1(reqobj))
+    #if(rspobj["result"] == "success"):
+        #wlist = rspobj["wallet_list"]
+    #else:
+        #wlist = []
      
     return dict(formA=formA,formB=formB,formC=formC, patient=patient,fullname=fullname,hmopatientmember=hmopatientmember,providername=provdict["providername"],
                 providerid=provdict["providerid"],page=page,returnurl=returnurl,memberid=memberid,tplanid=tplanid,treatment=treatment,
-                treatmentcost=paytm["treatmentcost"],copay=paytm["copay"],inspays=paytm["inspays"],companypays=paytm["companypays"],
-                walletamount=paytm["walletamount"],discount_amount = paytm["discount_amount"],
-                totaltreatmentcost=paytm["totaltreatmentcost"],totalinspays=paytm["totalinspays"],totalcopay=paytm["totalcopay"],
-                                totalpaid=paytm["totalpaid"],totaldue=paytm["totaldue"],online=online,cashless=cashless,cash=cash,cheque=cheque,
-                                totalcompanypays=paytm["totalcompanypays"],precopay=paytm["precopay"],totalprecopay=paytm["totalprecopay"],
-                                totalwalletamount=paytm["totalwalletamount"],totaldiscount_amount=paytm["totaldiscount_amount"],policy=policy,
-                                vlist=vlist,wlist=wlist
-                        )    
+                
+                treatmentcost=paytm["treatmentcost"],
+                copay=paytm["copay"],
+                inspays=paytm["inspays"],
+                companypays=paytm["companypays"],
+                walletamount=paytm["walletamount"],
+                discount_amount = paytm["discount_amount"],
+                totaltreatmentcost=paytm["totaltreatmentcost"],
+                totalinspays=paytm["totalinspays"],
+                totalcopay=paytm["totalcopay"],
+                totalpaid=paytm["totalpaid"],
+                totaldue=paytm["totaldue"],
+                totalcompanypays=paytm["totalcompanypays"],precopay=paytm["precopay"],totalprecopay=paytm["totalprecopay"],
+                totalwalletamount=paytm["totalwalletamount"],totaldiscount_amount=paytm["totaldiscount_amount"],policy=policy,
+                vlist=vlist,wlist=wlist,
+                online=online,cashless=cashless,cash=cash,cheque=cheque
+            )    
     
 
 @auth.requires(auth.has_membership('provider') or auth.has_membership('webadmin')) 

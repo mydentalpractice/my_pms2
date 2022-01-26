@@ -466,7 +466,6 @@ class Plan_Rules:
         rspobj = {}
         
         try:    
-            
             bnftObj = mdpbenefits.Benefit(db)
             rspobj = json.loads(bnftObj.get_benefits(avars))
         except Exception as e:
@@ -478,7 +477,139 @@ class Plan_Rules:
         logger.loggerpms2.info("Exit Plan_Rules rule_get_plan_Benefits" + mssg)
         return mssg       
 
+    #This rule is executed to calculated graded discount for a plan
+    #company_code, plan_code, member_id, provider_id
+    def rule_get_plan_benefits_1(self,avars):
+        logger.loggerpms2.info("Enter Plan Rules - rule_get_benefit_1 " + json.dumps(avars))
+        db = self.db
+        rspobj = {}
+        
+        try:    
+            bnftObj = mdpbenefits.Benefit(db)
+            rspobj = json.loads(bnftObj.get_benefits_1(avars))
+        except Exception as e:
+            mssg = " Exception Plan Rules rule_get_plan_benefits_1 " + str(e)
+            rspobj["result"] = "fail"
+            rspobj["error_message"] = mssg
+            
+        mssg = json.dumps(rspobj)
+        logger.loggerpms2.info("Exit Plan_Rules rule_get_plan_Benefits_1" + mssg)
+        return mssg       
 
+    #This rule is executed to calculated graded discount for a plan
+    #company_code, plan_code, member_id, provider_id
+    def rule_get_wallet_balance_1(self,avars):
+        logger.loggerpms2.info("Enter Plan Rules - rule_get_wallet_balance_1 " + json.dumps(avars))
+        db = self.db
+        rspobj = {}
+        
+        try:    
+            
+            bnftObj = mdpbenefits.Benefit(db)
+            rspobj = json.loads(bnftObj.getwallet_balance_1(avars))
+        except Exception as e:
+            mssg = " Exception Plan Rules rule_get_wallet_balance_1 " + str(e)
+            rspobj["result"] = "fail"
+            rspobj["error_message"] = mssg
+            
+        mssg = json.dumps(rspobj)
+        logger.loggerpms2.info("Exit Plan_Rules rule_get_wallet_balance_1" + mssg)
+        return mssg       
+
+    #This rule is executed to calculated graded discount for a plan
+    #company_code, plan_code, member_id, provider_id
+    def rule_get_wallet_balance_2(self,avars):
+        logger.loggerpms2.info("Enter Plan Rules - rule_get_wallet_balance_2 " + json.dumps(avars))
+        db = self.db
+        rspobj = {}
+        
+        try:    
+            
+            bnftObj = mdpbenefits.Benefit(db)
+            rspobj = json.loads(bnftObj.getwallet_balance_2(avars))
+        except Exception as e:
+            mssg = " Exception Plan Rules rule_get_wallet_balance_2 " + str(e)
+            rspobj["result"] = "fail"
+            rspobj["error_message"] = mssg
+            
+        mssg = json.dumps(rspobj)
+        logger.loggerpms2.info("Exit Plan_Rules rule_get_wallet_balance_2" + mssg)
+        return mssg       
+
+
+    #This rule is to execute benefit success
+    def rule_benefit_success_1(self,avars):
+        logger.loggerpms2.info("Enter Plan Rules - rule_benefit_success_1 " + json.dumps(avars))
+        db = self.db
+        rspobj = {}
+        
+        try:    
+            
+            bnftObj = mdpbenefits.Benefit(db)
+            rspobj = json.loads(bnftObj.benefit_success_1(avars))
+        except Exception as e:
+            mssg = " Exception Plan Rules rule_benefit_success_1 " + str(e)
+            rspobj["result"] = "fail"
+            rspobj["error_message"] = mssg
+            
+        mssg = json.dumps(rspobj)
+        logger.loggerpms2.info("Exit Plan_Rules rule_beneft_success_1" + mssg)
+        return mssg       
+
+    #This rule is to execute benefit Failure
+    def rule_benefit_failure_1(self,avars):
+        logger.loggerpms2.info("Enter Plan Rules - rule_benefit_failure_1 " + json.dumps(avars))
+        db = self.db
+        rspobj = {}
+        
+        try:    
+            bnftObj = mdpbenefits.Benefit(db)
+            rspobj = json.loads(bnftObj.benefit_failure_1(avars))
+        except Exception as e:
+            mssg = " Exception Plan Rules rule_benefit_failure_1 " + str(e)
+            rspobj["result"] = "fail"
+            rspobj["error_message"] = mssg
+            
+        mssg = json.dumps(rspobj)
+        logger.loggerpms2.info("Exit Plan_Rules rule_beneft_failur_1" + mssg)
+        return mssg       
+    #This rule is to execute benefit Failure
+    def rule_reverse_wallet_1(self,avars):
+        logger.loggerpms2.info("Enter Plan Rules - rule_reverse_wallet_1 " + json.dumps(avars))
+        db = self.db
+        rspobj = {}
+        
+        try:    
+            bnftObj = mdpbenefits.Benefit(db)
+            rspobj = json.loads(bnftObj.reverse_wallet_1(avars))
+        except Exception as e:
+            mssg = " Exception Plan Rules rule_reverse_wallet_1 " + str(e)
+            rspobj["result"] = "fail"
+            rspobj["error_message"] = mssg
+            
+        mssg = json.dumps(rspobj)
+        logger.loggerpms2.info("Exit Plan_Rules rule_reverse_wallet_1" + mssg)
+        return mssg    
+
+    #This rule is called to apply wallet (super wallet)
+    def rule_apply_wallet_1(self,avars):
+        logger.loggerpms2.info("Enter Plan Rules - rule_apply_wallet_1 " + json.dumps(avars))
+        db = self.db
+        rspobj = {}
+        
+        try:    
+            bnftObj = mdpbenefits.Benefit(db)
+            rspobj = json.loads(bnftObj.apply_wallet_1(avars))
+        except Exception as e:
+            mssg = " Exception Plan Rules rule_reverse_wallet_1 " + str(e)
+            rspobj["result"] = "fail"
+            rspobj["error_message"] = mssg
+            
+        mssg = json.dumps(rspobj)
+        logger.loggerpms2.info("Exit Plan_Rules rule_reverse_wallet_1" + mssg)
+        return mssg    
+            
+        
 class Pricing:
     def __init__(self,db):
         self.db = db
@@ -546,6 +677,7 @@ class Pricing:
             rspobj["result"] = "success"
             rspobj["error_message"] = ""
             rspobj["error_code"] = ""
+          
             for rule in rules:
                 if(rule.is_active == True):
                     rspobj = json.loads(getattr(self, (rule.rule_code).lower())(avars))
@@ -559,6 +691,7 @@ class Pricing:
             mssg = " Exception ALL API" + str(e)
             rspobj["result"] = "fail"
             rspobj["error_message"] = mssg
+            rspobj["active"] = True
             
         mssg = json.dumps(rspobj)
         logger.loggerpms2.info("Exit All " + mssg)

@@ -996,6 +996,7 @@ def _updatetreatmentpayment(db,tplanid,paymentid,policy="PREMWALKIN"):
     totalinspays = float(common.getvalue(r[0].totalinspays)) if len(r) > 0 else 0
     totalcompanypays = float(common.getvalue(r[0].totalcompanypays)) if len(r) > 0 else 0
     totalpaid = float(common.getvalue(r[0].totalpaid)) if len(r) > 0 else 0
+    
     #logger.loggerpms2.info("_updatetreatmentpayment -1A " + str(common.getvalue(totalpaid)))
     procs = db((db.treatment_procedure.treatmentid == treatmentid) & (db.treatment_procedure.is_active == True)).select()
     #logger.loggerpms2.info("_updatetreatmentpayment -2 " + str(tplanid) + " " + str(treatmentid))

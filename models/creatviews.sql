@@ -9149,7 +9149,12 @@ RENAME TO  `mydp_prod`.`rules` ;
 
 20. YYYZZZ Modify treatment, treatmentplan to add new fields - promo_code, promo_amount
 
-21. ZZZ Alter vw_treatmentplansummary, vw_treatmentplansummarybypatient, vw_treatmentplansummarybytreatment
+21. ZZZAlter vw_treatmentplansummary, vw_treatmentplansummarybypatient, vw_treatmentplansummarybytreatment
+
+22. ZZZModify Treatment table added column WPBA_response
+
+23. ZZZZModify table provider_region_plan to add default values to is_active, created_on, created_by, modified_by, modified_on
+
 Script file to clear user for sign-up
 =====================================
 

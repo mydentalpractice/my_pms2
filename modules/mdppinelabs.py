@@ -19,6 +19,8 @@ from applications.my_pms2.modules import mdppatient
 from applications.my_pms2.modules import account
 from applications.my_pms2.modules import mdppayment
 from applications.my_pms2.modules import mdpbenefits
+from applications.my_pms2.modules import mdputils
+from applications.my_pms2.modules import mdprules
 
 from applications.my_pms2.modules import datasecurity
 
@@ -380,28 +382,28 @@ class PineLabs:
             unique_merchant_txn_id = common.getkeyvalue(avars,"unique_merchant_txn_id","") 
             strarr = unique_merchant_txn_id.split('_')
             paymentid = 0 if(len(strarr)<=1) else int(common.getid(strarr[1]))
-
-            #memberid = int(common.getkeyvalue(avars,"udf_field_1","0"))
-            #providerid = int(common.getkeyvalue(avars,"udf_field_2","0"))
-            #treatmentid = int(common.getkeyvalue(avars,"udf_field_3","0"))
-            #paymentid = int(common.getkeyvalue(avars,"udf_field_4","0"))
-
-            
-
             
             p = db((db.payment.id == paymentid)).select() 
             tplanid = int(common.getid(p[0].treatmentplan)) if(len(p) != 0) else 0
             memberid = int(common.getid(p[0].patientmember)) if(len(p) != 0) else 0
             providerid = int(common.getid(p[0].provider)) if(len(p) != 0) else 0
+            patientid = memberid
+            
+            pats = db((db.patientmember.id == memberid) & (db.patientmember.is_active == True)).select()
+            companyid = int(common.getid(pats[0].company)) if(len(pats) != 0) else 0
+            c = db((db.company.id == companyid) & (db.company.is_active == True)).select()
+            company_code = common.getstring(c[0].company) if(len(c) >0 ) else ""
             
             tr = db((db.treatment.treatmentplan == tplanid) & (db.treatment.is_active == True)).select()
             treatmentid = int(tr[0].id) if(len(tr) > 0) else 0
             
             amount = float(common.getvalue(p[0].precommitamount)) if(len(p) != 0) else 0
             
-            patobj = mdppatient.Patient(db, providerid)
-            rsp = json.loads(patobj.getMemberPolicy({"providerid":str(providerid),"memberid":str(memberid)}))
-            policy = common.getkeyvalue(rsp,"plan","PREMWALKIN")
+            
+            rsp = json.loads(mdputils.getplandetailsformember(db, providerid, memberid, patientid))
+            #patobj = mdppatient.Patient(db, providerid)
+            #rsp = json.loads(patobj.getMemberPolicy({"providerid":str(providerid),"memberid":str(memberid)}))
+            policy = common.getkeyvalue(rsp,"plancode","PREMWALKIN")
             
             logger.loggerpms2.info("Pine Labs Call Back Transaction API==>Amount " + str(amount) + " status " + status + " " + policy + " " + str(paymentid))
             
@@ -432,35 +434,54 @@ class PineLabs:
                 db.commit()
             
                 #wallet_success
-                reqobj = {}
-                reqobj = {"paymentid" : paymentid}
-                rspobj = json.loads(vcobj.wallet_success(reqobj))                 
-                #here need to update treatmentplan tables
-                account._updatetreatmentpayment(db, tplanid, paymentid)
-                db.commit()                
+                #reqobj = {}
+                #reqobj = {"paymentid" : paymentid}
+                #rspobj = json.loads(vcobj.wallet_success(reqobj))                 
+                ##here need to update treatmentplan tables
+                #account._updatetreatmentpayment(db, tplanid, paymentid)
+                #db.commit()                
                 
                 
                 
                 trtmnt = db((db.treatment.id == treatmentid) & (db.treatment.is_active == True)).select()
                 discount_amount = trtmnt[0].companypay if(len(trtmnt) > 0) else 0
             
-                pmnt = db((db.payment.id == paymentid) & (db.payment.is_active == True)).select()
-                policy = pmnt[0].policy if(len(pmnt) > 0) else ""
+          
+
                 obj={
+                    "action":"benefit_success",
                     "paymentid":str(paymentid),
-                    "plan":policy,
+                    "plan_code":policy,
+                    "company_code":company_code,
                     "discount_amount":str(discount_amount),
-                    "memberid":str(memberid),
-                    "treatmentid":str(treatmentid)
+                    "member_id":str(memberid),
+                    "treatmentid":str(treatmentid),
+                    "rule_event":"benefit_success"
                 }
-                bnftobj = mdpbenefits.Benefit(db)
-                rspObj = json.loads(bnftobj.benefit_success(obj))
+                ruleObj = mdprules.Plan_Rules(db)
+                rspObj = json.loads(ruleObj.Get_Plan_Rules(obj))                
+                
+                
                 if(rspObj['result'] == "success"):
                     #update totalcompanypays (we are saving discount_amount as companypays )
-                    db(db.treatment.id == treatmentid).update(companypay = discount_amount)    
+                    db(db.treatment.id == treatmentid).update(companypay = discount_amount) 
                     #update treatmentplan assuming there is one treatment per tplan
                     db(db.treatmentplan.id==tplanid).update(totalcompanypays = discount_amount) 
-                    db.commit()                      
+                    db.commit() 
+                else:
+                    obj={
+                        "action":"benefit_failure",
+                        "paymentid":str(paymentid),
+                        "plan_code":policy,
+                        "company_code":company_code,
+                        "discount_amount":str(discount_amount),
+                        "member_id":str(memberid),
+                        "treatmentid":str(treatmentid),
+                        "rule_event":"benefit_failure"
+                    }
+                    ruleObj = mdprules.Plan_Rules(db)
+                    rspObj = json.loads(ruleObj.Get_Plan_Rules(obj))                
+                    
             
                 #here need to update treatmentplan tables
                 account._updatetreatmentpayment(db, tplanid, paymentid)
@@ -490,11 +511,23 @@ class PineLabs:
                                                                 precommitamount = 0
                                                                 
                                                                 )
-                
-                #Call Voucher Failure
-                vcobj = mdpbenefits.Benefit(db)
-                reqobj = {"paymentid" : paymentid}
-                rspobj = json.loads(vcobj.voucher_failure(reqobj))
+                #reset 
+                obj={
+                    "action":"benefit_failure",
+                    "paymentid":str(paymentid),
+                    "plan_code":policy,
+                    "company_code":company_code,
+                    "discount_amount":str(discount_amount),
+                    "member_id":str(memberid),
+                    "treatmentid":str(treatmentid),
+                    "rule_event":"benefit_failure"
+                }
+                ruleObj = mdprules.Plan_Rules(db)
+                rspObj = json.loads(ruleObj.Get_Plan_Rules(obj))                 
+
+                #db(db.treatment.id == treatmentid).update(companypay = 0, walletamount=0,wallet_type = "",
+                                                          #discount_amount=0,WPBA_response = "")  
+                #db(db.payment.id == paymentid).update(amount=0,fp_invoiceamt=0,fp_amount=0,fp_fee=0,walletamount=0,discount_amount=0)
                 
                 account._updatetreatmentpayment(db, tplanid,paymentid)
 

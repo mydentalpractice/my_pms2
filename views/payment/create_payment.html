@@ -79,68 +79,27 @@
 					     </tr>
 					    
 					     
-					      <tr>
-					      <td>
-                                              
-					      
-						      
-							<label class="m_title">Voucher</label>
-							      <div class="input-group" style="width:100%">
-								<select  class="form-control" id="vouchers" name="vouchers">
-		       {{ for i in xrange(0, len(vlist)): }}
-			 <option id="optvoucher" value={{=vlist[i]["voucher_code"]}}>{{=vlist[i]["voucher_code"]}} ({{=vlist[i]["voucher_message"]}})</option>
-			{{pass}}
-		      </select>
-				    
-							      </div>
-						       				      
-					      </td>
-					      <td>
-					       <button id="VC" style="margin: 8px 3px;float:left"  type="button"  onclick="loader(this.id),applyVoucher()" class="btn green" >Apply Voucher<i class="fa fa-spinner fa-spin" id="loaderDIVVC" style="display:none"></i></button>
-					      </td>
-					      </tr>
-					      <tr>
-						<td>
-						<label class="m_title">Discount</label>
-
-						</td>
-						
-						<td>
-						{{=discount_amount}}
-						</td>
-					     </tr>
-					      
-					      
-					      <tr>
-					      <td>
-					      
-					      
-						      
-							<label class="m_title">Wallet</label>
-							      <div class="input-group" style="width:100%">
-								<select  class="form-control" id="wallets" name="wallets">
-		       {{ for i in xrange(0, len(wlist)): }}
-			 <option id="optwallet" value={{=wlist[i]["wallet_amount"]}}:{{=wlist[i]["wallet_type"]}}>{{=wlist[i]["wallet_amount"]}}:{{=wlist[i]["wallet_type"]}} ({{=wlist[i]["wallet_message"]}})</option>
-			{{pass}}
-		      </select>
-				    
-							      </div>
-										      
-					      </td>
-					      <td>
-					       <button id="WL" style="margin: 8px 3px;float:left"  type="button"  onclick="loader(this.id),applyWallet()" class="btn green" >Apply Wallet<i class="fa fa-spinner fa-spin" id="loaderDIVWL" style="display:none"></i></button>
-					      </td>
-					      </tr>
+			
 					      
 					      <tr>
 						<td>
-						<label class="m_title">Wallet Cashback</label>
+						<label class="m_title">Super Wallet Cashback</label>
 						</td>
 						
 						<td>
 						{{=walletamount}}
 						</td>
-					     </tr>					    
+					     </tr>	
+					      <tr>
+						<td>
+						<label class="m_title">MDP Wallet Cashback</label>
+						</td>
+						
+						<td>
+						{{=discount_amount}}
+						</td>
+					     </tr>	
+					     
 					     <tr>
 						<td>
 						<label class="m_title">Plan Benefits</label>

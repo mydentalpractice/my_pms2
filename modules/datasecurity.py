@@ -68,7 +68,7 @@ class DataSecurity:
         urlprops = db(db.urlproperties.id > 0).select()
         self.phpurl = urlprops[0].php_url if(len(urlprops) > 0) else "http://localhost:81"
         self.encryption = common.getboolean(urlprops[0].encryption if(len(urlprops) > 0) else True)
-        self.x_api_key = 'MYDP~mc3b1q2o'
+        self.x_api_key = 'MDP~mc3b1q2o'
         return 
 
     def authenticate_api(self,avars):

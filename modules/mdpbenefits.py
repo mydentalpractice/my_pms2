@@ -156,84 +156,7 @@ class Benefit:
       return json.dumps(rspobj)  
       
   
-  #This API will debit wallet of the amount used from the wallet in the 
-  #payment
-  def ywallet_success(self,avars):
-    logger.loggerpms2.info("Enter Wallet Success API - " + json.dumps(avars))
-
-    db = self.db
-    rspobj = {}
-    reqobj = {}  
-    try:
-      paymentid = int(common.getkeyvalue(avars,"paymentid","0"))
-      p = db((db.payment.id == paymentid) & (db.payment.is_active == True)).select()
-      precommitamount = float(p[0].amount) if(len(p)>0) else 0
-      amount = float(p[0].amount) if(len(p)>0) else 0
-      amount = precommitamount if (precommitamoun > 0) else amount
-      
-      memberid = int(p[0].patientmember) if(len(p)>0) else 0
-      providerid = int(p[0].provider) if(len(p)>0) else 0
-      tplanid = int(p[0].treatmentplan) if(len(p)>0) else 0
-      tr = db((db.treatment.treatmentplan == tplanid) & (db.treatment.is_active == True)).select()
-      treatmentid = int(tr[0].id) if(len(tr)>0) else 0      
-      wallet_type  = tr[0].wallet_type if(len(tr) > 0) else ""
-      walletamount = amount
-      super_wallet_amount = walletamount if wallet_type == "SUPER_WALLET" else 0
-      mdp_wallet_amount = walletamount if wallet_type == "MDP_WALLET" else 0
-      
-      #get provider's region
-      #get region code
-      provs = db((db.provider.id == providerid) & (db.provider.is_active == True)).select(db.provider.groupregion)
-      regionid = int(common.getid(provs[0].groupregion)) if(len(provs) == 1) else 1
-      regions = db((db.groupregion.id == regionid) & (db.groupregion.is_active == True)).select(db.groupregion.groupregion)
-      regioncode = common.getstring(regions[0].groupregion) if(len(regions) == 1) else "ALL"
-    
-      #get companycode
-      pats = db((db.vw_memberpatientlist.primarypatientid == memberid) & (db.vw_memberpatientlist.patientid == memberid)).select(db.vw_memberpatientlist.company,db.vw_memberpatientlist.hmoplan)
-      companyid = int(common.getid(pats[0].company)) if(len(pats) == 1) else 0
-      companys = db((db.company.id == companyid) & (db.company.is_active == True)).select(db.company.company)
-      companycode = common.getstring(companys[0].company) if(len(companys) == 1) else "PREMWALKIN"
-    
-      ##for backward compatibility determine procedurepriceplancode from member's plan at the time of registration
-      hmoplanid = int(common.getid(pats[0].hmoplan)) if(len(pats) == 1) else 0  #this is the patient's previously assigned plan-typically at registration
-      hmoplans = db((db.hmoplan.id == hmoplanid) & (db.hmoplan.is_active == True)).select(db.hmoplan.hmoplancode,db.hmoplan.procedurepriceplancode)
-      hmoplancode = common.getstring(hmoplans[0].hmoplancode) if(len(hmoplans) == 1) else "PREMWALKIN"
-      r = db(
-        (db.provider_region_plan.companycode == companycode) &\
-        (db.provider_region_plan.plancode == hmoplancode) &\
-        ((db.provider_region_plan.regioncode == regioncode)|(db.provider_region_plan.regioncode == 'ALL'))&\
-        (db.provider_region_plan.is_active == True)).select()
-      plancode = r[0].policy if(len(r) == 1) else "PREMWALKIN"    
-      
-      avars={}
-      avars["plan_code"] =plancode
-      avars["company_code"] = companycode                          
-      avars["member_id"] = memberid
-      avars["rule_event"] = "rules_payment"
-      avars["mdp_wallet_usase"] = 0
-      avars["super_wallet_amount"] = super_wallet_amount 
-      avars["mdp_wallet_amount"] = mdp_wallet_amount
-  
-      rulesobj = None #mdprules.Plan_Rules(db)
-      rspobj = None #json.loads(rulesobj.Get_Plan_Rules(avars))
-      
-      if(rspobj["result"] == "fail"):
-        mssg = "Wallet Success API - Wallet Response Error: " + common.getkeyvalue(rspobj,"RETURN_MESSAGE", "")
-        rspobj["error_message"] = mssg
-      else:
-        db(db.payment.id == paymentid).update(wallet_type = wallet_type,walletamount=walletamount,
-                                              modified_on=common.getISTCurrentLocatTime())
-    
-    except Exception as e:
-      mssg = "Wallet Success API Exception " + str(e)
-      rspobj = {}
-      rspobj["result"] = "fail"
-      rspobj["error_message"] = mssg
-        
-    
-    mssg = json.dumps(rspobj)
-    logger.loggerpms2.info(mssg)
-    return mssg
+ 
 
   #This API will debit wallet of the amount used from the wallet in the 
   #payment
@@ -400,6 +323,98 @@ class Benefit:
     mssg = json.dumps(rspobj)
     logger.loggerpms2.info("Exit Apply Wallet API " + mssg)  
     return mssg
+
+
+  #this api is called with 
+  #treatment id, wallet type and wallet to apply
+  #avars={}
+    #avars["plan_code"] = plancode
+    #avars["company_code"] =companycode
+    #avars["rule_event"] ="apply_wallet"
+    #avars["region_code"] =regioncode
+    #avars["treatment_id"] =treatmentid
+    #avars["member_id"] =memberid
+  
+  def apply_wallet_1(self,avars):
+    
+    logger.loggerpms2.info("Enter Apply Wallet 1 API" + json.dumps(avars))
+      
+    db = self.db
+    rspobj = {}
+    
+    try:
+
+      #treatment
+      treatmentid = int(common.getkeyvalue(avars,"treatment_id","0"))
+      tr = db((db.treatment.id == treatmentid) & (db.treatment.is_active == True)).select(db.treatment.id, db.treatment.copay,db.treatment.treatmentplan)
+      current_amount = float(tr[0].copay - tr[0].inspay if(len(tr) > 0) else 0)
+      
+      #tplanid
+      tplanid = tr[0].treatmentplan if(len(tr) > 0) else 0
+      tp = db((db.treatmentplan.id == tplanid) & (db.treatmentplan.is_active == True)).select()    
+  
+      #memberid & patientid
+      memberid = tp[0].primarypatient if (len(tp) > 0) else 0
+      patientid = tp[0].patient if (len(tp) > 0) else 0
+    
+    
+      #get default provider 'P0001'
+      p = db((db.provider.provider == 'P0001') & (db.provider.is_active == True)).select(db.provider.id)
+      defproviderid = p[0].id if(len(p) > 0) else 0
+      providerid = tp[0].provider if (len(tp) > 0) else defproviderid
+
+      #get region code
+      provs = db((db.provider.id == providerid) & (db.provider.is_active == True)).select(db.provider.groupregion)
+      regionid = int(common.getid(provs[0].groupregion)) if(len(provs) == 1) else 1
+      regions = db((db.groupregion.id == regionid) & (db.groupregion.is_active == True)).select(db.groupregion.groupregion)
+      regioncode = common.getstring(regions[0].groupregion) if(len(regions) == 1) else "ALL"
+          
+      ## get patient's company
+      pats = db((db.vw_memberpatientlist.primarypatientid == memberid) & (db.vw_memberpatientlist.patientid == patientid)).select(db.vw_memberpatientlist.company,db.vw_memberpatientlist.hmoplan)
+      companyid = int(common.getid(pats[0].company)) if(len(pats) == 1) else 0
+      companys = db((db.company.id == companyid) & (db.company.is_active == True)).select(db.company.company)
+      companycode = common.getstring(companys[0].company) if(len(companys) == 1) else "PREMWALKIN"
+      
+      
+      ##for backward compatibility determine procedurepriceplancode from member's plan at the time of registration
+      hmoplanid = int(common.getid(pats[0].hmoplan)) if(len(pats) == 1) else 0  #this is the patient's previously assigned plan-typically at registration
+      hmoplans = db((db.hmoplan.id == hmoplanid) & (db.hmoplan.is_active == True)).select(db.hmoplan.hmoplancode,db.hmoplan.procedurepriceplancode)
+      hmoplancode = common.getstring(hmoplans[0].hmoplancode) if(len(hmoplans) == 1) else "PREMWALKIN"
+      r = db(
+             (db.provider_region_plan.companycode == companycode) &\
+             (db.provider_region_plan.plancode == hmoplancode) &\
+             ((db.provider_region_plan.regioncode == regioncode)|(db.provider_region_plan.regioncode == 'ALL')) &\
+             (db.provider_region_plan.is_active == True)).select()
+      plancode = r[0].policy if(len(r) == 1) else "PREMWALKIN"
+
+      
+      paytm = json.loads(account._calculatepayments(db, tplanid))
+      reqobj = {}
+      reqobj["member_id"] = memberid
+      reqobj["plan_code"] = plancode
+      reqobj["amount"] = paytm["totalcopay"]
+      reqobj["current_amount"] = current_amount
+      rspobj = json.loads(self.getwallet_balance_1(reqobj))
+      
+      #apply wallet
+      db((db.treatment.id == treatmentid) & (db.treatment.is_active == True)).update(wallet_type = wallet_type, walletamount = walletamount)
+      db((db.treatmentplan.id == tplanid) & (db.treatmentplan.is_active == True)).update(wallet_type = wallet_type, totalwalletamount = walletamount)
+      db.commit()
+          
+      rspobj["result"] = "success"
+      rspobj["error_message"] = ""
+    
+    except Exception as e:
+      mssg = "Apply Wallet API Exception" + str(e)
+      logger.loggerpms2.info(mssg)      
+      rspobj = {}
+      rspobj["result"] = "fail"
+      rspobj["error_message"] = mssg
+  
+    mssg = json.dumps(rspobj)
+    logger.loggerpms2.info("Exit Apply Wallet API " + mssg)  
+    return mssg
+
 
 
   def create_wallet_1(self,avars):
@@ -599,52 +614,56 @@ class Benefit:
     logger.loggerpms2.info(mssg)
     return mssg    
 
-  def xgetwallet_balance(self,avars):
-    
-    logger.loggerpms2.info("Enter Get Wallet Balance " + json.dumps(avars))
+  #This API is called from the rule_get_wallet_balance_1
+  #Internally this calls API getUsableWPBAAmountLimit
+  #{
+    #"member_id":26785,
+    #"amount": 1501,
+    #"current_amount": 501,
+    #"plan_code":"HIU499"
+  #}
+  def getwallet_balance_1(self,avars):
+    logger.loggerpms2.info("Enter Get Wallet Balance_1 " + json.dumps(avars))
     
     db = self.db
     rspobj = {}
     reqobj = {}
     
     try:
-      
       member_id = int(common.getid(common.getkeyvalue(avars,"member_id","0")))
+      plan_code = common.getkeyvalue(avars,"plan_code","PREMWALKIN")
       amount = float(common.getvalue(common.getkeyvalue(avars,"amount","0")))
       
       #make a POST Call
-      reqobj = {}
-      reqobj["member_id"] = member_id
+      reqobj = avars
       
-      urlprops = db(db.urlproperties.id > 0).select(db.urlproperties.vw_url)
-      vw_url = urlprops[0].vw_url if(len(urlprops) > 0) else ""
+      vw_url = "http://mtstg.mydentalplan.in/Mdpwebapi/getUsableWPBAmountLimit"
       
-      vw_url = vw_url + "getWalletBalance"
+      logger.loggerpms2.info("Get Wallet Balance_1 (getUsableWPBAmountLimit) Request " + vw_url + " " + json.dumps(reqobj))
       resp = requests.post(vw_url,json=reqobj)
+      logger.loggerpms2.info("Get Wallet Balance_1 Post (getUsableWPBAmountLimit) Response " + str(resp.status_code))
       if((resp.status_code == 200)|(resp.status_code == 201)|(resp.status_code == 202)|(resp.status_code == 203)):
             rspobj = resp.json()
+            logger.loggerpms2.info("Get Wallet Balance_1 Post (getUsableWPBAmountLimit) Response 1" + json.dumps(rspobj))
             
-            if(rspobj["RETURN_CODE"] != 1):
-              mssg = "Get Wallet Balance API - Wallet Response Error: " + common.getkeyvalue(rspobj,"RETURN_MESSAGE", "")
+            if(rspobj["result"] == "fail"):
+              mssg = "Get Wallet Balance1 API - Wallet Response Error: " + common.getkeyvalue(rspobj,"error_message", "")
               rspobj = {}
               rspobj["result"] = "fail"
               rspobj["error_message"] = mssg
               return json.dumps(rspobj)
             
-            mdp_wallet_usage = int((common.getkeyvalue(rspobj,"MDP_WALLET_USASE","0")))
-                        
-            
-            balobj = rspobj["WALLET_BALANCE"]
-            super_wallet_amount = float(common.getkeyvalue(balobj,"super_wallet_amount","0"))
-            mdp_wallet_amount = float(common.getkeyvalue(balobj,"mdp_wallet_amount","0"))
+            wallobj = rspobj["wallet"]
+            mdp_wallet_usage = float((common.getkeyvalue(wallobj,"MDP_WALLET_USASE","0")))
+            mdp_wallet_usage_for_plan = float((common.getkeyvalue(wallobj,"MDP_WALLET_USASE_FOR_PLAN","0")))
+            super_wallet_amount = float(common.getkeyvalue(wallobj,"super_wallet_amount","0"))
+            mdp_wallet_amount = float(common.getkeyvalue(wallobj,"mdp_wallet_amount","0"))
             
             #min of mdp wallet amount and % of total treatment amount to Pay
-            percentamount = float((amount * mdp_wallet_usage)/100)
-            mdp_wallet_usage_amount = min(mdp_wallet_amount,float((amount * mdp_wallet_usage)/100))  
+            percentamount = float((amount * mdp_wallet_usage_for_plan)/100)
+            mdp_wallet_usage_amount = min(mdp_wallet_amount,percentamount)  
             
-            #rspobj["super_wallet_amount"] = super_wallet_amount
-            #rspobj["mdp_wallet_amount"] = mdp_wallet_usage_amount
-            
+           
             rspobj["super_wallet_message"] = "Available Balance Rs." + str(super_wallet_amount)
             rspobj["mdp_wallet_message"] = "Available Balance Rs." + str(mdp_wallet_usage_amount) + ". " + \
               "This is minimum of " + str(mdp_wallet_amount) + " and " + str(mdp_wallet_usage) + " percentage of Rs." + str(amount) + "(" + str(percentamount) + ")"
@@ -664,10 +683,11 @@ class Benefit:
             lstobj["wallet_message"] = rspobj["mdp_wallet_message"]
             wallet_list.append(lstobj)
             rspobj["wallet_list"] = wallet_list
+            #rspobj["wallobj"] = wallobj
             
       else:
         #response error
-        mssg = "Get Wallet Balance API -  HTTP Response Error: " + str(resp.status_code)
+        mssg = "Exit Get Wallet Balance_1 API -  HTTP Response Error: " + str(resp.status_code)
         logger.loggerpms2.info(mssg)      
         rspobj = {}
         rspobj["result"] = "fail"
@@ -675,7 +695,7 @@ class Benefit:
         return json.dumps(rspobj)
       
     except Exception as e:
-      mssg = "Get Wallet Balance API Exception" + str(e)
+      mssg = "Get Wallet Balance 1 API Exception" + str(e)
       logger.loggerpms2.info(mssg)      
       rspobj = {}
       rspobj["result"] = "fail"
@@ -683,9 +703,100 @@ class Benefit:
       return json.dumps(rspobj)     
     
     mssg = json.dumps(rspobj)
-    logger.loggerpms2.info(mssg)
+    logger.loggerpms2.info("Exit Get Wallet Balance_1 "  + mssg)
     return mssg    
 
+  #{
+     #"member_id":26785,
+     #"plan_code":"HIU499"
+   #}
+  def getwallet_balance_2(self,avars):
+    
+    logger.loggerpms2.info("Enter Get Wallet Balance_2 " + json.dumps(avars))
+    
+    db = self.db
+    rspobj = {}
+    reqobj = {}
+    
+    try:
+      
+      member_id = int(common.getid(common.getkeyvalue(avars,"member_id","0")))
+      plan_code = common.getkeyvalue(avars,"plan_code","PREMWALKIN")
+      amount = float(common.getvalue(common.getkeyvalue(avars,"amount","0")))
+      
+      #make a POST Call
+      reqobj = avars
+      
+     
+      vw_url = "http://mtstg.mydentalplan.in/Mdpwebapi/getWalletPlanBenefits"
+      logger.loggerpms2.info("Get Wallet Balance_2 (getUsableWPBAmountLimit) Request " + vw_url + " " + json.dumps(reqobj))
+      resp = requests.post(vw_url,json=reqobj)
+      logger.loggerpms2.info("Get Wallet Balance_2 Post (getUsableWPBAmountLimit) Response " + str(resp.status_code))
+      if((resp.status_code == 200)|(resp.status_code == 201)|(resp.status_code == 202)|(resp.status_code == 203)):
+            rspobj = resp.json()
+            logger.loggerpms2.info("Get Wallet Balance_2 Post (getUsableWPBAmountLimit) Response 1" + json.dumps(rspobj))
+            
+            if(rspobj["result"] == "fail"):
+              mssg = "Get Wallet Balance1 API - Wallet Response Error: " + common.getkeyvalue(rspobj,"error_message", "")
+              rspobj = {}
+              rspobj["result"] = "fail"
+              rspobj["error_message"] = mssg
+              return json.dumps(rspobj)
+            
+            wallobj = rspobj["wallet"]
+            mdp_wallet_usage = float((common.getkeyvalue(wallobj,"MDP_WALLET_USASE","0")))
+            mdp_wallet_usage_for_plan = float((common.getkeyvalue(wallobj,"MDP_WALLET_USASE_FOR_PLAN","0")))
+            super_wallet_amount = float(common.getkeyvalue(wallobj,"super_wallet_amount","0"))
+            mdp_wallet_amount = float(common.getkeyvalue(wallobj,"mdp_wallet_amount","0"))
+            
+            #min of mdp wallet amount and % of total treatment amount to Pay
+            percentamount = float((amount * mdp_wallet_usage_for_plan)/100)
+            mdp_wallet_usage_amount = min(mdp_wallet_amount,percentamount)  
+            
+           
+            rspobj["super_wallet_message"] = "Available Balance Rs." + str(super_wallet_amount)
+            rspobj["mdp_wallet_message"] = "Available Balance Rs." + str(mdp_wallet_usage_amount) + ". " + \
+              "This is minimum of " + str(mdp_wallet_amount) + " and " + str(mdp_wallet_usage) + " percentage of Rs." + str(amount) + "(" + str(percentamount) + ")"
+            
+            rspobj["result"] = "success"
+            rspobj["error_message"] = ""
+            
+            wallet_list = []
+            lstobj = {}
+            lstobj["wallet_amount"] = super_wallet_amount
+            lstobj["wallet_type"]  = "SUPER_WALLET"
+            lstobj["wallet_message"] = rspobj["super_wallet_message"]
+            wallet_list.append(lstobj)
+            lstobj = {}
+            lstobj["wallet_amount"] = mdp_wallet_usage_amount
+            lstobj["wallet_type"]  = "MDP_WALLET"
+            lstobj["wallet_message"] = rspobj["mdp_wallet_message"]
+            wallet_list.append(lstobj)
+            rspobj["wallet_list"] = wallet_list
+          
+            
+      else:
+        #response error
+        mssg = "Exit Get Wallet Balance_1 API -  HTTP Response Error: " + str(resp.status_code)
+        logger.loggerpms2.info(mssg)      
+        rspobj = {}
+        rspobj["result"] = "fail"
+        rspobj["error_message"] = mssg
+        return json.dumps(rspobj)
+      
+    except Exception as e:
+      mssg = "Get Wallet Balance 1 API Exception" + str(e)
+      logger.loggerpms2.info(mssg)      
+      rspobj = {}
+      rspobj["result"] = "fail"
+      rspobj["error_message"] = mssg
+      return json.dumps(rspobj)     
+    
+    mssg = json.dumps(rspobj)
+    logger.loggerpms2.info("Exit Get Wallet Balance_2 "  + mssg)
+    return mssg    
+
+  
 
   # This API is called to reverse voucher application
   def reverse_voucher(self,avars):
@@ -786,6 +897,97 @@ class Benefit:
       rspobj["error_message"] = mssg
       return json.dumps(rspobj)        
     
+    return json.dumps(rspobj) 
+    
+  # This API is called to reverse wallet application
+  def reverse_wallet_1(self,avars):
+    logger.loggerpms2.info("Enter Reverse Wallet_1 API" + json.dumps(avars))
+    
+    db=self.db
+    try:
+      
+
+      #treatment
+      treatmentid = int(common.getkeyvalue(avars,"treatmentid","0"))
+
+      tr = db(db.treatment.id == treatmentid).select()
+      #tplanid
+      tplanid = tr[0].treatmentplan if(len(tr) > 0) else 0
+      tp  = db((db.treatmentplan.id == tplanid) & (db.treatmentplan.is_active == True)).select()
+      memberid = tp[0].primarypatient if(len(tp) > 0) else 0
+      
+      p = db((db.payment.treatmentplan == tplanid) & (db.payment.is_active == True)).select()
+      paymentid = p[0].id if(len(p)>0) else 0
+      
+      #wallet amount (superwallet amount)
+      walletamount = float(tr[0].walletamount) if (len(tr) > 0) else 0
+      #discount amount (mdp_wallet amount)
+      discount_amount = float(tr[0].discount_amount) if (len(tr) > 0) else 0
+      #company pays (benefit amount)
+      companypay = float(tr[0].companypay) if (len(tr) > 0) else 0
+      
+      wpba_response = common.getstring(tr[0].WPBA_response)
+      wpba_response = {} if(wpba_response == "") else json.loads(wpba_response)
+      
+      planobj = common.getkeyvalue(wpba_response,"planBenefits","")
+      benefit_id = common.getkeyvalue(planobj,"planobj",0)
+      
+      reqobj = {}
+   
+      reqobj["member_id"] = memberid
+      reqobj["transaction_type"] = "C"
+      reqobj["transac_for"] = "TREATMENT"
+      reqobj["transac_refrence_id"] = paymentid
+
+      reqobj["wallet_planbenefit_id"] = benefit_id
+      
+      reqobj["discount_amount"] = companypay
+      reqobj["cashback_amount"] = 0
+      reqobj["super_wallet_amount"] = walletamount
+      reqobj["mdp_wallet_amount"] = discount_amount
+      
+      rspobj = {}
+      vw_url = "http://mtstg.mydentalplan.in/Mdpwebapi/walletPlanBenefitsCrDr"
+      logger.loggerpms2.info("Reverse Wallet_1 (walletPlanBenefitsCrDr) Request " + vw_url + " " + json.dumps(reqobj))
+      resp = requests.post(vw_url,json=reqobj)
+      logger.loggerpms2.info("Reverse Wallet_1 Post (walletPlanBenefitsCrDr) Response " + str(resp.status_code))
+      if((resp.status_code == 200)|(resp.status_code == 201)|(resp.status_code == 202)|(resp.status_code == 203)):
+        rspobj = resp.json()
+        logger.loggerpms2.info("Get Reverse Wallet_1 Post (walletPlanBenefitsCrDr) Response 1" + json.dumps(rspobj))
+      else:
+        mssg = "Reverse Wallet_1 API  HTTP Response error " + str(resp.status_code)
+        logger.loggerpms2.info(mssg)      
+        rspobj = {}
+        rspobj["result"] = "fail"
+        rspobj["error_message"] = mssg
+        return json.dumps(rspobj)                
+
+      
+      db((db.treatment.id == treatmentid)& (db.treatment.is_active == True)).\
+        update(discount_amount = 0,walletamount = 0,wallet_type="",wpba_response = "" )
+      db((db.treatmentplan.id == tplanid) & (db.treatmentplan.is_active == True)).\
+        update(totaldiscount_amount = 0, totalwalletamount = 0, wallet_type="")
+      db.commit()
+
+      db((db.treatment_procedure.treatmentid == treatmentid)  & (db.treatment_procedure.is_active == True)).\
+        update(discount_amount,walletamount = 0)
+      db.commit()
+
+      account._updatetreatmentpayment(db,tplanid,0)
+      
+
+      rspobj["result"] = "success"
+      rspobj["error_message"] = ""
+      
+    except Exception as e:
+      mssg = "Reverse Wallet API  Exception:\n" + str(e)
+      logger.loggerpms2.info(mssg)      
+      rspobj = {}
+      rspobj["result"] = "fail"
+      rspobj["error_message"] = mssg
+      return json.dumps(rspobj)        
+    
+    logger.loggerpms2.info("Exit Reverse Wallet 1 " + json.dumps(rspobj))
     return json.dumps(rspobj) 
     
   
@@ -1289,89 +1491,114 @@ class Benefit:
     
     return json.dumps(rspobj)
 
-  def xget_benefits(self,avars):
-    logger.loggerpms2.info("Enter get_benefits " + json.dumps(avars))
-    db = self.db
-    rspobj = {}
-    
-    try:
-
-      policy = common.getkeyvalue(avars,"plan","")
-      providerid = int(common.getid(common.getkeyvalue(avars,"providerid","0")))
-      prov = db((db.provider.id == providerid) & (db.provider.is_active == True)).select(db.provider.city)
-      logger.loggerpms2.info("Enter get_benefits 1" + str(providerid))
+  def get_benefits_1(self,avars):
+  
+      logger.loggerpms2.info("Enter get_benefits_1 API " + json.dumps(avars))
+      db = self.db
+      rspobj = {}
       
-      #region regiond code      
-      city = prov[0].city if(len(prov) != 0) else "Jaipur"
-      regionid = common.getregionidfromcity(db,city)
-      regioncode =  common.getregioncodefromcity(db,city)         
-      logger.loggerpms2.info("Enter get_benefits 2" + str(regionid) + " " +regioncode)
-     
-      #get company code
-      memberid = int(common.getkeyvalue(avars,"memberid","0"))
-      members = db((db.patientmember.id == memberid) & (db.patientmember.is_active == True)).select(db.patientmember.company,db.patientmember.hmoplan)
-
-      companyid = int(common.getid(members[0].company) if (len(members) == 1) else "0")
-      c = db((db.company.id == companyid) & (db.company.is_active == True)).select(db.company.company)
-      companycode = c[0].company if (len(c) ==1) else ""
-      logger.loggerpms2.info("Enter get_benefits 3" + str(companyid) + " " + companycode + " " + str(len(c)))
-      
-      #get hmoplan code
-      hmoplanid = int(common.getid(members[0].hmoplan) if (len(members) == 1) else "0")  #members hmoplan assigned
-      h = db((db.hmoplan.id == hmoplanid) & (db.hmoplan.is_active == True)).select()    
-      hmoplancode = h[0].hmoplancode if(len(h) == 1) else "PREMWALKIN"
-      logger.loggerpms2.info("Enter get_benefits 4" + str(hmoplanid) + " " +hmoplancode)
-      
-      #get policy from provider-region-plan corr to companycode, regioncode and hmoplancode
-      prp = db((db.provider_region_plan.companycode == companycode) &\
-                     (db.provider_region_plan.regioncode == regioncode) &\
-                     (db.provider_region_plan.is_active == True)).select() 
-      
-      #prp = db((db.provider_region_plan.companycode == companycode) &\
-                     #(db.provider_region_plan.regioncode == regioncode) &\
-                     #(db.provider_region_plan.plancode == hmoplancode) &\
-                     #(db.provider_region_plan.is_active == True)).select() 
-      
-      
-      policy = prp[0].policy if(len(prp) == 1) else "PREMWALKIN"  #get policy corr.
-      
- 
-      
-      if(policy == "RPIP599"):
-        avars["plan"] = policy
-        rspobj = json.loads(self.RPIP599(avars))
-      else:
-        mssg = "Get Benefits:Invalid benefit Policy"
-        rspobj = {}
-        rspobj["result"] = "success"
-        rspobj["error_message"] = mssg
-        rspobj["redeem_code"] = "BNFT_INVALID"
-        rspobj["redeem_value"] = 0
-        rspobj["redeem_date"] = common.getstringfromdate(datetime.date.today(), "%d/%m/%Y")
-        rspobj["redeem_message"] = common.getmessage(db,"BNFT_INVALID")
-        rspobj["memberid"] = str(memberid)
-        rspobj["plan"] = policy
-     
-        rspobj["total_redeemed_benefits"] = 0
-        rspobj["benefit_code"] = ""
-        rspobj["benefit_name"] = ""
-        rspobj["benefit_value"] = str(0)
-        rspobj["discount_amount"] = str(0)
-   
+      try:
+        member_id = int(common.getid(common.getkeyvalue(avars,"member_id","0")))
+        plan_code = common.getkeyvalue(avars,"plan_code","PREMWALKIN")
+        treatmentid = int(common.getid(common.getkeyvalue(avars,"treatmentid","0")))
+        tplanid = int(common.getid(common.getkeyvalue(avars,"tplanid","0")))
         
+        pats = db((db.vw_memberpatientlist.primarypatientid == member_id) & (db.vw_memberpatientlist.patientid == member_id)).select()
+        
+        #benefit start date & benefit end date
+        benefit_start_date = pats[0].premstartdt if(len(pats)==1) else common.getISTCurrentLocatTime()
+        benefit_end_date = pats[0].premenddt if(len(pats)==1) else common.getISTCurrentLocatTime()        
+        
+        #for each of the treatment,determing total treatment cost, total UCR, total inspays, total company pays
+        #determine for this member -- total treatment cost, total inspays, total patient pays, total company pasy
+        totalactualtreatmentcost = 0   #UCR Cost
+        totaltreatmentcost = 0  #procedurefee which is = UCR or = x% of procedure fees depending on the Plans
+        totalcopay = 0  #actual amount patient pays
+        totalinspays = 0 #actual amount ins pays
+        totalcompanypays = 0
+        
+        #get all the treatments for this member, within the premium start and end date
+        rows = db((db.vw_treatmentprocedure.primarypatient == member_id) &\
+                  (db.vw_treatmentprocedure.treatmentdate >= benefit_start_date) &\
+                  (db.vw_treatmentprocedure.treatmentdate <= benefit_end_date) &\
+                  (db.vw_treatmentprocedure.is_active == True)).select()
+        
+        #add all the costs for those treatments
+        for r in rows:
+          totalactualtreatmentcost = totalactualtreatmentcost + float(common.getvalue(r.ucrfee))
+          totaltreatmentcost = totaltreatmentcost + float(common.getvalue(r.procedurefee))
+          totalcopay = totalcopay + float(common.getvalue(r.copay))
+          totalinspays = totalinspays + float(common.getvalue(r.inspays)) 
+          totalcompanypays = totalcompanypays + float(common.getvalue(r.companypays))         
+        
+        
+        
+        #determine the cost of the current treatment only
+        tr = db((db.treatment.id == treatmentid) & (db.treatment.is_active == True)).select()
+        treatmentcost = float(common.getvalue(tr[0].treatmentcost)) if (len(tr) > 0) else 0
+        copay = float(common.getvalue(tr[0].copay)) if (len(tr) > 0) else 0
+        inspays = float(common.getvalue(tr[0].inspay)) if (len(tr) > 0) else 0
+                                                                          
+        rspobj = {}
+        avars["amount"] = totalcopay - totalinspays
+        avars["current_amount"] = copay - inspays
+        vw_url = "http://mtstg.mydentalplan.in/Mdpwebapi/getUsableWPBAmountLimit"
+        logger.loggerpms2.info("Get Plan Benefits_1 (getUsableWPBAmountLimit) Request " + vw_url + " " + json.dumps(avars))
+        resp = requests.post(vw_url,json=avars)
+        logger.loggerpms2.info("Get Plan Benefits_1 Post (getUsableWPBAmountLimit) Response " + str(resp.status_code))
+        if((resp.status_code == 200)|(resp.status_code == 201)|(resp.status_code == 202)|(resp.status_code == 203)):
+          rspobj = resp.json()
+          logger.loggerpms2.info("Get Plan Benefits_1 Post (getUsableWPBAmountLimit) Response 1" + json.dumps(rspobj))
+          
+        else:
+          #response error
+          mssg = "Exit Plan Benefits_1 API -  HTTP Response Error: " + str(resp.status_code)
+          rspobj = {}
+          rspobj["result"] = "fail"
+          rspobj["error_message"] = mssg
+          mssg = json.dumps(rspobj)
+          logger.loggerpms2.info(mssg)      
+          return mssg       
+  
       
-    except Exception as e:
-      mssg = "Get Bnefits  Exception:\n" + str(e)
-      logger.loggerpms2.info(mssg)      
-      excpobj = {}
-      excpobj["result"] = "fail"
-      excpobj["error_message"] = mssg
-      return json.dumps(excpobj)     
-    
-    logger.loggerpms2.info("Exit get_benefits " + json.dumps(rspobj))
-    
-    return json.dumps(rspobj)
+        #return rspobj
+        rspobj = rspobj
+        planobj = rspobj["planBenefits"]
+      
+        rspobj["result"] = "success"
+        rspobj["error_message"] = ""
+        
+        
+        rspobj["memberid"] = member_id
+        rspobj["plan"] = plan_code
+        
+       
+        rspobj["benefit_code"] = plan_code
+        rspobj["benefit_name"] = ""
+        rspobj["benefit_value"] = float(common.getvalue(planobj[0]["redeem_value"])) if(len(planobj) >0) else 0
+        rspobj["benefit_start_date"] = common.getstringfromdate(benefit_start_date,"%d/%m/%Y")
+        rspobj["benefit_end_date"] = common.getstringfromdate(benefit_end_date,"%d/%m/%Y")
+        rspobj["redeen_code"] = "BNFT_OK"
+        
+        #graded discount and and available mdp wallet cashback
+        rspobj["discount_benefit_amount_usable"] = float(common.getvalue(planobj[0]["discount_benefit_amount_usable"])) if(len(planobj) > 0) else 0 # graded discount as per plan
+        rspobj["wallet_cashback_usable"] = float(common.getvalue(planobj[0]["wallet_cashback_usable"]))  if(len(planobj) > 0) else 0 
+        rspobj["discount_date"] = common.getstringfromdate(datetime.date.today(), "%d/%m/%Y")
+        rspobj["discount_message"] = common.getmessage(db,"BNFT_OK")
+        
+      except Exception as e:
+        mssg = "Get Bnefits_1  Exception:\n" + str(e)
+        logger.loggerpms2.info(mssg)      
+        excpobj = {}
+        excpobj["result"] = "fail"
+        excpobj["error_message"] = mssg
+        return json.dumps(excpobj)     
+      
+      logger.loggerpms2.info("Exit get_benefits_1 " + json.dumps(rspobj))
+      
+      return json.dumps(rspobj)
 
+ 
   
   def get_benefits_kytc(self,avars):
       logger.loggerpms2.info("Enter get_benefits for KYTC " + json.dumps(avars))
@@ -1415,6 +1642,192 @@ class Benefit:
       logger.loggerpms2.info("Exit get_benefits KYTC " + json.dumps(rspobj))
       
       return json.dumps(rspobj)
+
+
+  def benefit_success_1(self,avars):
+    
+    logger.loggerpms2.info("Enter Benefit Success_1 ==>>" + str(avars))
+    
+    db = self.db
+    benefit_obj = {}
+    auth = current.auth
+    
+    
+    try:
+      memberid = int(common.getkeyvalue(avars,"member_id","0"))
+      treatmentid = int(common.getkeyvalue(avars,"treatmentid","0"))
+      plan_code = common.getkeyvalue(avars,"plan_code","")
+      paymentid = int(common.getkeyvalue(avars,"paymentid","0"))
+      
+      r = db((db.treatment.id == treatmentid) & (db.treatment.is_active == True)).select(db.treatment.WPBA_response)
+      wpba_response = json.loads(r[0].WPBA_response if(len(r) >= 0) else "")
+      
+      
+      discount_amount = float(common.getkeyvalue(avars,"discount_amount","0"))      
+      balance_benefit_amount = float(common.getkeyvalue(avars,"balance_benefit_amount","0"))      
+      last_redeemed_amount = float(common.getkeyvalue(avars,"last_redeemed_amount","0"))      
+      benefit_member_id = 0
+      
+      ##call to credit the amount in wallet
+#`     #{
+        ##"member_id":26785,    // required
+        ##"transaction_type": "D",  // required
+        ##"transac_for": "TREATMENT" , // required
+        ##"transac_refrence_id": 1231,  // required
+        ##"wallet_planbenefit_id":31,  // required
+        ##"discount_amount": 0,  // required
+        ##"cashback_amount": 0,  // required
+        ##"super_wallet_amount": 0,  // required
+        ##"mdp_wallet_amount": 0,  // required
+        ##"remarks": "remark" // Optional
+      ##}
+#`      
+      reqobj = {}
+   
+      reqobj["member_id"] = memberid
+      reqobj["transaction_type"] = "D"
+      reqobj["transac_for"] = "TREATMENT"
+      reqobj["transac_refrence_id"] = paymentid
+      
+      planbenefits = wpba_response["planBenefits"]
+      reqobj["wallet_planbenefit_id"] = common.getkeyvalue(planbenefits,"id","0")
+      
+      reqobj["discount_amount"] = discount_amount
+      reqobj["cashback_amount"] = common.getkeyvalue(planbenefits,"cashback_amount","0")
+      reqobj["super_wallet_amount"] = common.getkeyvalue(planbenefits,"super_wallet_amount","0")
+      reqobj["mdp_wallet_amount"] = common.getkeyvalue(planbenefits,"mdp_wallet_amount","0")
+      
+      vw_url = "http://mtstg.mydentalplan.in/Mdpwebapi/walletPlanBenefitsCrDr"
+      logger.loggerpms2.info("Benefit Success_1 (walletPlanBenefitsCrDr) Request " + vw_url + " " + json.dumps(reqobj))
+      resp = requests.post(vw_url,json=reqobj)
+      logger.loggerpms2.info("Benefit Success_1 Post (walletPlanBenefitsCrDr) Response " + str(resp.status_code))
+      if((resp.status_code == 200)|(resp.status_code == 201)|(resp.status_code == 202)|(resp.status_code == 203)):
+        rspobj = resp.json()
+        logger.loggerpms2.info("Get Plan Benefits_1 Post (getUsableWPBAmountLimit) Response 1" + json.dumps(rspobj))
+        
+      else:
+        #response error
+        mssg = "Exit Plan Benefits_1 API -  HTTP Response Error: " + str(resp.status_code)
+        rspobj = {}
+        rspobj["result"] = "fail"
+        rspobj["error_message"] = mssg
+        mssg = json.dumps(rspobj)
+        logger.loggerpms2.info(mssg)      
+        return mssg             
+      
+        
+      rspobj = {}
+      rspobj["result"] = "success"
+      rspobj["error_message"] = ""
+      rspobj["plan"] = plan_code
+      rspobj["memberid"]=memberid
+      rspobj["treatmentid"]=treatmentid
+      rspobj["benefit_member_id"]  = str(benefit_member_id)
+      rspobj["discount_amount"] = str(discount_amount)
+      reqobj["wallet_planbenefit_id"] = common.getkeyvalue(planbenefits,"id","0")
+      reqobj["cashback_amount"] = common.getkeyvalue(planbenefits,"cashback_amount","0")
+      reqobj["super_wallet_amount"] = common.getkeyvalue(planbenefits,"super_wallet_amount","0")
+      reqobj["mdp_wallet_amount"] = common.getkeyvalue(planbenefits,"mdp_wallet_amount","0")
+      
+      
+    except Exception as e:
+      mssg = "Benefit Success_1 API Exception:\n" + str(e)
+      logger.loggerpms2.info(mssg)      
+      excpobj = {}
+      excpobj["result"] = "fail"
+      excpobj["error_message"] = mssg
+      return json.dumps(excpobj)     
+  
+    logger.loggerpms2.info("Exit from Benefit Success_1 " + json.dumps(rspobj))
+    return json.dumps(rspobj)
+
+
+  def benefit_failure_1(self,avars):
+    
+    logger.loggerpms2.info("Enter Benefit Failure_1 ==>>" + str(avars))
+    
+    db = self.db
+    benefit_obj = {}
+    auth = current.auth
+    
+    
+    try:
+      treatmentid = int(common.getkeyvalue(avars,"treatmentid","0"))
+      paymentid = int(common.getkeyvalue(avars,"paymentid","0"))
+      db(db.treatment.id == treatmentid).update(companypay = 0, walletamount=0,wallet_type = "",
+                                                discount_amount=0,WPBA_response = "")  
+      db(db.payment.id == paymentid).update(amount=0,fp_invoiceamt=0,fp_amount=0,fp_fee=0,walletamount=0,discount_amount=0)
+      
+      
+      discount_amount = float(common.getkeyvalue(avars,"discount_amount","0"))      
+      balance_benefit_amount = float(common.getkeyvalue(avars,"balance_benefit_amount","0"))      
+      last_redeemed_amount = float(common.getkeyvalue(avars,"last_redeemed_amount","0"))      
+      
+
+      ##call to credit the amount in wallet
+#`     #{
+        ##"member_id":26785,    // required
+        ##"transaction_type": "D",  // required
+        ##"transac_for": "TREATMENT" , // required
+        ##"transac_refrence_id": 1231,  // required
+        ##"wallet_planbenefit_id":31,  // required
+        ##"discount_amount": 0,  // required
+        ##"cashback_amount": 0,  // required
+        ##"super_wallet_amount": 0,  // required
+        ##"mdp_wallet_amount": 0,  // required
+        ##"remarks": "remark" // Optional
+      ##}
+#`      
+      reqobj = {}
+   
+      reqobj["member_id"] = memberid
+      reqobj["transaction_type"] = "C"
+      reqobj["transac_for"] = "TREATMENT"
+      reqobj["transac_refrence_id"] = paymentid
+      
+      planbenefits = wpba_response["planBenefits"]
+      reqobj["wallet_planbenefit_id"] = common.getkeyvalue(planbenefits,"id","0")
+      
+      reqobj["discount_amount"] = 0
+      reqobj["cashback_amount"] = 0
+      reqobj["super_wallet_amount"] = 0
+      reqobj["mdp_wallet_amount"] = common.getkeyvalue(planbenefits,"mdp_wallet_amount","0")
+      
+      vw_url = "http://mtstg.mydentalplan.in/Mdpwebapi/walletPlanBenefitsCrDr"
+      logger.loggerpms2.info("Benefit Success_1 (walletPlanBenefitsCrDr) Request " + vw_url + " " + json.dumps(reqobj))
+      resp = requests.post(vw_url,json=reqobj)
+      logger.loggerpms2.info("Benefit Failure_1 Post (walletPlanBenefitsCrDr) Response " + str(resp.status_code))
+      if((resp.status_code == 200)|(resp.status_code == 201)|(resp.status_code == 202)|(resp.status_code == 203)):
+        rspobj = resp.json()
+        logger.loggerpms2.info("Get Plan Failure_1 Post (getUsableWPBAmountLimit) Response 1" + json.dumps(rspobj))
+        
+      else:
+        #response error
+        mssg = "Exit Plan Failure_1 API -  HTTP Response Error: " + str(resp.status_code)
+        rspobj = {}
+        rspobj["result"] = "fail"
+        rspobj["error_message"] = mssg
+        mssg = json.dumps(rspobj)
+        logger.loggerpms2.info(mssg)      
+        return mssg             
+      
+        
+      rspobj = {}
+      rspobj["result"] = "success"
+      rspobj["error_message"] = ""
+     
+      
+      
+    except Exception as e:
+      mssg = "Benefit Failure_1 API Exception:\n" + str(e)
+      logger.loggerpms2.info(mssg)      
+      excpobj = {}
+      excpobj["result"] = "fail"
+      excpobj["error_message"] = mssg
+      return json.dumps(excpobj)     
+  
+    logger.loggerpms2.info("Exit from Benefit Failure_1 " + json.dumps(rspobj))
+    return json.dumps(rspobj)
 
 
   def RPIP599Success(self,avars):

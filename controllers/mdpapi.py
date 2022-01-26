@@ -3219,7 +3219,7 @@ def reverse_voucher(avars):
 
 def reverse_wallet(avars):
     obj = mdpbenefits.Benefit(current.globalenv['db'])
-    rsp = obj.reverse_wallet(avars)
+    rsp = obj.reverse_wallet_1(avars)
     return rsp
 
 
@@ -3233,10 +3233,13 @@ def credit_wallet(avars):
     rsp = obj.credit_wallet(avars)
     return rsp
 
-
+#using new APIs
 def getwallet_balance(avars):
-    obj = mdpbenefits.Benefit(current.globalenv['db'])
-    rsp = obj.getwallet_balance(avars)
+    ruleObj = mdprules.Plan_Rules(db)
+    avars["rule_event"] = "getwallet_balance"
+    rsp = ruleObj.Get_Plan_Rules(avars)
+    #obj = mdpbenefits.Benefit(current.globalenv['db'])
+    #rsp = obj.getwallet_balance(avars)
     return rsp
 
 
