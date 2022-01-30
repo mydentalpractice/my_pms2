@@ -17,7 +17,7 @@ from applications.my_pms2.modules import common
 from applications.my_pms2.modules import account
 from applications.my_pms2.modules import mdpbenefits
 from applications.my_pms2.modules import mdprules
-from applications.my_pms2.modules import mdppatient
+
 from applications.my_pms2.modules import mdputils
 from applications.my_pms2.modules import logger
 
@@ -479,32 +479,45 @@ class Payment:
             #ds = db.executesql(strsql)
             
             r = db(db.vw_payments_fast.id == tplanid).select()
-            
-            provs = db((db.provider.id == providerid) & (db.provider.is_active == True)).select(db.provider.groupregion)
-            regionid = int(common.getid(provs[0].groupregion)) if(len(provs) == 1) else 1
-            regions = db((db.groupregion.id == regionid) & (db.groupregion.is_active == True)).select(db.groupregion.groupregion)
-            regioncode = common.getstring(regions[0].groupregion) if(len(regions) == 1) else "ALL"
+            providerid = int(r[0].providerid) if(len(r) >= 1) else 1
+            #provs = db((db.provider.id == providerid) & (db.provider.is_active == True)).select(db.provider.groupregion)
+            #regionid = int(common.getid(provs[0].groupregion)) if(len(provs) == 1) else 1
+            #regions = db((db.groupregion.id == regionid) & (db.groupregion.is_active == True)).select(db.groupregion.groupregion)
+            #regioncode = common.getstring(regions[0].groupregion) if(len(regions) == 1) else "ALL"
             
             memberid = int(common.getid(r[0].memberid if(len(r)>=1 ) else 0))
             patientid = int(common.getid(r[0].patientid if(len(r)>=1 ) else 0))
             treatmentid = int(common.getid(r[0].treatmentid if(len(r)>=1 ) else 0))
-            pats = db((db.vw_memberpatientlist.primarypatientid == memberid) & (db.vw_memberpatientlist.patientid == patientid)).select(db.vw_memberpatientlist.company,db.vw_memberpatientlist.hmoplan)
-            companyid = int(common.getid(pats[0].company)) if(len(pats) == 1) else 0
-            companys = db((db.company.id == companyid) & (db.company.is_active == True)).select(db.company.company)
-            companycode = common.getstring(companys[0].company) if(len(companys) == 1) else "PREMWALKIN"
+            #pats = db((db.vw_memberpatientlist.primarypatientid == memberid) & (db.vw_memberpatientlist.patientid == patientid)).select(db.vw_memberpatientlist.company,db.vw_memberpatientlist.hmoplan)
+            #companyid = int(common.getid(pats[0].company)) if(len(pats) == 1) else 0
+            #companys = db((db.company.id == companyid) & (db.company.is_active == True)).select(db.company.company)
+            #companycode = common.getstring(companys[0].company) if(len(companys) == 1) else "PREMWALKIN"
     
     
             ##for backward compatibility determine procedurepriceplancode from member's plan at the time of registration
-            hmoplanid = int(common.getid(pats[0].hmoplan)) if(len(pats) == 1) else 0  #this is the patient's previously assigned plan-typically at registration
-            hmoplans = db((db.hmoplan.id == hmoplanid) & (db.hmoplan.is_active == True)).select(db.hmoplan.hmoplancode,db.hmoplan.procedurepriceplancode)
-            hmoplancode = common.getstring(hmoplans[0].hmoplancode) if(len(hmoplans) == 1) else "PREMWALKIN"
-            r1 = db(
-                (db.provider_region_plan.companycode == companycode) &\
-                (db.provider_region_plan.plancode == hmoplancode) &\
-                ((db.provider_region_plan.regioncode == regioncode)|(db.provider_region_plan.regioncode == 'ALL')) &\
-                 (db.provider_region_plan.is_active == True)).select()
-            plancode = r1[0].policy if(len(r1) == 1) else "PREMWALKIN"
-            policy = plancode
+            #hmoplanid = int(common.getid(pats[0].hmoplan)) if(len(pats) == 1) else 0  #this is the patient's previously assigned plan-typically at registration
+            #hmoplans = db((db.hmoplan.id == hmoplanid) & (db.hmoplan.is_active == True)).select(db.hmoplan.hmoplancode,db.hmoplan.procedurepriceplancode)
+            #hmoplancode = common.getstring(hmoplans[0].hmoplancode) if(len(hmoplans) == 1) else "PREMWALKIN"
+            #r1 = db(
+                #(db.provider_region_plan.companycode == companycode) &\
+                #(db.provider_region_plan.plancode == hmoplancode) &\
+                #((db.provider_region_plan.regioncode == regioncode)|(db.provider_region_plan.regioncode == 'ALL')) &\
+                 #(db.provider_region_plan.is_active == True)).select()
+            #plancode = r1[0].policy if(len(r1) == 1) else "PREMWALKIN"
+            #policy = plancode
+           
+            avars={}
+            avars["providerid"] = providerid
+            avars["memberid"] = memberid
+            avars["patientid"] = patientid
+            #patobj = mdppatient.Patient(db, providerid)
+            #patobj = json.loads(patobj.getMemberPolicy(avars))
+            patobj = json.loads(mdputils.getMemberPolicy(db,avars))
+            plancode = common.getkeyvalue(patobj,"plancode","PREMWALKIN")
+            policy = common.getkeyvalue(patobj,"policy","PREMWALKIN")
+            procedurepriceplancode = common.getkeyvalue(patobj,"procedurepriceplancode","PREM103")
+            regioncode = common.getkeyvalue(patobj,"regioncode","JAI")
+            companycode = common.getkeyvalue(patobj,"companycode","MYDP")           
            
             
             benefit_amount = 0
@@ -783,12 +796,35 @@ class Payment:
             benefit = json.loads(ruleObj.Get_Plan_Rules(avars))
             
             if(benefit["result"]=="success"):
-                discount_amount = float(common.getkeyvalue(benefit, "discount_amount",0))
+                logger.loggerpms2.info("New Payment - After GetPlanBenefits  - " + json.dumps(benefit))
+                #mdp_wallet_cashback
+                walletobj = common.getkeyvalue(benefit,"wallet", None)
+                discount_amount = 0 if (walletobj == None) else float(common.getkeyvalue(walletobj,"mdp_wallet_amount_usable",0))
+            
+                #Super Wallet Cashback
+                walletamount = 0 if (walletobj == None) else float(common.getkeyvalue(walletobj,"super_wallet_amount_usable",0))
+            
+                #planbenefit
+                planbenefitobj = common.getkeyvalue(benefit,"planBenefits", None)
+                companypays = 0 if ((planbenefitobj == None)|(len(planbenefitobj)==0)) else float(common.getkeyvalue(planbenefitobj[0],"discount_benefit_amount_usable",0))
+            
+            
                 #update totalcompanypays (we are saving discount_amount as companypays )
-                db(db.treatment.id == treatmentid).update(companypay = discount_amount)    
+                db(db.treatment.id == treatmentid).update(companypay = companypays, walletamount=walletamount,wallet_type = "SUPER_WALLET",
+                                                          discount_amount=discount_amount,WPBA_response = json.dumps(benefit))    
+            
                 #update treatmentplan assuming there is one treatment per tplan
-                db(db.treatmentplan.id==tplanid).update(totalcompanypays = discount_amount) 
-                db.commit()
+                db(db.treatmentplan.id==tplanid).update(totalcompanypays = companypays, totalwalletamount=walletamount,wallet_type = "SUPER_WALLET",
+                                                        totaldiscount_amount=discount_amount) 
+            
+                db.commit()                
+                
+                #discount_amount = float(common.getkeyvalue(benefit, "discount_amount",0))
+                ##update totalcompanypays (we are saving discount_amount as companypays )
+                #db(db.treatment.id == treatmentid).update(companypay = discount_amount)    
+                ##update treatmentplan assuming there is one treatment per tplan
+                #db(db.treatmentplan.id==tplanid).update(totalcompanypays = discount_amount) 
+                #db.commit()
                     
 
             dttodaydate = common.getISTFormatCurrentLocatDate()
@@ -1603,7 +1639,6 @@ class Payment:
            
                 #get list of procedures for this treatment
                 procs = db((db.vw_treatmentprocedure.treatmentid  == treatmentid) & \
-                           (db.vw_treatmentprocedure.providerid  == providerid) & \
                            (db.vw_treatmentprocedure.is_active == True)) .select()        
                        
                 proclist = []
@@ -1615,7 +1650,7 @@ class Payment:
                     procobj = {
                         "code": common.getstring(proc.procedurecode),
                         "description": common.getstring(proc.altshortdescription),
-                        "procedurefee":float(common.getvalue(proc.procedurefee))
+                        "procedurefee":float(common.getvalue(proc.copay))
                         
                     }
                     
@@ -1693,6 +1728,7 @@ class Payment:
                 "totaldue":paytm["totaldue"],
                 "totcompanypays":paytm["totalcompanypays"],
                 "totdiscountamount":paytm["totaldiscount_amount"],
+                "totalcopay":paytm["totalcopay"],
                 
                 "wallet_type":"SUPER_WALLET",
                 "totalwalletamount":float(common.getvalue(paytm["totalwalletamount"])),
@@ -1747,31 +1783,47 @@ class Payment:
             treatment_amount = tr[0].copay if (len(tr) > 0) else 0
 
             memberid = tp[0].primarypatient if (len(tp) > 0) else 0
+            patientid = tp[0].patient if (len(tp) > 0) else 0
             mems = db((db.patientmember.id == memberid) & (db.patientmember.is_active == True)).select(db.patientmember.city,\
                                                                                                        db.patientmember.st,db.patientmember.company)
            
             #get region code
-            provs = db((db.provider.id == providerid) & (db.provider.is_active == True)).select(db.provider.groupregion)
-            regionid = int(common.getid(provs[0].groupregion)) if(len(provs) == 1) else 1
-            regions = db((db.groupregion.id == regionid) & (db.groupregion.is_active == True)).select(db.groupregion.groupregion)
-            regioncode = common.getstring(regions[0].groupregion) if(len(regions) == 1) else "ALL"    
+            #provs = db((db.provider.id == providerid) & (db.provider.is_active == True)).select(db.provider.groupregion)
+            #regionid = int(common.getid(provs[0].groupregion)) if(len(provs) == 1) else 1
+            #regions = db((db.groupregion.id == regionid) & (db.groupregion.is_active == True)).select(db.groupregion.groupregion)
+            #regioncode = common.getstring(regions[0].groupregion) if(len(regions) == 1) else "ALL"    
             
             ## get patient's company
-            pats = db((db.vw_memberpatientlist.primarypatientid == memberid) & (db.vw_memberpatientlist.patientid == memberid)).select(db.vw_memberpatientlist.company,db.vw_memberpatientlist.hmoplan)
-            companyid = int(common.getid(pats[0].company)) if(len(pats) == 1) else 0
-            companys = db((db.company.id == companyid) & (db.company.is_active == True)).select(db.company.company)
-            companycode = common.getstring(companys[0].company) if(len(companys) == 1) else "PREMWALKIN"
+            #pats = db((db.vw_memberpatientlist.primarypatientid == memberid) & (db.vw_memberpatientlist.patientid == memberid)).select(db.vw_memberpatientlist.company,db.vw_memberpatientlist.hmoplan)
+            #companyid = int(common.getid(pats[0].company)) if(len(pats) == 1) else 0
+            #companys = db((db.company.id == companyid) & (db.company.is_active == True)).select(db.company.company)
+            #companycode = common.getstring(companys[0].company) if(len(companys) == 1) else "PREMWALKIN"
             
             ##for backward compatibility determine procedurepriceplancode from member's plan at the time of registration
-            hmoplanid = int(common.getid(pats[0].hmoplan)) if(len(pats) == 1) else 0  #this is the patient's previously assigned plan-typically at registration
-            hmoplans = db((db.hmoplan.id == hmoplanid) & (db.hmoplan.is_active == True)).select(db.hmoplan.hmoplancode,db.hmoplan.procedurepriceplancode)
-            hmoplancode = common.getstring(hmoplans[0].hmoplancode) if(len(hmoplans) == 1) else "PREMWALKIN"
-            r = db(
-               (db.provider_region_plan.companycode == companycode) &\
-               (db.provider_region_plan.plancode == hmoplancode) &\
-               ((db.provider_region_plan.regioncode == regioncode)|(db.provider_region_plan.regioncode == 'ALL')) &\
-               (db.provider_region_plan.is_active == True)).select()
-            plancode = r[0].policy if(len(r) == 1) else "PREMWALKIN"           
+            #hmoplanid = int(common.getid(pats[0].hmoplan)) if(len(pats) == 1) else 0  #this is the patient's previously assigned plan-typically at registration
+            #hmoplans = db((db.hmoplan.id == hmoplanid) & (db.hmoplan.is_active == True)).select(db.hmoplan.hmoplancode,db.hmoplan.procedurepriceplancode)
+            #hmoplancode = common.getstring(hmoplans[0].hmoplancode) if(len(hmoplans) == 1) else "PREMWALKIN"
+            #r = db(
+               #(db.provider_region_plan.companycode == companycode) &\
+               #(db.provider_region_plan.plancode == hmoplancode) &\
+               #((db.provider_region_plan.regioncode == regioncode)|(db.provider_region_plan.regioncode == 'ALL')) &\
+               #(db.provider_region_plan.is_active == True)).select()
+            #plancode = r[0].policy if(len(r) == 1) else "PREMWALKIN"           
+       
+            avars={}
+            avars["providerid"] = providerid
+            avars["memberid"] = memberid
+            avars["patientid"] = patientid
+            
+            #patobj = mdppatient.Patient(db, providerid)
+            #patobj = json.loads(patobj.getMemberPolicy(avars))       
+            patobj = json.loads(mdputils.getMemberPolicy(db,avars))       
+            
+            plancode = common.getkeyvalue(patobj,"plancode","PREMWALKIN")
+            policy = common.getkeyvalue(patobj,"policy","PREMWALKIN")
+            procedurepriceplancode = common.getkeyvalue(patobj,"procedurepriceplancode","PREM103")
+            regioncode = common.getkeyvalue(patobj,"regioncode","JAI")
+            companycode = common.getkeyvalue(patobj,"companycode","MYDP")       
        
             avars={}
             avars["plan_code"] = plancode

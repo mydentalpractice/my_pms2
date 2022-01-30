@@ -10,7 +10,84 @@ from datetime import timedelta
 
 
 from applications.my_pms2.modules import common
+
 from applications.my_pms2.modules import logger
+
+
+#returns the policy which the patient has subscribed to 
+#{ providerid,memberid,patientid}
+def getMemberPolicy(db,avars):
+
+    logger.loggerpms2.info("Enter getMemberPolicy (Utils) ==> " + str(avars))
+
+  
+    rspobj={}
+
+    try:
+
+	#determine provider's region. If Provider is empty, then set provider to P0001 and its region
+	p = db((db.provider.provider == "P0001") & (db.provider.is_active == True)).select(db.provider.id)
+	defproviderid = int(common.getid(p[0].id)) if(len(p) >=1) else 0
+	providerid = int(common.getid(common.getkeyvalue(avars,"providerid",str(defproviderid))))      
+
+	#get region code
+	provs = db((db.provider.id == providerid) & (db.provider.is_active == True)).select(db.provider.groupregion)
+	regionid = int(common.getid(provs[0].groupregion)) if(len(provs) >= 1) else 1   
+	regions = db((db.groupregion.id == regionid) & (db.groupregion.is_active == True)).select(db.groupregion.groupregion)
+	regioncode = common.getstring(regions[0].groupregion) if(len(regions) >= 1) else "ALL"
+
+	## get patient's company
+	memberid = int(common.getid(common.getkeyvalue(avars,"memberid","0")))
+	patientid = int(common.getid(common.getkeyvalue(avars,"memberid",memberid)))
+	pats = db((db.vw_memberpatientlist.primarypatientid == memberid) & (db.vw_memberpatientlist.patientid == patientid)).select(db.vw_memberpatientlist.company,db.vw_memberpatientlist.hmoplan)
+	companyid = int(common.getid(pats[0].company)) if(len(pats) >= 1) else 0
+	companys = db((db.company.id == companyid) & (db.company.is_active == True)).select(db.company.company)
+	companycode = common.getstring(companys[0].company) if(len(companys) >= 1) else "PREMWALKIN"
+
+	##for backward compatibility determine procedurepriceplancode from member's plan at the time of registration
+	hmoplanid = int(common.getid(pats[0].hmoplan)) if(len(pats) >= 1) else 0  #this is the patient's previously assigned plan-typically at registration
+	hmoplans = db((db.hmoplan.id == hmoplanid) & (db.hmoplan.is_active == True)).select(db.hmoplan.hmoplancode,db.hmoplan.procedurepriceplancode)
+	hmoplancode = common.getstring(hmoplans[0].hmoplancode) if(len(hmoplans) >= 1) else "PREMWALKIN"
+
+	#get policy from provider-region-plan corr to companycode, regioncode and hmoplancode
+	prp = db((db.provider_region_plan.companycode == companycode) &\
+                 (db.provider_region_plan.regioncode == regioncode) &\
+                 (db.provider_region_plan.plancode == hmoplancode) &\
+                 (db.provider_region_plan.is_active == True)).select() 
+
+	if(len(prp) == 0):
+	    #region code = "ALL"
+	    prp = db((db.provider_region_plan.companycode == companycode) &\
+	             (db.provider_region_plan.regioncode == "ALL") &\
+	             (db.provider_region_plan.plancode == hmoplancode) &\
+	             (db.provider_region_plan.is_active == True)).select() 
+
+
+	policy = prp[0].policy if(len(prp) >= 1) else "PREMWALKIN"
+	policy = "PREMWALKIN" if((policy == None) | (policy == "")) else policy
+	plancode = policy      
+	ppc = prp[0].procedurepriceplancode if(len(prp) >= 1) else "PREM103"
+
+	rspobj = {}
+	rspobj["memberid"] = str(memberid)
+	rspobj["providerid"] = str(providerid)
+
+	rspobj["plancode"] = plancode
+	rspobj["policy"] = policy
+	rspobj["companycode"] = companycode
+	rspobj["regioncode"] = regioncode
+	rspobj["procedurepriceplancode"] = ppc      
+
+    except Exception as e:
+	mssg = "Get Member Policy (Utils) Exception:\n" + str(e)
+	logger.loggerpms2.info(mssg)      
+	excpobj = {}
+	excpobj["result"] = "fail"
+	excpobj["error_message"] = mssg
+	return json.dumps(excpobj)     
+
+    logger.loggerpms2.info("Exit getMemberPolicy (Utils)==> " + json.dumps(rspobj))
+    return json.dumps(rspobj)
 
 
 #THIS API is called to get plan details for the member
@@ -76,31 +153,43 @@ def getprocedurepriceplancodeformember(db,providerid,memberid,patientid,policy_n
     procedurepriceplancode = "PREMWALKIN"  #default it to PREMWALKIN
     
     try:   
+	
+	avars={}
+	avars["providerid"] = providerid
+	avars["memberid"] = memberid
+	avars["patientid"] = patientid
+	patobj = json.loads(getMemberPolicy(db,avars))
+	
+	plancode = common.getkeyvalue(patobj,"plancode","PREMWALKIN")
+	policy = common.getkeyvalue(patobj,"policy","PREMWALKIN")
+	procedurepriceplancode = common.getkeyvalue(patobj,"procedurepriceplancode","PREM103")
+	regioncode = common.getkeyvalue(patobj,"regioncode","JAI")
+	companycode = common.getkeyvalue(patobj,"companycode","MYDP")	
         
         # get providers region via city
-        provs = db((db.provider.id == providerid) & (db.provider.is_active == True)).select(db.provider.groupregion)
-        regionid = int(common.getid(provs[0].groupregion)) if(len(provs) == 1) else 1
-        regions = db((db.groupregion.id == regionid) & (db.groupregion.is_active == True)).select(db.groupregion.groupregion)
-        regioncode = common.getstring(regions[0].groupregion) if(len(regions) == 1) else "ALL"
+        #provs = db((db.provider.id == providerid) & (db.provider.is_active == True)).select(db.provider.groupregion)
+        #regionid = int(common.getid(provs[0].groupregion)) if(len(provs) == 1) else 1
+        #regions = db((db.groupregion.id == regionid) & (db.groupregion.is_active == True)).select(db.groupregion.groupregion)
+        #regioncode = common.getstring(regions[0].groupregion) if(len(regions) == 1) else "ALL"
 	
         
         # get patient's company
-        pats = db((db.vw_memberpatientlist.primarypatientid == memberid) & (db.vw_memberpatientlist.patientid == patientid)).select(db.vw_memberpatientlist.company,db.vw_memberpatientlist.hmoplan)
-        companyid = int(common.getid(pats[0].company)) if(len(pats) == 1) else 0
-        companys = db((db.company.id == companyid) & (db.company.is_active == True)).select(db.company.company)
-        companycode = common.getstring(companys[0].company) if(len(companys) == 1) else "PREMWALKIN"
+        #pats = db((db.vw_memberpatientlist.primarypatientid == memberid) & (db.vw_memberpatientlist.patientid == patientid)).select(db.vw_memberpatientlist.company,db.vw_memberpatientlist.hmoplan)
+        #companyid = int(common.getid(pats[0].company)) if(len(pats) == 1) else 0
+        #companys = db((db.company.id == companyid) & (db.company.is_active == True)).select(db.company.company)
+        #companycode = common.getstring(companys[0].company) if(len(companys) == 1) else "PREMWALKIN"
 
 	##for backward compatibility determine procedurepriceplancode from member's plan at the time of registration
-	hmoplanid = int(common.getid(pats[0].hmoplan)) if(len(pats) == 1) else 0  #this is the patient's previously assigned plan-typically at registration
-	hmoplans = db((db.hmoplan.id == hmoplanid) & (db.hmoplan.is_active == True)).select(db.hmoplan.hmoplancode,db.hmoplan.procedurepriceplancode)
-	hmoplancode = common.getstring(hmoplans[0].hmoplancode) if(len(hmoplans) == 1) else "PREMWALKIN"
-	r = db(
-	    (db.provider_region_plan.companycode == companycode) &\
-	    (db.provider_region_plan.plancode == hmoplancode) &\
-	    ((db.provider_region_plan.regioncode == regioncode)|(db.provider_region_plan.regioncode == 'ALL'))&\
-	    (db.provider_region_plan.is_active == True)).select()
-	plancode = r[0].plancode if(len(r) == 1) else "PREMWALKIN"    
-	procedurepriceplancode = r[0].procedurepriceplancode if(len(r) == 1) else "PREMWALKIN"
+	#hmoplanid = int(common.getid(pats[0].hmoplan)) if(len(pats) == 1) else 0  #this is the patient's previously assigned plan-typically at registration
+	#hmoplans = db((db.hmoplan.id == hmoplanid) & (db.hmoplan.is_active == True)).select(db.hmoplan.hmoplancode,db.hmoplan.procedurepriceplancode)
+	#hmoplancode = common.getstring(hmoplans[0].hmoplancode) if(len(hmoplans) == 1) else "PREMWALKIN"
+	#r = db(
+	    #(db.provider_region_plan.companycode == companycode) &\
+	    #(db.provider_region_plan.plancode == hmoplancode) &\
+	    #((db.provider_region_plan.regioncode == regioncode)|(db.provider_region_plan.regioncode == 'ALL'))&\
+	    #(db.provider_region_plan.is_active == True)).select()
+	#plancode = r[0].plancode if(len(r) == 1) else "PREMWALKIN"    
+	#procedurepriceplancode = r[0].procedurepriceplancode if(len(r) == 1) else "PREMWALKIN"
 
         #for backward compatibility determine procedurepriceplancode from member's plan at the time of registration
 	#def_planid = int(common.getid(pats[0].hmoplan)) if(len(pats) == 1) else 0  #this is the patient's previously assigned plan-typically at registration

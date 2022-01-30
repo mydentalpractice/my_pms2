@@ -15,6 +15,7 @@ from applications.my_pms2.modules import tasks
 from applications.my_pms2.modules import logger
 
 from applications.my_pms2.modules import mdputils
+from applications.my_pms2.modules import mdppatient
 
 datefmt = "%d/%m/%Y"
 datetimefmt = "%d/%m/%Y %H:%M:%S"
@@ -1346,6 +1347,9 @@ class Treatment:
                 newmember = common.getboolean(r[0].newmember)
                 freetreatment = common.getboolean(r[0].freetreatment)
                 patienttype = r[0].patienttype
+                
+              
+
                 procedurepriceplancode =  mdputils.getprocedurepriceplancodeformember(db,providerid,memberid,patientid,policy_name) #IB:15-Mar-2020 r[0].procedurepriceplancode        
             
             
@@ -1477,6 +1481,7 @@ class Treatment:
                 newmember = common.getboolean(r[0].newmember)
                 freetreatment = common.getboolean(r[0].freetreatment)
                 patienttype = r[0].patienttype
+                              
                 procedurepriceplancode =  mdputils.getprocedurepriceplancodeformember(db,providerid,memberid,patientid,policy_name) #IB:15-Mar-2020 r[0].procedurepriceplancode        
             
             
@@ -1621,8 +1626,10 @@ class Treatment:
                     freetreatment = common.getboolean(r[0].freetreatment)
                     patienttype = r[0].patienttype
                     if(hv == False):
+                                             
                         procedurepriceplancode =  mdputils.getprocedurepriceplancodeformember(db,providerid,memberid,patientid,policy_name) #IB:15-Mar-2020 r[0].procedurepriceplancode
                     else:
+                                             
                         procedurepriceplancode =  mdputils.getprocedurepriceplancodeforHVmember(db,providerid,memberid,patientid,policy_name) #IB:15-Mar-2020 r[0].procedurepriceplancode
                 
                 

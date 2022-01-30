@@ -964,14 +964,9 @@ def _calculatepayments(db,tplanid,policy=None):
     return json.dumps(respobj)
 
 def _updatetreatmentpayment(db,tplanid,paymentid,policy="PREMWALKIN"):
-    
     logger.loggerpms2.info("Enter Update Treatment Payment " + str(tplanid) + " " + str(paymentid))
-    
     user = None
-    
-    tp = db((db.treatment.treatmentplan == tplanid) & (db.treatment.is_active == True)).select(db.treatment.id)
-    treatmentid = int(common.getid(tp[0].id))  if(len(tp) == 1) else 0
-    
+
     #calculate
     totalactualtreatmentcost = 0   #UCR Cost
     totaltreatmentcost = 0         #treatment cost as per the plan
@@ -982,70 +977,82 @@ def _updatetreatmentpayment(db,tplanid,paymentid,policy="PREMWALKIN"):
     totalpaid = 0                  #total amount paid
     totaldue = 0                   #total due
     totaldiscount_amount = 0
-    totalwallet_amount = 0
+    totalwalletamount = 0
     totalpromo_amount = 0
-    
-    
-    #get the previously set totalpaid, totalcompanypays, totalinspays
-    r = db((db.treatment.id == treatmentid) & (db.treatment.is_active == True)).select(db.treatment.treatmentplan)
-    tplanid = int(common.getvalue(r[0].treatmentplan)) if len(r) > 0 else 0
-    r = db((db.treatmentplan.id == tplanid) & (db.treatmentplan.is_active == True)).select()
-    
-    #logger.loggerpms2.info("_updatetreatmentpayment -1 " + str(tplanid) + " " + str(treatmentid))
-    
-    totalinspays = float(common.getvalue(r[0].totalinspays)) if len(r) > 0 else 0
-    totalcompanypays = float(common.getvalue(r[0].totalcompanypays)) if len(r) > 0 else 0
-    totalpaid = float(common.getvalue(r[0].totalpaid)) if len(r) > 0 else 0
-    
-    #logger.loggerpms2.info("_updatetreatmentpayment -1A " + str(common.getvalue(totalpaid)))
-    procs = db((db.treatment_procedure.treatmentid == treatmentid) & (db.treatment_procedure.is_active == True)).select()
-    #logger.loggerpms2.info("_updatetreatmentpayment -2 " + str(tplanid) + " " + str(treatmentid))
-    
-    for proc in procs:
-        #logger.loggerpms2.info("_updatetreatmentpayment -proc ")
-        
-        totalactualtreatmentcost = totalactualtreatmentcost + float(common.getvalue(proc.ucr))
-        totaltreatmentcost = totaltreatmentcost + float(common.getvalue(proc.procedurefee))
-        totalprecopay = totalprecopay + float(common.getvalue(proc.copay))
-        totalcopay = totalcopay + float(common.getvalue(proc.copay))
-        totalinspays = totalinspays + float(common.getvalue(proc.inspays))
-        totalcompanypays = totalcompanypays + float(common.getvalue(proc.companypays))
-    
-    #logger.loggerpms2.info("_updatetreatmentpayment -proc Exit loop ")
-    db((db.treatment.id == treatmentid) & (db.treatment.is_active == True)).update(actualtreatmentcost = totalactualtreatmentcost, treatmentcost=totaltreatmentcost, \
-                                              copay=totalcopay, inspay=totalinspays, companypay= totalcompanypays,
-                                              modified_on = datetime.datetime.today(),modified_by = 1 if(user == None) else user.id)    
 
+    #Table: treatment
+    #Columns:
+    #id int(11) AI PK 
+    #treatment varchar(64) 
+    #description varchar(128) 
+    #startdate date 
+    #enddate date 
+    #status varchar(45) 
+    #---actualtreatmentcost double 
+    #---treatmentcost double 
+    #---copay double 
+    #---inspay double 
+    #companypay double 
+    #walletamount double 
+    #discount_amount double 
+    #wallet_type varchar(45) 
+    #voucher_code varchar(45) 
+    #promo_code varchar(45) 
+    #promo_amount double 
+    #WPBA_response longtext 
+    #treatmentplan int(11) 
+    #provider int(11) 
+    #doctor int(11) 
+    #clinicid int(11) 
+    #dentalprocedure int(11) 
+    #quadrant varchar(45) 
+    #tooth varchar(45) 
+    #chiefcomplaint varchar(128) 
+    #authorized char(1) 
+    #is_active char(1) 
+    #created_on datetime 
+    #created_by int(11) 
+    #modified_on datetime 
+    #modified_by int(11)
     
     
     
-    tr = db((db.treatment.id == treatmentid) & (db.treatment.is_active == True)).select()
-    
-    totaldiscount_amount = float(common.getvalue(tr[0].discount_amount)) if(len(tr) > 0) else 0
-    totalwalletamount = float(common.getvalue(tr[0].walletamount)) if(len(tr) > 0) else 0
-    totalpromo_amount = float(common.getvalue(tr[0].promo_amount)) if(len(tr) > 0) else 0
-    voucher_code  = common.getstring(tr[0].voucher_code) if(len(tr) > 0) else 0
-    
-  
-    ps = db((db.payment.treatmentplan == tplanid) & (db.payment.is_active == True)).select()
-    #logger.loggerpms2.info("_updatetreatmentpayment -3 " + str(tplanid) + " " + str(len(ps)))
-    for p in ps:
-        #logger.loggerpms2.info("_updatetreatmentpayment -3A ")
-        totalpaid = totalpaid + float(common.getvalue(p.amount))
+    trs = db((db.treatment.treatmentplan == tplanid) & (db.treatment.is_active == True)).select()
+    for tr in trs:
+        procs = db((db.treatment_procedure.treatmentid == tr.id) & (db.treatment_procedure.is_active == True)).select()
+        actualtreatmentcost = 0
+        treatmentcost = 0
+        precopay = 0
+        copay = 0
+        inspay = 0
+        for proc in procs:
+            actualtreatmentcost = actualtreatmentcost +  float(common.getvalue(proc.ucr))
+            treatmentcost = treatmentcost + float(common.getvalue(proc.procedurefee))
+            precopay = precopay + float(common.getvalue(proc.copay))
+            copay = copay + float(common.getvalue(proc.copay))
+            inspay = inspay + float(common.getvalue(proc.inspays))
+         
+        #update proc costs into treatment costs
+        db((db.treatment.id == tr.id) & (tr.is_active == True)).update(actualtreatmentcost=actualtreatmentcost,treatmentcost=treatmentcost,copay=copay,inspay=inspay)
         
-    #logger.loggerpms2.info("_updatetreatmentpayment -4 " )
-  
-    #totaldue = totalcopay
-    ##logger.loggerpms2.info("_updatetreatmentpayment -41 " )
-    #totaldue = totalcopay - totalcompanypays
-    ##logger.loggerpms2.info("_updatetreatmentpayment -42 " )
-    #totaldue = totalcopay - totalcompanypays - totaldiscount_amount
-    ##logger.loggerpms2.info("_updatetreatmentpayment -43 " )
-    #totaldue = totalcopay - totalcompanypays - totaldiscount_amount - totalwalletamount
-    ##logger.loggerpms2.info("_updatetreatmentpayment -44 " )
-    #totaldue = totalcopay - totalcompanypays - totaldiscount_amount - totalwalletamount - totalpaid
-    
-    logger.loggerpms2.info("_updatetreatmentpayment -4A ")
+        #calculate total costs for treatment plan
+        totalactualtreatmentcost = totalactualtreatmentcost + actualtreatmentcost
+        totaltreatmentcost = totaltreatmentcost + treatmentcost
+        totalprecopay = totalprecopay + precopay
+        totalcopay = totalcopay + copay
+        totalinspays = totalinspays + inspay
+        
+        totalcompanypays = totalcompanypays + float(common.getvalue(tr.companypay))
+        totaldiscount_amount = totaldiscount_amount + float(common.getvalue(tr.discount_amount))
+        totalwalletamount = totalwalletamount + float(common.getvalue(tr.walletamount))
+        totalpromo_amount = totalpromo_amount + float(common.getvalue(tr.promo_amount))
+        
+    #calculate all the payments made and due for each treatment plan
+    pymnts = db((db.payment.treatmentplan == tplanid) & (db.payment.is_active == True)).select()
+    for pymnt in pymnts:
+        totalpaid = totalpaid + float(common.getvalue(pymnt.amount))
+        
+    totaldue = totalcopay - totalinspays - totalcompanypays - totaldiscount_amount - totalwalletamount - totalpromo_amount - totalpaid
     
     db(db.treatmentplan.id == tplanid).update(
         totaltreatmentcost = totaltreatmentcost,
@@ -1056,22 +1063,77 @@ def _updatetreatmentpayment(db,tplanid,paymentid,policy="PREMWALKIN"):
         totaldiscount_amount  = totaldiscount_amount,
         totalpromo_amount  = totalpromo_amount,
         totalpaid = totalpaid,
-        totaldue = totalcopay - totalcompanypays - totaldiscount_amount - totalwalletamount - totalpromo_amount - totalpaid
-
+        totaldue = totaldue
     )    
+    db.commit()
+    paytm = json.loads(_calculatepayments(db, tplanid,policy))
+    
+    ##logger.loggerpms2.info("_updatetreatmentpayment -1A " + str(common.getvalue(totalpaid)))
+    #procs = db((db.treatment_procedure.treatmentid == treatmentid) & (db.treatment_procedure.is_active == True)).select()
+    ##logger.loggerpms2.info("_updatetreatmentpayment -2 " + str(tplanid) + " " + str(treatmentid))
+    
+    #for proc in procs:
+        ##logger.loggerpms2.info("_updatetreatmentpayment -proc ")
+        
+        #totalactualtreatmentcost = totalactualtreatmentcost + float(common.getvalue(proc.ucr))
+        #totaltreatmentcost = totaltreatmentcost + float(common.getvalue(proc.procedurefee))
+        #totalprecopay = totalprecopay + float(common.getvalue(proc.copay))
+        #totalcopay = totalcopay + float(common.getvalue(proc.copay))
+        #totalinspays = totalinspays + float(common.getvalue(proc.inspays))
+        #totalcompanypays = totalcompanypays + float(common.getvalue(proc.companypays))
+    
+    ##logger.loggerpms2.info("_updatetreatmentpayment -proc Exit loop ")
+    #db((db.treatment.id == treatmentid) & (db.treatment.is_active == True)).update(actualtreatmentcost = totalactualtreatmentcost, treatmentcost=totaltreatmentcost, \
+                                              #copay=totalcopay, inspay=totalinspays, companypay= totalcompanypays,
+                                              #modified_on = datetime.datetime.today(),modified_by = 1 if(user == None) else user.id)    
+
+    
+    
+    
+    #tr = db((db.treatment.id == treatmentid) & (db.treatment.is_active == True)).select()
+    
+    #totaldiscount_amount = float(common.getvalue(tr[0].discount_amount)) if(len(tr) > 0) else 0
+    #totalwalletamount = float(common.getvalue(tr[0].walletamount)) if(len(tr) > 0) else 0
+    #totalpromo_amount = float(common.getvalue(tr[0].promo_amount)) if(len(tr) > 0) else 0
+    #voucher_code  = common.getstring(tr[0].voucher_code) if(len(tr) > 0) else 0
+    
+  
+    #ps = db((db.payment.treatmentplan == tplanid) & (db.payment.is_active == True)).select()
+    ##logger.loggerpms2.info("_updatetreatmentpayment -3 " + str(tplanid) + " " + str(len(ps)))
+    #for p in ps:
+        ##logger.loggerpms2.info("_updatetreatmentpayment -3A ")
+        #totalpaid = totalpaid + float(common.getvalue(p.amount))
+        
+    ##logger.loggerpms2.info("_updatetreatmentpayment -4 " )
+  
+    ##totaldue = totalcopay
+    ###logger.loggerpms2.info("_updatetreatmentpayment -41 " )
+    ##totaldue = totalcopay - totalcompanypays
+    ###logger.loggerpms2.info("_updatetreatmentpayment -42 " )
+    ##totaldue = totalcopay - totalcompanypays - totaldiscount_amount
+    ###logger.loggerpms2.info("_updatetreatmentpayment -43 " )
+    ##totaldue = totalcopay - totalcompanypays - totaldiscount_amount - totalwalletamount
+    ###logger.loggerpms2.info("_updatetreatmentpayment -44 " )
+    ##totaldue = totalcopay - totalcompanypays - totaldiscount_amount - totalwalletamount - totalpaid
+    
+    #logger.loggerpms2.info("_updatetreatmentpayment -4A ")
+    
+    #db(db.treatmentplan.id == tplanid).update(
+        #totaltreatmentcost = totaltreatmentcost,
+        #totalcopay = totalcopay,
+        #totalinspays = totalinspays,
+        #totalcompanypays = totalcompanypays,
+        #totalwalletamount = totalwalletamount,
+        #totaldiscount_amount  = totaldiscount_amount,
+        #totalpromo_amount  = totalpromo_amount,
+        #totalpaid = totalpaid,
+        #totaldue = totalcopay - totalcompanypays - totaldiscount_amount - totalwalletamount - totalpromo_amount - totalpaid
+
+    #)    
 
     #logger.loggerpms2.info("_updatetreatmentpayment -5 " )
-    paytm = json.loads(_calculatepayments(db, tplanid,policy))
+    
     #logger.loggerpms2.info("Paytm Update Treatment Payment " + json.dumps(paytm))
-    
-    
-    #update Treatment   
-    db(db.treatment.id == treatmentid).update(actualtreatmentcost = totalactualtreatmentcost, treatmentcost=totaltreatmentcost, \
-                                              copay=totalcopay, inspay=totalinspays, companypay= totalcompanypays,
-                                              modified_on = datetime.datetime.today(),modified_by = 1 if(user == None) else user.id)    
-    
-    
-    
    
     logger.loggerpms2.info("Exit Update Treamtnet Payment " + json.dumps(paytm))
     return json.dumps({"result":"success"})

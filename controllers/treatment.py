@@ -3959,29 +3959,42 @@ def add_proceduregrid():
     providerid = int(common.getid(t[0].provider if (len(t)>0) else 0 ))
     treatmentdate = t[0].startdate if (len(t)>0) else common.getISTFormatCurrentLocatDate()
     
+    avars={}
+    avars["providerid"] = providerid
+    avars["memberid"] = memberid
+    avars["patientid"] = patientid    
+    #patobj = mdppatient.Patient(db, providerid)
+    #patobj = json.loads(patobj.getMemberPolicy(avars))
+    patobj = json.loads(mdputils.getMemberPolicy(db,avars))
+    plancode = common.getkeyvalue(patobj,"plancode","PREMWALKIN")
+    policy = common.getkeyvalue(patobj,"policy","PREMWALKIN")
+    procedurepriceplancode = common.getkeyvalue(patobj,"procedurepriceplancode","PREM103")
+    regioncode = common.getkeyvalue(patobj,"regioncode","JAI")
+    companycode = common.getkeyvalue(patobj,"companycode","MYDP")    
+    
     #get region code
-    provs = db((db.provider.id == providerid) & (db.provider.is_active == True)).select(db.provider.groupregion)
-    regionid = int(common.getid(provs[0].groupregion)) if(len(provs) == 1) else 1
-    regions = db((db.groupregion.id == regionid) & (db.groupregion.is_active == True)).select(db.groupregion.groupregion)
-    regioncode = common.getstring(regions[0].groupregion) if(len(regions) == 1) else "ALL"
+    #provs = db((db.provider.id == providerid) & (db.provider.is_active == True)).select(db.provider.groupregion)
+    #regionid = int(common.getid(provs[0].groupregion)) if(len(provs) == 1) else 1
+    #regions = db((db.groupregion.id == regionid) & (db.groupregion.is_active == True)).select(db.groupregion.groupregion)
+    #regioncode = common.getstring(regions[0].groupregion) if(len(regions) == 1) else "ALL"
         
     ## get patient's company
-    pats = db((db.vw_memberpatientlist.primarypatientid == memberid) & (db.vw_memberpatientlist.patientid == patientid)).select(db.vw_memberpatientlist.company,db.vw_memberpatientlist.hmoplan)
-    companyid = int(common.getid(pats[0].company)) if(len(pats) == 1) else 0
-    companys = db((db.company.id == companyid) & (db.company.is_active == True)).select(db.company.company)
-    companycode = common.getstring(companys[0].company) if(len(companys) == 1) else "PREMWALKIN"
+    #pats = db((db.vw_memberpatientlist.primarypatientid == memberid) & (db.vw_memberpatientlist.patientid == patientid)).select(db.vw_memberpatientlist.company,db.vw_memberpatientlist.hmoplan)
+    #companyid = int(common.getid(pats[0].company)) if(len(pats) == 1) else 0
+    #companys = db((db.company.id == companyid) & (db.company.is_active == True)).select(db.company.company)
+    #companycode = common.getstring(companys[0].company) if(len(companys) == 1) else "PREMWALKIN"
     
     
-    ##for backward compatibility determine procedurepriceplancode from member's plan at the time of registration
-    hmoplanid = int(common.getid(pats[0].hmoplan)) if(len(pats) == 1) else 0  #this is the patient's previously assigned plan-typically at registration
-    hmoplans = db((db.hmoplan.id == hmoplanid) & (db.hmoplan.is_active == True)).select(db.hmoplan.hmoplancode,db.hmoplan.procedurepriceplancode)
-    hmoplancode = common.getstring(hmoplans[0].hmoplancode) if(len(hmoplans) == 1) else "PREMWALKIN"
-    r = db(
-           (db.provider_region_plan.companycode == companycode) &\
-           (db.provider_region_plan.plancode == hmoplancode) &\
-           ((db.provider_region_plan.regioncode == regioncode)|(db.provider_region_plan.regioncode == 'ALL')) &\
-           (db.provider_region_plan.is_active == True)).select()
-    plancode = r[0].policy if(len(r) == 1) else "PREMWALKIN"
+    ###for backward compatibility determine procedurepriceplancode from member's plan at the time of registration
+    #hmoplanid = int(common.getid(pats[0].hmoplan)) if(len(pats) == 1) else 0  #this is the patient's previously assigned plan-typically at registration
+    #hmoplans = db((db.hmoplan.id == hmoplanid) & (db.hmoplan.is_active == True)).select(db.hmoplan.hmoplancode,db.hmoplan.procedurepriceplancode)
+    #hmoplancode = common.getstring(hmoplans[0].hmoplancode) if(len(hmoplans) == 1) else "PREMWALKIN"
+    #r = db(
+           #(db.provider_region_plan.companycode == companycode) &\
+           #(db.provider_region_plan.plancode == hmoplancode) &\
+           #((db.provider_region_plan.regioncode == regioncode)|(db.provider_region_plan.regioncode == 'ALL')) &\
+           #(db.provider_region_plan.is_active == True)).select()
+    #plancode = r[0].policy if(len(r) == 1) else "PREMWALKIN"
     
     #Using new pricing engine  12/10/2021
     avars = {}

@@ -278,13 +278,13 @@ class Shopse:
                 db.commit()                
             
                 #Call Voucder success
-                vcobj = mdpbenefits.Benefit(db)
-                reqobj = {"paymentid" : paymentid}
-                rspobj = json.loads(vcobj.voucher_success(reqobj))                 
+                #vcobj = mdpbenefits.Benefit(db)
+                #reqobj = {"paymentid" : paymentid}
+                #rspobj = json.loads(vcobj.voucher_success(reqobj))                 
             
-                #here need to update treatmentplan tables
-                account._updatetreatmentpayment(db, tplanid, paymentid)
-                db.commit()
+                ##here need to update treatmentplan tables
+                #account._updatetreatmentpayment(db, tplanid, paymentid)
+                #db.commit()
             
                 ##wallet_success
                 #reqobj = {}
@@ -295,8 +295,9 @@ class Shopse:
                 #db.commit()                
 
                 trtmnt = db((db.treatment.id == treatmentid) & (db.treatment.is_active == True)).select()
-                discount_amount = trtmnt[0].companypay if(len(trtmnt) > 0) else 0
-            
+                discount_amount = trtmnt[0].discount_amount if(len(trtmnt) > 0) else 0
+                walletamount = trtmnt[0].walletamount if(len(trtmnt) > 0) else 0
+                companypay = trtmnt[0].companypay if(len(trtmnt) > 0) else 0            
                 
                 obj={
                     "action":"benefit_success",
@@ -304,20 +305,22 @@ class Shopse:
                     "plan_code":policy,
                     "company_code":company_code,
                     "discount_amount":str(discount_amount),
+                    "walletamount":str(walletamount),
+                    "companypay":str(companypay),
                     "member_id":str(memberid),
                     "treatmentid":str(treatmentid),
                     "rule_event":"benefit_success"
-                }
+                }                
+               
                 ruleObj = mdprules.Plan_Rules(db)
                 rspObj = json.loads(ruleObj.Get_Plan_Rules(obj))                   
                 
-                
                 if(rspObj['result'] == "success"):
                     #update totalcompanypays (we are saving discount_amount as companypays )
-                    db(db.treatment.id == treatmentid).update(companypay = discount_amount)    
-                    #update treatmentplan assuming there is one treatment per tplan
-                    db(db.treatmentplan.id==tplanid).update(totalcompanypays = discount_amount) 
-                    db.commit()          
+                    db(db.treatment.id == treatmentid).update(companypay = float(common.getkeyvalue(rspobj,"discount_benefit_amount",0)), 
+                                                              walletamount= float(common.getkeyvalue(rspobj,"super_wallet_amount",0)), 
+                                                              discount_amount = float(common.getkeyvalue(rspobj,"mdp_wallet_amount",0)))    
+                    db.commit() 
                 else:
                     obj={
                         "action":"benefit_failure",
@@ -330,7 +333,10 @@ class Shopse:
                         "rule_event":"benefit_failure"
                     }
                     ruleObj = mdprules.Plan_Rules(db)
-                    rspObj = json.loads(ruleObj.Get_Plan_Rules(obj))                     
+                    rspObj = json.loads(ruleObj.Get_Plan_Rules(obj))                
+                    db(db.treatment.id == treatmentid).update(companypay = 0, 
+                                                              walletamount= 0, 
+                                                              discount_amount = 0)    
             
                 #here need to update treatmentplan tables
                 account._updatetreatmentpayment(db, tplanid, paymentid)

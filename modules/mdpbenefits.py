@@ -1663,10 +1663,12 @@ class Benefit:
       wpba_response = json.loads(r[0].WPBA_response if(len(r) >= 0) else "")
       
       
-      discount_amount = float(common.getkeyvalue(avars,"discount_amount","0"))      
-      balance_benefit_amount = float(common.getkeyvalue(avars,"balance_benefit_amount","0"))      
-      last_redeemed_amount = float(common.getkeyvalue(avars,"last_redeemed_amount","0"))      
-      benefit_member_id = 0
+      discount_amount = float(common.getkeyvalue(avars,"discount_amount","0"))    #mdp wallet amount   
+      walletamount = float(common.getkeyvalue(avars,"walletamount","0"))          #super wallet amount
+      companypay = float(common.getkeyvalue(avars,"companypay","0"))              #graded plan discount 
+
+      planbenefits = wpba_response["planBenefits"][0]
+      wallets = wpba_response["wallet"]
       
       ##call to credit the amount in wallet
 #`     #{
@@ -1688,14 +1690,17 @@ class Benefit:
       reqobj["transaction_type"] = "D"
       reqobj["transac_for"] = "TREATMENT"
       reqobj["transac_refrence_id"] = paymentid
-      
-      planbenefits = wpba_response["planBenefits"]
       reqobj["wallet_planbenefit_id"] = common.getkeyvalue(planbenefits,"id","0")
+      reqobj["discount_amount"]  = common.getkeyvalue(planbenefits,"discount_benefit_amount_usable","0") # mdp wallet discount
+      reqobj["cashback_amount"] = common.getkeyvalue(planbenefits,"wallet_cashback_usable","0") # amount of cashback to mdp wallet
+      reqobj["super_wallet_amount"] = common.getkeyvalue(wallets,"super_wallet_amount_usable","0")   #super wallet amount to be discounted
+      reqobj["mdp_wallet_amount"] = common.getkeyvalue(wallets,"mdp_wallet_amount_usable","0") #mdp wallet amount to be discounted
       
-      reqobj["discount_amount"] = discount_amount
-      reqobj["cashback_amount"] = common.getkeyvalue(planbenefits,"cashback_amount","0")
-      reqobj["super_wallet_amount"] = common.getkeyvalue(planbenefits,"super_wallet_amount","0")
-      reqobj["mdp_wallet_amount"] = common.getkeyvalue(planbenefits,"mdp_wallet_amount","0")
+      #to maintain backward calling compatibility
+      #reqobj["companypays"]  = common.getkeyvalue(planbenefits,"discount_benefit_amount_usable","0")  # plan benefit graded discount
+      #reqobj["companypay"]  = common.getkeyvalue(planbenefits,"discount_benefit_amount_usable","0")  # plan benefit graded discount
+      #reqobj["discount_amount"]  = common.getkeyvalue(wallets,"mdp_wallet_amount_usable","0") # mdp wallet discount
+      #reqobj["walletamount"]  = common.getkeyvalue(wallets,"super_wallet_amount_usable","0") # superwallet discount
       
       vw_url = "http://mtstg.mydentalplan.in/Mdpwebapi/walletPlanBenefitsCrDr"
       logger.loggerpms2.info("Benefit Success_1 (walletPlanBenefitsCrDr) Request " + vw_url + " " + json.dumps(reqobj))
@@ -1722,14 +1727,20 @@ class Benefit:
       rspobj["plan"] = plan_code
       rspobj["memberid"]=memberid
       rspobj["treatmentid"]=treatmentid
-      rspobj["benefit_member_id"]  = str(benefit_member_id)
-      rspobj["discount_amount"] = str(discount_amount)
-      reqobj["wallet_planbenefit_id"] = common.getkeyvalue(planbenefits,"id","0")
-      reqobj["cashback_amount"] = common.getkeyvalue(planbenefits,"cashback_amount","0")
-      reqobj["super_wallet_amount"] = common.getkeyvalue(planbenefits,"super_wallet_amount","0")
-      reqobj["mdp_wallet_amount"] = common.getkeyvalue(planbenefits,"mdp_wallet_amount","0")
+      rspobj["benefit_member_id"]  = common.getkeyvalue(planbenefits,"id","0")
+      rspobj["wallet_planbenefit_id"] = common.getkeyvalue(planbenefits,"id","0")
       
+      rspobj["discount_benefit_amount"] = common.getkeyvalue(planbenefits,"discount_benefit_amount_usable","0")  #graded discount debited from account
+      rspobj["cashback_amount"] = common.getkeyvalue(planbenefits,"wallet_cashback_usable","0")                  #amount credited in mdp wallet to be used in next treatmet
+      rspobj["super_wallet_amount"] = common.getkeyvalue(wallets,"super_wallet_amount_usable","0")
+      rspobj["mdp_wallet_amount"] = common.getkeyvalue(wallets,"mdp_wallet_amount_usable","0")
       
+      #to maintain backward calling compatibility
+      rspobj["companypays"]  = common.getkeyvalue(planbenefits,"discount_benefit_amount_usable","0")  # plan benefit graded discount
+      rspobj["companypay"]  = common.getkeyvalue(planbenefits,"discount_benefit_amount_usable","0")  # plan benefit graded discount
+      rspobj["discount_amount"]  = common.getkeyvalue(wallets,"mdp_wallet_amount_usable","0") # mdp wallet discount
+      rspobj["walletamount"]  = common.getkeyvalue(wallets,"super_wallet_amount_usable","0") # superwallet discount
+                  
     except Exception as e:
       mssg = "Benefit Success_1 API Exception:\n" + str(e)
       logger.loggerpms2.info(mssg)      
@@ -1752,17 +1763,20 @@ class Benefit:
     
     
     try:
+      memberid = int(common.getkeyvalue(avars,"member_id","0"))
       treatmentid = int(common.getkeyvalue(avars,"treatmentid","0"))
-      paymentid = int(common.getkeyvalue(avars,"paymentid","0"))
+      plan_code = common.getkeyvalue(avars,"plan_code","")
+      paymentid = int(common.getkeyvalue(avars,"paymentid","0"))      
+  
+      r = db((db.treatment.id == treatmentid) & (db.treatment.is_active == True)).select(db.treatment.WPBA_response)
+      wpba_response = json.loads(r[0].WPBA_response if(len(r) >= 0) else "")
+      
+      planbenefits = wpba_response["planBenefits"][0]
+      wallets = wpba_response["wallet"]  
+  
       db(db.treatment.id == treatmentid).update(companypay = 0, walletamount=0,wallet_type = "",
                                                 discount_amount=0,WPBA_response = "")  
       db(db.payment.id == paymentid).update(amount=0,fp_invoiceamt=0,fp_amount=0,fp_fee=0,walletamount=0,discount_amount=0)
-      
-      
-      discount_amount = float(common.getkeyvalue(avars,"discount_amount","0"))      
-      balance_benefit_amount = float(common.getkeyvalue(avars,"balance_benefit_amount","0"))      
-      last_redeemed_amount = float(common.getkeyvalue(avars,"last_redeemed_amount","0"))      
-      
 
       ##call to credit the amount in wallet
 #`     #{
@@ -1785,13 +1799,14 @@ class Benefit:
       reqobj["transac_for"] = "TREATMENT"
       reqobj["transac_refrence_id"] = paymentid
       
-      planbenefits = wpba_response["planBenefits"]
+     
       reqobj["wallet_planbenefit_id"] = common.getkeyvalue(planbenefits,"id","0")
       
-      reqobj["discount_amount"] = 0
-      reqobj["cashback_amount"] = 0
-      reqobj["super_wallet_amount"] = 0
-      reqobj["mdp_wallet_amount"] = common.getkeyvalue(planbenefits,"mdp_wallet_amount","0")
+      reqobj["discount_amount"] = common.getkeyvalue(planbenefits,"discount_benefit_amount_usable",0)
+      reqobj["cashback_amount"] = common.getkeyvalue(planbenefits,"wallet_cashback_usable",0)
+      
+      reqobj["super_wallet_amount"] = common.getkeyvalue(wallets,"super_wallet_amount_usable","0")
+      reqobj["mdp_wallet_amount"] = common.getkeyvalue(wallets,"mdp_wallet_amount_usable","0")
       
       vw_url = "http://mtstg.mydentalplan.in/Mdpwebapi/walletPlanBenefitsCrDr"
       logger.loggerpms2.info("Benefit Success_1 (walletPlanBenefitsCrDr) Request " + vw_url + " " + json.dumps(reqobj))

@@ -660,14 +660,14 @@ class Pricing:
                 if(len(rules) == 0):
                     rules = db((db.rules.plan_code == plan_code) &\
                                (db.rules.company_code == company_code) &\
-                               ((db.rules.procedure_code == procedure_ALL)|(db.rules.procedure_code == procedure_OTHERS)) &\
+                               (db.rules.procedure_code == "ALL") &\
                                (db.rules.rule_event == rule_event) &\
                                (db.rules.is_active == True)).select(db.rules.ALL, orderby=db.rules.rule_order)
                     
             else:
                 rules = db((db.rules.plan_code == plan_code) &\
                            (db.rules.company_code == company_code) &\
-                           ((db.rules.procedure_code == procedure_code)|(db.rules.procedure_code == procedure_ALL)|(db.rules.procedure_code == procedure_OTHERS)) &\
+                           (db.rules.procedure_code == "ALL") &\
                            (db.rules.rule_event == rule_event) &\
                            (db.rules.is_active == True)).select(db.rules.ALL, orderby=db.rules.rule_order)
                 
@@ -700,136 +700,136 @@ class Pricing:
 
 
 
-    def vit_ap002(self,avars):
-        logger.loggerpms2.info("Enter  vit_ap002 " + json.dumps(avars))
+    #def vit_ap002(self,avars):
+        #logger.loggerpms2.info("Enter  vit_ap002 " + json.dumps(avars))
         
-        db = self.db
-        rspobj = {}
+        #db = self.db
+        #rspobj = {}
         
-        try:
-            procedure_code = common.getkeyvalue(avars,"procedure_code","")
-            plan_code = common.getkeyvalue(avars,"plan_code","")
-            company_code = common.getkeyvalue(avars,"company_code","")
+        #try:
+            #procedure_code = common.getkeyvalue(avars,"procedure_code","")
+            #plan_code = common.getkeyvalue(avars,"plan_code","")
+            #company_code = common.getkeyvalue(avars,"company_code","")
 
-            #apply pricing rules
-            rules = None
-            procedure_ALL = "all"
-            procedure_OTHERS = "others"
-            rules = db((db.rules.plan_code == plan_code) &\
-                       (db.rules.company_code == company_code) &\
-                       ((db.rules.procedure_code == procedure_code)|(db.rules.procedure_code == procedure_ALL)|(db.rules.procedure_code == procedure_OTHERS)) &\
-                       (db.rules.is_active == True)).select(db.rules.ALL, orderby=db.rules.rule_order)
+            ##apply pricing rules
+            #rules = None
+            #procedure_ALL = "all"
+            #procedure_OTHERS = "others"
+            #rules = db((db.rules.plan_code == plan_code) &\
+                       #(db.rules.company_code == company_code) &\
+                       #((db.rules.procedure_code == procedure_code)|(db.rules.procedure_code == procedure_ALL)|(db.rules.procedure_code == procedure_OTHERS)) &\
+                       #(db.rules.is_active == True)).select(db.rules.ALL, orderby=db.rules.rule_order)
             
             
-            rspobj = {}
-            rspobj["result"] = "fail"
-            rspobj["error_message"] = "vit_ap002 No Rule"
-            rspobj["error_code"] = ""
-            for rule in rules:
-                if(rule.is_active == True):
-                    rspobj = json.loads(getattr(self, (rule.rule_code).lower())(avars))
-                    if(rspobj["result"] == "fail"):
-                        break;
-                    if(rspobj["active"] == False):
-                        break;
+            #rspobj = {}
+            #rspobj["result"] = "fail"
+            #rspobj["error_message"] = "vit_ap002 No Rule"
+            #rspobj["error_code"] = ""
+            #for rule in rules:
+                #if(rule.is_active == True):
+                    #rspobj = json.loads(getattr(self, (rule.rule_code).lower())(avars))
+                    #if(rspobj["result"] == "fail"):
+                        #break;
+                    #if(rspobj["active"] == False):
+                        #break;
                        
-        except Exception as e:
-            rspobj = {}
-            mssg = " Exception VIT AP002 API" + str(e)
-            rspobj["result"] = "fail"
-            rspobj["error_message"] = mssg
+        #except Exception as e:
+            #rspobj = {}
+            #mssg = " Exception VIT AP002 API" + str(e)
+            #rspobj["result"] = "fail"
+            #rspobj["error_message"] = mssg
             
-        mssg = json.dumps(rspobj)
-        logger.loggerpms2.info("Exit VIT AP002 " + mssg)
-        return mssg
+        #mssg = json.dumps(rspobj)
+        #logger.loggerpms2.info("Exit VIT AP002 " + mssg)
+        #return mssg
 
     
-    def rpip99(self,avars):
-        logger.loggerpms2.info("Enter  RPIP99 " + json.dumps(avars))
+    #def rpip99(self,avars):
+        #logger.loggerpms2.info("Enter  RPIP99 " + json.dumps(avars))
         
-        db = self.db
-        rspobj = {}
+        #db = self.db
+        #rspobj = {}
         
-        try:
-            procedure_code = common.getkeyvalue(avars,"procedure_code","")
-            plan_code = common.getkeyvalue(avars,"plan_code","")
-            company_code = common.getkeyvalue(avars,"company_code","")
+        #try:
+            #procedure_code = common.getkeyvalue(avars,"procedure_code","")
+            #plan_code = common.getkeyvalue(avars,"plan_code","")
+            #company_code = common.getkeyvalue(avars,"company_code","")
 
-            #apply pricing rules
-            rules = None
-            procedure_ALL = "all"
-            procedure_OTHERS = "others"
-            rules = db((db.rules.plan_code == plan_code) &\
-                       (db.rules.company_code == company_code) &\
-                       ((db.rules.procedure_code == procedure_code)|(db.rules.procedure_code == procedure_ALL)|(db.rules.procedure_code == procedure_OTHERS)) &\
-                       (db.rules.is_active == True)).select(db.rules.ALL, orderby=db.rules.rule_order)
+            ##apply pricing rules
+            #rules = None
+            #procedure_ALL = "all"
+            #procedure_OTHERS = "others"
+            #rules = db((db.rules.plan_code == plan_code) &\
+                       #(db.rules.company_code == company_code) &\
+                       #((db.rules.procedure_code == procedure_code)|(db.rules.procedure_code == procedure_ALL)|(db.rules.procedure_code == procedure_OTHERS)) &\
+                       #(db.rules.is_active == True)).select(db.rules.ALL, orderby=db.rules.rule_order)
             
             
-            rspobj = {}
-            rspobj["result"] = "fail"
-            rspobj["error_message"] = "RPIP99 No Rule"
-            rspobj["error_code"] = ""
-            for rule in rules:
-                if(rule.is_active == True):
-                    rspobj = json.loads(getattr(self, (rule.rule_code).lower())(avars))
-                    if(rspobj["result"] == "fail"):
-                        break;
-                    if(rspobj["active"] == False):
-                        break;
+            #rspobj = {}
+            #rspobj["result"] = "fail"
+            #rspobj["error_message"] = "RPIP99 No Rule"
+            #rspobj["error_code"] = ""
+            #for rule in rules:
+                #if(rule.is_active == True):
+                    #rspobj = json.loads(getattr(self, (rule.rule_code).lower())(avars))
+                    #if(rspobj["result"] == "fail"):
+                        #break;
+                    #if(rspobj["active"] == False):
+                        #break;
                        
-        except Exception as e:
-            rspobj = {}
-            mssg = " Exception RPIP99 API" + str(e)
-            rspobj["result"] = "fail"
-            rspobj["error_message"] = mssg
+        #except Exception as e:
+            #rspobj = {}
+            #mssg = " Exception RPIP99 API" + str(e)
+            #rspobj["result"] = "fail"
+            #rspobj["error_message"] = mssg
             
-        mssg = json.dumps(rspobj)
-        logger.loggerpms2.info("Exit rpip99 " + mssg)
-        return mssg
+        #mssg = json.dumps(rspobj)
+        #logger.loggerpms2.info("Exit rpip99 " + mssg)
+        #return mssg
 
 
-    def rpip599(self,avars):
-        logger.loggerpms2.info("Enter  RPIP599 " + json.dumps(avars))
+    #def rpip599(self,avars):
+        #logger.loggerpms2.info("Enter  RPIP599 " + json.dumps(avars))
         
-        db = self.db
-        rspobj = {}
+        #db = self.db
+        #rspobj = {}
         
-        try:
-            procedure_code = common.getkeyvalue(avars,"procedure_code","")
-            plan_code = common.getkeyvalue(avars,"plan_code","")
-            company_code = common.getkeyvalue(avars,"company_code","")
+        #try:
+            #procedure_code = common.getkeyvalue(avars,"procedure_code","")
+            #plan_code = common.getkeyvalue(avars,"plan_code","")
+            #company_code = common.getkeyvalue(avars,"company_code","")
 
-            #apply pricing rules
-            rules = None
-            procedure_ALL = "all"
-            procedure_OTHERS = "others"
-            rules = db((db.rules.plan_code == plan_code) &\
-                       (db.rules.company_code == company_code) &\
-                       ((db.rules.procedure_code == procedure_code)|(db.rules.procedure_code == procedure_ALL)|(db.rules.procedure_code == procedure_OTHERS)) &\
-                       (db.rules.is_active == True)).select(db.rules.ALL, orderby=db.rules.rule_order)
+            ##apply pricing rules
+            #rules = None
+            #procedure_ALL = "all"
+            #procedure_OTHERS = "others"
+            #rules = db((db.rules.plan_code == plan_code) &\
+                       #(db.rules.company_code == company_code) &\
+                       #((db.rules.procedure_code == procedure_code)|(db.rules.procedure_code == procedure_ALL)|(db.rules.procedure_code == procedure_OTHERS)) &\
+                       #(db.rules.is_active == True)).select(db.rules.ALL, orderby=db.rules.rule_order)
             
             
-            rspobj = {}
-            rspobj["result"] = "fail"
-            rspobj["error_message"] = "RPIP599 No Rule"
-            rspobj["error_code"] = ""
-            for rule in rules:
-                if(rule.is_active == True):
-                    rspobj = json.loads(getattr(self, (rule.rule_code).lower())(avars))
-                    if(rspobj["result"] == "fail"):
-                        break;
-                    if(rspobj["active"] == False):
-                        break;
+            #rspobj = {}
+            #rspobj["result"] = "fail"
+            #rspobj["error_message"] = "RPIP599 No Rule"
+            #rspobj["error_code"] = ""
+            #for rule in rules:
+                #if(rule.is_active == True):
+                    #rspobj = json.loads(getattr(self, (rule.rule_code).lower())(avars))
+                    #if(rspobj["result"] == "fail"):
+                        #break;
+                    #if(rspobj["active"] == False):
+                        #break;
                        
-        except Exception as e:
-            rspobj = {}
-            mssg = " Exception RPIP599 API" + str(e)
-            rspobj["result"] = "fail"
-            rspobj["error_message"] = mssg
+        #except Exception as e:
+            #rspobj = {}
+            #mssg = " Exception RPIP599 API" + str(e)
+            #rspobj["result"] = "fail"
+            #rspobj["error_message"] = mssg
             
-        mssg = json.dumps(rspobj)
-        logger.loggerpms2.info("Exit rpip599 " + mssg)
-        return mssg
+        #mssg = json.dumps(rspobj)
+        #logger.loggerpms2.info("Exit rpip599 " + mssg)
+        #return mssg
     
     
     #This is a generic rule for all procedures for all plans for all procedurepriceplancodes
@@ -842,9 +842,7 @@ class Pricing:
         rspobj = {}
         
         try:
-            procedure_ALL = "all"
-            procedure_OTHERS = "others"            
-
+          
             procedure_code = common.getkeyvalue(avars,"procedure_code","")
             region_code = common.getkeyvalue(avars,"region_code","")
             plan_code = common.getkeyvalue(avars,"plan_code","")
@@ -867,13 +865,15 @@ class Pricing:
             else:
                 is_valid = False
             
-            
-            
-            
             prp = db((db.provider_region_plan.companycode == company_code) & \
-                     ((db.provider_region_plan.regioncode == region_code) | (db.provider_region_plan.regioncode==procedure_ALL)) & \
-                     ((db.provider_region_plan.policy == plan_code)|(db.provider_region_plan.plancode == procedure_ALL))).select()
-        
+                     (db.provider_region_plan.regioncode == region_code) & \
+                     (db.provider_region_plan.plancode == plan_code)).select()
+            
+            if(len(prp) == 0):
+                prp = db((db.provider_region_plan.companycode == company_code) & \
+                         (db.provider_region_plan.regioncode == "ALL") & \
+                         (db.provider_region_plan.plancode == plan_code)).select()
+
             ppc = prp[0].procedurepriceplancode if(len(prp) == 1) else "PREMWALKIN"
         
             ppp = db((db.procedurepriceplan.procedurecode == procedure_code) &\
@@ -944,8 +944,12 @@ class Pricing:
             
             
             prp = db((db.provider_region_plan.companycode == company_code) & \
-                     ((db.provider_region_plan.regioncode == region_code) | (db.provider_region_plan.regioncode==procedure_ALL)) & \
-                     ((db.provider_region_plan.policy == plan_code)|(db.provider_region_plan.plancode == procedure_ALL))).select()
+                     (db.provider_region_plan.regioncode == region_code) & \
+                     (db.provider_region_plan.plancode == plan_code)).select()
+            if(len(prp) == 0):
+                prp = db((db.provider_region_plan.companycode == company_code) & \
+                         (db.provider_region_plan.regioncode == "ALL") & \
+                         (db.provider_region_plan.plancode == plan_code)).select()
         
             ppc = prp[0].procedurepriceplancode if(len(prp) == 1) else "PREMWALKIN"
         
@@ -981,229 +985,229 @@ class Pricing:
             rspobj["error_message"] = mssg
             
         mssg = json.dumps(rspobj)
-        logger.loggerpms2.info("Exit Pricing rule0 " + mssg)
+        logger.loggerpms2.info("Exit Pricing rule walkin " + mssg)
         return mssg    
     
     #This rule - Consultation can only be used once in every four months - three in total.
-    def rpip599_consultancy_validity(self,avars):
-        logger.loggerpms2.info("Enter RPIP599 Rule 0 API " + json.dumps(avars))
+    #def rpip599_consultancy_validity(self,avars):
+        #logger.loggerpms2.info("Enter RPIP599 Rule 0 API " + json.dumps(avars))
         
-        db = self.db
-        rspobj = {}
+        #db = self.db
+        #rspobj = {}
         
-        try:
-            procedure_code = common.getkeyvalue(avars,"procedure_code","")
-            region_code = common.getkeyvalue(avars,"region_code","")
-            plan_code = common.getkeyvalue(avars,"plan_code","")
-            company_code = common.getkeyvalue(avars,"company_code","")
-            treatment_id = int(common.getid(common.getkeyvalue(avars,"treatment_id",0)))
+        #try:
+            #procedure_code = common.getkeyvalue(avars,"procedure_code","")
+            #region_code = common.getkeyvalue(avars,"region_code","")
+            #plan_code = common.getkeyvalue(avars,"plan_code","")
+            #company_code = common.getkeyvalue(avars,"company_code","")
+            #treatment_id = int(common.getid(common.getkeyvalue(avars,"treatment_id",0)))
             
-            is_valid = True
-            #number of times this procedure is used
-            trp = db((db.vw_treatmentprocedure.treatmentid == treatment_id) &\
-                     (db.vw_treatmentprocedure.procedurecode == procedure_code) &\
-                     (db.vw_treatmentprocedure.is_active == True)).select(db.vw_treatmentprocedure.ALL, orderby=~db.vw_treatmentprocedure.id)
+            #is_valid = True
+            ##number of times this procedure is used
+            #trp = db((db.vw_treatmentprocedure.treatmentid == treatment_id) &\
+                     #(db.vw_treatmentprocedure.procedurecode == procedure_code) &\
+                     #(db.vw_treatmentprocedure.is_active == True)).select(db.vw_treatmentprocedure.ALL, orderby=~db.vw_treatmentprocedure.id)
             
-            is_valid3 = True if(len(trp) >=3) else False #already used three times
-            is_valid0 = True if(len(trp) ==0) else False #Not used once
-            
-            
-            #last treatment date when this G0101 was added.
-            treatmentdate = trp[0].treatmentdate if((len(trp) > 0) & (is_valid == True)) else common.getISTCurrentLocatTime().date()
-            currentdate = common.getISTFormatCurrentLocatTime().date()
-            #if current date > last treatmentdate + 4 months, then G0101 can be added, else not.
-            #this is appx because we are not differentiating about 28,29,30,31 days month
-            months4 = timedelta(days=4*30)
-            day  = timedelta(days = 1)
-            nextdateallowed = (treatmentdate + months4) - day  
-            is_validn = True if(currentdate >= nextdateallowed) else False
-            
-            if(is_valid3 == True):  #3 times limit reached
-                is_valid = False
-            elif (is_valid0 == True): #0 times used
-                is_valid = True
-            elif (is_validn == True): # 4 months period passed
-                is_valid = True
-            else:
-                is_valid = False
+            #is_valid3 = True if(len(trp) >=3) else False #already used three times
+            #is_valid0 = True if(len(trp) ==0) else False #Not used once
             
             
-            prp = db((db.provider_region_plan.companycode == company_code) & \
-                     (db.provider_region_plan.regioncode == region_code) & \
-                     ((db.provider_region_plan.policy == plan_code)|(db.provider_region_plan.plancode == plan_code))).select()
+            ##last treatment date when this G0101 was added.
+            #treatmentdate = trp[0].treatmentdate if((len(trp) > 0) & (is_valid == True)) else common.getISTCurrentLocatTime().date()
+            #currentdate = common.getISTFormatCurrentLocatTime().date()
+            ##if current date > last treatmentdate + 4 months, then G0101 can be added, else not.
+            ##this is appx because we are not differentiating about 28,29,30,31 days month
+            #months4 = timedelta(days=4*30)
+            #day  = timedelta(days = 1)
+            #nextdateallowed = (treatmentdate + months4) - day  
+            #is_validn = True if(currentdate >= nextdateallowed) else False
+            
+            #if(is_valid3 == True):  #3 times limit reached
+                #is_valid = False
+            #elif (is_valid0 == True): #0 times used
+                #is_valid = True
+            #elif (is_validn == True): # 4 months period passed
+                #is_valid = True
+            #else:
+                #is_valid = False
+            
+            
+            #prp = db((db.provider_region_plan.companycode == company_code) & \
+                     #(db.provider_region_plan.regioncode == region_code) & \
+                     #((db.provider_region_plan.policy == plan_code)|(db.provider_region_plan.plancode == plan_code))).select()
         
-            ppc = prp[0].procedurepriceplancode if(len(prp) == 1) else "PREMWALKIN"
+            #ppc = prp[0].procedurepriceplancode if(len(prp) == 1) else "PREMWALKIN"
         
-            ppp = db((db.procedurepriceplan.procedurecode == procedure_code) &\
-                     (db.procedurepriceplan.procedurepriceplancode == ppc)  &\
-                     (db.procedurepriceplan.is_active == True)).select()
+            #ppp = db((db.procedurepriceplan.procedurecode == procedure_code) &\
+                     #(db.procedurepriceplan.procedurepriceplancode == ppc)  &\
+                     #(db.procedurepriceplan.is_active == True)).select()
         
-            #ppp JSON Object
-            rspobj["active"] = True 
-            rspobj["result"] = "success"
-            rspobj["error_message"] = ""
-            rspobj["error_code"] = ""
-            if(len(ppp) == 1):
-                rspobj["procedurepriceplancode"] = ppc
-                rspobj["ucrfee"] = float(common.getvalue(ppp[0].ucrfee))
-                rspobj["procedurefee"] = float(common.getvalue(ppp[0].procedurefee))
-                rspobj["copay"] = float(common.getvalue(ppp[0].copay))
-                rspobj["inspays"] = float(common.getvalue(ppp[0].inspays))
-                rspobj["companypays"] = float(common.getvalue(ppp[0].companypays))
-                rspobj["walletamount"] = float(common.getvalue(ppp[0].walletamount))
-                rspobj["discount_amount"] = float(common.getvalue(ppp[0].discount_amount))
-                rspobj["is_free"] = common.getboolean(ppp[0].is_free)
-                rspobj["voucher_code"] = common.getstring(ppp[0].voucher_code)
-                rspobj["active"] = is_valid 
-                rspobj["remarks"] = common.getstring(ppp[0].remarks)
-                c = db(db.company.company == company_code).select()
-                rspobj["authorizationrequired"] = False if (len(c) <= 0) else common.getboolean(c[0].authorizationrequired)
+            ##ppp JSON Object
+            #rspobj["active"] = True 
+            #rspobj["result"] = "success"
+            #rspobj["error_message"] = ""
+            #rspobj["error_code"] = ""
+            #if(len(ppp) == 1):
+                #rspobj["procedurepriceplancode"] = ppc
+                #rspobj["ucrfee"] = float(common.getvalue(ppp[0].ucrfee))
+                #rspobj["procedurefee"] = float(common.getvalue(ppp[0].procedurefee))
+                #rspobj["copay"] = float(common.getvalue(ppp[0].copay))
+                #rspobj["inspays"] = float(common.getvalue(ppp[0].inspays))
+                #rspobj["companypays"] = float(common.getvalue(ppp[0].companypays))
+                #rspobj["walletamount"] = float(common.getvalue(ppp[0].walletamount))
+                #rspobj["discount_amount"] = float(common.getvalue(ppp[0].discount_amount))
+                #rspobj["is_free"] = common.getboolean(ppp[0].is_free)
+                #rspobj["voucher_code"] = common.getstring(ppp[0].voucher_code)
+                #rspobj["active"] = is_valid 
+                #rspobj["remarks"] = common.getstring(ppp[0].remarks)
+                #c = db(db.company.company == company_code).select()
+                #rspobj["authorizationrequired"] = False if (len(c) <= 0) else common.getboolean(c[0].authorizationrequired)
                 
-        except Exception as e:
-            rspobj = {}
-            mssg = "RPIP599 Rule 0 API Exception " + str(e)
-            rspobj["result"] = "fail"
-            rspobj["error_message"] = mssg
+        #except Exception as e:
+            #rspobj = {}
+            #mssg = "RPIP599 Rule 0 API Exception " + str(e)
+            #rspobj["result"] = "fail"
+            #rspobj["error_message"] = mssg
             
-        mssg = json.dumps(rspobj)
-        logger.loggerpms2.info("Exit Pricing rpip599_consultancy_validity "  + mssg)
-        return mssg
+        #mssg = json.dumps(rspobj)
+        #logger.loggerpms2.info("Exit Pricing rpip599_consultancy_validity "  + mssg)
+        #return mssg
     
     #This rule - Consultation can only be used once in every four months - three in total.
-    def rpip99_consultancy_validity(self,avars):
-        logger.loggerpms2.info("Enter RPIP599 Rule 0 API " + json.dumps(avars))
+    #def rpip99_consultancy_validity(self,avars):
+        #logger.loggerpms2.info("Enter RPIP599 Rule 0 API " + json.dumps(avars))
         
-        db = self.db
-        rspobj = {}
+        #db = self.db
+        #rspobj = {}
         
-        try:
-            procedure_code = common.getkeyvalue(avars,"procedure_code","")
-            region_code = common.getkeyvalue(avars,"region_code","")
-            plan_code = common.getkeyvalue(avars,"plan_code","")
-            company_code = common.getkeyvalue(avars,"company_code","")
-            treatment_id = int(common.getid(common.getkeyvalue(avars,"treatment_id",0)))
+        #try:
+            #procedure_code = common.getkeyvalue(avars,"procedure_code","")
+            #region_code = common.getkeyvalue(avars,"region_code","")
+            #plan_code = common.getkeyvalue(avars,"plan_code","")
+            #company_code = common.getkeyvalue(avars,"company_code","")
+            #treatment_id = int(common.getid(common.getkeyvalue(avars,"treatment_id",0)))
             
-            is_valid = True
-            #number of times this procedure is used
-            trp = db((db.vw_treatmentprocedure.treatmentid == treatment_id) &\
-                     (db.vw_treatmentprocedure.procedurecode == procedure_code) &\
-                     (db.vw_treatmentprocedure.is_active == True)).select(db.vw_treatmentprocedure.ALL, orderby=~db.vw_treatmentprocedure.id)
+            #is_valid = True
+            ##number of times this procedure is used
+            #trp = db((db.vw_treatmentprocedure.treatmentid == treatment_id) &\
+                     #(db.vw_treatmentprocedure.procedurecode == procedure_code) &\
+                     #(db.vw_treatmentprocedure.is_active == True)).select(db.vw_treatmentprocedure.ALL, orderby=~db.vw_treatmentprocedure.id)
             
-            is_valid3 = True if(len(trp) >=3) else False #already used three times
-            is_valid0 = True if(len(trp) ==0) else False #Not used once
-            
-            
-            #last treatment date when this G0101 was added.
-            treatmentdate = trp[0].treatmentdate if((len(trp) > 0) & (is_valid == True)) else common.getISTCurrentLocatTime().date()
-            currentdate = common.getISTFormatCurrentLocatTime().date()
-            #if current date > last treatmentdate + 4 months, then G0101 can be added, else not.
-            #this is appx because we are not differentiating about 28,29,30,31 days month
-            months4 = timedelta(days=4*30)
-            day  = timedelta(days = 1)
-            nextdateallowed = (treatmentdate + months4) - day  
-            is_validn = True if(currentdate >= nextdateallowed) else False
-            
-            if(is_valid3 == True):  #3 times limit reached
-                is_valid = False
-            elif (is_valid0 == True): #0 times used
-                is_valid = True
-            elif (is_validn == True): # 4 months period passed
-                is_valid = True
-            else:
-                is_valid = False
+            #is_valid3 = True if(len(trp) >=3) else False #already used three times
+            #is_valid0 = True if(len(trp) ==0) else False #Not used once
             
             
-            prp = db((db.provider_region_plan.companycode == company_code) & \
-                     (db.provider_region_plan.regioncode == region_code) & \
-                     ((db.provider_region_plan.policy == plan_code)|(db.provider_region_plan.plancode == plan_code))).select()
+            ##last treatment date when this G0101 was added.
+            #treatmentdate = trp[0].treatmentdate if((len(trp) > 0) & (is_valid == True)) else common.getISTCurrentLocatTime().date()
+            #currentdate = common.getISTFormatCurrentLocatTime().date()
+            ##if current date > last treatmentdate + 4 months, then G0101 can be added, else not.
+            ##this is appx because we are not differentiating about 28,29,30,31 days month
+            #months4 = timedelta(days=4*30)
+            #day  = timedelta(days = 1)
+            #nextdateallowed = (treatmentdate + months4) - day  
+            #is_validn = True if(currentdate >= nextdateallowed) else False
+            
+            #if(is_valid3 == True):  #3 times limit reached
+                #is_valid = False
+            #elif (is_valid0 == True): #0 times used
+                #is_valid = True
+            #elif (is_validn == True): # 4 months period passed
+                #is_valid = True
+            #else:
+                #is_valid = False
+            
+            
+            #prp = db((db.provider_region_plan.companycode == company_code) & \
+                     #(db.provider_region_plan.regioncode == region_code) & \
+                     #((db.provider_region_plan.policy == plan_code)|(db.provider_region_plan.plancode == plan_code))).select()
         
-            ppc = prp[0].procedurepriceplancode if(len(prp) == 1) else "PREMWALKIN"
+            #ppc = prp[0].procedurepriceplancode if(len(prp) == 1) else "PREMWALKIN"
         
-            ppp = db((db.procedurepriceplan.procedurecode == procedure_code) &\
-                     (db.procedurepriceplan.procedurepriceplancode == ppc)  &\
-                     (db.procedurepriceplan.is_active == True)).select()
+            #ppp = db((db.procedurepriceplan.procedurecode == procedure_code) &\
+                     #(db.procedurepriceplan.procedurepriceplancode == ppc)  &\
+                     #(db.procedurepriceplan.is_active == True)).select()
         
-            #ppp JSON Object
-            rspobj["active"] = True 
-            rspobj["result"] = "success"
-            rspobj["error_message"] = ""
-            rspobj["error_code"] = ""
-            if(len(ppp) == 1):
-                rspobj["procedurepriceplancode"] = ppc
-                rspobj["ucrfee"] = float(common.getvalue(ppp[0].ucrfee))
-                rspobj["procedurefee"] = float(common.getvalue(ppp[0].procedurefee))
-                rspobj["copay"] = float(common.getvalue(ppp[0].copay))
-                rspobj["inspays"] = float(common.getvalue(ppp[0].inspays))
-                rspobj["companypays"] = float(common.getvalue(ppp[0].companypays))
-                rspobj["walletamount"] = float(common.getvalue(ppp[0].walletamount))
-                rspobj["discount_amount"] = float(common.getvalue(ppp[0].discount_amount))
-                rspobj["is_free"] = common.getboolean(ppp[0].is_free)
-                rspobj["voucher_code"] = common.getstring(ppp[0].voucher_code)
-                rspobj["active"] = is_valid 
-                rspobj["remarks"] = common.getstring(ppp[0].remarks)
-                c = db(db.company.company == company_code).select()
-                rspobj["authorizationrequired"] = False if (len(c) <= 0) else common.getboolean(c[0].authorizationrequired)
+            ##ppp JSON Object
+            #rspobj["active"] = True 
+            #rspobj["result"] = "success"
+            #rspobj["error_message"] = ""
+            #rspobj["error_code"] = ""
+            #if(len(ppp) == 1):
+                #rspobj["procedurepriceplancode"] = ppc
+                #rspobj["ucrfee"] = float(common.getvalue(ppp[0].ucrfee))
+                #rspobj["procedurefee"] = float(common.getvalue(ppp[0].procedurefee))
+                #rspobj["copay"] = float(common.getvalue(ppp[0].copay))
+                #rspobj["inspays"] = float(common.getvalue(ppp[0].inspays))
+                #rspobj["companypays"] = float(common.getvalue(ppp[0].companypays))
+                #rspobj["walletamount"] = float(common.getvalue(ppp[0].walletamount))
+                #rspobj["discount_amount"] = float(common.getvalue(ppp[0].discount_amount))
+                #rspobj["is_free"] = common.getboolean(ppp[0].is_free)
+                #rspobj["voucher_code"] = common.getstring(ppp[0].voucher_code)
+                #rspobj["active"] = is_valid 
+                #rspobj["remarks"] = common.getstring(ppp[0].remarks)
+                #c = db(db.company.company == company_code).select()
+                #rspobj["authorizationrequired"] = False if (len(c) <= 0) else common.getboolean(c[0].authorizationrequired)
                 
-        except Exception as e:
-            rspobj = {}
-            mssg = "RPIP599 Rule 0 API Exception " + str(e)
-            rspobj["result"] = "fail"
-            rspobj["error_message"] = mssg
+        #except Exception as e:
+            #rspobj = {}
+            #mssg = "RPIP599 Rule 0 API Exception " + str(e)
+            #rspobj["result"] = "fail"
+            #rspobj["error_message"] = mssg
             
-        mssg = json.dumps(rspobj)
-        logger.loggerpms2.info("Exit Pricing rpip99_consultancy_validity " + mssg)
-        return mssg
+        #mssg = json.dumps(rspobj)
+        #logger.loggerpms2.info("Exit Pricing rpip99_consultancy_validity " + mssg)
+        #return mssg
     
-    def rpip599_rule1(self,avars):
-        logger.loggerpms2.info("Enter RPIP599 Rule 1 API " + json.dumps(avars))
+    #def rpip599_rule1(self,avars):
+        #logger.loggerpms2.info("Enter RPIP599 Rule 1 API " + json.dumps(avars))
         
-        db = self.db
-        rspobj = {}
+        #db = self.db
+        #rspobj = {}
         
-        try:
-            procedure_code = common.getkeyvalue(avars,"procedure_code","")
-            region_code = common.getkeyvalue(avars,"region_code","")
-            plan_code = common.getkeyvalue(avars,"plan_code","")
-            company_code = common.getkeyvalue(avars,"company_code","")
-            treatment_id = int(common.getid(common.getkeyvalue(avars,"treatment_id",0)))
+        #try:
+            #procedure_code = common.getkeyvalue(avars,"procedure_code","")
+            #region_code = common.getkeyvalue(avars,"region_code","")
+            #plan_code = common.getkeyvalue(avars,"plan_code","")
+            #company_code = common.getkeyvalue(avars,"company_code","")
+            #treatment_id = int(common.getid(common.getkeyvalue(avars,"treatment_id",0)))
         
-            prp = db((db.provider_region_plan.companycode == company_code) & \
-                     (db.provider_region_plan.regioncode == region_code) & \
-                     (db.provider_region_plan.policy == plan_code)).select()
+            #prp = db((db.provider_region_plan.companycode == company_code) & \
+                     #(db.provider_region_plan.regioncode == region_code) & \
+                     #(db.provider_region_plan.policy == plan_code)).select()
         
-            ppc = prp[0].procedurepriceplancode if(len(prp) == 1) else "PREMWALKIN"
+            #ppc = prp[0].procedurepriceplancode if(len(prp) == 1) else "PREMWALKIN"
         
-            ppp = db((db.procedurepriceplan.procedurecode == procedure_code) &\
-                     (db.procedurepriceplan.procedurepriceplancode == ppc)  &\
-                     (db.procedurepriceplan.is_active == True)).select()
+            #ppp = db((db.procedurepriceplan.procedurecode == procedure_code) &\
+                     #(db.procedurepriceplan.procedurepriceplancode == ppc)  &\
+                     #(db.procedurepriceplan.is_active == True)).select()
         
-            #ppp JSON Object
-            rspobj["active"] = True 
-            rspobj["result"] = "success"
-            rspobj["error_message"] = ""
-            rspobj["error_code"] = ""
-            if(len(ppp) == 1):
-                rspobj["ucrfee"] = float(common.getvalue(ppp[0].ucrfee))
-                rspobj["procedurefee"] = float(common.getvalue(ppp[0].procedurefee))
-                rspobj["copay"] = float(common.getvalue(ppp[0].copay))
-                rspobj["inspays"] = float(common.getvalue(ppp[0].inspays))
-                rspobj["companypays"] = float(common.getvalue(ppp[0].companypays))
-                rspobj["walletamount"] = float(common.getvalue(ppp[0].walletamount))
-                rspobj["discount_amount"] = float(common.getvalue(ppp[0].discount_amount))
-                rspobj["is_free"] = common.getboolean(ppp[0].is_free)
-                rspobj["voucher_code"] = ppp[0].voucher_code
-                rspobj["active"] = True 
-                rspobj["remarks"] = common.getstring(ppp[0].remarks)
+            ##ppp JSON Object
+            #rspobj["active"] = True 
+            #rspobj["result"] = "success"
+            #rspobj["error_message"] = ""
+            #rspobj["error_code"] = ""
+            #if(len(ppp) == 1):
+                #rspobj["ucrfee"] = float(common.getvalue(ppp[0].ucrfee))
+                #rspobj["procedurefee"] = float(common.getvalue(ppp[0].procedurefee))
+                #rspobj["copay"] = float(common.getvalue(ppp[0].copay))
+                #rspobj["inspays"] = float(common.getvalue(ppp[0].inspays))
+                #rspobj["companypays"] = float(common.getvalue(ppp[0].companypays))
+                #rspobj["walletamount"] = float(common.getvalue(ppp[0].walletamount))
+                #rspobj["discount_amount"] = float(common.getvalue(ppp[0].discount_amount))
+                #rspobj["is_free"] = common.getboolean(ppp[0].is_free)
+                #rspobj["voucher_code"] = ppp[0].voucher_code
+                #rspobj["active"] = True 
+                #rspobj["remarks"] = common.getstring(ppp[0].remarks)
                 
-        except Exception as e:
-            rspobj = {}
-            mssg = "RPIP599 Rule 1 API Exception " + str(e)
-            rspobj["result"] = "fail"
-            rspobj["error_message"] = mssg
+        #except Exception as e:
+            #rspobj = {}
+            #mssg = "RPIP599 Rule 1 API Exception " + str(e)
+            #rspobj["result"] = "fail"
+            #rspobj["error_message"] = mssg
             
-        mssg = json.dumps(rspobj)
-        logger.loggerpms2.info("Exit Pricing rpip599_rule1 " + mssg)
-        return mssg
+        #mssg = json.dumps(rspobj)
+        #logger.loggerpms2.info("Exit Pricing rpip599_rule1 " + mssg)
+        #return mssg
     
     #This rule - Procedure is free once
     def rule1(self,avars):
@@ -1249,7 +1253,12 @@ class Pricing:
             
             prp = db((db.provider_region_plan.companycode == company_code) & \
                      (db.provider_region_plan.regioncode == region_code) & \
-                     ((db.provider_region_plan.policy == plan_code)|(db.provider_region_plan.plancode == plan_code))).select()
+                     (db.provider_region_plan.plancode == plan_code)).select()
+            if(len(prp) == 0):
+                prp = db((db.provider_region_plan.companycode == company_code) & \
+                         (db.provider_region_plan.regioncode == "ALL") & \
+                         (db.provider_region_plan.plancode == plan_code)).select()
+                
         
             ppc = prp[0].procedurepriceplancode if(len(prp) == 1) else "PREMWALKIN"
         
@@ -1334,7 +1343,11 @@ class Pricing:
             
             prp = db((db.provider_region_plan.companycode == company_code) & \
                      (db.provider_region_plan.regioncode == region_code) & \
-                     ((db.provider_region_plan.policy == plan_code)|(db.provider_region_plan.plancode == plan_code))).select()
+                     (db.provider_region_plan.plancode == plan_code)).select()
+            if(len(prp) == 0):
+                prp = db((db.provider_region_plan.companycode == company_code) & \
+                         (db.provider_region_plan.regioncode == "ALL") & \
+                         (db.provider_region_plan.plancode == plan_code)).select()
         
             ppc = prp[0].procedurepriceplancode if(len(prp) == 1) else "PREMWALKIN"
         

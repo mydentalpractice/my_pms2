@@ -425,28 +425,18 @@ class PineLabs:
                 db.commit()                
             
                 #Call Voucder success
-                vcobj = mdpbenefits.Benefit(db)
-                reqobj = {"paymentid" : paymentid}
-                rspobj = json.loads(vcobj.voucher_success(reqobj))                 
-            
-                #here need to update treatmentplan tables
-                account._updatetreatmentpayment(db, tplanid, paymentid)
-                db.commit()
-            
-                #wallet_success
-                #reqobj = {}
+                #vcobj = mdpbenefits.Benefit(db)
                 #reqobj = {"paymentid" : paymentid}
-                #rspobj = json.loads(vcobj.wallet_success(reqobj))                 
+                #rspobj = json.loads(vcobj.voucher_success(reqobj))                 
+            
                 ##here need to update treatmentplan tables
                 #account._updatetreatmentpayment(db, tplanid, paymentid)
-                #db.commit()                
-                
-                
+                #db.commit()
                 
                 trtmnt = db((db.treatment.id == treatmentid) & (db.treatment.is_active == True)).select()
-                discount_amount = trtmnt[0].companypay if(len(trtmnt) > 0) else 0
-            
-          
+                discount_amount = trtmnt[0].discount_amount if(len(trtmnt) > 0) else 0
+                walletamount = trtmnt[0].walletamount if(len(trtmnt) > 0) else 0
+                companypay = trtmnt[0].companypay if(len(trtmnt) > 0) else 0
 
                 obj={
                     "action":"benefit_success",
@@ -454,6 +444,8 @@ class PineLabs:
                     "plan_code":policy,
                     "company_code":company_code,
                     "discount_amount":str(discount_amount),
+                    "walletamount":str(walletamount),
+                    "companypay":str(companypay),
                     "member_id":str(memberid),
                     "treatmentid":str(treatmentid),
                     "rule_event":"benefit_success"
@@ -461,12 +453,11 @@ class PineLabs:
                 ruleObj = mdprules.Plan_Rules(db)
                 rspObj = json.loads(ruleObj.Get_Plan_Rules(obj))                
                 
-                
                 if(rspObj['result'] == "success"):
                     #update totalcompanypays (we are saving discount_amount as companypays )
-                    db(db.treatment.id == treatmentid).update(companypay = discount_amount) 
-                    #update treatmentplan assuming there is one treatment per tplan
-                    db(db.treatmentplan.id==tplanid).update(totalcompanypays = discount_amount) 
+                    db(db.treatment.id == treatmentid).update(companypay = float(common.getkeyvalue(rspobj,"discount_benefit_amount",0)), 
+                                                              walletamount= float(common.getkeyvalue(rspobj,"super_wallet_amount",0)), 
+                                                              discount_amount = float(common.getkeyvalue(rspobj,"mdp_wallet_amount",0)))    
                     db.commit() 
                 else:
                     obj={
@@ -481,6 +472,9 @@ class PineLabs:
                     }
                     ruleObj = mdprules.Plan_Rules(db)
                     rspObj = json.loads(ruleObj.Get_Plan_Rules(obj))                
+                    db(db.treatment.id == treatmentid).update(companypay = 0, 
+                                                              walletamount= 0, 
+                                                              discount_amount = 0)    
                     
             
                 #here need to update treatmentplan tables
@@ -498,9 +492,6 @@ class PineLabs:
                 jsonresp["paymentid"] = paymentid
                 jsonresp["result"] = "success"
                 jsonresp["error_message"] = ""
-                
-                
-                
             else:
                 db((db.payment.id == paymentid)).update(fp_status = status,
                                                                 paymentcommit = False,
@@ -511,6 +502,15 @@ class PineLabs:
                                                                 precommitamount = 0
                                                                 
                                                                 )
+                account._updatetreatmentpayment(db, tplanid, paymentid)
+                db.commit()    
+                
+  
+                trtmnt = db((db.treatment.id == treatmentid) & (db.treatment.is_active == True)).select()
+                discount_amount = trtmnt[0].discount_amount if(len(trtmnt) > 0) else 0
+                walletamount = trtmnt[0].walletamount if(len(trtmnt) > 0) else 0
+                companypay = trtmnt[0].companypay if(len(trtmnt) > 0) else 0                
+                
                 #reset 
                 obj={
                     "action":"benefit_failure",
@@ -525,10 +525,11 @@ class PineLabs:
                 ruleObj = mdprules.Plan_Rules(db)
                 rspObj = json.loads(ruleObj.Get_Plan_Rules(obj))                 
 
-                #db(db.treatment.id == treatmentid).update(companypay = 0, walletamount=0,wallet_type = "",
-                                                          #discount_amount=0,WPBA_response = "")  
-                #db(db.payment.id == paymentid).update(amount=0,fp_invoiceamt=0,fp_amount=0,fp_fee=0,walletamount=0,discount_amount=0)
+                db(db.treatment.id == treatmentid).update(companypay = 0, 
+                                                          walletamount= 0, 
+                                                          discount_amount = 0)    
                 
+
                 account._updatetreatmentpayment(db, tplanid,paymentid)
 
                 jsonresp = avars
