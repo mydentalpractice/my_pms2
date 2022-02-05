@@ -687,7 +687,7 @@ class Treatment:
         
     def gettreatment(self,treatmentid):
         
-        #logger.loggerpms2.info("Enter Get Treatment API")
+        logger.loggerpms2.info("Enter Get Treatment API")
         
         db = self.db
         providerid = self.providerid        
@@ -1058,7 +1058,29 @@ class Treatment:
                 
                 c = db(db.company.id == int(common.getid(p[0].company))).select(db.company.authorizationrequired)
                 
-            
+               #respobj["totaltreatmentcost"]=
+               #respobj["totalinspays"]=
+               #respobj["totalcompanypays"]=
+               #respobj["totalwalletamount"]=
+               #respobj["totaldiscount_amount"]=
+               #respobj["totalpromo_amount"]=totalpromo_amount
+               #respobj["totalprecopay"]=totalprecopay
+               #respobj["totalcopay"]=
+               #respobj["totalpaid"]=
+             
+           
+               #respobj["treatmentcost"]=treatmentcost
+               #respobj["copay"]=copay
+               #respobj["precopay"]=precopay
+               #respobj["inspays"]=inspays
+               #respobj["companypays"]=companypays
+               #respobj["walletamount"]=walletamount
+               #respobj["discount_amount"]=discount_amount
+               #respobj["promo_amount"]=promo_amount
+               #respobj["wallet_type"] = wallet_type
+               #respobj["voucher_code"] = voucher_code
+               #respobj["promo_code"] = promo_code
+                       
                 treatmentobj = {
                     
                     "providerid":providerid,
@@ -1090,12 +1112,18 @@ class Treatment:
                     "hv":hv,
                     "authorization": False if(len(c) <= 0) else ((len(procs)>0) & common.getboolean(c[0].authorizationrequired)),#
                     "authorized": True if(common.getstring(treatment[0].status) == "Authorized") else False,#
+                    
                     "totaltreatmentcost":float(common.getstring(r["totaltreatmentcost"])),#
                     "totalcopay":float(common.getstring(r["totalcopay"])),#
                     "totalinspays":float(common.getstring(r["totalinspays"])),#
                     "totaldue":float(common.getstring(r["totaldue"])),#
-                    "totalpaid":float(common.getstring(r["totaltreatmentcost"])) - float(common.getstring(r["totaldue"])),#
+                    "totalpaid":float(common.getstring(r["totalpaid"])),#
+                    "totalcompanypays":float(common.getstring(r["totalcompanypays"])),#
+                    "totalpromo_amount":float(common.getstring(r["totalpromo_amount"])),#
+                    "totalprecopay":float(common.getstring(r["totalprecopay"])),#
+                    
 
+                 
                     "wallet_type":"SUPER_WALLET",
                     "totalwalletamount":float(common.getvalue(r["totalwalletamount"])),
                     "totaldiscount_amount":float(common.getvalue(r["totaldiscount_amount"])),
@@ -1108,6 +1136,7 @@ class Treatment:
                     
                     
                 }        
+                
                 
                 #logger.loggerpms2.info("Enter Get Treatment API - C")
             

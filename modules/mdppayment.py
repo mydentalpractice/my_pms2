@@ -1909,6 +1909,7 @@ class Payment:
             p = db((db.payment.id == paymentid)).select() 
             tplanid = int(common.getid(p[0].treatmentplan)) if(len(p) != 0) else 0
             memberid = int(common.getid(p[0].patientmember)) if(len(p) != 0) else 0
+            patientid = int(common.getid(p[0].patientmember)) if(len(p) != 0) else 0
             pats = db((db.patientmember.id == memberid) & (db.patientmember.is_active == True)).select()
             companyid = int(common.getid(pats[0].company)) if(len(pats) != 0) else 0
             c = db((db.company.id == companyid) & (db.company.is_active == True)).select()

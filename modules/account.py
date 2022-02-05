@@ -872,7 +872,7 @@ def calculatepayments(tplanid,providerid,policy=None):
                 totalpaid=totalpaid,totaldue=totaldue,totalcompanypays=totalcompanypays,totalwalletamount=totalwalletamount)
 
 
-def _calculatepayments(db,tplanid,policy=None):
+def x_calculatepayments(db,tplanid,policy=None):
     respobj = {}
 
     treatmentcost = 0
@@ -1066,7 +1066,7 @@ def _updatetreatmentpayment(db,tplanid,paymentid,policy="PREMWALKIN"):
         totaldue = totaldue
     )    
     db.commit()
-    paytm = json.loads(_calculatepayments(db, tplanid,policy))
+    #paytm = json.loads(_calculatepayments(db, tplanid,policy))
     
     ##logger.loggerpms2.info("_updatetreatmentpayment -1A " + str(common.getvalue(totalpaid)))
     #procs = db((db.treatment_procedure.treatmentid == treatmentid) & (db.treatment_procedure.is_active == True)).select()
@@ -1135,6 +1135,163 @@ def _updatetreatmentpayment(db,tplanid,paymentid,policy="PREMWALKIN"):
     
     #logger.loggerpms2.info("Paytm Update Treatment Payment " + json.dumps(paytm))
    
-    logger.loggerpms2.info("Exit Update Treamtnet Payment " + json.dumps(paytm))
+    logger.loggerpms2.info("Exit Update Treamtnet Payment ")
     return json.dumps({"result":"success"})
+
+def _calculatepayments(db,tplanid,policy="PREMWALKIN"):
+    logger.loggerpms2.info("Enter Calulate Payment " + str(tplanid) )
+    user = None
+
+    treatmentcost = 0
+    copay = 0
+    inspays = 0
+    companypays = 0
+    precopay = 0
+    walletamount = 0 
+    discount_amount = 0
+    promo_amount = 0
+        
+    wallet_type = ""
+    voucher_code = ""
+    promo_code = ""
+
+    
+    #calculate
+    totalactualtreatmentcost = 0   #UCR Cost
+    totaltreatmentcost = 0         #treatment cost as per the plan
+    totalprecopay = 0              #total pre-copay by the patient prior to discount and wallet amounts
+    totalcopay = 0                 #total copay by the patient after discount and wallet amounts
+    totalinspays = 0               #total amount paid by the insurance
+    totalcompanypays = 0           #total amount paid by the company - benefit amount as per the plan
+    totalpaid = 0                  #total amount paid
+    totaldue = 0                   #total due
+    totaldiscount_amount = 0
+    totalwalletamount = 0
+    totalpromo_amount = 0
+
+
+    tplan = db((db.treatmentplan.id == tplanid) & (db.treatmentplan.is_active == True)).select()
+    if(len(tplan) > 0):
+        treatmentcost = float(common.getvalue(tplan[0].totaltreatmentcost))
+        companypays = float(common.getvalue(tplan[0].totalcompanypays))
+        walletamount = float(common.getvalue(tplan[0].totalwalletamount))  
+        discount_amount = float(common.getvalue(tplan[0].totaldiscount_amount))  
+        precopay =float(common.getvalue(tplan[0].totalcopay))
+        copay = float(common.getvalue(tplan[0].totalcopay)) - (discount_amount + companypays + walletamount)
+        inspays = float(common.getvalue(tplan[0].totalinspays))
+        memberid = int(common.getid(tplan[0].primarypatient))
+        promo_amount = float(common.getvalue(tplan[0].totalpromo_amount))  
+        promo_code = common.getstring(tplan[0].promo_code)
+        wallet_type = common.getstring(tplan[0].wallet_type)
+        voucher_code = common.getstring(tplan[0].voucher_code)
+        
+        
+    #Table: treatment
+    #Columns:
+    #id int(11) AI PK 
+    #treatment varchar(64) 
+    #description varchar(128) 
+    #startdate date 
+    #enddate date 
+    #status varchar(45) 
+    #---actualtreatmentcost double 
+    #---treatmentcost double 
+    #---copay double 
+    #---inspay double 
+    #companypay double 
+    #walletamount double 
+    #discount_amount double 
+    #wallet_type varchar(45) 
+    #voucher_code varchar(45) 
+    #promo_code varchar(45) 
+    #promo_amount double 
+    #WPBA_response longtext 
+    #treatmentplan int(11) 
+    #provider int(11) 
+    #doctor int(11) 
+    #clinicid int(11) 
+    #dentalprocedure int(11) 
+    #quadrant varchar(45) 
+    #tooth varchar(45) 
+    #chiefcomplaint varchar(128) 
+    #authorized char(1) 
+    #is_active char(1) 
+    #created_on datetime 
+    #created_by int(11) 
+    #modified_on datetime 
+    #modified_by int(11)
+    
+    
+    
+    trs = db((db.treatment.treatmentplan == tplanid) & (db.treatment.is_active == True)).select()
+    for tr in trs:
+        procs = db((db.treatment_procedure.treatmentid == tr.id) & (db.treatment_procedure.is_active == True)).select()
+        actualtreatmentcost = 0
+        treatmentcost = 0
+        precopay = 0
+        copay = 0
+        inspay = 0
+        for proc in procs:
+            actualtreatmentcost = actualtreatmentcost +  float(common.getvalue(proc.ucr))
+            treatmentcost = treatmentcost + float(common.getvalue(proc.procedurefee))
+            precopay = precopay + float(common.getvalue(proc.copay))
+            copay = copay + float(common.getvalue(proc.copay))
+            inspay = inspay + float(common.getvalue(proc.inspays))
+         
+        #update proc costs into treatment costs
+        db((db.treatment.id == tr.id) & (tr.is_active == True)).update(actualtreatmentcost=actualtreatmentcost,treatmentcost=treatmentcost,copay=copay,inspay=inspay)
+        
+        #calculate total costs for treatment plan
+        totalactualtreatmentcost = totalactualtreatmentcost + actualtreatmentcost
+        totaltreatmentcost = totaltreatmentcost + treatmentcost
+        totalprecopay = totalprecopay + precopay
+        totalinspays = totalinspays + inspay
+        
+        totalcompanypays = totalcompanypays + float(common.getvalue(tr.companypay))
+        totaldiscount_amount = totaldiscount_amount + float(common.getvalue(tr.discount_amount))
+        totalwalletamount = totalwalletamount + float(common.getvalue(tr.walletamount))
+        totalpromo_amount = totalpromo_amount + float(common.getvalue(tr.promo_amount))
+
+        totalcopay = totalprecopay - totalinspays - totalcompanypays - totaldiscount_amount -totalwalletamount-totalpromo_amount
+ 
+        
+    #calculate all the payments made and due for each treatment plan
+    pymnts = db((db.payment.treatmentplan == tplanid) & (db.payment.is_active == True)).select()
+    for pymnt in pymnts:
+        totalpaid = totalpaid + float(common.getvalue(pymnt.amount))
+    
+    totaldue = totalcopay - totalpaid
+    
+   
+    respobj = {}
+    respobj["totaltreatmentcost"]=totaltreatmentcost
+    respobj["totalinspays"]=totalinspays
+    respobj["totalcompanypays"]=totalcompanypays
+    respobj["totalwalletamount"]=totalwalletamount
+    respobj["totaldiscount_amount"]=totaldiscount_amount
+    respobj["totalpromo_amount"]=totalpromo_amount
+    respobj["totalprecopay"]=totalprecopay
+    respobj["totalcopay"]=totalcopay
+    respobj["totalpaid"]=totalpaid
+    respobj["totaldue"]=totaldue
+
+    respobj["treatmentcost"]=treatmentcost
+    respobj["precopay"]=precopay
+    respobj["inspays"]=inspays
+    respobj["companypays"]=companypays
+    respobj["walletamount"]=walletamount
+    respobj["discount_amount"]=discount_amount
+    respobj["promo_amount"]=promo_amount
+    respobj["wallet_type"] = wallet_type
+    respobj["voucher_code"] = voucher_code
+    respobj["promo_code"] = promo_code
+    respobj["copay"]=precopay-inspays-companypays-discount_amount-walletamount-promo_amount
+
+
+    respobj["result"] = "success"
+    respobj["error_message"] = ""
+    
+    mssg = json.dumps(respobj)
+    logger.loggerpms2.info("Exit _CalculatePayments " + mssg)
+    return mssg
 

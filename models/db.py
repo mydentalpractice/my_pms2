@@ -1547,6 +1547,8 @@ db.define_table('treatment',
                 Field('doctor', 'integer',represent=lambda v, r: 0 if v is None else v, label=T('Dentist'), default=''),
                 Field('clinicid', 'integer',represent=lambda v, r: 0 if v is None else v, label=T('Clinic'), default=''),
                 Field('dentalprocedure','reference procedurepriceplan',label='Member/Patient'),
+                Field('benefit_applied', 'boolean'),
+                
                 auth.signature,
                 format = '%(treatment)s'
                 )
@@ -3775,6 +3777,7 @@ db.define_table('vw_payments_fast',
     Field('memberid', 'integer',represent=lambda v, r: 0 if v is None else v),
     Field('patientid', 'integer',represent=lambda v, r: 0 if v is None else v),
     Field('providerid','integer',represent=lambda v, r: 0 if v is None else v),
+   
     Field('voucher_code', 'string',represent=lambda v, r: '' if v is None else v),
     #Field('lastpayment', 'double',represent=lambda v, r: 0 if v is None else v),
     Field('lastpaymentdate', 'date',represent=lambda v, r: '' if v is None else v,requires=IS_DATE(format=T('%d/%m/%Y'))),

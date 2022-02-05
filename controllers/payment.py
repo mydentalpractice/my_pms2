@@ -54,7 +54,8 @@ def getproceduregrid(treatmentid, providerid):
     
     query = ((db.vw_treatmentprocedure.treatmentid  == treatmentid) & (db.vw_treatmentprocedure.providerid  == providerid) & (db.vw_treatmentprocedure.is_active == True))
     
-    fields=(db.vw_treatmentprocedure.procedurecode,db.vw_treatmentprocedure.altshortdescription, db.vw_treatmentprocedure.relgrprocdesc,\
+    fields=(db.vw_treatmentprocedure.procedurecode,db.vw_treatmentprocedure.altshortdescription, \
+            #db.vw_treatmentprocedure.relgrprocdesc,\
             db.vw_treatmentprocedure.tooth,db.vw_treatmentprocedure.quadrant,\
             db.vw_treatmentprocedure.procedurefee,db.vw_treatmentprocedure.copay,db.vw_treatmentprocedure.inspays,db.vw_treatmentprocedure.status,\
             db.vw_treatmentprocedure.treatmentdate)
@@ -63,11 +64,11 @@ def getproceduregrid(treatmentid, providerid):
     headers={
         'vw_treatmentprocedure.procedurecode':'Code',
         'vw_treatmentprocedure.altshortdescription':'Description',
-        'vw_treatmentprocedure.relgrprocdesc':'Religare Procedure'  if(session.religare == True) else '',
+        #'vw_treatmentprocedure.relgrprocdesc':'Religare Procedure'  if(session.religare == True) else '',
         'vw_treatmentprocedure.tooth':'Tooth',
         'vw_treatmentprocedure.quadrant':'Quadrant',
-        'vw_treatmentprocedure.procedurefee':'Procedure Cost',
-        'vw_treatmentprocedure.copay':'Co-Pay',
+        'vw_treatmentprocedure.copay':'Procedure Cost',
+        #'vw_treatmentprocedure.copay':'Co-Pay',
         'vw_treatmentprocedure.inspays':'Authorized',
         'vw_treatmentprocedure.status':'Status',
         'vw_treatmentprocedure.treatmentdate':'Treatment Date'
@@ -2551,8 +2552,12 @@ def getpaymentsgrid(providerid,  xpatientname, page,returnurl):
     
     fields=( db.vw_payments.id,db.vw_payments.memberid, db.vw_payments.patientid, db.vw_payments.treatmentid ,\
              db.vw_payments.providerid,db.vw_payments.patientname, \
-             db.vw_payments.treatmentdate, db.vw_payments.treatment, db.vw_payments.shortdescription, \
-             db.vw_payments.totaltreatmentcost, db.vw_payments.totalinspays, db.vw_payments.totalcopay, \
+             db.vw_payments.treatmentdate, db.vw_payments.treatment, \
+             db.vw_payments.shortdescription, \
+             
+             db.vw_payments.totaltreatmentcost, db.vw_payments.totalinspays, db.vw_payments.totalcopay,\
+             db.vw_payments.totalcompanypays, db.vw_payments.totaldiscount_amount, db.vw_payments.totalwalletamount,\
+             
              db.vw_payments.totalpaid,db.vw_payments.totaldue
              )
     
@@ -2580,6 +2585,10 @@ def getpaymentsgrid(providerid,  xpatientname, page,returnurl):
            'vw_payments.totaltreatmentcost':'Total Cost',
            'vw_payments.totalinspays':'Total Insurance',
            'vw_payments.totalcopay':'Total CoPay',
+           'vw_payments.totalcompanypays':'Total Benefits',
+           'vw_payments.totalwalletamount':'Total Discount',
+           'vw_payments.totaldiscount_amount':'Total Cashback',
+           
            'vw_payments.totalpaid':'Total Paid',
            'vw_payments.totaldue':'Total Due'
            }
@@ -2661,7 +2670,7 @@ def getpaymentgrid(tplanid,treatmentid, providerid,memberid,patientid,page,patie
     links = [\
            
            #dict(header=CENTER("New"), body=lambda row: CENTER(A(IMG(_src="/my_pms2/static/img/edit.png",_width=25, _height=25),_href=URL("payment","create_payment",vars=dict(page=page,tplanid=row.tplanid,patientid=patientid, memberid=memberid,providerid=providerid,returnurl=returnurl))))),
-           dict(header=CENTER("Open"), body=lambda row: CENTER(A(IMG(_src="/my_pms2/static/img/edit.png",_width=25, _height=25),_href=URL("payment","update_payment",vars=dict(paymentid=row.id, page=page,tplanid=tplanid,treatmentid=treatmentid,patient=patient,fullname=fullname,patientid=patientid, memberid=memberid,providerid=providerid,providername=providername,returnurl=returnurl,mode="update"))))),
+           #dict(header=CENTER("Open"), body=lambda row: CENTER(A(IMG(_src="/my_pms2/static/img/edit.png",_width=25, _height=25),_href=URL("payment","update_payment",vars=dict(paymentid=row.id, page=page,tplanid=tplanid,treatmentid=treatmentid,patient=patient,fullname=fullname,patientid=patientid, memberid=memberid,providerid=providerid,providername=providername,returnurl=returnurl,mode="update"))))),
            dict(header=CENTER("View/Print"), body=lambda row: CENTER(A(IMG(_src="/my_pms2/static/img/edit.png",_width=25, _height=25),_href=URL("payment","print_payment_receipt",vars=dict(paymentid=row.id, page=page,tplanid=tplanid,treatmentid=treatmentid,patient=patient,fullname=fullname,patientid=patientid, memberid=memberid,providerid=providerid,providername=providername,returnurl=returnurl,mode="update"))))),
            #dict(header='Delete',body=lambda row: A(IMG(_src="/my_pms2/static/img/png/001-rubbish-bin.png",_width=30, _height=30),_href=URL("payment","delete_payment",vars=dict(page=page,paymentid=row.id,providerid=providerid,tplanid=tplanid,memberid=memberid))))
     ]

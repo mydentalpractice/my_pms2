@@ -9159,6 +9159,14 @@ RENAME TO  `mydp_prod`.`rules` ;
 
 25. YYYYZZZModify all tables to set is_actice, created_on, created_by, modified_on, modified_by to their defaule values
 
+26. ZZZZModifiy vw_treatmentpaymentreport
+
+27. yyyyZZZModify treatment added col. 'benefit_applied'
+ALTER TABLE `treatment` 
+ADD COLUMN `benefit_applied` CHAR(1) NULL DEFAULT 'F' AFTER `authorized`;
+
+
+
 Script file to clear user for sign-up
 =====================================
 

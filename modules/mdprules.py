@@ -911,6 +911,113 @@ class Pricing:
         logger.loggerpms2.info("Exit Pricing rule0 " + mssg)
         return mssg
     
+    
+    #This is a generic rule for all procedures for all plans for all procedurepriceplancodes
+    #Bring all the fields
+    #All procedures are valid for the plan validity for that member
+    def rule0_all(self,avars):
+        logger.loggerpms2.info("Enter Rule 0 API " + json.dumps(avars))
+        
+        db = self.db
+        rspobjall = {}
+        proclist = []
+        
+        try:
+           
+            procedure_code = common.getkeyvalue(avars,"procedure_code","")
+            region_code = common.getkeyvalue(avars,"region_code","")
+            plan_code = common.getkeyvalue(avars,"plan_code","")
+            company_code = common.getkeyvalue(avars,"company_code","")
+            treatment_id = int(common.getid(common.getkeyvalue(avars,"treatment_id",0)))
+            query = ""
+            
+            procedurepriceplancode = common.getkeyvalue(avars,"procedurepriceplancode","")
+            searchphrase = common.getkeyvalue(avars,"searchphrase","")
+            if((searchphrase == "") | (searchphrase == None)):
+                query = ( \
+                    (db.vw_procedurepriceplan.procedurepriceplancode == procedurepriceplancode) &\
+                    (db.vw_procedurepriceplan.is_active == True))
+            else:
+                query=  ( \
+                    (db.vw_procedurepriceplan.procedurepriceplancode == procedurepriceplancode) &\
+                    (db.vw_procedurepriceplan.shortdescription.like('%' + searchphrase + '%'))\
+                    & (db.vw_procedurepriceplan.is_active == True))
+        
+            procs = db(query).select()
+            #check whether the plan is valid for this member or not
+            tr = db((db.vw_treatmentlist_fast.id == treatment_id) & (db.vw_treatmentlist_fast.is_active == True)).select(db.vw_treatmentlist_fast.memberid,db.vw_treatmentlist_fast.startdate)
+            
+          
+            memberid = int(common.getid(tr[0].memberid)) if(len(tr) == 1)  else 0
+            members = db((db.patientmember.id == memberid) & (db.patientmember.is_active == True)).select(db.patientmember.premstartdt,db.patientmember.premenddt)
+            premenddt = members[0].premenddt if(len(members) == 1) else common.getdatefromstring("01/01/1900","%d/%m/%Y")
+            premstartdt = members[0].premstartdt if(len(members) == 1) else common.getdatefromstring("01/01/1900","%d/%m/%Y")
+            tr_startdate = tr[0].startdate if(len(tr) == 1) else common.getdatefromstring("01/01/2200","%d/%m/%Y")
+            
+            is_valid = True
+            if((tr_startdate >= premstartdt) & (tr_startdate <= premenddt)):
+                is_valid = True
+            else:
+                is_valid = False
+            
+            prp = db((db.provider_region_plan.companycode == company_code) & \
+                     (db.provider_region_plan.regioncode == region_code) & \
+                     (db.provider_region_plan.plancode == plan_code)).select()
+            
+            if(len(prp) == 0):
+                prp = db((db.provider_region_plan.companycode == company_code) & \
+                         (db.provider_region_plan.regioncode == "ALL") & \
+                         (db.provider_region_plan.plancode == plan_code)).select()
+
+            ppc = prp[0].procedurepriceplancode if(len(prp) == 1) else "PREMWALKIN"
+        
+            for proc in procs:
+                procedure_code = proc.procedurecode
+                ppp = db((db.procedurepriceplan.procedurecode == procedure_code) &\
+                         (db.procedurepriceplan.procedurepriceplancode == ppc)  &\
+                         (db.procedurepriceplan.is_active == True)).select()
+            
+                #ppp JSON Object
+                rspobj = {}
+                rspobj["active"] = True 
+                rspobj["result"] = "success"
+                rspobj["error_message"] = ""
+                rspobj["error_code"] = ""
+                if(len(ppp) >=1):
+                    rspobj["procedurepriceplancode"] = ppc
+                    rspobj["ucrfee"] = float(common.getvalue(ppp[0].ucrfee))
+                    rspobj["procedurefee"] = float(common.getvalue(ppp[0].procedurefee))
+                    rspobj["copay"] = float(common.getvalue(ppp[0].copay))
+                    rspobj["inspays"] = float(common.getvalue(ppp[0].inspays))
+                    rspobj["companypays"] = float(common.getvalue(ppp[0].companypays))
+                    rspobj["walletamount"] = float(common.getvalue(ppp[0].walletamount))
+                    rspobj["discount_amount"] = float(common.getvalue(ppp[0].discount_amount))
+                    rspobj["is_free"] = common.getboolean(ppp[0].is_free)
+                    rspobj["voucher_code"] = common.getstring(ppp[0].voucher_code)
+                    rspobj["active"] = is_valid 
+                    rspobj["remarks"] = common.getstring(ppp[0].remarks)
+                    c = db(db.company.company == company_code).select()
+                    rspobj["authorizationrequired"] = False if (len(c) <= 0) else common.getboolean(c[0].authorizationrequired)
+                    
+                    proclist.append(rspobj)
+
+            rspobjall = {}
+            rspobjall["active"] = True 
+            rspobjall["result"] = "success"
+            rspobjall["error_message"] = ""
+            rspobjall["error_code"] = ""   
+            rspobjall["proclist"] = proclist
+            
+        except Exception as e:
+            rspobj = {}
+            mssg = "RPIP599 Rule 0 API Exception " + str(e)
+            rspobj["result"] = "fail"
+            rspobj["error_message"] = mssg
+        
+        mssg = json.dumps(rspobj)
+        logger.loggerpms2.info("Exit Pricing rule0 " + mssg)
+        return mssg    
+
     #There is not validity check for WALKIN Patient
     def rule_walkin(self,avars):
         logger.loggerpms2.info("Enter Rule WALKIN API " + json.dumps(avars))

@@ -432,7 +432,7 @@ class Benefit:
       #vw_url = urlprops[0].vw_url if(len(urlprops) > 0) else ""
       #vw_url = vw_url + "createWallet"
       
-      vw_url = "http://mtstg.mydentalplan.in/Mdpwebapi/createWalletPlanBenefits"
+      vw_url = "http://mtstg.mydentalplan.in/walletapi/createWalletPlanBenefits"
       logger.loggerpms2.info("Create Wallet_1 Request " + vw_url + " " + json.dumps(reqobj))
       resp = requests.post(vw_url,json=reqobj)
       #logger.loggerpms2.info("Create Wallet_1 Respones " + vw_url + " " + json.dumps(resp.json()))
@@ -637,7 +637,7 @@ class Benefit:
       #make a POST Call
       reqobj = avars
       
-      vw_url = "http://mtstg.mydentalplan.in/Mdpwebapi/getUsableWPBAmountLimit"
+      vw_url = "http://mtstg.mydentalplan.in/walletapi/getUsableWPBAmountLimit"
       
       logger.loggerpms2.info("Get Wallet Balance_1 (getUsableWPBAmountLimit) Request " + vw_url + " " + json.dumps(reqobj))
       resp = requests.post(vw_url,json=reqobj)
@@ -728,7 +728,7 @@ class Benefit:
       reqobj = avars
       
      
-      vw_url = "http://mtstg.mydentalplan.in/Mdpwebapi/getWalletPlanBenefits"
+      vw_url = "http://mtstg.mydentalplan.in/walletapi/getWalletPlanBenefits"
       logger.loggerpms2.info("Get Wallet Balance_2 (getUsableWPBAmountLimit) Request " + vw_url + " " + json.dumps(reqobj))
       resp = requests.post(vw_url,json=reqobj)
       logger.loggerpms2.info("Get Wallet Balance_2 Post (getUsableWPBAmountLimit) Response " + str(resp.status_code))
@@ -947,7 +947,7 @@ class Benefit:
       reqobj["mdp_wallet_amount"] = discount_amount
       
       rspobj = {}
-      vw_url = "http://mtstg.mydentalplan.in/Mdpwebapi/walletPlanBenefitsCrDr"
+      vw_url = "http://mtstg.mydentalplan.in/walletapi/walletPlanBenefitsCrDr"
       logger.loggerpms2.info("Reverse Wallet_1 (walletPlanBenefitsCrDr) Request " + vw_url + " " + json.dumps(reqobj))
       resp = requests.post(vw_url,json=reqobj)
       logger.loggerpms2.info("Reverse Wallet_1 Post (walletPlanBenefitsCrDr) Response " + str(resp.status_code))
@@ -1504,10 +1504,54 @@ class Benefit:
         tplanid = int(common.getid(common.getkeyvalue(avars,"tplanid","0")))
         
         pats = db((db.vw_memberpatientlist.primarypatientid == member_id) & (db.vw_memberpatientlist.patientid == member_id)).select()
-        
+      
         #benefit start date & benefit end date
         benefit_start_date = pats[0].premstartdt if(len(pats)==1) else common.getISTCurrentLocatTime()
-        benefit_end_date = pats[0].premenddt if(len(pats)==1) else common.getISTCurrentLocatTime()        
+        benefit_end_date = pats[0].premenddt if(len(pats)==1) else common.getISTCurrentLocatTime()                
+        
+        #determine if plan benefits has already been applied for this treatment, then skip
+        tr = db((db.treatment.id == treatmentid) & (db.treatment.is_active == True)).select(db.treatment.WPBA_response,db.treatment.benefit_applied)
+        wpba_response = common.getstring(tr[0].WPBA_response) if(len(tr) > 0) else ""
+        benefit_applied = bool(common.getboolean(tr[0].benefit_applied)) if(len(tr)>0) else False
+        
+        if(benefit_applied):
+          wpba_response = json.loads(wpba_response)
+          rspobj = wpba_response
+            
+          planobj = wpba_response["planBenefits"]
+          wallets = wpba_response["wallet"]          
+
+          logger.loggerpms2.info("No Benefits - get_benefits_1" + json.dumps(wpba_response))
+          
+         
+          
+          rspobj["result"] = "success"
+          rspobj["error_message"] = ""
+          
+          rspobj["memberid"] = member_id
+          rspobj["plan"] = plan_code
+          
+         
+          rspobj["benefit_code"] = plan_code
+          rspobj["benefit_name"] = ""
+          rspobj["benefit_value"] = float(common.getvalue(planobj[0]["redeem_value"])) if(len(planobj) >0) else 0
+          rspobj["benefit_start_date"] = common.getstringfromdate(benefit_start_date,"%d/%m/%Y")
+          rspobj["benefit_end_date"] = common.getstringfromdate(benefit_end_date,"%d/%m/%Y")
+          rspobj["redeen_code"] = "BNFT_OK"
+          
+          #graded discount and and available mdp wallet cashback
+          rspobj["discount_benefit_amount_usable"] = float(common.getvalue(planobj[0]["discount_benefit_amount_usable"])) if(len(planobj) > 0) else 0 # graded discount as per plan
+          rspobj["wallet_cashback_usable"] = float(common.getvalue(planobj[0]["wallet_cashback_usable"]))  if(len(planobj) > 0) else 0 
+          rspobj["discount_date"] = common.getstringfromdate(datetime.date.today(), "%d/%m/%Y")
+          rspobj["discount_message"] = common.getmessage(db,"BNFT_OK")
+          
+          rspobj["benefit_applied"] = benefit_applied
+          
+          mssg = json.dumps(rspobj)
+          logger.loggerpms2.info("Return from No Benefits - get_benefit_1 " + mssg)
+          return mssg
+        
+       
         
         #for each of the treatment,determing total treatment cost, total UCR, total inspays, total company pays
         #determine for this member -- total treatment cost, total inspays, total patient pays, total company pasy
@@ -1542,7 +1586,7 @@ class Benefit:
         rspobj = {}
         avars["amount"] = totalcopay - totalinspays
         avars["current_amount"] = copay - inspays
-        vw_url = "http://mtstg.mydentalplan.in/Mdpwebapi/getUsableWPBAmountLimit"
+        vw_url = "http://mtstg.mydentalplan.in/walletapi/getUsableWPBAmountLimit"
         logger.loggerpms2.info("Get Plan Benefits_1 (getUsableWPBAmountLimit) Request " + vw_url + " " + json.dumps(avars))
         resp = requests.post(vw_url,json=avars)
         logger.loggerpms2.info("Get Plan Benefits_1 Post (getUsableWPBAmountLimit) Response " + str(resp.status_code))
@@ -1585,6 +1629,9 @@ class Benefit:
         rspobj["wallet_cashback_usable"] = float(common.getvalue(planobj[0]["wallet_cashback_usable"]))  if(len(planobj) > 0) else 0 
         rspobj["discount_date"] = common.getstringfromdate(datetime.date.today(), "%d/%m/%Y")
         rspobj["discount_message"] = common.getmessage(db,"BNFT_OK")
+        
+        rspobj["benefit_applied"] = benefit_applied
+
         
       except Exception as e:
         mssg = "Get Bnefits_1  Exception:\n" + str(e)
@@ -1659,9 +1706,9 @@ class Benefit:
       plan_code = common.getkeyvalue(avars,"plan_code","")
       paymentid = int(common.getkeyvalue(avars,"paymentid","0"))
       
-      r = db((db.treatment.id == treatmentid) & (db.treatment.is_active == True)).select(db.treatment.WPBA_response)
-      wpba_response = json.loads(r[0].WPBA_response if(len(r) >= 0) else "")
-      
+      r = db((db.treatment.id == treatmentid) & (db.treatment.is_active == True)).select(db.treatment.WPBA_response,db.treatment.benefit_applied)
+      wpba_response = json.loads(r[0].WPBA_response if(len(r) > 0) else "")
+      benefit_applied = bool(common.getboolean(r[0].benefit_applied)) if(len(r) > 0) else False
       
       discount_amount = float(common.getkeyvalue(avars,"discount_amount","0"))    #mdp wallet amount   
       walletamount = float(common.getkeyvalue(avars,"walletamount","0"))          #super wallet amount
@@ -1669,6 +1716,35 @@ class Benefit:
 
       planbenefits = wpba_response["planBenefits"][0]
       wallets = wpba_response["wallet"]
+      
+      if(benefit_applied):
+        logger.loggerpms2.info("Enter Benefit_success_1 : benefit_applied ")
+        rspobj = {}
+        rspobj["result"] = "success"
+        rspobj["error_message"] = ""
+        rspobj["plan"] = plan_code
+        rspobj["memberid"]=memberid
+        rspobj["treatmentid"]=treatmentid
+        rspobj["benefit_member_id"]  = common.getkeyvalue(planbenefits,"id","0")
+        rspobj["wallet_planbenefit_id"] = common.getkeyvalue(planbenefits,"id","0")
+        
+        rspobj["discount_benefit_amount"] = common.getkeyvalue(planbenefits,"discount_benefit_amount_usable","0")  #graded discount debited from account
+        rspobj["cashback_amount"] = common.getkeyvalue(planbenefits,"wallet_cashback_usable","0")                  #amount credited in mdp wallet to be used in next treatmet
+        rspobj["super_wallet_amount"] = common.getkeyvalue(wallets,"super_wallet_amount_usable","0")
+        rspobj["mdp_wallet_amount"] = common.getkeyvalue(wallets,"mdp_wallet_amount_usable","0")
+        
+        #to maintain backward calling compatibility
+        rspobj["companypays"]  = common.getkeyvalue(planbenefits,"discount_benefit_amount_usable","0")  # plan benefit graded discount
+        rspobj["companypay"]  = common.getkeyvalue(planbenefits,"discount_benefit_amount_usable","0")  # plan benefit graded discount
+        rspobj["discount_amount"]  = common.getkeyvalue(wallets,"mdp_wallet_amount_usable","0") # mdp wallet discount
+        rspobj["walletamount"]  = common.getkeyvalue(wallets,"super_wallet_amount_usable","0") # superwallet discount        
+        
+        rspobj["benefit_applied"] = benefit_applied
+        
+        mssg = json.dumps(rspobj)
+        logger.loggerpms2.info("Exit Benefit_Success_1 (benefit_applied True " + mssg)
+        return mssg
+      
       
       ##call to credit the amount in wallet
 #`     #{
@@ -1702,12 +1778,13 @@ class Benefit:
       #reqobj["discount_amount"]  = common.getkeyvalue(wallets,"mdp_wallet_amount_usable","0") # mdp wallet discount
       #reqobj["walletamount"]  = common.getkeyvalue(wallets,"super_wallet_amount_usable","0") # superwallet discount
       
-      vw_url = "http://mtstg.mydentalplan.in/Mdpwebapi/walletPlanBenefitsCrDr"
+      vw_url = "http://mtstg.mydentalplan.in/walletapi/walletPlanBenefitsCrDr"
       logger.loggerpms2.info("Benefit Success_1 (walletPlanBenefitsCrDr) Request " + vw_url + " " + json.dumps(reqobj))
       resp = requests.post(vw_url,json=reqobj)
       logger.loggerpms2.info("Benefit Success_1 Post (walletPlanBenefitsCrDr) Response " + str(resp.status_code))
       if((resp.status_code == 200)|(resp.status_code == 201)|(resp.status_code == 202)|(resp.status_code == 203)):
         rspobj = resp.json()
+        db((db.treatment.id == treatmentid) & (db.treatment.is_active == True)).update(benefit_applied = True)
         logger.loggerpms2.info("Get Plan Benefits_1 Post (getUsableWPBAmountLimit) Response 1" + json.dumps(rspobj))
         
       else:
@@ -1740,6 +1817,8 @@ class Benefit:
       rspobj["companypay"]  = common.getkeyvalue(planbenefits,"discount_benefit_amount_usable","0")  # plan benefit graded discount
       rspobj["discount_amount"]  = common.getkeyvalue(wallets,"mdp_wallet_amount_usable","0") # mdp wallet discount
       rspobj["walletamount"]  = common.getkeyvalue(wallets,"super_wallet_amount_usable","0") # superwallet discount
+         
+      rspobj["benefit_applied"] = benefit_applied
                   
     except Exception as e:
       mssg = "Benefit Success_1 API Exception:\n" + str(e)
@@ -1808,7 +1887,7 @@ class Benefit:
       reqobj["super_wallet_amount"] = common.getkeyvalue(wallets,"super_wallet_amount_usable","0")
       reqobj["mdp_wallet_amount"] = common.getkeyvalue(wallets,"mdp_wallet_amount_usable","0")
       
-      vw_url = "http://mtstg.mydentalplan.in/Mdpwebapi/walletPlanBenefitsCrDr"
+      vw_url = "http://mtstg.mydentalplan.in/walletapi/walletPlanBenefitsCrDr"
       logger.loggerpms2.info("Benefit Success_1 (walletPlanBenefitsCrDr) Request " + vw_url + " " + json.dumps(reqobj))
       resp = requests.post(vw_url,json=reqobj)
       logger.loggerpms2.info("Benefit Failure_1 Post (walletPlanBenefitsCrDr) Response " + str(resp.status_code))

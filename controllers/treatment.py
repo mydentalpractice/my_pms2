@@ -602,6 +602,7 @@ def gettreatments(db,tplanid, treatment,tplan,member,fromdt,todt,status,limitby)
 def getproceduregrid(providerid,tplanid,treatmentid,memberid,patientid,authorization,authorized,preauthorized,page,hmopatientmember,writablflag,webadmin):
     
     # procedures grid
+    session.religare = None
     db.vw_treatmentprocedure.relgrtransactionid.readable = False
     if(session.religare != None):
         db.vw_treatmentprocedure.relgrprocdesc.readable = session.religare
@@ -611,44 +612,50 @@ def getproceduregrid(providerid,tplanid,treatmentid,memberid,patientid,authoriza
     query = ((db.vw_treatmentprocedure.treatmentid  == treatmentid) & (db.vw_treatmentprocedure.is_active == True))
     
     if((hmopatientmember == True) | (session.religare == True)):
-        fields=(db.vw_treatmentprocedure.procedurecode,db.vw_treatmentprocedure.altshortdescription, db.vw_treatmentprocedure.relgrprocdesc, \
+        #fields=(db.vw_treatmentprocedure.procedurecode,db.vw_treatmentprocedure.altshortdescription, db.vw_treatmentprocedure.relgrprocdesc, \
+                   #db.vw_treatmentprocedure.tooth,db.vw_treatmentprocedure.quadrant,
+                   #db.vw_treatmentprocedure.procedurefee,db.vw_treatmentprocedure.inspays,db.vw_treatmentprocedure.status,\
+                   #db.vw_treatmentprocedure.treatmentdate, db.vw_treatmentprocedure.relgrproc,db.vw_treatmentprocedure.relgrtransactionid)
+        fields=(db.vw_treatmentprocedure.procedurecode,db.vw_treatmentprocedure.altshortdescription, 
                    db.vw_treatmentprocedure.tooth,db.vw_treatmentprocedure.quadrant,
-                   db.vw_treatmentprocedure.procedurefee,db.vw_treatmentprocedure.inspays,db.vw_treatmentprocedure.copay,db.vw_treatmentprocedure.status,\
-                   db.vw_treatmentprocedure.treatmentdate, db.vw_treatmentprocedure.relgrproc,db.vw_treatmentprocedure.relgrtransactionid)
+                   db.vw_treatmentprocedure.copay,db.vw_treatmentprocedure.inspays,db.vw_treatmentprocedure.status,
+                   db.vw_treatmentprocedure.treatmentdate)
 
         
         headers={
             'vw_treatmentprocedure.procedurecode':'Code',
             'vw_treatmentprocedure.altshortdescription':'Description',
-            'vw_treatmentprocedure.relgrprocdesc':'Religare Procedure'  if(session.religare != None) else '',
             'vw_treatmentprocedure.tooth':'Tooth',
             'vw_treatmentprocedure.quadrant':'Quadrant',
-            'vw_treatmentprocedure.procedurefee':'Procedure Cost',
+            'vw_treatmentprocedure.copay':'Procedure Cost',
             'vw_treatmentprocedure.inspays':'Insurance Pays',
-            'vw_treatmentprocedure.copay':'Patient Pays',
             'vw_treatmentprocedure.status':'Status',
             'vw_treatmentprocedure.treatmentdate':'Treatment Date'
         }
         
     else:
-        fields=(db.vw_treatmentprocedure.procedurecode,db.vw_treatmentprocedure.altshortdescription, db.vw_treatmentprocedure.relgrprocdesc,\
+        fields=(db.vw_treatmentprocedure.procedurecode,db.vw_treatmentprocedure.altshortdescription,
+             
                    db.vw_treatmentprocedure.tooth,db.vw_treatmentprocedure.quadrant,
-                   db.vw_treatmentprocedure.procedurefee,db.vw_treatmentprocedure.status,\
-                   db.vw_treatmentprocedure.treatmentdate,db.vw_treatmentprocedure.relgrproc,db.vw_treatmentprocedure.relgrtransactionid)
+                   db.vw_treatmentprocedure.copay,db.vw_treatmentprocedure.inspays,db.vw_treatmentprocedure.status,
+                   db.vw_treatmentprocedure.treatmentdate)
         
         headers={
             'vw_treatmentprocedure.procedurecode':'Code',
             'vw_treatmentprocedure.altshortdescription':'Description',
-            'vw_treatmentprocedure.relgrprocdesc':'',
+            #'vw_treatmentprocedure.relgrprocdesc':'',
             'vw_treatmentprocedure.tooth':'Tooth',
             'vw_treatmentprocedure.quadrant':'Quadrant',
-            'vw_treatmentprocedure.procedurefee':'Procedure Cost',
+            'vw_treatmentprocedure.copay':'Procedure Cost',
+            'vw_treatmentprocedure.inspays':'Insurance Pays',
             'vw_treatmentprocedure.status':'Status',
             'vw_treatmentprocedure.treatmentdate':'Treatment Date'
         }
         
       
         
+   
+    
     if(writablflag):
         links = [\
                 dict(header=CENTER('Edit'),body=lambda row: CENTER(A(IMG(_src="/my_pms2/static/img/edit.png",_width=30, _height=30),\
@@ -658,31 +665,32 @@ def getproceduregrid(providerid,tplanid,treatmentid,memberid,patientid,authoriza
                                                                       _href=URL("treatment","complete_procedure",vars=dict(page=page,providerid=providerid,treatmentprocedureid=row.id,patientid=patientid,memberid=memberid,tplanid=tplanid,treatmentid=treatmentid,authorization=authorization,preauthorized=preauthorized,authorized=authorized,webadmin=webadmin))))\
                                                                 if(row.status == 'Started') else\
                                                                 CENTER(A(IMG(_src="/my_pms2/static/img/complete_off.png",_width=30, _height=30),\
+                                                                         
         _href=URL("treatment","complete_procedure",vars=dict(page=page,providerid=providerid,treatmentprocedureid=row.id,patientid=patientid,\
                                                              memberid=memberid,tplanid=tplanid,treatmentid=treatmentid,authorization=authorization,preauthorized=preauthorized,authorized=authorized,\
-                                                             webadmin=webadmin))))))\
+                                                             webadmin=webadmin))))))),\
                                                                 
-                             if((row.relgrproc == False) | (row.relgrtransactionid == None)) else\
+                             #if((row.relgrproc == False) | (row.relgrtransactionid == None)) else\
                              
-                             ((CENTER(A(IMG(_src="/my_pms2/static/img/religare_on.png",_width=30, _height=30),\
-                _href=URL("religare","settle_transaction",vars=dict(page=page,providerid=providerid,treatmentprocedureid=row.id,\
-                                                                    patientid=patientid,memberid=memberid,tplanid=tplanid,treatmentid=treatmentid,\
-                                                                    authorization=authorization,preauthorized=preauthorized,authorized=authorized,webadmin=webadmin))))\
-                             if(row.status == 'Started') else\
-                             CENTER(A(IMG(_src="/my_pms2/static/img/religare_off.png",_width=30, _height=30)))))\
+                             #((CENTER(A(IMG(_src="/my_pms2/static/img/religare_on.png",_width=30, _height=30),\
+                #_href=URL("religare","settle_transaction",vars=dict(page=page,providerid=providerid,treatmentprocedureid=row.id,\
+                                                                    #patientid=patientid,memberid=memberid,tplanid=tplanid,treatmentid=treatmentid,\
+                                                                    #authorization=authorization,preauthorized=preauthorized,authorized=authorized,webadmin=webadmin))))\
+                             #if(row.status == 'Started') else\
+                             #CENTER(A(IMG(_src="/my_pms2/static/img/religare_off.png",_width=30, _height=30)))))\
                              
-                     ),
+                     #),
                 
                 dict(header=CENTER('Delete'),body=lambda row: ((CENTER(A(IMG(_src="/my_pms2/static/img/delete.png",_width=30, _height=30),\
                                                                       _href=URL("treatment","delete_procedure",vars=dict(page=page,providerid=providerid,treatmentprocedureid=row.id,patientid=patientid,memberid=memberid,tplanid=tplanid,treatmentid=treatmentid,authorization=authorization,preauthorized=preauthorized,authorized=authorized,webadmin=webadmin))))))\
                                                                 
-                             if(row.relgrproc == False) | (row.relgrtransactionid == None) else\
+                             #if(row.relgrproc == False) | (row.relgrtransactionid == None) else\
                                      
-                                    ((CENTER(A(IMG(_src="/my_pms2/static/img/delete.png",_width=30, _height=30),\
-                                               _href=URL("religare","void_transaction",vars=dict(page=page,providerid=providerid,treatmentprocedureid=row.id,patientid=patientid,memberid=memberid,tplanid=tplanid,treatmentid=treatmentid,authorization=authorization,preauthorized=preauthorized,authorized=authorized,webadmin=webadmin))))))
+                                    #((CENTER(A(IMG(_src="/my_pms2/static/img/delete.png",_width=30, _height=30),\
+                                               #_href=URL("religare","void_transaction",vars=dict(page=page,providerid=providerid,treatmentprocedureid=row.id,patientid=patientid,memberid=memberid,tplanid=tplanid,treatmentid=treatmentid,authorization=authorization,preauthorized=preauthorized,authorized=authorized,webadmin=webadmin))))))
 
-                                    if(row.status == 'Started') else\
-                                    ((CENTER(A(IMG(_src="/my_pms2/static/img/delete_off.png",_width=30, _height=30)))))
+                                    #if(row.status == 'Started') else\
+                                    #((CENTER(A(IMG(_src="/my_pms2/static/img/delete_off.png",_width=30, _height=30)))))
                                     
                              
                      )
@@ -704,6 +712,61 @@ def getproceduregrid(providerid,tplanid,treatmentid,memberid,patientid,authoriza
                 
         ]
     
+    #if(writablflag):
+        #links = [\
+                #dict(header=CENTER('Edit'),body=lambda row: CENTER(A(IMG(_src="/my_pms2/static/img/edit.png",_width=30, _height=30),\
+                                                                   #_href=URL("treatment","update_procedure",vars=dict(page=page,providerid=providerid,treatmentprocedureid=row.id,patientid=patientid,memberid=memberid,tplanid=tplanid,treatmentid=treatmentid,authorization=authorization,preauthorized=preauthorized,authorized=authorized,webadmin=webadmin,hmopatientmember=hmopatientmember))))),
+                
+                #dict(header=CENTER('Complete'),body=lambda row: ((CENTER(A(IMG(_src="/my_pms2/static/img/complete_on.png",_width=30, _height=30),\
+                                                                      #_href=URL("treatment","complete_procedure",vars=dict(page=page,providerid=providerid,treatmentprocedureid=row.id,patientid=patientid,memberid=memberid,tplanid=tplanid,treatmentid=treatmentid,authorization=authorization,preauthorized=preauthorized,authorized=authorized,webadmin=webadmin))))\
+                                                                #if(row.status == 'Started') else\
+                                                                #CENTER(A(IMG(_src="/my_pms2/static/img/complete_off.png",_width=30, _height=30),\
+        #_href=URL("treatment","complete_procedure",vars=dict(page=page,providerid=providerid,treatmentprocedureid=row.id,patientid=patientid,\
+                                                             #memberid=memberid,tplanid=tplanid,treatmentid=treatmentid,authorization=authorization,preauthorized=preauthorized,authorized=authorized,\
+                                                             #webadmin=webadmin))))))\
+                                                                
+                             #if((row.relgrproc == False) | (row.relgrtransactionid == None)) else\
+                             
+                             #((CENTER(A(IMG(_src="/my_pms2/static/img/religare_on.png",_width=30, _height=30),\
+                #_href=URL("religare","settle_transaction",vars=dict(page=page,providerid=providerid,treatmentprocedureid=row.id,\
+                                                                    #patientid=patientid,memberid=memberid,tplanid=tplanid,treatmentid=treatmentid,\
+                                                                    #authorization=authorization,preauthorized=preauthorized,authorized=authorized,webadmin=webadmin))))\
+                             #if(row.status == 'Started') else\
+                             #CENTER(A(IMG(_src="/my_pms2/static/img/religare_off.png",_width=30, _height=30)))))\
+                             
+                     #),
+                
+                #dict(header=CENTER('Delete'),body=lambda row: ((CENTER(A(IMG(_src="/my_pms2/static/img/delete.png",_width=30, _height=30),\
+                                                                      #_href=URL("treatment","delete_procedure",vars=dict(page=page,providerid=providerid,treatmentprocedureid=row.id,patientid=patientid,memberid=memberid,tplanid=tplanid,treatmentid=treatmentid,authorization=authorization,preauthorized=preauthorized,authorized=authorized,webadmin=webadmin))))))\
+                                                                
+                             #if(row.relgrproc == False) | (row.relgrtransactionid == None) else\
+                                     
+                                    #((CENTER(A(IMG(_src="/my_pms2/static/img/delete.png",_width=30, _height=30),\
+                                               #_href=URL("religare","void_transaction",vars=dict(page=page,providerid=providerid,treatmentprocedureid=row.id,patientid=patientid,memberid=memberid,tplanid=tplanid,treatmentid=treatmentid,authorization=authorization,preauthorized=preauthorized,authorized=authorized,webadmin=webadmin))))))
+
+                                    #if(row.status == 'Started') else\
+                                    #((CENTER(A(IMG(_src="/my_pms2/static/img/delete_off.png",_width=30, _height=30)))))
+                                    
+                             
+                     #)
+        #]
+    #else:
+        #links = [\
+                #dict(header=CENTER('Edit'),body=lambda row: CENTER(A(IMG(_src="/my_pms2/static/img/edit.png",_width=30, _height=30),\
+                                                                   #_href=URL("treatment","update_procedure",vars=dict(page=page,providerid=providerid,treatmentprocedureid=row.id,patientid=patientid,memberid=memberid,tplanid=tplanid,treatmentid=treatmentid,authorization=authorization,preauthorized=preauthorized,authorized=authorized,webadmin=webadmin,hmopatientmember=hmopatientmember))))),
+                
+                
+                #dict(header=CENTER('Complete'),body=lambda row: ((CENTER(A(IMG(_src="/my_pms2/static/img/complete_on.png",_width=30, _height=30),\
+                                                                                      #_href=URL("treatment","complete_procedure",vars=dict(status=row.status,page=page,providerid=providerid,treatmentprocedureid=row.id,patientid=patientid,memberid=memberid,tplanid=tplanid,treatmentid=treatmentid,authorization=authorization,preauthorized=preauthorized,authorized=authorized,webadmin=webadmin))))\
+                                                                                #if(row.status == 'Started') else\
+                                                                                #CENTER(A(IMG(_src="/my_pms2/static/img/complete_off.png",_width=30, _height=30)\
+                                                                                                                                                #)))))\
+                
+                
+                
+                
+        #]
+
     
     maxtextlengths = {'vw_treatmentprocedure.altshortdescription':100,'vw_treatmentprocedure.relgrprocdesc':100,'vw_treatmentprocedure.status':32}
 

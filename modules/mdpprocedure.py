@@ -494,8 +494,8 @@ class Procedure:
        
         
         #get memberid and patientid
-        rows = db((db.vw_treatmentlist.id == treatmentid) & (db.vw_treatmentlist.is_active == True)).\
-            select(db.vw_treatmentlist.memberid,db.vw_treatmentlist.patientid,db.vw_treatmentlist.providerid)
+        rows = db((db.vw_treatmentlist_fast.id == treatmentid) & (db.vw_treatmentlist_fast.is_active == True)).\
+            select(db.vw_treatmentlist_fast.memberid,db.vw_treatmentlist_fast.patientid,db.vw_treatmentlist_fast.providerid)
         patientid = int(common.getid(rows[0].patientid)) if(len(rows) >= 1) else 0
         memberid = int(common.getid(rows[0].memberid)) if(len(rows) >= 1) else 0 
         providerid = int(common.getid(rows[0].providerid)) if(len(rows) >= 1) else 0 
@@ -560,18 +560,22 @@ class Procedure:
                      & (db.vw_procedurepriceplan.is_active == True))
 
         if(page >= 0):
-            procs = db(query).select(db.vw_procedurepriceplan.procedurecode,db.vw_procedurepriceplan.altshortdescription,\
-                                          db.vw_procedurepriceplan.procedurefee,db.vw_procedurepriceplan.inspays,\
-                                          db.vw_procedurepriceplan.copay,limitby=limitby,orderby=db.vw_procedurepriceplan.procedurecode
+            procs = db(query).select(limitby=limitby,orderby=db.vw_procedurepriceplan.procedurecode
                                           )
+            #procs = db(query).select(db.vw_procedurepriceplan.procedurecode,db.vw_procedurepriceplan.altshortdescription,\
+                                          #db.vw_procedurepriceplan.procedurefee,db.vw_procedurepriceplan.inspays,\
+                                          #db.vw_procedurepriceplan.copay,limitby=limitby,orderby=db.vw_procedurepriceplan.procedurecode
+                                          #)
             if(maxcount == 0):
                 maxcount = db(query).count()            
         else:
-            procs = db(query).select(db.vw_procedurepriceplan.procedurecode,db.vw_procedurepriceplan.altshortdescription,\
-                                          db.vw_procedurepriceplan.procedurefee,db.vw_procedurepriceplan.inspays,\
-                                          db.vw_procedurepriceplan.copay,db.vw_procedurepriceplan.procedurecode,\
-                                          orderby=db.vw_procedurepriceplan.procedurecode
-                                          )        
+            procs = db(query).select()        
+            
+            #procs = db(query).select(db.vw_procedurepriceplan.procedurecode,db.vw_procedurepriceplan.altshortdescription,\
+                                          #db.vw_procedurepriceplan.procedurefee,db.vw_procedurepriceplan.inspays,\
+                                          #db.vw_procedurepriceplan.copay,db.vw_procedurepriceplan.procedurecode,\
+                                          #orderby=db.vw_procedurepriceplan.procedurecode
+                                          #)        
             if(maxcount == 0):
                 maxcount = db(query).count()            
 
@@ -590,6 +594,8 @@ class Procedure:
             avars["company_code"] = companycode
             avars["procedure_code"] = proc.procedurecode
             avars["plan_code"] = plancode
+            #avars["procedurepriceplancode"] = procedurepriceplancode
+            #avars["searcphrase"] = searchphrase
         
             pricingObj = mdprules.Pricing(db)
             rspobj = json.loads(pricingObj.Get_Procedure_Fees(avars))            
@@ -709,12 +715,13 @@ class Procedure:
             tplanid = int(common.getid(t[0].tplanid)) if(len(t) > 0) else 0
             memberid = int(common.getid(t[0].memberid)) if(len(t) > 0) else 0
             #update treatment with new treatment cost
+            
             account.updatetreatmentcostandcopay(db,auth.user,treatmentid)
             #update tplan with new treatment cost
-            account.calculatecost(db,tplanid)
-            account.calculatecopay(db, tplanid,memberid)
-            account.calculateinspays(db,tplanid)
-            account.calculatedue(db,tplanid)            
+            #account.calculatecost(db,tplanid)
+            #account.calculatecopay(db, tplanid,memberid)
+            #account.calculateinspays(db,tplanid)
+            #account.calculatedue(db,tplanid)            
     
             jsonObj = {\
                 "result" : "success" if(procid > 0) else "fail",
