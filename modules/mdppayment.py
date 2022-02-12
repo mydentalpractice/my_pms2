@@ -1945,7 +1945,9 @@ class Payment:
                                                     amount = amount,
                                                     fp_invoiceamt = amount,
                                                     fp_amount = amount, 
-                                                    precommitamount = 0
+                                                    precommitamount = 0,
+                                                    paymenttype = "Treatment",
+                                                    paymentmode = "Online"
                                                     )
 
 
