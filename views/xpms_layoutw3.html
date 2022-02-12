@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>PMS</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <script src="../static/js/bootstrap.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  
+<script>
+  function w3_open() {
+    document.getElementById("mySidenav").style.display = "block";
+}
+function w3_close() {
+    document.getElementById("mySidenav").style.display = "none";
+}
+</script>
+  <!--<link rel="stylesheet" href="../static/css/bootstrap-responsive.min.css" />-->
+  <!--<link rel="stylesheet" href="../static/css/bootstrap.min.css" />-->
+  <link rel="stylesheet" href="../static/css/web2py.css"  />
+  <link rel="stylesheet" href="../static/css/web2py_bootstrap.css" />
+  <link rel="stylesheet" href="../static/css/web2py_bootstrap_nojs.css" />
+  <link rel="stylesheet" href="../static/css/w3.css" />  
+  <link rel="stylesheet" href="../static/css/font-awesome.css" />  
+  <link rel="stylesheet" href="http://www.w3schools.com/lib/w3-theme-white.css">
+  <!--<link href="../static/css/styles.css" rel="stylesheet" />-->
+  
+  <!--<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">-->
+  
+  
+  {{include 'web2py_ajax.html'}}     
+ 
+
+
+<header class="w3-container w3-white w3-border w3-border-blue" >
+<div class="w3-container w3-padding-4 w3-theme-d3 w3-blue-grey">
+  <div class="w3-left">
+  <span class="w3-opennav  w3-padding-16" onclick="w3_open()" id="openNav"><i class="fa fa-bars fa-fw w3-xlarge"></i></span>&nbsp;&nbsp; 
+    <a href="{{=URL('admin','providerhome')}}"><i class="fa fa-home w3-xlarge"></i>Home</a>&nbsp;&nbsp; 
+    <a href="{{=returnurl}}" ><i class="fa fa-reply w3-xlarge"></i>Back</a>&nbsp;&nbsp; 
+   <span>Welcome, <strong>{{=providername}}</strong></span>
+  </div>
+  <div class="w3-right">
+   {{=request.now.strftime('%b, %d %Y %H:%M:%S')}}&nbsp;&nbsp; &nbsp;&nbsp; 
+     <a href="{{=URL('admin','logout')}}" ><i class="fa fa-close w3-xlarge"></i></a>
+  </div>
+  
+</div>
+<nav class="w3-sidenav w3-white w3-card-2 w3-animate-left " style="display:none;left:0;" id="mySidenav">
+  <a href="javascript:void(0)" 
+  onclick="w3_close()"
+  class="w3-closenav w3-large">Close &times;</a>
+  <a href="{{=URL('admin','providerhome')}}">Home</a>
+
+  <a href="{{=URL('member','list_members',vars=dict(providerid=providerid,page=1))}}">Members</a>
+  <a href="{{=URL('treatment','list_treatmentplans',vars=dict(providerid=providerid,page=1))}}">Treatments</a>
+  <a href="{{=URL("dentalimage","list_dentalimages",vars=dict(providerid=providerid,page=0))}}">Images</a>
+  <a href="{{=URL('appointment','calendar',vars=dict(providerid=providerid,page=0))}}">Appointments</a>
+  <a href="{{=URL('utility', 'reminders',vars=dict(providerid=providerid,page=0))}}">Birthday Reminders</a>
+  <a href="{{=URL('appointment', 'reminders',vars=dict(providerid=providerid,page=0))}}">Appointment Reminders</a>
+  <a href="{{=URL('utility', 'list_memberpatient',vars=dict(providerid=providerid,page=1,notification="SMS"))}}">Send SMS</a>
+  <a href="{{=URL('utility', 'list_memberpatient',vars=dict(providerid=providerid,page=1,notification="Email"))}}">Send Email</a>
+
+  <a href="{{=URL('admin','logout')}}">Logout</a>
+</nav>
+
+<div class="w3-row w3-padding-4">
+<div class="w3-quarter w3-container">
+<img  src="http://www.mydentalplan.us/my_dentalplan/static/assets/img/logo-my-dental-plan_color.png" class="w3-image" style="width:50%"><br/><br/>
+<!--<a class="w3-padding-0" href="#"><i class="fa fa-home w3-xlarge w3-display-bottom-left "></i></a> &nbsp;&nbsp;<a class="w3-padding-0" href="#"><i class="fa fa-reply w3-xlarge w3-display-bottom-left"></i></a><br/>-->
+
+</div>
+<div class="w3-threequarter w3-container">
+
+<div class="w3-quarter w3-container">
+     
+      <a class="w3-btn w3-black " style="width:40%" href="{{=URL('member','list_members',vars=dict(providerid=providerid,page=1))}}">Members</a>
+      <a class="w3-btn w3-black w3-margin-left " style="width:40%" href="{{=URL('member','list_nonmembers',vars=dict(providerid=providerid,page=1))}}">Non-Members</a>
+    
+      <div class="w3-container w3-white w3-padding-0 " >
+      
+        <div class="w3-container w3-left w3-clear">
+         
+          <h4 class="w3-small">Members</h4>
+
+          <h4 class="w3-small">ExMembers</h4>
+          <h4 class="w3-small">Non-Members </h4>
+        </div>
+        <div class="w3-container w3-clear" style="text-align:left;">
+          <h4 class="w3-small"> {{=session.members}}</h4>
+          <h4 class="w3-small">{{=session.exmembers}}</h4>
+          <h4 class="w3-small">{{=session.nonmembers}}</h4>
+        </div>
+      </div>
+    </div>
+  
+<div class="w3-quarter w3-container">
+   
+     <a class="w3-btn w3-black  w3-margin-left w3-margin-right" style="width:40%" href="{{=URL('treatment','list_treatmentplans',vars=dict(providerid=providerid,page=1))}}">Treatments</a>
+      <div class="w3-container w3-white w3-padding-0 " >
+      
+        <div class="w3-container w3-left w3-clear">
+         
+          <h4 class="w3-small">Treatments</h4>
+        </div>
+        <div class="w3-container w3-clear" style="text-align:left;">
+          <h4 class="w3-small"> {{=session.treatmentplans}}</h4>
+        </div>
+      </div>
+    </div>
+<div class="w3-quarter w3-container">
+   
+     <a class="w3-btn w3-black  w3-margin-left w3-margin-right" style="width:40%" href="{{=URL("payment","list_payment",vars=dict(providerid=providerid,page=0))}}">Payments</a>
+      <div class="w3-container w3-white w3-padding-0 " >
+      
+        <div class="w3-container w3-left w3-clear">
+         
+          <h4 class="w3-small">Payments</h4>
+        </div>
+        <div class="w3-container w3-clear" style="text-align:left;">
+          <h4 class="w3-small">0</h4>
+        </div>
+      </div>
+    </div>
+    
+<div class="w3-quarter w3-container">
+   
+     <a class="w3-btn w3-black  w3-margin-left w3-margin-right" style="width:40%" href="{{=URL('appointment','calendar',vars=dict(providerid=providerid,page=0))}}">Appointment</a>
+      <div class="w3-container w3-white w3-padding-0 " >
+      
+        <div class="w3-container w3-left w3-clear">
+         
+          <h4 class="w3-small">Appointments</h4>
+        </div>
+        <div class="w3-container w3-clear" style="text-align:left;">
+          <h4 class="w3-small">{{=session.appointments}}</h4>
+        </div>
+      </div>
+    </div>
+  
+</div>
+<nav class="w3-topnav w3-theme">
+  <a href="{{=URL('dentalimage', 'list_dentalimages',vars=dict(providerid=providerid,page=page))}}" class="w3-hover-text-red"><strong><u>Images</u></strong></a>
+  <a href="{{=URL('utility', 'reminders',vars=dict(providerid=providerid,page=page))}}" class="w3-hover-text-red"><strong><u>Birthday Reminders</u></strong></a>
+  <a href="{{=URL('appointment', 'reminders',vars=dict(providerid=providerid,page=0))}}" class="w3-hover-text-red"><strong><u>Appointment Reminders</u></strong></a>
+  <a href="{{=URL('utility', 'list_memberpatient',vars=dict(providerid=providerid,page=1,notification="SMS"))}}" class="w3-hover-text-red"><strong><u>Send SMS</u></strong></a>
+  <a href="{{=URL('utility', 'list_memberpatient',vars=dict(providerid=providerid,page=1,notification="Email"))}}" class="w3-hover-text-red"><strong><u>Send Email</u></strong></a>
+</nav>  
+</div>
+
+
+
+</header> 
+
+
+
+
+</head>
+
+<body>
+
+
+{{block center}}
+{{include}}
+{{end}}
+       
+
+<footer class="w3-container w3-blue-grey w3-border" style="text-align:right" >
+   <a  href="http://www.mydentalplan.in" target="_blank"> &copy;2015 mydentalplan.in </a>
+</footer>
+
+</body>
+</html>

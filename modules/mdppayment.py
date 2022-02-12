@@ -354,6 +354,8 @@ class Payment:
         logger.loggerpms2.info("Exit List Payments " + dmp)
         return dmp
 
+   
+
     def listpayments_fast(self, memberid, patientid):
         logger.loggerpms2.info("Enter List Payments =>" + str(memberid) + " " + str(patientid))
         db = self.db
@@ -386,7 +388,10 @@ class Payment:
             
             paymentlist = []
             
+            
+            
             for payment in payments:
+
                 treatmentid = payment.treatmentid
                 tr = db((db.treatment.id == treatmentid) & (db.treatment.is_active == True)).select()
                 tplanid = tr[0].treatmentplan if(len(tr) > 0) else 0
@@ -423,6 +428,9 @@ class Payment:
                     "treatment":payment.treatment,
                     "treatmentdate":(payment.treatmentdate).strftime("%d/%m/%Y"),
                     "procedures":shortdesc,
+                    
+                                   
+                    
                     "totaltreatmentcost":float(common.getvalue(payment.totaltreatmentcost)),
                     "totalcopay":float(common.getvalue(payment.totalcopay)),
                     "totalinspays":float(common.getvalue(payment.totalinspays)),
@@ -430,6 +438,7 @@ class Payment:
                     "totaldiscount":float(common.getvalue(payment.totalcompanypays)),
                     "totalpaid":float(common.getvalue(payment.totalpaid)),
                     "totaldue":float(common.getvalue(payment.totaldue)),
+                    
                     "hv":False if(hv == 0) else True
                     
                     
@@ -653,6 +662,7 @@ class Payment:
         payobj = {}
         
         for payment in payments:
+            #logger.loggerpms2.info("GetPyment list ")
             hv = db(db.hv_treatment.treatmentid == treatmentid).count()
             providerid = payment.providerid
             payobj = {
@@ -683,7 +693,7 @@ class Payment:
                 "totalcopay":paytm["totalcopay"],
                 "totalpaid":paytm["totalpaid"],
                 "totaldue":paytm["totaldue"],
-                "totalprecopay":paytm["totalcompanypays"],
+                "totalprecopay":paytm["totalprecopay"],
                 "totalcompanypays":paytm["totalcompanypays"],
                 "totalwalletamount":float(paytm["totalwalletamount"]),
                 "totaldiscount_amount":float(paytm["totaldiscount_amount"]),

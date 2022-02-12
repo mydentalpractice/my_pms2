@@ -1,0 +1,130 @@
+{{extend 'pms2_layoutw3.html'}}
+
+
+<style>
+#suggestions { position: relative; }
+.suggestions { background: white; border: solid 1px #55A6C8; }
+.suggestions DIV { padding: 2px 4px 2px 4px; }
+</style>
+
+<header class="w3-container w3-blue-grey">
+      <h4><strong>New Appointment</strong></h4>
+</header>
+
+<div class="w3-container" >
+   {{=form.custom.begin}} 
+<label class="w3-text-black w3-margin-left"><b>Look up Member for Appointment:</b></label>
+
+  <div class="w3-cell-row" style="width:100%">
+  
+  <div class="w3-container  w3-cell">
+    {{=form.custom.widget.patientmember}}
+  </div>
+  </div> 
+<div id="hide"  style="display:none">
+
+ <p id="phide">Click <strong>X</strong> to close the Patient List after selection</p>
+</div>
+ 
+<div style="position: absolute;" id="suggestions"
+    class="suggestions">
+ </div>
+ 
+  
+ 
+
+
+ <div class="w3-cell-row" style="width:100%">
+ <div class="w3-row-padding   w3-small">
+  <div class="w3-half " style='line-height:1.5;'>
+    <label>Start Date Time</label><br/>
+    {{=form.custom.widget.start_date}}
+    
+  </div>
+  <div class="w3-half" style='line-height:1.5;'>
+    <label>End Date Time</label><br/>
+    {{=form.custom.widget.end_date}}
+  </div>
+</div>
+</div>
+<div class="w3-row-padding">
+<div class="w3-container w3-full">
+  <label>Description</label><br/>
+   {{=form.custom.widget.description}}
+</div>    
+</div>
+
+
+<div class="w3-container w3-hide">
+     {{=form.custom.submit}}
+     {{=form.custom.widget.memberid}}
+     {{=form.custom.widget.patientid}}
+     {{=form.custom.widget.xpatientmember}}
+     {{=form.custom.widget.xfullname}}
+     {{=form.custom.widget.xmemberid}}
+  </div>
+  
+  
+
+  
+  
+  
+
+
+<br/>
+
+<div class="w3-container w3-padding-4">
+<div class="w3-bar">
+  <a href="{{=returnurl}}" class="w3-button w3-left  w3-green" style="height:40px;width:20%">Cancel</a>
+  
+  <button class="w3-button w3-right w3-black" style="height:40px;width:20%"><i class="fa fa-save w3-margin-right"></i>Click to Save</button> 
+</div>
+</div>
+{{=form.custom.end}}
+
+</div>
+
+
+
+
+<script>
+
+      
+      
+jQuery("#no_table_patientmember").keyup(function(){
+
+       $("#suggestions").show();
+       var x = $('#no_table_patientmember').val();
+       $("#no_table_xpatientmember").val(x);  
+       
+       ajax('{{=URL('appointment', 'appointpatient_selector')}}', ['patientmember','xmemberid'], 'suggestions')});
+
+$(document).ready(function(){
+   
+    $("#hide").hide();
+    $("#phide").click(function(){
+       ajax('{{=URL('appointment', 'appointment_hide')}}',  ['patientmember','xmemberid'], 'suggestions')
+        $("#hide").hide();
+    });   
+   
+    $("#suggestions").show();
+    
+    $("#suggestions") .click(function(){
+      
+	x= $("#no_table_newpatient").val();
+
+	
+	$("#no_table_xpatientmember").val(x);
+	
+	var strarr = x.split(":")
+	$("#no_table_newpatient").val(strarr[0])
+
+	$("#suggestions").hide();
+	
+    
+    });
+    
+  
+    
+});
+</script>

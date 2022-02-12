@@ -9098,72 +9098,105 @@ CREATE TABLE `kytc_track_log` (
 
 12/8/2021
 ==========
-1. YYYYZZZAdd table 'price_rules'
+x1. YYYYZZZAdd table 'price_rules'
 
-2. YYYZZZModified procedurepriceplan definition in db.py
+x2. YYYZZZModified procedurepriceplan definition in db.py
 
-3. YYYZZZPopulated price_rules table with pricing rules for each procedure for a plan for a company
+x3. YYYZZZPopulated price_rules table with pricing rules for each procedure for a plan for a company
 
-4. YYYZZZZModify hmoplan with 4 fields voucher_code, discount_amount, wallet_amount, authorizationrequired
+x4. YYYZZZZModify hmoplan with 4 fields voucher_code, discount_amount, wallet_amount, authorizationrequired
 ALTER TABLE `mydp_prod`.`hmoplan` 
 ADD COLUMN `voucher_code` VARCHAR(45) NULL DEFAULT NULL AFTER `welcomeletter`,
 ADD COLUMN `discount_amount` DOUBLE NULL DEFAULT 0 AFTER `voucher_code`,
 ADD COLUMN `walletamount` DOUBLE NULL DEFAULT 0 AFTER `discount_amount`,
 ADD COLUMN `authorizationrequired` CHAR(1) NULL DEFAULT 'F' AFTER `walletamount`;
+ADD COLUMN `company_code` VARCHAR(45) NULL DEFAULT NULL AFTER `authorizationrequired`;
 
-5. YYYZZZZModify ProcedurPricePlan added 'authorizationrequired'
+x5. YYYZZZZModify ProcedurPricePlan added 'authorizationrequired'
 
-6. YYYZZZModified imporprocedurepriceplan
+x6. YYYZZZModified imporprocedurepriceplan
 
-7. YYYZZZ Modified importplan
+x7. YYYZZZ Modified importplan
 
-8. YYYZZZZ Modified hmoplan - added company code table
+x8. YYYZZZZ Modified hmoplan - added company code table
 ALTER TABLE `mydp_prod`.`hmoplan` 
 ADD COLUMN `company_code` VARCHAR(45) NULL DEFAULT NULL AFTER `authorizationrequired`;
 
-9. YYYZZZModify ImportPlan
+x9. YYYZZZModify ImportPlan
 ALTER TABLE `mydp_prod`.`importplan` 
 ADD COLUMN `company_code` VARCHAR(45) NULL DEFAULT NULL AFTER `authorizationrequired`;
 
-10. YYYZZZModify pricing_rules table add 'rule_event'
+x10. YYYZZZModify pricing_rules table add 'rule_event'
 
-11. YYYYZZZRename pricing_rules table to rules table
+x11. YYYYZZZRename pricing_rules table to rules table
     ALTER TABLE `mydp_prod`.`price_rules` 
 RENAME TO  `mydp_prod`.`rules` ;
 
-12. YYYZZZ Modify importcustomers table - added P_D & relation fields
+x12. YYYZZZ Modify importcustomers table - added P_D & relation fields
 
-13. YYYZZZ Modify treatmentplan voucher_code is varchar
+x13. YYYZZZ Modify treatmentplan voucher_code is varchar
 
-14. YYYZZZZPopulate Rules table 
+x14. YYYZZZZPopulate Rules table 
 
-15. YYYZZZZPopulate CompanyCode in HMOPLAN table
+x15. YYYZZZZPopulate CompanyCode in HMOPLAN table
 
-16. ZZZprocedurefee=ucrfee in procedurepriceplan table
+x16. ZZZprocedurefee=ucrfee in procedurepriceplan table
 
-17. YYYZZZZRules table modified for MDP/PCP002/PCP001
+x17. YYYZZZZRules table modified for MDP/PCP002/PCP001
 
-18. YYYZZZZHMOPlan table modified for PCP002,PCP001
+x18. YYYZZZZHMOPlan table modified for PCP002,PCP001
 
 19. YYYYZZZ Rules and PPP tables modified for MYDP company instead of MDP
 
-20. YYYZZZ Modify treatment, treatmentplan to add new fields - promo_code, promo_amount
+x20. YYYZZZ Modify treatment, treatmentplan to add new fields - promo_code, promo_amount
 
-21. YYYZZZAlter vw_treatmentplansummary, vw_treatmentplansummarybypatient, vw_treatmentplansummarybytreatment
+x21. YYYZZZAlter vw_treatmentplansummary, vw_treatmentplansummarybypatient, vw_treatmentplansummarybytreatment
 
-22. YYYZZZModify Treatment table added column WPBA_response
+x22. YYYZZZModify Treatment table added column WPBA_response
 
-23. YYYZZZZModify table provider_region_plan to add default values to is_active, created_on, created_by, modified_by, modified_on
+x23. YYYZZZZModify table provider_region_plan to add default values to is_active, created_on, created_by, modified_by, modified_on
 
 24. YYYZZZ Populate rules, provider_region_plan for ALL region code
 
-25. YYYYZZZModify all tables to set is_actice, created_on, created_by, modified_on, modified_by to their defaule values
+x25. YYYYZZZModify all tables to set is_actice, created_on, created_by, modified_on, modified_by to their defaule values
 
 26. ZZZZModifiy vw_treatmentpaymentreport
 
-27. yyyyZZZModify treatment added col. 'benefit_applied'
+x27. yyyyZZZModify treatment added col. 'benefit_applied'
 ALTER TABLE `treatment` 
 ADD COLUMN `benefit_applied` CHAR(1) NULL DEFAULT 'F' AFTER `authorized`;
+
+xALTER TABLE `mydp_prod`.`treatmentplan` 
+CHANGE COLUMN `patientname` `patientname` VARCHAR(255) NULL DEFAULT NULL ;
+
+x29. Modify table patientmember to increase field sizes
+ALTER TABLE `mydp_prod`.`patientmember` 
+CHANGE COLUMN `fname` `fname` VARCHAR(128) NULL DEFAULT NULL ,
+CHANGE COLUMN `mname` `mname` VARCHAR(128) NULL DEFAULT NULL ,
+CHANGE COLUMN `lname` `lname` VARCHAR(128) NULL DEFAULT NULL ,
+CHANGE COLUMN `address1` `address1` VARCHAR(128) NULL DEFAULT NULL ,
+CHANGE COLUMN `address2` `address2` VARCHAR(128) NULL DEFAULT NULL ,
+CHANGE COLUMN `address3` `address3` VARCHAR(128) NULL DEFAULT NULL ,
+CHANGE COLUMN `email` `email` VARCHAR(255) NULL DEFAULT NULL ,
+CHANGE COLUMN `groupref` `groupref` VARCHAR(128) NULL DEFAULT NULL ;
+
+x30. Modify patientdependants to increase field sizes
+ALTER TABLE `mydp_prod`.`patientmemberdependants` 
+CHANGE COLUMN `fname` `fname` VARCHAR(128) NULL DEFAULT NULL ,
+CHANGE COLUMN `mname` `mname` VARCHAR(128) NULL DEFAULT NULL ,
+CHANGE COLUMN `lname` `lname` VARCHAR(128) NULL DEFAULT NULL ;
+
+x31. Modify payment to increase field sizes
+ALTER TABLE `mydp_prod`.`payment` 
+CHANGE COLUMN `payor` `payor` VARCHAR(128) NULL DEFAULT NULL ,
+CHANGE COLUMN `fp_paymentref` `fp_paymentref` VARCHAR(128) NULL DEFAULT NULL ,
+CHANGE COLUMN `fp_cardtype` `fp_cardtype` VARCHAR(128) NULL DEFAULT NULL ,
+CHANGE COLUMN `fp_merchantid` `fp_merchantid` VARCHAR(128) NULL DEFAULT NULL ,
+CHANGE COLUMN `fp_merchantdisplay` `fp_merchantdisplay` VARCHAR(128) NULL DEFAULT NULL ,
+CHANGE COLUMN `fp_invoice` `fp_invoice` VARCHAR(128) NULL DEFAULT NULL ,
+CHANGE COLUMN `fp_error` `fp_error` VARCHAR(128) NULL DEFAULT NULL ,
+CHANGE COLUMN `fp_errormsg` `fp_errormsg` VARCHAR(255) NULL DEFAULT NULL ,
+CHANGE COLUMN `fp_otherinfo` `fp_otherinfo` VARCHAR(255) NULL DEFAULT NULL ;
 
 
 

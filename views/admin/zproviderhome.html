@@ -1,0 +1,93 @@
+{{extend 'pms2_layoutw3.html'}}
+
+
+<style>
+#suggestions { position: relative; }
+.suggestions { background: white; border: solid 1px #55A6C8; }
+.suggestions DIV { padding: 2px 4px 2px 4px; }
+</style>
+
+
+<div class="w3-container" >
+{{=form.custom.begin}} 
+<label class="w3-text-black w3-margin-left"><b>Search Patient:</b></label>
+
+  <div class="w3-cell-row" style="width:100%">
+  
+  <div class="w3-container  w3-cell" style="width:90%">
+    {{=form.custom.widget.patientmember}}
+  </div>
+  <div class="w3-container  w3-cell" style="width:10%">
+    <button class="w3-btn w3-black">Search Patient</button>
+  </div>
+
+ </div>
+
+<div id="hide" style="display:none;" >
+
+ <p id="phide">Click <strong>X</strong> to close the Patient List after selection</p>
+</div>
+<div style="position: absolute;" id="suggestions"
+    class="suggestions">
+ </div>
+  
+  
+ <div style="display:none;">
+{{=form.custom.widget.xpatientmember}}
+
+{{=form.custom.submit}}
+
+</div>
+
+{{=form.custom.end}}
+
+</div>
+
+
+            
+<div class="w3-row" >
+<div class="w3-container w3-panel w3-card">
+<div class="w3-panel w3-card">
+ <iframe src="http://www.mydentalplan.in" style="border:none;width:100%;height:40%"></iframe>
+ 
+</div>
+</div>
+</div>
+
+<script>
+jQuery("#no_table_patientmember").keyup(function(){
+
+       $("#suggestions").show();
+       var x = $('#no_table_patientmember').val();
+       $("#no_table_xpatientmember").val(x);
+       
+      ajax('{{=URL('admin', 'patient_selector')}}', ['patientmember'], 'suggestions')});
+      
+
+      
+$(document).ready(function(){
+   
+    <!--$("#hide").hide();-->
+    <!--$("#phide").click(function(){-->
+       <!--ajax('{{=URL('treatment', 'treatment_hide')}}',  ['patientmember','xmemberid'], 'suggestions')-->
+        <!--$("#hide").hide();-->
+    <!--});-->
+    
+     $("#suggestions").show();
+    
+    $("#suggestions") .click(function(){
+      
+	x= $("#no_table_patientmember").val();
+
+	
+	$("#no_table_xpatientmember").val(x);
+	
+
+	$("#suggestions").hide();
+	
+    
+    });
+    
+ });
+         
+</script>

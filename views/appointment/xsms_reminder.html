@@ -1,0 +1,123 @@
+{{extend 'pms2_layoutw3.html'}}
+
+
+
+<script>
+
+</script>
+
+{{=formA.custom.begin}}
+<header class="w3-container w3-dark-grey ">
+   <h4>{{=formheader}}</h4>
+</header>
+
+<div class="w3-hide"> 
+{{=formA.custom.widget.smstemplate}}
+</div>
+
+
+
+
+<div class="w3-container">
+<table>
+
+ <tr >
+       <td >
+	   SMS Template
+       </td>
+       <td >
+		<select class="form_details" id="smsfiles" onchange="changeSMSFiles()" style="width:500px">
+		    <option value='0'>--Select--</option>
+		    {{index=0}}
+		    {{ for index in range(len(smsfiles)): }}
+			<option value={{=index+1}}>{{=smsfiles[index]}}</option>
+			
+		    {{pass}}
+                </select>    
+       
+	
+	</td>
+    </tr>  
+    
+  <tr>
+       <td >
+	   To:
+       </td>
+       <td>
+       {{=formA.custom.widget.to}}
+	</td>
+    </tr>
+  <tr>
+       <td >
+	   Appt.On:
+       </td>
+       <td>
+       {{=formA.custom.widget.appton}}
+	</td>
+    </tr>
+  <tr>
+       <td >
+	   Location:
+       </td>
+       <td>
+       {{=formA.custom.widget.loc}}
+	</td>
+    </tr>
+
+  <tr>
+       <td >
+	   Message:
+       </td>
+       <td >
+<div id="smsdiv">       
+	{{=formA.custom.widget.description}}
+</div>	
+	</td>
+    </tr>
+
+<tr>
+<td></td>
+<td>
+{{=formA.custom.submit}}
+</td>
+</tr>
+</table>
+
+<div>
+
+</div>
+
+{{if(retVal == False):}}
+<h5 style="color:red">Error in texting appointment reminder<h5>
+{{pass}}
+{{if(retVal == True):}}
+<h5 style="color:red">Success in texting appointment reminder<h5>
+{{pass}}
+{{=formA.custom.end}}
+</div>
+<script>
+
+jQuery(document).ready(function(){
+<!--alert(smsfile)-->
+var x = document.getElementById("no_table_smstemplate");
+    x.value = "SMS_Empty.txt";
+
+   
+ajax('{{=URL('appointment','smsmessage')}}', ['smstemplate'], 'smsdiv');   
+});
+
+function changeSMSFiles(){
+
+var smsfiles = document.getElementById("smsfiles");
+var smsfile = smsfiles.options[smsfiles.selectedIndex].text;
+
+<!--alert(smsfile)-->
+var x = document.getElementById("no_table_smstemplate");
+    x.value = smsfile;
+   
+ajax('{{=URL('appointment','smsmessage')}}', ['smstemplate'], 'smsdiv');   
+   
+
+   
+};
+</script>

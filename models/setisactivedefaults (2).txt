@@ -1,0 +1,497 @@
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('HIU','HIU99','ALL',0,'rule0',1,'pricing','','T');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('HIU','HIU99','G0101',0,'rule1',1,'pricing','','T');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('HIU','HIU99','ALL',0,'rule_createwallet_1',1,'enroll_customer',"Create Wallet for a member",'T');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('HIU','HIU99','ALL',0,'rule_get_plan_benefits_1',1,'get_plan_benefits',"Get Plan Benefits",'T');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('HIU','HIU99','ALL',0,'rule_benefit_success_1',1,'benefit_success',"Plan Benefit Success on Payment Callback",'T');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('HIU','HIU99','ALL',0,'rule_benefit_failure_1',1,'benefit_failure',"Plan Benefit Failuree on Payment Callback",'T');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('HIU','HIU99','ALL',0,'rule_get_wallet_balance_1',1,'getwallet_balance',"Get Wallet Balance getUsableWPBAmountLimit API)",'F');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('HIU','HIU99','ALL',0,'rule_get_wallet_balance_2',1,'getwallet_balance',"Get Wallet Balance (getUsableWPBAmountLimit API)",'T');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('HIU','HIU99','ALL',0,'rule_reverse_wallet_1',1,'reverse_wallet',"Reverse Wallet",'T');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('HIU','HIU99','ALL',0,'rule_apply_wallet_1',1,'apply_wallet',"Apply Wallet",'T');
+
+================
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('HIU','HIU499','ALL',0,'rule0',1,'pricing','','T');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('HIU','HIU499','G0101',0,'rule1',1,'pricing','','T');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('HIU','HIU499','ALL',0,'rule_createwallet_1',1,'enroll_customer',"Create Wallet for a member",'T');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('HIU','HIU499','ALL',0,'rule_get_plan_benefits_1',1,'get_plan_benefits',"Get Plan Benefits",'T');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('HIU','HIU499','ALL',0,'rule_benefit_success_1',1,'benefit_success',"Plan Benefit Success on Payment Callback",'T');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('HIU','HIU499','ALL',0,'rule_benefit_failure_1',1,'benefit_failure',"Plan Benefit Failuree on Payment Callback",'T');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('HIU','HIU499','ALL',0,'rule_get_wallet_balance_1',1,'getwallet_balance',"Get Wallet Balance getUsableWPBAmountLimit API)",'F');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('HIU','HIU499','ALL',0,'rule_get_wallet_balance_2',1,'getwallet_balance',"Get Wallet Balance (getUsableWPBAmountLimit API)",'T');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('HIU','HIU499','ALL',0,'rule_reverse_wallet_1',1,'reverse_wallet',"Reverse Wallet",'T');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('HIU','HIU499','ALL',0,'rule_apply_wallet_1',1,'apply_wallet',"Apply Wallet",'T');
+
+======================================================
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('HQ','HQ60-99_NDP3C','ALL',0,'rule0',1,'pricing',"Generic Pricing Rule",'T');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('HQ','HQ60-99_NDP3C','G0101',0,'rule3_consultancy_validity',2,'pricing',"Consultancy Validitiy rule for Plan HQ60 NDP3C",'T');
+
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('HQ','HQ60-99_NDP3C','ALL',0,'rule_createwallet',1,'enroll_customer',"Create Member Wallet",'F');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('HQ','HQ60-99_NDP3C','ALL',0,'rule_credit_super_wallet',2,'enroll_customer',"Credit Wallet for a member",'F');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('HQ','HQ60-99_NDP3C','ALL',0,'rule_credit_mdp_wallet',3,enroll_customer,"Credit Wallet for a member",'F');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('HQ','HQ60-99_NDP3C','ALL',0,'rule_plan_cashback',1,'apply_wallet',Cashback,'F');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('HQ','HQ60-99_NDP3C','ALL',0,'rule_debit_mdp_wallet',1,'rules_payment',"Debit MDP Wallet",'F');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('HQ','HQ60-99_NDP3C','ALL',0,'rule_debit_super_wallet',1,'rules_payment',"Debit Super Wallet",'F');
+
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('HQ','HQ60-99_NDP3C','ALL',0,'rule_createwallet_1',1,'enroll_customer',"Create Wallet for a member",'T');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('HQ','HQ60-99_NDP3C','ALL',0,'rule_get_plan_benefits_1',1,'get_plan_benefits',"Get Plan Benefits",'T');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('HQ','HQ60-99_NDP3C','ALL',0,'rule_benefit_success_1',1,'benefit_success',"Plan Benefit Success on Payment Callback",'T');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('HQ','HQ60-99_NDP3C','ALL',0,'rule_benefit_failure_1',1,'benefit_failure',"Plan Benefit Failuree on Payment Callback",'T');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('HQ','HQ60-99_NDP3C','ALL',0,'rule_get_wallet_balance_1',1,'getwallet_balance',"Get Wallet Balance getUsableWPBAmountLimit API)",'F');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('HQ','HQ60-99_NDP3C','ALL',0,'rule_get_wallet_balance_2',1,'getwallet_balance',"Get Wallet Balance (getUsableWPBAmountLimit API)",'T');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('HQ','HQ60-99_NDP3C','ALL',0,'rule_reverse_wallet_1',1,'reverse_wallet',"Reverse Wallet",'T');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('HQ','HQ60-99_NDP3C','ALL',0,'rule_apply_wallet_1',1,'apply_wallet',"Apply Wallet",'T');
+
+
+===================================
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('HQ','HQ360-599_NDPC','ALL',0,'rule0',1,'pricing',"Generic Pricing Rule",'T');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('HQ','HQ360-599_NDPC','G0101',0,'rule1',2,'pricing',"Consultancy Validitiy rule for Plan HQ60 NDP3C",'T');
+
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('HQ','HQ360-599_NDPC','ALL',0,'rule_createwallet',1,'enroll_customer',"Create Member Wallet",'F');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('HQ','HQ360-599_NDPC','ALL',0,'rule_credit_super_wallet',2,'enroll_customer',"Credit Wallet for a member",'F');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('HQ','HQ360-599_NDPC','ALL',0,'rule_credit_mdp_wallet',3,enroll_customer,"Credit Wallet for a member",'F');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('HQ','HQ360-599_NDPC','ALL',0,'rule_get_plan_benefits',1,'get_plan_benefits','Cashback','F');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('HQ','HQ360-599_NDPC','ALL',0,'rule_createwallet_1',1,'enroll_customer',"Create Wallet for a member",'T');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('HQ','HQ360-599_NDPC','ALL',0,'rule_get_plan_benefits_1',1,'get_plan_benefits',"Get Plan Benefits",'T');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('HQ','HQ360-599_NDPC','ALL',0,'rule_benefit_success_1',1,'benefit_success',"Plan Benefit Success on Payment Callback",'T');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('HQ','HQ360-599_NDPC','ALL',0,'rule_benefit_failure_1',1,'benefit_failure',"Plan Benefit Failuree on Payment Callback",'T');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('HQ','HQ360-599_NDPC','ALL',0,'rule_get_wallet_balance_1',1,'getwallet_balance',"Get Wallet Balance getUsableWPBAmountLimit API)",'F');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('HQ','HQ360-599_NDPC','ALL',0,'rule_get_wallet_balance_2',1,'getwallet_balance',"Get Wallet Balance (getUsableWPBAmountLimit API)",'T');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('HQ','HQ360-599_NDPC','ALL',0,'rule_reverse_wallet_1',1,'reverse_wallet',"Reverse Wallet",'T');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('HQ','HQ360-599_NDPC','ALL',0,'rule_apply_wallet_1',1,'apply_wallet',"Apply Wallet",'T');
+
+==================================================
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('VIT','VIT_AP002','ALL',0,'rule0',1,'pricing','','T');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('VIT','VIT_AP002','G0001',0,'rule1',1,'pricing','','T');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('VIT','VIT_AP002','ALL',0,'rule_createwallet_1',1,'enroll_customer',"Create Wallet for a member",'T');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('VIT','VIT_AP002','ALL',0,'rule_get_plan_benefits_1',1,'get_plan_benefits',"Get Plan Benefits",'T');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('VIT','VIT_AP002','ALL',0,'rule_benefit_success_1',1,'benefit_success',"Plan Benefit Success on Payment Callback",'T');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('VIT','VIT_AP002','ALL',0,'rule_benefit_failure_1',1,'benefit_failure',"Plan Benefit Failuree on Payment Callback",'T');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('VIT','VIT_AP002','ALL',0,'rule_get_wallet_balance_1',1,'getwallet_balance',"Get Wallet Balance getUsableWPBAmountLimit API)",'F');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('VIT','VIT_AP002','ALL',0,'rule_get_wallet_balance_2',1,'getwallet_balance',"Get Wallet Balance (getUsableWPBAmountLimit API)",'T');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('VIT','VIT_AP002','ALL',0,'rule_reverse_wallet_1',1,'reverse_wallet',"Reverse Wallet",'T');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('VIT','VIT_AP002','ALL',0,'rule_apply_wallet_1',1,'apply_wallet',"Apply Wallet",'T');
+
+=============================================================================================================================
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('MEDI','NDPC','ALL',0,'rule0',1,'pricing','','T');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('MEDI','NDPC','G0001',0,'rule1',1,'pricing','','F');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('MEDI','NDPC','ALL',0,'rule_createwallet_1',1,'enroll_customer',"Create Wallet for a member",'T');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('MEDI','NDPC','ALL',0,'rule_get_plan_benefits_1',1,'get_plan_benefits',"Get Plan Benefits",'T');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('MEDI','NDPC','ALL',0,'rule_benefit_success_1',1,'benefit_success',"Plan Benefit Success on Payment Callback",'T');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('MEDI','NDPC','ALL',0,'rule_benefit_failure_1',1,'benefit_failure',"Plan Benefit Failuree on Payment Callback",'T');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('MEDI','NDPC','ALL',0,'rule_get_wallet_balance_1',1,'getwallet_balance',"Get Wallet Balance getUsableWPBAmountLimit API)",'F');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('MEDI','NDPC','ALL',0,'rule_get_wallet_balance_2',1,'getwallet_balance',"Get Wallet Balance (getUsableWPBAmountLimit API)",'T');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('MEDI','NDPC','ALL',0,'rule_reverse_wallet_1',1,'reverse_wallet',"Reverse Wallet",'T');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('MEDI','NDPC','ALL',0,'rule_apply_wallet_1',1,'apply_wallet',"Apply Wallet",'T');
+
+===============================================================================================================
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('ABHI','ABHI','ALL',0,'rule0',1,'pricing','','T');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('ABHI','ABHI','G0001',0,'rule1',1,'pricing','','F');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('ABHI','ABHI','ALL',0,'rule_createwallet_1',1,'enroll_customer',"Create Wallet for a member",'T');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('ABHI','ABHI','ALL',0,'rule_get_plan_benefits_1',1,'get_plan_benefits',"Get Plan Benefits",'T');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('ABHI','ABHI','ALL',0,'rule_benefit_success_1',1,'benefit_success',"Plan Benefit Success on Payment Callback",'T');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('ABHI','ABHI','ALL',0,'rule_benefit_failure_1',1,'benefit_failure',"Plan Benefit Failuree on Payment Callback",'T');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('ABHI','ABHI','ALL',0,'rule_get_wallet_balance_1',1,'getwallet_balance',"Get Wallet Balance getUsableWPBAmountLimit API)",'F');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('ABHI','ABHI','ALL',0,'rule_get_wallet_balance_2',1,'getwallet_balance',"Get Wallet Balance (getUsableWPBAmountLimit API)",'T');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('ABHI','ABHI','ALL',0,'rule_reverse_wallet_1',1,'reverse_wallet',"Reverse Wallet",'T');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('ABHI','ABHI','ALL',0,'rule_apply_wallet_1',1,'apply_wallet',"Apply Wallet",'T');
+
+===========================================================================================================================
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('RPIP99','RPIP99','ALL',0,'rule0',1,'pricing','','T');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('RPIP99','RPIP99','G0001',0,'rule1',1,'pricing','','T');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('RPIP99','RPIP99','ALL',0,'rule_createwallet_1',1,'enroll_customer',"Create Wallet for a member",'T');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('RPIP99','RPIP99','ALL',0,'rule_get_plan_benefits_1',1,'get_plan_benefits',"Get Plan Benefits",'T');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('RPIP99','RPIP99','ALL',0,'rule_benefit_success_1',1,'benefit_success',"Plan Benefit Success on Payment Callback",'T');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('RPIP99','RPIP99','ALL',0,'rule_benefit_failure_1',1,'benefit_failure',"Plan Benefit Failuree on Payment Callback",'T');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('RPIP99','RPIP99','ALL',0,'rule_get_wallet_balance_1',1,'getwallet_balance',"Get Wallet Balance getUsableWPBAmountLimit API)",'F');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('RPIP99','RPIP99','ALL',0,'rule_get_wallet_balance_2',1,'getwallet_balance',"Get Wallet Balance (getUsableWPBAmountLimit API)",'T');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('RPIP99','RPIP99','ALL',0,'rule_reverse_wallet_1',1,'reverse_wallet',"Reverse Wallet",'T');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('RPIP99','RPIP99','ALL',0,'rule_apply_wallet_1',1,'apply_wallet',"Apply Wallet",'T');
+==========================================================================
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('RPIP599','RPIP599','ALL',0,'rule0',1,'pricing','','T');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('RPIP599','RPIP599','G0001',0,'rule1',1,'pricing','','T');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('RPIP599','RPIP599','ALL',0,'rule_createwallet_1',1,'enroll_customer',"Create Wallet for a member",'T');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('RPIP599','RPIP599','ALL',0,'rule_get_plan_benefits_1',1,'get_plan_benefits',"Get Plan Benefits",'T');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('RPIP599','RPIP599','ALL',0,'rule_benefit_success_1',1,'benefit_success',"Plan Benefit Success on Payment Callback",'T');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('RPIP599','RPIP599','ALL',0,'rule_benefit_failure_1',1,'benefit_failure',"Plan Benefit Failuree on Payment Callback",'T');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('RPIP599','RPIP599','ALL',0,'rule_get_wallet_balance_1',1,'getwallet_balance',"Get Wallet Balance getUsableWPBAmountLimit API)",'F');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('RPIP599','RPIP599','ALL',0,'rule_get_wallet_balance_2',1,'getwallet_balance',"Get Wallet Balance (getUsableWPBAmountLimit API)",'T');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('RPIP599','RPIP599','ALL',0,'rule_reverse_wallet_1',1,'reverse_wallet',"Reverse Wallet",'T');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('RPIP599','RPIP599','ALL',0,'rule_apply_wallet_1',1,'apply_wallet',"Apply Wallet",'T');
+
+============================================================================================
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('PREMWALKIN','PREMWALKIN','ALL',0,'rule0',1,'pricing','','T');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('PREMWALKIN','PREMWALKIN','G0001',0,'rule1',1,'pricing','','F');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('PREMWALKIN','PREMWALKIN','ALL',0,'rule_createwallet_1',1,'enroll_customer',"Create Wallet for a member",'T');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('PREMWALKIN','PREMWALKIN','ALL',0,'rule_get_plan_benefits_1',1,'get_plan_benefits',"Get Plan Benefits",'F');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('PREMWALKIN','PREMWALKIN','ALL',0,'rule_benefit_success_1',1,'benefit_success',"Plan Benefit Success on Payment Callback",'T');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('PREMWALKIN','PREMWALKIN','ALL',0,'rule_benefit_failure_1',1,'benefit_failure',"Plan Benefit Failuree on Payment Callback",'T');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('PREMWALKIN','PREMWALKIN','ALL',0,'rule_get_wallet_balance_1',1,'getwallet_balance',"Get Wallet Balance getUsableWPBAmountLimit API)",'F');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('PREMWALKIN','PREMWALKIN','ALL',0,'rule_get_wallet_balance_2',1,'getwallet_balance',"Get Wallet Balance (getUsableWPBAmountLimit API)",'T');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('PREMWALKIN','PREMWALKIN','ALL',0,'rule_reverse_wallet_1',1,'reverse_wallet',"Reverse Wallet",'T');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('PREMWALKIN','PREMWALKIN','ALL',0,'rule_apply_wallet_1',1,'apply_wallet',"Apply Wallet",'T');
+================================================================
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('WALKIN','WALKIN','ALL',0,'rule0',1,'pricing','','T');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('WALKIN','WALKIN','G0001',0,'rule1',1,'pricing','','T');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('WALKIN','WALKIN','ALL',0,'rule_createwallet_1',1,'enroll_customer',"Create Wallet for a member",'T');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('WALKIN','WALKIN','ALL',0,'rule_get_plan_benefits_1',1,'get_plan_benefits',"Get Plan Benefits",'F');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('WALKIN','WALKIN','ALL',0,'rule_benefit_success_1',1,'benefit_success',"Plan Benefit Success on Payment Callback",'T');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('WALKIN','WALKIN','ALL',0,'rule_benefit_failure_1',1,'benefit_failure',"Plan Benefit Failuree on Payment Callback",'T');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('WALKIN','WALKIN','ALL',0,'rule_get_wallet_balance_1',1,'getwallet_balance',"Get Wallet Balance getUsableWPBAmountLimit API)",'F');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('WALKIN','WALKIN','ALL',0,'rule_get_wallet_balance_2',1,'getwallet_balance',"Get Wallet Balance (getUsableWPBAmountLimit API)",'T');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('WALKIN','WALKIN','ALL',0,'rule_reverse_wallet_1',1,'reverse_wallet',"Reverse Wallet",'T');
+
+INSERT INTO `mydp_prod`.`rules`
+(`company_code`,`plan_code`,`procedure_code`,`treatment_id`,`rule_code`,`rule_order`,rule_event,`description`,`is_active`)
+VALUES('WALKIN','WALKIN','ALL',0,'rule_apply_wallet_1',1,'apply_wallet',"Apply Wallet",'T');
+
+=============================================================================
+
+
+

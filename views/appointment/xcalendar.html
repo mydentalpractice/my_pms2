@@ -1,0 +1,166 @@
+{{extend 'pms2_layoutw3.html'}}
+{{from datetime import datetime}}
+<link href='../static/css/fullcalendar.css' rel='stylesheet' />
+<link href='../static/css/fullcalendar.print.css' rel='stylesheet' media='print' />
+<script src='../static/js/moment.min.js'></script>
+<script src='../static/js/jquery.min.js'></script>
+<script src='../static/js/fullcalendar.min.js'></script>
+
+<header class="w3-container w3-blue-grey ">
+    <h4><strong>Appointment Calendar   &nbsp;&nbsp;&nbsp;&nbsp;{{=membername}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="w3-btn w3-black" href="{{=URL('appointment','new_appointment',vars=dict(page=page,memberpage=memberpage,patientid=patientid,providerid=providerid,memberid=memberid))}}"><i class="fa fa-plus"></i>New Appointment</a> </strong></h4>
+</header>
+
+    
+
+
+
+{{=form.custom.begin}}
+<div class="w3-container w3-row-padding ">
+  <div class="w3-half" style='width:50%;line-height:1.0;'></br>
+    <label>Start Date/Time:</label>
+   {{=form.custom.widget.start}} 
+  </div>
+  <div class="w3-half" style='width:50%;line-height:1.0;'></br>
+    <label>End Date/Time: </label>
+    {{=form.custom.widget.end}}
+  </div>
+</div>
+
+<div class="w3-container " style='line-height:1.0;'>
+    <br/>
+     <button class="w3-btn w3-black " style="width:100%;line-height:1.5"><i class="fa fa-search w3-margin-right"></i>Search for Appointment</button>
+  </div>  
+
+
+<br/>
+
+<div style="display:none;">
+{{=form.custom.submit}}
+</div>
+{{=form.custom.end}}
+
+<script>
+
+	$(document).ready(function() {
+		var date = new Date();
+		var d = date.getDate();
+		var m = date.getMonth();
+		var y = date.getFullYear();
+		
+		$('#calendar').fullCalendar({
+		
+		<!--eventClick: function(event) {-->
+				<!--// opens events in a popup window-->
+				<!--window.open(event.url, 'gcalevent', 'width=700,height=600');-->
+				<!--return false;-->
+			<!--},-->
+			
+		header: {
+				left: 'prev,next today',
+				center: 'title',
+				right: 'month,agendaWeek,agendaDay'
+			},
+			
+			defaultDate: '{{=defdate}}',
+			editable: true,
+			eventLimit: true, // allow "more" link when too many events
+			events: [
+			
+				
+            {{for i,row in enumerate(rows):}}{{if i!=0:}},{{pass}}
+	    
+	         
+	    
+		{{if((row.f_start_time >= datetime.strptime(start,'%Y-%m-%d %H:%M:%S')) & (row.f_start_time <= datetime.strptime(end,'%Y-%m-%d %H:%M:%S'))):}}
+		    {
+		       
+			title: '{{=row.f_title}}',
+			allDay: false,
+			start: new Date('{{=row.f_start_time.strftime('%B %d, %Y %H:%M:%S')}}'),
+			end: new Date('{{=row.f_end_time.strftime('%B %d, %Y %H:%M:%S')}}'),
+			url: '{{=URL('appointment_update',vars=dict(apptid = row.id,page=page,memberpage=memberpage))}}',
+			color: 'red'
+			
+		    
+		    }
+		{{else:}} 
+		    {
+			{{if(row.is_active == True):}}
+			    
+				title: '{{=row.f_title}}',
+				allDay: false,
+				start: new Date('{{=row.f_start_time.strftime('%B %d, %Y %H:%M:%S')}}'),
+				end: new Date('{{=row.f_end_time.strftime('%B %d, %Y %H:%M:%S')}}'),
+				{{if(row.f_title == 'New'):}}
+					title: '{{=row.f_title}}',
+					url: "{{=URL('appointment','appointment_create',vars=dict(page=1,providerid=providerid,memberid=memberid))}}",
+					color: 'blue'
+				{{else:}}					
+					url: '{{=URL('appointment_update',vars=dict(apptid = row.id,page=page,memberpage=memberpage))}}',
+					color: 'red'
+				{{pass}}
+			   
+			{{else:}}
+			    title: '{{=row.f_title}}',
+			    allDay: false,
+			    start: new Date('{{=row.f_start_time.strftime('%B %d, %Y %H:%M:%S')}}'),
+			    end: new Date('{{=row.f_end_time.strftime('%B %d, %Y %H:%M:%S')}}'),
+			    url: '{{=URL('appointment_update',vars=dict(apptid = row.id))}}',
+			    color:'blue'
+			 {{pass}}
+		    
+		    }
+		{{pass}}
+	    {{pass}}
+       
+	    
+            ]
+		});
+		
+	});
+
+jQuery("#no_table_start").keyup(function(){
+
+       $("#calendar").hide();
+      
+});
+jQuery("#no_table_end").keyup(function(){
+
+       $("#calendar").hide();
+       
+});
+
+jQuery("#no_table_start").click(function(){
+
+       $("#calendar").hide();
+      
+});
+jQuery("#no_table_end").click(function(){
+
+       $("#calendar").hide();
+       
+});
+
+</script>
+<style>
+
+	body {
+		margin: 40px 10px;
+		padding: 0;
+		font-family: "Lucida Grande",Helvetica,Arial,Verdana,sans-serif;
+		font-size: 14px;
+	}
+
+	#calendar {
+		max-width: 900px;
+		margin: 0 auto;
+	}
+
+</style>
+</head>
+<body>
+
+	<div id='calendar' class="w3-container"></div>
+
+</body>
+</html>

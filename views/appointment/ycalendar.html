@@ -1,0 +1,120 @@
+{{extend 'pms2_layoutw4.html'}}
+{{from datetime import datetime}}
+
+{{=form.custom.begin}}
+
+    
+                   
+                        <div class="row">
+                            <div class="col-md-12" style="margin: 30px 2px;">
+                                <div class="portlet light portlet-fit bordered calendar">
+                                    <div class="portlet-title" style="border-bottom: 1px solid rgb(230, 230, 230); background:none">
+                                        <div class="caption">
+                                            <i class=" icon-layers font-green"></i>
+                                            <span class="caption-subject font-green sbold uppercase">Appointment Calendar</span>
+                                            <span class="caption-subject font-green sbold uppercase"> &nbsp; | &nbsp; Ranjani A :BLROPT10088 &nbsp;</span>
+                                            <span ><a href="javascript:;" id="event_add" class="btn green" data-toggle="modal" data-target="#myModal"><i class="fa fa-plus"></i> New Appointment  </a></span>
+                                        </div>
+                                        <div class="col-sm-12">
+                                            <div class="col-sm-6">
+                                                  <div class="mt-repeater-input">
+                                                            <label class="m_title">Start Date</label>
+                                                            
+                                                            <input class="input-group form-control form-control-inline date date-picker" size="16" type="text" value="01/08/2016" name="group-a[0][date-input]" data-date-format="dd/mm/yyyy"> 
+                                               </div>
+                                            </div>
+                                            <div class="col-sm-6">
+                                               <div class="mt-repeater-input">
+                                                            <label class="m_title">End Date</label>
+                                                            
+                                                            <input class="input-group form-control form-control-inline date date-picker" size="16" type="text" value="01/08/2016" name="group-a[0][date-input]" data-date-format="dd/mm/yyyy"> 
+                                               </div>
+
+                                            </div>
+                                               
+
+                                        </div>
+                                    </div>
+                                
+                                     
+                                
+                                    <div class="portlet-body">
+                                        <div class="row">
+                                            <div class="col-md-6 col-sm-12">
+                                                <!-- BEGIN DRAGGABLE EVENTS PORTLET-->
+                                                <h3 class="event-form-title margin-bottom-20" style="margin-top:80px"></h3>
+                                                
+                                                <!-- END DRAGGABLE EVENTS PORTLET-->
+                                            </div>
+                                            <div class="col-md-12 col-sm-12">
+                                           
+                                                <div id="calendar" class="has-toolbar">
+                                                
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                
+                                </div><!-- XXXXX-->
+                            </div>
+                        </div>    
+<!-- Modal -->
+  <div class="modal fade" id="myModal" role="dialog">
+    <div class="modal-dialog">
+    
+      <!-- Modal content-->
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title">New Appointment</h4>
+        </div>
+        <div class="modal-body" style=" padding: 0px;">
+         <div class="col-md-12"     style="margin-top: 31px !important;">
+            <h4 class="m_title">Look up Member for Appointment:</h4>
+                <div class="form-group">
+                   <div class="input-group"  style="width:100%">
+                       <input type="text" class="form-control" value=""> 
+                    </div>
+                </div>
+          </div>
+          <div class="col-md-6">
+            <h4 class="m_title">Start Date Time</h4>
+                <div class="form-group">
+                   <div class="input-group"  style="width:100%">
+                       <input type="text" class="form-control" value=""> 
+                    </div>
+                </div>
+          </div>
+          <div class="col-md-6">
+            <h4 class="m_title">End Date Time</h4>
+                <div class="form-group" >
+                   <div class="input-group"  style="width:100%">
+                       <input type="text" class="form-control" value=""> 
+                    </div>
+                </div>
+          </div>
+          <div class="col-md-12">
+            <h4 class="m_title">Description</h4>
+                <div class="form-group">
+                   <div class="input-group">
+                      <textarea class="form-control" rows="5" cols="80" id="comment"></textarea> 
+                    </div>
+                </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+         
+           <a href="#" class="btn default">Cancel </a>
+           <a href="#" class="btn green">Click to Save </a>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+  
+
+
+    
+                
+{{=form.custom.end}}
+        

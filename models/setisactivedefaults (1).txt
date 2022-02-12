@@ -1,0 +1,86 @@
+INSERT INTO `provider_region_plan`
+(`companycode`,`regioncode`,`policy`,`plancode`,`procedurepriceplancode`)
+VALUES  
+('VIT','ALL','VIT_AP002','VIT_AP002','AP002_104');
+
+INSERT INTO `provider_region_plan`
+(`companycode`,`regioncode`,`policy`,`plancode`,`procedurepriceplancode`)
+VALUES  
+('MEDI','ALL','NDPC','NDPC','NDPC104');
+
+INSERT INTO `provider_region_plan`
+(`companycode`,`regioncode`,`policy`,`plancode`,`procedurepriceplancode`)
+VALUES  
+('HQ','ALL','HQ360-599_NDPC','HQ360-599_NDPC','NDPC104');
+
+INSERT INTO `provider_region_plan`
+(`companycode`,`regioncode`,`policy`,`plancode`,`procedurepriceplancode`)
+VALUES  
+('HQ','ALL','HQ60-99_NDP3C','HQ60-99_NDP3C','NDP3C104');
+
+INSERT INTO `provider_region_plan`
+(`companycode`,`regioncode`,`policy`,`plancode`,`procedurepriceplancode`)
+VALUES  
+('HIU','ALL','HIU499','HIU499','HIU499_104');
+
+INSERT INTO `provider_region_plan`
+(`companycode`,`regioncode`,`policy`,`plancode`,`procedurepriceplancode`)
+VALUES  
+('HIU','ALL','HIU1799','HIU1799','HIU1799_104');
+
+INSERT INTO `provider_region_plan`
+(`companycode`,`regioncode`,`policy`,`plancode`,`procedurepriceplancode`)
+VALUES  
+('TWCPIP59','ALL','TWCPIP59','TWCPIP59','NDPC104');
+
+INSERT INTO `provider_region_plan`
+(`companycode`,`regioncode`,`policy`,`plancode`,`procedurepriceplancode`)
+VALUES  
+('RPIP99','ALL','RPIP99','RPIP99','NDPC104');
+
+INSERT INTO `provider_region_plan`
+(`companycode`,`regioncode`,`policy`,`plancode`,`procedurepriceplancode`)
+VALUES  
+('RPIP599','ALL','RPIP599','RPIP599','NDPC104');
+
+INSERT INTO `provider_region_plan`
+(`companycode`,`regioncode`,`policy`,`plancode`,`procedurepriceplancode`)
+VALUES  
+('DEMO','ALL','NDPC','NDPC','NDPC104');
+
+INSERT INTO `provider_region_plan`
+(`companycode`,`regioncode`,`policy`,`plancode`,`procedurepriceplancode`)
+VALUES  
+('CSX','ALL','CSX','CSX','NDPCSX104');
+
+INSERT INTO `provider_region_plan`
+(`companycode`,`regioncode`,`policy`,`plancode`,`procedurepriceplancode`)
+VALUES  
+('CPIP59','ALL','CPIP59','CPIP59','NDPC104');
+
+INSERT INTO `provider_region_plan`
+(`companycode`,`regioncode`,`policy`,`plancode`,`procedurepriceplancode`)
+VALUES  
+('CISCO','ALL','CISCO','CISCO','NDPCSX104');
+
+INSERT INTO `provider_region_plan`
+(`companycode`,`regioncode`,`policy`,`plancode`,`procedurepriceplancode`)
+VALUES  
+('BSPJNA','ALL','BSPJNA','BSPJNA','BSPJNA_PPP');
+
+INSERT INTO `provider_region_plan`
+(`companycode`,`regioncode`,`policy`,`plancode`,`procedurepriceplancode`)
+VALUES  
+('BSPJ','ALL','BSPJ','BSPJ','BSPJ_PPP');
+
+INSERT INTO `provider_region_plan`
+(`companycode`,`regioncode`,`policy`,`plancode`,`procedurepriceplancode`)
+VALUES  
+('ABHIC','ALL','ABHIC','ABHIC','NDPCSX104');
+
+INSERT INTO `provider_region_plan`
+(`companycode`,`regioncode`,`policy`,`plancode`,`procedurepriceplancode`)
+VALUES  
+('ABHI','ALL','ABHI','ABHI','ABHI104');
+
+

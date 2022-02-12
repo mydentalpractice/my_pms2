@@ -1,0 +1,75 @@
+{{extend 'pms2_layoutw3.html'}}
+
+{{=form.custom.begin}}
+
+<header class="w3-container w3-blue-grey ">
+    <h4><strong>New Appointment : Member ID: {{=memberref}}</strong></h5>
+</header>
+
+<div class="w3-container w3-padding-0   w3-small ">
+
+<div class="w3-row-padding  w3-small">
+  <div class="w3-half" style='line-height:1.5;'>
+    <label>Member</label><br/>
+    {{=membername}}
+    
+  </div>
+  <div class="w3-half" style='line-height:1.5;'>
+    <label>Patient</label><br/>
+     {{=patientname}}
+    
+  </div>
+</div>
+
+<div class="w3-row-padding  w3-small">
+  <div class="w3-half" style='line-height:1.5;'>
+    <label>Title:</label><br/>
+    {{=form.custom.widget.title}}
+    
+  </div>
+  <div class="w3-half" style='line-height:1.5;'>
+    <label>Location</label><br/>
+    {{=form.custom.widget.location}}
+    
+  </div>
+  
+</div>
+
+<div class="w3-row-padding   w3-small">
+  <div class="w3-half " style='line-height:1.5;'>
+    <label>Start Date Time</label><br/>
+    {{=form.custom.widget.start}}
+    
+  </div>
+  <div class="w3-half" style='line-height:1.5;'>
+    <label>End Date Time</label><br/>
+    {{=form.custom.widget.end}}
+  </div>
+</div>
+
+
+<div class="w3-container w3-hide" >
+{{=form.custom.submit}}
+</div>
+<br/>
+
+
+
+
+<div class="w3-container w3-padding-4">
+<div class="w3-bar">
+  <a href="{{=returnurl}}" class="w3-button w3-left  w3-dark-grey" style="height:40px;width:20%">Cancel</a>
+  
+  <button class="w3-button w3-right w3-black" style="height:40px;width:20%"><i class="fa fa-save w3-margin-right"></i>Click to Save</button> 
+</div>
+</div>
+
+</div>
+
+
+</div>
+
+
+
+{{=form.custom.end}}
+<br/>

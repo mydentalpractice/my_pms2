@@ -1,0 +1,108 @@
+{{extend 'pms2_layoutw4.html'}}
+
+{{=form2.custom.begin}}
+<style>
+#suggestions { position: relative;z-index:3000;}
+.suggestions { background: white; border: solid 1px #55A6C8; }
+.suggestions DIV { padding: 2px 4px 2px 4px; }
+</style>
+ <form enctype="multipart/form-data" action="" method="post">
+   {{=form2.hidden_fields()}}
+
+      <!-- Modal content-->
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title">Appointment</h4>
+        </div>
+        <div class="modal-body" style=" padding: 0px;">
+         <div class="col-md-12"     style="margin-top: 31px !important;">
+            <h4 class="m_title">Look up Member for Appointment:</h4>
+                <div class="form-group">
+                   <div class="input-group"  style="width:100%">
+		    {{=form2.custom.widget.patientmember}}
+                    </div>
+                </div>
+		<div id="hide"  style="display:none">
+		    <p id="phide">Click <strong>X</strong> to close the Patient List after selection</p>
+		</div>
+                <div style="position: absolute;" id="suggestions"
+                    class="suggestions">
+                </div>
+ 
+ 
+          </div>
+	  
+	    <div class="col-md-12" >
+            <h4 class="m_title">Title:</h4>
+                <div class="form-group">
+                   <div class="input-group"  style="width:100%">
+		    {{=form2.custom.widget.title}}
+                    </div>
+                </div>
+          </div>
+	  	 
+						  
+          <div class="col-md-6">
+            <h4 class="m_title">Start Date Time</h4>
+                <div class="form-group">
+                  <div class="input-group date form_datetime form_datetime bs-datetime">
+                                                            <span class="input-group-addon">
+							    <div class='form-control'>
+							     {{=form2.custom.widget.start_date}}
+							    
+                                                                <button class="btn default date-set" type="button">
+                                                                    <i class="fa fa-calendar"></i>
+                                                                </button>
+							     </div>
+                                                            </span>
+                                                        </div>
+                </div>
+          </div>
+	  
+          <div class="col-md-6">
+            <h4 class="m_title">End Date Time</h4>
+                <div class="form-group">
+                  <div class="input-group date form_datetime form_datetime bs-datetime">
+                                                            <input type="text" size="16" class="form-control">
+                                                            <span class="input-group-addon">
+							    <div style="display:none">
+							     {{=form2.custom.widget.end_date}}
+							     </div>
+                                                                <button class="btn default date-set" type="button">
+                                                                    <i class="fa fa-calendar"></i>
+                                                                </button>
+                                                            </span>
+                                                        </div>
+                </div>
+          </div>
+          <div class="col-md-12" >
+            <h4 class="m_title">Description</h4>
+                <div class="form-group">
+                   <div class="input-group">
+                      {{=form2.custom.widget.description}}
+                    </div>
+                </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+         
+           <a href="{{=returnurl}}" class="btn default">Cancel </a>
+           <button class="btn green" type="submit">Click to Save </a>
+        </div>
+      </div>
+      
+  
+
+
+<div style="display:none">
+     {{=form2.custom.submit}}
+     {{=form2.custom.widget.memberid}}
+     {{=form2.custom.widget.patientid}}
+     {{=form2.custom.widget.xpatientmember}}
+     {{=form2.custom.widget.xfullname}}
+     {{=form2.custom.widget.xmemberid}}
+  </div>
+  </form>
+{{=form2.custom.end}}
+

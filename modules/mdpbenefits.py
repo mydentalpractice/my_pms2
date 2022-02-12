@@ -432,8 +432,11 @@ class Benefit:
       #vw_url = urlprops[0].vw_url if(len(urlprops) > 0) else ""
       #vw_url = vw_url + "createWallet"
       
-      vw_url = "http://mtstg.mydentalplan.in/walletapi/createWalletPlanBenefits"
+      vw_url = urlprops[0].vw_url if(len(urlprops) > 0) else ""
+      vw_url = vw_url + "walletapi/createWalletPlanBenefits"
+      #vw_url = "http://mtstg.mydentalplan.in/walletapi/createWalletPlanBenefits"
       logger.loggerpms2.info("Create Wallet_1 Request " + vw_url + " " + json.dumps(reqobj))
+      
       resp = requests.post(vw_url,json=reqobj)
       #logger.loggerpms2.info("Create Wallet_1 Respones " + vw_url + " " + json.dumps(resp.json()))
       if((resp.status_code == 200)|(resp.status_code == 201)|(resp.status_code == 202)|(resp.status_code == 203)):
@@ -636,8 +639,13 @@ class Benefit:
       
       #make a POST Call
       reqobj = avars
+
+      urlprops = db(db.urlproperties.id > 0).select(db.urlproperties.vw_url)
+      vw_url = urlprops[0].vw_url if(len(urlprops) > 0) else ""
+      vw_url = vw_url + "walletapi/getUsableWPBAmountLimit"
+
       
-      vw_url = "http://mtstg.mydentalplan.in/walletapi/getUsableWPBAmountLimit"
+      #vw_url = "http://mtstg.mydentalplan.in/walletapi/getUsableWPBAmountLimit"
       
       logger.loggerpms2.info("Get Wallet Balance_1 (getUsableWPBAmountLimit) Request " + vw_url + " " + json.dumps(reqobj))
       resp = requests.post(vw_url,json=reqobj)
@@ -726,9 +734,12 @@ class Benefit:
       
       #make a POST Call
       reqobj = avars
-      
+
+      urlprops = db(db.urlproperties.id > 0).select(db.urlproperties.vw_url)
+      vw_url = urlprops[0].vw_url if(len(urlprops) > 0) else ""
+      vw_url = vw_url + "walletapi/getWalletPlanBenefits"
      
-      vw_url = "http://mtstg.mydentalplan.in/walletapi/getWalletPlanBenefits"
+      #vw_url = "http://mtstg.mydentalplan.in/walletapi/getWalletPlanBenefits"
       logger.loggerpms2.info("Get Wallet Balance_2 (getUsableWPBAmountLimit) Request " + vw_url + " " + json.dumps(reqobj))
       resp = requests.post(vw_url,json=reqobj)
       logger.loggerpms2.info("Get Wallet Balance_2 Post (getUsableWPBAmountLimit) Response " + str(resp.status_code))
@@ -947,7 +958,12 @@ class Benefit:
       reqobj["mdp_wallet_amount"] = discount_amount
       
       rspobj = {}
-      vw_url = "http://mtstg.mydentalplan.in/walletapi/walletPlanBenefitsCrDr"
+      
+      urlprops = db(db.urlproperties.id > 0).select(db.urlproperties.vw_url)
+      vw_url = urlprops[0].vw_url if(len(urlprops) > 0) else ""
+      vw_url = vw_url + "walletapi/walletPlanBenefitsCrDr"
+      
+      #vw_url = "http://mtstg.mydentalplan.in/walletapi/walletPlanBenefitsCrDr"
       logger.loggerpms2.info("Reverse Wallet_1 (walletPlanBenefitsCrDr) Request " + vw_url + " " + json.dumps(reqobj))
       resp = requests.post(vw_url,json=reqobj)
       logger.loggerpms2.info("Reverse Wallet_1 Post (walletPlanBenefitsCrDr) Response " + str(resp.status_code))
@@ -1586,7 +1602,12 @@ class Benefit:
         rspobj = {}
         avars["amount"] = totalcopay - totalinspays
         avars["current_amount"] = copay - inspays
-        vw_url = "http://mtstg.mydentalplan.in/walletapi/getUsableWPBAmountLimit"
+        
+        urlprops = db(db.urlproperties.id > 0).select(db.urlproperties.vw_url)
+        vw_url = urlprops[0].vw_url if(len(urlprops) > 0) else ""
+        vw_url = vw_url + "walletapi/getUsableWPBAmountLimit"
+        
+        #vw_url = "http://mtstg.mydentalplan.in/walletapi/getUsableWPBAmountLimit"
         logger.loggerpms2.info("Get Plan Benefits_1 (getUsableWPBAmountLimit) Request " + vw_url + " " + json.dumps(avars))
         resp = requests.post(vw_url,json=avars)
         logger.loggerpms2.info("Get Plan Benefits_1 Post (getUsableWPBAmountLimit) Response " + str(resp.status_code))
@@ -1777,8 +1798,12 @@ class Benefit:
       #reqobj["companypay"]  = common.getkeyvalue(planbenefits,"discount_benefit_amount_usable","0")  # plan benefit graded discount
       #reqobj["discount_amount"]  = common.getkeyvalue(wallets,"mdp_wallet_amount_usable","0") # mdp wallet discount
       #reqobj["walletamount"]  = common.getkeyvalue(wallets,"super_wallet_amount_usable","0") # superwallet discount
-      
-      vw_url = "http://mtstg.mydentalplan.in/walletapi/walletPlanBenefitsCrDr"
+
+
+      urlprops = db(db.urlproperties.id > 0).select(db.urlproperties.vw_url)
+      vw_url = urlprops[0].vw_url if(len(urlprops) > 0) else ""
+      vw_url = vw_url + "walletapi/walletPlanBenefitsCrDr"
+      #vw_url = "http://mtstg.mydentalplan.in/walletapi/walletPlanBenefitsCrDr"
       logger.loggerpms2.info("Benefit Success_1 (walletPlanBenefitsCrDr) Request " + vw_url + " " + json.dumps(reqobj))
       resp = requests.post(vw_url,json=reqobj)
       logger.loggerpms2.info("Benefit Success_1 Post (walletPlanBenefitsCrDr) Response " + str(resp.status_code))
@@ -1887,8 +1912,13 @@ class Benefit:
       reqobj["super_wallet_amount"] = common.getkeyvalue(wallets,"super_wallet_amount_usable","0")
       reqobj["mdp_wallet_amount"] = common.getkeyvalue(wallets,"mdp_wallet_amount_usable","0")
       
-      vw_url = "http://mtstg.mydentalplan.in/walletapi/walletPlanBenefitsCrDr"
+      
+      urlprops = db(db.urlproperties.id > 0).select(db.urlproperties.vw_url)
+      vw_url = urlprops[0].vw_url if(len(urlprops) > 0) else ""
+      vw_url = vw_url + "walletapi/walletPlanBenefitsCrDr"      
+      #vw_url = "http://mtstg.mydentalplan.in/walletapi/walletPlanBenefitsCrDr"
       logger.loggerpms2.info("Benefit Success_1 (walletPlanBenefitsCrDr) Request " + vw_url + " " + json.dumps(reqobj))
+      
       resp = requests.post(vw_url,json=reqobj)
       logger.loggerpms2.info("Benefit Failure_1 Post (walletPlanBenefitsCrDr) Response " + str(resp.status_code))
       if((resp.status_code == 200)|(resp.status_code == 201)|(resp.status_code == 202)|(resp.status_code == 203)):

@@ -1,0 +1,198 @@
+{{
+
+from datetime import datetime
+}}
+
+<script>
+	$(document).ready(function() {
+	
+	    $("#suggestions").show();
+		
+		$("#suggestions") .click(function(){
+		  
+		    x= $("#no_table_patientmember").val();
+	    
+		    
+		    $("#no_table_xpatientmember").val(x);
+		    
+	    
+		    $("#suggestions").hide();
+		    
+		
+		});
+		
+  
+		var date = new Date();
+		var d = date.getDate();
+		var m = date.getMonth();
+		var y = date.getFullYear();
+		
+		$('#xcalendar').fullCalendar({
+		
+      header:
+      {
+        left: 'today',
+        center: 'title',
+        right: 'month,agendaWeek,agendaDay'
+      },
+      defaultDate: '{{=defdate}}',
+      navLinks: true, // can click day/week names to navigate views
+      selectable: true,
+      selectHelper: true,
+      select: function(start, end) {
+      
+          
+
+	  <!--alert("Start = " + start.format() + " End = " + end.format());-->
+	 
+	 
+	
+        <!--var title = prompt('Event Title:');-->
+        <!--var eventData;-->
+        <!--if (title) {-->
+          <!--eventData = {-->
+            <!--title: title,-->
+            <!--start: start,-->
+            <!--end: end-->
+          <!--};-->
+          <!--$('#xcalendar').fullCalendar('renderEvent', eventData, true); // stick? = true-->
+        <!--}-->
+        $('#xcalendar').fullCalendar('unselect');
+		<!--alert("Event Data = " + eventData.title + " Start=" + eventData.start.format() + " End=" + eventData.end.format());-->
+      },
+	  eventClick: function(event) {
+	    <!--var m = $.fullCalendar.moment(event.end);-->
+		<!--if(event.end != null)-->
+			<!--alert("Event title: " + event.title + "UniqueID = " + event.uniqueid + " Start Date: " +  event.start.format() + "End Date =" + event.end.format());-->
+		<!--else-->
+			<!--alert("Event title: " + event.title + "UniqueID = " + event.uniqueid +  " Start Date: " +  event.start.format());-->
+		
+		
+		    
+		 <!--$('#modalTitle').html(event.title);-->
+		 <!--$('#modalBody').html(event.description);-->
+		 <!--$('#fullCalModal').modal();-->
+
+		$.post("{{=URL('appointment',"appointment_update")}}",
+			    {
+				apptid: event.uniqueid,
+				page: "1",
+				memberpage: "1",
+				providerid: providerid,
+				source:source
+				
+			    }
+			    );
+	  },
+	
+	  eventDrop: function(event,dayDelta,minuteDelta,allDay,revertFunc) {
+          <!--alert("Enter event drop")-->
+	  <!--if(event.end != null)-->
+	  <!--alert("Title = " + event.title + " Start = " + event.start.format() + "ID=" + event.uniqueid + " End = " + event.end.format())-->
+	  <!--else-->
+	  <!--alert("Title = " + event.title + " Start = " + event.start.format() + "ID=" + event.uniqueid  )-->
+	  var endtime = ""
+	  if(event.end != null)
+	    endtime = event.end.format()
+	  else
+	    endtime = ""
+	  
+	   if (!confirm("Are you sure about this change? SMS will be sent on confirmation")) {
+            revertFunc();
+          }  
+	
+	  $.post("{{=URL('admin',"appointment_drop")}}",
+	    {
+	        xuniqueid: event.uniqueid,
+		xtitle: event.title,
+		xstart: event.start.format(),
+		xend: endtime
+		
+		
+	    }
+	  
+	
+	);
+
+	 
+	  
+      },
+      eventAllow: function(dropLocation, draggedEvent) {
+         
+	  
+	  
+	  draggedEvent.start = $.fullCalendar.moment(dropLocation.start);
+	  return true;
+      },
+      editable: true,
+      eventLimit: true, // allow "more" link when too many events
+      events: [
+        {{for i,row in enumerate(rows):}}{{if i!=0:}},{{pass}}
+	    
+		
+		{{if((row.t_appointment.f_start_time >= datetime.strptime(start,'%Y-%m-%d %H:%M')) & (row.t_appointment.f_start_time <= datetime.strptime(end,'%Y-%m-%d %H:%M'))):}}
+		    {
+		      
+			title: '{{=row.t_appointment.f_patientname}}',
+			allDay: false,
+			start: new Date('{{=row.t_appointment.f_start_time.strftime('%B %d, %Y %H:%M')}}'),
+			end: new Date('{{=row.t_appointment.f_end_time.strftime('%B %d, %Y %H:%M')}}'),
+			url: '{{=URL('appointment','appointment_update',vars=dict(apptid = row.t_appointment.id,page=page,memberpage=memberpage,providerid=providerid,source=source))}}','
+			color: '{{=row.doctor.color}}',
+			uniqueid: '{{=row.t_appointment.id}}'
+			
+			 
+		    
+		    }
+		{{else:}} 
+		    {
+			{{if(row.t_appointment.is_active == True):}}
+			      
+				
+				title: '{{=row.t_appointment.f_patientname}}',
+
+				allDay: false,
+				start: new Date('{{=row.t_appointment.f_start_time.strftime('%B %d, %Y %H:%M')}}'),
+				end: new Date('{{=row.t_appointment.f_end_time.strftime('%B %d, %Y %H:%M')}}'),
+				{{if(row.t_appointment.f_title == 'New'):}}
+					url: "{{=URL('appointment','appointment_create',vars=dict(page=1,providerid=providerid,memberid=memberid))}}",
+					color: '{{=row.doctor.color}}',
+					uniqueid: '{{=row.t_appointment.id}}'
+						
+				{{else:}}					
+					url: '{{=URL('appointment','appointment_update',vars=dict(apptid = row.t_appointment.id,page=page,memberpage=memberpage,providerid=providerid,source=source))}}',
+					color: '{{=row.doctor.color}}',
+					uniqueid: '{{=row.t_appointment.id}}'
+				{{pass}}
+			   
+			{{else:}}
+			    title: '{{=row.t_appointment.f_patientname}}',
+			    allDay: false,
+			    start: new Date('{{=row.t_appointment.f_start_time.strftime('%B %d, %Y %H:%M')}}'),
+			    end: new Date('{{=row.t_appointment.f_end_time.strftime('%B %d, %Y %H:%M')}}'),
+			    url: '{{=URL('appointment','appointment_update', vars=dict(apptid = row.t_appointment.id,page=page,memberpage=memberpage,providerid=providerid,source=source))}}',
+			    color: '{{=row.doctor.color}}',
+			    uniqueid: '{{=row.t_appointment.id}}'
+			    
+			 {{pass}}
+		    
+		    }
+		{{pass}}
+	    {{pass}}
+      ]
+    });
+     $('#prev').on('click', function() {
+          <!--ajax('{{=URL("appointment", "prevappt", vars=dict(action="next"))}}', [] , 'xcalendar');-->
+     
+    $('#xcalendar').fullCalendar('prev'); // call method
+  });
+		
+     $('#next').on('click', function() {
+          ajax('{{=URL("appointment", "nextappt", vars=dict(action="next"))}}', [] , 'cal');
+
+	<!--$('#xcalendar').fullCalendar('next'); // call method-->
+  });
+	});
+
+
+</script>
