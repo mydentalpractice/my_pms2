@@ -816,7 +816,11 @@ class Payment:
             
                 #planbenefit
                 planbenefitobj = common.getkeyvalue(benefit,"planBenefits", None)
-                companypays = 0 if ((planbenefitobj == None)|(len(planbenefitobj)==0)) else float(common.getkeyvalue(planbenefitobj[0],"discount_benefit_amount_usable",0))
+                
+                if(planbenefitobj == None):
+                    companypays = 0
+                else:
+                    companypays = 0 if ((len(planbenefitobj)==0)) else float(common.getkeyvalue(planbenefitobj[0],"discount_benefit_amount_usable",0))
             
             
                 #update totalcompanypays (we are saving discount_amount as companypays )

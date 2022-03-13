@@ -2678,3 +2678,26 @@ class Benefit:
   
     logger.loggerpms2.info("Exit from RPIP599 KYTC Benefit " + json.dumps(benefit_obj))
     return json.dumps(benefit_obj)  
+  
+  #this API credits x% of treatment cost to MDP Wallet as Cashback
+  def treatment_cost_cashback(self,avars):
+    
+    logger.loggerpms2.info("Enter treatment_cost_cashback ==>>" + str(avars))
+    
+    db = self.db
+    rspobj = {}
+    
+    try:
+      i = 0
+    
+    except Exception as e:
+      mssg = "Treatment Cost Cashback API Exception" + str(e)
+      logger.loggerpms2.info(mssg)      
+      rspobj = {}
+      rspobj["result"] = "fail"
+      rspobj["error_message"] = mssg
+      return json.dumps(rspobj)     
+    
+    
+    logger.loggerpms2.info("Exit Treatment Cost Cashback API==>>" + json.dumps(rspobj))
+    return json.dumps(rspobj)  

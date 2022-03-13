@@ -609,7 +609,25 @@ class Plan_Rules:
         logger.loggerpms2.info("Exit Plan_Rules rule_reverse_wallet_1" + mssg)
         return mssg    
             
+
+    #This rule is called to credit x% of treatment cost to MDP Wallet
+    def rule_treatment_discount_cashback(self,avars):
+        logger.loggerpms2.info("Enter Plan Rules - rule_treatment_cost_cashback " + json.dumps(avars))
+        db = self.db
+        rspobj = {}
         
+        try:    
+            bnftObj = mdpbenefits.Benefit(db)
+            rspobj = json.loads(bnftObj.treatment_discount_cashback(avars))
+        except Exception as e:
+            mssg = " Exception Plan Rules rule_treatment_discount_cashback " + str(e)
+            rspobj["result"] = "fail"
+            rspobj["error_message"] = mssg
+            
+        mssg = json.dumps(rspobj)
+        logger.loggerpms2.info("Exit Plan_Rules rule_treatment_discount_cashback" + mssg)
+        return mssg    
+                   
 class Pricing:
     def __init__(self,db):
         self.db = db
@@ -858,13 +876,13 @@ class Pricing:
             premenddt = members[0].premenddt if(len(members) == 1) else common.getdatefromstring("01/01/1900","%d/%m/%Y")
             premstartdt = members[0].premstartdt if(len(members) == 1) else common.getdatefromstring("01/01/1900","%d/%m/%Y")
             tr_startdate = tr[0].startdate if(len(tr) == 1) else common.getdatefromstring("01/01/2200","%d/%m/%Y")
-            
+
             is_valid = True
             if((tr_startdate >= premstartdt) & (tr_startdate <= premenddt)):
                 is_valid = True
             else:
                 is_valid = False
-            
+         
             prp = db((db.provider_region_plan.companycode == company_code) & \
                      (db.provider_region_plan.regioncode == region_code) & \
                      (db.provider_region_plan.plancode == plan_code)).select()
@@ -953,12 +971,13 @@ class Pricing:
             premenddt = members[0].premenddt if(len(members) == 1) else common.getdatefromstring("01/01/1900","%d/%m/%Y")
             premstartdt = members[0].premstartdt if(len(members) == 1) else common.getdatefromstring("01/01/1900","%d/%m/%Y")
             tr_startdate = tr[0].startdate if(len(tr) == 1) else common.getdatefromstring("01/01/2200","%d/%m/%Y")
-            
+
             is_valid = True
             if((tr_startdate >= premstartdt) & (tr_startdate <= premenddt)):
                 is_valid = True
             else:
                 is_valid = False
+
             
             prp = db((db.provider_region_plan.companycode == company_code) & \
                      (db.provider_region_plan.regioncode == region_code) & \
