@@ -1335,7 +1335,7 @@ class Pricing:
         #logger.loggerpms2.info("Exit Pricing rpip599_rule1 " + mssg)
         #return mssg
     
-    #This rule - Procedure is free once
+    #This rule - Procedure is free once in a year for a member across all treatments
     def rule1(self,avars):
         logger.loggerpms2.info("Enter rule1 API " + json.dumps(avars))
         
@@ -1349,33 +1349,35 @@ class Pricing:
             company_code = common.getkeyvalue(avars,"company_code","")
             treatment_id = int(common.getid(common.getkeyvalue(avars,"treatment_id",0)))
             
+            #check whether the plan is valid for this member or not
+            tr = db((db.vw_treatmentlist_fast.id == treatment_id) & (db.vw_treatmentlist_fast.is_active == True)).select(db.vw_treatmentlist_fast.memberid,db.vw_treatmentlist_fast.startdate)
+            memberid = int(common.getid(tr[0].memberid)) if(len(tr) == 1)  else 0
+            members = db((db.patientmember.id == memberid) & (db.patientmember.is_active == True)).select(db.patientmember.premstartdt,db.patientmember.premenddt)
+            premenddt = members[0].premenddt if(len(members) == 1) else common.getdatefromstring("01/01/1900","%d/%m/%Y")
+            premstartdt = members[0].premstartdt if(len(members) == 1) else common.getdatefromstring("01/01/1900","%d/%m/%Y")
+
             is_valid = True
-            #number of times this procedure is used 1 in a plan year
-            trp = db((db.vw_treatmentprocedure.treatmentid == treatment_id) &\
-                     (db.vw_treatmentprocedure.procedurecode == procedure_code) &\
-                     (db.vw_treatmentprocedure.is_active == True)).select(db.vw_treatmentprocedure.ALL, orderby=~db.vw_treatmentprocedure.id)
+            #get a list of treatments withing premstartdt and premenddt for this member
+            trs = db((db.vw_treatmentlist_fast.memberid == memberid) & \
+                     (db.vw_treatmentlist_fast.startdate >= premstartdt) & (db.vw_treatmentlist_fast.startdate <= premenddt) &\
+                     (db.vw_treatmentlist_fast.is_active == True)).select()
             
-            
-            is_valid0 = True if(len(trp) ==0) else False #Not used once
-            
-            
-            #last treatment date when this G0101 was added.
-            treatmentdate = trp[0].treatmentdate if((len(trp) > 0) & (is_valid == True)) else common.getISTCurrentLocatTime().date()
-            currentdate = common.getISTFormatCurrentLocatTime().date()
-            #if current date > last treatmentdate + 1 year, then procedure can be added
-            year1 = timedelta(days=365)
-            day  = timedelta(days = 1)
-            nextdateallowed = (treatmentdate + year1) - day  
-            
-            is_validn = True if(currentdate >= nextdateallowed) else False
-            
-            if (is_valid0 == True): #0 times used
-                is_valid = True
-            elif (is_validn == True): # once is used
-                is_valid = True
-            else:
-                is_valid = False
-            
+            is_valid = True
+            for tr in trs:
+                procs = db((db.treatment_procedure.treatmentid == tr.id)).select(db.treatment_procedure.dentalprocedure)
+                
+                for proc in procs:
+                    dentalprocid = int(common.getid(proc.dentalprocedure))
+                    r = db(db.procedurepriceplan.id == dentalprocid).select(db.procedurepriceplan.procedurecode)
+                    dentalprocedurecode = r[0].procedurecode if(len(r) > 0) else ""
+                    if(dentalprocedurecode == procedure_code):
+                        is_valid = False
+                        break;
+
+                    if(is_valid == False):
+                        break;
+                
+                
             
             prp = db((db.provider_region_plan.companycode == company_code) & \
                      (db.provider_region_plan.regioncode == region_code) & \

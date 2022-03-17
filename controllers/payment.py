@@ -572,7 +572,7 @@ def print_payment_receipt():
     tottreatmentcost  = 0
     totinspays = 0    
     totaldue = 0
-    
+    totalcopay = 0
     
     if(status == 'S'):
                
@@ -582,7 +582,7 @@ def print_payment_receipt():
         totinspays= paytm["totalinspays"]
         totpaid=paytm["totalpaid"] 
         totaldue = paytm["totaldue"]        
-    
+        totalcopay = paytm["totalcopay"]
    
     
     
@@ -624,6 +624,8 @@ def print_payment_receipt():
                 status = status,\
                 doctorname  = doctorname,\
                 treatment = treatment,\
+                treatmentcost = tottreatmentcost,\
+                copay = totalcopay,\
                 description =description,\
                 chiefcomplaint = chiefcomplaint,\
                 otherinfo=otherinfo,\
@@ -807,7 +809,7 @@ def payment_success():
     tottreatmentcost  = 0
     totinspays = 0    
     totaldue = 0
-
+    totalcopay = 0
     
     #paytm = calculatepayments(tplanid,providerid)
     #tottreatmentcost= paytm["totaltreatmentcost"]
@@ -879,7 +881,8 @@ def payment_success():
         tottreatmentcost= paytm["totaltreatmentcost"]
         totinspays= paytm["totalinspays"]
         totpaid=paytm["totalpaid"] 
-        totaldue = paytm["totaldue"]  
+        totaldue = paytm["totaldue"] 
+        totalcopay = paytm["totalcopay"]
     else:
         
         #here need to update treatmentplan tables
@@ -923,7 +926,8 @@ def payment_success():
         totinspays= paytm["totalinspays"]
         totpaid=paytm["totalpaid"] 
         totaldue = paytm["totaldue"]      
-    
+        totalcopay = paytm["totalcopay"]
+        
     return dict(formProcedure=formProcedure,\
                 todaydate = todaydate,\
                 providerid = providerid,
@@ -959,6 +963,9 @@ def payment_success():
                 status = status,\
                 doctorname  = doctorname,\
                 treatment = treatment,\
+                treatmentcost = tottreatmentcost,\
+                copay = totalcopay,\
+                
                 description =description,\
                 chiefcomplaint = chiefcomplaint,\
                 otherinfo=otherinfo,\
@@ -1784,11 +1791,12 @@ def pinelabs_payment_callback():
     tottreatmentcost  = 0
     totinspays = 0    
     totaldue = 0
-    
+    totalcopay = 0
     
     if(status == 'S'):
         paytm = json.loads(account._calculatepayments(db,tplanid))
         tottreatmentcost= paytm["totaltreatmentcost"]
+        totalcopay = paytm["totalcopay"]
         totinspays= paytm["totalinspays"]
         totpaid=paytm["totalpaid"] 
         totaldue = paytm["totaldue"]
@@ -1831,6 +1839,8 @@ def pinelabs_payment_callback():
                 status = status,\
                 doctorname  = doctorname,\
                 treatment = treatment,\
+                treatmentcost = tottreatmentcost,\
+                copay = totalcopay,\
                 description =description,\
                 chiefcomplaint = chiefcomplaint,\
                 otherinfo=otherinfo,\
@@ -2032,11 +2042,13 @@ def shopse_payment_callback():
         tottreatmentcost  = 0
         totinspays = 0    
         totaldue = 0
+        totalcopay = 0
         
         
         if(status == 'S'):
             paytm = json.loads(account._calculatepayments(db, tplanid))
             tottreatmentcost= paytm["totaltreatmentcost"]
+            totalcopay = paytm["totalcopay"]            
             totinspays= paytm["totalinspays"]
             totpaid=paytm["totalpaid"] 
             totaldue = paytm["totaldue"]
@@ -2122,6 +2134,8 @@ def shopse_payment_callback():
                 status = status,\
                 doctorname  = doctorname,\
                 treatment = treatment,\
+                treatmentcost = tottreatmentcost,\
+                copay = totalcopay,\
                 description =description,\
                 chiefcomplaint = chiefcomplaint,\
                 otherinfo=otherinfo,\
