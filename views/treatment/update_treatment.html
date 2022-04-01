@@ -70,6 +70,10 @@
                                                  <li>
 						    <a href="{{=URL("payment","create_payment",vars=dict(page=page,tplanid=tplanid,treatmentid=treatmentid,providerid=providerid,providername=providername,memberid=memberid,patientid=patientid))}}" aria-expanded="false"> Payment </a>						    
                                                 </li>
+						<li class="">
+                                                    
+						    <a onclick="open_DM()"> Dental Mammoth </a>
+                                                </li>
                                             </ul>
                                             
                                             
@@ -466,6 +470,8 @@
 						 <br/>
 						</div>
                                                 <!-- END OF PAYMENT -->
+						
+						
                                         </div>
                                        
                                     </div>
@@ -811,5 +817,11 @@ function xadd_proceduregrid(){
    
   
     
+}
+
+function open_DM(){
+
+var dmWindow = window.open("https://demoweb.mydentalplan.in/dental-mammoth#", "DentalMammoth", "_blank","fullscreen=yes");
+
 }
  </script>
