@@ -110,6 +110,9 @@ class Clinic:
                     "longitude":r[0].longitude if len(r) == 1 else "",
                     "latitude":r[0].latitude if len(r) == 1 else "",
                     "gps_location":r[0].gps_location if len(r) == 1 else "",
+                    "isMDP":r[0].isMDP if len(r) >= 1 else True,
+                    "logo_id":r[0].logo_id if len(r) >= 1 else 0,
+                    "logo_file":r[0].logo_file if len(r) >= 1 else "",
                     
                 }
                 cliniclist.append(dobj)
@@ -401,6 +404,10 @@ class Clinic:
                 "notes":ds[0].notes,
                 "registration_certificate":ds[0].registration_certificate,
                 "state_dental_registration":ds[0].state_dental_registration,
+                "isMDP":common.getboolean(ds[0].isMDP),
+                "logo_id":int(common.getid(ds[0].logo_id)),
+                "logo_file":ds[0].logo_file,
+                
                 "result":"success",
                 "error_message":"",
                 "error_code":""
@@ -536,7 +543,9 @@ class Clinic:
                 
                 state_dental_registration = common.getkeyvalue(avars,"state_dental_registration",ds[0].state_dental_registration),
                 registration_certificate =  common.getkeyvalue(avars,"registration_certificate",ds[0].registration_certificate),                
-
+                isMDP = common.getkeyvalue(avars,"isMDP", ds[0].isMDP),
+                logo_id = common.getkeyvalue(avars,"logo_id", ds[0].logo_id),
+                logo_file = common.getkeyvalue(avars,"logo_file", ds[0].logo_file),
                 
                 modified_on=common.getISTFormatCurrentLocatTime(),
                 modified_by= 1 if(auth.user == None) else auth.user.id
@@ -637,6 +646,9 @@ class Clinic:
                 
                 state_dental_registration = common.getkeyvalue(avars,"state_dental_registration",None),
                 registration_certificate =  common.getkeyvalue(avars,"registration_certificate",None),
+                isMDP =  common.getkeyvalue(avars,"isMDP",True),
+                logo_id = common.getkeyvalue(avars,"logo_id", 0),
+                logo_file = common.getkeyvalue(avars,"logo_file", ""),
                 
                 is_active = True,
                 created_on=common.getISTFormatCurrentLocatTime(),

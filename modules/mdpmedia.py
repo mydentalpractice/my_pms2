@@ -375,29 +375,39 @@ class Media:
     
     
             ##upload the media  to the server
+
             x = appath.split('\\') 
             appath = os.path.join(x[0],"\\")
             appath = os.path.join(appath,x[1])
             appath = os.path.join(appath,x[2])            
             appath = os.path.join(appath,x[3]) if len(x) == 4 else appath
-            
+
             dirpath = os.path.join(appath , "media")
+            if(not os.path.exists(dirpath)):
+                os.makedirs(dirpath,0777)    
+
+            
+            strdate = common.getstringfromdate(datetime.date.today(),"%m-%Y")    
+            dirpath = os.path.join(dirpath , strdate)
+            media_subfolder = dirpath
             if(not os.path.exists(dirpath)):
                 os.makedirs(dirpath,0777)    
     
             dirpath = os.path.join(dirpath , self.mtype)
-            media_subfolder = os.path.join("media" , self.mtype)
+            media_subfolder = dirpath
             if(not os.path.exists(dirpath)):
-                os.makedirs(dirpath,0777)    
+                os.makedirs(dirpath,0777)                 
+            
+            
+          
     
+            #dirpath = os.path.join(dirpath, provcode)
+            #if(not os.path.exists(dirpath)):
+                #os.makedirs(dirpath,0777)    
     
-            dirpath = os.path.join(dirpath, provcode)
-            if(not os.path.exists(dirpath)):
-                os.makedirs(dirpath,0777)    
-    
-            dirpath = os.path.join(dirpath, patmember)  
-            if(not os.path.exists(dirpath)):
-                os.makedirs(dirpath,0777)    
+            #dirpath = os.path.join(dirpath, patmember)  
+            #if(not os.path.exists(dirpath)):
+                #os.makedirs(dirpath,0777)    
     
             uploadfolder=dirpath
     
@@ -557,7 +567,7 @@ class Media:
                 f.write(mediadata.decode('base64'))     
     
             
-            logger.loggerpms2.info("Image Uploaded to " + tempmediafile.name)
+            #logger.loggerpms2.info("Image Uploaded to " + tempmediafile.name)
     
     
             #upload the image to the server
@@ -608,9 +618,9 @@ class Media:
             media = db(db.dentalimage.id == mediaid).select(db.dentalimage.image)
             mediaobj = {
                 'mediaid': mediaid,
-                'media':media[0].image,
-                'uploadfolder':uploadfolder,
-                'mediafilename':"",
+                'media':media[0].image,   #jpg file name
+                'uploadfolder':uploadfolder,   #folder where the jpg is uploaded
+                'mediafilename':os.path.join(uploadfolder,media[0].image),
                 
                 
                 "result":"success",

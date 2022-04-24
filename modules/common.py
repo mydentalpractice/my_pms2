@@ -355,7 +355,9 @@ def getprovider(auth,db):
     latitude = ""
     longitude = ""
     locationurl = ""
-    
+    isMDP = True
+    logo_file = ""
+    logo_id = 0
     
     if(auth.has_membership('provider')):
         #logger.loggerpms2.info("Provider is member of Provider")
@@ -385,6 +387,9 @@ def getprovider(auth,db):
                 longitude = getstring(rows[0]["pa_longitude"])
                 latitude = getstring(rows[0]["pa_latitude"])
                 locationurl = getstring(rows[0]["pa_locationurl"])
+                isMDP = getboolean(rows[0]["isMDP"])
+                logo_file = rows[0]["logo_file"]
+                logo_id = rows[0]["logo_id"]
                 
                 
         else:
@@ -400,7 +405,7 @@ def getprovider(auth,db):
     
     return dict(providerid=providerid,provider=provider,providername=providername,registration=registration,
         practicename=practicename,practiceaddress=practiceaddress,email=email,cell=cell,rlgrpolicynumber=rlgrpolicynumber,
-        rlgprovider=rlgprovider,regionid=regionid,planid=planid)
+        rlgprovider=rlgprovider,regionid=regionid,planid=planid,isMDP=isMDP,logo_file=logo_file,logo_id=logo_id)
 
 def getproviderfromid(db,aproviderid):
     
@@ -428,7 +433,8 @@ def getproviderfromid(db,aproviderid):
     city = ""
     st = ""
     pin = ""
-
+    
+    isMDP = True
 
     if(providerid > 0):
         rows = db((db.provider.id == providerid) & (db.provider.is_active == True)).select()
@@ -458,11 +464,11 @@ def getproviderfromid(db,aproviderid):
                 longitude = getstring(rows[0]["pa_longitude"])
                 latitude = getstring(rows[0]["pa_latitude"])
                 locationurl = getstring(rows[0]["pa_locationurl"])
-            
+                isMDP = getboolean(rows[0]["isMDP"])
             
     return dict(providerid=providerid,provider=provider,providername=providername,registration=registration,
                 practicename=practicename,practiceaddress=practiceaddress,city=city,st=st,pin=pin,email=email,cell=cell,rlgrpolicynumber=rlgrpolicynumber,
-                rlgprovider=rlgprovider,regionid=regionid,planid=planid,longitude=longitude,latitude=latitude,locationurl=locationurl)
+                rlgprovider=rlgprovider,regionid=regionid,planid=planid,longitude=longitude,latitude=latitude,locationurl=locationurl,isMDP=isMDP)
                 
    
    

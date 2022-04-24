@@ -480,6 +480,10 @@ db.define_table('clinic',
                 
                 Field('state_dental_registration','string'),
                 Field('registration_certificate','string'),
+                Field('isMDP', 'boolean',default=True),
+                Field('logo_id', 'integer'),
+                Field('logo_file', 'string'),
+                
                 
                 Field('notes','text'),
                 auth.signature                
@@ -1117,6 +1121,10 @@ db.define_table('provider',
                 Field('imageid','integer'),                
                 Field('IND_VC','boolean',default=False),
                 Field('available','boolean',default=True),
+                Field('isMDP', 'boolean',default=True),
+                Field('logo_id', 'integer'),
+                Field('logo_file', 'string'),
+                
                 
                 auth.signature,
                 format='%(providername)s (%(provider)s')
@@ -1212,6 +1220,9 @@ db.define_table('prospect',
                 
                 Field('bankid','reference providerbank'),                
                 Field('newcity', 'string'),
+                Field('isMDP', 'boolean',default=True),
+                Field('logo_id', 'integer'),
+                Field('logo_file', 'string'),
                 
                 auth.signature,
                 format='%(providername)s (%(provider)s')
@@ -1799,6 +1810,9 @@ db.define_table('urlproperties',
                 Field('vw_url','text'),
                 Field('vw_stg_url','text'),
                 Field('vw_prod_url','text'),
+                
+                Field('mdp_contact_cell','string',default='18001027526'),
+                Field('mdp_contact_email','string',default='appointments@mydentalplan.in'),
 
                 auth.signature
                 )
@@ -4905,6 +4919,19 @@ db.define_table('rules',
                 )
 db.rules._singular = "rules"
 db.rules._plural   = "rules"
+
+
+db.define_table('mdp_nonmdp',
+                Field('prospect_id','integer'),
+                Field('provider_id','integer'),
+                Field('clinic_id','integer'),
+                Field('image_id','integer')
+                
+                
+                )
+db.mdp_nonmdp._singular = "mdp_nonmdp"
+db.mdp_nonmdp._plural   = "mdp_nonmdp"  
+
 
 def geocode2(form):
     from gluon.tools import geocode

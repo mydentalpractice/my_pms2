@@ -384,11 +384,13 @@ def save_prescription():
 
     providerid = int(common.getid(request.get_vars.providerid))
     doctorid = int(common.getid(request.get_vars.doctor))
-    doctorid = int(common.getid(request.post_vars.doctorid)) if(doctorid == 0) else doctorid
-    tplanid = int(common.getid(request.get_vars.tplanid))
-    tplanid = int(common.getid(request.post_vars.tplanid)) if(tplanid == 0) else tplanid
+    doctorid = int(common.getid(request.post_vars.doctor)) if(doctorid == 0) else doctorid
+   
+    
     treatmentid = int(common.getid(request.get_vars.treatmentid))
     treatmentid = int(common.getid(request.post_vars.treatmentid)) if(treatmentid == 0) else treatmentid
+    r = db((db.treatment.id == treatmentid) & (db.treatment.is_active == True)).select(db.treatment.treatmentplan)
+    tplanid = r[0].treatmentplan if(len(r) > 0) else 0
     
     medicineid = int(common.getid(request.vars.medicine))
 

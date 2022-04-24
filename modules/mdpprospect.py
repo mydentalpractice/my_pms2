@@ -139,6 +139,10 @@ class Prospect:
                     "cell":d.prospect.cell,
                     "email":d.prospect.email,
                     "status":d.prospect.status,
+                    "isMDP":d.prospect.isMDP,
+                    "logo_id":int(common.getid(d.prospecte.logo_id)),
+                    "logo_file":d.prospecte.logo_file,
+                    
                     "clinic_count":str(clinic_count)
                 }
                 lst.append(obj)   
@@ -248,6 +252,9 @@ class Prospect:
                 "clinic_count":str(clinic_count),  
                 
                 "newcity":common.getstring(ds[0].newcity),
+                "isMDP":common.getboolean(ds[0].isMDP),
+                "logo_id":int(common.getid(ds[0].logo_id)),
+                "logo_file":common.getstring(ds[0].logo_file),
                 
                 "result":"success",
                 "error_message":"",
@@ -384,6 +391,10 @@ class Prospect:
                 groupemail=common.getkeyvalue(avars,'groupemail',ds[0].groupemail),
                 bankid=common.getkeyvalue(avars,'bankid',ds[0].bankid),
                 newcity = common.getkeyvalue(avars,'newcity',ds[0].newcity),
+                isMDP = common.getkeyvalue(avars,'isMDP',ds[0].isMDP),
+                logo_id = common.getkeyvalue(avars,'logo_id',ds[0].logo_id),
+                logo_file = common.getkeyvalue(avars,'logo_file',ds[0].logo_file),
+                
                 
                 modified_on=common.getISTFormatCurrentLocatTime(),
                 modified_by= 1 if(auth.user == None) else auth.user.id
@@ -544,6 +555,9 @@ class Prospect:
             pa_practicepin=common.getkeyvalue(avars,'pa_practicepin',"")
             pa_practicepin = pin if(pa_practicepin == "") else pa_practicepin
             
+            isMDP = common.getkeyvalue(avars,'isMDP', True)
+            logo_id = common.getkeyvalue(avars,'logo_id',0)
+            logo_file = common.getkeyvalue(avars,'logo_file',0)
             
             prospectid = db.prospect.insert(\
                 
@@ -615,7 +629,9 @@ class Prospect:
                 captiationmtd  = 0,
                 
                 newcity = newcity,
-               
+                isMDP = common.getkeyvalue(avars,'isMDP',True),
+                logo_id = common.getkeyvalue(avars,'logo_id',0),
+                logo_file = common.getkeyvalue(avars,'logo_file',0),
 
                 is_active = True,
                 created_on=common.getISTFormatCurrentLocatTime(),

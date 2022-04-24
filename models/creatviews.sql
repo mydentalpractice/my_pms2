@@ -9200,6 +9200,76 @@ CHANGE COLUMN `fp_otherinfo` `fp_otherinfo` VARCHAR(255) NULL DEFAULT NULL ;
 
 
 
+06/04/2021
+===========
+
+1. YYZZModify Prospect, Provider, Clinic tables - added isMDP flag and logo_id, logo_file fields
+ALTER TABLE `mydp_prod`.`prospect` 
+ADD COLUMN `isMDP` CHAR(1) NULL DEFAULT 'T' AFTER `newcity`,
+ADD COLUMN `logo_id` INT(11) NULL COMMENT 'Ref to image id which holds the logo to be displayed' AFTER `isMDP`,
+ADD COLUMN `logo_file` VARCHAR(255) NULL COMMENT 'Logo file name' AFTER `logo_id`;
+
+ALTER TABLE `mydp_prod`.`provider` 
+ADD COLUMN `isMDP` CHAR(1) NULL DEFAULT 'T' AFTER `available`,
+ADD COLUMN `logo_id` INT(11) NULL COMMENT 'ref to logo image' AFTER `isMDP`,
+ADD COLUMN `logo_file` VARCHAR(255) NULL COMMENT 'Logo file name' AFTER `logo_id`;
+
+ALTER TABLE `mydp_prod`.`clinic` 
+ADD COLUMN `isMDP` CHAR(1) NULL DEFAULT 'T' AFTER `latitude`,
+ADD COLUMN `logo_id` INT(11) NULL COMMENT 'ref to logo image' AFTER `isMDP`,
+ADD COLUMN `logo_file` VARCHAR(255) NULL COMMENT 'Logo file name' AFTER `logo_id`;
+
+
+2. Populate Group Region with Network
+INSERT INTO `mydp_prod`.`groupregion`
+(`groupregion`,`region`,`is_active`,`created_on`,`created_by`,`modified_on`,`modified_by`)
+VALUES ('REG0','Pricing Region 0', 'T','2022-04-12',1,'2022-04-12',1);
+
+INSERT INTO `mydp_prod`.`groupregion`
+(`groupregion`,`region`,`is_active`,`created_on`,`created_by`,`modified_on`,`modified_by`)
+VALUES ('REG1','Pricing Region 1', 'T','2022-04-12',1,'2022-04-12',1);
+
+INSERT INTO `mydp_prod`.`groupregion`
+(`groupregion`,`region`,`is_active`,`created_on`,`created_by`,`modified_on`,`modified_by`)
+VALUES ('REG2','Pricing Region 2', 'T','2022-04-12',1,'2022-04-12',1);
+
+INSERT INTO `mydp_prod`.`groupregion`
+(`groupregion`,`region`,`is_active`,`created_on`,`created_by`,`modified_on`,`modified_by`)
+VALUES ('REG3','Pricing Region 3', 'T','2022-04-12',1,'2022-04-12',1);
+
+INSERT INTO `mydp_prod`.`groupregion`
+(`groupregion`,`region`,`is_active`,`created_on`,`created_by`,`modified_on`,`modified_by`)
+VALUES ('REG4','Pricing Region 4', 'T','2022-04-12',1,'2022-04-12',1);
+
+INSERT INTO `mydp_prod`.`groupregion`
+(`groupregion`,`region`,`is_active`,`created_on`,`created_by`,`modified_on`,`modified_by`)
+VALUES ('REG5','Pricing Region 5', 'T','2022-04-12',1,'2022-04-12',1);
+
+INSERT INTO `mydp_prod`.`groupregion`
+(`groupregion`,`region`,`is_active`,`created_on`,`created_by`,`modified_on`,`modified_by`)
+VALUES ('REG6','Pricing Region 6', 'T','2022-04-12',1,'2022-04-12',1);
+
+INSERT INTO `mydp_prod`.`groupregion`
+(`groupregion`,`region`,`is_active`,`created_on`,`created_by`,`modified_on`,`modified_by`)
+VALUES ('REG7','Pricing Region 7', 'T','2022-04-12',1,'2022-04-12',1);
+
+INSERT INTO `mydp_prod`.`groupregion`
+(`groupregion`,`region`,`is_active`,`created_on`,`created_by`,`modified_on`,`modified_by`)
+VALUES ('REG8','Pricing Region 8', 'T','2022-04-12',1,'2022-04-12',1);
+
+INSERT INTO `mydp_prod`.`groupregion`
+(`groupregion`,`region`,`is_active`,`created_on`,`created_by`,`modified_on`,`modified_by`)
+VALUES ('REG9','Pricing Region 9', 'T','2022-04-12',1,'2022-04-12',1);
+
+4. Populate Provider logo_id & logo_file to point to correct logo for isMDP = True and isMDP = False
+
+5. YYYZZZModified urlproperties - added mdp_contact_cell and mdp_contact_email
+ALTER TABLE `mydp_prod`.`urlproperties` 
+ADD COLUMN `mdp_contact_cell` VARCHAR(45) NULL DEFAULT '18001027526' AFTER `vw_prod_url`,
+ADD COLUMN `mdp_contact_email` VARCHAR(45) NULL DEFAULT 'appointments@mydentalplan.in' AFTER `mdp_contact_cell`;
+
+
+
 Script file to clear user for sign-up
 =====================================
 

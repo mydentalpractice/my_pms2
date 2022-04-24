@@ -152,7 +152,9 @@ class Provider:
         schedulecapitation  = float(common.getvalue(common.getkeyvalue(avars,'schedulecapitation',"0.0"))),
         capitationytd  = float(common.getvalue(common.getkeyvalue(avars,'capitationytd',"0.0"))),
         captiationmtd  = float(common.getvalue(common.getkeyvalue(avars,'captiationmtd',"0.0"))),        
-
+        isMDP = common.getboolean(common.getkeyvalue(avars,"isMDP",True)),
+        logo_id = common.getkeyvalue(avars,"logo_id",0),
+        logo_file = common.getkeyvalue(avars,"logo_file",""),
   
         is_active = True,
         created_on=common.getISTFormatCurrentLocatTime(),
@@ -280,6 +282,9 @@ class Provider:
         "captiationmtd":str(ds[0].captiationmtd),
    
         "status":ds[0].status,
+        "isMDP":common.getboolean(ds[0].isMDP),
+        "logo_id":int(common.getid(ds[0].logo_id)),
+        "logo_file":ds[0].logo_file,
         
         "is_active":ds[0].is_active,
         
@@ -335,7 +340,9 @@ class Provider:
         "longitude":provdict["longitude"],
         "latitude":provdict["latitude"],
         "locationurl":provdict["locationurl"],
-      
+        "isMDP":common.getboolean(provdict["isMDP"]),
+        "logo_id":int(common.getid(provdict["logo_id"])),
+        "logo_file":provdict["logo_file"]
       }
       
       logger.loggerpms2.info("GetProvider Rsp_data=\n" + json.dumps(resp) + "\n")
@@ -459,7 +466,10 @@ class Provider:
             "cell":prov.cell,
             "telephone":prov.telephone,
             "registration":prov.registration,
-            "location":prov.pa_locationurl
+            "location":prov.pa_locationurl,
+            "isMDP":common.getboolean(prov.isMDP),
+            "logo_id": int(common.getid(prov.logo_id)),
+            "logo_file":prov.logo_file
           }
           
           provlist.append(provobj)

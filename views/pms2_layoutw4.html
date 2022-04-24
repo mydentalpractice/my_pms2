@@ -230,10 +230,16 @@ div.flash{    z-index: 30023 !important;}
                                     </a>
                                     </td>-->
                                     <td align="right">
+                                    {{if(session.isMDP == False):}}
+                                        <a title="nonMDP_Provider" href="{{=URL('admin','providerhome')}}">
+                                        <img id="nonMDP" style="margin-left: 4px;width:60px;" id src="{{=session.logo_file}}" alt="" />      
+                                    </a>
+                                    {{else:}}
                                     {{if(session.religare==True):}}
                                     <a title="Religare" href="{{=URL('religare','religare')}}">
                                     <img id="rel" style="margin-left: 4px;width:125px;" id src="/my_pms2/static/img/religare-logo.jpg" alt="" />      
                                     </a>
+                                    {{pass}}
                                     {{pass}}
                                     </td>
                                     </tr>
@@ -299,12 +305,14 @@ div.flash{    z-index: 30023 !important;}
                                             
                                         </a>
                                     </li>
+                                    {{if(session.isMDP==True):}}
                                     <li class="nav-item">
                                         <a href="{{=URL('member','list_patients',vars=dict(providerid=providerid,page=1))}}" class="nav-link ">
                                          <i class="fa fa-users"></i>
                                             <span class="title">Members</span>
                                         </a>
                                     </li>
+                                    {{pass}}
                                     <li class="nav-item  ">
                                         <a href="{{=URL('member','list_nonmembers',vars=dict(providerid=providerid,page=1))}}" class="nav-link ">
                                          <i class="fa fa-user"></i>
@@ -366,7 +374,8 @@ div.flash{    z-index: 30023 !important;}
                                             <span class="title">Dental Chart</span>
                                         </a>
                                     </li>
-                            
+                                 
+                                    
                                     <li class="nav-item  ">
                                         <a href="javascript:;" class="nav-link nav-toggle">
                                             <i class="fa fa fa-bell-o"></i>
@@ -466,6 +475,8 @@ div.flash{    z-index: 30023 !important;}
                                        
                                         </ul>
                                     </li>
+                                    
+                                    {{if(session.isMDP == True):}}
                                      <li class="nav-item  ">
                                         <a href="javascript:;" class="nav-link nav-toggle">
                                             <i class="fa fa-file-text-o"></i>
@@ -489,6 +500,7 @@ div.flash{    z-index: 30023 !important;}
                                             
                                         </ul>
                                     </li>
+                                    
                                     <li class="nav-item  " style="background:#0f6633">
                                         <a href="javascript:;" class="nav-link nav-toggle">
                                             <img  style="height:16px;width:16px" src="/my_pms2/static/assets/global/img/abhicl_menu_icon.png" alt="ABHICL">
@@ -537,6 +549,7 @@ div.flash{    z-index: 30023 !important;}
                                         </ul>
                                     </li>
                                     
+                                    {{pass}}
                                     {{pass}}
 
 

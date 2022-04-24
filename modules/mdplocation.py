@@ -324,7 +324,12 @@ class Location:
       db = self.db
       auth = current.auth
       
+      
+      
       try:
+        props = db(db.urlproperties.id > 0).select(db.urlproperties.mdp_contact_cell, db.urlproperties.mdp_contact_email )
+        mdp_contact_cell = props[0].mdp_contact_cell if(len(props) > 0) else ""
+        mdp_contact_email = props[0].mdp_contact_email if(len(props) > 0) else ""
         
         clnlist = []
         clnobj = {}
@@ -383,8 +388,8 @@ class Location:
               "name":cln.vw_clinic.name,
               "city":cln.vw_clinic.city,
               "pin":cln.vw_clinic.pin,
-              "cell":cln.vw_clinic.cell,
-              "email":cln.vw_clinic.email,
+              "cell":mdp_contact_cell,
+              "email":mdp_contact_email, #cln.vw_clinic.email
               "primary_clinic":common.getboolean(cln.vw_clinic.primary_clinic),
               "latitude":cln.vw_clinic.latitude,
               "longitude":cln.vw_clinic.longitude,

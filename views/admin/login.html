@@ -59,7 +59,10 @@
         <div class="content">
             <!-- BEGIN LOGIN FORM -->
             <!--<a href="index.html"><img style="width: 80%;" src="https://mydentalplan.in/MDP%20Logo.png" alt="" /> </a>-->
-            <a href="index.html"><img style="width: 80%;" src="../static/img/MDPLogo.jpg" alt="" /> </a>
+            <a href="index.html"><img style="width: 80%;" src="{{=session.logo_file}}" alt="" /> </a>
+            
+            
+            
             <!--<form class="login-form" method="post">-->
             {{=form.custom.begin}}  
                 <h3 class="form-title">Login to your account</h3>

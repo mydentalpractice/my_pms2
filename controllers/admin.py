@@ -570,9 +570,16 @@ def loginblock(login, username):
 def login():
     
     
+    cc = common.getkeyvalue(request.vars,"cc","P0001")
     
+    provs = db((db.provider.provider == cc) & (db.provider.is_active == True)).select(db.provider.logo_id)
+    logo_id = provs[0].logo_id if(len(provs)>0) else 0
+    logo_file = URL('my_dentalplan','media','media_download',args=[logo_id])      
+    session.logo_file = logo_file
+    session.logo_id = logo_id
     
     session.religare = False
+    
     form = SQLFORM.factory(
                 Field('username', 'string',  label='User Name',requires=[IS_NOT_EMPTY(), IS_IN_DB(db,'auth_user.username','%(registration_id)s')]),
                 Field('password', 'password',  label='Password',requires=[IS_NOT_EMPTY(),CRYPT(key=auth.settings.hmac_key)])
@@ -624,6 +631,11 @@ def login():
             logmssg = ""
             provdict = common.getprovider(auth, db)
             session.religare = common.getboolean(provdict["rlgprovider"])
+            session.isMDP = common.getboolean(provdict["isMDP"])
+            session.logo_id = provdict["logo_id"]
+            session.logo_file =  URL('my_dentalplan','media','media_download',args=[provdict["logo_id"]])
+            
+            
             if(int(provdict["providerid"]) == 0):
                 logmssg = 'Login Success - SuperAdmin Access'
                 db.loghistory.insert(username = form.vars.username, logerror = logmssg, logstatus = True,\
@@ -649,7 +661,7 @@ def login():
          
         
             
-    return dict(form = form)
+    return dict(form = form,logo_id=logo_id,logo_file=logo_file)
 
 
 
@@ -703,6 +715,9 @@ def select_clinic():
     if(providerid  < 0):
         raise HTTP(400,"PMS-Error: There is no valid logged-in Provider: select clinic()")    
 
+    #cc=common.getkeyvalue(request.vars,"cc","MDP")
+    #logo_file = cc + "Logo.jpg"
+    #isMDP = common.getboolean(provdict["isMDP"])
 
     #primary clinicid of this provider
     c = db((db.vw_clinic.is_active == True) & (db.vw_clinic.ref_code == 'PRV') & (db.vw_clinic.ref_id == providerid) & (db.vw_clinic.primary_clinic == True)).select()
@@ -1762,15 +1777,17 @@ def providerhome():
     provdict = common.getprovider(auth,db)
     
     providerid = int(provdict["providerid"])
+    isMDP = common.getboolean(provdict["isMDP"])
+    
     #logger.loggerpms2.info("Provider ID "+str(providerid))
     if(providerid  < 0):
         raise HTTP(400,"PMS-Error: There is no valid logged-in Provider: providerhome()")    
 
     logger.loggerpms2.info("Enter Provider Home = " + str(providerid) + " " + str(clinicid) + " " + clinicname)
    
-    prov = db(db.provider.id == providerid).select(db.provider.pa_practicename,db.provider.pa_practiceaddress)
+    prov = db(db.provider.id == providerid).select(db.provider.pa_practicename,db.provider.pa_practiceaddress,db.provider.logo_file)
     
-    
+    logo_file = prov[0].logo_file if(len(prov) > 0) else ""
    
     
     if(request.vars.moment != None):
@@ -2169,6 +2186,7 @@ def providerhome():
    
     #trtmnts = db((db.vw_treatmentlist.providerid==providerid)&(db.vw_treatmentlist.is_active==True)).select()
     #returnurl = URL('admin','providerhome')
+    
     return dict(form=form,docs=docs,defdate=defdate,start=start,end=end,rows=rows,memberpage=1,page=1,\
                 dailyappts=dailyappts,monthlyappts=monthlyappts,weeklyappts=weeklyappts,providerid=provdict["providerid"], providername= provdict["providername"] + " " + provdict["provider"],returnurl=returnurl,source='home',externalurl=exturl)
 
