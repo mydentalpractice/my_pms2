@@ -126,7 +126,7 @@ class Customer:
             
             cell = common.getkeyvalue(avars, "cell", "")
 
-            c = db((db.customer.cell == cell) & (db.customer.is_active == True)).count()
+            c = db((db.customer.cell == cell) & (db.customer.is_active == True)).select()
             
             if(c >= 1):
                 mssg = "This number " +  cell + " is already registered with us. Please register with another cell number or call Customer Support"
@@ -134,7 +134,8 @@ class Customer:
                     "result":"success",
                     "new_customer":"false",
                     "error_message":mssg,
-                    "error_code":""
+                    "error_code":"",
+                    "customer_ref":c[0].customer_ref
                     
                 }
             else:
@@ -1085,7 +1086,12 @@ class Customer:
 
 
    
-
+    #avars{
+    #action:"get_customer",
+    #customer_ref = "ABC_001",
+    #cell:"9123456"
+    #customer_id = 1314
+    #}
     def get_customer(self,avars):
         logger.loggerpms2.info("Enter xget_customer " + json.dumps(avars))
         db = self.db        
@@ -1096,9 +1102,23 @@ class Customer:
         depcount = 0
         customerid = 0
         jsonresp = {}
+        c = None
+        
         try:
-            customer_ref = common.getkeyvalue(avars,"customer_ref","")
-            c = db((db.customer.customer_ref == customer_ref) & (db.customer.is_active == True)).select()
+            
+            customer_id = int(common.getkeyvalue(avars,"customer_id",0))
+            c = db((db.customer.id == customer_id) & (db.customer.is_active == True)).select()
+            
+            if(len(c) == 0):
+                customer_ref = common.getkeyvalue(avars,"customer_ref","")
+                c = db((db.customer.customer_ref == customer_ref) & (db.customer.is_active == True)).select()
+            
+
+            if(len(c) == 0):
+                cell = common.getkeyvalue(avars,"cell","")
+                c = db((db.customer.cell == cell) & (db.customer.is_active == True)).select()
+            
+            
             customerid = 0 if(len(c) == 0) else int(common.getid(c[0].id))
             
             jsonresp={
@@ -1472,7 +1492,7 @@ class Customer:
                 
                 )
                 db.commit()
-                
+                    
                 #if a customer/member is successfully enrolled, then we have to create a wallet and credit it with voucher amount
                 plan_id = int(common.getkeyvalue(jsonresp,"hmoplan","0"))
                 company_id = int(common.getkeyvalue(jsonresp,"company","0"))
@@ -1527,7 +1547,11 @@ class Customer:
                     "result":"fail",
                     "error_message":mssg,
                     "error_code":error_code
-                }            
+                }   
+                
+             
+                
+                
                 
         except Exception as e:
             error_code = "ENROLL_CUST_001"

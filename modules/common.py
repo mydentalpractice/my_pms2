@@ -435,7 +435,9 @@ def getproviderfromid(db,aproviderid):
     pin = ""
     
     isMDP = True
-
+    logo_id = 0
+    logo_file = ""
+    
     if(providerid > 0):
         rows = db((db.provider.id == providerid) & (db.provider.is_active == True)).select()
         if(len(rows)==1):
@@ -465,10 +467,13 @@ def getproviderfromid(db,aproviderid):
                 latitude = getstring(rows[0]["pa_latitude"])
                 locationurl = getstring(rows[0]["pa_locationurl"])
                 isMDP = getboolean(rows[0]["isMDP"])
+                logo_id = int(getid(rows[0]["logo_id"]))
+                logo_file = getstring(rows[0]["logo_file"])
+                
             
     return dict(providerid=providerid,provider=provider,providername=providername,registration=registration,
                 practicename=practicename,practiceaddress=practiceaddress,city=city,st=st,pin=pin,email=email,cell=cell,rlgrpolicynumber=rlgrpolicynumber,
-                rlgprovider=rlgprovider,regionid=regionid,planid=planid,longitude=longitude,latitude=latitude,locationurl=locationurl,isMDP=isMDP)
+                rlgprovider=rlgprovider,regionid=regionid,planid=planid,longitude=longitude,latitude=latitude,locationurl=locationurl,isMDP=isMDP,logo_id=logo_id,logo_file=logo_file)
                 
    
    

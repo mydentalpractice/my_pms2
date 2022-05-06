@@ -1386,6 +1386,13 @@ class Appointment:
                 clinicid = int(common.getid(appt.vw_appointments.clinicid))
                 doctorid = int(common.getid(appt.vw_appointments.doctor))
                 appttime = (appt.vw_appointments.f_start_time).strftime('%d/%m/%Y %I:%M %p')
+                
+                #to determine whether this is a member or walkin
+                mems = db((db.patientmember.id == memberid) & (db.patientmember.is_active == True)).select(db.patientmember.hmopatientmember,db.patientmember.patientmember)
+                hmomember = False if(len(mems) == 0) else common.getboolean(mems[0].hmopatientmember)
+                hmomember = "Walk-In" if(hmomember == False) else "Member"
+                patientmember = "" if(len(mems) == 0) else common.getstring(mems[0].patientmember)
+                sub = hmomember + " " + patientmember + ": "
             
                 #clinicname. clinicaddress, clinicno, cliniclocation
                 clinicname = common.getstring(appt.clinic.name)
@@ -1456,7 +1463,7 @@ class Appointment:
                     
                 if((patemail != "")&(sendemail)):
                     #retVal1= mail.groupEmail(db, patemail, ccs, "Appointment: " + appttime, patemailmssg)  # send email to patient        
-                    retVal1= mail._groupEmail(db, _mail, patemail, ccs, "Appointment: " + appttime, patemailmssg)  # send email to patient        
+                    retVal1= mail._groupEmail(db, _mail, patemail, ccs, sub + "Appointment: " + appttime, patemailmssg)  # send email to patient        
                 
                 rspobj = {}
                 if(retVal == True):

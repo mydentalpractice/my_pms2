@@ -782,8 +782,8 @@ class Payment:
         try:
             
             rspobj = json.loads(mdputils.getplandetailsformember(db, providerid,memberid, patientid))
-            policy = common.getkeyvalue(rspobj,"plancode","RPIP599")
-            companycode = common.getkeyvalue(rspobj,"companycode","RPIP599")
+            policy = common.getkeyvalue(rspobj,"plancode","PREMWALKIN")
+            companycode = common.getkeyvalue(rspobj,"companycode","WALKIN")
 
             trtmnt = db(db.treatment.id == treatmentid).select()
             tplanid = int(common.getid(trtmnt[0].treatmentplan)) if(len(trtmnt) > 0) else 0
@@ -809,6 +809,18 @@ class Payment:
                 logger.loggerpms2.info("New Payment - After GetPlanBenefits  - " + json.dumps(benefit))
                 #mdp_wallet_cashback
                 walletobj = common.getkeyvalue(benefit,"wallet", None)
+                
+                #dummy walletobj for None - to take care of Premium Walkin
+                if(walletobj == None):
+                    owallet = {}
+                    owallet["mdp_wallet_usage_for_plan"]="0.00"
+                    owallet["super_wallet_amount"]="0.0"
+                    owallet["mdp_wallet_amount"]="0.00"
+                    owallet["mdp_wallet_0_amount"]="0.00"
+                    owallet["mdp_wallet_amount_usable"]=0
+                    owallet["super_wallet_amount_usable"]=0
+                    benefit["wallet"] = owallet
+                
                 discount_amount = 0 if (walletobj == None) else float(common.getkeyvalue(walletobj,"mdp_wallet_amount_usable",0))
             
                 #Super Wallet Cashback

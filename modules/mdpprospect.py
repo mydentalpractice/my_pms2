@@ -65,6 +65,10 @@ class Prospect:
                     "cell":d.provider.cell,
                     "email":d.provider.email,
                     "status":d.provider.status,
+                    "isMDP":d.provider.isMDP,
+                    "logo_id":int(common.getid(d.provider.logo_id)),
+                    "logo_file":d.provider.logo_file,
+                    
                     "clinic_count":str(clinic_count)
                 }
                 lst.append(obj)   
@@ -140,8 +144,8 @@ class Prospect:
                     "email":d.prospect.email,
                     "status":d.prospect.status,
                     "isMDP":d.prospect.isMDP,
-                    "logo_id":int(common.getid(d.prospecte.logo_id)),
-                    "logo_file":d.prospecte.logo_file,
+                    "logo_id":int(common.getid(d.prospect.logo_id)),
+                    "logo_file":d.prospect.logo_file,
                     
                     "clinic_count":str(clinic_count)
                 }
