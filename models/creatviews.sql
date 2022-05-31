@@ -9268,6 +9268,25 @@ ALTER TABLE `mydp_prod`.`urlproperties`
 ADD COLUMN `mdp_contact_cell` VARCHAR(45) NULL DEFAULT '18001027526' AFTER `vw_prod_url`,
 ADD COLUMN `mdp_contact_email` VARCHAR(45) NULL DEFAULT 'appointments@mydentalplan.in' AFTER `mdp_contact_cell`;
 
+6.   YYYZZZCreate viw vw_agent_prospect_clinic
+USE `mydp_prod`;
+CREATE  OR REPLACE VIEW `vw_agent_prospect_clinic` AS
+select agent.id as agent_id, agent.agent,agent.name as agent_name,
+prospect.id as prospect_id, prospect.providername,DATE(prospect.created_on) as prospect_add_date, 
+clinic.id as clinic_id, clinic.clinic_ref, clinic.name as clinic_name,clinic.city as clinic_city, clinic.pin as clinic_pin, DATE(clinic.created_on) as clinic_add_date
+from prospect_ref
+left join agent on agent.id = prospect_ref.ref_id
+left join prospect on prospect.id = prospect_ref.prospect_id
+left join clinic_ref on clinic_ref.ref_id = prospect.id
+left join clinic on clinic.id = clinic_ref.clinic_id
+where prospect_ref.ref_code = 'AGN' and clinic_ref.ref_code = 'PST' and agent.is_active = 'T' and prospect.is_active = 'T' and clinic.is_active = 'T' 
+order by agent.name
+;
+
+7. YYYZZZUpdate benefit_master_x_member add col patient_id
+ALTER TABLE `mydp_prod`.`benefit_master_x_member` 
+ADD COLUMN `patient_id` INT(11) NULL AFTER `member_id`;
+
 
 
 Script file to clear user for sign-up
