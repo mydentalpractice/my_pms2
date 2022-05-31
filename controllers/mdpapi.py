@@ -917,6 +917,16 @@ def getpatient(avars):
     
     return pat 
 
+def getpatientbyreference(avars):
+    opat = mdppatient.Patient(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
+    #urlprops = db(db.urlproperties.id > 0).select(db.urlproperties.mydp_ipaddress)
+    #imageurl =urlprops[0].mydp_ipaddress + URL('dentalimage',"download")    
+    pat = opat.getpatientbyreference(avars)
+    
+    
+    return pat 
+
+
 def addpatientimage(avars):
     opat = mdppatient.Patient(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
     avars["appath"] = current.globalenv["request"].folder
@@ -3637,7 +3647,7 @@ mdpapi_switcher = {"listappointments":getappointments,"getappointmentsbymonth":g
                    "getpatappointmentcountbymonth":getpatappointmentcountbymonth,"getpatappointmentsbyday":getpatappointmentsbyday,"sendAllAppointmentsSMSEmail":sendAllAppointmentsSMSEmail,\
                    "createappointment":newappointment,'updateappointment':updateappointment,'cancelappointment':cancelappointment,'checkinappointment':checkinappointment,\
                    "login":mdplogin,"logout":mdplogout,"forgotusername":forgotusername,"forgotpassword":forgotpassword,"getmailserverdetails":getmailserverdetails,\
-                   "resetpassword":resetpassword,"searchpatient":searchpatient,"newpatient":newpatient,"getpatient":getpatient,\
+                   "resetpassword":resetpassword,"searchpatient":searchpatient,"newpatient":newpatient,"getpatient":getpatient,"getpatientbyreference":getpatientbyreference,\
                    "newalkinpatient":newalkinpatient,"updatewalkinpatient":updatewalkinpatient,"registerVCPatient":registerVCPatient,\
                    "doctorlist":doctorlist,"doctor":getdoctor,"rolelist":rolelist,"specialitylist":specialitylist,"newpayment":newpayment,\
                    "listpayments":listpayments,"getpayment":getpayment,"paymentcallback":paymentcallback,"paymentcallback_0":paymentcallback_0,"groupsmsmessage":groupsmsmessage,"paymentreceipt":paymentreceipt,\
