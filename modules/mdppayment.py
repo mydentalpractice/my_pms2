@@ -404,7 +404,7 @@ class Payment:
                 totalpromo_amount = float(common.getvalue(paytm["totalpromo_amount"]))
                 
                 providerid = payment.providerid
-                ts = db(db.treatment_procedure.treatmentid == treatmentid).select(db.dentalprocedure.shortdescription,\
+                ts = db((db.treatment_procedure.treatmentid == treatmentid) & (db.treatment_procedure.is_active == True)).select(db.dentalprocedure.shortdescription,\
                                                                                  left=(db.procedurepriceplan.on(db.procedurepriceplan.id == db.treatment_procedure.dentalprocedure),
                                                                                       db.dentalprocedure.on(db.dentalprocedure.dentalprocedure == db.procedurepriceplan.procedurecode)))
                 
@@ -1116,43 +1116,49 @@ class Payment:
         logger.loggerpms2.info("Enter Paymentcallback " + json.dumps(paymentdata))
         db = self.db
         providerid = self.providerid
-        
+       
         paymentcallbackobj = {}
         discount_amount = 0
         
         try:
+            providerinfo = getproviderinformation(db,providerid)
             dttodaydate = common.getISTFormatCurrentLocatDate()        
-           
-            
            
             jsonConfirmPayment = paymentdata
             
-            paymentref = common.getstring(jsonConfirmPayment['payment_reference']) if('payment_reference' in jsonConfirmPayment) else ""   #yes 
-            paymenttype = common.getstring(jsonConfirmPayment['payment_type']) if('payment_type' in jsonConfirmPayment) else ""            #yes
-            paymentdetail = common.getstring(jsonConfirmPayment['payment_detail']) if('payment_detail' in jsonConfirmPayment) else ""      #yes
+            logger.loggerpms2.info("Paymentcallback A")
             
+            paymentref = common.getkeyvalue(jsonConfirmPayment,"payment_reference","")
+            paymenttype = common.getkeyvalue(jsonConfirmPayment,"payment_type","")
+            paymentdetail = common.getkeyvalue(jsonConfirmPayment,"payment_detail","")
             
-            cardtype = common.getstring(jsonConfirmPayment['card_type']) if('card_type' in jsonConfirmPayment) else paymenttype            #?
-            merchantid = common.getstring(jsonConfirmPayment['merchant_id']) if('merchant_id' in jsonConfirmPayment) else ""               #yes
-            merchantdisplay = common.getstring(jsonConfirmPayment['merchant_display']) if('merchant_display' in jsonConfirmPayment) else "" #yes
-            status = common.getstring(jsonConfirmPayment['status']) if('status' in jsonConfirmPayment) else ""    #yes
-            invoice = common.getstring(jsonConfirmPayment['invoice']) if('invoice' in jsonConfirmPayment) else ""   #yes
+            cardtype = common.getkeyvalue(jsonConfirmPayment,"card_type","")
+            merchantid = common.getkeyvalue(jsonConfirmPayment,"merchant_id","")
+            merchantdisplay = common.getkeyvalue(jsonConfirmPayment,"merchant_display","")
+            status = common.getkeyvalue(jsonConfirmPayment,"status","")
+            invoice = common.getkeyvalue(jsonConfirmPayment,"invoice","")
+            
             amount = 0 if(status != 'S') else (float(common.getvalue(jsonConfirmPayment['amount'])) if('amount' in jsonConfirmPayment) else 0)  #yes
             fee = 0    #if(status != 'S') else (common.getstring(jsonConfirmPayment['fee']) if('fee' in jsonConfirmPayment) else 0)   #no
     
-            jsonObj = json.loads(common.getstring(jsonConfirmPayment['addln_detail']))  #yes
-            paymentid = int(common.getstring(jsonObj["paymentid"]))  
-            paymentdate = common.getstring(jsonObj['paymentdate']) if('paymentdate' in jsonObj) else "01/01/1900"       
+            jsonObj = common.getkeyvalue(jsonConfirmPayment,"addln_detail",{})
+            logger.loggerpms2.info("Paymentcallback B" + json.dumps(jsonObj))
+            
+        
+            paymentid = int(common.getid(common.getkeyvalue(jsonConfirmPayment,"paymentid",0)))
+            paymentdate = common.getkeyvalue(jsonConfirmPayment,"paymentdate","01/01/1990")
             invoiceamt = float(common.getvalue(jsonObj['invoiceamt'])) if('invoiceamt' in jsonObj) else 0.00
-            
-            error = "" if(status =="S") else common.getstring(jsonConfirmPayment['error'])
-            errormsg = "" if(status =="S") else common.getstring(jsonConfirmPayment['errormsg'])
+
+            error = "" if(status =="S") else common.getkeyvalue(jsonConfirmPayment,"error","")
+            errormsg = "" if(status =="S") else common.getkeyvalue(jsonConfirmPayment,"errormsg","")
     
-            chequeno = common.getstring(jsonConfirmPayment['chequeno']) if('chequeno' in jsonConfirmPayment) else "0000"   #yes
-            acctno = common.getstring(jsonConfirmPayment['acctno']) if('acctno' in jsonConfirmPayment) else "0000"   #yes
-            acctname =common.getstring(jsonConfirmPayment['acctname']) if('acctname' in jsonConfirmPayment) else "XXXX"   #yes
-            bankname =common.getstring(jsonConfirmPayment['bankname']) if('bankname' in jsonConfirmPayment) else "XXXX"   #yes
+            chequeno = common.getkeyvalue(jsonConfirmPayment,"chequeno","")
+            acctno = common.getkeyvalue(jsonConfirmPayment,"acctno","")
+            acctname = common.getkeyvalue(jsonConfirmPayment,"acctname","")
+            bankname = common.getkeyvalue(jsonConfirmPayment,"bankname","")
             
+            logger.loggerpms2.info("Enter Paymentcallback C")
+                    
             doctortitle = ''
             doctorname = ''
             treatment = ''
@@ -1163,7 +1169,7 @@ class Payment:
             providerid = 0
             treatmentid = 0
             tplanid = 0
-            patientinfo = None
+            patientinfo = {}
             hmopatientmember = False
             
             memberid = 0
@@ -1173,6 +1179,7 @@ class Payment:
             
             r = db(db.vw_fonepaise.paymentid == paymentid).select()
             if(len(r)>0):
+                logger.loggerpms2.info("Paymentcallback D")
                 memberid = int(common.getid(r[0].patientid))
                 patientid = int(common.getid(r[0].memberid))
                 
@@ -1222,10 +1229,12 @@ class Payment:
             
             )
             db.commit()
+            logger.loggerpms2.info("Paymentcallback E")
            
             #here need to update treatmentplan tables
             account._updatetreatmentpayment(db, tplanid, paymentid)
             db.commit()             
+            logger.loggerpms2.info("Paymentcallback F")
 
             totalpaid = 0        
             totpaid = 0
@@ -1306,11 +1315,13 @@ class Payment:
                     #here need to update treatmentplan tables
                     account._updatetreatmentpayment(db, tplanid, paymentid)
                     db.commit()   
+                    logger.loggerpms2.info("Paymentcallback G")
                    
                  
                    
                     
             else:    
+                logger.loggerpms2.info("Paymentcallback H")
                 
                 #call Voucher Failure
                 obj = {"paymentid":paymentid}
@@ -1335,6 +1346,7 @@ class Payment:
                 }
                 bnftobj = mdpbenefits.Benefit(db)
                 rspObj = json.loads(bnftobj.benefit_failure(obj))
+                logger.loggerpms2.info("Paymentcallback I")
             
             paytm = json.loads(account._calculatepayments(db, tplanid))
             tottreatmentcost= paytm["totaltreatmentcost"]
@@ -1342,6 +1354,7 @@ class Payment:
             totpaid=paytm["totalpaid"] 
             totaldue = paytm["totaldue"]                         
             
+            logger.loggerpms2.info("Paymentcallback J")
             paymentcallbackobj = {
                 "paytm":paytm,
                 "paymentid":paymentid,
@@ -1349,23 +1362,27 @@ class Payment:
                 "error_message":"",
                 "todaydate":common.getstringfromdate(dttodaydate,"%d/%m/%Y"),
                 "providerid":providerid,
-                "practicename":providerinfo["practicename"],
-                "providername ":providerinfo["providername"],
-                "provideregnon":providerinfo["providerregno"],
-                "practiceaddress1":providerinfo["practiceaddress1"],
-                "practiceaddress2":providerinfo["practiceaddress2"],
-                "practicephone":providerinfo["practicephone"],
-                "practiceemail":providerinfo["practiceemail"],
-                "patientname":patientinfo["patientname"],
-                "patientmember":patientinfo["patientmember"],
-                "patientemail":patientinfo["patientemail"],
-                "patientcell":patientinfo["patientcell"],
-                "patientgender":patientinfo["patientgender"],
-                "patientage":patientinfo["patientage"],
-                "patientaddress":patientinfo["patientaddress"],
-                "groupref":patientinfo["groupref"],
-                "companyname":patientinfo["companyname"],
-                "planname ":patientinfo["planname"],
+                
+                
+                "practicename":common.getkeyvalue(providerinfo,"practicename",""),
+                "providername":common.getkeyvalue(providerinfo,"providername",""),
+                "provideregnon":common.getkeyvalue(providerinfo,"provideregnon",""),
+                "practiceaddress1":common.getkeyvalue(providerinfo,"practiceaddress1",""),
+                "practiceaddress2":common.getkeyvalue(providerinfo,"practiceaddress2",""),
+                "practicephone":common.getkeyvalue(providerinfo,"practicephone",""),
+                "practiceemail":common.getkeyvalue(providerinfo,"practiceemail",""),
+                
+                "patientname":common.getkeyvalue(providerinfo,"patientname",""),
+                "patientmember":common.getkeyvalue(patientinfo,"patientmember",""),
+                "patientemail":common.getkeyvalue(patientinfo,"patientemail",""),
+                "patientcell":common.getkeyvalue(patientinfo,"patientcell",""),
+                "patientgender":common.getkeyvalue(patientinfo,"patientgender",""),
+                "patientage":common.getkeyvalue(patientinfo,"patientage",""),
+                "patientaddress":common.getkeyvalue(patientinfo,"patientaddress",""),
+                "groupref":common.getkeyvalue(patientinfo,"groupref",""),
+                "companyname":common.getkeyvalue(patientinfo,"companyname",""),
+                "planname":common.getkeyvalue(patientinfo,"planname",""),
+                
                 "doctorname ":doctorname,
                 "treatment":treatment,
                 "fp_paymentref": paymentref,
@@ -1399,6 +1416,7 @@ class Payment:
                 "walletamount":paytm["walletamount"]
                 
             }
+            logger.loggerpms2.info("Paymentcallback K")
             
         except Exception as e:
             mssg = "Payment Callback Exception:\n" + str(e)
@@ -1591,6 +1609,9 @@ class Payment:
         treatmentid = 0
         totalcompanypays = 0
         
+        
+        patientid = 0
+        memberid = 0
         logger.loggerpms2.info("Enter Payment Receipt ==>" + str(paymentid) + " " + str(providerid))
         
         try:
@@ -1634,12 +1655,14 @@ class Payment:
             
             treatmentid = 0
             tplanid = 0
-            patientinfo = None
+            patientinfo = {}
             hmopatientmember = False
+            procs = None
             
             proclist = []        
             providerinfo  = getproviderinformation(db,providerid)    
             r = db(db.vw_fonepaise.paymentid == paymentid).select()
+            
             if(len(r)>0):
                 
                 memberid = int(common.getid(r[0].memberid))
@@ -1714,16 +1737,16 @@ class Payment:
                 "practiceaddress2":providerinfo["practiceaddress2"] if(providerinfo != None) else "",
                 "practicephone":providerinfo["practicephone"] if(providerinfo != None) else "",
                 "practiceemail":providerinfo["practiceemail"] if(providerinfo != None) else "",
-                "patientname":patientinfo["patientname"] if(providerinfo != None) else "",
-                "patientmember":patientinfo["patientmember"] if(providerinfo != None) else "",
-                "patientemail":patientinfo["patientemail"] if(patientinfo != None) else "",
-                "patientcell":patientinfo["patientcell"] if(patientinfo != None) else "",
-                "patientgender":patientinfo["patientgender"] if(patientinfo != None) else "",
-                "patientage":patientinfo["patientage"] if(patientinfo != None) else "",
-                "patientaddress":patientinfo["patientaddress"] if(patientinfo != None) else "",
-                "groupref":patientinfo["groupref"] if(patientinfo != None) else "",
-                "companyname":patientinfo["companyname"] if(patientinfo != None) else "",
-                "planname ":patientinfo["planname"] if(patientinfo != None) else "",
+                "patientname":common.getkeyvalue(patientinfo, "patientname",""),
+                "patientmember":common.getkeyvalue(patientinfo, "patientmember",""),
+                "patientemail":common.getkeyvalue(patientinfo, "patientemail",""),
+                "patientcell":common.getkeyvalue(patientinfo, "patientcell",""),
+                "patientgender":common.getkeyvalue(patientinfo, "patientgender",""),
+                "patientage":common.getkeyvalue(patientinfo, "patientage",""),
+                "patientaddress":common.getkeyvalue(patientinfo, "patientaddress",""),
+                "groupref":common.getkeyvalue(patientinfo, "groupref",""),
+                "companyname":common.getkeyvalue(patientinfo, "companyname",""),
+                "planname ":common.getkeyvalue(patientinfo, "planname",""),
                 "doctorname ":doctorname,
                 "treatment":treatment,
                 "fp_paymentref": paymentref,
@@ -1759,10 +1782,12 @@ class Payment:
                 "wallet_type":"SUPER_WALLET",
                 "totalwalletamount":float(common.getvalue(paytm["totalwalletamount"])),
                 "wallet_balance":wallet_balance,
-                "procedurelist":{"count":len(procs),"procedurelist":proclist}
+                "procedurelist":{"count":len(proclist),"procedurelist":proclist}
                
                 
             }
+            
+            
         except Exception as e:
             mssg = "Payment Receipt Exception:\n" + str(e)
             logger.loggerpms2.info(mssg)      

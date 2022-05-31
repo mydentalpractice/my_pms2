@@ -309,8 +309,17 @@ class Clinic:
         owner = ""
         urlprops = db(db.urlproperties.id >0 ).select()
         try:
+            
+            ref_code = common.getkeyvalue(avars,"ref_code","")
+            
             clinicid = int(common.getkeyvalue(avars,"clinicid",0))
-            r = db(db.clinic_ref.clinic_id ==clinicid).select()
+            r = ""
+            if(ref_code == ""):
+                r = db(db.clinic_ref.clinic_id ==clinicid).select()
+            else:
+                r = db((db.clinic_ref.clinic_id ==clinicid) & (db.clinic_ref.ref_code == ref_code)).select()
+                
+                
             ref_code = r[0].ref_code if len(r) == 1 else ""
             ref_id = int(r[0].ref_id) if len(r) == 1 else 0
             ds = db((db.clinic.id == clinicid) & (db.clinic.is_active == True)).select()
@@ -401,6 +410,7 @@ class Clinic:
                 "rotary_endodontics":ds[0].rotary_endodontics,            
                 "status":ds[0].status,   
                 "owner":owner,
+                "providerid":ref_id,
                 "notes":ds[0].notes,
                 "registration_certificate":ds[0].registration_certificate,
                 "state_dental_registration":ds[0].state_dental_registration,

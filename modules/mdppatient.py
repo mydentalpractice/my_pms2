@@ -624,7 +624,7 @@ class Patient:
       else:
         if(patientsearch != ""):
           qry = ((qry) & ((db.vw_memberpatientlist.patient.like("%" + patientsearch + "%")) | (db.vw_memberpatientlist.patientmember.like("%" + patientmembersearch + "%"))))        
-          logger.loggerpms2.info("Search Patient Query = " + str(qry))
+          #logger.loggerpms2.info("Search Patient Query = " + str(qry))
         
         pats = db((qry))\
           .select(db.vw_memberpatientlist.hmopatientmember,\
@@ -1106,6 +1106,52 @@ class Patient:
                    
     logger.loggerpms2.info(json.dumps(memobj))
     return json.dumps(memobj)
+  
+  
+  #this api gets patient details based on either customer_ref or cell
+  #it returns patient details
+  #avars{
+  #action:"getpatientbyreference"
+  #customer_ref:"ABCDEF_GHI"
+  #cell"1234567890"}
+  
+  def getpatientbyreference(self,avars):
+    
+    logger.loggerpms2.info("Enter GetPatientByReference API =>> " + json.dumps(avars))
+    db = self.db
+    
+    planid = 0
+    memberid = 0
+    patientid = 0
+    
+    try:
+      
+      
+      jsonresp = {}
+      patobj = {}
+      
+      cell = common.getkeyvalue(avars, "cell", "")
+      customer_ref = common.getkeyvalue(avars, "customer_ref", "")
+    
+      p = db((db.patientmember.cell == cell) & (db.patientmember.is_active == True)).select()
+      if(len(p) == 0):
+        if((customer_ref != "") & (customer_ref != None)):
+          p = db((db.patientmember.groupref == customer_ref) & (db.patientmember.is_active == True)).select()
+
+      memberid = p[0].id if(len(p)>0) else 0
+      patobj = json.loads(self.getpatient(memberid, memberid, "")) if(memberid > 0) else {"result":"success","memberid":0,"error_code":"", "error_message":""}
+        
+      
+    except Exception as e:
+      logger.loggerpms2.info("Get Patient  By Reference API Exception:\n" + str(e))
+      excpobj = {}
+      excpobj["result"] = "fail"
+      excpobj["error_message"] = "Get Patient By Reference API Exception Error - " + str(e)
+      return json.dumps(excpobj)  
+                   
+    logger.loggerpms2.info("Exit Getpatient By Reference API " + json.dumps(patobj))
+    return json.dumps(patobj)
+
   
   #def xsearchpatient(self,page,patientsearch,maxcount):
       
@@ -1592,19 +1638,25 @@ class Patient:
   def newalkinpatient(self,patobj):
     
     db = self.db
-    providerid = self.providerid
+    
+    provs = db((db.provider.provider == 'P0001') & (db.provider.is_active == True)).select(db.provider.id)
+    defproviderid = int(provs[0].id) if(len(provs) > 0 ) else 0
+    
+    providerid = common.getkeyvalue(patobj, "providerid", defproviderid)
+
     auth = current.auth
     newpatobj = {}
     
     try:
+      
       #generating patient member
       r = db((db.provider.id == providerid) & (db.provider.is_active == True)).select(db.provider.provider)
-      provider = r[0].provider if(len(r) == 1)  else "MYDP"
+      provider = r[0].provider if(len(r) == 1)  else "P0001"
       provcount = db(db.patientmember.provider == providerid).count()
       patientmember = provider + str(provcount).zfill(4)    
      
       #WALKIN company
-      r = db((db.company.company.lower() == 'walkin') & (db.company.is_active == False)).select()  #this is a dummy company created for WALKIN
+      r = db((db.company.company.lower() == 'walkin') & (db.company.is_active == True)).select()  #this is a dummy company created for WALKIN
       companyid = int(common.getid(r[0].id))  if(len(r) == 1) else 0
       
       #WALKIN PLAN
@@ -1889,6 +1941,100 @@ class Patient:
     return json.dumps(noteobj)
   
   
+  def newmemberfordependant(self, avars):
+    
+    logger.loggerpms2.info("Enter newmemberfordependant " + json.dumps(avars))
+    
+    db = self.db
+    providerid = self.providerid
+    patobj = {}
+    patid = 0
+    rspobj = {}
+    
+    try:
+      
+      patobj = json.loads(avars)
+      
+      deplist = common.getkeyvalue(patobj,"dependants",[])
+      memberid = int(common.getid(patobj["primarypatientid"]))
+      mems = db((db.patientmember.id == memberid) & (db.patientmember.is_active == True)).select()
+      mem = mems[0] if(len(mems) > 0) else None
+      depcount = 0
+      for dep in deplist:
+
+        #create member dep obj
+        #insert into patientmember <primaty patient patientmember>_<primary patient id>_<rel>_<family member order>
+        depcount = depcount + 1
+        x = patobj["patientmember"] + "_" + str(dep["patientmember"])+ "_" + dep["relation"] + "_" + str(depcount)
+        patid = db.patientmember.insert(\
+          patientmember = x ,
+          groupref = patobj["groupref"],
+          fname = dep["fname"],
+          mname = dep["mname"],
+          lname = dep["lname"],
+          cell = patobj["cell"],
+          email = patobj["email"],
+
+          gender = dep["gender"],
+          dob = common.getdatefromstring(dep["depdob"],"%d/%m/%Y"),
+          
+          address1 = mem["address1"] if(len(mems) > 0) else "",
+          address2 = mem["address2"] if(len(mems) > 0) else "",
+          address3 = mem["address3"] if(len(mems) > 0) else "",
+          city = mem["city"] if(len(mems) > 0) else "",
+          st = mem["st"] if(len(mems) > 0) else "",
+          pin = mem["pin"] if(len(mems) > 0) else "",
+          
+          status = 'Enrolled',
+          groupregion = int(common.getid(patobj["regionid"])),
+          provider = int(common.getid(patobj["providerid"])),
+          company = int(common.getid(patobj["company"])),
+          hmoplan = int(common.getid(patobj["hmoplan"])),
+          enrollmentdate = common.getdatefromstring(patobj["premstartdt"], "%d/%m/%Y"),
+          premstartdt = common.getdatefromstring(patobj["premstartdt"], "%d/%m/%Y"),
+          premenddt = common.getdatefromstring(patobj["premenddt"], "%d/%m/%Y"),
+          startdate = common.getdatefromstring(patobj["premstartdt"], "%d/%m/%Y"),
+          hmopatientmember = True,
+          paid = False,
+          newmember = True,
+          freetreatment  = True,
+          memberorder = depcount,
+          created_on = common.getISTFormatCurrentLocatTime(),
+          created_by = 1,
+          modified_on = common.getISTFormatCurrentLocatTime(),
+          modified_by = 1     
+        
+        )
+        
+        db.commit()
+        planid = int(common.getid(common.getkeyvalue(patobj,"hmoplan",0)))
+        h = db((db.hmoplan.id == planid) & (db.hmoplan.is_active == True)).select()
+        plan_code = h[0].hmoplancode if(len(h) > 0) else "PREMWALKIN"      
+
+        
+        obj={
+          "plan":plan_code,
+          "memberid":patid,
+          "patientid":patid
+        }  
+        
+        bnft = mdpbenefits.Benefit(db)
+        bnft.map_member_benefit(obj)        
+    
+      rspobj = {}
+      rspobj["result"] = "success"
+      rspobj["error_message"] = ""
+      rspobj["error_code"] = ""
+        
+    except Exception as e:
+      logger.loggerpms2.info("New Patient Dependant API  Exception:\n" + str(e))      
+      excpobj = {}
+      excpobj["result"] = "fail"
+      excpobj["error_message"] = "New Patient Dependant API Exception Error - " + str(e)
+      return json.dumps(excpobj)       
+      
+    return json.dumps(rspobj)
+  
   def newpatientfromcustomer(self,avars):
     
     db = self.db
@@ -1998,11 +2144,19 @@ class Patient:
         modified_by = 1     
       
       )
-     
+      
+      obj={
+        "plan":plan_code,
+        "memberid":patid,
+        "patientid":patid
+      }
+      bnft = mdpbenefits.Benefit(db)
+      bnft.map_member_benefit(obj)
+      depid = 0
       deps = common.getkeyvalue(avars,"dependants",None)
       if(deps != None):
         for dep in deps:
-          db.patientmemberdependants.insert(
+          depid = db.patientmemberdependants.insert(
             
             title = "",
             fname = dep["fname"],
@@ -2020,14 +2174,16 @@ class Patient:
             modified_by = 1                 
           
           )
+          obj={
+                  "plan":plan_code,
+                  "memberid":patid,
+                  "patientid":depid
+                }      
+          
+          bnft.map_member_benefit(obj)
      
-      obj={
-        "plan":plan_code,
-        "memberid":patid
-      }
+
       
-      bnft = mdpbenefits.Benefit(db)
-      bnft.map_member_benefit(obj)
   
       pat = db((db.vw_memberpatientlist.primarypatientid == patid) & \
                      (db.vw_memberpatientlist.patientid == patid) & \
@@ -2054,6 +2210,8 @@ class Patient:
         "dob":common.getstringfromdate(pat[0].dob,"%d/%m/%Y"),  #pat[0].dob.strftime("%d/%m/%Y"),
         "gender":common.getstring(pat[0].gender), 
         "relation":common.getstring(pat[0].relation), 
+        
+   
         
         "regionid":int(common.getid(pat[0].regionid)), 
         "providerid" :int(common.getid(pat[0].providerid)), 
@@ -2090,7 +2248,7 @@ class Patient:
         deplist.append(depobj)
       
       patobj["dependants"] = deplist
-        
+      db.commit()  
         
     except Exception as e:
       logger.loggerpms2.info("New Patient API  Exception:\n" + str(e))      

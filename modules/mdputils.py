@@ -42,13 +42,16 @@ def getMemberPolicy(db,avars):
 	pats = db((db.vw_memberpatientlist.primarypatientid == memberid) & (db.vw_memberpatientlist.patientid == patientid)).select(db.vw_memberpatientlist.company,db.vw_memberpatientlist.hmoplan)
 	companyid = int(common.getid(pats[0].company)) if(len(pats) >= 1) else 0
 	companys = db((db.company.id == companyid) & (db.company.is_active == True)).select(db.company.company)
-	companycode = common.getstring(companys[0].company) if(len(companys) >= 1) else "PREMWALKIN"
+	companycode = common.getstring(companys[0].company) if(len(companys) >= 1) else "WALKIN"
 
 	##for backward compatibility determine procedurepriceplancode from member's plan at the time of registration
 	hmoplanid = int(common.getid(pats[0].hmoplan)) if(len(pats) >= 1) else 0  #this is the patient's previously assigned plan-typically at registration
 	hmoplans = db((db.hmoplan.id == hmoplanid) & (db.hmoplan.is_active == True)).select(db.hmoplan.hmoplancode,db.hmoplan.procedurepriceplancode)
 	hmoplancode = common.getstring(hmoplans[0].hmoplancode) if(len(hmoplans) >= 1) else "PREMWALKIN"
 
+
+       
+	
 	#get policy from provider-region-plan corr to companycode, regioncode and hmoplancode
 	prp = db((db.provider_region_plan.companycode == companycode) &\
                  (db.provider_region_plan.regioncode == regioncode) &\
@@ -67,6 +70,7 @@ def getMemberPolicy(db,avars):
 	policy = "PREMWALKIN" if((policy == None) | (policy == "")) else policy
 	plancode = policy      
 	ppc = prp[0].procedurepriceplancode if(len(prp) >= 1) else "PREM103"
+	
 
 	rspobj = {}
 	rspobj["memberid"] = str(memberid)
@@ -77,6 +81,8 @@ def getMemberPolicy(db,avars):
 	rspobj["companycode"] = companycode
 	rspobj["regioncode"] = regioncode
 	rspobj["procedurepriceplancode"] = ppc      
+	
+	
 
     except Exception as e:
 	mssg = "Get Member Policy (Utils) Exception:\n" + str(e)

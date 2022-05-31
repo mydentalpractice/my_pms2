@@ -552,7 +552,7 @@ class Patient:
       else:
         if(patientsearch != ""):
           qry = ((qry) & ((db.vw_memberpatientlist.patient.like("%" + patientsearch + "%")) | (db.vw_memberpatientlist.patientmember.like("%" + patientmembersearch + "%"))))        
-          logger.loggerpms2.info("Search Patient Query = " + str(qry))
+          #logger.loggerpms2.info("Search Patient Query = " + str(qry))
         
         pats = db((qry))\
           .select(db.vw_memberpatientlist.hmopatientmember,\

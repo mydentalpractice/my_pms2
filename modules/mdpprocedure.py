@@ -888,6 +888,9 @@ class Procedure:
         
     #this method 'cancels' the procedure for this treatment
     def canceltreatmentprocedure(self,treatmentid,treatmentprocid ):
+        
+        logger.loggerpms2.info("Enter Cancel Treatment Procedure API " + str(treatmentid) + " " + str(treatmentprocid))
+        
         db = self.db
         
         jsonObj = {}
@@ -907,14 +910,17 @@ class Procedure:
                 
             }
             r = db(db.treatment.id == treatmentid).select(db.treatment.treatmentplan)
-            account.updatetreatmentcostandcopay(db,None,treatmentid)
+            d = account.updatetreatmentcostandcopay(db,None,treatmentid)
+            
         except Exception as e:
             retobj1 = {}
             retobj1["result"] = "fail"
             retobj1["error_message"] = "Cancelling Treatment Procedure API Exception Error " + str(e)
             json.dumps(retobj1)
         
-        return json.dumps(jsonObj)
+        mssg = json.dumps(jsonObj) + " " + json.dumps(d)
+        logger.loggerpms2.info("Exit Cancel Treatment Procedure API " + mssg)
+        return mssg
         
     #this method sets status = 'sent for authorization' the procedure for this treatment
     def sentforauthorization(self,treatmentid,treatmentprocid ):

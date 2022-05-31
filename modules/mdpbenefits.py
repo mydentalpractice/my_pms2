@@ -435,6 +435,11 @@ class Benefit:
       vw_url = urlprops[0].vw_url if(len(urlprops) > 0) else ""
       vw_url = vw_url + "walletapi/createWalletPlanBenefits"
       #vw_url = "http://mtstg.mydentalplan.in/walletapi/createWalletPlanBenefits"
+      #"fname":"dep821_FN",
+      #"lname":"dep822_LN",
+      #"depdob":"31/01/2000",
+      #"relation":"Spouse",
+      #"gender":"Female"
       logger.loggerpms2.info("Create Wallet_1 Request " + vw_url + " " + json.dumps(reqobj))
       
       resp = requests.post(vw_url,json=reqobj)
@@ -1329,6 +1334,7 @@ class Benefit:
       planid = int(common.getid(r[0].id)) if(len(r)>0) else 0
       
       memberid = int(common.getkeyvalue(avars,"memberid","0"))
+      patientid = int(common.getkeyvalue(avars,"patientid","0"))
       p = db((db.benefit_master.benefit_code == policy) & (db.benefit_master.is_active == True)).select()
       benefit_master_id = int(common.getid(p[0].id)) if(len(p)>0) else 0
       if(benefit_master_id == 0):
@@ -1338,9 +1344,11 @@ class Benefit:
         return json.dumps(rspobj)
       
       db.benefit_master_x_member.update_or_insert((db.benefit_master_x_member.member_id == memberid) & \
+                                                  (db.benefit_master_x_member.patient_id == patientid) &\
                                                   (db.benefit_master_x_member.benefit_master_id == benefit_master_id) &\
                                                   (db.benefit_master_x_member.plan_code == policy),
                                                   member_id = memberid,
+                                                  patient_id = patientid,
                                                   benefit_master_id = benefit_master_id,
                                                   plan_code = policy,
                                                   plan_id = planid
@@ -1507,6 +1515,7 @@ class Benefit:
     
     return json.dumps(rspobj)
 
+  #avars will include patient_id for dependant patient
   def get_benefits_1(self,avars):
   
       logger.loggerpms2.info("Enter get_benefits_1 API " + json.dumps(avars))
@@ -1515,6 +1524,7 @@ class Benefit:
       
       try:
         member_id = int(common.getid(common.getkeyvalue(avars,"member_id","0")))
+        patient_id = int(common.getid(common.getkeyvalue(avars,"patient_id",member_id)))
         plan_code = common.getkeyvalue(avars,"plan_code","PREMWALKIN")
         treatmentid = int(common.getid(common.getkeyvalue(avars,"treatmentid","0")))
         tplanid = int(common.getid(common.getkeyvalue(avars,"tplanid","0")))
@@ -1545,6 +1555,7 @@ class Benefit:
           rspobj["error_message"] = ""
           
           rspobj["memberid"] = member_id
+          rspobj["patientid"] = patient_id
           rspobj["plan"] = plan_code
           
          
@@ -1577,8 +1588,9 @@ class Benefit:
         totalinspays = 0 #actual amount ins pays
         totalcompanypays = 0
         
-        #get all the treatments for this member, within the premium start and end date
+        #get all the treatments for this member/patient, within the premium start and end date
         rows = db((db.vw_treatmentprocedure.primarypatient == member_id) &\
+                  (db.vw_treatmentprocedure.patient == patient_id) &\
                   (db.vw_treatmentprocedure.treatmentdate >= benefit_start_date) &\
                   (db.vw_treatmentprocedure.treatmentdate <= benefit_end_date) &\
                   (db.vw_treatmentprocedure.is_active == True)).select()
@@ -1635,6 +1647,7 @@ class Benefit:
         
         
         rspobj["memberid"] = member_id
+        rspobj["patientid"] = patient_id
         rspobj["plan"] = plan_code
         
        
@@ -1677,25 +1690,27 @@ class Benefit:
         m = db((db.patientmember.groupref == "KYTC")&(db.patientmember.is_active == True)).select(db.patientmember.id)
         avars["memberid"] = m[0].id if(len(m) > 0) else 0
         plan = common.getkeyvalue(avars,"plan","RPIP599")
-        if(plan == "RPIP599"):
-          rspobj = json.loads(self.RPIP599_kytc(avars))
-        else:
-          mssg = "Get Benefits:Invalid benefit KYTC Policy"
-          rspobj = {}
-          rspobj["result"] = "success"
-          rspobj["error_message"] = mssg
-          rspobj["redeem_code"] = "BNFT_INVALID"
-          rspobj["redeem_value"] = 0
-          rspobj["redeem_date"] = common.getstringfromdate(datetime.date.today(), "%d/%m/%Y")
-          rspobj["redeem_message"] = common.getmessage(db,"BNFT_INVALID")
-          rspobj["memberid"] = common.getkeyvalue(avars,"memberid","")
-          rspobj["plan"] = plan
+        rspobj = json.loads(self.RPIP599_kytc(avars))
+        
+        #if(plan == "RPIP599"):
+          #rspobj = json.loads(self.RPIP599_kytc(avars))
+        #else:
+          #mssg = "Get Benefits:Invalid benefit KYTC Policy"
+          #rspobj = {}
+          #rspobj["result"] = "success"
+          #rspobj["error_message"] = mssg
+          #rspobj["redeem_code"] = "BNFT_INVALID"
+          #rspobj["redeem_value"] = 0
+          #rspobj["redeem_date"] = common.getstringfromdate(datetime.date.today(), "%d/%m/%Y")
+          #rspobj["redeem_message"] = common.getmessage(db,"BNFT_INVALID")
+          #rspobj["memberid"] = common.getkeyvalue(avars,"memberid","")
+          #rspobj["plan"] = plan
        
-          rspobj["total_redeemed_benefits"] = 0
-          rspobj["benefit_code"] = ""
-          rspobj["benefit_name"] = ""
-          rspobj["benefit_value"] = str(0)
-          rspobj["discount_amount"] = str(0)
+          #rspobj["total_redeemed_benefits"] = 0
+          #rspobj["benefit_code"] = ""
+          #rspobj["benefit_name"] = ""
+          #rspobj["benefit_value"] = str(0)
+          #rspobj["discount_amount"] = str(0)
      
           
         
@@ -1723,6 +1738,7 @@ class Benefit:
     
     try:
       memberid = int(common.getkeyvalue(avars,"member_id","0"))
+      patientid = int(common.getkeyvalue(avars,"patient_id",memberid))
       treatmentid = int(common.getkeyvalue(avars,"treatmentid","0"))
       plan_code = common.getkeyvalue(avars,"plan_code","")
       paymentid = int(common.getkeyvalue(avars,"paymentid","0"))
@@ -1745,6 +1761,7 @@ class Benefit:
         rspobj["error_message"] = ""
         rspobj["plan"] = plan_code
         rspobj["memberid"]=memberid
+        rspobj["patientid"] = patientid
         rspobj["treatmentid"]=treatmentid
         rspobj["benefit_member_id"]  = common.getkeyvalue(planbenefits,"id","0")
         rspobj["wallet_planbenefit_id"] = common.getkeyvalue(planbenefits,"id","0")
@@ -1784,6 +1801,7 @@ class Benefit:
       reqobj = {}
    
       reqobj["member_id"] = memberid
+      reqobj["patient_id"] = patientid,
       reqobj["transaction_type"] = "D"
       reqobj["transac_for"] = "TREATMENT"
       reqobj["transac_refrence_id"] = paymentid
@@ -1828,6 +1846,7 @@ class Benefit:
       rspobj["error_message"] = ""
       rspobj["plan"] = plan_code
       rspobj["memberid"]=memberid
+      rspobj["patientid"]=patientid
       rspobj["treatmentid"]=treatmentid
       rspobj["benefit_member_id"]  = common.getkeyvalue(planbenefits,"id","0")
       rspobj["wallet_planbenefit_id"] = common.getkeyvalue(planbenefits,"id","0")

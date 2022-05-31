@@ -963,10 +963,20 @@ class Appointment:
         locationurl = prov[0].pa_locationurl if len(prov) == 1 else ""
         apptobj = {}
         
+        memberid = 0
+        patientid = 0
+        patientmember = ""
         try:
             #appt = db((db.vw_appointments.f_uniqueid == apptid) & (db.vw_appointments.provider == providerid)  & (db.vw_appointments.is_active == True)).select()
             appt = db((db.vw_appointments.id == apptid) &  (db.vw_appointments.blockappt == False) &  (db.vw_appointments.is_active == True)).select()
             if(len(appt) == 1):
+                memberid=int(common.getid(appt[0].patientmember))
+                patientid=int(common.getid(appt[0].patient))
+                pats = db((db.vw_memberpatientlist.primarypatientid == memberid) &\
+                          (db.vw_memberpatientlist.patientid == patientid) &\
+                          (db.vw_memberpatientlist.is_active == True)).select(db.vw_memberpatientlist.patientmember)
+                patientmember = pats[0].patientmember if(len(pats) > 0) else ""
+                
                 apptobj= {
                     "appointmentid":apptid,
                     "clinicid":int(common.getid(appt[0].clinicid)),
@@ -977,8 +987,9 @@ class Appointment:
                     "location":common.getstring(appt[0].f_location),
                     "locationurl":locationurl,
                     "status":common.getstring(appt[0].f_status) if(common.getstring(appt[0].f_status) != "") else "Confirmed",
-                    "memberid":int(common.getid(appt[0].patientmember)),
-                    "patientid":int(common.getid(appt[0].patient)),
+                    "memberid":memberid,
+                    "patientid":patientid,
+                    "patientmember":patientmember,
                     "patientname" : common.getstring(appt[0].f_patientname),
                     "patcell":common.modify_cell(appt[0].cell),
                     "doctorid":int(common.getid(appt[0].doctor)),

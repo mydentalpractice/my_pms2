@@ -415,7 +415,7 @@ class Treatment:
     def getproceduresfromtreatment(self,treatmentid):
         db = self.db
         procs = ""
-        tps = db(db.treatment_procedure.treatmentid == treatmentid).select()
+        tps = db((db.treatment_procedure.treatmentid == treatmentid) & (db.treatment_procedure.is_active == True)).select()
         for tp in tps:
             proc = db(db.procedurepriceplan.id == tp.dentalprocedure).select(db.dentalprocedure.shortdescription,
                                                                              left=db.dentalprocedure.on(db.dentalprocedure.dentalprocedure == db.procedurepriceplan.procedurecode ))

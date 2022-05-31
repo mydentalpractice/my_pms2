@@ -1482,6 +1482,11 @@ class Customer:
                 jsonresp = json.loads(pat.newpatientfromcustomer(cobj))
                 
                 pat.addpatientnotes(jsonresp["primarypatientid"], jsonresp["patientid"], c[0].notes)
+                pat.newmemberfordependant(json.dumps(jsonresp))
+                
+                #for each family dependant, create corresponding primary members.
+                #this for a plan where each family member has individual plan benefits/limits.
+                
                 
                 db(db.customer.id == customerid).update(
                     

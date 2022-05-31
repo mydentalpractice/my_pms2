@@ -794,6 +794,9 @@ def get_booking_amount(db,treatmentid):
     return booking_amount
 
 def updatetreatmentcostandcopay(db,user,treatmentid):
+    
+    logger.loggerpms2.info("Enter Update Treatment Cost Copay " + str(treatmentid))
+    
     totalactualtreatmentcost = 0   #UCR Cost
     totaltreatmentcost = 0  #Cost charged to the client which is equal to UCR fee by default
     totalcopay = 0
@@ -814,7 +817,9 @@ def updatetreatmentcostandcopay(db,user,treatmentid):
                                               modified_on = datetime.datetime.today(),modified_by = 1 if(user == None) else user.id)
     
     
-    return dict()
+    d = dict(totalactualtreatmentcost=totalactualtreatmentcost,totaltreatmentcost=totaltreatmentcost,totalcopay=totalcopay,totalinspays=totalinspays,totalcompanypays=totalcompanypays)
+    logger.loggerpms2.info("Exit Update Treatment Cost Copay API " + json.dumps(d))
+    return dict(totalactualtreatmentcost=totalactualtreatmentcost,totaltreatmentcost=totaltreatmentcost,totalcopay=totalcopay,totalinspays=totalinspays,totalcompanypays=totalcompanypays)
 
 
 def calculatepayments(tplanid,providerid,policy=None):
