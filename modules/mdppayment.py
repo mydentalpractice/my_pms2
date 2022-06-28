@@ -1125,8 +1125,9 @@ class Payment:
             dttodaydate = common.getISTFormatCurrentLocatDate()        
            
             jsonConfirmPayment = paymentdata
+            jsonObj = json.loads(paymentdata["addln_detail"])
             
-            logger.loggerpms2.info("Paymentcallback A")
+            logger.loggerpms2.info("Paymentcallback A" + " " + json.dumps(jsonObj))
             
             paymentref = common.getkeyvalue(jsonConfirmPayment,"payment_reference","")
             paymenttype = common.getkeyvalue(jsonConfirmPayment,"payment_type","")
@@ -1141,12 +1142,12 @@ class Payment:
             amount = 0 if(status != 'S') else (float(common.getvalue(jsonConfirmPayment['amount'])) if('amount' in jsonConfirmPayment) else 0)  #yes
             fee = 0    #if(status != 'S') else (common.getstring(jsonConfirmPayment['fee']) if('fee' in jsonConfirmPayment) else 0)   #no
     
-            jsonObj = common.getkeyvalue(jsonConfirmPayment,"addln_detail",{})
+            #jsonObj = json.loads(common.getkeyvalue(jsonConfirmPayment,"addln_detail",{}))
             logger.loggerpms2.info("Paymentcallback B" + json.dumps(jsonObj))
             
         
-            paymentid = int(common.getid(common.getkeyvalue(jsonConfirmPayment,"paymentid",0)))
-            paymentdate = common.getkeyvalue(jsonConfirmPayment,"paymentdate","01/01/1990")
+            paymentid = common.getkeyvalue(jsonObj,"paymentid",0)
+            paymentdate = common.getkeyvalue(jsonObj,"paymentdate","01/01/1990")
             invoiceamt = float(common.getvalue(jsonObj['invoiceamt'])) if('invoiceamt' in jsonObj) else 0.00
 
             error = "" if(status =="S") else common.getkeyvalue(jsonConfirmPayment,"error","")

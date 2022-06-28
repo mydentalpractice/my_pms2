@@ -622,41 +622,55 @@ class Customer:
     def customer(self,avars):
         logger.loggerpms2.info("Enter customer " + json.dumps(avars))
         db = self.db
-        customer_ref = common.getkeyvalue(avars, "customer_ref", "")
-        customer_ref = customer_ref if(customer_ref != "") else common.getkeyvalue(avars,"cell","")
         
-        plan_code = common.getkeyvalue(avars, "plan_code", "RPIP599")
         
-        company_code = common.getkeyvalue(avars, "company_code", plan_code)
-        c = db((db.company.company == company_code) & (db.company.is_active == True)).select()
-        company_id = c[0].id if(len(c) == 1) else 0
-        
-        avars["companyid"] = str(company_id)
-        avars["company_code"] = company_code
-        
-        jsonresp={}
-        if(customer_ref != ""):
-            c = db((db.customer.customer_ref == customer_ref) & (db.customer.is_active == True)).select(db.customer.id, db.customer.customer_ref)
+        try:
+            customer_ref = common.getkeyvalue(avars, "customer_ref", "")
+            customer_ref = customer_ref if(customer_ref != "") else common.getkeyvalue(avars,"cell","")
             
-            if(len(c) == 0):
-                #new custoemr
-                jsonresp = json.loads(self.new_customer(avars))
-                jsonresp["new_customer"] = True
+            plan_code = common.getkeyvalue(avars, "plan_code", "RPIP599")
+            
+            company_code = common.getkeyvalue(avars, "company_code", plan_code)
+            c = db((db.company.company == company_code) & (db.company.is_active == True)).select()
+            company_id = c[0].id if(len(c) == 1) else 0
+            
+            avars["companyid"] = str(company_id)
+            avars["company_code"] = company_code
+            
+            jsonresp={}
+            if(customer_ref != ""):
+                c = db((db.customer.customer_ref == customer_ref) & (db.customer.is_active == True)).select(db.customer.id, db.customer.customer_ref)
+                
+                if(len(c) == 0):
+                    #new custoemr
+                    jsonresp = json.loads(self.new_customer(avars))
+                    jsonresp["new_customer"] = True
+                    
+                else:
+                    #update customer
+                    jsonresp = json.loads(self.update_customer(avars))
+                    jsonresp["new_customer"] = False
                 
             else:
-                #update customer
-                jsonresp = json.loads(self.update_customer(avars))
-                jsonresp["new_customer"] = False
-            
-        else:
-            error_code = "CUST_001"
-            mssg = error_code + ":" + "Customer not created! No Customer_Ref:\n"
+                error_code = "CUST_001"
+                mssg = error_code + ":" + "Customer not created! No Customer_Ref:\n"
+                logger.loggerpms2.info(mssg)
+                jsonresp = {
+                    "result":"fail",
+                    "error_message":mssg,
+                    "error_code":error_code
+                } 
+        except Exception as e:
+            error_code = "CUST_000"
+            mssg = error_code + ":" + "Exception Customer:\n" + "(" + str(e) + ")"
             logger.loggerpms2.info(mssg)
             jsonresp = {
                 "result":"fail",
                 "error_message":mssg,
                 "error_code":error_code
-            } 
+            }            
+      
+                
             
         return json.dumps(jsonresp)
     
@@ -1482,10 +1496,13 @@ class Customer:
                 jsonresp = json.loads(pat.newpatientfromcustomer(cobj))
                 
                 pat.addpatientnotes(jsonresp["primarypatientid"], jsonresp["patientid"], c[0].notes)
-                pat.newmemberfordependant(json.dumps(jsonresp))
+                
                 
                 #for each family dependant, create corresponding primary members.
                 #this for a plan where each family member has individual plan benefits/limits.
+                #this method used to create primary members for each dependant but both were getting
+                #listed in some of the functions. So currently we commenting
+                pat.newmemberfordependant(json.dumps(jsonresp))
                 
                 
                 db(db.customer.id == customerid).update(

@@ -829,7 +829,7 @@ class User:
     user_id = a[0].id if(len(a) > 0) else 0
     
     #search for the cell number in patientmember
-    pats = db((db.vw_memberpatientlist.cell == cell)|(db.vw_memberpatientlist.cell == cellno)).select()   #compare with 91 or without 91
+    pats = db((db.vw_memberpatientlist_fast.cell == cell)|(db.vw_memberpatientlist_fast.cell == cellno)).select()   #compare with 91 or without 91
     
     patlist = []
     patobj  = {}
@@ -846,9 +846,20 @@ class User:
         "patientid":int(common.getid(pat.patientid)),
         "primary":True if(pat.patienttype == "P") else False,   #True if "P" False if "D"
         "relation":pat.relation,
+        "memberorder":pat.order,
         "cell":pat.cell,
         "email":pat.email,
-        "providerid":pat.providerid
+        "providerid":pat.providerid,
+        
+        "premstartdt":common.getstringfromdate(pat.premstartdt,"%Y-%m-%d"),
+        "premenddt": common.getstringfromdate(pat.premenddt,  "%Y-%m-%d"),
+        
+        "plan_id":pat.plan_id,
+        "plan_code":pat.plan_code,
+        "plan_name":pat.plan_name,
+        "plan_details":pat.plan_details,
+        "company_code":pat.company_code
+        
       }
       patlist.append(patobj)   
       

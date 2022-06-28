@@ -9287,6 +9287,11 @@ order by agent.name
 ALTER TABLE `mydp_prod`.`benefit_master_x_member` 
 ADD COLUMN `patient_id` INT(11) NULL AFTER `member_id`;
 
+8. XXXX  ZZZZ Changes
+ALTER TABLE `hmoplan` ADD `plan_details` TEXT NULL DEFAULT NULL AFTER `company_code`;
+
+9. YYYZZZ vw_memberpatientlist_fast
+Modified 
 
 
 Script file to clear user for sign-up

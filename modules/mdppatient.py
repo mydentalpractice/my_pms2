@@ -1965,16 +1965,19 @@ class Patient:
         #create member dep obj
         #insert into patientmember <primaty patient patientmember>_<primary patient id>_<rel>_<family member order>
         depcount = depcount + 1
+        
         x = patobj["patientmember"] + "_" + str(dep["patientmember"])+ "_" + dep["relation"] + "_" + str(depcount)
+        
         patid = db.patientmember.insert(\
           patientmember = x ,
+         
           groupref = patobj["groupref"],
           fname = dep["fname"],
           mname = dep["mname"],
           lname = dep["lname"],
           cell = patobj["cell"],
           email = patobj["email"],
-
+          
           gender = dep["gender"],
           dob = common.getdatefromstring(dep["depdob"],"%d/%m/%Y"),
           
@@ -1997,8 +2000,9 @@ class Patient:
           hmopatientmember = True,
           paid = False,
           newmember = True,
+          
           freetreatment  = True,
-          memberorder = depcount,
+          memberorder = depcount + 1,
           created_on = common.getISTFormatCurrentLocatTime(),
           created_by = 1,
           modified_on = common.getISTFormatCurrentLocatTime(),

@@ -681,7 +681,10 @@ def mdplogout(avars):
 
 def otpvalidation(avars):
     ouser = mdpuser.User(current.globalenv['db'],None,"","")
-    rsp = ouser.otpvalidation(str(avars["cell"]), str(avars["email"]), str(avars["otp"]), datetime.datetime.strptime(str(avars["otpdatetime"]),"%d/%m/%Y %H:%M:%S"))
+    rsp = ouser.otpvalidation(str(avars["cell"]), 
+                              common.getkeyvalue(avars,"email",""),
+                              common.getkeyvalue(avars,"otp",""),
+                              datetime.datetime.strptime(common.getkeyvalue(avars,"otpdatetime","01/01/1990 00:00:00"),"%d/%m/%Y %H:%M:%S"))
     
     return rsp
     

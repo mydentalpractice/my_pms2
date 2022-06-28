@@ -1198,10 +1198,10 @@ db.define_table('prospect',
                 Field('pa_pan', 'string', default='', label=''),
                 Field('pa_regno', 'string', default='', label=''),
                 Field('pa_dob', 'date', label=''),
-                Field('pa_date', 'datetime', default=request.now, label=''),
+                Field('pa_date', 'date', default=request.now, label=''),
                 Field('pa_accepted', 'boolean', default=False),
                 Field('pa_approved', 'boolean', default=False),
-                Field('pa_approvedon', 'datetime', default=request.now, label=''),
+                Field('pa_approvedon', 'date', default=request.now, label=''),
                 Field('pa_approvedby', 'integer'),
                 Field('pa_day', 'string', default='', label=''),
                 Field('pa_month', 'string', default='', label=''),
@@ -2777,7 +2777,22 @@ db.define_table('vw_memberpatientlist_fast',
                 Field('cell','string'), 
                 Field('email','string'), 
                 Field('hmopatientmember','boolean'),
-                Field('pattern','string')
+                Field('fname','string'),
+                Field('mname','string'),
+                Field('lname','string'),
+                Field('premstartdt','date'),
+                Field('premenddt','date'),
+                Field('patienttype','string'),
+                Field('relation','string'),
+                Field('memberorder','integer'),
+                Field('pattern','text'),
+                Field('plan_details','text'),
+                Field('plan_id','integer'),
+                Field('plan_code','string'),
+                Field('plan_name','string'),
+                Field('company_code','string')
+                
+                
                 )
 db.vw_memberpatientlist_fast._singular = "vw_memberpatientlist_fast"
 db.vw_memberpatientlist_fast_plural   = "vw_memberpatientlist+fast"
