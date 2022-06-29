@@ -9292,7 +9292,7 @@ ALTER TABLE `hmoplan` ADD `plan_details` TEXT NULL DEFAULT NULL AFTER `company_c
 
 9. YYYZZZ vw_memberpatientlist_fast
 Modified 
-
+\10.
 
 Script file to clear user for sign-up
 =====================================

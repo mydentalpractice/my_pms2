@@ -228,4 +228,3 @@ CREATE VIEW `vw_agent_prospect_clinic` AS select `prospect_ref`.`id` AS `id`,`ag
 
 
 
-
