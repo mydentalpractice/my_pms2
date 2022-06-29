@@ -1,5 +1,5 @@
 from gluon import current
-
+#
 db = current.globalenv['db']
 
 import os

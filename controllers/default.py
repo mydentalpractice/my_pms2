@@ -6,7 +6,7 @@ db = current.globalenv['db']
 from decimal import Decimal
 from gluon.tools import Mail
 from string import Template
-
+#
 import urllib
 import os
 import mail

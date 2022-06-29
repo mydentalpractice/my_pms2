@@ -1,6 +1,6 @@
 from gluon import current
 db = current.globalenv['db']
-
+#
 import datetime
 
 from shutil import copyfile
@@ -12,7 +12,7 @@ from base64 import decodestring
 #sys.path.append('modules')
 from applications.my_pms2.modules import common
 #from gluon.contrib import common
-
+#
 
 
 #parameters for calling out dental procedures

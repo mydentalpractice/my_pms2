@@ -6,7 +6,7 @@ db = current.globalenv['db']
 #crud = Crud(db)
 
 #crud.settings.formstyle='table3cols'
-
+#
 
 import datetime
 import time

@@ -1,6 +1,6 @@
 from gluon import current
 db = current.globalenv['db']
-
+#
 from gluon.tools import Crud
 crud = Crud(db)
 
