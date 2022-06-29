@@ -20,7 +20,7 @@ from applications.my_pms2.modules import mdppatient
 datefmt = "%d/%m/%Y"
 datetimefmt = "%d/%m/%Y %H:%M:%S"
 
-
+#
 def showSendForAuthorization(status, authorization, authorized):
     
     if(status.lower() == 'started'):

@@ -1,6 +1,6 @@
 from gluon import current
 db = current.globalenv['db']
-
+#
 import json
 
 import requests

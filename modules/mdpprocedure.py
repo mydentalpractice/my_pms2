@@ -15,7 +15,7 @@ from applications.my_pms2.modules import tasks
 from applications.my_pms2.modules import mdprules
 from applications.my_pms2.modules import mdputils
 from applications.my_pms2.modules import logger
-
+#
 datefmt = "%d/%m/%Y"
 datetimefmt = "%d/%m/%Y %H:%M:%S"
 

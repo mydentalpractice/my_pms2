@@ -4,7 +4,7 @@ import hashlib
 import md5
 import common
 from applications.my_pms2.modules import logger
-
+#
 def assignedPatients(db,providerid):
 
     sql = " SELECT  patientmember.patientmember, patientmember.fname, patientmember.lname, patientmember.cell, patientmember.dob,company.company FROM patientmember "
