@@ -612,14 +612,14 @@ def getproceduregrid(providerid,tplanid,treatmentid,memberid,patientid,authoriza
     query = ((db.vw_treatmentprocedure.treatmentid  == treatmentid) & (db.vw_treatmentprocedure.is_active == True))
     
     if((hmopatientmember == True) | (session.religare == True)):
-        #fields=(db.vw_treatmentprocedure.procedurecode,db.vw_treatmentprocedure.altshortdescription, db.vw_treatmentprocedure.relgrprocdesc, \
-                   #db.vw_treatmentprocedure.tooth,db.vw_treatmentprocedure.quadrant,
-                   #db.vw_treatmentprocedure.procedurefee,db.vw_treatmentprocedure.inspays,db.vw_treatmentprocedure.status,\
-                   #db.vw_treatmentprocedure.treatmentdate, db.vw_treatmentprocedure.relgrproc,db.vw_treatmentprocedure.relgrtransactionid)
-        fields=(db.vw_treatmentprocedure.procedurecode,db.vw_treatmentprocedure.altshortdescription, 
+        fields=(db.vw_treatmentprocedure.procedurecode,db.vw_treatmentprocedure.altshortdescription, db.vw_treatmentprocedure.relgrprocdesc, \
                    db.vw_treatmentprocedure.tooth,db.vw_treatmentprocedure.quadrant,
-                   db.vw_treatmentprocedure.copay,db.vw_treatmentprocedure.inspays,db.vw_treatmentprocedure.status,
-                   db.vw_treatmentprocedure.treatmentdate)
+                   db.vw_treatmentprocedure.procedurefee,db.vw_treatmentprocedure.copay,db.vw_treatmentprocedure.inspays,db.vw_treatmentprocedure.status,\
+                   db.vw_treatmentprocedure.treatmentdate, db.vw_treatmentprocedure.relgrproc,db.vw_treatmentprocedure.relgrtransactionid)
+        #fields=(db.vw_treatmentprocedure.procedurecode,db.vw_treatmentprocedure.altshortdescription, 
+                   #db.vw_treatmentprocedure.tooth,db.vw_treatmentprocedure.quadrant,
+                   #db.vw_treatmentprocedure.copay,db.vw_treatmentprocedure.inspays,db.vw_treatmentprocedure.status,
+                   #db.vw_treatmentprocedure.treatmentdate)
 
         
         headers={
@@ -627,7 +627,8 @@ def getproceduregrid(providerid,tplanid,treatmentid,memberid,patientid,authoriza
             'vw_treatmentprocedure.altshortdescription':'Description',
             'vw_treatmentprocedure.tooth':'Tooth',
             'vw_treatmentprocedure.quadrant':'Quadrant',
-            'vw_treatmentprocedure.copay':'Procedure Cost',
+            'vw_treatmentprocedure.procedurefee':'Procedure Fee',
+            'vw_treatmentprocedure.copay':'Copay',
             'vw_treatmentprocedure.inspays':'Insurance Pays',
             'vw_treatmentprocedure.status':'Status',
             'vw_treatmentprocedure.treatmentdate':'Treatment Date'
@@ -637,6 +638,7 @@ def getproceduregrid(providerid,tplanid,treatmentid,memberid,patientid,authoriza
         fields=(db.vw_treatmentprocedure.procedurecode,db.vw_treatmentprocedure.altshortdescription,
              
                    db.vw_treatmentprocedure.tooth,db.vw_treatmentprocedure.quadrant,
+                   db.vw_treatmentprocedure.procedurefee,
                    db.vw_treatmentprocedure.copay,db.vw_treatmentprocedure.inspays,db.vw_treatmentprocedure.status,
                    db.vw_treatmentprocedure.treatmentdate)
         
@@ -646,7 +648,8 @@ def getproceduregrid(providerid,tplanid,treatmentid,memberid,patientid,authoriza
             #'vw_treatmentprocedure.relgrprocdesc':'',
             'vw_treatmentprocedure.tooth':'Tooth',
             'vw_treatmentprocedure.quadrant':'Quadrant',
-            'vw_treatmentprocedure.copay':'Procedure Cost',
+            'vw_treatmentprocedure.procedurefee':'Procedure Fee',
+            'vw_treatmentprocedure.copay':'Copay',
             'vw_treatmentprocedure.inspays':'Insurance Pays',
             'vw_treatmentprocedure.status':'Status',
             'vw_treatmentprocedure.treatmentdate':'Treatment Date'
@@ -3902,7 +3905,7 @@ def update_procedure():
     
         xinspays = formProcedure.element('#no_table_inspays')
         xinspays['_class'] = 'form-control'
-        xinspays['_onchange'] = 'totalcalculation()'
+        #xinspays['_onchange'] = 'totalcalculation()'
         xinspays['_autocomplete'] = 'off' 
     
         xproc = formProcedure.element('#no_table_procedurecost')
@@ -3920,6 +3923,7 @@ def update_procedure():
             authorized = True
         
         if(writablflag):
+            
             db(db.treatment_procedure.id == treatmentprocedureid).update(\
                 quadrant = common.getstring(formProcedure.vars.quadrant),\
                 tooth = common.getstring(formProcedure.vars.tooth),\
