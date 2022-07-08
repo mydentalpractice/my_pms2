@@ -165,11 +165,11 @@
 									    </div>
 									{{pass}}
 								    {{else:}}
-									<div class="col-md-4" style="display:none">
+									<div class="col-md-4" style="">
 									    <label class="m_title">Total Patient Pays (Taxes Extra)</label><br/>
 									    {{=formTreatment.custom.widget.copay}}
 									</div>
-									<div class="col-md-4" style="display:none">
+									<div class="col-md-4" style="">
 									    <label class="m_title">Total Authorized Pay</label><br/>
 									    {{=formTreatment.custom.widget.inspay}}
 									</div>
@@ -214,6 +214,14 @@
 														    <label class="m_title">Total Authorized Pay</label><br/>
 														    {{=formTreatment.custom.widget.inspay}}
 														</div>
+<div class="col-md-4">
+														    <label class="m_title">Total Paid</label><br/>
+														    {{=formTreatment.custom.widget.totalpaid}}
+														</div>
+														    <div class="col-md-4" >
+															<label style="color:red" class="m_title">Total Due</label><br/>
+															{{=formTreatment.custom.widget.totaldue}}
+														    </div>														
 														{{pass}}
 										      </div>                                        <!-- End of new Row-->-
 

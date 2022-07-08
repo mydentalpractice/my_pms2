@@ -210,7 +210,7 @@
 					       <span>
 					       <a href="{{=returnurl}}" class="btn green" style="margin: 8px 3px;float:right">Cancel </a>&nbsp;&nbsp;
 					       {{if(cheque):}}
-					       <button style="margin: 8px 3px;float:right" type="button" id="CKP1"  class="btn green" data-toggle="modal" data-target="#myModal"  >Cheque Payment  </button>
+					       <button style="margin: 8px 3px;float:right;display:none" type="button" id="CKP1"  class="btn green" data-toggle="modal" data-target="#myModal"  >Cheque Payment  </button>
 					       {{pass}}
 					       {{if(cheque):}}
 					       <button  style="margin: 8px 3px;float:right;display:none" type="submit" id="chequePayment" onclick="makeChequePayment()" class="btn green" >xCheque Payment </button>
@@ -224,18 +224,18 @@
 					       <button id="CP0" style="margin: 8px 3px;float:right" type="submit"   onclick="loader(this.id),makeCashlessPayment()" class="btn green" >Cashless Payment <i class="fa fa-spinner fa-spin" id="loaderDIVCP0" style="display:none"></i></button>&nbsp;&nbsp;
 					       {{pass}}
 					       {{if(online):}}
-					       <button id="OP" style="margin: 8px 3px;float:right"  type="submit"  onclick="loader(this.id),makeOnlinePayment()" class="btn green" >Online Payment <i class="fa fa-spinner fa-spin" id="loaderDIVOP" style="display:none"></i></button>
+					       <button id="OP" style="margin: 8px 3px;float:right;display:none"  type="submit"  onclick="loader(this.id),makeOnlinePayment()" class="btn green" >Online Payment <i class="fa fa-spinner fa-spin" id="loaderDIVOP" style="display:none"></i></button>
 					       <!--<a href="#" class="btn green" onclick="makeOnlinePayment()" style="margin: 8px 3px;float:right">Online Payment </a>&nbsp;&nbsp;-->
 					       {{pass}}
 					       {{if(online):}}
-					       <button id="PL" style="margin: 8px 3px;float:right"  type="submit"  onclick="loader(this.id),makePineLabsPayment()" class="btn green" >PineLabs Payment <i class="fa fa-spinner fa-spin" id="loaderDIVPL" style="display:none"></i></button>
+					       <button id="PL" style="margin: 8px 3px;float:right"  type="submit"  onclick="loader(this.id),makePineLabsPayment()" class="btn green" >PineLabs (Online) Payment <i class="fa fa-spinner fa-spin" id="loaderDIVPL" style="display:none"></i></button>
 					       <!--<a href="#" class="btn green" onclick="makeOnlinePayment()" style="margin: 8px 3px;float:right">Online Payment </a>&nbsp;&nbsp;-->
 					       {{pass}}
 					       
 					       
 					       {{if(online):}}
 					       
-					       <button id="SP" style="float:right"  type="submit"  onclick="loader(this.id),makeShopseePayment()"  ><img src="..\static\images\shopsebtn.png" /><i class="fa fa-spinner fa-spin" id="loaderDIVSP" style="display:none"></i>
+					       <button id="SP" style="float:right;display:none"  type="submit"  onclick="loader(this.id),makeShopseePayment()"  ><img src="..\static\images\shopsebtn.png" /><i class="fa fa-spinner fa-spin" id="loaderDIVSP" style="display:none"></i>
                                                   					       
 					       </button>
 					       {{pass}}

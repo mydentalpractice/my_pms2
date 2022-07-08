@@ -34,7 +34,7 @@
 						 <strong>{{=formProcedure.custom.widget.procedure}}</strong>
 					   </div>
 					   {{if(session.religare == None):}}
-					   <div class="col-md-4" style="margin-bottom:5px; display:none">
+					   <div class="col-md-4" style="margin-bottom:5px; ">
 						 <label class="m_title">Status</label><br/>
 						 <strong>{{=formProcedure.custom.widget.procstatus}}</strong>
 					   </div>
@@ -50,12 +50,12 @@
 					
                                     <div class="col-sm-12 md_r"> 
 					   {{if(session.religare == None):}}
-					   <div class="col-md-3" style="margin-bottom:5px;display:none">
+					   <div class="col-md-3" style="margin-bottom:5px;">
 						 <label class="m_title">UCR Fee</label><br/>
 						 <strong>{{=formProcedure.custom.widget.ucr}}</strong>
 					   </div>
 					   {{else:}}
-					   <div class="col-md-3" style="margin-bottom:5px;display:none">
+					   <div class="col-md-3" style="margin-bottom:5px;">
 						 <label class="m_title">UCR Fee</label><br/>
 						 <strong>{{=formProcedure.custom.widget.ucr}}</strong>
 					   </div>
@@ -77,13 +77,13 @@
 						<strong>{{=formProcedure.custom.widget.copay}}</strong>
                                            </div>    
 					{{else:}}
-                                           <div class="col-md-3" style="display:none">
+                                           <div class="col-md-3" style="">
 						<label class="m_title">Authorized Fee</label>
 						<br/>
 						<strong>{{=formProcedure.custom.widget.inspays}}</strong>
                                            </div>    
 					   
-                                           <div class="col-md-3" style="display:none">
+                                           <div class="col-md-3" style="">
 						<label class="m_title">Procedure Copay</label><br/>
 						<strong>{{=formProcedure.custom.widget.copay}}</strong>
                                            </div>    
@@ -141,7 +141,8 @@ function totalcalculation()
     proccost = parseFloat(document.getElementById('no_table_procedurecost').value);
     inspays = parseFloat(document.getElementById('no_table_inspays').value);
     
-    copay = proccost - inspays
+    <!--copay = proccost - inspays-->
+    copay = proccost
     
     document.getElementById('no_table_copay').value = copay;  
     
