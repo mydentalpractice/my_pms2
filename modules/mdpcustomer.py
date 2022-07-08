@@ -1502,7 +1502,10 @@ class Customer:
                 #this for a plan where each family member has individual plan benefits/limits.
                 #this method used to create primary members for each dependant but both were getting
                 #listed in some of the functions. So currently we commenting
-                pat.newmemberfordependant(json.dumps(jsonresp))
+                r = db((db.hmoplan.id ==  c[0].planid) & (db.hmoplan.is_active == True)).select(db.hmoplan.mdp_family)
+                mdp_family = r[0].mdp_family if(len(r) > 0) else False
+                if(mdp_family == True):
+                    pat.newmemberfordependant(json.dumps(jsonresp))
                 
                 
                 db(db.customer.id == customerid).update(
