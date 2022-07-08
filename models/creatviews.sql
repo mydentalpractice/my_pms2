@@ -9289,10 +9289,17 @@ ADD COLUMN `patient_id` INT(11) NULL AFTER `member_id`;
 
 8. XXXX  ZZZZ Changes
 ALTER TABLE `hmoplan` ADD `plan_details` TEXT NULL DEFAULT NULL AFTER `company_code`;
+ALTER TABLE `mydp_prod`.`hmoplan` 
+ADD COLUMN `mdp_family` CHAR(1) NULL DEFAULT 'F' AFTER `plan_details`;
+
+
 
 9. YYYZZZ vw_memberpatientlist_fast
 Modified 
-\10.
+
+
+
+
 
 Script file to clear user for sign-up
 =====================================

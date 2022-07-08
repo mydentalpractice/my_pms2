@@ -687,7 +687,8 @@ db.define_table('hmoplan',
                 Field('walletamount','double',default=0),
                 Field('authorizationrequired','boolean',default=False),
                 Field('company_code','string',default=None),
-                
+                Field('plan_details','text',default=None),
+                Field('mdp_family','boolean',default=False),
                 auth.signature,
                 format = '%(name)s (%(hmoplancode)s)'
                )
