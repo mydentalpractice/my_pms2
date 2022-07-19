@@ -2015,6 +2015,9 @@ class Patient:
         h = db((db.hmoplan.id == planid) & (db.hmoplan.is_active == True)).select()
         plan_code = h[0].hmoplancode if(len(h) > 0) else "PREMWALKIN"      
 
+        company_id = int(common.getid(patobj["company"])),
+        c = db((db.company.id == company_id) & (db.company.is_active == True)).select(db.company.company)
+        company_code = c[0].company if(len(c)>0) else "WALKIN"
         
         obj={
           "plan":plan_code,
@@ -2023,8 +2026,33 @@ class Patient:
         }  
         
         bnft = mdpbenefits.Benefit(db)
-        bnft.map_member_benefit(obj)        
-    
+        bnft.map_member_benefit(obj)  
+        
+        #if a customer/member is successfully enrolled, then we have to create a wallet and credit it with voucher amount
+        plan_id = int(common.getkeyvalue(jsonresp,"hmoplan","0"))
+
+        member_id = patid
+        plans = db((db.hmoplan.id == plan_id) & (db.hmoplan.is_active == True)).select()
+        
+      
+        avars={}
+        avars["plan_code"] = plan_code
+        avars["company_code"] = company_code                            
+        avars["member_id"] = patid
+        avars["rule_event"] = "enroll_customer"
+        avars["mdp_wallet_usase"] = float(common.getvalue(h[0].walletamount)) if(len(h) > 0) else 0
+        avars["super_wallet_amount"] = float(common.getvalue(h[0].discount_amount)) if(len(h) > 0) else 0
+        avars["mdp_wallet_amount"] = 0
+      
+        logger.loggerpms2.info("NewMemberforDependant - Plan Rule " + json.dumps(avars))
+        rspobj = {}
+        rulesobj = mdprules.Plan_Rules(db)
+        rspobj  = json.loads(rulesobj.Get_Plan_Rules(avars))
+        logger.loggerpms2.info("After Create Wallet in NewMemberforDependant B " + json.dumps(rspobj))         
+        if(rspobj["result"] == "fail"):
+          logger.loggerpms2.info("Error Create Wallet in NewMemberforDependant B " + json.dumps(rspobj))         
+          continue
+
       rspobj = {}
       rspobj["result"] = "success"
       rspobj["error_message"] = ""

@@ -1124,10 +1124,20 @@ class Payment:
             providerinfo = getproviderinformation(db,providerid)
             dttodaydate = common.getISTFormatCurrentLocatDate()        
            
-            jsonConfirmPayment = paymentdata
-            jsonObj = json.loads(paymentdata["addln_detail"])
             
-            logger.loggerpms2.info("Paymentcallback A" + " " + json.dumps(jsonObj))
+            
+            #this is to make paymentdata callback from Razorpay, Cash & Cashless compatible
+            if(common.getkeyvalue(paymentdata,"addln_detail","") == ""):
+                tempObj = {}
+                tempObj["paymentid"] = common.getkeyvalue(paymentdata,"paymentid",0)
+                tempObj["paymentdate"] = common.getkeyvalue(paymentdata,"paymentdate","01/01/1990")
+                tempObj["invoiceamt"] = common.getkeyvalue(paymentdata,"invoiceamt",0)
+                paymentdata["addln_detail"] = json.dumps(tempObj)
+                
+            jsonConfirmPayment = paymentdata
+            #jsonObj = json.loads(paymentdata["addln_detail"])
+            
+            logger.loggerpms2.info("Paymentcallback A" + " " + json.dumps(jsonConfirmPayment))
             
             paymentref = common.getkeyvalue(jsonConfirmPayment,"payment_reference","")
             paymenttype = common.getkeyvalue(jsonConfirmPayment,"payment_type","")
@@ -1143,9 +1153,10 @@ class Payment:
             fee = 0    #if(status != 'S') else (common.getstring(jsonConfirmPayment['fee']) if('fee' in jsonConfirmPayment) else 0)   #no
     
             #jsonObj = json.loads(common.getkeyvalue(jsonConfirmPayment,"addln_detail",{}))
-            logger.loggerpms2.info("Paymentcallback B" + json.dumps(jsonObj))
             
-        
+            
+            jsonObj = json.loads(common.getstring(jsonConfirmPayment['addln_detail']))  #yes
+            logger.loggerpms2.info("Paymentcallback B" + json.dumps(jsonObj))
             paymentid = common.getkeyvalue(jsonObj,"paymentid",0)
             paymentdate = common.getkeyvalue(jsonObj,"paymentdate","01/01/1990")
             invoiceamt = float(common.getvalue(jsonObj['invoiceamt'])) if('invoiceamt' in jsonObj) else 0.00

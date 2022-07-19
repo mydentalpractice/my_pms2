@@ -920,7 +920,7 @@ class Procedure:
         
         mssg = json.dumps(jsonObj) + " " + json.dumps(d)
         logger.loggerpms2.info("Exit Cancel Treatment Procedure API " + mssg)
-        return mssg
+        return json.dumps(jsonObj)
         
     #this method sets status = 'sent for authorization' the procedure for this treatment
     def sentforauthorization(self,treatmentid,treatmentprocid ):

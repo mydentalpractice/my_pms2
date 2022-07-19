@@ -614,7 +614,7 @@ def getproceduregrid(providerid,tplanid,treatmentid,memberid,patientid,authoriza
     if((hmopatientmember == True) | (session.religare == True)):
         fields=(db.vw_treatmentprocedure.procedurecode,db.vw_treatmentprocedure.altshortdescription, db.vw_treatmentprocedure.relgrprocdesc, \
                    db.vw_treatmentprocedure.tooth,db.vw_treatmentprocedure.quadrant,
-                   db.vw_treatmentprocedure.procedurefee,db.vw_treatmentprocedure.copay,db.vw_treatmentprocedure.inspays,db.vw_treatmentprocedure.status,\
+                   db.vw_treatmentprocedure.procedurefee,db.vw_treatmentprocedure.copay,db.vw_treatmentprocedure.inspays,db.vw_treatmentprocedure.netcopay,db.vw_treatmentprocedure.status,\
                    db.vw_treatmentprocedure.treatmentdate, db.vw_treatmentprocedure.relgrproc,db.vw_treatmentprocedure.relgrtransactionid)
         #fields=(db.vw_treatmentprocedure.procedurecode,db.vw_treatmentprocedure.altshortdescription, 
                    #db.vw_treatmentprocedure.tooth,db.vw_treatmentprocedure.quadrant,
@@ -630,6 +630,7 @@ def getproceduregrid(providerid,tplanid,treatmentid,memberid,patientid,authoriza
             'vw_treatmentprocedure.procedurefee':'Procedure Fee',
             'vw_treatmentprocedure.copay':'Copay',
             'vw_treatmentprocedure.inspays':'Insurance Pays',
+            'vw_treatmentprocedure.netcopay':'Net Copay',
             'vw_treatmentprocedure.status':'Status',
             'vw_treatmentprocedure.treatmentdate':'Treatment Date'
         }
@@ -639,7 +640,7 @@ def getproceduregrid(providerid,tplanid,treatmentid,memberid,patientid,authoriza
              
                    db.vw_treatmentprocedure.tooth,db.vw_treatmentprocedure.quadrant,
                    db.vw_treatmentprocedure.procedurefee,
-                   db.vw_treatmentprocedure.copay,db.vw_treatmentprocedure.inspays,db.vw_treatmentprocedure.status,
+                   db.vw_treatmentprocedure.copay,db.vw_treatmentprocedure.inspays,vw_treatmentprocedure.netcopay,db.vw_treatmentprocedure.status,
                    db.vw_treatmentprocedure.treatmentdate)
         
         headers={
@@ -651,6 +652,7 @@ def getproceduregrid(providerid,tplanid,treatmentid,memberid,patientid,authoriza
             'vw_treatmentprocedure.procedurefee':'Procedure Fee',
             'vw_treatmentprocedure.copay':'Copay',
             'vw_treatmentprocedure.inspays':'Insurance Pays',
+            'vw_treatmentprocedure.netcopay':'Net Copay',
             'vw_treatmentprocedure.status':'Status',
             'vw_treatmentprocedure.treatmentdate':'Treatment Date'
         }

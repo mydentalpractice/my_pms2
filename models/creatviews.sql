@@ -9098,7 +9098,7 @@ CREATE TABLE `kytc_track_log` (
 
 12/8/2021
 ==========
-x1. YYYYZZZAdd table 'price_rules'
+x1. XXXYYYYZZZAdd table 'price_rules'  - > rules table
 
 x2. YYYZZZModified procedurepriceplan definition in db.py
 
@@ -9203,7 +9203,7 @@ CHANGE COLUMN `fp_otherinfo` `fp_otherinfo` VARCHAR(255) NULL DEFAULT NULL ;
 06/04/2021
 ===========
 
-1. YYZZModify Prospect, Provider, Clinic tables - added isMDP flag and logo_id, logo_file fields
+1. XXXYYZZModify Prospect, Provider, Clinic tables - added isMDP flag and logo_id, logo_file fields
 ALTER TABLE `mydp_prod`.`prospect` 
 ADD COLUMN `isMDP` CHAR(1) NULL DEFAULT 'T' AFTER `newcity`,
 ADD COLUMN `logo_id` INT(11) NULL COMMENT 'Ref to image id which holds the logo to be displayed' AFTER `isMDP`,
@@ -9220,7 +9220,7 @@ ADD COLUMN `logo_id` INT(11) NULL COMMENT 'ref to logo image' AFTER `isMDP`,
 ADD COLUMN `logo_file` VARCHAR(255) NULL COMMENT 'Logo file name' AFTER `logo_id`;
 
 
-2. Populate Group Region with Network
+2. XXXYYYZZZZPopulate Group Region with Network
 INSERT INTO `mydp_prod`.`groupregion`
 (`groupregion`,`region`,`is_active`,`created_on`,`created_by`,`modified_on`,`modified_by`)
 VALUES ('REG0','Pricing Region 0', 'T','2022-04-12',1,'2022-04-12',1);
@@ -9263,7 +9263,7 @@ VALUES ('REG9','Pricing Region 9', 'T','2022-04-12',1,'2022-04-12',1);
 
 4. Populate Provider logo_id & logo_file to point to correct logo for isMDP = True and isMDP = False
 
-5. YYYZZZModified urlproperties - added mdp_contact_cell and mdp_contact_email
+5. XXXYYYZZZModified urlproperties - added mdp_contact_cell and mdp_contact_email
 ALTER TABLE `mydp_prod`.`urlproperties` 
 ADD COLUMN `mdp_contact_cell` VARCHAR(45) NULL DEFAULT '18001027526' AFTER `vw_prod_url`,
 ADD COLUMN `mdp_contact_email` VARCHAR(45) NULL DEFAULT 'appointments@mydentalplan.in' AFTER `mdp_contact_cell`;
@@ -9283,7 +9283,7 @@ where prospect_ref.ref_code = 'AGN' and clinic_ref.ref_code = 'PST' and agent.is
 order by agent.name
 ;
 
-7. YYYZZZUpdate benefit_master_x_member add col patient_id
+7. XXXYYYZZZUpdate benefit_master_x_member add col patient_id
 ALTER TABLE `mydp_prod`.`benefit_master_x_member` 
 ADD COLUMN `patient_id` INT(11) NULL AFTER `member_id`;
 
@@ -9297,6 +9297,8 @@ ADD COLUMN `mdp_family` CHAR(1) NULL DEFAULT 'F' AFTER `plan_details`;
 9. YYYZZZ vw_memberpatientlist_fast
 Modified 
 
+10. ZZZ vw_treatmentprocedure
+Added netcopay field
 
 
 
