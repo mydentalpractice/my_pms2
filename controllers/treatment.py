@@ -640,7 +640,7 @@ def getproceduregrid(providerid,tplanid,treatmentid,memberid,patientid,authoriza
              
                    db.vw_treatmentprocedure.tooth,db.vw_treatmentprocedure.quadrant,
                    db.vw_treatmentprocedure.procedurefee,
-                   db.vw_treatmentprocedure.copay,db.vw_treatmentprocedure.inspays,vw_treatmentprocedure.netcopay,db.vw_treatmentprocedure.status,
+                   db.vw_treatmentprocedure.copay,db.vw_treatmentprocedure.inspays,db.vw_treatmentprocedure.netcopay,db.vw_treatmentprocedure.status,
                    db.vw_treatmentprocedure.treatmentdate)
         
         headers={
