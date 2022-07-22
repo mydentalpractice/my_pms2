@@ -140,9 +140,9 @@ def saveNewAppt(userid,form2,providerid):
                         )
                                 
                        
-                        
+                        #22/07/22 : As per new appointment confirmation process, the original status is Open instead o Confirmed
                         apptid  = db.t_appointment.insert(f_start_time=apptdt, f_end_time = endapptdt, f_duration= duration, cell = common.getstring(form2.vars.cell),
-                                                        f_title = common.getstring(form2.vars.title),f_status='Confirmed',
+                                                        f_title = common.getstring(form2.vars.title),f_status='Open',
                                                         f_patientname = common.getstring(form2.vars.patientmember),
                                                         f_location = form2.vars.location,
                                                         f_treatmentid = treatmentid,
@@ -160,7 +160,7 @@ def saveNewAppt(userid,form2,providerid):
                 else:
                        
                         apptid  = db.t_appointment.insert(f_start_time=apptdt, f_end_time = endapptdt, f_duration = duration, cell = common.getstring(form2.vars.cell),
-                                                        f_title = common.getstring(form2.vars.title),f_status='Confirmed',
+                                                        f_title = common.getstring(form2.vars.title),f_status='Open',
                                                         f_treatmentid = treatmentid,
                                                         f_patientname = common.getstring(form2.vars.patientmember),
                                                         clinicid = clinicid,

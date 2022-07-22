@@ -15,6 +15,7 @@ from applications.my_pms2.modules import relations
 from applications.my_pms2.modules import mdputils
 from applications.my_pms2.modules import mdpmedia
 from applications.my_pms2.modules import mdpbenefits
+from applications.my_pms2.modules import mdprules
 from applications.my_pms2.modules import logger
 
 class Patient:
@@ -1962,6 +1963,7 @@ class Patient:
       depcount = 0
       for dep in deplist:
 
+        
         #create member dep obj
         #insert into patientmember <primaty patient patientmember>_<primary patient id>_<rel>_<family member order>
         depcount = depcount + 1
@@ -2015,7 +2017,7 @@ class Patient:
         h = db((db.hmoplan.id == planid) & (db.hmoplan.is_active == True)).select()
         plan_code = h[0].hmoplancode if(len(h) > 0) else "PREMWALKIN"      
 
-        company_id = int(common.getid(patobj["company"])),
+        company_id = int(common.getid(patobj["company"]))
         c = db((db.company.id == company_id) & (db.company.is_active == True)).select(db.company.company)
         company_code = c[0].company if(len(c)>0) else "WALKIN"
         
@@ -2029,10 +2031,10 @@ class Patient:
         bnft.map_member_benefit(obj)  
         
         #if a customer/member is successfully enrolled, then we have to create a wallet and credit it with voucher amount
-        plan_id = int(common.getkeyvalue(jsonresp,"hmoplan","0"))
+        
 
         member_id = patid
-        plans = db((db.hmoplan.id == plan_id) & (db.hmoplan.is_active == True)).select()
+        plans = db((db.hmoplan.id == planid) & (db.hmoplan.is_active == True)).select()
         
       
         avars={}
@@ -2053,6 +2055,10 @@ class Patient:
           logger.loggerpms2.info("Error Create Wallet in NewMemberforDependant B " + json.dumps(rspobj))         
           continue
 
+      #now that member objects have been created for each dependant member, then need to make these dependants inactive for Plans which are distinct for each dependant
+      db(db.patientmemberdependants.patientmember == memberid).update(is_active=False,modified_on = common.getISTFormatCurrentLocatTime(),modified_by = 1 )
+      db.commit()
+      
       rspobj = {}
       rspobj["result"] = "success"
       rspobj["error_message"] = ""

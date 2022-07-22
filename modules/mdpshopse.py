@@ -276,6 +276,11 @@ class Shopse:
                 #here need to update treatmentplan tables
                 account._updatetreatmentpayment(db, tplanid, paymentid)
                 db.commit()                
+
+                #20/07/22 : If the payment is success, then set Tplan status, Treatment Status and all the Procedures status to 'Completed'
+                db(db.treatmentplan.id == tplanid).update(status = 'Completed')
+                db(db.treatment.id == treatmentid).update(status = 'Completed')
+                db(db.treatment_procedure.treatmentid == treatmentid).update(status = 'Completed')                
             
                 #Call Voucder success
                 #vcobj = mdpbenefits.Benefit(db)

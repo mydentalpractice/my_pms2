@@ -986,7 +986,7 @@ class Appointment:
                     "notes":common.getstring(appt[0].description),
                     "location":common.getstring(appt[0].f_location),
                     "locationurl":locationurl,
-                    "status":common.getstring(appt[0].f_status) if(common.getstring(appt[0].f_status) != "") else "Confirmed",
+                    "status":common.getstring(appt[0].f_status) if(common.getstring(appt[0].f_status) != "") else "Open",  #22/07/22 changed to Open from COnfirmed
                     "memberid":memberid,
                     "patientid":patientid,
                     "patientmember":patientmember,
@@ -1126,8 +1126,8 @@ class Appointment:
                     
                     #logger.loggerpms2.info("Insert Appointment SQL ",strSQL)
                    
-                    
-                    apptid  = db.t_appointment.insert(f_start_time=startapptdt, f_end_time = endapptdt, f_duration = duration, f_status = "Confirmed", 
+                    #22/07/22 As per new Appointment confirmation process, we are setting the initial status as Open rather than Confirmed
+                    apptid  = db.t_appointment.insert(f_start_time=startapptdt, f_end_time = endapptdt, f_duration = duration, f_status = "Open", 
                                                       cell = cell,f_title = complaint,f_treatmentid = 0,
                                                       f_patientname = common.getstring(pat[0].fullname),
                                                       description = providernotes,f_location = location, sendsms = True, smsaction = 'create',sendrem = True,
@@ -1261,7 +1261,7 @@ class Appointment:
 
         providernotes = common.getkeyvalue(avars,"providernotes","")
         cell = common.getkeyvalue(avars,"cell","")
-        status = common.getkeyvalue(avars,"status","Confirmed")
+        status = common.getkeyvalue(avars,"status","Open")
         
         appPath = common.getkeyvalue(avars,"appPath","")
         
@@ -1751,7 +1751,10 @@ class Appointment:
                             select(db.vw_memberpatientlist.fullname,db.vw_memberpatientlist.dob,db.vw_memberpatientlist.email,db.vw_memberpatientlist.cell)        
             #check for block
             if((self.isBlocked(startapptdt,endapptdt,doctorid,clinicid)==False)):
-                sts = "Blocked" if(blockappt == True) else "Confirmed"
+                
+                #22/07/22 - As per new appointment confirmation process, we are setting initial stattus as Open rather than confirmed
+                #sts = "Blocked" if(blockappt == True) else "Confirmed"
+                sts = "Blocked" if(blockappt == True) else "Open"
                 apptid  = db.t_appointment.insert(f_start_time=startapptdt, f_end_time = endapptdt, f_duration = duration, f_status = sts, \
                                                   cell = cell,f_title = complaint,f_treatmentid = 0,blockappt = blockappt,\
                                                   f_patientname = common.getstring("" if (len(pat) == 0) else pat[0].fullname),
@@ -1962,7 +1965,7 @@ class Appointment:
                 x=common.getstring(appt[0].description)
                 x=common.getstring(appt[0].f_location)
                 x=locationurl
-                x=common.getstring(appt[0].f_status) if(common.getstring(appt[0].f_status) != "") else "Confirmed"
+                x=common.getstring(appt[0].f_status) if(common.getstring(appt[0].f_status) != "") else "Open"  #22/07/22 changed to Open from COnfirmed
                 x=common.getid(appt[0].patientmember)
                 x=common.getid(appt[0].patient)
                 x=common.getstring(appt[0].f_patientname)
@@ -1988,7 +1991,7 @@ class Appointment:
                     "notes":common.getstring(appt[0].description),
                     "location":common.getstring(appt[0].f_location),
                     "locationurl":locationurl,
-                    "status":common.getstring(appt[0].f_status) if(common.getstring(appt[0].f_status) != "") else "Confirmed",
+                    "status":common.getstring(appt[0].f_status) if(common.getstring(appt[0].f_status) != "") else "Open", #22/07/22 changed to Open from COnfirmed
                     "memberid":common.getid(appt[0].patientmember),
                     "patientid":common.getid(appt[0].patient),
                     "patientname" : common.getstring(appt[0].f_patientname),
@@ -2090,7 +2093,7 @@ class Appointment:
                         #"notes":common.getstring(appt[0].description),
                         #"location":common.getstring(appt[0].f_location),
                         #"locationurl":locationurl,
-                        "status":common.getstring(appt[0].f_status) if(common.getstring(appt[0].f_status) != "") else "Confirmed",
+                        "status":common.getstring(appt[0].f_status) if(common.getstring(appt[0].f_status) != "") else "Open", #22/07/22 changed to Open from COnfirmed
                         #"memberid":common.getid(appt[0].patientmember),
                         #"patientid":common.getid(appt[0].patient),
                         "patientname" : common.getstring(appt[0].f_patientname),

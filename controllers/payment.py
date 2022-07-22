@@ -830,6 +830,13 @@ def payment_success():
         #here need to update treatmentplan tables
         account._updatetreatmentpayment(db, tplanid, paymentid)
         db.commit()                
+
+        #20/07/22 : If the payment is success, then set Tplan status, Treatment Status and all the Procedures status to 'Completed'
+        tr = db((db.treatment.treatmentplan == tplanid) & (db.treatment.is_active == True)).select()
+        treatmentid = int(tr[0].id) if(len(tr) > 0) else 0                    
+        db(db.treatmentplan.id == tplanid).update(status = 'Completed')
+        db(db.treatment.id == treatmentid).update(status = 'Completed')
+        db(db.treatment_procedure.treatmentid == treatmentid).update(status = 'Completed')        
     
         #Call Voucder success
         vcobj = mdpbenefits.Benefit(db)
@@ -1146,6 +1153,13 @@ def payment_success_hdfc():
         #here need to update treatmentplan tables
         account._updatetreatmentpayment(db, tplanid, paymentid)
         db.commit()                
+
+        #20/07/22 : If the payment is success, then set Tplan status, Treatment Status and all the Procedures status to 'Completed'
+        tr = db((db.treatment.treatmentplan == tplanid) & (db.treatment.is_active == True)).select()
+        treatmentid = int(tr[0].id) if(len(tr) > 0) else 0                    
+        db(db.treatmentplan.id == tplanid).update(status = 'Completed')
+        db(db.treatment.id == treatmentid).update(status = 'Completed')
+        db(db.treatment_procedure.treatmentid == treatmentid).update(status = 'Completed')        
     
         #Call Voucder success
         vcobj = mdpbenefits.Benefit(db)
@@ -1803,6 +1817,13 @@ def pinelabs_payment_callback():
         
         otherinfo  = otherinfo + " Total Cost " + str(paytm["totalcopay"]) + " Plan Benefits = " + str(paytm["totalcompanypays"]) + " Super Wallet = " + str(paytm["totalwalletamount"]) + " Discount = " + str(paytm["discount_amount"])
 
+        #20/07/22 : If the payment is success, then set Tplan status, Treatment Status and all the Procedures status to 'Completed'
+        tr = db((db.treatment.treatmentplan == tplanid) & (db.treatment.is_active == True)).select()
+        treatmentid = int(tr[0].id) if(len(tr) > 0) else 0                    
+        db(db.treatmentplan.id == tplanid).update(status = 'Completed')
+        db(db.treatment.id == treatmentid).update(status = 'Completed')
+        db(db.treatment_procedure.treatmentid == treatmentid).update(status = 'Completed')    
+
     return dict(formProcedure=formProcedure,\
                 todaydate = todaydate,\
                 providerid = providerid,
@@ -2052,6 +2073,14 @@ def shopse_payment_callback():
             totinspays= paytm["totalinspays"]
             totpaid=paytm["totalpaid"] 
             totaldue = paytm["totaldue"]
+            
+            #20/07/22 : If the payment is success, then set Tplan status, Treatment Status and all the Procedures status to 'Completed'
+            tr = db((db.treatment.treatmentplan == tplanid) & (db.treatment.is_active == True)).select()
+            treatmentid = int(tr[0].id) if(len(tr) > 0) else 0                    
+            db(db.treatmentplan.id == tplanid).update(status = 'Completed')
+            db(db.treatment.id == treatmentid).update(status = 'Completed')
+            db(db.treatment_procedure.treatmentid == treatmentid).update(status = 'Completed')                
+            
     else:
         dttodaydate = common.getISTFormatCurrentLocatTime()
         todaydate = dttodaydate.strftime("%d/%m/%Y")        

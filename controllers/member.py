@@ -1561,7 +1561,8 @@ def new_nonmember():
     if(len(r) > 0):
         companyid = common.getid(r[0].id)
     
-
+    def_prem_start = request.now
+    def_prem_end = common.addyears(def_prem_start, 1)
     
     formA = SQLFORM.factory(
                     Field('patientmember','string',widget = lambda field, value:SQLFORM.widgets.string.widget(field, value,_class='form-control'), default=patientmember,requires=IS_NOT_EMPTY(), label="Member/Patient ID"),

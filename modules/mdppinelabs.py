@@ -423,6 +423,14 @@ class PineLabs:
                 #here need to update treatmentplan tables
                 account._updatetreatmentpayment(db, tplanid, paymentid)
                 db.commit()                
+                
+                #20/07/22 : If the payment is success, then set Tplan status, Treatment Status and all the Procedures status to 'Completed'
+                db(db.treatmentplan.id == tplanid).update(status = 'Completed')
+                db(db.treatment.id == treatmentid).update(status = 'Completed')
+                db(db.treatment_procedure.treatmentid == treatmentid).update(status = 'Completed')
+
+                
+                
             
                 #Call Voucder success
                 #vcobj = mdpbenefits.Benefit(db)
@@ -607,7 +615,14 @@ class PineLabs:
                    
                     
                     
-                    
+                    #20/07/22 : If the payment is success, then set Tplan status, Treatment Status and all the Procedures status to 'Completed'
+                    p = db((db.payment.id == paymentid)).select() 
+                    tplanid = int(common.getid(p[0].treatmentplan)) if(len(p) != 0) else 0                    
+                    tr = db((db.treatment.treatmentplan == tplanid) & (db.treatment.is_active == True)).select()
+                    treatmentid = int(tr[0].id) if(len(tr) > 0) else 0                    
+                    db(db.treatmentplan.id == tplanid).update(status = 'Completed')
+                    db(db.treatment.id == treatmentid).update(status = 'Completed')
+                    db(db.treatment_procedure.treatmentid == treatmentid).update(status = 'Completed')                    
        
                     jsonresp = {}
                     jsonresp["result"] = "success"

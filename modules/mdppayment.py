@@ -1280,7 +1280,11 @@ class Payment:
                     #account._updatetreatmentpayment(db, tplanid, paymentid)
                     #db.commit()                
 
-
+                    #20/07/22 : If the payment is success, then set Tplan status, Treatment Status and all the Procedures status to 'Completed'
+                    db(db.treatmentplan.id == tplanid).update(status = 'Completed')
+                    db(db.treatment.id == treatmentid).update(status = 'Completed')
+                    db(db.treatment_procedure.treatmentid == treatmentid).update(status = 'Completed')
+                    
 
 
                     #Call Benefit Success
@@ -1329,7 +1333,7 @@ class Payment:
                     db.commit()   
                     logger.loggerpms2.info("Paymentcallback G")
                    
-                 
+                    
                    
                     
             else:    
@@ -1500,6 +1504,11 @@ class Payment:
                 #here need to update treatmentplan tables
                 account._updatetreatmentpayment(db, tplanid, paymentid)
                 db.commit()                
+
+                #20/07/22 : If the payment is success, then set Tplan status, Treatment Status and all the Procedures status to 'Completed'
+                db(db.treatmentplan.id == tplanid).update(status = 'Completed')
+                db(db.treatment.id == treatmentid).update(status = 'Completed')
+                db(db.treatment_procedure.treatmentid == treatmentid).update(status = 'Completed')
 
                 #Call Voucder success
                 vcobj = mdpbenefits.Benefit(db)
@@ -2024,6 +2033,11 @@ class Payment:
             ##here need to update treatmentplan tables
             #account._updatetreatmentpayment(db, tplanid, paymentid)
             #db.commit()                
+
+            #20/07/22 : If the payment is success, then set Tplan status, Treatment Status and all the Procedures status to 'Completed'
+            db(db.treatmentplan.id == tplanid).update(status = 'Completed')
+            db(db.treatment.id == treatmentid).update(status = 'Completed')
+            db(db.treatment_procedure.treatmentid == treatmentid).update(status = 'Completed')
 
             trtmnt = db((db.treatment.id == treatmentid) & (db.treatment.is_active == True)).select()
             discount_amount = trtmnt[0].companypay if(len(trtmnt) > 0) else 0
