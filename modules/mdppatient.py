@@ -2041,6 +2041,7 @@ class Patient:
         avars["plan_code"] = plan_code
         avars["company_code"] = company_code                            
         avars["member_id"] = patid
+        avars["patient_id"] = patid
         avars["rule_event"] = "enroll_customer"
         avars["mdp_wallet_usase"] = float(common.getvalue(h[0].walletamount)) if(len(h) > 0) else 0
         avars["super_wallet_amount"] = float(common.getvalue(h[0].discount_amount)) if(len(h) > 0) else 0

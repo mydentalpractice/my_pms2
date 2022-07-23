@@ -455,6 +455,7 @@ class PineLabs:
                     "walletamount":str(walletamount),
                     "companypay":str(companypay),
                     "member_id":str(memberid),
+                    "patient_id":str(patientid),
                     "treatmentid":str(treatmentid),
                     "rule_event":"benefit_success"
                 }
@@ -475,6 +476,7 @@ class PineLabs:
                         "company_code":company_code,
                         "discount_amount":str(discount_amount),
                         "member_id":str(memberid),
+                        "patient_id":str(patientid),
                         "treatmentid":str(treatmentid),
                         "rule_event":"benefit_failure"
                     }
@@ -527,6 +529,7 @@ class PineLabs:
                     "company_code":company_code,
                     "discount_amount":str(discount_amount),
                     "member_id":str(memberid),
+                    "patient_id":str(patientid),
                     "treatmentid":str(treatmentid),
                     "rule_event":"benefit_failure"
                 }

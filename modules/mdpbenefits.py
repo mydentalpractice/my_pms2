@@ -1532,8 +1532,8 @@ class Benefit:
         pats = db((db.vw_memberpatientlist.primarypatientid == member_id) & (db.vw_memberpatientlist.patientid == member_id)).select()
       
         #benefit start date & benefit end date
-        benefit_start_date = pats[0].premstartdt if(len(pats)==1) else common.getISTCurrentLocatTime()
-        benefit_end_date = pats[0].premenddt if(len(pats)==1) else common.getISTCurrentLocatTime()                
+        benefit_start_date = pats[0].premstartdt if(len(pats)>0) else common.getISTCurrentLocatTime()
+        benefit_end_date = pats[0].premenddt if(len(pats)>0) else common.getISTCurrentLocatTime()                
         
         #determine if plan benefits has already been applied for this treatment, then skip
         tr = db((db.treatment.id == treatmentid) & (db.treatment.is_active == True)).select(db.treatment.WPBA_response,db.treatment.benefit_applied)
@@ -1547,7 +1547,7 @@ class Benefit:
           planobj = wpba_response["planBenefits"]
           wallets = wpba_response["wallet"]          
 
-          logger.loggerpms2.info("No Benefits - get_benefits_1" + json.dumps(wpba_response))
+          logger.loggerpms2.info("No Benefits - get_benefits_1" + json.dumps(wpba_response) + " " + json.dumps(planobj) + " " + json.dumps(wallets))
           
          
           
@@ -1602,7 +1602,7 @@ class Benefit:
           totalcopay = totalcopay + float(common.getvalue(r.copay))
           totalinspays = totalinspays + float(common.getvalue(r.inspays)) 
           totalcompanypays = totalcompanypays + float(common.getvalue(r.companypays))         
-        
+          logger.loggerpms2.info("get_benefits_1 loop " + str(len(rows)) + " " + str(totalcopay) + " " + str(totalinspays) + " " + str(r.copay) + " " + str(r.inspays) )
         
         
         #determine the cost of the current treatment only
@@ -1610,6 +1610,8 @@ class Benefit:
         treatmentcost = float(common.getvalue(tr[0].treatmentcost)) if (len(tr) > 0) else 0
         copay = float(common.getvalue(tr[0].copay)) if (len(tr) > 0) else 0
         inspays = float(common.getvalue(tr[0].inspay)) if (len(tr) > 0) else 0
+        
+        logger.loggerpms2.info("get_benefits_1 " + str(len(rows)) + " " + str(totalcopay) + " " + str(totalinspays) + " " + str(copay) + " " + str(inspays) )
                                                                           
         rspobj = {}
         avars["amount"] = totalcopay - totalinspays
@@ -1747,12 +1749,18 @@ class Benefit:
       wpba_response = json.loads(r[0].WPBA_response if(len(r) > 0) else "")
       benefit_applied = bool(common.getboolean(r[0].benefit_applied)) if(len(r) > 0) else False
       
+      logger.loggerpms2.info("Benefit Success_1 wpba_response " + json.dumps(wpba_response) + "Benefits applied " + str(benefit_applied))
+      
       discount_amount = float(common.getkeyvalue(avars,"discount_amount","0"))    #mdp wallet amount   
       walletamount = float(common.getkeyvalue(avars,"walletamount","0"))          #super wallet amount
       companypay = float(common.getkeyvalue(avars,"companypay","0"))              #graded plan discount 
 
-      planbenefits = wpba_response["planBenefits"][0]
-      wallets = wpba_response["wallet"]
+      planbenefits = wpba_response["planBenefits"] 
+      planbenefits = planbenefits[0] if(len(planbenefits) > 0) else []
+      
+      wallets = common.getkeyvalue(wpba_response,"wallet",[])
+      
+      logger.loggerpms2.info("Benefit Success_1 A " + json.dumps(planbenefits) + "wallets " + json.dumps(wallets))
       
       if(benefit_applied):
         logger.loggerpms2.info("Enter Benefit_success_1 : benefit_applied ")

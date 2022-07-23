@@ -536,6 +536,7 @@ class Payment:
             avars = {
                 "action": "get_benefit",
                 "member_id":str(memberid),
+                "patient_id":str(patientid),
                 "provider_id":str(providerid),
                 "plan_code":policy,
                 "rule_event":"rules_payment"
@@ -796,6 +797,7 @@ class Payment:
             avars = {
               
                 "member_id":str(memberid),
+                "patient_id":str(patientid),
                 "plan_code":policy,
                 "company_code":companycode,
                 "treatmentid":treatmentid,
@@ -1258,6 +1260,7 @@ class Payment:
             
             tp = db(db.treatmentplan.id == tplanid).select()
             memberid = int(common.getid(tp[0].primarypatient)) if(len(tp) >= 1) else 0
+            patientid = int(common.getid(tp[0].patient)) if(len(tp) >= 1) else 0
             if((status.lower() == "success")|(status.lower() == "s")):
                     #here need to update treatmentplan tables
                     account._updatetreatmentpayment(db, tplanid, paymentid)
@@ -1301,6 +1304,7 @@ class Payment:
                         "company_code":company_code,
                         "discount_amount":str(discount_amount),
                         "member_id":str(memberid),
+                        "patient_id":str(patientid),
                         "treatmentid":str(treatmentid),
                         "rule_event":"benefit_success"
                     }
@@ -1321,6 +1325,7 @@ class Payment:
                             "company_code":company_code,
                             "discount_amount":str(discount_amount),
                             "member_id":str(memberid),
+                            "patient_id":str(patientid),
                             "treatmentid":str(treatmentid),
                             "rule_event":"benefit_failure"
                         }
@@ -1552,6 +1557,7 @@ class Payment:
                     "company_code":company_code,
                     "discount_amount":str(discount_amount),
                     "member_id":str(memberid),
+                    "patient_id":str(patientid),
                     "treatmentid":str(treatmentid),
                     "rule_event":"benefit_success"
                 }
@@ -1904,6 +1910,7 @@ class Payment:
             avars["region_code"] =regioncode
             avars["treatment_id"] =treatmentid
             avars["member_id"] =memberid
+            avars["patient_id"]=patientid
             
             
             ruleObj = mdprules.Plan_Rules(db)
@@ -2052,6 +2059,7 @@ class Payment:
                 "company_code":company_code,
                 "discount_amount":str(discount_amount),
                 "member_id":str(memberid),
+                "patient_id":str(patientid),
                 "treatmentid":str(treatmentid),
                 "rule_event":"benefit_success"
             }

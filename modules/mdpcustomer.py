@@ -1530,6 +1530,7 @@ class Customer:
                 avars["plan_code"] = plans[0].hmoplancode if(len(plans) == 1) else "PREMWALKIN"
                 avars["company_code"] = cos[0].company if(len(plans) == 1) else "MDP"                            
                 avars["member_id"] = member_id
+                avars["patient_id"] = member_id
                 avars["rule_event"] = "enroll_customer"
                 avars["mdp_wallet_usase"] = float(common.getvalue(plans[0].walletamount)) if(len(plans) == 1) else 0
                 avars["super_wallet_amount"] = float(common.getvalue(plans[0].discount_amount)) if(len(plans) == 1) else 0

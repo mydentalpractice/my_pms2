@@ -1200,6 +1200,8 @@ def payment_success_hdfc():
             "walletamount":str(walletamount),
             "companypay":str(companypay),
             "member_id":str(memberid),
+            "patient_id":str(patientid),
+            
             "treatmentid":str(treatmentid),
             "rule_event":"benefit_success"
         }
@@ -1221,6 +1223,8 @@ def payment_success_hdfc():
                 "company_code":company_code,
                 "discount_amount":str(discount_amount),
                 "member_id":str(memberid),
+                "patient_id":str(patientid),
+                
                 "treatmentid":str(treatmentid),
                 "rule_event":"benefit_failure"
             }
@@ -3056,6 +3060,7 @@ def apply_wallet():
     avars["region_code"] =regioncode
     avars["treatment_id"] =treatmentid
     avars["member_id"] =memberid
+    avars["patient_id"] = memberid
     
     ruleObj = mdprules.Plan_Rules(db)
     rspobj = json.loads(ruleObj.Get_Plan_Rules(avars))
@@ -3220,10 +3225,13 @@ def create_payment():
     avars = {
         "action": "get_benefit",
         "member_id":str(memberid),
+        "patient_id":str(patientid),
+        
         "provider_id":str(providerid),
         "plan_code":plancode,
         "company_code":companycode,
         "treatmentid" : str(treatmentid),
+        
         "tplanid" : str(tplanid),
         "rule_event":"get_plan_benefits"
     }
@@ -3429,7 +3437,7 @@ def update_payment():
     providername = common.getstring(provdict["providername"])
 
     paytm = json.loads(account._calculatepayments(db, tplanid))
-    if((paytm["totaldue"] == 0) & (paytm["totalwalletamount"] > 0)):
+    if((paytm["copay"] == 0) &  (paytm["walletamount"] > 0)):
         logger.loggerpms2.info("Call PaymentCallback_0")
         avars = {}
         avars["paymentid"] = paymentid
@@ -3440,10 +3448,10 @@ def update_payment():
         paymentobj = mdppayment.Payment(db, providerid)
         receiptobj = json.loads(paymentobj.paymentreceipt(paymentid))
         logger.loggerpms2.info("Pine  - Exit Payment Receipt " + json.dumps(receiptobj))
+        
         returnurl = URL("admin","logout") 
-    
-             
         redirect(returnurl)
+        
         return json.dumps(rspobj)
         
     

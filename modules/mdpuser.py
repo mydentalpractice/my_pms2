@@ -846,7 +846,7 @@ class User:
         "patientid":int(common.getid(pat.patientid)),
         "primary":True if(pat.patienttype == "P") else False,   #True if "P" False if "D"
         "relation":pat.relation,
-        "memberorder":pat.order,
+        "memberorder":pat.memberorder,
         "cell":pat.cell,
         "email":pat.email,
         "providerid":pat.providerid,

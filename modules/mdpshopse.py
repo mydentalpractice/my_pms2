@@ -313,6 +313,8 @@ class Shopse:
                     "walletamount":str(walletamount),
                     "companypay":str(companypay),
                     "member_id":str(memberid),
+                    "patient_id":str(patientid),
+                    
                     "treatmentid":str(treatmentid),
                     "rule_event":"benefit_success"
                 }                
@@ -334,6 +336,7 @@ class Shopse:
                         "company_code":company_code,
                         "discount_amount":str(discount_amount),
                         "member_id":str(memberid),
+                        "patient_id":str(patientid),
                         "treatmentid":str(treatmentid),
                         "rule_event":"benefit_failure"
                     }
@@ -385,6 +388,8 @@ class Shopse:
                     "company_code":company_code,
                     "discount_amount":str(discount_amount),
                     "member_id":str(memberid),
+                    "patient_id":str(patientid),
+                    
                     "treatmentid":str(treatmentid),
                     "rule_event":"benefit_failure"
                 }

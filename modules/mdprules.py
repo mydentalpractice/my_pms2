@@ -53,6 +53,7 @@ class Plan_Rules:
             plan_code = common.getkeyvalue(avars,"plan_code","")
             company_code = common.getkeyvalue(avars,"company_code","")
             member_id = int(common.getkeyvalue(avars,"member_id","0"))
+            patient_id = int(common.getkeyvalue(avars,"patient_id",member_id))
             event = common.getkeyvalue(avars,"rule_event","")
             mdp_wallet_usase = float(common.getkeyvalue(avars,"mdp_wallet_usase",0))
 
