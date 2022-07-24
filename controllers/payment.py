@@ -644,7 +644,7 @@ def payment_success():
     
     dttodaydate = common.getISTFormatCurrentLocatTime()
     todaydate = dttodaydate.strftime("%d/%m/%Y")
-    
+
     
     jsonData = json.dumps(request.post_vars)
     jsonConfirmPayment = json.loads(jsonData)
@@ -674,9 +674,10 @@ def payment_success():
     
     
     returnurl = common.getstring(jsonObj["returnurl"])
+    
     if((returnurl == None) |(returnurl == "")):
         returnurl = URL("admin","logout")    
-    
+
     if(status == 'S'):
         error = ""
         errormsg = ""
@@ -1679,6 +1680,7 @@ def pinelabs_payment_callback():
     paymentobj = mdppayment.Payment(db, providerid)
     receiptobj = json.loads(paymentobj.paymentreceipt(paymentid))
     logger.loggerpms2.info("Pine Labs - Exit Payment Receipt " + json.dumps(receiptobj))
+   
     returnurl = URL("admin","logout") 
     
     

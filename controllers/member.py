@@ -1562,7 +1562,7 @@ def new_nonmember():
         companyid = common.getid(r[0].id)
     
     def_prem_start = request.now
-    def_prem_end = common.addyears(def_prem_start, 1)
+    def_prem_end = common.addyears(def_prem_start, 100)
     
     formA = SQLFORM.factory(
                     Field('patientmember','string',widget = lambda field, value:SQLFORM.widgets.string.widget(field, value,_class='form-control'), default=patientmember,requires=IS_NOT_EMPTY(), label="Member/Patient ID"),
@@ -1582,12 +1582,12 @@ def new_nonmember():
                     Field('telephone', 'string', widget = lambda field, value:SQLFORM.widgets.string.widget(field, value,_class='form-control '), default="",label='Telephone'),
                     Field('cell', 'string', widget = lambda field, value:SQLFORM.widgets.string.widget(field, value,_class='form-control '), default="",label='Cell',requires=IS_NOT_EMPTY()),
                     Field('email', 'string', widget = lambda field, value:SQLFORM.widgets.string.widget(field, value,_class='form-control '), default="",label='Email',requires=IS_EMPTY_OR(IS_EMAIL())), 
-                    Field('enrollmentdate','date',widget = lambda field, value:SQLFORM.widgets.string.widget(field, value,_class='form-control  date'), default=request.now, label='Enrollment Date'),
-                    Field('terminationdate','date', widget = lambda field, value:SQLFORM.widgets.string.widget(field, value,_class='form-control  date'),label='Termination Date',default=request.now),
-                    Field('duedate','date', widget = lambda field, value:SQLFORM.widgets.string.widget(field, value,_class='form-control  date'), label='Due Date',default=request.now ),
-                    Field('premstartdt','date', widget = lambda field, value:SQLFORM.widgets.string.widget(field, value,_class='form-control  date'),label='Prem. Start Date',default=request.now ),
-                    Field('premenddt','date', widget = lambda field, value:SQLFORM.widgets.string.widget(field, value,_class='form-control  date'), label='Prem. End Date',default=request.now),
-                    Field('startdate','date',widget = lambda field, value:SQLFORM.widgets.date.widget(field, value, _class='form-control  date'), label='Start Date',default=request.now,  \
+                    Field('enrollmentdate','date',widget = lambda field, value:SQLFORM.widgets.string.widget(field, value,_class='form-control  date'), default=def_prem_start, label='Enrollment Date'),
+                    Field('terminationdate','date', widget = lambda field, value:SQLFORM.widgets.string.widget(field, value,_class='form-control  date'),label='Termination Date',default=def_prem_end),
+                    Field('duedate','date', widget = lambda field, value:SQLFORM.widgets.string.widget(field, value,_class='form-control  date'), label='Due Date',default=def_prem_end ),
+                    Field('premstartdt','date', widget = lambda field, value:SQLFORM.widgets.string.widget(field, value,_class='form-control  date'),label='Prem. Start Date',default=def_prem_start ),
+                    Field('premenddt','date', widget = lambda field, value:SQLFORM.widgets.string.widget(field, value,_class='form-control  date'), label='Prem. End Date',default=def_prem_end),
+                    Field('startdate','date',widget = lambda field, value:SQLFORM.widgets.date.widget(field, value, _class='form-control  date'), label='Start Date',default=def_prem_start,  \
                                           requires=IS_EMPTY_OR(IS_DATE(format=('%d/%m/%Y'))),length=20),
                     Field('status', 'string',widget = lambda field, value:SQLFORM.widgets.options.widget(field, value,_class='form-control '),  label='Status',default="Enrolled",requires = IS_EMPTY_OR(IS_IN_SET(status.STATUS))),
                     Field('provider','integer', default=providerid),
