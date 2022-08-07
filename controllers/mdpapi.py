@@ -1242,8 +1242,11 @@ def confirm(avars):
     return rsp
 
 def reSchedule(avars):
+    
     oappts = mdpappointment.Appointment(current.globalenv['db'],common.getkeyvalue(avars,"poviderid",0))
+
     rsp = oappts.reSchedule(avars)
+    
     # Send Confirmation SMS
     obj = json.loads(rsp)
     apptPath = current.globalenv["request"].folder
@@ -1256,6 +1259,7 @@ def reSchedule(avars):
 def sendAllAppointmentsSMSEmail(avars):
     appPath = current.globalenv["request"].folder
     avars["appPath"] =appPath
+    avars["weburl"] = URL("admin","login",scheme=True,host=True)
     oappts = mdpappointment.Appointment(current.globalenv['db'],common.getkeyvalue(avars,"poviderid",0))
     rsp = oappts.sendAllAppointmentsSMSEmail(avars)
     return rsp
@@ -3735,18 +3739,18 @@ def mdpapi():
 	    rspobj = json.loads(dsobj.authenticate_api(avars))
 	    if(rspobj["result"] == "fail"):
 		mssg = rspobj["error_message"]
-		logger.loggerpms2.info(">>MDP API A ==>>" + mssg)
+		#logger.loggerpms2.info(">>MDP API A ==>>" + mssg)
 		raise Exception(mssg)
 		
 
 	    if(encryption):
-		logger.loggerpms2.info(">>MDP API with Encryption")
+		#logger.loggerpms2.info(">>MDP API with Encryption")
 		encrypt_req = vars["req_data"]
 		vars = json.loads(dsobj.decrypts(encrypt_req))		
 
 	    #decrypted request date
 	    action = common.getkeyvalue(vars,"action","") #str(vars["action"])
-	    logger.loggerpms2.info(">>MEDIA API ACTION==>>" + action)
+	    #logger.loggerpms2.info(">>MEDIA API ACTION==>>" + action)
        
 	    #return json.dumps({"action":action})
             rsp = mdpapi_switcher.get(action,unknown)(vars)
@@ -4256,18 +4260,18 @@ def userAPI():
 		raise Exception(mssg)
 	    
 	    if(encryption):
-		logger.loggerpms2.info(">>User with Encryption")
+		#logger.loggerpms2.info(">>User with Encryption")
 		encrypt_req = vars["req_data"]
 		vars = json.loads(dsobj.decrypts(encrypt_req))
-		logger.loggerpms2.info("UserAPI-Derypted data -==>" + json.dumps(vars))
+		#logger.loggerpms2.info("UserAPI-Derypted data -==>" + json.dumps(vars))
 		
 	    #decrypted request date
 	    action = common.getkeyvalue(vars,"action","") #str(vars["action"])
-	    logger.loggerpms2.info(">>User ACTION==>>" + action)
+	    #logger.loggerpms2.info(">>User ACTION==>>" + action)
 	    
 	    #return json.dumps({"action":action})
 	    rsp = userAPI_switcher.get(action,unknown)(vars)
-	    logger.loggerpms2.info("UserAPI =>Decrypted Response " + json.dumps(rsp))
+	    #logger.loggerpms2.info("UserAPI =>Decrypted Response " + json.dumps(rsp))
 	    common.setcookies(response)
 	    if(encryption):
 		return json.dumps({"resp_data":dsobj.encrypts(rsp)})

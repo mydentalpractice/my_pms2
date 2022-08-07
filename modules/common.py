@@ -34,6 +34,7 @@ fmt = "%Y-%m-%d %H:%M:%S"
 
 
 
+
 def getregioncodefromcity(db,city):
         rgn = db((db.groupregion.region == city) & (db.groupregion.is_active == True)).select()
         return rgn[0].groupregion if(len(rgn) != 0) else "JAI"
@@ -274,8 +275,9 @@ def getLoggedProvider(db,auth):
     return providerid
 
 def showerror(header,mssg,returnurl):
-    redirect(URL('default','showerror',args=[header,mssg,returnurl]))
-    return
+    x = URL('admin','login')
+    #redirect(URL('default','showerror',args=[header,mssg,returnurl]))
+    return x
 
 def getrenewals(db,fromrp,torp):
     

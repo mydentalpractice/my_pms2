@@ -1,3 +1,9 @@
+from gluon import current
+db = current.globalenv['db']
+
+from gluon.tools import Crud
+crud = Crud(db)
+
 
 from gluon import current
 from gluon.tools import Mail
@@ -64,7 +70,7 @@ class Appointment:
             
             db = self.db
             
-           
+            clinicid = self.clinicid if clinicid == 0 else clinicid
                 
             retval = False
             str1 = datetime.datetime.strftime(startdt, "%Y-%m-%d %H:%M:%S")
@@ -92,6 +98,7 @@ class Appointment:
     def isBlocked(self, startdt, enddt,doctorid,clinicid=0):
         
         db = self.db
+        clinicid = self.clinicid if clinicid == 0 else clinicid
        
         
         retval = False
@@ -283,7 +290,7 @@ class Appointment:
             to_appt_dt = common.getdatefromstring(appt_dt_str, "%Y-%m-%d %H:%M:%S")
             
             providerid = int(common.getid(common.getkeyvalue(avars,"providerid","0")))
-            clinicid = int(common.getid(common.getkeyvalue(avars,"clinicid","0")))
+            clinicid = int(common.getid(common.getkeyvalue(avars,"clinicid",str(self.clinicid))))
             doctorid = int(common.getid(common.getkeyvalue(avars,"doctorid","0")))
             
                
@@ -448,7 +455,7 @@ class Appointment:
             to_appt_dt = common.getdatefromstring(appt_dt_str, "%Y-%m-%d %H:%M:%S")
             
             providerid = int(common.getid(common.getkeyvalue(avars,"providerid","0")))
-            clinicid = int(common.getid(common.getkeyvalue(avars,"clinicid","0")))
+            clinicid = int(common.getid(common.getkeyvalue(avars,"clinicid",str(self.clinicid))))
             doctorid = int(common.getid(common.getkeyvalue(avars,"doctorid","0")))
             
                
@@ -605,7 +612,7 @@ class Appointment:
         
         db = self.db
         providerid = self.providerid
-        clinicid = self.clinicid
+        clinicid = self.clinicid if clinicid == 0 else clinicid
         
         start = str(year) + "-" + str(month).zfill(2) + "-01 00:00:00"
         end   = str(year) + "-" + str(month).zfill(2) + "-31 23:59:00"  #no need to take 30 or 31 days - just default to 31 days
@@ -646,7 +653,7 @@ class Appointment:
         
         db = self.db
         providerid = self.providerid
-             
+        clinicid = self.clinicid if clinicid == 0 else clinicid     
         
         start = str(year) + "-" + str(month).zfill(2) + "-01 00:00:00"
         end   = str(year) + "-" + str(month).zfill(2) + "-31 23:59:00"  #no need to take 30 or 31 days - just default to 31 days
@@ -694,7 +701,7 @@ class Appointment:
     
         db = self.db
         providerid = self.providerid
-        #clinicid = self.clinicid
+        clinicid = self.clinicid if clinicid == 0 else clinicid
         
         start = str(year) + "-" + str(month).zfill(2) + "-01 00:00:00"
         end   = str(year) + "-" + str(month).zfill(2) + "-31 23:59:00"  #no need to take 30 or 31 days - just default to 31 days
@@ -742,7 +749,7 @@ class Appointment:
     
         db = self.db
         providerid = self.providerid
-        
+        clinicid = self.clinicid if clinicid == 0 else clinicid
         start = str(year) + "-" + str(month).zfill(2) + "-" + str(day).zfill(2) + " 00:00:00"
         end   = str(year) + "-" + str(month).zfill(2) + "-" + str(day).zfill(2) + " 23:59:59"
         
@@ -789,7 +796,7 @@ class Appointment:
     
         db = self.db
         providerid = self.providerid
-        
+        clinicid  = self.clinicid
         start = str(year) + "-" + str(month).zfill(2) + "-" + str(day).zfill(2) + " 00:00:00"
         end   = str(year) + "-" + str(month).zfill(2) + "-" + str(day).zfill(2) + " 23:59:59"
         
@@ -824,11 +831,11 @@ class Appointment:
 
     #this method returns number of appointments/day for all the days in a month
     def getappointmentcountbymonth(self,month,year,clinicid = 0):
-
+        
         logger.loggerpms2.info("Enter API getappointmentcountbymonth "+  str(month) + " " + str(year)  + " " +str(clinicid) )
         db = self.db
         providerid = self.providerid
-        #clinicid = self.clinicid
+        clinicid = self.clinicid if clinicid == 0 else clinicid
         
         start = str(year) + "-" + str(month).zfill(2) + "-01 00:00:00"
         end   = str(year) + "-" + str(month).zfill(2) + "-31 23:59:00"  #no need to take 30 or 31 days - just default to 31 days
@@ -913,7 +920,7 @@ class Appointment:
         logger.loggerpms2.info("Enter API getdocappointmentcountbymonth " + str(month) + " " + str(year) + " " + str(clinicid))   
         db = self.db
         providerid = self.providerid
-        #clinicid = self.clinicid
+        clinicid = self.clinicid if clinicid == 0 else clinicid
         
         start = str(year) + "-" + str(month).zfill(2) + "-01 00:00:00"
         end   = str(year) + "-" + str(month).zfill(2) + "-31 23:59:00"  #no need to take 30 or 31 days - just default to 31 days
@@ -1038,7 +1045,7 @@ class Appointment:
             memberid = int(common.getid(common.getkeyvalue(avars,"memberid","0")))
             patientid = int(common.getid(common.getkeyvalue(avars,"patientid","0")))
             doctorid = int(common.getid(common.getkeyvalue(avars,"doctorid","0")))
-            clinicid = int(common.getid(common.getkeyvalue(avars,"clinicid","0")))
+            clinicid = int(common.getid(common.getkeyvalue(avars,"clinicid",str(self.clinicid))))
             
             complaint = common.getkeyvalue(avars,"complaint","")
             
@@ -1183,7 +1190,7 @@ class Appointment:
             complaint = "" if(len(appt) == 0) else appt[0].f_title,
             apptobj = {}
             
-            db(db.t_appointment.id == appointmentid).update(f_status = "Cancelled", sendsms = False, sendrem=False, smsaction='cancelled', \
+            db(db.t_appointment.id == appointmentid).update(f_status = "Cancelled", sendsms = True, sendrem=True, smsaction='cancelled', \
                                                             description = providernotes if(providernotes != "") else currnotes, is_active = False,
                                                             modified_on = common.getISTFormatCurrentLocatTime(),
                                                             modified_by = 1 if(auth.user == None) else auth.user.id                                                        
@@ -1200,8 +1207,8 @@ class Appointment:
                     common.logapptnotes(db,complaint,providernotes,appointmentid)
                             
             # Send Confirmation SMS
-            retval = self.sms_confirmation(appPath,appointmentid,"delete")
-            logger.loggerpms2.info("SMS Confirmation Ret value = >>" + str(retval))
+            #retval = self.sms_confirmation(appPath,appointmentid,"delete")
+            #logger.loggerpms2.info("SMS Confirmation Ret value = >>" + str(retval))
             
             if(retval == True):
                 apptobj= {"result":True, "appointmentid":appointmentid,"message":"Appointment deleted successfully"}
@@ -1252,7 +1259,7 @@ class Appointment:
         treatmentid = int(common.getid(common.getkeyvalue(avars,"treatmentid","0")))
         appointmentid = int(common.getid(common.getkeyvalue(avars,"appointmentid","0")))
         doctorid = int(common.getid(common.getkeyvalue(avars,"doctorid","0")))
-        clinicid = int(common.getid(common.getkeyvalue(avars,"clinicid","0")))
+        clinicid = int(common.getid(common.getkeyvalue(avars,"clinicid",self.clinicid)))
         
         complaint = common.getkeyvalue(avars,"complaint","")
         
@@ -1262,6 +1269,8 @@ class Appointment:
         providernotes = common.getkeyvalue(avars,"providernotes","")
         cell = common.getkeyvalue(avars,"cell","")
         status = common.getkeyvalue(avars,"status","Open")
+        sendsms = common.getkeyvalue(avars,"sendsms",False)
+        sendrem = common.getkeyvalue(avars,"sendrem",False)
         
         appPath = common.getkeyvalue(avars,"appPath","")
         
@@ -1299,6 +1308,7 @@ class Appointment:
                     f_status = status if(status != "") else appt[0].f_status,
                     sendsms = True  if(curraptdt !=newapptdt ) else common.getboolean(appt[0].sendsms),
                     sendrem = True  if(curraptdt !=newapptdt ) else common.getboolean(appt[0].sendrem),
+                    
                     smsaction = 'update'  if(curraptdt !=newapptdt ) else common.getboolean(appt[0].smsaction),
                     description = providernotes if(providernotes != "") else currnotes,
                     doctor = doctorid if(doctorid != 0) else appt[0].doctor,
@@ -1398,6 +1408,10 @@ class Appointment:
                 doctorid = int(common.getid(appt.vw_appointments.doctor))
                 appttime = (appt.vw_appointments.f_start_time).strftime('%d/%m/%Y %I:%M %p')
                 
+                provname = common.getstring(appt.vw_appointments.provname)
+                provcell = common.modify_cell(common.getstring(appt.vw_appointments.provcell))
+                provemail = common.getstring(appt.vw_appointments.provemail)                
+
                 #to determine whether this is a member or walkin
                 mems = db((db.patientmember.id == memberid) & (db.patientmember.is_active == True)).select(db.patientmember.hmopatientmember,db.patientmember.patientmember)
                 hmomember = False if(len(mems) == 0) else common.getboolean(mems[0].hmopatientmember)
@@ -1428,43 +1442,57 @@ class Appointment:
                 smsfile = ""
                 emailfile = ""
                 if(appt.vw_appointments.smsaction == "create"):
-                    #new appointment message
-                    smsfile  = os.path.join(appPath,'templates/sms','SMS_ApptConfirm.txt') 
-                    emailfile  = os.path.join(appPath,'templates/sms','Email_ApptConfirm.txt') 
+                    #new appointment message 
+                    smsfile  = os.path.join(appPath,'templates/sms','SMS_ApptRequest.txt') 
+                    emailfile  = os.path.join(appPath,'templates/sms','Email_ApptRequest.txt') 
                     
-                elif(appt.vw_appointments.smsaction == "update"):
-                    #reschedule  appointment message
-                    smsfile  = os.path.join(appPath,'templates/sms','SMS_ApptReschedule.txt') 
-                elif(appt.vw_appointments.smsaction == "cancel"):
+                elif(appt.vw_appointments.smsaction.lower() == "update"):
+                    smsfile  = os.path.join(appPath,'templates/sms','SMS_ApptReschedule.txt')
+                    emailfile  = os.path.join(appPath,'templates/sms','Email_ApptReschedule.txt') 
+                    #confirm
+                    if(appt.vw_appointments.f_status.lower() == "confirmed"):
+                        smsfile  = os.path.join(appPath,'templates/sms','SMS_ApptConfirm.txt') 
+                        emailfile  = os.path.join(appPath,'templates/sms','Email_ApptConfirm.txt') 
+                elif((appt.vw_appointments.smsaction.lower() == "cancelled")|(appt.vw_appointments.smsaction.lower() == "cancel")):
                     smsfile  = os.path.join(appPath,'templates/sms','SMS_ApptCancel.txt') 
+                    emailfile  = os.path.join(appPath,'templates/sms','Email_ApptCancel.txt') 
+                elif(appt.vw_appointments.smsaction.lower() == "rescheduled"):
+                    smsfile  = os.path.join(appPath,'templates/sms','SMS_ApptReschedule.txt')
+                    emailfile  = os.path.join(appPath,'templates/sms','Email_ApptReschedule.txt') 
                 else:
-                    smsfile  = os.path.join(appPath,'templates/sms','SMS_ApptConfirm.txt') 
-        
+                    smsfile  = os.path.join(appPath,'templates/sms','SMS_ApptReschedule.txt')
+                    emailfile  = os.path.join(appPath,'templates/sms','Email_ApptReschedule.txt') 
+                    
                 f = open(smsfile,'rb')
                 temp = Template(f.read())
                 f.close()  
                 patmessage = temp.template
-                patmessage = patmessage.replace("$fname", fname)
-                patmessage = patmessage.replace("$docname", docname)
-                patmessage = patmessage.replace("$appointmentdate", appttime)
+                
+                patmessage = patmessage.replace("$provname", provname)                
+                patmessage = patmessage.replace("$provcell", provcell)                
+                patmessage = patmessage.replace("$fname", fname)                 #fname = full patient name like ram verma
+                patmessage = patmessage.replace("$docname", docname)             #docname  = full doctors name including Dr.
+                patmessage = patmessage.replace("$appointmentdate", appttime)    #appointmentdate = full dd/mm/yyyy hh:mm format
                 patmessage = patmessage.replace("$clinicname", clinicname)             
-                #patmessage = patmessage.replace("$clinicaddress1", "")             
-                #patmessage = patmessage.replace("$clinicaddress2", "")             
-                patmessage = patmessage.replace("$cliniclocation", cliniclocation)             
-                patmessage = patmessage.replace("$clinicno", clinicno)
+                patmessage = patmessage.replace("$clinicaddress1", clinicaddress1)             
+                patmessage = patmessage.replace("$clinicaddress2", clinicaddress2)             
+                patmessage = patmessage.replace("$cliniclocation", cliniclocation)   
+                #patmessage = patmessage.replace("$clinicno", clinicno)
                 
                 f = open(emailfile,'rb')
                 temp1 = Template(f.read())
                 f.close()  
                 patemailmssg = temp1.template
-                patemailmssg = patemailmssg.replace("$fname", fname)
-                patemailmssg = patemailmssg.replace("$docname", docname)
-                patemailmssg = patemailmssg.replace("$appointmentdate", appttime)
+                patemailmssg = patemailmssg.replace("$provname", provname)                
+                patemailmssg = patemailmssg.replace("$provcell", provcell)                                
+                patemailmssg = patemailmssg.replace("$fname", fname)             #fname = full patient name like ram verma
+                patemailmssg = patemailmssg.replace("$docname", docname)         #docname  = full doctors name including Dr.
+                patemailmssg = patemailmssg.replace("$appointmentdate", appttime)  #appointmentdate = full dd/mm/yyyy hh:mm format
                 patemailmssg = patemailmssg.replace("$clinicname", clinicname)             
                 patemailmssg = patemailmssg.replace("$clinicaddress1", clinicaddress1)             
                 patemailmssg = patemailmssg.replace("$clinicaddress2", clinicaddress2)             
                 patemailmssg = patemailmssg.replace("$cliniclocation", cliniclocation)             
-                patemailmssg = patemailmssg.replace("$clinicno", clinicno)
+                #patemailmssg = patemailmssg.replace("$clinicno", clinicno)
                 
         
                 retVal = True
@@ -1525,7 +1553,7 @@ class Appointment:
 
 
     def sendDocSMSEmail(self,avars):
-        logger.loggerpms2.info("Enter Send DOC SMS Email " + json.dumps(avars))
+        logger.loggerpms2.info("Enter Send DOC/Provider SMS Email " + json.dumps(avars))
         db = self.db
         rspobj = {}
         rspmail = {}
@@ -1547,6 +1575,7 @@ class Appointment:
             retVal1 = True
             
             for appt in appts:
+                clinicname = common.getstring(appt.clinic.name)
                 memberid = int(common.getid(appt.vw_appointments.patientmember))
                 patientid = int(common.getid(appt.vw_appointments.patient))
                 providerid = int(common.getid(appt.vw_appointments.provider))
@@ -1560,6 +1589,10 @@ class Appointment:
                 doccell = common.modify_cell(common.getstring(appt.vw_appointments.doccell))
                 docemail = common.getstring(appt.vw_appointments.docemail)
                 
+                provname = common.getstring(appt.vw_appointments.provname)
+                provcell = common.modify_cell(common.getstring(appt.vw_appointments.provcell))
+                provemail = common.getstring(appt.vw_appointments.provemail)
+                
                 pats = db((db.vw_memberpatientlist.patientid == patientid) & (db.vw_memberpatientlist.primarypatientid==memberid) & (db.vw_memberpatientlist.is_active==True)).\
                     select(db.vw_memberpatientlist.cell, db.vw_memberpatientlist.email)
                 
@@ -1567,47 +1600,79 @@ class Appointment:
                              
                 #send SMS & email to patient
                 smsfile = ""
+                emailfile =""
+                username  = ""
+                password = ""
+                #if(appt.vw_appointments.smsaction == "create"):
+                    ##new appointment message
+                    #smsfile  = os.path.join(appPath,'templates/sms','SMS_ApptRequestProv.txt') 
+                    #emailfile  = os.path.join(appPath,'templates/sms','Email_ApptRequestProv.txt') 
+                    
+                #elif(appt.vw_appointments.smsaction == "update"):
+                    ##reschedule  appointment message
+                    #smsfile  = os.path.join(appPath,'templates/sms','SMS_ApptRescheduleDoc.txt') 
+                #elif(appt.vw_appointments.smsaction == "cancel"):
+                    #smsfile  = os.path.join(appPath,'templates/sms','SMS_ApptCancel.txt') 
+                #else:
+                    #smsfile  = os.path.join(appPath,'templates/sms','SMS_ApptCancelDoc.txt')             
+                
                 if(appt.vw_appointments.smsaction == "create"):
-                    #new appointment message
-                    smsfile  = os.path.join(appPath,'templates/sms','SMS_ApptConfirmDoc.txt') 
-                elif(appt.vw_appointments.smsaction == "update"):
-                    #reschedule  appointment message
-                    smsfile  = os.path.join(appPath,'templates/sms','SMS_ApptRescheduleDoc.txt') 
-                elif(appt.vw_appointments.smsaction == "cancel"):
-                    smsfile  = os.path.join(appPath,'templates/sms','SMS_ApptCancel.txt') 
+                    #new appointment message 
+                    smsfile  = os.path.join(appPath,'templates/sms','SMS_ApptRequestProv.txt') 
+                    emailfile  = os.path.join(appPath,'templates/sms','Email_ApptRequestProv.txt') 
+                    
+                elif(appt.vw_appointments.smsaction.lower() == "update"):
+                    smsfile  = os.path.join(appPath,'templates/sms','SMS_ApptRescheduleProv.txt')
+                    emailfile  = os.path.join(appPath,'templates/sms','Email_ApptRescheduleProv.txt') 
+                    #confirm
+                    if(appt.vw_appointments.f_status.lower() == "confirmed"):
+                        smsfile  = os.path.join(appPath,'templates/sms','SMS_ApptConfirmProv.txt') 
+                        emailfile  = os.path.join(appPath,'templates/sms','Email_ApptConfirmProv.txt') 
+                        
+                elif((appt.vw_appointments.smsaction.lower() == "cancelled")|(appt.vw_appointments.smsaction.lower() == "cancel")):
+                    smsfile  = os.path.join(appPath,'templates/sms','SMS_ApptCancelProv.txt') 
+                    emailfile  = os.path.join(appPath,'templates/sms','Email_ApptCancelProv.txt') 
                 else:
-                    smsfile  = os.path.join(appPath,'templates/sms','SMS_ApptCancelDoc.txt')             
-        
+                    smsfile  = os.path.join(appPath,'templates/sms','SMS_ApptRescheduleProv.txt')
+                    emailfile  = os.path.join(appPath,'templates/sms','Email_ApptRescheduleProv.txt') 
+                
                 f = open(smsfile,'rb')
                 temp = Template(f.read())
                 f.close()  
                 docmessage = temp.template
+                docmessage = docmessage.replace("$provname", provname)
                 docmessage = docmessage.replace("$fname", fname)
                 docmessage = docmessage.replace("$docname", docname)
                 docmessage = docmessage.replace("$appointmentdate", appttime)
                 docmessage = docmessage.replace("$patcell", patcell)
-        
+                docmessage = docmessage.replace("$clinicname", clinicname)
+                docmessage = docmessage.replace("$username", username)
+                docmessage = docmessage.replace("$password", password)
+                
+                weburl = common.getkeyvalue(avars, "weburl", "")
+                docmessage = docmessage.replace("$weburl",weburl)
+                
                 retVal = True
                 retVal1 = True
-                if((doccell != "") & (sendsms)):
+                if((provcell != "") & (sendsms)):
                     #retVal = mail.sendSMS2Email(db,doccell,docmessage)
-                    retVal = mail.sendAPI_SMS2Email(db,doccell,docmessage)
+                    retVal = mail.sendAPI_SMS2Email(db,provcell,docmessage)
                     
-                if((docemail != "")&(sendemail)):
+                if((provemail != "")&(sendemail)):
                     #retVal1 = mail.groupEmail(db, docemail, ccs, "Appointment: " + appttime, docmessage)  # send email to patient        
-                    retVal1 = mail._groupEmail(db, _mail, docemail, ccs, "Appointment: " + appttime, docmessage)  # send email to patient        
+                    retVal1 = mail._groupEmail(db, _mail, provemail, ccs, "Appointment: " + appttime, docmessage)  # send email to provider        
                 
                 
                 
                 rspobj = {}
                 if(retVal == True):
-                    mssg = "sendDocSMSEmail: Doctor SMS sent successfully to this doctor " + docname + "(" + doccell + ")"
+                    mssg = "sendDocSMSEmail: Doctor SMS sent successfully to this doctor " + provname + "(" + provcell + ")"
                     rspobj["appointmentid"] = str(apptid)
                     rspobj["result"] = "success"
                     rspobj["error_message"] = ""
                     rspobj["message"] = mssg
                 else:
-                    mssg = "sendDocSMSEmail:  Error sending SMS  to this doctor " + docname + "(" + doccell + ")"
+                    mssg = "sendDocSMSEmail:  Error sending SMS  to this doctor " + provname + "(" + provcell + ")"
                     rspobj["appointmentid"] = str(apptid)
                     rspobj["result"] = "fail"
                     rspobj["error_message"] = mssg
@@ -1616,12 +1681,12 @@ class Appointment:
                 
                 rspmail={}
                 if(retVal1 == True):
-                    mssg = "sendDocSMSEmail: Doctor Email sent successfully to this doctor " + docname + "(" + docemail + ")"
+                    mssg = "sendDocSMSEmail: Doctor Email sent successfully to this doctor " + provname + "(" + provemail + ")"
                     rspmail["result"] = "success"
                     rspmail["error_message"] = ""
                     rspmail["message"] = mssg
                 else:
-                    mssg = "sendDocSMSEmail:  Error sending Email to this doctor " + docname + "(" + docemail + ")"
+                    mssg = "sendDocSMSEmail:  Error sending Email to this doctor " + provname + "(" + provemail + ")"
                     rspmail["result"] = "fail"
                     rspmail["error_message"] = mssg
                 
@@ -1653,12 +1718,15 @@ class Appointment:
          
         db = self.db
         rspObj = {}
+        
         try:
+            
+            
             appPath = common.getkeyvalue(avars,"appPath","")
             props = db(db.urlproperties.id>0).select()
             ccs = props[0].mailcc if(len(props)>0) else ""
             
-            #get all appointments for which SMS has not been sent & appointment date > from Date & < to Date
+            #get all appointments for which SMS has not been sent 
             appts = db((db.vw_appointments.sendsms == True) &\
                        ((db.vw_appointments.is_active == True) | ((db.vw_appointments.is_active == False)&(db.vw_appointments.f_status == 'Cancelled')))).\
                 select(db.vw_appointments.id,limitby=(0, 1),orderby_on_limitby = False)
@@ -1674,13 +1742,16 @@ class Appointment:
                 patrspObj = json.loads(self.sendPatSMSEmail(avars))
                 
                             
-                #send SMS to Doctor
+                #send SMS to Doctor/Provider
                 avars["appointmentid"]  = str(appt.id)
                 avars["ccs"]  = ccs
                 docrspObj = json.loads(self.sendDocSMSEmail(avars))
               
                 
-                #send SMS to Provider
+                ##send SMS to Provider
+                #avars["appointmentid"]  = str(appt.id)
+                #avars["ccs"]  = ccs
+                #docrspObj = json.loads(self.sendDocSMSEmail(avars))
                 
                 db(db.t_appointment.id == appt.id).update(sendsms = False,sendrem=False) 
                 db.commit()
@@ -1713,7 +1784,7 @@ class Appointment:
             
             blockappt = common.getboolean(common.getkeyvalue(avars,"block","False"))
             providerid = int(common.getkeyvalue(avars,"providerid","0"))
-            clinicid = int(common.getkeyvalue(avars,"clinicid","0"))
+            clinicid = int(common.getkeyvalue(avars,"clinicid",str(self.clinicid)))
             
             memberid = int(common.getkeyvalue(avars,"memberid","0"))
             patientid = int(common.getkeyvalue(avars,"patientid",common.getstring(memberid)))
@@ -1833,6 +1904,7 @@ class Appointment:
                    
                     cell = common.getkeyvalue(avars,"cell",ds[0].cell),
                     smsaction = common.getkeyvalue(avars,"smsaction",ds[0].smsaction),
+
                     
                     f_start_time = common.getdatefromstring(common.getkeyvalue(avars,"f_start_time",def_start_time_str),"%d/%m/%Y %H:%M"),
                     f_end_time = common.getdatefromstring(common.getkeyvalue(avars,"f_end_time",def_end_time_str),"%d/%m/%Y %H:%M"),
@@ -1893,6 +1965,9 @@ class Appointment:
             db((db.t_appointment.id == appointmentid)).update(\
                 description = notes,
                 f_status = "Cancelled"  ,  
+                sendsms = True,
+                sendrem = True,
+                smsaction = "cancelled",
                 is_active = False,
                     
                 modified_on=common.getISTFormatCurrentLocatTime(),
@@ -2136,7 +2211,7 @@ class Appointment:
         
         try:
             providerid = int(common.getkeyvalue(avars,"providerid","0"))
-            clinicid = int(common.getkeyvalue(avars,"clinicid","0"))
+            clinicid = int(common.getkeyvalue(avars,"clinicid",str(self.clinicid)))
             doctorid = int(common.getkeyvalue(avars,"doctorid","0"))
             memberid = int(common.getkeyvalue(avars,"memberid","0"))
             patientid = int(common.getkeyvalue(avars,"patientid","0"))
@@ -2245,7 +2320,7 @@ class Appointment:
 
             
             providerid = int(common.getkeyvalue(avars,"providerid","0"))
-            clinicid = int(common.getkeyvalue(avars,"clinicid","0"))
+            clinicid = int(common.getkeyvalue(avars,"clinicid",str(self.clinicid)))
             doctorid = int(common.getkeyvalue(avars,"doctorid","0"))
             memberid = int(common.getkeyvalue(avars,"memberid","0"))
             patientid = int(common.getkeyvalue(avars,"patientid","0"))
@@ -2504,7 +2579,11 @@ class Appointment:
         db = self.db
         
         avars["f_status"] = "Confirmed" 
+        avars["smsaction"] = "update"
+        avars["sendsms"] = True
+        avars["sendrem"] = True
         rsp = json.loads(self.update_appointment(avars))
+        
         appointmentid = int(common.getkeyvalue(avars,"appointmentid","0"))
         db((db.hv_doc_appointment.appointmentid == appointmentid)).update(\
                         hv_appt_confirmed_on = common.getISTFormatCurrentLocatTime(),
@@ -2527,7 +2606,9 @@ class Appointment:
         avars["f_duration"] = str(duration)
         avars["f_start_time"] = common.getstringfromdate(startapptdt,"%d/%m/%Y %H:%M")
         avars["f_end_time"] = common.getstringfromdate(endapptdt,"%d/%m/%Y %H:%M")
-        
+        avars["smsaction"] = "rescheduled"
+        avars["sendsms"] = True
+        avars["sendrem"] = True
         
         rsp = json.loads(self.update_appointment(avars))
         return json.dumps(rsp)

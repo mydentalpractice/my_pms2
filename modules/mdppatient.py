@@ -1638,6 +1638,7 @@ class Patient:
   
   def newalkinpatient(self,patobj):
     
+    logger.loggerpms2.info("Enter new walkin patient " + json.dumps(patobj))
     db = self.db
     
     provs = db((db.provider.provider == 'P0001') & (db.provider.is_active == True)).select(db.provider.id)

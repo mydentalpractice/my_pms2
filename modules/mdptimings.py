@@ -572,7 +572,7 @@ class OPS_Timing:
             if((is_holiday == True)|(is_saturday == True)|(is_sunday==True)):     
                 strtime = common.getkeyvalue(avars,"open_time","12:00 AM")
             else:
-                strtime = common.getkeyvalue(avars,"open_time","09:00 AM")
+                strtime = common.getkeyvalue(avars,"open_time","10:00 AM")
                 
             open_time = datetime.datetime(*(common.gettimefromstring(strtime, "%I:%M %p"))[:6])
             
@@ -580,7 +580,7 @@ class OPS_Timing:
             if((is_holiday == True)|(is_saturday == True)|(is_sunday==True)):     
                 strtime = common.getkeyvalue(avars,"close_time","11:59 PM")
             else:
-                strtime = common.getkeyvalue(avars,"close_time","06:00 PM")
+                strtime = common.getkeyvalue(avars,"close_time","07:30 PM")
             close_time = datetime.datetime(*(common.gettimefromstring(strtime, "%I:%M %p"))[:6])
 
 
@@ -688,13 +688,13 @@ class OPS_Timing:
                         timings = common.getkeyvalue(avars,day_name,None)
                         if(timings != None):
                             for timing in timings:
-                                otstr = common.getkeyvalue(timing,"open_time","9:00")
-                                otstr = "9:00" if(otstr == "") else otstr
+                                otstr = common.getkeyvalue(timing,"open_time","10:00")
+                                otstr = "10:00" if(otstr == "") else otstr
                                 #logger.loggerpms2.info("OTSTR = " + otstr)
                                 open_time = common.convert24to12clock(otstr)
                                 
-                                ctstr = common.getkeyvalue(timing,"close_time","18:00")
-                                ctstr = "18:00" if(ctstr == "") else ctstr
+                                ctstr = common.getkeyvalue(timing,"close_time","19:30")
+                                ctstr = "19:30" if(ctstr == "") else ctstr
                                 #ogger.loggerpms2.info("OTSTR = " + ctstr)
                                 
                                 close_time = common.convert24to12clock(ctstr)

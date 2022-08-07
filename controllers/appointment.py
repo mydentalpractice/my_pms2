@@ -1857,6 +1857,7 @@ def new_appointment():
 @auth.requires(auth.has_membership('provider') or auth.has_membership('webadmin')) 
 @auth.requires_login()
 def appointment_update():
+        
     
     
     apptid = int(common.getid(request.vars.apptid))
@@ -2040,12 +2041,26 @@ def appointment_update():
         treatmentid = int(common.getid(request.vars.treatment))
         chiefcomplaint = common.getstring(request.vars.chiefcomplaint)  # this is stored in f_title field
         
+        appt = db(db.t_appointment.id == apptid).select()
+        curr_apptdt = appt[0].f_start_time
         
         duration = int(common.getid(request.vars.duration))
         start_date = common.getnulldt(request.vars.start_date)
         apptdt = datetime.datetime.strptime(start_date, '%d %B %Y - %H:%M')
         endapptdt = apptdt + timedelta(minutes=duration)
+        
+        sendsms = False
+        sendrem = False
+        
+        
+        if(curr_apptdt == apptdt):
+                smsaction = "update"
 
+        else:
+                smsaction = "rescheduled"
+                sendsms = True
+                sendrem = True
+        
         
         providerid = int(common.getid(request.vars.providerid))
         memberid = int(common.getid(request.vars.xmemberid))
@@ -2063,10 +2078,10 @@ def appointment_update():
             patientid = 0
        
          
-
+        newstatus = common.getstring(form2.vars.status)
         
         db(db.t_appointment.id == apptid).update(f_title = chiefcomplaint, f_start_time = apptdt, f_end_time =  endapptdt, f_duration=duration,\
-                                                 f_status=common.getstring(form2.vars.status),\
+                                                 f_status=common.getstring(form2.vars.status),smsaction = smsaction,sendsms = sendsms, sendrem=sendrem,\
                                                  description = newdescription, cell = cell,  doctor=doctorid,f_treatmentid=treatmentid,\
                                                  modified_by = auth.user_id, modified_on=common.getISTFormatCurrentLocatTime())
         
@@ -2081,12 +2096,12 @@ def appointment_update():
             #csrid = db.casereport.insert(appointmentid=apptid,memberid=memberid,patientid = patientid, providerid=providerid, doctorid=doctorid, casereport = csr, is_active=True,\
                                      #created_on = request.now, created_by = providerid, modified_on = request.now, modified_by = providerid)        
         
-        # Send Confirmation SMS only when appt start date is changed
+        # Send Confirmation SMS only when appt start date is changed or status is changed from Open to Confirmed or Open to Cancelled
         # The confirmation sms will be sent from Superadmin Activity Tracker Group Message module
         # At this point we will send 
         retval=False
-        if(apptdt != curraptdt):
-                db(db.t_appointment.id == apptid).update(sendsms = True, sendrem = True,smsaction="update")
+        if((apptdt != curraptdt) | ((newstatus != status) & ((newstatus == 'Confirmed') | (newstatus == 'Cancelled')))):
+                db(db.t_appointment.id == apptid).update(sendsms = True, sendrem = True,smsaction=smsaction)
                 session.flash = "Appointment updated! SMS confirmation will be sent to the patient and the doctor!"
     
         #return HTML(BODY(SCRIPT('window.close()'))).xml()        
@@ -2308,13 +2323,7 @@ def delete_appointment():
     form = FORM.confirm('Yes?',{'No':returnurl})
 
     if form.accepted:
-        db((db.t_appointment.id == apptid)).update(is_active=False,f_status='Cancelled', smsaction="cancel",modified_by = auth.user_id, modified_on=common.getISTFormatCurrentLocatTime())
-        
-        # Send Confirmation SMS
-        #retval=False
-        #retval = sms_confirmation(apptid,'delete')
-        
-        
+        db((db.t_appointment.id == apptid)).update(is_active=False,f_status='Cancelled', sendsms = True,sendrem=True, smsaction="cancelled",modified_by = auth.user_id, modified_on=common.getISTFormatCurrentLocatTime())
         session.flash = "Appointment has been cancelled! SMS confirmation will be sent to the patient and the doctor"
         
         redirect(returnurl)

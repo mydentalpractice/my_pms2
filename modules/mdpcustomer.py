@@ -722,10 +722,10 @@ class Customer:
                     
                     status = common.getkeyvalue(avars,"status", "No_Attempt"),
                     
-                    providerid = int(common.getkeyvalue(avars,"providerid", "1")),
-                    companyid = int(common.getkeyvalue(avars,"companyid", "1")),
-                    planid = int(common.getkeyvalue(avars,"planid", "1")),
-                    regionid = int(common.getkeyvalue(avars,"regionid", "1")),
+                    providerid = int(common.getid(common.getkeyvalue(avars,"providerid", "1"))),
+                    companyid = int(common.getid(common.getkeyvalue(avars,"companyid", "1"))),
+                    planid = int(common.getid(common.getkeyvalue(avars,"planid", "1"))),
+                    regionid = int(common.getid(common.getkeyvalue(avars,"regionid", "1"))),
                    
                     enrolldate = common.getdatefromstring(
                         common.getkeyvalue(avars, "enrolldate",common.getstringfromdate(common.getISTFormatCurrentLocatTime(),"%d/%m/%Y")),"%d/%m/%Y"),
@@ -874,9 +874,9 @@ class Customer:
                     
                     status = common.getkeyvalue(avars,"status", "No_Attempt"),
                     
-                    providerid = int(common.getkeyvalue(avars,"providerid", defproviderid)),
-                    companyid = int(common.getkeyvalue(avars,"companyid", defcompanyid)),
-                    clinicid = int(common.getkeyvalue(avars,"clinicid", defclinicid)),
+                    providerid = int(common.getid(common.getkeyvalue(avars,"providerid", defproviderid))),
+                    companyid = int(common.getid(common.getkeyvalue(avars,"companyid", defcompanyid))),
+                    clinicid = int(common.getid(common.getkeyvalue(avars,"clinicid", defclinicid))),
                     planid = planid,
                     regionid = regionid,
                    
@@ -1023,9 +1023,9 @@ class Customer:
                     
                     status = common.getkeyvalue(avars,"status", "No_Attempt"),
                     
-                    providerid = int(common.getkeyvalue(avars,"providerid", c[0].providerid)),
-                    companyid = int(common.getkeyvalue(avars,"companyid",  c[0].companyid)),
-                    planid = int(common.getkeyvalue(avars,"planid",  c[0].planid)),
+                    providerid = int(common.getid(common.getkeyvalue(avars,"providerid", c[0].providerid))),
+                    companyid = int(common.getid(common.getkeyvalue(avars,"companyid",  c[0].companyid))),
+                    planid = int(common.getid(common.getkeyvalue(avars,"planid",  c[0].planid))),
                     regionid = int(common.getkeyvalue(avars,"regionid",  c[0].regionid)),
 
                     enrolldate = enrolldate,
@@ -1049,7 +1049,7 @@ class Customer:
                 deps = common.getkeyvalue(avars,"dependants",None)
                 if(deps != None):
                     for dep in deps:
-                        depid = int(dep["dependant"])
+                        depid = int(common.getid(dep["dependant"]))
                         db(db.customerdependants.id == depid).update(
                             dependant = dep["dependant"],
                             dependant_ref = dep["dependant_ref"],
@@ -1120,7 +1120,7 @@ class Customer:
         
         try:
             
-            customer_id = int(common.getkeyvalue(avars,"customer_id",0))
+            customer_id = int(common.getid(common.getkeyvalue(avars,"customer_id",0)))
             c = db((db.customer.id == customer_id) & (db.customer.is_active == True)).select()
             
             if(len(c) == 0):
@@ -1374,7 +1374,7 @@ class Customer:
                                      )   
             
             #update appointment unique id with customer appointment id
-            db(db.t_appointment.id == int(apptobj["appointmentid"])).update(f_uniqueid == appointment_id)
+            db(db.t_appointment.id == int(common.getid(apptobj["appointmentid"]))).update(f_uniqueid == appointment_id)
             
             
             #email Welcome Kit
@@ -1519,9 +1519,9 @@ class Customer:
                 db.commit()
                     
                 #if a customer/member is successfully enrolled, then we have to create a wallet and credit it with voucher amount
-                plan_id = int(common.getkeyvalue(jsonresp,"hmoplan","0"))
-                company_id = int(common.getkeyvalue(jsonresp,"company","0"))
-                member_id = int(common.getkeyvalue(jsonresp,"primarypatientid","0"))
+                plan_id = int(common.getid(common.getkeyvalue(jsonresp,"hmoplan","0")))
+                company_id = int(common.getid(common.getkeyvalue(jsonresp,"company","0")))
+                member_id = int(common.getid(common.getkeyvalue(jsonresp,"primarypatientid","0")))
                 
                 plans = db((db.hmoplan.id == plan_id) & (db.hmoplan.is_active == True)).select()
                 cos = db((db.company.id == company_id) & (db.company.is_active == True)).select(db.company.company)
@@ -1620,16 +1620,16 @@ class Customer:
                 
                 paymentid = db.payment.insert(
                     paymentdate= payment_date,
-                    amount = float(common.getkeyvalue(avars,"amount_paid","0")),
+                    amount = float(common.getvalue(common.getkeyvalue(avars,"amount_paid","0"))),
                     paymenttype = "Premium",
                     paymentmode = "Online",
                     fp_paymentref = common.getkeyvalue(avars,"payment_id","RPIP599_" + defdtstr),
                     fp_status = common.getkeyvalue(avars,"payment_status","success"),
                     fp_paymenttype = "Premium",
                     fp_paymentdate =  payment_date,
-                    fp_amount = float(common.getkeyvalue(avars,"amount_paid","0")),
+                    fp_amount = float(common.getvalue(common.getkeyvalue(avars,"amount_paid","0"))),
                     fp_invoice = common.getkeyvalue(avars,"payment_id","RPIP599_" + defdtstr),
-                    fp_invoiceamt = float(common.getkeyvalue(avars,"amount_paid","0")),
+                    fp_invoiceamt = float(common.getvalue(common.getkeyvalue(avars,"amount_paid","0"))),
                     is_active=True,chequeno="0000",bankname="XXXX",accountname="XXXX",accountno="0000"
                 )
             
@@ -1646,7 +1646,7 @@ class Customer:
                      "paymenttype" : "Premium",
                      "paymentmode" : "Online",
                      "paymentdate" : common.getstringfromdate(payment_date,"%d/%m/%Y"),
-                     "amount_paid" : float(common.getkeyvalue(avars,"amount_paid","0"))
+                     "amount_paid" : float(common.getvalue(common.getkeyvalue(avars,"amount_paid","0")))
                 }
                 
             

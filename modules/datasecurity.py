@@ -72,11 +72,11 @@ class DataSecurity:
         return 
 
     def authenticate_api(self,avars):
-        #logger.loggerpms2.info("Enter Authenticate API - " + json.dumps(avars))
+        #logger.loggerpms2.info("Enter Authenticate API - " )
         db = self.db
         request = avars["request"]
         x_api_key = common.getstring(request.env.http_x_api_key)
-        #x_api_key = "MYDP~mc3b1q2o" if(x_api_key == "") else x_api_key
+        x_api_key = "MYDP~mc3b1q2o" if(x_api_key == "") else x_api_key
         xarr = x_api_key.split('~')
         companycode = "" if(len(xarr) < 1) else xarr[0]
         x_api_key = "" if(len(xarr)<2) else xarr[1]
@@ -261,8 +261,10 @@ class DataSecurity:
 
     #base64 Decode + Decrypt AES-256-CBC
     def decrypts(self,encrypt):
-
+        
         phpurl = self.phpurl + "/decrypt.php"
+        
+        #logger.loggerpms2.info("Enter Decrypts " + encrypt  + " " + phpurl) 
         #phpurl = "http://myphp.com/decrypt.php"
         #phpurl = "http://localhost/decrypt.php"
 
@@ -272,6 +274,7 @@ class DataSecurity:
 
         jsonresp = {}
         if((resp.status_code == 200)|(resp.status_code == 201)|(resp.status_code == 202)|(resp.status_code == 203)):
+            #logger.loggerpms2.info("PHP URL Success " + json.dumps(resp.json()))
             respobj = resp.json()    
             jsonresp = {
                 "raw": respobj["raw"]
