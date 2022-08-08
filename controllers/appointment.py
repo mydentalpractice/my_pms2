@@ -2029,12 +2029,15 @@ def appointment_update():
       
       
     if form2.process(formname='form_two',keepvalues=True).accepted:
-            
         
+        apptid = int(common.getid(request.vars.apptid))    
+        if(form2.vars.status.lower() == "cancelled"):
+                redirect(URL('delete_appointment',vars=dict(apptid = apptid)))
+                
         page = common.getpage(request.vars.page)
         memberpage = common.getpage(request.vars.memberpage)
         
-        apptid = int(common.getid(request.vars.apptid))
+        
         
         newdescription = common.getstring(request.vars.description)
         cell = common.getstring(request.vars.cell)
