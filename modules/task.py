@@ -12,7 +12,7 @@ API_ENDPOINT = "http://127.0.0.1:8001/my_pms2/mdpapi/mdpapi"
 #API_ENDPOINT = "http://mydentalplan.pythonanywhere.com/my_pms2/mdpapi/mdpapi"
  
 # data to be sent to api
-data = {'action':'task'}
+data = {'action':'sendAllAppointmentsSMSEmail'}
 
 # sending post request and saving response as response object
 r = requests.post(url = API_ENDPOINT, data = data)

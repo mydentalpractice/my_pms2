@@ -130,6 +130,18 @@ def createMailCC(ccs):
     
     return cc1
     
+#tos = email1,email2..
+#to1 = ['email1','email2']
+def createMailTo(tos):
+    to1 = []
+    if((tos == "") | (tos==None)):
+        return to1
+    
+    arr = tos.split(',')
+    for i in xrange(0,len(arr)):
+        to1.append(arr[i])
+    
+    return to1
     
 def emailAssignedMembers(db,request,providercode, provideremail, pdffile):
 
@@ -1879,7 +1891,7 @@ def _groupEmail(db,mail,emails,ccs, subject,message):
         mail.settings.login =  login
         mail.settings.tls = tls
 
-        to      =  emails
+        to      =  createMailTo(emails)
         subject =  subject
         message = message
         

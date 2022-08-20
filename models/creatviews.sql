@@ -9301,6 +9301,12 @@ Modified
 Added netcopay field
 
 
+20/08/2021
+==========
+
+1. ZZZZModify vw_memberpatientlist_fast - added is_active flag
+2. ZZZZ New View vw_mambepatientlist_min addedd
+
 
 
 Script file to clear user for sign-up

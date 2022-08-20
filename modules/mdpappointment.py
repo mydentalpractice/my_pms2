@@ -456,6 +456,7 @@ class Appointment:
             
             providerid = int(common.getid(common.getkeyvalue(avars,"providerid","0")))
             clinicid = int(common.getid(common.getkeyvalue(avars,"clinicid",str(self.clinicid))))
+            clinicid = self.clinicid if clinicid == 0 else clinicid
             doctorid = int(common.getid(common.getkeyvalue(avars,"doctorid","0")))
             
                
@@ -796,10 +797,10 @@ class Appointment:
     
         db = self.db
         providerid = self.providerid
-        clinicid  = self.clinicid
+        clinicid = self.clinicid if clinicid == 0 else clinicid
         start = str(year) + "-" + str(month).zfill(2) + "-" + str(day).zfill(2) + " 00:00:00"
         end   = str(year) + "-" + str(month).zfill(2) + "-" + str(day).zfill(2) + " 23:59:59"
-        
+        logger.loggerpms2.info("Enter API getappointmentsbyday "+ str(day) + " " + str(month) + " " + str(year) + " " + str(clinicid) )
         if(clinicid==0):
             appts = db((db.vw_appointments.provider == providerid) & (db.vw_appointments.f_start_time >= start) & \
                        (db.vw_appointments.f_start_time <= end) & (db.vw_appointments.is_active == True)).\
@@ -1039,146 +1040,188 @@ class Appointment:
    
         
      
-    #def newappointment(self,memberid,patientid,doctorid,complaint,startdt,duration,providernotes,cell,appPath,appointment_ref = None):
+    
     def newappointment(self,avars):        
             logger.loggerpms2.info("Enter NewAppointment API ==>" + json.dumps(avars))
-            memberid = int(common.getid(common.getkeyvalue(avars,"memberid","0")))
-            patientid = int(common.getid(common.getkeyvalue(avars,"patientid","0")))
-            doctorid = int(common.getid(common.getkeyvalue(avars,"doctorid","0")))
-            clinicid = int(common.getid(common.getkeyvalue(avars,"clinicid",str(self.clinicid))))
-            
-            complaint = common.getkeyvalue(avars,"complaint","")
-            
-            startdt = common.getkeyvalue(avars,"startdt",common.getstringfromdate(common.getISTFormatCurrentLocatTime(),"%d/%m/%Y"))
-            duration = int(common.getid(common.getkeyvalue(avars,"duration","30")))
-
-            providernotes = common.getkeyvalue(avars,"providernotes","")
-            cell = common.getkeyvalue(avars,"cell","")
-            appPath = common.getkeyvalue(avars,"appPath","")
-            appointment_ref = common.getkeyvalue(avars,"appointment_ref","")
-            
-
-            
-            logger.loggerpms2.info("Enter newappointment in mdpappointment" + str(memberid) + " " + startdt + " " + str(self.clinicid))
-            
-            db = self.db
-            providerid = self.providerid
-            
-            clinicid = self.clinicid if(clinicid == 0) else clinicid
-
-            auth = current.auth
-            
             newapptobj = {}
             
             
             try:
-                #location of the Provider's practice
-                location = ""
-                provs = db(db.provider.id == providerid).select()
-                if(len(provs) == 1):
-                    location = provs[0].pa_practicename + ", " + provs[0].pa_practiceaddress
+                providerid = self.providerid
+                doctorid = int(common.getid(common.getkeyvalue(avars,"doctorid","0")))
+                clinicid = int(common.getid(common.getkeyvalue(avars,"clinicid",str(self.clinicid))))
+                clinicid = self.clinicid if(clinicid == 0) else clinicid
+               
                 
                 # find out day of the appt.
+                startdt = common.getkeyvalue(avars,"startdt",common.getstringfromdate(common.getISTFormatCurrentLocatTime(),"%d/%m/%Y"))
+                duration = int(common.getid(common.getkeyvalue(avars,"duration",30)))                
                 startapptdt    = common.getdt(datetime.datetime.strptime(startdt,"%d/%m/%Y %H:%M"))
                 endapptdt = startapptdt + timedelta(minutes=duration)
+                avars["block"] = self.isBlocked(startapptdt,endapptdt,doctorid,clinicid)
+                avars["providerid"] = providerid
+                avars["appointment_start"] = common.getstringfromdate(startapptdt,"%d/%m/%Y %H:%M")
+                avars["notes"] = common.getkeyvalue(avars,"providernotes","")
+                newapptobj = json.loads(self.new_appointment(avars))
+                newapptobj["appointment_ref"] = str(newapptobj["appointment_ref"])
                 
-                
-        
-                
-                pat = db((db.vw_memberpatientlist.primarypatientid == memberid) & (db.vw_memberpatientlist.patientid == patientid)).\
-                    select(db.vw_memberpatientlist.fullname,db.vw_memberpatientlist.dob)
-                
-                #check for block
-                if((self.isBlocked(startapptdt,endapptdt,doctorid,clinicid)==False)):
-                    logger.loggerpms2.info("Not Blocked")
-                    
-                    #strSQL = ""
-                    #strstart = common.getstringfromdate(startapptdt, "%Y-%m-%d %H:%M")
-                    #strend = common.getstringfromdate(endapptdt, "%Y-%m-%d %H:%M")
-                    
-                    #uniqueid = random.randint(9999,999999)
-                    #y = db(db.t_appointment.f_uniqueid == uniqueid).count()
-                    #if(y > 0):
-                        #uniqueid = random.randint(9999,999999)
-                    
-                    
-                    
-                    #strSQL = strSQL + "INSERT INTO t_appointment( "
-                    #strSQL = strSQL + "f_uniqueid , f_title, f_patientname, f_start_time, f_end_time, f_duration,f_location,f_treatmentid,f_status, description,provider,doctor,"
-                    #strSQL = strSQL + "patientmember,patient,cell,sendsms,sendrem,smsaction) VALUES ("
-                    #strSQL = strSQL + str(uniqueid) + ","
-                    #strSQL = strSQL + "'" + complaint + "',"
-                    #strSQL = strSQL + "'" + pat[0].fullname + "',"
-                    #strSQL = strSQL + "'" + strstart + "',"
-                    #strSQL = strSQL + "'" + strend + "',"
-                    #strSQL = strSQL + str(duration) + ","
-                    #strSQL = strSQL + "'" + location + "',"
-                    #strSQL = strSQL + "0" + ","
-                    #strSQL = strSQL + "'Open'" + ","
-                    #strSQL = strSQL + "'" + providernotes + "',"
-                    #strSQL = strSQL +  str(providerid) + ","
-                    #strSQL = strSQL +  str(doctorid) + ","
-                    #strSQL = strSQL +  str(memberid) + ","
-                    #strSQL = strSQL + str(patientid) + ","
-                    #strSQL = strSQL + "'" + cell + "',"
-                    #strSQL = strSQL + "'T'" + ","
-                    #strSQL = strSQL + "'T'" + ","
-                    #strSQL = strSQL + "'create'"  + ")"           
-                    ##strSQL = strSQL + "'T'" + ")"
-                    ##strSQL = strSQL + "1",
-                    ##strSQL = strSQL + "'" + common.getstringfromdate(datetime.datetime.today(),"%Y-%m-%d %H:%M") +"',"
-                    ##strSQL = strSQL + "1",
-                    ##strSQL = strSQL + "'" + common.getstringfromdate(datetime.datetime.today(),"%Y-%m-%d %H:%M") + "')"
-                    
-                    
-                    #logger.loggerpms2.info("Insert Appointment SQL ",strSQL)
-                   
-                    #22/07/22 As per new Appointment confirmation process, we are setting the initial status as Open rather than Confirmed
-                    apptid  = db.t_appointment.insert(f_start_time=startapptdt, f_end_time = endapptdt, f_duration = duration, f_status = "Open", 
-                                                      cell = cell,f_title = complaint,f_treatmentid = 0,
-                                                      f_patientname = common.getstring(pat[0].fullname),
-                                                      description = providernotes,f_location = location, sendsms = True, smsaction = 'create',sendrem = True,
-                                                      doctor = doctorid, provider=providerid, clinicid=clinicid,\
-                                                      patient=patientid,patientmember=memberid, is_active=True,
-                                                      created_on=common.getISTFormatCurrentLocatTime(),modified_on=common.getISTFormatCurrentLocatTime(),
-                                                      created_by = 1,
-                                                      modified_by= 1) 
-                    
-                    #db.executesql(strSQL)
-                    #db.commit()
-                    #ds = db(db.t_appointment.f_uniqueid == uniqueid).select(db.t_appointment.id)
-                    #apptid = int(common.getid(ds[0].id) if (len(ds) == 1) else "0")
-                    
-                    logger.loggerpms2.info("New Appointment " + str(apptid))
-                    
-                    appointment_ref = common.getkeyvalue(avars,"appointment_ref", str(apptid))
-                    appointment_ref = str(apptid) if(common.getstring(appointment_ref) == "") else appointment_ref
-                    
-                    db(db.t_appointment.id == apptid).update(f_uniqueid = appointment_ref)
-                    
-                    #save in case report
-                    common.logapptnotes(db,complaint,providernotes,apptid)
-                    
-                    # Send Confirmation SMS
-                    #self.sms_confirmation(appPath,apptid,"create")
-                    
-                    newapptobj= {"result":"success","error_message":"","appointment_ref":appointment_ref,"appointmentid":apptid,"clinicid":clinicid,"message":"success"}
-                 
-                else:
-                    logger.loggerpms2.info("Blocked")
-                    newapptobj = {"result":"success","error_message":"","appointment_ref":appointment_ref,"clinicid":clinicid, "appointmentid":0,"message":"Invalid Appointment Date and Time"}
-                    
             except Exception as e:
                 excpobj = {}
                 excpobj["result"] = "fail"
-                excpobj["error_message"] = "New Appointment API Exception Error - " + str(e)
+                excpobj["error_message"] = "NewAppointment API Exception Error - " + str(e)
                 return json.dumps(excpobj)       
                 
     
             
             return json.dumps(newapptobj)    
+
+    def xnewappointment(self,avars):        
+                logger.loggerpms2.info("Enter NewAppointment API ==>" + json.dumps(avars))
+                
+                
+                
+                memberid = int(common.getid(common.getkeyvalue(avars,"memberid","0")))
+                patientid = int(common.getid(common.getkeyvalue(avars,"patientid","0")))
+                doctorid = int(common.getid(common.getkeyvalue(avars,"doctorid","0")))
+                clinicid = int(common.getid(common.getkeyvalue(avars,"clinicid",str(self.clinicid))))
+                clinicid = self.clinicid if clinicid == 0 else clinicid
+                
+                complaint = common.getkeyvalue(avars,"complaint","")
+                
+                startdt = common.getkeyvalue(avars,"startdt",common.getstringfromdate(common.getISTFormatCurrentLocatTime(),"%d/%m/%Y"))
+                duration = int(common.getid(common.getkeyvalue(avars,"duration","30")))
+    
+                providernotes = common.getkeyvalue(avars,"providernotes","")
+                cell = common.getkeyvalue(avars,"cell","")
+                appPath = common.getkeyvalue(avars,"appPath","")
+                appointment_ref = common.getkeyvalue(avars,"appointment_ref","")
+                
+                
+                
+                logger.loggerpms2.info("Enter newappointment in mdpappointment" + str(memberid) + " " + startdt + " " + str(self.clinicid))
+                
+                db = self.db
+                providerid = self.providerid
+                
+                clinicid = self.clinicid if(clinicid == 0) else clinicid
+    
+                auth = current.auth
+                
+                newapptobj = {}
+                
+                
+                try:
+                    #location of the Provider's practice
+                    location = ""
+                    provs = db(db.provider.id == providerid).select()
+                    if(len(provs) == 1):
+                        location = provs[0].pa_practicename + ", " + provs[0].pa_practiceaddress
+                    
+                    # find out day of the appt.
+                    startapptdt    = common.getdt(datetime.datetime.strptime(startdt,"%d/%m/%Y %H:%M"))
+                    endapptdt = startapptdt + timedelta(minutes=duration)
+                    
+                    
+            
+                    
+                    pat = db((db.vw_memberpatientlist.primarypatientid == memberid) & (db.vw_memberpatientlist.patientid == patientid)).\
+                        select(db.vw_memberpatientlist.fullname,db.vw_memberpatientlist.dob)
+                    
+                    #check for block
+                    if((self.isBlocked(startapptdt,endapptdt,doctorid,clinicid)==False)):
+                        logger.loggerpms2.info("Not Blocked")
+                        
+                        #strSQL = ""
+                        #strstart = common.getstringfromdate(startapptdt, "%Y-%m-%d %H:%M")
+                        #strend = common.getstringfromdate(endapptdt, "%Y-%m-%d %H:%M")
+                        
+                        #uniqueid = random.randint(9999,999999)
+                        #y = db(db.t_appointment.f_uniqueid == uniqueid).count()
+                        #if(y > 0):
+                            #uniqueid = random.randint(9999,999999)
+                        
+                        
+                        
+                        #strSQL = strSQL + "INSERT INTO t_appointment( "
+                        #strSQL = strSQL + "f_uniqueid , f_title, f_patientname, f_start_time, f_end_time, f_duration,f_location,f_treatmentid,f_status, description,provider,doctor,"
+                        #strSQL = strSQL + "patientmember,patient,cell,sendsms,sendrem,smsaction) VALUES ("
+                        #strSQL = strSQL + str(uniqueid) + ","
+                        #strSQL = strSQL + "'" + complaint + "',"
+                        #strSQL = strSQL + "'" + pat[0].fullname + "',"
+                        #strSQL = strSQL + "'" + strstart + "',"
+                        #strSQL = strSQL + "'" + strend + "',"
+                        #strSQL = strSQL + str(duration) + ","
+                        #strSQL = strSQL + "'" + location + "',"
+                        #strSQL = strSQL + "0" + ","
+                        #strSQL = strSQL + "'Open'" + ","
+                        #strSQL = strSQL + "'" + providernotes + "',"
+                        #strSQL = strSQL +  str(providerid) + ","
+                        #strSQL = strSQL +  str(doctorid) + ","
+                        #strSQL = strSQL +  str(memberid) + ","
+                        #strSQL = strSQL + str(patientid) + ","
+                        #strSQL = strSQL + "'" + cell + "',"
+                        #strSQL = strSQL + "'T'" + ","
+                        #strSQL = strSQL + "'T'" + ","
+                        #strSQL = strSQL + "'create'"  + ")"           
+                        ##strSQL = strSQL + "'T'" + ")"
+                        ##strSQL = strSQL + "1",
+                        ##strSQL = strSQL + "'" + common.getstringfromdate(datetime.datetime.today(),"%Y-%m-%d %H:%M") +"',"
+                        ##strSQL = strSQL + "1",
+                        ##strSQL = strSQL + "'" + common.getstringfromdate(datetime.datetime.today(),"%Y-%m-%d %H:%M") + "')"
+                        
+                        
+                        #logger.loggerpms2.info("Insert Appointment SQL ",strSQL)
+                       
+                        #22/07/22 As per new Appointment confirmation process, we are setting the initial status as Open rather than Confirmed
+                        apptid  = db.t_appointment.insert(f_start_time=startapptdt, f_end_time = endapptdt, f_duration = duration, f_status = "Open", 
+                                                          cell = cell,f_title = complaint,f_treatmentid = 0,
+                                                          f_patientname = common.getstring(pat[0].fullname),
+                                                          description = providernotes,f_location = location, sendsms = True, smsaction = 'create',sendrem = True,
+                                                          doctor = doctorid, provider=providerid, clinicid=clinicid,\
+                                                          patient=patientid,patientmember=memberid, is_active=True,
+                                                          created_on=common.getISTFormatCurrentLocatTime(),modified_on=common.getISTFormatCurrentLocatTime(),
+                                                          created_by = 1,
+                                                          modified_by= 1) 
+                        
+                        #db.executesql(strSQL)
+                        #db.commit()
+                        #ds = db(db.t_appointment.f_uniqueid == uniqueid).select(db.t_appointment.id)
+                        #apptid = int(common.getid(ds[0].id) if (len(ds) == 1) else "0")
+                        
+                        logger.loggerpms2.info("New Appointment " + str(apptid))
+                        
+                        appointment_ref = common.getkeyvalue(avars,"appointment_ref", str(apptid))
+                        appointment_ref = str(apptid) if(common.getstring(appointment_ref) == "") else appointment_ref
+                        
+                        db(db.t_appointment.id == apptid).update(f_uniqueid = appointment_ref)
+                        
+                        #save in case report
+                        common.logapptnotes(db,complaint,providernotes,apptid)
+                        
+                        # Send Confirmation SMS
+                        #self.sms_confirmation(appPath,apptid,"create")
+                        
+                        newapptobj= {"result":"success","error_message":"","appointment_ref":appointment_ref,"appointmentid":apptid,"clinicid":clinicid,"message":"success"}
+                     
+                    else:
+                        logger.loggerpms2.info("Blocked")
+                        newapptobj = {"result":"success","error_message":"","appointment_ref":appointment_ref,"clinicid":clinicid, "appointmentid":0,"message":"Invalid Appointment Date and Time"}
+                        
+                except Exception as e:
+                    excpobj = {}
+                    excpobj["result"] = "fail"
+                    excpobj["error_message"] = "New Appointment API Exception Error - " + str(e)
+                    return json.dumps(excpobj)       
+                    
+        
+                
+                return json.dumps(newapptobj)    
+                
+        
     def cancelappointment(self,appointmentid,providernotes,appPath):
+        
         logger.loggerpms2.info("Enter Cancel Appointment APi")
+        
         db = self.db
         providerid = self.providerid
         auth = current.auth
@@ -1209,21 +1252,65 @@ class Appointment:
             # Send Confirmation SMS
             #retval = self.sms_confirmation(appPath,appointmentid,"delete")
             #logger.loggerpms2.info("SMS Confirmation Ret value = >>" + str(retval))
-            
-            if(retval == True):
-                apptobj= {"result":True, "appointmentid":appointmentid,"message":"Appointment deleted successfully"}
-            else:
-                apptobj= {"result":False, "appointmentid":appointmentid,"message":"Error sending delete appointment SMS message"}  
+            apptobj= {"result":True, "appointmentid":appointmentid,"message":"Appointment deleted successfully"}
                 
         except Exception as e:
             excpobj = {}
-            excpobj["result"] = False
-            excpobj["error_message"] = "Cancel Appointment API Exception Error - " + str(e)
+            excpobj["result"] = "fail"
+            excpobj["error_message"] = "CancelAppointment API Exception Error - " + str(e)
             
             logger.loggerpms2.info("Cancel Appointment API Exception Error - " + str(e))
             return json.dumps(excpobj)       
 
         return json.dumps(apptobj)
+    
+    def cancel_appointment(self,avars):
+        logger.loggerpms2.info("Enter Cancel_Appointment API ==>"  + json.dumps(avars))
+        db = self.db
+        auth = current.auth
+        
+        
+        apptobj = {}
+        
+        
+        try:
+            
+            appointmentid = int(common.getkeyvalue(avars,"appointmentid","0"))
+            appt = db((db.t_appointment.id == appointmentid) & (db.t_appointment.is_active == True)).select(db.t_appointment.description,db.t_appointment.f_title)
+            desc = "" if len(appt) != 1 else appt[0].description
+            notes = common.getkeyvalue(avars,"notes",desc)
+            cc = "" if len(appt) != 1 else appt[0].f_title
+            
+            db((db.t_appointment.id == appointmentid)).update(\
+                description = notes,
+                f_status = "Cancelled"  ,  
+                sendsms = True,
+                sendrem = True,
+                smsaction = "cancelled",
+                is_active = False,
+                    
+                modified_on=common.getISTFormatCurrentLocatTime(),
+                modified_by= 1 if(auth.user == None) else auth.user.id
+                
+            )
+            
+            db((db.hv_doc_appointment.appointmentid == appointmentid)).update(\
+                     hv_appt_cancelled_on = common.getISTFormatCurrentLocatTime(),
+                     hv_appt_cancelled_by = 1 if(auth.user == None) else auth.user.id   
+                 )        
+            common.logapptnotes(db,cc,notes,appointmentid)
+            apptobj= {"result":"success", "appointmentid":appointmentid,"error_message":"", "error_code":"", "message":"Appointment Cancelled successfully"}
+            
+                
+        except Exception as e:
+            excpobj = {}
+            excpobj["result"] = "fail"
+            excpobj["error_message"] = "Cancel_Appointment API Exception Error - " + str(e)
+            return json.dumps(excpobj)       
+        
+                 
+        return json.dumps(apptobj)
+    
                                                         
     def checkinappointment(self,apptid):
         logger.loggerpms2.info("Enter Checkin Appointment APi")
@@ -1255,12 +1342,65 @@ class Appointment:
     
     #def updateappointment(self,appointmentid,doctorid,complaint,startdt,duration,providernotes,cell,status,treatmentid,appPath):
     def updateappointment(self,avars):
+
+        logger.loggerpms2.info("Enter API updateappointment " + json.dumps(avars))
+        db = self.db
+        auth = current.auth        
+
+        apptobj = {}
+        
+        
+        try:
+            appointmentid = int(common.getid(common.getkeyvalue(avars,"appointmentid","0"))) 
+           
+            appt = db(db.t_appointment.id == appointmentid).select()
+
+            #current appointment date/time & new appt date time
+            #if they are different then, it is Reschedule else it is normal update
+            curraptdt = appt[0].f_start_time
+            startdt = common.getkeyvalue(avars,"startdt",common.getstringfromdate(curraptdt,"%d/%m/%Y %H:%M"))
+            newapptdt    = common.getdt(datetime.datetime.strptime(startdt,"%d/%m/%Y %H:%M"))
+            
+            
+            #reschedule
+            if(curraptdt != newapptdt):
+                avars["appointment_start"] = common.getstringfromdate(newapptdt,"%d/%m/%Y %H:%M")
+                apptobj = json.loads(self.reSchedule(avars))
+            else:
+                #update
+                avars["appointment_start"] = startdt
+                
+                if("duration" in avars):
+                    avars["f_duration"] = common.getkeyvalue(avars,"duration","30")
+                if("status" in avars):
+                    avars["f_status"] = common.getkeyvalue(avars,"status","Open")
+                if("providernotes" in avars):
+                    avars["notes"] = common.getkeyvalue(avars,"providernotes","")
+                
+                if("startdt" in avars)    :
+                    avars["f_start_time"] = startdt
+                
+                if("doctorid" in avars):
+                    avars["doctor"] = common.getkeyvalue(avars,"doctorid",0)
+                    
+                apptobj = json.loads(self.update_appointment(avars))
+                
+        except Exception as e:
+            excpobj = {}
+            excpobj["result"] = "fail"
+            excpobj["error_message"] = "UpdateAppointment  API Exception Error - " + str(e)
+            return json.dumps(excpobj)       
+        
+               
+        return json.dumps(apptobj)
+        
+    def xupdateappointment(self,avars):
         
         treatmentid = int(common.getid(common.getkeyvalue(avars,"treatmentid","0")))
         appointmentid = int(common.getid(common.getkeyvalue(avars,"appointmentid","0")))
         doctorid = int(common.getid(common.getkeyvalue(avars,"doctorid","0")))
         clinicid = int(common.getid(common.getkeyvalue(avars,"clinicid",self.clinicid)))
-        
+        clinicid = self.clinicid if clinicid == 0 else clinicid
         complaint = common.getkeyvalue(avars,"complaint","")
         
         startdt = common.getkeyvalue(avars,"startdt",common.getstringfromdate(common.getISTFormatCurrentLocatTime(),"%d/%m/%Y"))
@@ -1283,18 +1423,22 @@ class Appointment:
         providerid = self.providerid
         auth = current.auth
         
-        appt = db(db.t_appointment.id == appointmentid).select()  
-        curraptdt = appt[0].f_start_time
-        currenddt = appt[0].f_end_time
-        currnotes = common.getstring(appt[0].description)
-        
+       
         
         apptobj = {}
         
         
         try:
+            
+            appt = db(db.t_appointment.id == appointmentid).select()  
+            curraptdt = appt[0].f_start_time
+            currenddt = appt[0].f_end_time
+            currnotes = common.getstring(appt[0].description)
+            
             newapptdt    = common.getdt(datetime.datetime.strptime(startdt,"%d/%m/%Y %H:%M"))
             newendapptdt = newapptdt + timedelta(minutes=duration)       
+            
+           
             
             if(self.isBlocked(newapptdt,newendapptdt,doctorid if(doctorid != 0) else appt[0].doctor)==False):
                 db(db.t_appointment.id == appointmentid).update(\
@@ -1309,7 +1453,7 @@ class Appointment:
                     sendsms = True  if(curraptdt !=newapptdt ) else common.getboolean(appt[0].sendsms),
                     sendrem = True  if(curraptdt !=newapptdt ) else common.getboolean(appt[0].sendrem),
                     
-                    smsaction = 'update'  if(curraptdt !=newapptdt ) else common.getboolean(appt[0].smsaction),
+                    smsaction = 'rescheduled'  if(curraptdt !=newapptdt ) else common.getboolean(appt[0].smsaction),
                     description = providernotes if(providernotes != "") else currnotes,
                     doctor = doctorid if(doctorid != 0) else appt[0].doctor,
                     cell = cell if(common.getstring(cell) != "") else appt[0].cell,
@@ -1328,19 +1472,18 @@ class Appointment:
                 #if(curraptdt !=newapptdt ):
                     #retval = self.sms_confirmation(appPath,appointmentid,"update")
                 
-                apptobj= {"result":True, "appointmentid":appointmentid,"message":"Appointment updated successfully"}
+                apptobj= {"result":"success", "appointmentid":appointmentid,"message":"Appointment updated successfully"}
             else:
-                apptobj = {"result":False, "appointmentid":appointmentid,"message":"Invalid Appointment Date and Time"}
+                apptobj = {"result":"fail", "appointmentid":appointmentid,"message":"Invalid Appointment Date and Time"}
                 
         except Exception as e:
             excpobj = {}
-            excpobj["result"] = False
+            excpobj["result"] = "fail"
             excpobj["error_message"] = "Check-in Appointment API Exception Error - " + str(e)
             return json.dumps(excpobj)       
         
                
         return json.dumps(apptobj)
-        
      
     def groupsms(self,appPath):
         
@@ -1657,10 +1800,16 @@ class Appointment:
                 if((provcell != "") & (sendsms)):
                     #retVal = mail.sendSMS2Email(db,doccell,docmessage)
                     retVal = mail.sendAPI_SMS2Email(db,provcell,docmessage)
+                    if(doccell != ""):
+                        retVal = mail.sendAPI_SMS2Email(db,doccell,docmessage)
                     
                 if((provemail != "")&(sendemail)):
                     #retVal1 = mail.groupEmail(db, docemail, ccs, "Appointment: " + appttime, docmessage)  # send email to patient        
-                    retVal1 = mail._groupEmail(db, _mail, provemail, ccs, "Appointment: " + appttime, docmessage)  # send email to provider        
+                    
+                    emails = provemail
+                    if(docemail != ""):
+                        emails = emails + "," + docemail
+                    retVal1 = mail._groupEmail(db, _mail, emails, ccs, "Appointment: " + appttime, docmessage)  # send email to provider        
                 
                 
                 
@@ -1763,7 +1912,7 @@ class Appointment:
             
         
         except Exception as e:
-            mssg = "sendSMS API Exception Error ==>>" + str(e)
+            mssg = "sendAllAppointmentsSMSEmail API Exception Error ==>>" + str(e)
             excpobj = {}
             excpobj["result"] = "fail"
             excpobj["error_message"] = mssg
@@ -1784,7 +1933,8 @@ class Appointment:
             
             blockappt = common.getboolean(common.getkeyvalue(avars,"block","False"))
             providerid = int(common.getkeyvalue(avars,"providerid","0"))
-            clinicid = int(common.getkeyvalue(avars,"clinicid",str(self.clinicid)))
+            clinicid = int(common.getid(common.getkeyvalue(avars,"clinicid",str(self.clinicid))))
+            clinicid = self.clinicid if clinicid == 0 else clinicid
             
             memberid = int(common.getkeyvalue(avars,"memberid","0"))
             patientid = int(common.getkeyvalue(avars,"patientid",common.getstring(memberid)))
@@ -1797,7 +1947,7 @@ class Appointment:
             defdoctorid = d[0].id if(len(d) != 0) else 0
             doctorid = int(common.getkeyvalue(avars,"doctorid",common.getstring(defdoctorid)))
             
-            duration = common.getkeyvalue(avars,"duration","30")
+            duration = int(common.getid(common.getkeyvalue(avars,"duration",30)))
             defdtstr = common.getstringfromdate(datetime.datetime.today(), "%d/%m/%Y %H:%M")
             startdtstr = common.getkeyvalue(avars,"appointment_start",defdtstr)
             startapptdt = common.getdatefromstring(startdtstr, "%d/%m/%Y %H:%M")
@@ -1882,6 +2032,15 @@ class Appointment:
                 
                 def_start_time_str = common.getstringfromdate(ds[0].f_start_time,"%d/%m/%Y %H:%M")
                 def_end_time_str  = common.getstringfromdate(ds[0].f_end_time,"%d/%m/%Y %H:%M")
+                def_start_time =ds[0].f_start_time
+                curr_start_time = common.getdatefromstring(common.getkeyvalue(avars,"f_start_time",def_start_time_str),"%d/%m/%Y %H:%M")
+                
+                #check whether to reschedule
+                if(def_start_time != curr_start_time):
+                    avars["smsaction"] = "rescheduled"
+                    avars["sendsms"] = True
+                    avars["sendrem"] = True
+                
                 notes = common.getkeyvalue(avars,"notes",ds[0].description)
                 cc = common.getkeyvalue(avars,"complaint",ds[0].f_title)
                 
@@ -1945,52 +2104,6 @@ class Appointment:
                
         return json.dumps(apptobj)
         
-    def cancel_appointment(self,avars):
-        logger.loggerpms2.info("Enter Cancel_Appointment API ==>"  + json.dumps(avars))
-        db = self.db
-        auth = current.auth
-        
-        
-        apptobj = {}
-        
-        
-        try:
-            
-            appointmentid = int(common.getkeyvalue(avars,"appointmentid","0"))
-            appt = db((db.t_appointment.id == appointmentid) & (db.t_appointment.is_active == True)).select(db.t_appointment.description,db.t_appointment.f_title)
-            desc = "" if len(appt) != 1 else appt[0].description
-            notes = common.getkeyvalue(avars,"notes",desc)
-            cc = "" if len(appt) != 1 else appt[0].f_title
-            
-            db((db.t_appointment.id == appointmentid)).update(\
-                description = notes,
-                f_status = "Cancelled"  ,  
-                sendsms = True,
-                sendrem = True,
-                smsaction = "cancelled",
-                is_active = False,
-                    
-                modified_on=common.getISTFormatCurrentLocatTime(),
-                modified_by= 1 if(auth.user == None) else auth.user.id
-                
-            )
-            
-            db((db.hv_doc_appointment.appointmentid == appointmentid)).update(\
-                     hv_appt_cancelled_on = common.getISTFormatCurrentLocatTime(),
-                     hv_appt_cancelled_by = 1 if(auth.user == None) else auth.user.id   
-                 )        
-            common.logapptnotes(db,cc,notes,appointmentid)
-            apptobj= {"result":"success", "appointmentid":appointmentid,"error_message":"", "error_code":"", "message":"Appointment Cancelled successfully"}
-            
-                
-        except Exception as e:
-            excpobj = {}
-            excpobj["result"] = False
-            excpobj["error_message"] = "Cancel Appointment API Exception Error - " + str(e)
-            return json.dumps(excpobj)       
-        
-                 
-        return json.dumps(apptobj)
                   
     
     def get_appointment(self,avars):
@@ -2211,7 +2324,8 @@ class Appointment:
         
         try:
             providerid = int(common.getkeyvalue(avars,"providerid","0"))
-            clinicid = int(common.getkeyvalue(avars,"clinicid",str(self.clinicid)))
+            clinicid = int(common.getid(common.getkeyvalue(avars,"clinicid",str(self.clinicid))))
+            clinicid = self.clinicid if clinicid == 0 else clinicid
             doctorid = int(common.getkeyvalue(avars,"doctorid","0"))
             memberid = int(common.getkeyvalue(avars,"memberid","0"))
             patientid = int(common.getkeyvalue(avars,"patientid","0"))
@@ -2492,7 +2606,7 @@ class Appointment:
                 
         except Exception as e:
             excpobj = {}
-            excpobj["result"] = False
+            excpobj["result"] = "fail"
             excpobj["error_message"] = "Remove Block API Exception Error - " + str(e)
             return json.dumps(excpobj)       
         
@@ -2529,7 +2643,7 @@ class Appointment:
                     
             except Exception as e:
                 excpobj = {}
-                excpobj["result"] = False
+                excpobj["result"] = "fail"
                 excpobj["error_message"] = "Remove Block API Exception Error - " + str(e)
                 return json.dumps(excpobj)       
             
@@ -2596,7 +2710,7 @@ class Appointment:
     
     def reSchedule(self,avars):
         logger.loggerpms2.info("Enter API reSchedule  " + json.dumps(avars))
-        duration = common.getkeyvalue(avars,"duration","30")
+        duration = common.getkeyvalue(avars,"duration",30)
         defdtstr = common.getstringfromdate(datetime.datetime.today(), "%d/%m/%Y %H:%M")
         startdtstr = common.getkeyvalue(avars,"appointment_start",defdtstr)
         startapptdt = common.getdatefromstring(startdtstr, "%d/%m/%Y %H:%M")

@@ -2792,13 +2792,48 @@ db.define_table('vw_memberpatientlist_fast',
                 Field('plan_id','integer'),
                 Field('plan_code','string'),
                 Field('plan_name','string'),
-                Field('company_code','string')
+                Field('company_code','string'),
+                Field('is_active','boolean')
                 
                 
                 )
 db.vw_memberpatientlist_fast._singular = "vw_memberpatientlist_fast"
-db.vw_memberpatientlist_fast_plural   = "vw_memberpatientlist+fast"
+db.vw_memberpatientlist_fast._plural   = "vw_memberpatientlist_fast"
 
+
+
+db.define_table('vw_memberpatientlist_min',
+                Field('patientid','integer'), 
+                Field('memberid','integer'), 
+                Field('providerid','integer'), 
+                Field('patientmember','string'),  
+                Field('cell','string'), 
+                Field('email','string'), 
+                Field('hmopatientmember','boolean'),
+                Field('fname','string'),
+           
+                Field('lname','string'),
+                Field('fullname','string'),
+                Field('patient','string'),
+                Field('groupref','string'),
+                Field('gender','string'),
+                Field('dob','date'),
+                Field('premstartdt','date'),
+                Field('premenddt','date'),
+                Field('patienttype','string'),
+                Field('relation','string'),
+               
+                Field('hmoplan','integer'),
+                Field('company','integer'),
+                Field('hmoplanname','string'),
+                Field('hmoplancode','string'),
+                
+                Field('is_active','boolean')
+                
+                
+                )
+db.vw_memberpatientlist_min._singular = "vw_memberpatientlist_min"
+db.vw_memberpatientlist_min._plural   = "vw_memberpatientlist_min"
 
 
 

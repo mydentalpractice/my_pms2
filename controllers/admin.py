@@ -601,7 +601,7 @@ def login():
 
     
     if form.process().accepted:
-        logger.loggerpms2.info("MyDentalPlan Login ==>>" + common.getstring(form.vars.username) + " " + common.getstring(form.vars.password.password))
+        #logger.loggerpms2.info("MyDentalPlan Login ==>>" + common.getstring(form.vars.username) + " " + common.getstring(form.vars.password.password))
         session.clinicid = 0
         session.clinicname = ""
 
@@ -631,11 +631,12 @@ def login():
             auth.settings.login_url = URL('admin','login')
             logmssg = ""
             provdict = common.getprovider(auth, db)
-            session.religare = common.getboolean(provdict["rlgprovider"])
+            #session.religare = common.getboolean(provdict["rlgprovider"])
             session.isMDP = common.getboolean(provdict["isMDP"])
             session.logo_id = provdict["logo_id"]
             session.logo_file =  URL('my_dentalplan','media','media_download',args=[provdict["logo_id"]])
             
+            logger.loggerpms2.info("Login " + str(session.religare))
             
             if(int(provdict["providerid"]) == 0):
                 logmssg = 'Login Success - SuperAdmin Access'
@@ -651,7 +652,7 @@ def login():
                                                         )                   
                 
                 #redirect(URL('admin','providerhome'))
-                redirect(URL('admin','select_clinic'))
+                redirect(URL('admin','select_clinic',vars=dict(providerid =int(provdict["providerid"]) )))
                 
     elif form.errors:
         logmssg = "Login Error " + str(form.errors)
@@ -707,23 +708,27 @@ def reset_password():
 
 def select_clinic():
     #logger.loggerpms2.info("Enter Select Clinic")
-    formheader = "New Agent"
+    formheader = "Select Clinic"
     username = ""
     returnurl = URL('admin','login')
 
-    provdict = common.getprovider(auth,db)
-    providerid = int(provdict["providerid"])
-    if(providerid  < 0):
-        raise HTTP(400,"PMS-Error: There is no valid logged-in Provider: select clinic()")    
-
-    #cc=common.getkeyvalue(request.vars,"cc","MDP")
-    #logo_file = cc + "Logo.jpg"
-    #isMDP = common.getboolean(provdict["isMDP"])
+    providerid = int(common.getid(common.getkeyvalue(request.vars,"providerid",0)))
+   
 
     #primary clinicid of this provider
     c = db((db.vw_clinic.is_active == True) & (db.vw_clinic.ref_code == 'PRV') & (db.vw_clinic.ref_id == providerid) & (db.vw_clinic.primary_clinic == True)).select()
     clinicid = int(common.getid(c[0].id)) if(len(c) == 1) else 0
     clinics = db((db.vw_clinic.ref_code == 'PRV') & (db.vw_clinic.ref_id == providerid) & (db.vw_clinic.is_active == True ))
+    clinicname = ""
+    
+    #if single clinic then default to that clinic and go to home page
+    if(len(c)==1):
+        
+      
+        clinicname= common.getstring(c[0].name) 
+        session.clinicid = clinicid
+        session.clinicname = clinicname
+        redirect(URL('admin','providerhome', vars=dict(clinicid=clinicid,clinicname=clinicname)))         
     
     form = SQLFORM.factory(
         Field('clinic', 'string', widget = lambda field, value:SQLFORM.widgets.options.widget(field, value,_style="width:100%;height:35px",_class='form-control'),

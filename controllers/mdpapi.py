@@ -1248,11 +1248,11 @@ def reSchedule(avars):
     rsp = oappts.reSchedule(avars)
     
     # Send Confirmation SMS
-    obj = json.loads(rsp)
-    apptPath = current.globalenv["request"].folder
-    appointmentid = common.getkeyvalue(obj,"appointmentid",0)
-    if((appointmentid != 0) & (apptPath != "")):
-	oappts.sms_confirmation(apptPath,appointmentid,"update")     
+    #obj = json.loads(rsp)
+    #apptPath = current.globalenv["request"].folder
+    #appointmentid = common.getkeyvalue(obj,"appointmentid",0)
+    #if((appointmentid != 0) & (apptPath != "")):
+	#oappts.sms_confirmation(apptPath,appointmentid,"update")     
 	
     return rsp
     
@@ -1382,6 +1382,8 @@ def newappointment(avars):
     return rsp
 #X
 def updateappointment(avars):
+    
+    
     avars["appPath"] = current.globalenv["request"].folder
     oappts = mdpappointment.Appointment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
     rsp = oappts.updateappointment(avars)
@@ -1408,14 +1410,20 @@ def cancelappointment(avars):
     
     oappts = mdpappointment.Appointment(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
     
-   # (self,appointmentid,doctorid,complaint,startdt,duration,providernotes,cell,status,treatmentid,appPath):
-    rsp = oappts.cancelappointment(\
+    avars0 = {}
+    avars0["appointmentid"] = common.getkeyvalue(avars,"appointmentid",0)
+    avars0["notes"] = common.getkeyvalue(avars,"providernotes","")
+    
+    rsp = cancel_appointment(avars0)
+    
+   ## (self,appointmentid,doctorid,complaint,startdt,duration,providernotes,cell,status,treatmentid,appPath):
+    #rsp = oappts.cancelappointment(\
         
-        int(common.getid(str(avars["appointmentid"]))) if("appointmentid" in avars) else 0,
+        #int(common.getid(str(avars["appointmentid"]))) if("appointmentid" in avars) else 0,
        
-        common.getstring(str(avars["providernotes"]))  if("providernotes"in avars) else "",
+        #common.getstring(str(avars["providernotes"]))  if("providernotes"in avars) else "",
        
-        current.globalenv["request"].folder)    
+        #current.globalenv["request"].folder)    
 
 
     return rsp

@@ -595,7 +595,11 @@ def list_patients():
     
     returnurl = URL('admin', 'providerhome')    
 
-    r = db((db.vw_memberpatientlist.providerid==providerid)&(db.vw_memberpatientlist.patientid==patientid)&(db.vw_memberpatientlist.primarypatientid==memberid)&(db.vw_memberpatientlist.is_active==True)).select()
+    #r = db((db.vw_memberpatientlist_fast.providerid==providerid)&(db.vw_memberpatientlist_fast.patientid==patientid)&(db.vw_memberpatientlist_fast.primarypatientid==memberid)&(db.vw_memberpatientlist_fast.is_active==True)).select()
+    r = db((db.patientmember.provider==providerid)&\
+           (db.patientmember.id==patientid)&\
+           (db.patientmember.hmopatientmember==True)&\
+           (db.patientmember.is_active==True)).select()
     if(len(r)>0):
         memberref = common.getstring(r[0].patientmember)  #patientmember
         fullname = common.getstring(r[0].fullname)      #fname + lname

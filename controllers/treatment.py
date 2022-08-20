@@ -2495,6 +2495,303 @@ def authorizetreatment():
 
 @auth.requires(auth.has_membership('provider') or auth.has_membership('webadmin')) 
 @auth.requires_login()
+#http://164.52.212.106/my_pms2/treatment/update_treatment?imagepage=0&page=1&providerid=95&treatmentid=14169
+def update_treatment_new():
+    
+    authorization = False   #authorization required based on company/plan
+    preauthorized = False
+    authorized = False      #post authorization
+    preauthorizeerror = False
+    authorizeerror = False
+    webadmin = auth.user.impersonated
+    
+    try:
+        
+        
+        page = int(common.getid(common.getkeyvalue(request.vars,"page","0")))
+        imagepage = int(common.getid(common.getkeyvalue(request.vars,"imagepage","0")))
+        
+        providerid = int(common.getid(common.getkeyvalue(request.vars,"providerid","0")))
+        provs = db((db.provider.id == providerid) & (db.provider.is_active == True)).select()
+        providername = provs[0].providername if (len(provs) > 0) else ""
+        treatmentid = int(common.getid(common.getkeyvalue(request.vars,"treatmentid","0")))
+        
+      
+        #treatmentid,treatment, memberid,patientid,patientmember,membername, patientname, patienttype
+        treatments = db((db.treatment.id == treatmentid) & (db.treatment.is_active == True)).select()
+        tplanid = treatments[0].treatmentplan if(len(treatments) > 0) else 0
+        treatment = treatments[0].treatmentplan if(len(treatments) > 0) else ""
+        procedureid = int(common.getid(treatments[0].dentalprocedure)) if(len(treatments) > 0) else 0
+        doctorid = int(common.getid(treatments[0].doctor)) if(len(treatments) > 0) else 0
+        currnotes = common.getstring(treatments[0].description) if(len(treatments) > 0) else ""
+        
+        docs = db((db.doctor.id == doctorid) & (db.doctor.is_active == True)).select()
+        doctorname = docs[0].name if(len(docs) > 0) else ""       
+        
+        #logger.loggerpms2.info("Enter updatetreatmentpayment from update treatment")
+        r = json.loads(account._updatetreatmentpayment(db,tplanid,0))
+        #logger.loggerpms2.info("After updatetreatmentpayment from update treatment " + json.dumps(r))
+        paytm = json.loads(account._calculatepayments(db,tplanid,None))
+        
+            
+
+        totalactualtreatmentcost = float(common.getvalue(treatments[0].actualtreatmentcost))   if(len(treatments) > 0) else 0  #this is total UCRR
+        authorized = common.getboolean(treatments[0].authorized) & (webadmin == True) if(len(treatments) > 0) else False
+        authorizationurl = URL('reports', 'treatmentreport', vars=dict(page=page, providerid=providerid,treatmentid=treatmentid))
+        
+        procs = db(db.vw_procedurepriceplan.id == procedureid).select()  
+        
+        ucrfee = float(common.getvalue(procs[0].ucrfee))  if(len(procs) > 0) else 0
+        altshortdescription = common.getstring(procs[0].altshortdescription) if(len(procs) > 0) else ""
+        remarks =  common.getstring(procs[0].remarks) if(len(procs) > 0) else ""
+           
+        tplans = db((db.treatmentplan.id == tplanid) & (db.treatmentplan.provider==providerid) & (db.treatmentplan.is_active == True)).select()
+         
+       
+        memberid = tplans[0].primarypatient if(len(tplans) > 0) else 0
+        patientid = tplans[0].patient if(len(tplans) > 0) else 0
+        patienttype = tplans[0].patienttype if(len(tplans) > 0) else 'P'
+        patientname = common.getstring(tplans[0].patientname).strip() if(len(tplans) > 0) else ""
+            
+        rows = db((db.vw_memberpatientlist.primarypatientid == memberid)&(db.vw_memberpatientlist.patientid == patientid)&\
+            (db.vw_memberpatientlist.providerid == providerid) & (db.vw_memberpatientlist.is_active == True)).select()
+        
+        
+        title = rows[0].title if(len(rows) > 0) else ""
+        fullname = common.getstring(rows[0].fullname).strip()   if(len(rows) > 0) else ""
+        patientmember = common.getstring(rows[0].patientmember).strip()  if(len(rows) > 0) else ""
+        patient = common.getstring(rows[0].patient).strip()  if(len(rows) > 0) else ""
+        membername = common.getstring(rows[0].fullname).strip()  if(len(rows) > 0) else ""
+        hmopatientmember = rows[0].hmopatientmember  if(len(rows) > 0) else ""
+        #procedurepriceplancode = mdputils.getprocedurepriceplancodeformember(db,providerid, memberid, patientid) #IB:15-Mar-2020 rows[0].procedurepriceplancode
+        newmember = common.getboolean(rows[0].newmember)   if(len(rows) > 0) else False       
+        freetreatment = common.getboolean(rows[0].freetreatment)  if(len(rows) > 0) else False                  
+        companyid = int(common.getstring(rows[0].company))  if(len(rows) > 0) else 0
+        cos = db(db.company.id == companyid).select()
+        # No Authorization till procedures are added.
+        procs = db((db.treatment_procedure.treatmentid == treatmentid)&(db.treatment_procedure.is_active==True)).count()                
+        authorization = common.getboolean(cos[0].authorizationrequired) & (procs>0)
+                    
+             
+ 
+        
+        #medical alerts
+        medicalalerts = False
+        alerts = db((db.medicalnotes.patientid == patientid) & (db.medicalnotes.memberid == memberid)).select()
+        if(len(alerts)>0):
+            medicalalerts = medicalalerts | common.getboolean(alerts[0].allergic)
+            medicalalerts = medicalalerts | common.getboolean(alerts[0].bp)
+            medicalalerts = medicalalerts | common.getboolean(alerts[0].heart)
+            medicalalerts = medicalalerts | common.getboolean(alerts[0].cardiac)
+            medicalalerts = medicalalerts | common.getboolean(alerts[0].diabetes)
+            medicalalerts = medicalalerts | common.getboolean(alerts[0].anyother)
+       
+           
+          
+        #determine treatment status   
+        defsts = common.getstring(treatments[0].status)
+        defsts = defsts if((defsts != None) & (defsts != "")) else 'Started'
+       
+        if(defsts == 'Sent for Authorization'):
+            preauthorized = True
+    
+        if(defsts == 'Authorized'):
+            preauthorized = True
+            authorized = True
+        
+  
+        writablflag = (not authorization) | (((not preauthorized) & (not authorized)&(not webadmin))|((webadmin)))
+         
+        enddate = common.getdt(treatments[0].enddate)
+        
+        precopay = paytm["precopay"]
+        discount_amount = paytm["discount_amount"] + paytm["walletamount"]
+        walletamount = paytm["walletamount"]
+        netcopay = paytm["copay"]
+        treatmentcost = paytm["treatmentcost"]
+        inspay = paytm["inspays"]
+        totalpaid = paytm["totalpaid"]
+        totaldue = paytm["totaldue"]
+        companypay = paytm["companypays"]
+        
+        formTreatment = SQLFORM.factory(
+           Field('patientmember', 'string',  label='Patient', default = fullname,\
+                 requires=[IS_NOT_EMPTY(),IS_IN_DB(db(db.vw_memberpatientlist.providerid == providerid), 'vw_memberpatientlist.fullname','%(fullname)s')],writable=False),
+           Field('xmemberid', 'string',  label='Member',default=memberid),
+           Field('treatment','string',label='Treatment No.', default=treatments[0].treatment),
+           Field('chiefcomplaint','string',label='Chief Complaint', default=treatments[0].chiefcomplaint,writable=writablflag),
+           Field('description','text', label='Description', default=treatments[0].description,writable=writablflag),
+           Field('quadrant','string', label='Quadrant(s)', default='',writable=writablflag),
+           Field('tooth','string', label='Tooth/Teeth', default='',writable=writablflag),
+           Field('startdate', 'date', label='From Date',default=treatments[0].startdate, requires=IS_EMPTY_OR(IS_DATE(format=('%d/%m/%Y'))),writable=writablflag),
+           Field('enddate', 'date', label='To Date',default=enddate, requires=IS_EMPTY_OR(IS_DATE(format=('%d/%m/%Y'))),writable=writablflag),
+           Field('status', 'string', widget = lambda field, value:SQLFORM.widgets.options.widget(field, value, _style="width:100%;height:35px",_class='w3-input w3-border ',_onchange='onstatuschange()'),label='Status',default=defsts, requires = IS_IN_SET(status.TREATMENTSTATUS),writable=True,readable=True),  
+           Field('ucrfee', 'double', label='Total UCR',default=totalactualtreatmentcost,writable=False),  
+           Field('treatmentcost', 'double', label='Total Treament Cost',default=treatmentcost,writable=False),  
+           Field('precopay', 'double', label='Total Copay',default=precopay, writable = False),  
+           Field('companypay', 'double', label='Benefit Amount',default=companypay, writable = False),  
+           Field('discount_amount', 'double', label='Discount Amount',default=discount_amount, writable = False),  
+           Field('copay', 'double', label='Total Copay',default=netcopay, writable = False),  
+           Field('inspay', 'double', label='Total Ins. Pays',default=inspay, writable=False),  
+           Field('totalpaid', 'double', label='Total Paid',default=totalpaid, writable=False),  
+           Field('totaldue', 'double', label='Total Due',default=totaldue, writable=False),  
+           Field('doctor', widget = lambda field, value:SQLFORM.widgets.options.widget(field, value, _class='form_details'), default=doctorid, label='Doctor',requires=IS_IN_DB(db((db.doctor.providerid==providerid)&(db.doctor.stafftype == 'Doctor')&(db.doctor.is_active==True)), 'doctor.id', '%(name)s')),
+           Field('vwdentalprocedure', 'string',   label='Procedure ID'),
+           Field('vwdentalprocedurecode', 'string',   label='Procedure Code'),
+           Field('xaction', 'string', default = 'UpdateTreatment')
+           )    
+     
+        doc = formTreatment.element('#no_table_doctor')
+        if(doc != None):
+            doc['_class'] = 'form-control'
+            doc['_style'] = 'width:100%'
+    
+        
+        xtreatment = formTreatment.element('input',_id='no_table_treatment')
+        if(xtreatment != None):
+            xtreatment['_class'] =  'form-control'
+            xtreatment['_type'] =  'text'
+            xtreatment['_autocomplete'] = 'off'     
+            xtreatment['_readonly'] = 'true'
+            
+        xvwdentalprocedurecode = formTreatment.element('input',_id='no_table_vwdentalprocedurecode')
+        if(xvwdentalprocedurecode != None):
+            xvwdentalprocedurecode['_class'] =  'form-control '
+            xvwdentalprocedurecode['_placeholder'] = 'Enter Dental Procedure Code' 
+            xvwdentalprocedurecode['_autocomplete'] = 'off'         
+            xvwdentalprocedurecode['_style'] = 'width:100%'
+        
+        xvwdentalprocedure = formTreatment.element('input',_id='no_table_vwdentalprocedure')
+        if(xvwdentalprocedure != None):
+            xvwdentalprocedure['_class'] =  'form-control '
+            xvwdentalprocedure['_placeholder'] = 'Enter Dental Procedure Name' 
+            xvwdentalprocedure['_autocomplete'] = 'off'         
+            xvwdentalprocedure['_style'] = 'width:100%'
+     
+        xtooth = formTreatment.element('input',_id='no_table_tooth')
+        if(xtooth != None):
+            xtooth['_class'] =  'form-control '
+            xtooth['_placeholder'] = 'Enter Tooth Number' 
+            xtooth['_autocomplete'] = 'off'         
+            xtooth['_style'] = 'width:100%'
+        
+        xquad = formTreatment.element('input',_id='no_table_quadrant')
+        if(xquad != None):
+            xquad['_class'] =  'form-control '
+            xquad['_placeholder'] = 'Enter Quadrant' 
+            xquad['_autocomplete'] = 'off'         
+            xquad['_style'] = 'width:100%'
+            
+       
+    
+        if(writablflag):
+            formTreatment.element('textarea[name=description]')['_style'] = 'height:100px;line-height:1.0;'
+            formTreatment.element('textarea[name=description]')['_rows'] = 5
+            formTreatment.element('textarea[name=description]')['_class'] = 'form-control'
+    
+            xstartdate = formTreatment.element('input',_id='no_table_startdate')
+            xstartdate['_class'] =  'input-group form-control form-control-inline date-picker'
+            xstartdate['_data-date-format'] = 'dd/mm/yyyy'
+            xstartdate['_autocomplete'] = 'off' 
+        
+            xenddate = formTreatment.element('input',_id='no_table_enddate')
+            xenddate['_class'] =  'input-group form-control form-control-inline date-picker'
+            xenddate['_data-date-format'] = 'dd/mm/yyyy'
+            xenddate['_autocomplete'] = 'off' 
+    
+           
+    
+            cc = formTreatment.element('input', _id='no_table_chiefcomplaint')
+            cc['_class'] = 'form-control'
+            cc['_style'] = 'width:100%'
+            cc['_type'] =  'text'
+      
+        
+        # procedures grid
+        formProcedure = getproceduregrid(providerid,tplanid,treatmentid,memberid,patientid,authorization,authorized,preauthorized,page,hmopatientmember,writablflag,webadmin)
+        
+        
+        returnurl = URL('treatment','list_treatments',vars=dict(page=page,providerid=providerid,memberid=memberid,patientid=patientid))
+        if formTreatment.accepts(request,session=session,formname='formtreatment',keepvalues=True):
+            treatmentcost = float(common.getvalue(formTreatment.vars.treatmentcost))
+            doctorid = int(common.getid(formTreatment.vars.doctor))
+            docs = db(db.doctor.id == doctorid).select()
+            doctorname = docs[0].name
+            
+            if(defsts == 'Authorized'):
+                authorized = True
+            else:
+                authorized = False  
+            
+           
+            db(db.treatment.id == treatmentid).update(\
+                treatment = formTreatment.vars.treatment,
+                chiefcomplaint = formTreatment.vars.chiefcomplaint,
+                description  = formTreatment.vars.description,
+                startdate = formTreatment.vars.startdate,
+                enddate = formTreatment.vars.enddate,
+                status = formTreatment.vars.status,       #status = defsts  before 16.9.2020
+                authorized = authorized,
+                actualtreatmentcost = 0,
+                treatmentcost = treatmentcost,
+                quadrant = '',
+                tooth = '',
+                dentalprocedure = 0, 
+                doctor = doctorid,
+                modified_on = common.getISTFormatCurrentLocatTime(),
+                modified_by = providerid,
+            
+            )    
+            
+            
+            updatetreatmentcostandcopay(treatmentid,tplanid)
+                            
+        
+            db.treatmentnotes.update_or_insert(db.treatmentnotes.treatment == treatmentid, treatment = treatmentid, notes = formTreatment.vars.prescription)   
+            
+            if(changeinnotes(currnotes, formTreatment.vars.description)):
+                common.lognotes(db,formTreatment.vars.description,treatmentid)
+            
+            response.flash = "Treatment Details Updated!"
+            
+        elif formTreatment.errors:
+            session.flash = "Error - Updating Treatment Report!" + str(formTreatment.errors)
+            redirect(returnurl)
+                
+        #====== Medical History Foem
+        #===== End Medical History
+        
+        
+        #===== Medical Test form and grid
+        #====== End of Medical Test
+        
+        #====== Prescription Form and grid
+        #===== End of Prescription
+        
+        
+        #==== Images
+        #==== End of Images
+              
+           
+        booking_amount = account.get_booking_amount(db, treatmentid)
+        showprocgrid = True
+        booking = True if(booking_amount > 0) else False
+    except Exception as  e:
+        session.flash = "Exception Error Update_Treatment_new ==" + str(e)
+        redirect(returnurl)        
+    
+    return dict(formTreatment=formTreatment, formProcedure=formProcedure,  \
+                page=page, memberpage=0, imagepage=imagepage,procedureid=procedureid,\
+                providerid=providerid, providername=providername,doctorid=doctorid,doctorname=doctorname,\
+                patientmember=patientmember, memberid=memberid,membername=membername, patientid=patientid,patientname=patientname, hmopatientmember=hmopatientmember,\
+                treatment=treatment,treatmentid=treatmentid,tplanid=tplanid,medicalalerts=medicalalerts,\
+                authorization=authorization,authorizationurl=authorizationurl,writablflag=writablflag,
+                preauthorized=preauthorized,preauthorizeerror=preauthorizeerror,authorizeerror=authorizeerror,authorized=authorized,webadmin=webadmin,returnurl=returnurl,\
+                freetreatment=freetreatment,newmember=newmember,showprocgrid = showprocgrid,booking=booking,booking_amount = booking_amount
+                )        
+            
+@auth.requires(auth.has_membership('provider') or auth.has_membership('webadmin')) 
+@auth.requires_login()
 def update_treatment():
     
     
@@ -2843,788 +3140,7 @@ def update_treatment():
                 preauthorized=preauthorized,preauthorizeerror=preauthorizeerror,authorizeerror=authorizeerror,authorized=authorized,webadmin=webadmin,returnurl=returnurl,\
                 freetreatment=freetreatment,newmember=newmember,showprocgrid = showprocgrid,booking=booking,booking_amount = booking_amount
                 )        
-            
 
-#@auth.requires(auth.has_membership('provider') or auth.has_membership('webadmin')) 
-#@auth.requires_login()
-#def xupdate_treatment():
-    
-    
-    #memberid = 0
-    #patientid = 0
-    #procedureid = 0
-    #ucrfee = 0    
-    #tplanid = 0
-    #doctorid = 0
-    
-    #patienttype = 'P'
-    #patientmember = ''
-    #hmopatientmember = False
-    #membername = ''
-    #patientname = ''
-    #fullname = ''
-    #patient = ''
-    #doctorname = ''
-    #altshortdescription = ''
-    #title = ''
-    
-    ##provider : logged in
-    #providerid = int(common.getid(request.vars.providerid))
-    #provdict = common.getprovider(auth, db)
-    #providername  = provdict["providername"]
-    
-    #treatment = ""
-    
-    ##page
-    #page       = int(common.getpage(request.vars.page)) 
-    #imagepage  = int(common.getpage(request.vars.imagepage))
- 
-    #dob = ""
-    #cell = ""
-    #email = ""
-    #telephone = ""
-    #address1 = ""
-    #address2 = ""
-    #address3 = ""
-    #city = ""
-    #st = ""
-    #pin = ""
-    #newmember = False
-    #freetreatment = True
-    
-    #medicalalert = False
-    
-    #authorization = False   #authorization required based on company/plan
-    #preauthorized = False
-    #authorized = False      #post authorization
-    #preauthorizeerror = False
-    #authorizeerror = False
-    #webadmin = auth.user.impersonated
-       
-    #rows = None
-   
-    ##treatmentid,treatment, memberid,patientid,patientmember,membername, patientname, patienttype
-    #treatmentid = int(common.getid(request.vars.treatmentid))
-    #treatments = db(db.treatment.id == treatmentid).select()
-    #authorizationurl = URL('reports', 'treatmentreport', vars=dict(page=page, providerid=providerid,treatmentid=treatmentid))
-    
-    #totaltreatmentcost = 0
-    #totalactualtreatmentcost = 0
-    
-    
-    
-    #procedurepriceplancode = "PREMWALKIN"
-    #remarks = ""
-    #patienttype = 'P'
-    #writablflag = True
-    #formTreatment = None
-    #formProcedure = None
-    #currentnotes = ""
-    
-    #if(len(treatments) > 0):
-        
-        #treatment = common.getstring(treatments[0].treatment)
-        #tplanid = int(common.getid(treatments[0].treatmentplan))
-        #procedureid = int(common.getid(treatments[0].dentalprocedure))
-        #doctorid = int(common.getid(treatments[0].doctor))
-        #currnotes = common.getstring(treatments[0].description)
-        
-        #docs=db(db.doctor.id == doctorid).select(db.doctor.name)
-        #totaltreatmentcost = float(common.getvalue(treatments[0].treatmentcost)) #this is the actual treatment cost = total treatment cost unless it is changed by provider
-        #totalactualtreatmentcost = float(common.getvalue(treatments[0].actualtreatmentcost))   #this is total UCRR
-        #authorized = common.getboolean(treatments[0].authorized) & (webadmin == True)
-    
-            
-        #procs = db(db.vw_procedurepriceplan.id == procedureid).select()  
-        #if(len(procs) > 0):
-            #ucrfee = common.getvalue(procs[0].ucrfee)
-            #altshortdescription = common.getstring(procs[0].altshortdescription)
-            #remarks =  common.getstring(procs[0].remarks)
-       
-        #tplans = db((db.treatmentplan.id == tplanid) & (db.treatmentplan.provider==providerid) & (db.treatmentplan.is_active == True)).select()
-       
-      
-        
-        #if(len(tplans) > 0):
-            #memberid = tplans[0].primarypatient
-            #patientid = tplans[0].patient
-            #patienttype = tplans[0].patienttype
-            #patientname = tplans[0].patientname.strip()
-            
-            #rows = db((db.vw_memberpatientlist.primarypatientid == memberid)&(db.vw_memberpatientlist.patientid == patientid)&(db.vw_memberpatientlist.providerid == providerid) & (db.vw_memberpatientlist.is_active == True)).\
-                #select()
-            #companyid = ""
-            #if(len(rows)>0):
-                #title = rows[0].title
-                #fullname = rows[0].fullname.strip()
-                #patientmember = rows[0].patientmember.strip()
-                #patient = rows[0].patient.strip()
-                #membername = rows[0].fullname.strip()
-                #hmopatientmember = rows[0].hmopatientmember
-                #procedurepriceplancode = rows[0].procedurepriceplancode
-                #newmember = common.getboolean(rows[0].newmember)          
-                #freetreatment = common.getboolean(rows[0].freetreatment)                    
-                #companyid = int(common.getstring(rows[0].company))
-                #cos = db(db.company.id == companyid).select()
-                ## No Authorization till procedures are added.
-                #procs = db((db.treatment_procedure.treatmentid == treatmentid)&(db.treatment_procedure.is_active==True)).count()                
-                #authorization = common.getboolean(cos[0].authorizationrequired) & (procs>0)
-                           
-                
- 
-        
-        ##medical alerts
-        #medicalalerts = False
-        #alerts = db((db.medicalnotes.patientid == patientid) & (db.medicalnotes.memberid == memberid)).select()
-        #if(len(alerts)>0):
-            #medicalalerts = medicalalerts | common.getboolean(alerts[0].allergic)
-            #medicalalerts = medicalalerts | common.getboolean(alerts[0].bp)
-            #medicalalerts = medicalalerts | common.getboolean(alerts[0].heart)
-            #medicalalerts = medicalalerts | common.getboolean(alerts[0].cardiac)
-            #medicalalerts = medicalalerts | common.getboolean(alerts[0].diabetes)
-            #medicalalerts = medicalalerts | common.getboolean(alerts[0].anyother)
-       
-       
-      
-        ##determine treatment status   
-        #defsts = common.getstring(treatments[0].status)
-        #defsts = defsts if((defsts != None) & (defsts != "")) else 'Started'
-       
-        #if(defsts == 'Sent for Authorization'):
-            #preauthorized = True
-    
-        #if(defsts == 'Authorized'):
-            #preauthorized = True
-            #authorized = True
-        
-  
-        #writablflag = (not authorization) | (((not preauthorized) & (not authorized)&(not webadmin))|((webadmin)))
-         
-        #enddate = common.getdt(treatments[0].enddate)
-        #formTreatment = SQLFORM.factory(
-           #Field('patientmember', 'string',  label='Patient', default = fullname,\
-                 #requires=[IS_NOT_EMPTY(),IS_IN_DB(db(db.vw_memberpatientlist.providerid == providerid), 'vw_memberpatientlist.fullname','%(fullname)s')],writable=False),
-           #Field('xmemberid', 'string',  label='Member',default=memberid),
-           #Field('treatment','string',label='Treatment No.', default=treatments[0].treatment),
-           #Field('chiefcomplaint','string',label='Chief Complaint', default=treatments[0].chiefcomplaint,writable=writablflag),
-           #Field('description','text', label='Description', default=treatments[0].description,writable=writablflag),
-           #Field('quadrant','string', label='Quadrant(s)', default=''),
-           #Field('tooth','string', label='Tooth/Teeth', default=''),
-           #Field('startdate', 'date', label='From Date',default=treatments[0].startdate, requires=IS_EMPTY_OR(IS_DATE(format=('%d/%m/%Y'))),writable=writablflag),
-           #Field('enddate', 'date', label='To Date',default=enddate, requires=IS_EMPTY_OR(IS_DATE(format=('%d/%m/%Y'))),writable=writablflag),
-           #Field('status', 'string', widget = lambda field, value:SQLFORM.widgets.options.widget(field, value, _style="width:100%;height:35px",_class='w3-input w3-border ',_onchange='onstatuschange()'),label='Status',default=defsts, requires = IS_IN_SET(status.TREATMENTSTATUS),writable=False,readable=True),  
-           #Field('ucrfee', 'double', label='Total UCR',default=totalactualtreatmentcost,writable=False),  
-           #Field('treatmentcost', 'double', label='Total Treament Cost',default=totaltreatmentcost,writable=False),  
-           #Field('copay', 'double', label='Total Copay',default=treatments[0].copay, writable = False),  
-           #Field('inspay', 'double', label='Total Ins. Pays',default=treatments[0].inspay, writable=False),  
-           #Field('doctor', widget = lambda field, value:SQLFORM.widgets.options.widget(field, value, _class='form_details'), default=doctorid, label='Doctor',requires=IS_IN_DB(db((db.doctor.providerid==providerid)&(db.doctor.stafftype == 'Doctor')&(db.doctor.is_active==True)), 'doctor.id', '%(name)s')),
-           #Field('vwdentalprocedure', 'string',   label='Procedure ID'),
-           #Field('vwdentalprocedurecode', 'string',   label='Procedure Code'),
-           #Field('xaction', 'string', default = 'UpdateTreatment')
-           #)    
-     
-        #doc = formTreatment.element('#no_table_doctor')
-        #if(doc != None):
-            #doc['_class'] = 'form-control'
-            #doc['_style'] = 'width:100%'
-    
-        
-        #xtreatment = formTreatment.element('input',_id='no_table_treatment')
-        #if(xtreatment != None):
-            #xtreatment['_class'] =  'form-control'
-            #xtreatment['_type'] =  'text'
-            #xtreatment['_autocomplete'] = 'off'     
-            #xtreatment['_readonly'] = 'true'
-            
-        #xvwdentalprocedurecode = formTreatment.element('input',_id='no_table_vwdentalprocedurecode')
-        #if(xvwdentalprocedurecode != None):
-            #xvwdentalprocedurecode['_class'] =  'form-control '
-            #xvwdentalprocedurecode['_placeholder'] = 'Enter Dental Procedure Code' 
-            #xvwdentalprocedurecode['_autocomplete'] = 'off'         
-            #xvwdentalprocedurecode['_style'] = 'width:100%'
-        
-        #xvwdentalprocedure = formTreatment.element('input',_id='no_table_vwdentalprocedure')
-        #if(xvwdentalprocedure != None):
-            #xvwdentalprocedure['_class'] =  'form-control '
-            #xvwdentalprocedure['_placeholder'] = 'Enter Dental Procedure Name' 
-            #xvwdentalprocedure['_autocomplete'] = 'off'         
-            #xvwdentalprocedure['_style'] = 'width:100%'
-     
-        #xtooth = formTreatment.element('input',_id='no_table_tooth')
-        #if(xtooth != None):
-            #xtooth['_class'] =  'form-control '
-            #xtooth['_placeholder'] = 'Enter Tooth Number' 
-            #xtooth['_autocomplete'] = 'off'         
-            #xtooth['_style'] = 'width:100%'
-        
-        #xquad = formTreatment.element('input',_id='no_table_quadrant')
-        #if(xquad != None):
-            #xquad['_class'] =  'form-control '
-            #xquad['_placeholder'] = 'Enter Quadrant' 
-            #xquad['_autocomplete'] = 'off'         
-            #xquad['_style'] = 'width:100%'
-    
-        #if(writablflag):
-            #formTreatment.element('textarea[name=description]')['_style'] = 'height:100px;line-height:1.0;'
-            #formTreatment.element('textarea[name=description]')['_rows'] = 5
-            #formTreatment.element('textarea[name=description]')['_class'] = 'form-control'
-    
-            #xstartdate = formTreatment.element('input',_id='no_table_startdate')
-            #xstartdate['_class'] =  'input-group form-control form-control-inline date-picker'
-            #xstartdate['_data-date-format'] = 'dd/mm/yyyy'
-            #xstartdate['_autocomplete'] = 'off' 
-        
-            #xenddate = formTreatment.element('input',_id='no_table_enddate')
-            #xenddate['_class'] =  'input-group form-control form-control-inline date-picker'
-            #xenddate['_data-date-format'] = 'dd/mm/yyyy'
-            #xenddate['_autocomplete'] = 'off' 
-    
-           
-    
-            #cc = formTreatment.element('input', _id='no_table_chiefcomplaint')
-            #cc['_class'] = 'form-control'
-            #cc['_style'] = 'width:100%'
-            #cc['_type'] =  'text'
-      
-        
-        ## procedures grid
-        #query = ((db.vw_treatmentprocedure.treatmentid  == treatmentid) & (db.vw_treatmentprocedure.is_active == True))
-        #if((hmopatientmember == True) | (session.religare != None)):
-            #fields=(db.vw_treatmentprocedure.procedurecode,db.vw_treatmentprocedure.altshortdescription, db.vw_treatmentprocedure.relgrprocdesc, \
-                       #db.vw_treatmentprocedure.procedurefee,db.vw_treatmentprocedure.inspays,db.vw_treatmentprocedure.copay,db.vw_treatmentprocedure.status,\
-                       #db.vw_treatmentprocedure.treatmentdate, db.vw_treatmentprocedure.relgrproc)
-    
-    
-            #headers={
-                #'vw_treatmentprocedure.procedurecode':'Code',
-                #'vw_treatmentprocedure.altshortdescription':'Description',
-                #'vw_treatmentprocedure.relgrprocdesc':'Procedure Group',
-                #'vw_treatmentprocedure.procedurefee':'Procedure Cost',
-                #'vw_treatmentprocedure.inspays':'Insurance Pays',
-                #'vw_treatmentprocedure.copay':'Co-Pay',
-                #'vw_treatmentprocedure.status':'Status',
-                #'vw_treatmentprocedure.treatmentdate':'Treatment Date'
-            #}
-            
-            #db.vw_treatmentprocedure.relgrproc.writable = False
-            #db.vw_treatmentprocedure.relgrproc.readable = False
-        #else:
-            #fields=(db.vw_treatmentprocedure.procedurecode,db.vw_treatmentprocedure.altshortdescription, db.vw_treatmentprocedure.relgrprocdesc,\
-                       #db.vw_treatmentprocedure.procedurefee,db.vw_treatmentprocedure.status,\
-                       #db.vw_treatmentprocedure.treatmentdate,db.vw_treatmentprocedure.relgrproc)
-            
-            #headers={
-                #'vw_treatmentprocedure.procedurecode':'Code',
-                #'vw_treatmentprocedure.altshortdescription':'Description',
-                #'vw_treatmentprocedure.relgrprocdesc':'Procedure Group',
-                #'vw_treatmentprocedure.procedurefee':'Procedure Cost',
-                #'vw_treatmentprocedure.status':'Status',
-                #'vw_treatmentprocedure.treatmentdate':'Treatment Date'
-            #}
-            
-            #db.vw_treatmentprocedure.relgrproc.writable = False
-            #db.vw_treatmentprocedure.relgrproc.readable = False
-            
-        #if(writablflag):
-            #links = [\
-                    #dict(header=CENTER('Edit'),body=lambda row: CENTER(A(IMG(_src="/my_pms2/static/img/edit.png",_width=30, _height=30),\
-                                                                       #_href=URL("treatment","update_procedure",vars=dict(page=page,providerid=providerid,treatmentprocedureid=row.id,patientid=patientid,memberid=memberid,tplanid=tplanid,treatmentid=treatmentid,authorization=authorization,preauthorized=preauthorized,authorized=authorized,webadmin=webadmin,hmopatientmember=hmopatientmember))))),
-                    
-                    #dict(header=CENTER('Complete'),body=lambda row: ((CENTER(A(IMG(_src="/my_pms2/static/img/complete_on.png",_width=30, _height=30),\
-                                                                          #_href=URL("treatment","complete_procedure",vars=dict(page=page,providerid=providerid,treatmentprocedureid=row.id,patientid=patientid,memberid=memberid,tplanid=tplanid,treatmentid=treatmentid,authorization=authorization,preauthorized=preauthorized,authorized=authorized,webadmin=webadmin))))\
-                                                                    #if(row.status != 'Completed') else\
-                                                                    #CENTER(A(IMG(_src="/my_pms2/static/img/complete_off.png",_width=30, _height=30),\
-                                                                                                                                              #_href=URL("treatment","complete_procedure",vars=dict(page=page,providerid=providerid,treatmentprocedureid=row.id,patientid=patientid,memberid=memberid,tplanid=tplanid,treatmentid=treatmentid,authorization=authorization,preauthorized=preauthorized,authorized=authorized,webadmin=webadmin))))))\
-                                                                    
-                                 #if(row.relgrproc == False) else\
-                                 
-                                 #((CENTER(A(IMG(_src="/my_pms2/static/img/religare_on.png",_width=30, _height=30),\
-                                                                                                           #_href=URL("treatment","complete_procedure",vars=dict(page=page,providerid=providerid,treatmentprocedureid=row.id,patientid=patientid,memberid=memberid,tplanid=tplanid,treatmentid=treatmentid,authorization=authorization,preauthorized=preauthorized,authorized=authorized,webadmin=webadmin))))\
-                                 #if(row.status != 'Completed') else\
-                                 #CENTER(A(IMG(_src="/my_pms2/static/img/religare_off.png",_width=30, _height=30),\
-                                                                                                           #_href=URL("treatment","complete_procedure",vars=dict(page=page,providerid=providerid,treatmentprocedureid=row.id,patientid=patientid,memberid=memberid,tplanid=tplanid,treatmentid=treatmentid,authorization=authorization,preauthorized=preauthorized,authorized=authorized,webadmin=webadmin))))))\
-                                 
-                         #),
-                    #dict(header=CENTER('Delete'),body=lambda row: CENTER(A(IMG(_src="/my_pms2/static/img/delete.png",_width=30, _height=30),\
-                                                                          #_href=URL("treatment","delete_procedure",vars=dict(page=page,providerid=providerid,treatmentprocedureid=row.id,patientid=patientid,memberid=memberid,tplanid=tplanid,treatmentid=treatmentid,authorization=authorization,preauthorized=preauthorized,authorized=authorized,webadmin=webadmin)))))
-            #]
-        #else:
-            #links = [\
-                    #dict(header=CENTER('Edit'),body=lambda row: CENTER(A(IMG(_src="/my_pms2/static/img/edit.png",_width=30, _height=30),\
-                                                                       #_href=URL("treatment","update_procedure",vars=dict(page=page,providerid=providerid,treatmentprocedureid=row.id,patientid=patientid,memberid=memberid,tplanid=tplanid,treatmentid=treatmentid,authorization=authorization,preauthorized=preauthorized,authorized=authorized,webadmin=webadmin,hmopatientmember=hmopatientmember))))),
-                    #dict(header=CENTER('Complete'),body=lambda row: CENTER(A(IMG(_src="/my_pms2/static/img/complete.png",_width=30, _height=30),\
-                                                                          #_href=URL("treatment","complete_procedure",vars=dict(page=page,providerid=providerid,treatmentprocedureid=row.id,patientid=patientid,memberid=memberid,tplanid=tplanid,treatmentid=treatmentid,authorization=authorization,preauthorized=preauthorized,authorized=authorized,webadmin=webadmin))))),
-            #]
-        
-    
-        #maxtextlengths = {'vw_treatmentprocedure.altshortdescription':100,'vw_treatmentprocedure.relgrprocdesc':100,'vw_treatmentprocedure.status':32}
-        
-        #exportlist = dict( csv_with_hidden_cols=False, html=False,tsv_with_hidden_cols=False, tsv=False, json=False, csv=False, xml=False)
-           
-        #formProcedure = SQLFORM.grid(query=query,
-                            #headers=headers,
-                            #fields=fields,
-                            #links=links,
-                            #paginate=10,
-                            #maxtextlengths=maxtextlengths,
-                            #orderby=None,
-                            #exportclasses=exportlist,
-                            #links_in_grid=True,
-                            #searchable=False,
-                            #create=False,
-                            #deletable=False,
-                            #editable=False,
-                            #details=False,
-                            #user_signature=True
-                           #)  
-  
-        #returnurl = URL('treatment','list_treatments',vars=dict(page=page,providerid=providerid,memberid=memberid,patientid=patientid))
-        #if formTreatment.accepts(request,session=session,formname='formtreatment',keepvalues=True):
-            #treatmentcost = float(common.getvalue(formTreatment.vars.treatmentcost))
-            #doctorid = int(common.getid(formTreatment.vars.doctor))
-            #docs = db(db.doctor.id == doctorid).select()
-            #doctorname = docs[0].name
-            
-            #if(formTreatment.vars.status == 'Authorized'):
-                #authorized = True
-            #else:
-                #authorized = False
-            
-            #db(db.treatment.id == treatmentid).update(\
-                #treatment = formTreatment.vars.treatment,
-                #chiefcomplaint = formTreatment.vars.chiefcomplaint,
-                #description  = formTreatment.vars.description,
-                #startdate = formTreatment.vars.startdate,
-                #enddate = formTreatment.vars.enddate,
-                #status = formTreatment.vars.status,
-                #authorized = authorized,
-                #actualtreatmentcost = 0,
-                #treatmentcost = treatmentcost,
-                #quadrant = '',
-                #tooth = '',
-                #dentalprocedure = 0, 
-                #doctor = doctorid,
-                #modified_on = datetime.date.today(),
-                #modified_by = providerid,
-            
-            #)    
-            
-            
-            #updatetreatmentcostandcopay(treatmentid,tplanid)
-            #calculatecost(tplanid)
-            #calculatecopay(db, tplanid,memberid)
-            #calculateinspays(tplanid)
-            #calculatedue(tplanid)
-            
-            #db.commit()                
-        
-            #db.treatmentnotes.update_or_insert(db.treatmentnotes.treatment == treatmentid, treatment = treatmentid, notes = formTreatment.vars.prescription)   
-            
-            #if(changeinnotes(currnotes, formTreatment.vars.description)):
-                #common.lognotes(db,formTreatment.vars.description,treatmentid)
-            
-            #response.flash = "Treatment Details Updated!"
-            
-        #elif formTreatment.errors:
-            #session.flash = "Error - Updating Treatment Report!" + str(formTreatment.errors)
-            #redirect(returnurl)
-            
-    ##====== Notes Foem
-    
-    #dob = ""
-    #age = ""
-    #xgender = ""
-    
-    #if((rows[0].dob != None) & (rows[0].dob != "")):    
-        #dob = common.getstring(rows[0].dob)
-        #age = common.getstring(getage(rows[0].dob))
-        
-    #xgender = common.getstring(rows[0].gender)    
-    
-    #memrows = db(db.patientmember.id == memberid).select()
-    #address = ""
-    #telephone  = ""
-    #if(len(memrows)>0):
-        #addr1 = common.getstring(memrows[0].address1)
-        #addr2 = common.getstring(memrows[0].address2)
-        #addr3 = common.getstring(memrows[0].address3)
-        #city = common.getstring(memrows[0].city)
-        #st = common.getstring(memrows[0].st)
-        #pin = common.getstring(memrows[0].pin)
-        #address = addr1 + " " + addr2 + " " + addr3 + ",\r\n" + city + ", " + st + " " + pin
-        #telephone = common.getstring(memrows[0].telephone)
-    
-    #notes = db((db.medicalnotes.patientid == patientid) & (db.medicalnotes.memberid == memberid)).select()
-    #if(len(notes) < 0) :
-        #redirect(returnurl)
-        
-    #if(len(notes)>0):
-        #formNotes = SQLFORM.factory(
-            #Field('patientmember', 'string',  label='Patient', default = fullname,writable=False),
-            #Field('notesdate', 'date', label='To Date',default=datetime.date.today(), requires=IS_EMPTY_OR(IS_DATE(format=('%d/%m/%Y')))),
-            #Field('dob', 'date', label='To Date',default=rows[0].dob, requires=IS_EMPTY_OR(IS_DATE(format=('%d/%m/%Y')))),
-            #Field('age', 'string', default=age),
-            #Field('cell', 'string', default=common.getstring(rows[0].cell)),
-            #Field('email', 'string', default=common.getstring(rows[0].email)),
-            #Field('telephone', 'string', default=telephone),
-            #Field('occupation', 'string', default=common.getstring(notes[0].occupation)),
-            #Field('xgender', 'string', widget = lambda field, value:SQLFORM.widgets.options.widget(field, value, _class='form-control '),label='Gender',default=xgender, requires = IS_IN_SET(gender.GENDER)),
-            #Field('address','text', label='Address', default=address),
-            #Field('referer','string', label='Doctor/Fried', default=common.getstring(notes[0].referer)),
-            #Field('resoff','string', label='Residence/Office', default=common.getstring(notes[0].resoff)),
-            #Field('bp','boolean', default = common.getboolean(notes[0].bp)),
-            #Field('diabetes','boolean', default = common.getboolean(notes[0].diabetes)),
-            #Field('anaemia','boolean', default = common.getboolean(notes[0].anaemia)),
-            #Field('epilepsy','boolean', default = common.getboolean(notes[0].epilepsy)),
-            #Field('asthma','boolean', default = common.getboolean(notes[0].asthma)),
-            #Field('sinus','boolean', default = common.getboolean(notes[0].sinus)),
-            #Field('heart','boolean', default = common.getboolean(notes[0].heart)),
-            #Field('jaundice','boolean', default = common.getboolean(notes[0].jaundice)),
-            #Field('tb','boolean', default = common.getboolean(notes[0].tb)),
-            #Field('cardiac','boolean', default = common.getboolean(notes[0].cardiac)),
-            #Field('arthritis','boolean', default = common.getboolean(notes[0].arthritis)),
-            #Field('anyother','boolean', default = common.getboolean(notes[0].anyother)),
-            #Field('allergic','boolean', default = common.getboolean(notes[0].allergic)),
-            #Field('excessivebleeding','boolean', default = common.getboolean(notes[0].excessivebleeding)),
-            #Field('seriousillness','boolean', default = common.getboolean(notes[0].seriousillness)),
-            #Field('hospitalized','boolean', default = common.getboolean(notes[0].hospitalized)),
-            #Field('medications','boolean', default = common.getboolean(notes[0].medications)),
-            #Field('surgery','boolean', default = common.getboolean(notes[0].surgery)),
-            #Field('pregnant','boolean', default = common.getboolean(notes[0].pregnant)),
-            #Field('breastfeeding','boolean', default = common.getboolean(notes[0].breastfeeding)),
-            #Field('anyothercomplaint','text',represent=lambda v, r: '' if v is None else v, default=common.getstring(notes[0].anyothercomplaint)),
-            #Field('chiefcomplaint','text',represent=lambda v, r: '' if v is None else v, default=common.getstring(notes[0].chiefcomplaint)),
-            #Field('duration','text', represent=lambda v, r: '' if v is None else v, default=common.getstring(notes[0].duration)),
-            #Field('is_active','boolean', default = True)
-        #)  
-    #else:
-        #formNotes = SQLFORM.factory(
-            #Field('patientmember', 'string',  label='Patient', default = fullname,writable=False),
-            #Field('notesdate', 'date', label='To Date',default=datetime.date.today(), requires=IS_EMPTY_OR(IS_DATE(format=('%d/%m/%Y')))),
-            #Field('dob', 'date', label='To Date',default=rows[0].dob, requires=IS_EMPTY_OR(IS_DATE(format=('%d/%m/%Y')))),
-            #Field('age', 'string', default=age),
-            #Field('cell', 'string', default=common.getstring(rows[0].cell)),
-            #Field('email', 'string', default=common.getstring(rows[0].email)),
-            #Field('telephone', 'string', default=telephone),
-            #Field('occupation', 'string', default=""),
-            #Field('xgender', 'string', widget = lambda field, value:SQLFORM.widgets.options.widget(field, value, _class='form-control '),label='Gender',default="Male", requires = IS_IN_SET(gender.GENDER)),
-            #Field('address','text', label='Address', default=""),
-            #Field('referer','string', label='Doctor/Fried', default=""),
-            #Field('resoff','string', label='Residence/Office', default=""),
-            #Field('bp','boolean', default = ""),
-            #Field('diabetes','boolean', default = ""),
-            #Field('anaemia','boolean', default = ""),
-            #Field('epilepsy','boolean', default = ""),
-            #Field('asthma','boolean', default = ""),
-            #Field('sinus','boolean', default = ""),
-            #Field('heart','boolean', default = ""),
-            #Field('jaundice','boolean', default = ""),
-            #Field('tb','boolean', default = ""),
-            #Field('cardiac','boolean', default = ""),
-            #Field('arthritis','boolean', default = ""),
-            #Field('anyother','boolean', default = ""),
-            #Field('allergic','boolean', default = ""),
-            #Field('excessivebleeding','boolean', default = ""),
-            #Field('seriousillness','boolean', default = ""),
-            #Field('hospitalized','boolean', default = ""),
-            #Field('medications','boolean', default = ""),
-            #Field('surgery','boolean', default = ""),
-            #Field('pregnant','boolean', default = ""),
-            #Field('breastfeeding','boolean', default = ""),
-            #Field('anyothercomplaint','text',represent=lambda v, r: '' if v is None else v, default=""),
-            #Field('chiefcomplaint','text',represent=lambda v, r: '' if v is None else v, default=""),
-            #Field('duration','text', represent=lambda v, r: '' if v is None else v, default=""),
-            #Field('is_active','boolean', default = True)
-        #)  
-        
-    
-    #formNotes.element('textarea[name=anyothercomplaint]')['_style'] = 'height:50px;line-height:1.0;'
-    #formNotes.element('textarea[name=anyothercomplaint]')['_rows'] = 2
-    #formNotes.element('textarea[name=anyothercomplaint]')['_class'] = 'form-control' 
-    
-    #formNotes.element('textarea[name=chiefcomplaint]')['_style'] = 'height:60px;line-height:1.0;'
-    #formNotes.element('textarea[name=chiefcomplaint]')['_rows'] = 3
-    #formNotes.element('textarea[name=chiefcomplaint]')['_class'] = 'form-control' 
-
-    
-    #formNotes.element('textarea[name=duration]')['_style'] = 'height:60px;line-height:1.0;'
-    #formNotes.element('textarea[name=duration]')['_rows'] = 3
-    #formNotes.element('textarea[name=duration]')['_class'] = 'form-control' 
-
-    
-
-    #xnotesdate = formNotes.element('input',_id='no_table_notesdate')
-    #xnotesdate['_class'] =  'input-group form-control form-control-inline date-picker'
-    #xnotesdate['_data-date-format'] = 'dd/mm/yyyy'
-    #xnotesdate['_autocomplete'] = 'off'  
-
-    
-    #xdob = formNotes.element('input',_id='no_table_dob')
-    #xdob['_class'] =  'input-group form-control form-control-inline date-picker'
-    #xdob['_data-date-format'] = 'dd/mm/yyyy'
-    #xdob['_autocomplete'] = 'off'  
-    
-    #xage = formNotes.element('input',_id='no_table_age')
-    #xage['_class'] =  'form-control'
-    #xage['_type'] =  'text'
-    #xage['_placeholder'] = 'Enter Dental Tooth T1 to T32' 
-    #xage['_autocomplete'] = 'off'     
-
-    #xcell = formNotes.element('input',_id='no_table_cell')
-    #xcell['_class'] =  'form-control'
-    #xcell['_type'] =  'text'
-    
-    #xemail = formNotes.element('input',_id='no_table_email')
-    #xemail['_class'] =  'form-control'
-    #xemail['_type'] =  'text'
-    
-    #xtel = formNotes.element('input',_id='no_table_telephone')
-    #xtel['_class'] =  'form-control'
-    #xtel['_type'] =  'text'
-
-    #xocc = formNotes.element('input',_id='no_table_occupation')
-    #xocc['_class'] =  'form-control'
-    #xocc['_type'] =  'text'
-
-    #xref = formNotes.element('input',_id='no_table_referer')
-    #xref['_class'] =  'form-control'
-    #xref['_type'] =  'text'
-    
-    #xresoff = formNotes.element('input',_id='no_table_resoff')
-    #xresoff['_class'] =  'form-control'
-    #xresoff['_type'] =  'text'
-    
-    #formNotes.element('textarea[name=address]')['_style'] = 'height:100px;line-height:1.0;'
-    #formNotes.element('textarea[name=address]')['_rows'] = 3
-    #formNotes.element('textarea[name=address]')['_class'] = 'form-control'
-
-    #if formNotes.accepts(request,session=session,formname='formnotes',keepvalues=True):
-        
-        #patientid = int(common.getid(request.vars.notes_patientid))
-        #memberid = int(common.getid(request.vars.notes_memberid))
-        #providerid = int(common.getid(request.vars.notes_providerid))
-        
-       
-
-        
-        #db.medicalnotes.update_or_insert(((db.medicalnotes.patientid == patientid) & (db.medicalnotes.memberid == memberid) & (db.medicalnotes.is_active == True)),
-                                         #patientid = patientid,
-                                         #memberid = memberid,
-                                         #bp = common.getboolean(formNotes.vars.bp),
-                                         #diabetes = common.getboolean(formNotes.vars.diabetes),
-                                         #anaemia = common.getboolean(formNotes.vars.anaemia),
-                                         #epilepsy = common.getboolean(formNotes.vars.epilepsy),
-                                         #asthma = common.getboolean(formNotes.vars.asthma),
-                                         #sinus = common.getboolean(formNotes.vars.sinus),\
-                                         #heart = common.getboolean(formNotes.vars.heart),\
-                                         #jaundice = common.getboolean(formNotes.vars.jaundice),\
-                                         #tb = common.getboolean(formNotes.vars.tb),\
-                                         #cardiac = common.getboolean(formNotes.vars.cardiac),\
-                                         #arthritis = common.getboolean(formNotes.vars.arthritis),\
-                                         #anyother = common.getboolean(formNotes.vars.anyother),\
-                                         #allergic = True if request.vars.allergic == "1" else False,\
-                                         #excessivebleeding = True if request.vars.excessivebleeding == "1" else False,\
-                                         #seriousillness = True if request.vars.seriousillness == "1" else False,\
-                                         #hospitalized = True if request.vars.hospitalized == "1" else False,\
-                                         #medications = True if request.vars.medications == "1" else False,\
-                                         #surgery = True if request.vars.surgery == "1" else False,\
-                                         #pregnant = True if request.vars.pregnant == "1" else False,\
-                                         #breastfeeding = True if request.vars.breastfeeding == "1" else False,\
-                                         #anyothercomplaint = common.getstring(formNotes.vars.anyothercomplaint),\
-                                         #chiefcomplaint = common.getstring(formNotes.vars.chiefcomplaint),\
-                                         #duration = common.getstring(formNotes.vars.duration),\
-                                         #occupation = common.getstring(formNotes.vars.occupation),\
-                                         #referer = common.getstring(formNotes.vars.referer),\
-                                         #resoff = common.getstring(formNotes.vars.resoff),\
-                                         #is_active = True,\
-                                         #created_on = datetime.date.today(),\
-                                         #created_by = providerid,\
-                                         #modified_on = datetime.date.today(),\
-                                         #modified_by = providerid
-                                         #)   
-        #db.commit()
-        #redirect(returnurl)
-    #elif formNotes.errors:
-        #response.flash = "Error Treatment Update " + str(formNotes.errors)
-      
-    
-    
-        
-
-    ##===== End Notes
-    
-    
-    ##===== Medical Test form and grid
-    #formMedtest = SQLFORM.factory(
-             #Field('testname', 'string',  label='Test', default = "Test ABC")
-          #)  
-       
-    #medtestgrid = getmedtestgrid(patientid,providerid)
-
-    #if formMedtest.accepts(request,session=session,formname='formmedtest',keepvalues=True):
-        #i  = 0
-    #elif formMedtest.errors:
-        #response.flash = "Error in Medical Test " + str(formMedtest.errors)
-     
-        
-        #j = 0    
-    ##====== End of Medical Test
-    
-    ##====== Prescription Form and grid
-    #formPres = SQLFORM.factory(\
-        #Field('prescriptiondate', 'date', label='Date',  default=datetime.date.today(),requires=IS_EMPTY_OR(IS_DATE(format=('%d/%m/%Y')))),
-        #Field('doctor', 'integer', widget = lambda field, value:SQLFORM.widgets.options.widget(field, value, _style="width:100%;height:35px",_class='form_details'),  label='Drug',requires=IS_IN_DB(db((db.doctor.providerid==providerid)&(db.doctor.is_active == True)), 'doctor.id', '%(name)s')),
-        #Field('medicine', 'integer', widget = lambda field, value:SQLFORM.widgets.options.widget(field, value, _style="width:100%;height:35px",_class='form_details'),  label='Drug',requires=IS_IN_DB(db((db.medicine.providerid==providerid)&(db.medicine.is_active == True)), 'medicine.id', '%(medicine)s:%(strength)s:%(strengthuom)s')),
-        #Field('strength', 'string',represent=lambda v, r: '' if v is None else v),
-        #Field('strengthuom', 'string',represent=lambda v, r: '' if v is None else v,default="",requires=IS_IN_SET(STRENGTHUOM)),
-        #Field('frequency', 'string',represent=lambda v, r: '' if v is None else v,default=""),
-        #Field('dosage', 'string',represent=lambda v, r: '' if v is None else v,default=""),
-        #Field('quantity', 'string',represent=lambda v, r: '' if v is None else v,default=""),
-        #Field('presremarks', 'text',represent=lambda v, r: '' if v is None else v,default=""),
-        
-    #)
-    
-    #xdate =  formPres.element('#no_table_prescriptiondate')
-    #xdate['_class'] =  'input-group form-control form-control-inline date-picker'
-    #xdate['_data-date-format'] = 'dd/mm/yyyy'
-    #xdate['_autocomplete'] = 'off'  
-    
-    #xdoctor = formPres.element('#no_table_doctor')
-    #xdoctor['_class'] = 'form-control'
-    #xdoctor['_autocomplete'] = 'off'    
-    
-    #xmedicine = formPres.element('#no_table_medicine')
-    #xmedicine['_class'] = 'form-control'
-    #xmedicine['_autocomplete'] = 'off'    
-    
-    #xstrength = formPres.element('#no_table_strength')
-    #xstrength['_class'] = 'form-control'
-    #xstrength['_autocomplete'] = 'off'    
-    
-    #xstrengthuom = formPres.element('#no_table_strengthuom')
-    #xstrengthuom['_class'] = 'form-control'
-    #xstrengthuom['_autocomplete'] = 'off'    
-    
-    #xfreq = formPres.element('#no_table_frequency')
-    #xfreq['_class'] = 'form-control'
-    #xfreq['_autocomplete'] = 'off'    
-    
-    #xdosage = formPres.element('#no_table_dosage')
-    #xdosage['_class'] = 'form-control'
-    #xdosage['_autocomplete'] = 'off'   
-    
-    #xqty = formPres.element('#no_table_quantity')
-    #xqty['_class'] = 'form-control'
-    #xqty['_autocomplete'] = 'off'   
-    
-    #formPres.element('textarea[name=presremarks]')['_class'] = 'form-control'
-    #formPres.element('textarea[name=presremarks]')['_style'] = 'height:100px;line-height:1.0;'
-    #formPres.element('textarea[name=presremarks]')['_rows'] = 5
-    
-    
-    ##fromPres = SQLFORM.factory(
-             ##Field('medicinename', 'string',  label='', default = "")
-          ##)  
-       
-    #prescriptions = getpresgrid(memberid, patientid, providerid)
-
-    #if formPres.accepts(request,session=session,formname='formpres',keepvalues=True):
-        #i  = 0
-    #elif formPres.errors:
-        #response.flash = "Error in Prescription " + str(formPres.errors)
-   
-
-        #j = 0    
-    ##===== End of Prescription
-    
-    
-    ##==== Images
-    
-    
-    #items_per_page = 4
-    #limitby = ((imagepage)*items_per_page,(imagepage+1)*items_per_page)       
-    
-    #images = None
-    #if(limitby > 0):
-        #images = db((db.dentalimage.patient == patientid) & (db.dentalimage.provider == providerid) & (db.dentalimage.image != "") & \
-                      #(db.dentalimage.image != None) & (db.dentalimage.is_active == True)).select(\
-                        #db.dentalimage.id,db.dentalimage.title,db.dentalimage.image,db.dentalimage.tooth,db.dentalimage.quadrant,db.dentalimage.imagedate,\
-                        #db.dentalimage.patienttype,db.dentalimage.patientname,db.dentalimage.description,db.dentalimage.is_active,db.vw_memberpatientlist.patientmember,\
-                        #left=[db.vw_memberpatientlist.on(db.dentalimage.patient == db.vw_memberpatientlist.patientid)],\
-                              #limitby=limitby, orderby = db.vw_memberpatientlist.patientmember | ~db.dentalimage.patienttype | ~db.dentalimage.id                      
-                      #)
-    #else:
-        #images = db((db.dentalimage.patient == patientid) & (db.dentalimage.provider == providerid) & (db.dentalimage.image != "") & \
-                      #(db.dentalimage.image != None) & (db.dentalimage.is_active == True)).select(
-                        #db.dentalimage.id,db.dentalimage.title,db.dentalimage.image,db.dentalimage.tooth,db.dentalimage.quadrant,db.dentalimage.imagedate,\
-                        #db.dentalimage.patienttype,db.dentalimage.patientname,db.dentalimage.description,db.dentalimage.is_active,db.vw_memberpatientlist.patientmember,\
-                        #left=[db.vw_memberpatientlist.on(db.dentalimage.patient == db.vw_memberpatientlist.patientid)],\
-                              #orderby = db.vw_memberpatientlist.patientmember | ~db.dentalimage.patienttype | ~db.dentalimage.id
-                    #)
-                        
-    #formImage = SQLFORM.factory(
-               #Field('title', 'string',  label='Image Title', default = "Test ABC")
-            #)     
-    ##==== End of Images
-          
-       
-    ##==== Dental Chart
-    ##newchart = common.getboolean(request.vars.newchart)
-    ##appPath = request.folder    
-    ##srcchartfile = os.path.join(appPath, 'static/charts/default','dentalchart.jpg') 
-    ##destfilename  = str(tplanid) + str(treatmentid) + patientname.replace(" ","").lower() + ".jpg"
-    ##destchartfile = os.path.join(appPath, 'static/charts',destfilename)   
-    ##if((newchart == True) | (not os.path.isfile(destchartfile))):
-        ##copyfile(srcchartfile,destchartfile);
-    ##chartfile = "../static/charts/" + destfilename
-    ##charturl = URL('static', 'charts/' + destfilename)
-
-    ##chartnotes=""
-    ##chartdate= datetime.date.today()
-    ##charttitle=str(tplanid) + "_" + str(treatmentid) + "_" + patientname
-    
-    ##charts = db((db.dentalchart.provider == providerid) & (db.dentalchart.treatmentplan == tplanid) & (db.dentalchart.treatment == treatmentid) & (db.dentalchart.is_active == True)).select()
-    ##if(len(charts) > 0):
-        ##chartnotes = common.getstring(charts[0].description)
-        ##chartdate = common.getdt(charts[0].chartdate)
-        ##charttitle = common.getstring(charts[0].title)
-    
-    ##formDentalChart = SQLFORM.factory(
-                   ##Field('charttitle', 'string',  label='Title',default=chartnotes),
-                   ##Field('chartdate', 'date',  label='Date',default=chartdate, requires=IS_DATE(format=('%d/%m/%Y'))),
-                   ##Field('chartnotes','text', label='Description', default=chartnotes),
-                   ##)            
-    ##formDentalChart.element('textarea[name=chartnotes]')['_style'] = 'width:80%;line-height:1.0;'
-          
-    ##xcharttitle = formDentalChart.element('input',_id='no_table_charttitle')
-    ##xcharttitle['_class'] =  'form-control'
-    ##xcharttitle['_type'] =  'text'
-    ##xcharttitle['_style'] ='width:80%'
-    ##xcharttitle['_autocomplete'] = 'off' 
-    
-    ##xchartdate = formDentalChart.element('input',_id='no_table_chartdate')
-    ##xchartdate['_class'] =  'input-group form-control form-control-inline date-picker'
-    ##xchartdate['_style'] ='width:80%'
-    ##xchartdate['_autocomplete'] = 'off'                     
-      
-    ##if formDentalChart.accepts(request,session=session,formname='formdentalchart',keepvalues=True):
-        ##i = 0
-    ##elif formDentalChart.errors:
-        ##j= 0
-    ##==== End Dental Chart
-    
-    ##membername = <responsible party enrolled member's fname lname> patientname = <Patient's fname, lname> patientmember = <Member/Patient Code>
-
-    #return dict(formTreatment=formTreatment, formProcedure=formProcedure,formPres=formPres,formNotes=formNotes, formMedtest=formMedtest, medtestgrid=medtestgrid, prescriptions=prescriptions,\
-                #images = images,formImage=formImage,\
-                #page=page, memberpage=0, imagepage=imagepage,procedureid=procedureid,\
-                #providerid=providerid, providername=providername,doctorid=doctorid,doctorname=docs[0].name,\
-                #patientmember=patientmember, memberid=memberid,membername=membername, patientid=patientid,patientname=patientname, hmopatientmember=hmopatientmember,\
-                #treatment=treatment,treatmentid=treatmentid,tplanid=tplanid,medicalalerts=medicalalerts,\
-                #authorization=authorization,authorizationurl=authorizationurl,writablflag=writablflag,
-                #preauthorized=preauthorized,preauthorizeerror=preauthorizeerror,authorizeerror=authorizeerror,authorized=authorized,webadmin=webadmin,returnurl=returnurl,\
-                #freetreatment=freetreatment,newmember=newmember
-                #)        
             
 
 

@@ -369,29 +369,33 @@ def getprovider(auth,db):
         
         
         if(len(rows)==1):
-            providerid = int(getid(rows[0].id))
-            if(providerid == 0):
-                providerid = -1
-            else:
-                rlgprov = db(db.rlgprovider.providerid == providerid).select()   
-                urlprops = db(db.urlproperties.id > 0).select(db.urlproperties.relgrpolicynumber)
-                rlgrpolicynumber =  "9999" if(len(urlprops) == 0) else getstring(urlprops[0].relgrpolicynumber)
-                rlgprovider = False if(len(rlgprov) == 0) else getboolean(rlgprov[0].is_active)
-                regionid =  0 if(len(rlgprov) == 0) else int(rlgprov[0].regionid)
-                planid = 0 if(len(rlgprov) == 0) else int(rlgprov[0].planid)
-                provider = getstring(rows[0]["provider"])
-                providername = getstring(rows[0]["providername"])  
-                registration = getstring(rows[0]["registration"])
-                practicename =  getstring(rows[0]["pa_practicename"])
-                practiceaddress =  getstring(rows[0]["pa_practiceaddress"])
-                email =  getstring(rows[0]["email"])
-                cell =  getstring(rows[0]["cell"])
-                longitude = getstring(rows[0]["pa_longitude"])
-                latitude = getstring(rows[0]["pa_latitude"])
-                locationurl = getstring(rows[0]["pa_locationurl"])
-                isMDP = getboolean(rows[0]["isMDP"])
-                logo_file = rows[0]["logo_file"]
-                logo_id = rows[0]["logo_id"]
+                providerid = int(getid(rows[0].id))
+                if(providerid == 0):
+                        providerid = -1
+                else:
+                        rlgprov = db((db.rlgprovider.providerid == providerid) & (db.rlgprovider.is_active==True)).select() 
+                        
+                        #strsql = "SELECT * FROM rlgprovider WHERE providerid = " + str(providerid) + " AND is_active = 'T' " 
+                        #ds = db.executesql(strsql)
+                        #logger.loggerpms2.info("Get ProviderX " +  " " + str(providerid) + " " + str(len(rlgprov)) + " " + str(rlgprov[0].is_active) + " " + str(len(ds)))
+                        urlprops = db(db.urlproperties.id > 0).select(db.urlproperties.relgrpolicynumber)
+                        rlgrpolicynumber =  "9999" if(len(urlprops) == 0) else getstring(urlprops[0].relgrpolicynumber)
+                        rlgprovider = False if(len(rlgprov) < 1 ) else getboolean(rlgprov[0].is_active)
+                        regionid =  0 if(len(rlgprov) < 1) else int(rlgprov[0].regionid)
+                        planid = 0 if(len(rlgprov) < 1) else int(rlgprov[0].planid)
+                        provider = getstring(rows[0]["provider"])
+                        providername = getstring(rows[0]["providername"])  
+                        registration = getstring(rows[0]["registration"])
+                        practicename =  getstring(rows[0]["pa_practicename"])
+                        practiceaddress =  getstring(rows[0]["pa_practiceaddress"])
+                        email =  getstring(rows[0]["email"])
+                        cell =  getstring(rows[0]["cell"])
+                        longitude = getstring(rows[0]["pa_longitude"])
+                        latitude = getstring(rows[0]["pa_latitude"])
+                        locationurl = getstring(rows[0]["pa_locationurl"])
+                        isMDP = getboolean(rows[0]["isMDP"])
+                        logo_file = rows[0]["logo_file"]
+                        logo_id = rows[0]["logo_id"]
                 
                 
         else:
@@ -404,7 +408,7 @@ def getprovider(auth,db):
         provider = ''
         providername = getstring(auth.user.first_name)  + " " + getstring(auth.user.last_name)
     
-    
+    #logger.loggerpms2.info("Get Provider " + str(rlgprovider) + " " + str(providerid) + " " + str(len(rlgprov)))
     return dict(providerid=providerid,provider=provider,providername=providername,registration=registration,
         practicename=practicename,practiceaddress=practiceaddress,email=email,cell=cell,rlgrpolicynumber=rlgrpolicynumber,
         rlgprovider=rlgprovider,regionid=regionid,planid=planid,isMDP=isMDP,logo_file=logo_file,logo_id=logo_id)
@@ -482,61 +486,122 @@ def getproviderfromid(db,aproviderid):
    
 def dashboard(db,session,providerid):
     
-    oneday = datetime.timedelta(days=1)
-    today = datetime.date.today()
-    tomorrow = today + oneday
-    
-    
-    members = db(((db.vw_memberpatientlist.providerid == providerid)&\
-                    (db.vw_memberpatientlist.hmopatientmember == True)&\
-                    (datetime.date.today().strftime('%Y-%m-%d') <= db.vw_memberpatientlist.premenddt)&\
-                    (db.vw_memberpatientlist.is_active == True))).count()
-      
-    exmembers = db(((db.vw_memberpatientlist.providerid == providerid)&\
-                    (db.vw_memberpatientlist.hmopatientmember == True)&\
-                    (datetime.date.today().strftime('%Y-%m-%d') > db.vw_memberpatientlist.premenddt)&\
-                    (db.vw_memberpatientlist.is_active == True))).count()
-  
-    nonmembers = db((db.vw_memberpatientlist.providerid == providerid) & \
-                   (db.vw_memberpatientlist.is_active == True) & \
-                   (db.vw_memberpatientlist.hmopatientmember == False)).count()
-
-    newmembers = db(((db.vw_memberpatientlist.providerid == providerid)&\
-                        (db.vw_memberpatientlist.hmopatientmember == True)&\
-                        (db.vw_memberpatientlist.newmember == True) & \
-                        (datetime.date.today().strftime('%Y-%m-%d') <= db.vw_memberpatientlist.premenddt)&\
-                        (db.vw_memberpatientlist.is_active == True))).count()
         
+        oneday = datetime.timedelta(days=1)
+        today = datetime.date.today()
+        tomorrow = today + oneday
 
-      
-    images = db((db.dentalimage.provider == providerid) & (db.dentalimage.is_active == True)).count()
-    treatmentplans = db((db.treatmentplan.provider == providerid) & (db.treatmentplan.is_active == True)).count()
-    treatments = db((db.treatment.provider == providerid) & (db.treatment.is_active == True)).count()
-    appointments = db((db.t_appointment.provider == providerid) & (db.t_appointment.is_active == True)).count()
-    
- 
 
-    #ds= db((db.t_appointment.provider == providerid) &  (db.t_appointment.is_active == True)).select()
-    
-    todayappts = db((db.t_appointment.provider == providerid) & ((db.t_appointment.f_start_time.day() == today.day) & (db.t_appointment.f_start_time.month() == today.month) & (db.t_appointment.f_start_time.year() == today.year)) & \
-                                                                 (db.t_appointment.is_active == True)).count()
-    tomorrowappts = db((db.t_appointment.provider == providerid) & ((db.t_appointment.f_start_time.day() == tomorrow.day) & (db.t_appointment.f_start_time.month() == tomorrow.month) & (db.t_appointment.f_start_time.year() == tomorrow.year)) & \
-                                                                 (db.t_appointment.is_active == True)).count()
+        members = db((\
+                      (db.patientmember.hmopatientmember == True)&\
+                      (datetime.date.today().strftime('%Y-%m-%d') <= db.patientmember.premenddt)&\
+                      (db.patientmember.is_active == True))).count()
+        exmembers = 0
+        #exmembers = db(((db.vw_memberpatientlist_fast.providerid == providerid)&\
+                        #(db.vw_memberpatientlist_fast.hmopatientmember == True)&\
+                        #(datetime.date.today().strftime('%Y-%m-%d') > db.vw_memberpatientlist_fast.premenddt)&\
+                        #(db.vw_memberpatientlist_fast.is_active == True))).count()
 
-    session.members = members
-    session.exmembers = exmembers
-    session.nonmembers = nonmembers
-    session.newmembers = newmembers
-    session.images = images
-    session.treatmentplans = treatments
-    session.appointments = appointments
-    session.todayappts = todayappts
-    session.tomorrowappts = tomorrowappts
-    
-      
-    
-    
-    return dict()
+        nonmembers = db(\
+                        (db.patientmember.is_active == True) & \
+                        (db.patientmember.hmopatientmember == False)).count()
+        newmembers = 0
+        #newmembers = db(((db.vw_memberpatientlist_fast.providerid == providerid)&\
+                         #(db.vw_memberpatientlist_fast.hmopatientmember == True)&\
+                         #(db.vw_memberpatientlist_fast.newmember == True) & \
+                         #(datetime.date.today().strftime('%Y-%m-%d') <= db.vw_memberpatientlist_fast.premenddt)&\
+                         #(db.vw_memberpatientlist_fast.is_active == True))).count()
+
+
+
+        images = db((db.dentalimage.provider == providerid) & (db.dentalimage.is_active == True)).count()
+        #treatmentplans = db((db.treatmentplan.provider == providerid) & (db.treatmentplan.is_active == True)).count()
+        treatments = db((db.treatment.provider == providerid) & (db.treatment.is_active == True)).count()
+        appointments = db((db.t_appointment.provider == providerid) & (db.t_appointment.is_active == True)).count()
+
+
+
+        #ds= db((db.t_appointment.provider == providerid) &  (db.t_appointment.is_active == True)).select()
+        
+        todayappts = db((db.t_appointment.provider == providerid) & ((db.t_appointment.f_start_time.day() == today.day) & (db.t_appointment.f_start_time.month() == today.month) & (db.t_appointment.f_start_time.year() == today.year)) & \
+                        (db.t_appointment.is_active == True)).count()
+        tomorrowappts = 0
+        tomorrowappts = db((db.t_appointment.provider == providerid) & ((db.t_appointment.f_start_time.day() == tomorrow.day) & (db.t_appointment.f_start_time.month() == tomorrow.month) & (db.t_appointment.f_start_time.year() == tomorrow.year)) & \
+                           (db.t_appointment.is_active == True)).count()
+
+        session.members = members
+        session.exmembers = exmembers
+        session.nonmembers = nonmembers
+        session.newmembers = newmembers
+        session.images = images
+        session.treatmentplans = treatments
+        session.appointments = appointments
+        session.todayappts = todayappts
+        session.tomorrowappts = tomorrowappts
+
+
+          
+        
+        
+        return dict()
+
+def xdashboard(db,session,providerid):
+
+        oneday = datetime.timedelta(days=1)
+        today = datetime.date.today()
+        tomorrow = today + oneday
+
+
+        members = db(((db.vw_memberpatientlist.providerid == providerid)&\
+                      (db.vw_memberpatientlist.hmopatientmember == True)&\
+                      (datetime.date.today().strftime('%Y-%m-%d') <= db.vw_memberpatientlist.premenddt)&\
+                      (db.vw_memberpatientlist.is_active == True))).count()
+
+        exmembers = db(((db.vw_memberpatientlist.providerid == providerid)&\
+                        (db.vw_memberpatientlist.hmopatientmember == True)&\
+                        (datetime.date.today().strftime('%Y-%m-%d') > db.vw_memberpatientlist.premenddt)&\
+                        (db.vw_memberpatientlist.is_active == True))).count()
+
+        nonmembers = db((db.vw_memberpatientlist.providerid == providerid) & \
+                        (db.vw_memberpatientlist.is_active == True) & \
+                        (db.vw_memberpatientlist.hmopatientmember == False)).count()
+
+        newmembers = db(((db.vw_memberpatientlist.providerid == providerid)&\
+                         (db.vw_memberpatientlist.hmopatientmember == True)&\
+                         (db.vw_memberpatientlist.newmember == True) & \
+                         (datetime.date.today().strftime('%Y-%m-%d') <= db.vw_memberpatientlist.premenddt)&\
+                         (db.vw_memberpatientlist.is_active == True))).count()
+
+
+
+        images = db((db.dentalimage.provider == providerid) & (db.dentalimage.is_active == True)).count()
+        treatmentplans = db((db.treatmentplan.provider == providerid) & (db.treatmentplan.is_active == True)).count()
+        treatments = db((db.treatment.provider == providerid) & (db.treatment.is_active == True)).count()
+        appointments = db((db.t_appointment.provider == providerid) & (db.t_appointment.is_active == True)).count()
+
+
+
+        #ds= db((db.t_appointment.provider == providerid) &  (db.t_appointment.is_active == True)).select()
+
+        todayappts = db((db.t_appointment.provider == providerid) & ((db.t_appointment.f_start_time.day() == today.day) & (db.t_appointment.f_start_time.month() == today.month) & (db.t_appointment.f_start_time.year() == today.year)) & \
+                        (db.t_appointment.is_active == True)).count()
+        tomorrowappts = db((db.t_appointment.provider == providerid) & ((db.t_appointment.f_start_time.day() == tomorrow.day) & (db.t_appointment.f_start_time.month() == tomorrow.month) & (db.t_appointment.f_start_time.year() == tomorrow.year)) & \
+                           (db.t_appointment.is_active == True)).count()
+
+        session.members = members
+        session.exmembers = exmembers
+        session.nonmembers = nonmembers
+        session.newmembers = newmembers
+        session.images = images
+        session.treatmentplans = treatments
+        session.appointments = appointments
+        session.todayappts = todayappts
+        session.tomorrowappts = tomorrowappts
+
+
+
+
+        return dict()
 
 
 

@@ -338,7 +338,7 @@ class Media:
 
     #this method uploads audio/video files to Application Server
     def upload_mediafile(self,avars):
-
+        logger.loggerpms2.info("Enter upload_media file   " + json.dumps(avars))
         db = self.db
         providerid = self.providerid
         auth = current.auth
@@ -482,7 +482,7 @@ class Media:
 
     def upload_media(self,avars):
 
-        logger.loggerpms2.info("Enter upload_media  " + json.dumps(avars))
+        logger.loggerpms2.info("Enter upload_media  " + avars["appath"] + " " + avars["ref_code"] + " " + avars["mediaformat"] + " " + avars["title"] + " " + avars["mediadate"] + " " + avars["ref_id"]  + " " + avars["ref_"] )
         db = self.db
         providerid = self.providerid
         auth = current.auth
