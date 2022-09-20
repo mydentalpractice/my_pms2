@@ -2193,7 +2193,7 @@ def providerhome():
     #trtmnts = db((db.vw_treatmentlist.providerid==providerid)&(db.vw_treatmentlist.is_active==True)).select()
     #returnurl = URL('admin','providerhome')
     
-    return dict(form=form,docs=docs,defdate=defdate,start=start,end=end,rows=rows,memberpage=1,page=1,\
+    return dict(form=form,docs=docs,defdate=defdate,start=start,end=end,rows=rows,memberpage=1,page=1,clinicid=clinicid,\
                 dailyappts=dailyappts,monthlyappts=monthlyappts,weeklyappts=weeklyappts,providerid=provdict["providerid"], providername= provdict["providername"] + " " + provdict["provider"],returnurl=returnurl,source='home',externalurl=exturl)
 
 

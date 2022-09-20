@@ -482,7 +482,7 @@ class Media:
 
     def upload_media(self,avars):
 
-        logger.loggerpms2.info("Enter upload_media  " + avars["appath"] + " " + avars["ref_code"] + " " + avars["mediaformat"] + " " + avars["title"] + " " + avars["mediadate"] + " " + avars["ref_id"]  + " " + avars["ref_"] )
+        logger.loggerpms2.info("Enter upload_media  " + json.dumps(avars))
         db = self.db
         providerid = self.providerid
         auth = current.auth

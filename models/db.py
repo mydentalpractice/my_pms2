@@ -771,6 +771,7 @@ db.define_table('company',
                 Field('hmoplan', 'reference hmoplan'),
                 Field('agent', 'reference agent'),
                 Field('groupkey', 'string', label='Group Key', length=20),
+                Field('logo', 'string'),
                 auth.signature,
                 format='%(name)s (%(company)s)')
 
@@ -1813,6 +1814,7 @@ db.define_table('urlproperties',
                 Field('vw_url','text'),
                 Field('vw_stg_url','text'),
                 Field('vw_prod_url','text'),
+                Field('tpapi_url','text'),
                 
                 Field('mdp_contact_cell','string',default='18001027526'),
                 Field('mdp_contact_email','string',default='appointments@mydentalplan.in'),

@@ -784,7 +784,7 @@ def emailPaymentReceipt(db,request,memberid,paymentid,
 
 def emailWelcomeKit(db,request,memberid,providerid):
 
-    #logger.loggerpms2.info("Enter mail emailWelcomeKit " + str(memberid) + " " + str(providerid))
+    logger.loggerpms2.info("Enter mail emailWelcomeKit " + str(memberid) + " " + str(providerid))
     props = db(db.urlproperties.id>0).select()
     server = None
     sender = None
@@ -827,278 +827,306 @@ def emailWelcomeKit(db,request,memberid,providerid):
     
     #member = db(db.webmember.id == memberid).select()
     try:
-        member = db(db.patientmember.id == memberid).select()
-        if(len(member)>0):
-            membercode = member[0].patientmember
-            fname = member[0].fname
-            lname = member[0].lname
-            name = fname + ' '  + lname
-            address1 = member[0].address1
-            address2 = member[0].address2
-            address3 = member[0].address3
-            if(address3 == None):
-                address3 = ''
+        
+        tpapi_url = props[0].tpapi_url + "sendWelcomeLetter"
+        avars={}
+        avars["member_id"] = str(memberid)
+        avars["token_exptime"] = "+525600 minutes"
+        
+        headers = {'Content-Type':'application/json','X-Api-Key':'MDPTEST~ipeetye9'}
+        
+        logger.loggerpms2.info("POST Request " + tpapi_url + " " + json_dumps(avars))
+        resp = requests.post(tpapi_url,json=avars,headers=headers)
+        respobj = resp.json()
+ 
+        if((resp.status_code == 200)|(resp.status_code == 201)|(resp.status_code == 202)|(resp.status_code == 203)):
+            respobj = resp.json()            
+            logger.loggerpms2.info("SEmail Welcome Kit TPAPI_URL Response " + tpapi_url + " " + json.dumps(respobj))
+            
+            respobj["result"] = "success"
+            respobj["error_mssg"] = ""
+            respobj["error_code"] = ""
+            return True
+            
+        else:
+            respobj["result"] = "fail"
+            respobj["error_mssg"] = ""
+            respobj["error_code"] = ""
+            return False
+        
+        
+        #member = db(db.patientmember.id == memberid).select()
+        #if(len(member)>0):
+            #membercode = member[0].patientmember
+            #fname = member[0].fname
+            #lname = member[0].lname
+            #name = fname + ' '  + lname
+            #address1 = member[0].address1
+            #address2 = member[0].address2
+            #address3 = member[0].address3
+            #if(address3 == None):
+                #address3 = ''
     
-            city = member[0].city
-            st = member[0].st
-            pin = member[0].pin
-            cell = member[0].cell
-            effectivedate = member[0].enrollmentdate
-            email = member[0].email
-            if(email == ''):
-                retVal = False
-                raise HTTP(403,"Member email not provided")
-            group = db(db.company.id == int(member[0].company)).select()
-            groupid = group[0].company
+            #city = member[0].city
+            #st = member[0].st
+            #pin = member[0].pin
+            #cell = member[0].cell
+            #effectivedate = member[0].enrollmentdate
+            #email = member[0].email
+            #if(email == ''):
+                #retVal = False
+                #raise HTTP(403,"Member email not provided")
+            #group = db(db.company.id == int(member[0].company)).select()
+            #groupid = group[0].company
     
-            if(member[0].groupregion != None):
-                regionid = int(member[0].groupregion)
-            else:
-                regionid = 0
+            #if(member[0].groupregion != None):
+                #regionid = int(member[0].groupregion)
+            #else:
+                #regionid = 0
                     
-            #hmoplanid = int(group[0].hmoplan)
-            if(member[0].hmoplan != None):
-                hmoplanid = int(member[0].hmoplan)
-            else:
-                hmoplanid = 0
+            ##hmoplanid = int(group[0].hmoplan)
+            #if(member[0].hmoplan != None):
+                #hmoplanid = int(member[0].hmoplan)
+            #else:
+                #hmoplanid = 0
     
-            hmoplan = db((db.hmoplan.id == hmoplanid) & (db.hmoplan.groupregion == regionid) & (db.hmoplan.is_active == True)).select()
-            if(len(hmoplan)>0):
-                hmoplancode = hmoplan[0].hmoplancode
-                planfile = hmoplan[0].planfile
-                welcomeletter = hmoplan[0].welcomeletter
-                #logger.loggerpms2.info("Planfile and Welcomeletter " + planfile + " " + welcomeletter)
-            else:
-                hmoplancode = ''
-                planfile = ''
-                welcomeletter = ''
+            #hmoplan = db((db.hmoplan.id == hmoplanid) & (db.hmoplan.groupregion == regionid) & (db.hmoplan.is_active == True)).select()
+            #if(len(hmoplan)>0):
+                #hmoplancode = hmoplan[0].hmoplancode
+                #planfile = hmoplan[0].planfile
+                #welcomeletter = hmoplan[0].welcomeletter
+                ##logger.loggerpms2.info("Planfile and Welcomeletter " + planfile + " " + welcomeletter)
+            #else:
+                #hmoplancode = ''
+                #planfile = ''
+                #welcomeletter = ''
                 
            
     
-            regions = db((db.groupregion.id == regionid) & (db.groupregion.is_active == True)).select()
-            if(len(regions)>0):
-                region = regions[0].groupregion
-            else:
-                region = ''
+            #regions = db((db.groupregion.id == regionid) & (db.groupregion.is_active == True)).select()
+            #if(len(regions)>0):
+                #region = regions[0].groupregion
+            #else:
+                #region = ''
     
-        else:
-            retVal = False
-            raise HTTP(403,"Member not found")
+        #else:
+            #retVal = False
+            #raise HTTP(403,"Member not found")
     
     
-        pats = db(db.vw_memberpatientlist.primarypatientid == memberid).select()
+        #pats = db(db.vw_memberpatientlist.primarypatientid == memberid).select()
         
-        provider = db(db.provider.id == providerid).select()
-        if(len(provider)>0):
-            pname = provider[0].providername
-            paddress1 = provider[0].address1
-            paddress2 = provider[0].address2
-            if(paddress2 == None):
-                paddress2 = ''
-            paddress3 = provider[0].address3
-            if(paddress3 == None):
-                paddress3 = ''
-            pcity = provider[0].city
-            pst = provider[0].address1
-            ppin = provider[0].pin
-            pcell = provider[0].cell
-            pemail = provider[0].email
-            paddr = paddress1 + ' '  + paddress2 + ' '  + paddress3 + ' ' + pcity + ' ' + pst + ' ' + ppin
-            pcode = provider[0].provider
+        #provider = db(db.provider.id == providerid).select()
+        #if(len(provider)>0):
+            #pname = provider[0].providername
+            #paddress1 = provider[0].address1
+            #paddress2 = provider[0].address2
+            #if(paddress2 == None):
+                #paddress2 = ''
+            #paddress3 = provider[0].address3
+            #if(paddress3 == None):
+                #paddress3 = ''
+            #pcity = provider[0].city
+            #pst = provider[0].address1
+            #ppin = provider[0].pin
+            #pcell = provider[0].cell
+            #pemail = provider[0].email
+            #paddr = paddress1 + ' '  + paddress2 + ' '  + paddress3 + ' ' + pcity + ' ' + pst + ' ' + ppin
+            #pcode = provider[0].provider
     
-        if(len(props)>0):
-            server = props[0].mailserver + ":"  + props[0].mailserverport
-            sender = props[0].mailsender
-            login  = props[0].mailusername + ":" + props[0].mailpassword
-            mailcc = props[0].mailcc
+        #if(len(props)>0):
+            #server = props[0].mailserver + ":"  + props[0].mailserverport
+            #sender = props[0].mailsender
+            #login  = props[0].mailusername + ":" + props[0].mailpassword
+            #mailcc = props[0].mailcc
             
-            emailreceipt = props[0].emailreceipt
+            #emailreceipt = props[0].emailreceipt
             
-            port = int(props[0].mailserverport)
-            if((port != 25) & (port != 26)):
-                tls = True
-            else:
-                tls = False
+            #port = int(props[0].mailserverport)
+            #if((port != 25) & (port != 26)):
+                #tls = True
+            #else:
+                #tls = False
     
-            if((props[0].mailusername == 'None')):
-                login = None
+            #if((props[0].mailusername == 'None')):
+                #login = None
             
-        else:
-            retVal = False
-            raise HTTP(400,"Mail attributes not found")
+        #else:
+            #retVal = False
+            #raise HTTP(400,"Mail attributes not found")
 
-        #tls=False   
-        mmail = Mail()
+        ##tls=False   
+        #mmail = Mail()
         
         
-        #mailserver = p3plcpnl0607.prod.phx3.secureserver.net
-        #mailserverport = 587
-        #mailusername = enrollment@mydentalplan.in
-        #mailpassword= enr0!!ment
-        #mailsender = enrollment@mydentalplan.in
+        ##mailserver = p3plcpnl0607.prod.phx3.secureserver.net
+        ##mailserverport = 587
+        ##mailusername = enrollment@mydentalplan.in
+        ##mailpassword= enr0!!ment
+        ##mailsender = enrollment@mydentalplan.in
         
-        #server = 'smtp.gmail.com:587'
-        #login = 'mydentalplan.in@gmail.com:MNgrak@7526#'
-        #sender = 'mydentalplan.in@gmail.com'
-        #tls = True        
+        ##server = 'smtp.gmail.com:587'
+        ##login = 'mydentalplan.in@gmail.com:MNgrak@7526#'
+        ##sender = 'mydentalplan.in@gmail.com'
+        ##tls = True        
 
-        mmail.settings.server = server
-        mmail.settings.sender = sender
-        mmail.settings.login =  login
-        mmail.settings.tls = tls
+        #mmail.settings.server = server
+        #mmail.settings.sender = sender
+        #mmail.settings.login =  login
+        #mmail.settings.tls = tls
         
         
-        to      =  email
-        subject = "MyDentalPlan Member Welcome Letter"
+        #to      =  email
+        #subject = "MyDentalPlan Member Welcome Letter"
         
-        patientrow = db(db.patientmember.patientmember == membercode).select()
-        patientid = 0
-        if(len(patientrow)>0):
-            patientid = patientrow[0].id
-        else:
-            raise HTTP(403,"Error in mapping Webmember and enrolled patientmember")
+        #patientrow = db(db.patientmember.patientmember == membercode).select()
+        #patientid = 0
+        #if(len(patientrow)>0):
+            #patientid = patientrow[0].id
+        #else:
+            #raise HTTP(403,"Error in mapping Webmember and enrolled patientmember")
     
-        normaltime = time.asctime(time.localtime(time.time())).encode('base64','strict')
-        str1 = normaltime +'_'+ membercode
-        encodedarg = str1.encode('base64','strict')    
+        #normaltime = time.asctime(time.localtime(time.time())).encode('base64','strict')
+        #str1 = normaltime +'_'+ membercode
+        #encodedarg = str1.encode('base64','strict')    
     
-        normaltime = time.asctime(time.localtime(time.time())).encode('base64','strict')
-        returnurl = props[0].mydp_ipaddress  + "/my_dentalplan/member/list_member/"
-        page = 0
+        #normaltime = time.asctime(time.localtime(time.time())).encode('base64','strict')
+        #returnurl = props[0].mydp_ipaddress  + "/my_dentalplan/member/list_member/"
+        #page = 0
         
-        links = []
-        names = []
-        styles = []
+        #links = []
+        #names = []
+        #styles = []
         
-        for i in xrange(0,14):
-            styles.insert(i,"display:none")
+        #for i in xrange(0,14):
+            #styles.insert(i,"display:none")
         
         
-        for i in xrange(0, len(pats)):
+        #for i in xrange(0, len(pats)):
             
-            args = normaltime + "_" + str(common.getid(pats[i].primarypatientid)) + "_" + str(common.getid(pats[i].patientid)) + "_" + common.getstring(pats[i].patienttype)
-            encodedarg = args.encode('base64','strict')
-            link = props[0].mydp_ipaddress  + "/my_dentalplan/member/member_card_welcomekit/" + encodedarg
-            links.insert(i,link)
+            #args = normaltime + "_" + str(common.getid(pats[i].primarypatientid)) + "_" + str(common.getid(pats[i].patientid)) + "_" + common.getstring(pats[i].patienttype)
+            #encodedarg = args.encode('base64','strict')
+            #link = props[0].mydp_ipaddress  + "/my_dentalplan/member/member_card_welcomekit/" + encodedarg
+            #links.insert(i,link)
             
-            names.insert(i, common.getstring(pats[i].fullname))
+            #names.insert(i, common.getstring(pats[i].fullname))
         
-            styles[i] = "display:block"
+            #styles[i] = "display:block"
         
         
-        helpfultiplink = props[0].mydp_ipaddress + "/my_dentalplan/templates/images/HelpfulTips.jpg"
-        dateandtime = time.asctime(time.localtime(time.time()))
+        #helpfultiplink = props[0].mydp_ipaddress + "/my_dentalplan/templates/images/HelpfulTips.jpg"
+        #dateandtime = time.asctime(time.localtime(time.time()))
     
-        appPath = request.folder
-        if((welcomeletter == None) | (welcomeletter == '')):
-            if(groupid != ""):
-                htmlfile = os.path.join(appPath, 'templates', groupid + '_WelcomeLetter.html')
-                if(os.path.isfile(htmlfile) == False):
-                    htmlfile = os.path.join(appPath, 'templates','MyDentalPlanMemberWelcomeLetter.html')
-            else:
-                htmlfile = os.path.join(appPath, 'templates','MyDentalPlanMemberWelcomeLetter.html')
-        else:
-            htmlfile = os.path.join(appPath, 'templates', welcomeletter)
+        #appPath = request.folder
+        #if((welcomeletter == None) | (welcomeletter == '')):
+            #if(groupid != ""):
+                #htmlfile = os.path.join(appPath, 'templates', groupid + '_WelcomeLetter.html')
+                #if(os.path.isfile(htmlfile) == False):
+                    #htmlfile = os.path.join(appPath, 'templates','MyDentalPlanMemberWelcomeLetter.html')
+            #else:
+                #htmlfile = os.path.join(appPath, 'templates','MyDentalPlanMemberWelcomeLetter.html')
+        #else:
+            #htmlfile = os.path.join(appPath, 'templates', welcomeletter)
     
-        #htmlfile = os.path.join(appPath, 'templates','MyDentalPlanMemberWelcomeLetter.html')
-        #logger.loggerpms2.info("HTML File - " + htmlfile)
-        f = open(htmlfile,'rb')
-        html = Template(f.read())
-        f.close()
+        ##htmlfile = os.path.join(appPath, 'templates','MyDentalPlanMemberWelcomeLetter.html')
+        ##logger.loggerpms2.info("HTML File - " + htmlfile)
+        #f = open(htmlfile,'rb')
+        #html = Template(f.read())
+        #f.close()
         
         
        
         
-        subsdict = dict()
+        #subsdict = dict()
         
-        for i in xrange(0,len(links)):
-            key = "linkdep" + str(i)
-            val = links[i]
-            subsdict[key] = val
+        #for i in xrange(0,len(links)):
+            #key = "linkdep" + str(i)
+            #val = links[i]
+            #subsdict[key] = val
         
-        for i in xrange(0,len(names)):
-            key = "dep" + str(i)
-            val = names[i]
-            subsdict[key] = val
+        #for i in xrange(0,len(names)):
+            #key = "dep" + str(i)
+            #val = names[i]
+            #subsdict[key] = val
         
-        for i in xrange(0,len(styles)):
-            key = "displaydep" + str(i)
-            val =  styles[i]
-            subsdict[key] = val
+        #for i in xrange(0,len(styles)):
+            #key = "displaydep" + str(i)
+            #val =  styles[i]
+            #subsdict[key] = val
             
-        subsdict["helpfultiplink"]  = helpfultiplink
-        subsdict["dateandtime"]  = dateandtime
+        #subsdict["helpfultiplink"]  = helpfultiplink
+        #subsdict["dateandtime"]  = dateandtime
         
-        result = html.safe_substitute(subsdict)
-        
-        
+        #result = html.safe_substitute(subsdict)
         
         
         
-        providerpdf = None
-        providerpdf = os.path.join(appPath, 'templates','providers',pcode + '.pdf')
-        #logger.loggerpms2.info("Provider file " + providerpdf)
-        if(os.path.isfile(providerpdf) == False):
-            providerpdf = None
+        
+        
+        #providerpdf = None
+        #providerpdf = os.path.join(appPath, 'templates','providers',pcode + '.pdf')
+        ##logger.loggerpms2.info("Provider file " + providerpdf)
+        #if(os.path.isfile(providerpdf) == False):
+            #providerpdf = None
     
-        planpdf = None
-        planstr = ""
-    
-        if((planfile == None) | (planfile == "")):
-            if(hmoplancode.find("PRE")>-1):
-                planstr = "_MyDentalPlan_Premium_TreatmentCosting"
-            elif(hmoplancode.find("EXE")>-1):
-                planstr = "_MyDentalPlan_Executive_TreatmentCosting"
-            elif(hmoplancode.find("JUN")>-1):
-                planstr = "_MyDentalPlan_Junior_TreatmentCosting"
-            elif(hmoplancode.find("BAS")>-1):
-                planstr = "_MyDentalPlan_Basic_TreatmentCosting"
-            elif(hmoplancode.find("PLAN")>-1):
-                planstr = "_MyDentalPlan_Plan_TreatmentCosting"
-    
-            #BLR test is for backward compatibility
-            if((hmoplancode.startswith(region))|(hmoplancode.startswith("BLR"))):
-                planpdf = os.path.join(appPath, 'templates','plans',hmoplancode + planstr + '.pdf')
-            else:
-                planpdf = os.path.join(appPath, 'templates','plans',region + hmoplancode + planstr + '.pdf')
-    
-        else:
-            planpdf = os.path.join(appPath, 'templates','plans', planfile)
-    
-        #logger.loggerpms2.info("Plan PDF = " + planpdf)
-        if(os.path.isfile(planpdf) == False):
-            planpdf = None
-        helpfulpdf = None
-        helpfulpdf = os.path.join(appPath, 'templates','images','HelpfulTips_MyDentalPlan.pdf')
-        if(os.path.isfile(helpfulpdf) == False):
-            helpfulpdf = None
-    
-        #logger.loggerpms2.info("Help PDF = " + helpfulpdf)
-        attachments = []
-        
-        #PDF attachments will be turned on once all Provider PDF are under 1MB 06 Sep 2018
-        providerpdf = None
         #planpdf = None
+        #planstr = ""
+    
+        #if((planfile == None) | (planfile == "")):
+            #if(hmoplancode.find("PRE")>-1):
+                #planstr = "_MyDentalPlan_Premium_TreatmentCosting"
+            #elif(hmoplancode.find("EXE")>-1):
+                #planstr = "_MyDentalPlan_Executive_TreatmentCosting"
+            #elif(hmoplancode.find("JUN")>-1):
+                #planstr = "_MyDentalPlan_Junior_TreatmentCosting"
+            #elif(hmoplancode.find("BAS")>-1):
+                #planstr = "_MyDentalPlan_Basic_TreatmentCosting"
+            #elif(hmoplancode.find("PLAN")>-1):
+                #planstr = "_MyDentalPlan_Plan_TreatmentCosting"
+    
+            ##BLR test is for backward compatibility
+            #if((hmoplancode.startswith(region))|(hmoplancode.startswith("BLR"))):
+                #planpdf = os.path.join(appPath, 'templates','plans',hmoplancode + planstr + '.pdf')
+            #else:
+                #planpdf = os.path.join(appPath, 'templates','plans',region + hmoplancode + planstr + '.pdf')
+    
+        #else:
+            #planpdf = os.path.join(appPath, 'templates','plans', planfile)
+    
+        ##logger.loggerpms2.info("Plan PDF = " + planpdf)
+        #if(os.path.isfile(planpdf) == False):
+            #planpdf = None
         #helpfulpdf = None
+        #helpfulpdf = os.path.join(appPath, 'templates','images','HelpfulTips_MyDentalPlan.pdf')
+        #if(os.path.isfile(helpfulpdf) == False):
+            #helpfulpdf = None
+    
+        ##logger.loggerpms2.info("Help PDF = " + helpfulpdf)
+        #attachments = []
         
-        if(providerpdf != None):
-            attachments += [Mail.Attachment(providerpdf)]
+        ##PDF attachments will be turned on once all Provider PDF are under 1MB 06 Sep 2018
+        #providerpdf = None
+        ##planpdf = None
+        ##helpfulpdf = None
+        
+        #if(providerpdf != None):
+            #attachments += [Mail.Attachment(providerpdf)]
     
-        if(planpdf != None):
-            attachments += [Mail.Attachment(planpdf)]
+        #if(planpdf != None):
+            #attachments += [Mail.Attachment(planpdf)]
     
-        if(helpfulpdf != None):
-            attachments += [Mail.Attachment(helpfulpdf)]
+        #if(helpfulpdf != None):
+            #attachments += [Mail.Attachment(helpfulpdf)]
     
         
-        if(len(attachments) == 0):
-            #logger.loggerpms2.info("Before mail send 0 attachments")
-            retVal = mmail.send(to,subject,result,encoding='utf-8',headers={'Disposition-Notification-To': emailreceipt})       
-        else:
-            #logger.loggerpms2.info("Before mail send attachments " + str(len(attachments)))            
-            retVal = mmail.send(to,subject,result,attachments = attachments,encoding='utf-8',headers={'Disposition-Notification-To': emailreceipt})       
+        #if(len(attachments) == 0):
+            ##logger.loggerpms2.info("Before mail send 0 attachments")
+            #retVal = mmail.send(to,subject,result,encoding='utf-8',headers={'Disposition-Notification-To': emailreceipt})       
+        #else:
+            ##logger.loggerpms2.info("Before mail send attachments " + str(len(attachments)))            
+            #retVal = mmail.send(to,subject,result,attachments = attachments,encoding='utf-8',headers={'Disposition-Notification-To': emailreceipt})       
             
-        #logger.loggerpms2.info("After  mail send " + str(retVal))    
+        ##logger.loggerpms2.info("After  mail send " + str(retVal))    
 
     except Exception as e:
         logger.loggerpms2.info(">>Email Welcom Kit\n")
@@ -2075,9 +2103,11 @@ def emailPreAuthorization(db,appPath,treatmentid):
             cc = mailcc
     else:
         if(mailcc == ""):
-            cc = provemail
+            # removing provider from cc provemail    Dr. Deepak's request (15/09/2022)
+            cc = ""   
         else:
-            cc = provemail + "," + mailcc
+            # removing provider from cc provemail + "," + mailcc  Dr. Deepak's request 15/09/2022
+            cc = mailcc  
         
     
   
@@ -2223,9 +2253,10 @@ def emailAuthorizedTreatment(db,appPath,treatmentid):
             cc = mailcc
     else:
         if(mailcc == ""):
-            cc = provemail
+            #remove provemail from cc as per dr. deepak (15/09/2022)
+            cc = ""
         else:
-            cc = provemail + "," + mailcc
+            cc = mailcc
                 
        
   

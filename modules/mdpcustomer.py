@@ -1541,7 +1541,7 @@ class Customer:
                 rulesobj = mdprules.Plan_Rules(db)
                 rspobj  = json.loads(rulesobj.Get_Plan_Rules(avars))
                
-                #logger.loggerpms2.info("Create Wallet After Get_Plan_Rules " + json.dumps(rspobj))
+                logger.loggerpms2.info("Create Wallet After Get_Plan_Rules " + json.dumps(rspobj))
                 if(rspobj["result"] == "fail"):
                     #logger.loggerpms2.info("Create Wallet After Get_Plan_Rules B " + json.dumps(rspobj))
                     #logger.loggerpms2.info("Create Wallet After Get_Plan_Rules C " + json.dumps(jsonresp))

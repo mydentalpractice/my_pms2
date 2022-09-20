@@ -1894,6 +1894,7 @@ class Appointment:
                 #send SMS to Doctor/Provider
                 avars["appointmentid"]  = str(appt.id)
                 avars["ccs"]  = ccs
+                avars["weburl"] = "https://linktr.ee/mydentalpractice"
                 docrspObj = json.loads(self.sendDocSMSEmail(avars))
               
                 

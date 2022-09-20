@@ -9304,9 +9304,13 @@ Added netcopay field
 20/08/2021
 ==========
 
-1. ZZZZModify vw_memberpatientlist_fast - added is_active flag
-2. ZZZZ New View vw_mambepatientlist_min addedd
+1. XXXYYYZZZZModify vw_memberpatientlist_fast - added is_active flag
+2. XXXYYYZZZZ New View vw_mambepatientlist_min addedd
 
+20/09/2022
+==========
+1. ZZZAdd logo column in Company
+2. ZZZAdd tpapi_url in urlproperties 
 
 
 Script file to clear user for sign-up
