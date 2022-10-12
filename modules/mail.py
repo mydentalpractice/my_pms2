@@ -835,7 +835,7 @@ def emailWelcomeKit(db,request,memberid,providerid):
         
         headers = {'Content-Type':'application/json','X-Api-Key':'MDPTEST~ipeetye9'}
         
-        logger.loggerpms2.info("POST Request " + tpapi_url + " " + json_dumps(avars))
+        logger.loggerpms2.info("POST Request " + tpapi_url + " " + json.dumps(avars))
         resp = requests.post(tpapi_url,json=avars,headers=headers)
         respobj = resp.json()
  

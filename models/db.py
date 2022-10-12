@@ -17,7 +17,7 @@ if not request.env.web2py_runtime_gae:
     #STG__db =  DAL('mysql://StagingServer:mydentalplan@StagingServer.mysql.pythonanywhere-services.com:3306/StagingServer$prod_stg',pool_size=10,check_reserved=['all'],migrate_enabled=False,lazy_tables=True)
     #db = DAL('mysql://root:root@localhost:3306/prod_dup',pool_size=10,check_reserved=['all'],migrate_enabled=False,lazy_tables=True)
     #db = DAL('mysql://root:root@localhost:3306/mydp_stg',pool_size=10,check_reserved=['all'],migrate_enabled=False,lazy_tables=True)
-    db = DAL('mysql://root:root@localhost:3306/mydp_prod',pool_size=10,check_reserved=['all'],migrate_enabled=False,lazy_tables=True)
+    db = DAL('mysql://root:xxx@localhost:3306/mydp_prod',pool_size=10,check_reserved=['all'],migrate_enabled=False,lazy_tables=True)
 else:
     ## connect to Google BigTable (optional 'google:datastore://namespace')
     db = DAL('google:datastore+ndb')
