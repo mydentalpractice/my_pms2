@@ -907,18 +907,21 @@ class Customer:
                 dependantscount = 0 if deps == None else len(deps)
                 if(dependantscount > 0):
                     for dep in deps:
+                        depdobstr = common.getstring(common.getkeyvalue(dep,"depdob",common.getstringfromdate(common.getISTFormatCurrentLocatTime(),"%d/%m/%Y")))
+                        relation=common.getstring(common.getkeyvalue(dep,"relation",""))
+                        
                         
                         depid=db.customerdependants.insert(
                             
-                            fname=dep["fname"],
-                            mname=dep["mname"] if "mname" in dep else "",
-                            lname=dep["lname"],
-                            depdob=common.getdatefromstring(dep["depdob"], "%d/%m/%Y"),
-                            gender=dep["gender"],
-                            relation=dep["relation"],
+                            fname=common.getstring(common.getkeyvalue(dep,"fname","")), 
+                            mname=common.getstring(common.getkeyvalue(dep,"mname","")),  
+                            lname=common.getstring(common.getkeyvalue(dep,"lname","")),  
+                            depdob=common.getdatefromstring(depdobstr, "%d/%m/%Y"),
+                            gender=common.getstring(common.getkeyvalue(dep,"gender","")),
+                            relation = relation,
                             customer_id=customer_id,
                             
-                            dependant_ref = customer_ref + "_" + dep["relation"],
+                            dependant_ref = customer_ref + "_" + relation,
                             is_active = True,
                             created_on = common.getISTFormatCurrentLocatTime(),
                             created_by = 1 if(auth.user == None) else auth.user.id,
@@ -967,7 +970,7 @@ class Customer:
         try:
             i=0
             customer_ref = common.getkeyvalue(avars, "customer_ref", "")
-            
+            mdp_customer_id = 0
             if(customer_ref != "" ):
                 c = db((db.customer.customer_ref == customer_ref)& (db.customer.is_active == True)).select()
                 mdp_customer_id = int(common.getid(c[0].id)) if(len(c) == 1) else 0
@@ -992,10 +995,11 @@ class Customer:
                 amount_paid = float(common.getvalue(common.getkeyvalue(avars,"amount_paid","0")))
 
                 
-                
-                xdob = common.getkeyvalue(avars,"dob",  c[0].dob)
-                if((xdob == None) | (xdob == "")):
-                    xdob = common.getISTFormatCurrentLocatDate()
+                xdob = common.getstring(common.getkeyvalue(avars,"dob",common.getstringfromdate(c[0].dob,"%d/%m/%Y")))
+                xdob = common.getdatefromstring(xdob, "%d/%m/%Y")
+                #xdob = common.getkeyvalue(avars,"dob",  c[0].dob)
+                #if((xdob == None) | (xdob == "")):
+                    #xdob = common.getISTFormatCurrentLocatDate()
                     
                 
                 db((db.customer.customer_ref == customer_ref) & (db.customer.is_active == True)).update(
@@ -1015,8 +1019,8 @@ class Customer:
                     pin3 = common.getkeyvalue(avars,"pin3", c[0].pin3),
 
                     gender = common.getkeyvalue(avars,"gender", c[0].gender),
-                    #dob = common.getkeyvalue(avars,"dob",  c[0].dob),
-                    #dob = xdob,
+
+                    dob = xdob,
                     telephone = common.getkeyvalue(avars,"telephone",  c[0].telephone),
                     cell = common.getkeyvalue(avars,"cell",  c[0].cell),
                     email = common.getkeyvalue(avars,"email",  c[0].email),
@@ -1049,16 +1053,18 @@ class Customer:
                 deps = common.getkeyvalue(avars,"dependants",None)
                 if(deps != None):
                     for dep in deps:
-                        depid = int(common.getid(dep["dependant"]))
+                        
+                        depid = int(common.getid(common.getkeyvalue(dep,"dependant","0")))
+                        
+                        depdobstr = common.getstring(common.getkeyvalue(dep,"depdob",common.getstringfromdate(common.getISTFormatCurrentLocatTime(),"%d/%m/%Y")))
                         db(db.customerdependants.id == depid).update(
-                            dependant = dep["dependant"],
-                            dependant_ref = dep["dependant_ref"],
-                            fname = dep["fname"],
-                            mname = dep["mname"],
-                            lname = dep["lname"],
-                            gender = dep["gender"],
-                            relation = dep["relation"],
-                            depdob = common.getdatefromstring(dep["depdob"], "%d/%m/%Y"),
+                            dependant_ref = common.getkeyvalue(dep,"dependant_ref",""),
+                            fname = common.getstring(common.getkeyvalue(dep,"fname","")),
+                            mname = common.getstring(common.getkeyvalue(dep,"mname","")),
+                            lname = common.getstring(common.getkeyvalue(dep,"lname","")),
+                            gender = common.getstring(common.getkeyvalue(dep,"gender","")),
+                            relation = common.getstring(common.getkeyvalue(dep,"relation","")),
+                            depdob = common.getdatefromstring(depdobstr, "%d/%m/%Y"),
                             
                             modified_on = common.getISTFormatCurrentLocatTime(),
                             modified_by =1 if(auth.user == None) else auth.user.id                            

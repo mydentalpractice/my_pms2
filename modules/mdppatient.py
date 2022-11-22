@@ -1669,6 +1669,11 @@ class Patient:
       r = db((db.groupregion.groupregion.lower() == 'all') & (db.groupregion.is_active == True)).select()
       regionid = int(common.getid(r[0].id))  if(len(r) == 1) else 1
   
+  
+      day = timedelta(days = 1)
+      year = timedelta(days = 365 * 100)  # for walk in patient, plan is lifetime (100 years)
+      
+    
       #Create new WALK in patient
       todaydt = datetime.date.today()
       todaystr = common.getstringfromdate(todaydt,"%d/%m/%Y")
@@ -1696,7 +1701,7 @@ class Patient:
            hmoplan = hmoplanid,
            enrollmentdate = todaydt,
            premstartdt = todaydt,
-           premenddt = todaydt,
+           premenddt = todaydt + year - day,
            startdate = todaydt,
            hmopatientmember = False,
            paid = False,
