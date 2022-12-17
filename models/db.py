@@ -3771,6 +3771,8 @@ db.define_table('vw_appointments',
                 Field('clinicid', 'integer'),
                 Field('clinic_ref', 'string'),
                 Field('clinic_name', 'string'),
+                Field('company_name', 'string'),
+                Field('company_code', 'string'),
                 
                 auth.signature
     )
@@ -5014,6 +5016,73 @@ db.define_table('vw_agent_prospect_clinic',
 
 db.vw_agent_prospect_clinic._singular = "vw_agent_prospect_clinic"
 db.vw_agent_prospect_clinic._plural   = "vw_agent_prospect_clinic"  
+
+
+db.define_table('vw_dashboard',
+                Field('id','integer'),
+                Field('f_title', 'string'),
+                Field('f_patientname', 'string'),
+                Field('cell', 'string'),
+                Field('f_start_time', 'datetime'), 
+                Field('f_end_time', 'datetime'),
+                Field('f_duration', 'string'),
+                Field('f_location','string'),
+                Field('f_uniqueid', 'integer'),
+                Field('f_treatmentid', 'integer'),
+                Field('f_status', 'string'),
+                Field('newpatient', 'boolean'),
+                Field('blockappt', 'boolean'),
+                Field('description','string'),
+                Field('provider', 'reference provider'),
+                Field('doctor', 'integer'),
+                Field('patient', 'integer'),
+                Field('patientmember', 'string'),
+                Field('sendsms', 'boolean'),
+                Field('sendrem', 'boolean'),
+                Field('smsaction', 'string'),
+                Field('docname', 'string'),
+                Field('doccell', 'string'),
+                Field('docemail', 'string'),
+                Field('provcell', 'string'),
+                Field('clinic', 'string'),
+                Field('provname', 'string'),
+                Field('provemail','string'),
+                Field('color','string'),
+                Field('docsms', 'boolean'),
+                Field('docemailflag', 'boolean'),
+                Field('groupsms', 'boolean'),
+                Field('groupemail', 'boolean'),
+                Field('provtel', 'string'),
+                Field('companyid', 'integer'),
+                Field('groupref', 'string'),
+                Field('membercode', 'string'),
+                Field('dob', 'datetime',requires=IS_DATE(format=T('%d/%m/%Y'))),
+                Field('gender', 'string'),
+                Field('hmopatientmember', 'boolean',default="False"),
+                Field('clinicid', 'integer'),
+                Field('clinic_ref', 'string'),
+                Field('clinic_name', 'string'),
+                Field('company_name', 'string'),
+                Field('company_code', 'string'),
+
+                auth.signature
+                )
+
+
+db.define_table('vw_dashboard_appt_count',
+                 Field('company_code','string'),
+                 Field('apptcount','integer')
+                 )
+db.vw_dashboard_appt_count._singular = "vw_dashboard_appt_count"
+db.vw_dashboard_appt_count._plural   = "vw_dashboard_appt_count" 
+
+db.define_table('dashboard_appt_count',
+                 Field('month_name','string'),
+                 Field('company_code','string'),
+                 Field('apptcount','integer')
+                 )
+db.dashboard_appt_count._singular = "dashboard_appt_count"
+db.dashboard_appt_count._plural   = "dashboard_appt_count"  
 
 def geocode2(form):
     from gluon.tools import geocode

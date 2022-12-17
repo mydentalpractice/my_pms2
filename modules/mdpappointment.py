@@ -1586,8 +1586,12 @@ class Appointment:
                 emailfile = ""
                 if(appt.vw_appointments.smsaction == "create"):
                     #new appointment message 
-                    smsfile  = os.path.join(appPath,'templates/sms','SMS_ApptRequest.txt') 
-                    emailfile  = os.path.join(appPath,'templates/sms','Email_ApptRequest.txt') 
+                    if(hmomember == 'Member'):
+                        smsfile  = os.path.join(appPath,'templates/sms','SMS_ApptRequest.txt') 
+                        emailfile  = os.path.join(appPath,'templates/sms','Email_ApptRequest.txt') 
+                    else:
+                        smsfile  = os.path.join(appPath,'templates/sms','SMS_ApptConfirm.txt') 
+                        emailfile  = os.path.join(appPath,'templates/sms','Email_ApptConfirm.txt') 
                     
                 elif(appt.vw_appointments.smsaction.lower() == "update"):
                     smsfile  = os.path.join(appPath,'templates/sms','SMS_ApptReschedule.txt')

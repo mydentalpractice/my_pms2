@@ -9312,6 +9312,13 @@ Added netcopay field
 1. ZZZAdd logo column in Company
 2. ZZZAdd tpapi_url in urlproperties 
 
+22/11/2022
+==========
+1. modified vw_appointments
+2. New view vw_dashboard
+3. New view vw_dasboard_appt_count
+4. New table dashboard_appt_count
+
 
 Script file to clear user for sign-up
 =====================================

@@ -140,9 +140,9 @@ def saveNewAppt(userid,form2,providerid):
                         )
                                 
                        
-                        #22/07/22 : As per new appointment confirmation process, the original status is Open instead o Confirmed
+                        #22/07/22 : As per new appointment confirmation process, the original status is Open instead of Confirmed, except for walk-in patient
                         apptid  = db.t_appointment.insert(f_start_time=apptdt, f_end_time = endapptdt, f_duration= duration, cell = common.getstring(form2.vars.cell),
-                                                        f_title = common.getstring(form2.vars.title),f_status='Open',
+                                                        f_title = common.getstring(form2.vars.title),f_status='Confirmed',
                                                         f_patientname = common.getstring(form2.vars.patientmember),
                                                         f_location = form2.vars.location,
                                                         f_treatmentid = treatmentid,
@@ -158,9 +158,11 @@ def saveNewAppt(userid,form2,providerid):
                                                       created_on=common.getISTFormatCurrentLocatTime(),modified_on=common.getISTFormatCurrentLocatTime(),
                                               created_by = userid, modified_by=userid)
                 else:
-                       
+                        p = db(db.patientmember.id == memberid).select(db.patientmember.hmopatientmember)
+                        p1 = False if(len(p) <= 0) else common.getboolean(p[0].hmopatientmember)
+                        sts = 'Confirmed' if(p1 == False) else 'Open'
                         apptid  = db.t_appointment.insert(f_start_time=apptdt, f_end_time = endapptdt, f_duration = duration, cell = common.getstring(form2.vars.cell),
-                                                        f_title = common.getstring(form2.vars.title),f_status='Open',
+                                                        f_title = common.getstring(form2.vars.title),f_status=sts,
                                                         f_treatmentid = treatmentid,
                                                         f_patientname = common.getstring(form2.vars.patientmember),
                                                         clinicid = clinicid,

@@ -1516,7 +1516,6 @@ class Pricing:
         return mssg
 
     #This rule - Consultation can only be used once in every four months - three in total.
-    
     def rule_free_half_yearly_cleaning(self,avars):
         logger.loggerpms2.info("Enter  rule_free_Half_Yearly_Cleaning API " + json.dumps(avars))
         
@@ -1603,6 +1602,82 @@ class Pricing:
             
         mssg = json.dumps(rspobj)
         logger.loggerpms2.info("Exit Pricing rule_free_Half_Yearly_Cleaning "  + mssg)
+        return mssg
+
+    # This rule checks that procedures can be used freely twice a year. After that those procedures have to be priced
+    def rule_2_free_yearly(self,avars):
+        logger.loggerpms2.info("Enter  rule_2_free_yearly API " + json.dumps(avars))
+        
+        db = self.db
+        rspobj = {}
+        
+        try:
+            procedure_code = common.getkeyvalue(avars,"procedure_code","")
+            region_code = common.getkeyvalue(avars,"region_code","")
+            plan_code = common.getkeyvalue(avars,"plan_code","")
+            company_code = common.getkeyvalue(avars,"company_code","")
+            treatment_id = int(common.getid(common.getkeyvalue(avars,"treatment_id",0)))
+            
+            is_valid = True
+            #number of times this procedure is used
+            trp = db((db.vw_treatmentprocedure.treatmentid == treatment_id) &\
+                     (db.vw_treatmentprocedure.procedurecode == procedure_code) &\
+                     (db.vw_treatmentprocedure.is_active == True)).select(db.vw_treatmentprocedure.ALL, orderby=~db.vw_treatmentprocedure.id)
+            
+            is_valid2 = True if(len(trp) >=2) else False #already used twice times
+            #is_valid0 = True if(len(trp) ==0) else False #Not used once
+            
+            #if(is_valid2 == True):  #2 times limit reached
+                #is_valid = False
+            #elif (is_valid0 == True): #0 times used
+                #is_valid = True
+            #else:
+                #is_valid = False
+            
+            
+            prp = db((db.provider_region_plan.companycode == company_code) & \
+                     (db.provider_region_plan.regioncode == region_code) & \
+                     (db.provider_region_plan.plancode == plan_code)).select()
+            if(len(prp) == 0):
+                prp = db((db.provider_region_plan.companycode == company_code) & \
+                         (db.provider_region_plan.regioncode == "ALL") & \
+                         (db.provider_region_plan.plancode == plan_code)).select()
+        
+            ppc = prp[0].procedurepriceplancode if(len(prp) == 1) else "PREMWALKIN"
+        
+            ppp = db((db.procedurepriceplan.procedurecode == procedure_code) &\
+                     (db.procedurepriceplan.procedurepriceplancode == ppc)  &\
+                     (db.procedurepriceplan.is_active == True)).select()
+        
+            #ppp JSON Object
+            rspobj["active"] = True 
+            rspobj["result"] = "success"
+            rspobj["error_message"] = ""
+            rspobj["error_code"] = ""
+            if(len(ppp) == 1):
+                rspobj["procedurepriceplancode"] = ppc
+                rspobj["ucrfee"] = float(common.getvalue(ppp[0].ucrfee)) if(is_valid2 == True) else 0
+                rspobj["procedurefee"] = float(common.getvalue(ppp[0].procedurefee)) if(is_valid2 == True) else 0
+                rspobj["copay"] = float(common.getvalue(ppp[0].copay)) if(is_valid2 == True) else 0
+                rspobj["inspays"] = float(common.getvalue(ppp[0].inspays)) if(is_valid2 == True) else 0
+                rspobj["companypays"] = float(common.getvalue(ppp[0].companypays)) if(is_valid2 == True) else 0
+                rspobj["walletamount"] = float(common.getvalue(ppp[0].walletamount)) if(is_valid2 == True) else 0
+                rspobj["discount_amount"] = float(common.getvalue(ppp[0].discount_amount)) if(is_valid2 == True) else 0
+                rspobj["is_free"] = common.getboolean(ppp[0].is_free) if(is_valid2 == True) else True
+                rspobj["voucher_code"] = common.getstring(ppp[0].voucher_code)
+                rspobj["active"] = is_valid 
+                rspobj["remarks"] = common.getstring(ppp[0].remarks)
+                c = db(db.company.company == company_code).select()
+                rspobj["authorizationrequired"] = False if (len(c) <= 0) else common.getboolean(c[0].authorizationrequired)
+                
+        except Exception as e:
+            rspobj = {}
+            mssg = "rule_2_free_yearly API Exception " + str(e)
+            rspobj["result"] = "fail"
+            rspobj["error_message"] = mssg
+            
+        mssg = json.dumps(rspobj)
+        logger.loggerpms2.info("Exit Pricing rule_2_free_yearly "  + mssg)
         return mssg
 
 
