@@ -634,6 +634,7 @@ class Appointment:
                 "apptdatetime":(appt.f_start_time).strftime("%d/%m/%Y %I:%M %p"),
                 "patientname" : common.getstring(appt.f_patientname),
                 "patcell": common.modify_cell(appt.cell),
+                "91patcell":common.modify_cell(appt.cell),
                 "docname":common.getstring(appt.docname),
                 "doctorid": common.getstring(appt.doctor),
                 "color":common.getstring(appt.color),
@@ -680,6 +681,7 @@ class Appointment:
                 "apptdatetime":(appt.f_start_time).strftime("%d/%m/%Y %I:%M %p"),
                 "patientname" : common.getstring(appt.f_patientname),
                 "patcell": common.modify_cell(appt.cell),
+                "91patcell": common.modify_cell(appt.cell),
                 "docname":common.getstring(appt.docname),
                 "doctorid": int(common.getid(appt.doctor)),
                 "clinicid": int(common.getid(appt.clinicid)),
@@ -728,6 +730,7 @@ class Appointment:
                 "appttime"  : (appt.f_start_time).strftime("%I:%M %p"),
                 "patientname" : appt.f_patientname,
                 "patcell": common.modify_cell(appt.cell),
+                "91patcell": common.modify_cell(appt.cell),
                 "docname":appt.docname,
                 "clinicid" : int(common.getid(appt.clinicid)),
                 
@@ -778,6 +781,7 @@ class Appointment:
                 "patientname" : appt.f_patientname,
                 "docname":appt.docname,
                 "patcell":common.modify_cell(appt.cell),
+                "91patcell":common.modify_cell(appt.cell),
                 "clinicid" : int(common.getid(appt.clinicid)),
                 "blockappt":common.getboolean(appt.blockappt)
             }
@@ -823,6 +827,7 @@ class Appointment:
                 "patientname" : appt.f_patientname,
                 "docname":appt.docname,
                 "patcell":common.modify_cell(appt.cell),
+                "91patcell":common.modify_cell(appt.cell),
                 "clinicid" : int(common.getid(appt.clinicid)),
                 "blockappt":common.getboolean(appt.blockappt)
             }
@@ -951,6 +956,7 @@ class Appointment:
                 
                 "doctor":common.getstring(ds[i][1]),
                 'doccell':common.modify_cell(ds[i][4]),
+                '91doccell':common.modify_cell(ds[i][4]),
                 "count": int(common.getstring(ds[i][3])),
                 "color": common.getstring(ds[i][2])
             
@@ -1000,11 +1006,14 @@ class Appointment:
                     "patientmember":patientmember,
                     "patientname" : common.getstring(appt[0].f_patientname),
                     "patcell":common.modify_cell(appt[0].cell),
+                    "91patcell":common.modify_cell(appt[0].cell),
                     "doctorid":int(common.getid(appt[0].doctor)),
                     "docname":common.getstring(appt[0].docname),
                     "doccell":common.modify_cell(appt[0].doccell),
+                    "91doccell":common.modify_cell(appt[0].doccell),
                     "color": appt[0].color if(common.getstring(appt[0].color) != "") else "#ff0000",
                     "provcell":common.modify_cell(appt[0].provcell),
+                    "91provcell":common.modify_cell(appt[0].provcell),
                     "gender":common.getstring(appt[0].gender),
                     "dob":common.getstringfromdate(appt[0].dob,"%d/%M/%Y"),  
                     "age":calculateAge(appt[0].dob) if(appt[0].dob != None) else 0,
@@ -1867,7 +1876,7 @@ class Appointment:
    
     
     def sendAllAppointmentsSMSEmail(self,avars):
-        logger.loggerpms2.info("Enter sendAllAppointmentsSMSEmail " + json.dumps(avars))
+        #logger.loggerpms2.info("Enter sendAllAppointmentsSMSEmail " + json.dumps(avars))
          
         db = self.db
         rspObj = {}

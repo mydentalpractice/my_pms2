@@ -806,6 +806,16 @@ def addproviderimage(avars):
     return prov
 
 ######################################################## PATIENT APIS  ##################################    
+def add_dependant(avars):
+    opat = mdppatient.Patient(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
+    rsp = opat.add_dependant(avars)
+    return rsp
+
+def del_dependant(avars):
+    opat = mdppatient.Patient(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
+    rsp = opat.del_dependant(avars)
+    return rsp
+
 
 def registerVCPatient(avars):
     opat = mdppatient.Patient(current.globalenv['db'],int(common.getid(str(avars["providerid"]))) if "providerid" in avars else 0)
@@ -3460,6 +3470,8 @@ def get_hv_appt_feedback(avars):
 
 ############################# END OF HV API  ###################################################
 
+
+
 ############################# START OF DEVICE API  ###################################################
 def get_device_info(avars):
     odr = mdpdevice.Device(db)
@@ -3489,11 +3501,35 @@ def get_procedure_fees(avars):
 
 ############################# END OF PRICING API  ###################################################
 
+############################# START OF CRM API  ###################################################
+def get_patient(avars):
+    mssg = "Enter get_patient"
+    return mssg
+
+def crm_getpatient(avars):
+    opat = mdppatient.Patient(db,0)
+    rsp = opat.crm_getpatient(avars)
+    return rsp
+
+def crm_updatepatient(avars):
+    logger.loggerpms2.info("Enter CRM Update Patient " + json.dumps(avars))
+    opat = mdppatient.Patient(db,0)
+    rsp = opat.crm_updatepatient(avars)
+    
+    return rsp
+
+############################# END OF PATIENT API  ###################################################
 
 def unknown(avars):
     return dict()
 
 
+crmAPI_switcher={
+
+    "crm_getpatient":crm_getpatient,
+    "crm_updatepatient":crm_updatepatient
+
+}
 rulesAPI_switcher={
     
     "get_procedure_fees":get_procedure_fees
@@ -3718,7 +3754,8 @@ mdpapi_switcher = {"listappointments":getappointments,"getappointmentsbymonth":g
                    "getOPDServicesCashless":getOPDServicesCashless,"getTransactionIDCashless":getTransactionIDCashless,\
                    "agent_otp_login":agent_otp_login,"otp_login":otp_login,"hvdoc_registration":hvdoc_registration,\
                    "searchpatient_fast":searchpatient_fast,"gettreatments_fast":gettreatments_fast,"hv_doc_login":hv_doc_login,\
-                   "get_city_state_frompin":get_city_state_frompin
+                   "get_city_state_frompin":get_city_state_frompin,"get_patient":get_patient,\
+                   "crm_getpatient":crm_getpatient,"add_dependant":add_dependant,"del_dependant":del_dependant
                    
                    }
 
@@ -3729,8 +3766,10 @@ def mdpapi():
    
     response.view = 'generic' + request.extension
     def GET(*args, **vars):
+	action = common.getkeyvalue(vars,"action","")
+	rsp = mdpapi_switcher.get(action,unknown)(vars)
 	
-        return
+        return rsp
 
     def POST(*args, **vars):
 	i = 0
@@ -3791,6 +3830,7 @@ def mdpapi():
 def mediaAPI():
     response.view = 'generic' + request.extension
     def GET(*args, **vars):
+	
 	
 	return
 
@@ -4817,3 +4857,61 @@ def rulesAPI():
 
     return locals()
 
+@request.restful()
+def crmAPI():
+    response.view = 'generic' + request.extension
+    def GET(*args, **vars):
+	action = common.getkeyvalue(vars,"action","")
+	rsp = crmAPI_switcher.get(action,unknown)(vars)	
+	return rsp
+
+    def POST(*args, **vars):
+	i = 0
+	try:
+	    #logger.loggerpms2.info(">>Enter Pricing API==>>")
+	    dsobj = datasecurity.DataSecurity(current.globalenv['db'])
+	    encryption = vars.has_key("req_data")
+	    avars = {
+	      "encryption" : encryption,
+	      "request":request
+	    }
+	    rspobj = json.loads(dsobj.authenticate_api(avars))
+	    if(rspobj["result"] == "fail"):
+		mssg = rspobj["error_message"]
+		raise Exception(mssg)
+		    
+		    
+	    
+	    if(encryption):
+		#logger.loggerpms2.info(">>Device with Encryption")
+		encrypt_req = vars["req_data"]
+		vars = json.loads(dsobj.decrypts(encrypt_req))
+	    
+	    #decrypted request date
+	    action = common.getkeyvalue(vars,"action","") #str(vars["action"])
+	    #logger.loggerpms2.info(">>PLAN ACTION==>>" + action)
+	    
+	    #return json.dumps({"action":action})
+	    rsp = crmAPI_switcher.get(action,unknown)(vars)
+	    common.setcookies(response)
+	    if(encryption):
+		return json.dumps({"resp_data":dsobj.encrypts(rsp)})
+	    else:
+		return rsp
+	    
+	except Exception as e:
+	    mssg = "CRM_Updatepatient API Exception Error =>>\n" + str(e)
+	    logger.loggerpms2.info(mssg)
+	    excpobj = {}
+	    excpobj["result"] = "fail"
+	    excpobj["error_code"] = "MDP404"
+	    excpobj["error_message"] = mssg
+	    return json.dumps(excpobj)    	    
+
+    def PUT(*args, **vars):
+	return dict()
+
+    def DELETE(*args, **vars):
+	return dict()
+
+    return locals()

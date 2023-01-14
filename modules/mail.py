@@ -2193,12 +2193,15 @@ def emailAuthorizedTreatment(db,appPath,treatmentid):
     procs = db((db.vw_treatmentprocedure.treatmentid  == treatmentid) & (db.vw_treatmentprocedure.is_active == True)).select()
     str1 = str1 + "<table border=\"1\">"
     for proc in procs:
+        
+        provshare = float(common.getvalue(proc.copay)) * 0.85
         str1 = str1 + "<tr border=\"1\">"
         str1 = str1 + "<td span=\"2\">"  + common.getdt(proc.treatmentdate).strftime("%d/%m/%Y") + "</td>"
         str1 = str1 + "<td span=\"2\">"  + common.getstring(proc.altshortdescription) + "</td>"
         str1 = str1 + "<td> Procedure Fee </td<td>"  + "Rs. " + str(common.getvalue(proc.procedurefee)) + "</td>"
         str1 = str1 + "<td> Authorized Amount </td<td>"  + "Rs. " + str(common.getvalue(proc.inspays)) + "</td>"
         str1 = str1 + "<td> Co-Pay </td<td>"  + "Rs. " + str(common.getvalue(proc.copay)) + "</td>"
+        
         str1 = str1 + "</tr>"
         
     str1 = str1 + "</table>"    
@@ -2242,7 +2245,10 @@ def emailAuthorizedTreatment(db,appPath,treatmentid):
     mail.settings.login =  login
     mail.settings.tls = tls
 
-    to      =  medi_mydp_email
+
+    
+    
+    to      =  medi_mydp_email   #'deepak@mydentalplan.in'
     subject = "Authorized Treatment for " + patient   
     
     cc = ""
@@ -2254,9 +2260,9 @@ def emailAuthorizedTreatment(db,appPath,treatmentid):
     else:
         if(mailcc == ""):
             #remove provemail from cc as per dr. deepak (15/09/2022)
-            cc = ""
+            cc = provemail
         else:
-            cc = mailcc
+            cc = provemail + "," + mailcc   #appointments@mydentalplan.in,manjunathshidling@mydentalplan.in
                 
        
   

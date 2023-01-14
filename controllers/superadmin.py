@@ -52,7 +52,7 @@ def testgroupsms():
 def smsservice():
      
      message = "Enter Loop" + " " + (common.getISTFormatCurrentLocatTime()).strftime(datetimefmt)
-     logger.loggerpms2.info(message)
+     #logger.loggerpms2.info(message)
      strdt  = request.vars.activitydate
      groupapptsms = request.vars.groupapptsms
      activitydate = datetime.datetime.strptime(strdt, datefmt)
@@ -70,7 +70,7 @@ def smsservice():
         
           if(groupapptsms == "1"):
                message = "Re-Enter Loop"  + " " + (common.getISTFormatCurrentLocatTime()).strftime(datetimefmt)
-               logger.loggerpms2.info(message)
+               #logger.loggerpms2.info(message)
                obj = {"appPath":request.folder}
                
                o = mdpappointment.Appointment(db, 1)

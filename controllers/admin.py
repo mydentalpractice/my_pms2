@@ -477,7 +477,7 @@ def register():
             db.commit()
             
             sql = "insert into medicine(providerid,medicine,medicinetype, strength,strengthuom, instructions,   is_active, created_by, created_on, modified_by, modified_on)"
-            sql = sql + " select " + str(providerid) + ", medicine , meditype , strength , strngthuom ,instructions, 'T'," +  str(providerid) + ", NOW()," + str(providerid) + ", NOW() from medicine_default"
+            sql = sql + " select " + str(providerid) + ", medicine , meditype , strength , strengthuom ,instructions, 'T'," +  str(providerid) + ", NOW()," + str(providerid) + ", NOW() from medicine_default"
             db.executesql(sql)    
             db.commit()
             
@@ -980,37 +980,54 @@ def patient_selector():
     provdict = common.getprovider(auth,db)
     providerid = common.getid(provdict["providerid"])    
     
-    #display all those patients who have seeked appointments with this provider. Appointment guarantees that these patient/members have 
-    #agreed to this provider.
-    memberset = set()
-
-    appts = db((db.t_appointment.is_active == True)&\
-               (db.t_appointment.f_status != 'Cancelled')&\
-               (db.t_appointment.provider == providerid)).select(db.t_appointment.patientmember, db.t_appointment.patient)
-
-    for appt in appts:
-        if(appt.patientmember in memberset):
-            continue
-        memberset.add(appt.patientmember)      
-
-    qry = (db.vw_memberpatientlist.is_active == True)
+    prov = db((db.provider.id == providerid) & (db.provider.is_active == True)).select(db.provider.isMDP)
+    isMDP  = False if(len(prov) <= 0) else bool(common.getboolean(prov[0].isMDP))
     
-    if(providerid > 0):
-        q = (qry) & ((db.vw_memberpatientlist.hmopatientmember == True) & (db.vw_memberpatientlist.providerid == providerid))
-        pats = db(qry).select(db.vw_memberpatientlist.primarypatientid)
-        for pat in pats:
-            if(pat.primarypatientid in memberset):
+    if(isMDP == True):
+        #display all those patients who have seeked appointments with this provider. Appointment guarantees that these patient/members have 
+        #agreed to this provider.
+        memberset = set()
+    
+        appts = db((db.t_appointment.is_active == True)&\
+                   (db.t_appointment.f_status != 'Cancelled')&\
+                   (db.t_appointment.provider == providerid)).select(db.t_appointment.patientmember, db.t_appointment.patient)
+    
+        for appt in appts:
+            if(appt.patientmember in memberset):
                 continue
-            memberset.add(pat.primarypatientid)
+            memberset.add(appt.patientmember)      
     
-    
-    if(providerid > 0):  #list of walk-in patients for this Provider + list of MDP Members matching the search phrase
-        qry = (qry) & (((db.vw_memberpatientlist.hmopatientmember == False) & (db.vw_memberpatientlist.providerid == providerid)) |\
-                       ((db.vw_memberpatientlist.primarypatientid.belongs(memberset)) &  (db.vw_memberpatientlist.hmopatientmember == True) &  (datetime.date.today().strftime('%Y-%m-%d') <= db.vw_memberpatientlist.premenddt) ))
-    else: # list of MDP Members matching the search phrase
-        qry = (qry) & ((db.vw_memberpatientlist.primarypatientid.belongs(memberset)) &  (db.vw_memberpatientlist.hmopatientmember == True) &  (datetime.date.today().strftime('%Y-%m-%d') <= db.vw_memberpatientlist.premenddt))
+        qry = (db.vw_memberpatientlist.is_active == True)
+        
+        if(providerid > 0):
+            q = (qry) & ((db.vw_memberpatientlist.hmopatientmember == True) & (db.vw_memberpatientlist.providerid == providerid))
+            pats = db(qry).select(db.vw_memberpatientlist.primarypatientid)
+            for pat in pats:
+                if(pat.primarypatientid in memberset):
+                    continue
+                memberset.add(pat.primarypatientid)
+        
+        if(providerid > 0):  #list of walk-in patients for this Provider + list of MDP Members matching the search phrase
+            qry = (qry) & (((db.vw_memberpatientlist.hmopatientmember == False) & (db.vw_memberpatientlist.providerid == providerid)) |\
+                           ((db.vw_memberpatientlist.primarypatientid.belongs(memberset)) &  (db.vw_memberpatientlist.hmopatientmember == True) &  (datetime.date.today().strftime('%Y-%m-%d') <= db.vw_memberpatientlist.premenddt) ))
+        else: # list of MDP Members matching the search phrase
+            qry = (qry) & ((db.vw_memberpatientlist.primarypatientid.belongs(memberset)) &  (db.vw_memberpatientlist.hmopatientmember == True) &  (datetime.date.today().strftime('%Y-%m-%d') <= db.vw_memberpatientlist.premenddt))
+            
+    else:
+        memberset= set()
+        rows = db((db.vw_memberpatientlist.providerid == providerid) &\
+                  (db.vw_memberpatientlist.hmopatientmember == False) &\
+                  (db.vw_memberpatientlist.is_active == True)).select()
+        for r in rows:
+            if(r.primarypatientid in memberset):
+                continue
+            else:
+                memberset.add(r.primarypatientid)
+            
+        qry = ((db.vw_memberpatientlist.is_active == True) & (db.vw_memberpatientlist.hmopatientmember == False) & (db.vw_memberpatientlist.providerid == providerid))
+        
 
-    
+        
     
     if(request.vars.xpatientmember1 == ""):
         pattern = '%'
@@ -1168,23 +1185,32 @@ def newpatient_selector():
     providerid = int(common.getid(request.vars.providerid))
     xmemberid = int(common.getid(request.vars.xmemberid))
     
+    provs = db((db.provider.id == providerid) & (db.provider.is_active == True)).select(db.provider.isMDP)
+    isMDP = False if(len(provs) <= 0) else bool(common.getboolean(provs[0].isMDP))
     
-   
     if(request.vars.patientmember == ""):
         pattern = '%'
     else:
         pattern = request.vars.patientmember.capitalize() + '%'
-        
-    if(xmemberid == 0):
-        selected = [row.patient for row in db(((db.vw_appointmentmemberlist.is_active == True)  & \
-                                               ((db.vw_appointmentmemberlist.providerid == providerid) | ((db.vw_appointmentmemberlist.providerid == 1)&\
-                                                                                                          (db.vw_appointmentmemberlist.hmopatientmember == False))))&\
-                                              (db.vw_appointmentmemberlist.patient.like(pattern))).select(db.vw_appointmentmemberlist.patient)]
+    
+    if(isMDP == True):
+            
+        if(xmemberid == 0):
+            selected = [row.patient for row in db(((db.vw_appointmentmemberlist.is_active == True)  & \
+                                                   ((db.vw_appointmentmemberlist.providerid == providerid) | ((db.vw_appointmentmemberlist.providerid == 1)&\
+                                                                                                              (db.vw_appointmentmemberlist.hmopatientmember == False))))&\
+                                                  (db.vw_appointmentmemberlist.patient.like(pattern))).select(db.vw_appointmentmemberlist.patient)]
+        else:
+            selected = [row.patient for row in db(((db.vw_appointmentmemberlist.is_active == True)  & (db.vw_appointmentmemberlist.primarypatientid == xmemberid)  & \
+                                                   ((db.vw_appointmentmemberlist.providerid == providerid) | ((db.vw_appointmentmemberlist.providerid == 1)&\
+                                                                                                              (db.vw_appointmentmemberlist.hmopatientmember == False))))&\
+                                                  (db.vw_appointmentmemberlist.patient.like(pattern))).select(db.vw_appointmentmemberlist.patient)]
     else:
-        selected = [row.patient for row in db(((db.vw_appointmentmemberlist.is_active == True)  & (db.vw_appointmentmemberlist.primarypatientid == xmemberid)  & \
-                                               ((db.vw_appointmentmemberlist.providerid == providerid) | ((db.vw_appointmentmemberlist.providerid == 1)&\
-                                                                                                          (db.vw_appointmentmemberlist.hmopatientmember == False))))&\
-                                              (db.vw_appointmentmemberlist.patient.like(pattern))).select(db.vw_appointmentmemberlist.patient)]
+
+        selected = [row.patient for row in db((db.vw_appointmentmemberlist.is_active == True)  &\
+                                               (db.vw_appointmentmemberlist.providerid == providerid) & (db.vw_appointmentmemberlist.hmopatientmember == False)&\
+                                               (db.vw_appointmentmemberlist.patient.like(pattern))).select(db.vw_appointmentmemberlist.patient)]
+        
         
     return ''.join([DIV(k,
                  _onclick="jQuery('#no_table_patientmember').text('%s')" % k,

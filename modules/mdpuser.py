@@ -815,6 +815,7 @@ class User:
     
     return json.dumps(user_data)
 
+
   #This method receives validated otp with cell number from mobile app
   #Search the patientmembers for registered cell number.  Ideally, there will be only 
   #one registered cell number, if more are found, then return with error
@@ -822,6 +823,7 @@ class User:
   def otpvalidation(self, cell, email, otp, otpdatetime):
     
     db = self.db   #there is no provider id at this stage
+    cell = common.strip_cell(cell)
     
     cellno = common.modify_cell(cell)   #in standard with 91
     
@@ -848,6 +850,7 @@ class User:
         "relation":pat.relation,
         "memberorder":pat.memberorder,
         "cell":pat.cell,
+        "91cell" : common.modify_cell(pat.cell),
         "email":pat.email,
         "providerid":pat.providerid,
         

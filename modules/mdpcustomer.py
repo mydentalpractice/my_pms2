@@ -1492,7 +1492,8 @@ class Customer:
                             "lname":dep["lname"],
                             "depdob":common.getstringfromdate(dep["depdob"],"%d/%m/%Y"),
                             "gender":dep["gender"],
-                            "relation":dep["relation"],
+                            "relation":dep["relation"]
+                            
                         }
                         deplist.append(depobj)
                 

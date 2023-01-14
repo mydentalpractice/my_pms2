@@ -818,7 +818,21 @@ def gettreatmentgrid(db,page, imagepage, providerid, providername, treatment,mem
 
 
 
+#this function strips leading +91 from the cell number
+def strip_cell(cell):
+        if((cell == None)|(cell == "")):
+                return "0000000000"
+        cell = cell.lstrip(' ')
+        cellno = cell
+        #if the leading phrase is +91, then strip +91
+        if(cell.startswith("+91") == True):
+                cellno = cell.replace("+91","").lstrip(' ')
+        
+        #if the total cound > 10, then strip the leading digits till 10 are left
+        for x in xrange(len(cellno)-10):
+                cellno = cellno[(len(cellno)-10):]
 
+        return cellno
 
 
 def modify_cell(cell):

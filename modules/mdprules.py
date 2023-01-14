@@ -905,6 +905,25 @@ class Pricing:
             rspobj["error_message"] = ""
             rspobj["error_code"] = ""
             if(len(ppp) >=1):
+                #if(company_code == "MEDI"):
+                    #i = 0
+                    #rspobj["procedurepriceplancode"] = ppc
+                    ##MEDI procedure fee = ucr fee
+                    ##copay = procedurefee - inspays
+                    ##TPA share = (procedurefee * 0.10)
+                    ##provider share = (procedure fee - tpa share) * 0.85
+                    
+                    #rspobj["ucrfee"] = float(common.getvalue(ppp[0].ucrfee))
+                    #rspobj["procedurefee"] = float(common.getvalue(ppp[0].ucrfee))
+                    #rspobj["inspays"] = float(common.getvalue(ppp[0].inspays))
+                    #rspobj["copay"] = float(common.getvalue(ppp[0].ucrfee)) -float(common.getvalue(ppp[0].inspays))
+                    #rspobj["companypays"] = float(common.getvalue(ppp[0].companypays))
+                    #rspobj["walletamount"] = float(common.getvalue(ppp[0].walletamount))
+                    #rspobj["discount_amount"] = float(common.getvalue(ppp[0].discount_amount))
+                    #rspobj["tpashare"] = float(common.getvalue(ppp[0].ucrfee)) * 0.10
+                    #rspobj["providershare"] = (float(common.getvalue(ppp[0].ucrfee))-(float(common.getvalue(ppp[0].ucrfee)) * 0.10) * 0.85)
+                    
+                #else:
                 rspobj["procedurepriceplancode"] = ppc
                 rspobj["ucrfee"] = float(common.getvalue(ppp[0].ucrfee))
                 rspobj["procedurefee"] = float(common.getvalue(ppp[0].procedurefee))
@@ -1617,10 +1636,23 @@ class Pricing:
             plan_code = common.getkeyvalue(avars,"plan_code","")
             company_code = common.getkeyvalue(avars,"company_code","")
             treatment_id = int(common.getid(common.getkeyvalue(avars,"treatment_id",0)))
+            #get memberid 
+            x = db((db.vw_treatmentlist_fast.id == treatment_id) & (db.vw_treatmentlist_fast.is_active== True)).select()
+            memberid = 0 if(len(x) <= 0) else int(common.getid(x[0].memberid))
+            patientid = 0 if(len(x) <= 0) else int(common.getid(x[0].patientid))
+            
+            x = db((db.patientmember.id == memberid) & (db.patientmember.is_active == True)).select()
+            premstartdt = common.getdatefromstring("2300-01-01","%Y-%m-%d") if(len(x) <= 0) else x[0].premstartdt
+            premenddt = common.getdatefromstring("2300-01-01","%Y-%m-%d") if(len(x) <= 0) else x[0].premenddt
+            
+            
             
             is_valid = True
             #number of times this procedure is used
-            trp = db((db.vw_treatmentprocedure.treatmentid == treatment_id) &\
+            trp = db((db.vw_treatmentprocedure.primarypatient == memberid) &\
+                     (db.vw_treatmentprocedure.patient == patientid) &\
+                     (db.vw_treatmentprocedure.treatmentdate >= premstartdt) &\
+                     (db.vw_treatmentprocedure.treatmentdate <= premenddt) &\
                      (db.vw_treatmentprocedure.procedurecode == procedure_code) &\
                      (db.vw_treatmentprocedure.is_active == True)).select(db.vw_treatmentprocedure.ALL, orderby=~db.vw_treatmentprocedure.id)
             
@@ -1680,7 +1712,82 @@ class Pricing:
         logger.loggerpms2.info("Exit Pricing rule_2_free_yearly "  + mssg)
         return mssg
 
+    # This rule checks first usage of procedure after waiting of 7 days
+    def rule_first_7days_waiting(self,avars):
+        logger.loggerpms2.info("Enter  rule_first_7days_waiting API " + json.dumps(avars))
+        
+        db = self.db
+        rspobj = {}
+        
+        try:
+            procedure_code = common.getkeyvalue(avars,"procedure_code","")
+            region_code = common.getkeyvalue(avars,"region_code","")
+            plan_code = common.getkeyvalue(avars,"plan_code","")
+            company_code = common.getkeyvalue(avars,"company_code","")
+            treatment_id = int(common.getid(common.getkeyvalue(avars,"treatment_id",0)))
+            
+           
+            
+            #find the plan enrollment date
+            x = db((db.vw_treatmentlist_fast.id == treatment_id) & (db.vw_treatmentlist_fast.is_active == True)).select()
+            memberid = 0 if(len(x) <= 0) else int(common.getid(x[0].memberid))
+            x = db((db.patientmember.id == memberid) & (db.patientmember.is_active == True)).select()
+            premstartdt = common.getdatefromstring("2300-01-01","%Y-%m-%d") if(len(x) <= 0) else x[0].premstartdt
+            days_7  = timedelta(days = 7)
+            nextdateallowed = (premstartdt + days_7)
+            
+            is_valid = True
+            #check for 7 days for waiting period when used for first time of the procedure in the rules, No check for waiting for other procedures
+            #check whether the procedure code is not the one in the rules. If it is the same as the rules, then we need to check for waiting else not
+            x = db((db.rules.company_code==company_code) & (db.rules.plan_code == plan_code) & (db.rules.procedure_code == procedure_code)).select()
+            if(len(x) > 0):
+                tr = db((db.treatment.id == treatment_id) & (db.treatment.startdate >= nextdateallowed) & (db.treatment.is_active == True)).select()
+                is_valid = is_valid & (True if(len(tr)>=1) else False)
 
+            prp = db((db.provider_region_plan.companycode == company_code) & \
+                     (db.provider_region_plan.regioncode == region_code) & \
+                     (db.provider_region_plan.plancode == plan_code)).select()
+            if(len(prp) == 0):
+                prp = db((db.provider_region_plan.companycode == company_code) & \
+                         (db.provider_region_plan.regioncode == "ALL") & \
+                         (db.provider_region_plan.plancode == plan_code)).select()
+        
+            ppc = prp[0].procedurepriceplancode if(len(prp) == 1) else "PREMWALKIN"
+        
+            ppp = db((db.procedurepriceplan.procedurecode == procedure_code) &\
+                     (db.procedurepriceplan.procedurepriceplancode == ppc)  &\
+                     (db.procedurepriceplan.is_active == True)).select()
+        
+            #ppp JSON Object
+            rspobj["active"] = True 
+            rspobj["result"] = "success"
+            rspobj["error_message"] = ""
+            rspobj["error_code"] = ""
+            if(len(ppp) == 1):
+                rspobj["procedurepriceplancode"] = ppc
+                rspobj["ucrfee"] = float(common.getvalue(ppp[0].ucrfee)) if(is_valid == True) else 0
+                rspobj["procedurefee"] = float(common.getvalue(ppp[0].procedurefee)) if(is_valid == True) else 0
+                rspobj["copay"] = float(common.getvalue(ppp[0].copay)) if(is_valid == True) else 0
+                rspobj["inspays"] = float(common.getvalue(ppp[0].inspays)) if(is_valid == True) else 0
+                rspobj["companypays"] = float(common.getvalue(ppp[0].companypays)) if(is_valid == True) else 0
+                rspobj["walletamount"] = float(common.getvalue(ppp[0].walletamount)) if(is_valid == True) else 0
+                rspobj["discount_amount"] = float(common.getvalue(ppp[0].discount_amount)) if(is_valid == True) else 0
+                rspobj["is_free"] = common.getboolean(ppp[0].is_free) if(is_valid == True) else True
+                rspobj["voucher_code"] = common.getstring(ppp[0].voucher_code)
+                rspobj["active"] = is_valid 
+                rspobj["remarks"] = common.getstring(ppp[0].remarks)
+                c = db(db.company.company == company_code).select()
+                rspobj["authorizationrequired"] = False if (len(c) <= 0) else common.getboolean(c[0].authorizationrequired)
+                
+        except Exception as e:
+            rspobj = {}
+            mssg = "rule_first_7days_waiting API Exception " + str(e)
+            rspobj["result"] = "fail"
+            rspobj["error_message"] = mssg
+            
+        mssg = json.dumps(rspobj)
+        logger.loggerpms2.info("Exit Pricing rule_first_7days_waiting "  + mssg)
+        return mssg
 
 
     def Template(self,avars):

@@ -443,6 +443,7 @@ class Patient:
         "primary":True if(pat.patienttype == "P") else False,   #True if "P" False if "D"
         "relation":pat.relation,
         "cell":pat.cell,
+        "91cell":common.modify_cell(pat.cell),
         "email":pat.email
         
       }
@@ -659,6 +660,7 @@ class Patient:
           "primary":True if(pat.patienttype == "P") else False,   #True if "P" False if "D"
           "relation":pat.relation,
           "cell":pat.cell,
+          "91cell":common.modify_cell(pat.cell),
           "email":pat.email,
           "age":pat.age,
           "dob":common.getstringfromdate(pat.dob,"%d/%m/%Y"),
@@ -809,6 +811,7 @@ class Patient:
           #"primary":True if(pat.patienttype == "P") else False,   #True if "P" False if "D"
           #"relation":pat.relation,
           "cell":patarr[5],
+          "91cell":common.modify_cell(patarr[5]),
           "email":patarr[6],
           #"age":pat.age,
           #"dob":common.getstringfromdate(pat.dob,"%d/%m/%Y"),
@@ -956,6 +959,7 @@ class Patient:
           "primary":True if(pat.patienttype == "P") else False,   #True if "P" False if "D"
           "relation":pat.relation,
           "cell":pat.cell,
+          "91cell":common.modify_cell(pat.cell),
           "email":pat.email
           
         }
@@ -1053,7 +1057,8 @@ class Patient:
           "city":common.getstring(mem[0].patientmember.city),
           "st":common.getstring(mem[0].patientmember.st),
           "pin":common.getstring(mem[0].patientmember.pin),
-          "cell ":common.getstring(mem[0].patientmember.cell), 
+          "cell ":common.getstring(mem[0].patientmember.cell),
+          "91cell":common.modify_cell(common.getstring(mem[0].patientmember.cell)),
           "email ":common.getstring(mem[0].patientmember.email),         
           "region":common.getstring(mem[0].groupregion.groupregion),
           "regionid":int(common.getid(mem[0].groupregion.id))
@@ -1108,6 +1113,311 @@ class Patient:
     logger.loggerpms2.info(json.dumps(memobj))
     return json.dumps(memobj)
   
+  
+
+  def crm_updatepatient(self,avars):
+    logger.loggerpms2.info("Enter crm_updatepatient API =>> " + json.dumps(avars))
+    #<parameter name="action" value="crm_updatepatient" ></parameter>
+    #<parameter name="fname" value="@fname" ></parameter>
+    #<parameter name="mname" value="@mname" ></parameter>
+    #<parameter name="lname" value="@lname" ></parameter>
+    #<parameter name="address1" value="@address1" ></parameter>
+    #<parameter name="address2" value="@address2" ></parameter>
+    #<parameter name="address3" value="@address3" ></parameter>
+    #<parameter name="city" value="@city" ></parameter>
+    #<parameter name="state" value="@state" ></parameter>
+    #<parameter name="pin" value="@pin" ></parameter>
+    #<parameter name="cell" value="@cell" ></parameter>
+    #<parameter name="email" value="@email" ></parameter>  
+    #<parameter name="dob" value="@dob" ></parameter>  
+    #<parameter name="gender" value="@gender" ></parameter>  
+    #<parameter name="title" value="@title" ></parameter>  
+    #<parameter name="status" value="@status" ></parameter>  
+    #<parameter name="enrollmentdate" value="@enrollmentdate" ></parameter>  
+    
+    #<parameter name="plancode" value="@plancode" ></parameter>  
+    #<parameter name="planstartdate" value="@planstartdate" ></parameter>  
+    #<parameter name="planenddate" value="@planenddate" ></parameter>  
+    #<parameter name="planvalue" value="@planvalue" ></parameter>  
+    #<parameter name="companycode" value="@companycode" ></parameter>  
+    #<parameter name="region" value="@region" ></parameter>  
+    
+    
+    db = self.db
+    auth = current.auth
+    rspobj = {}
+    try:
+      
+      cell = common.getkeyvalue(avars,"cell","0000000000")
+      cell = common.strip_cell(cell)
+      pats = db((db.patientmember.cell == cell) &  (db.patientmember.is_active == True)).select()
+      memberid = 0 if(len(pats) <= 0) else int(common.getid(pats[0].id))
+                                              
+      
+      #update if already present, else create a new patient
+      if(memberid > 0):
+        dobstr = common.getkeyvalue(avars,"dob","")
+        dob = common.getdatefromstring(dobstr,"%Y-%m-%d") if(dobstr != "") else (None if(len(pats) <= 0) else pats[0].dob)
+      
+        enrollmentdatestr = common.getkeyvalue(avars,"enrollmentdate","")
+        
+        
+        db(db.patientmember.id == memberid).update(\
+          title = common.getkeyvalue(avars,'title', pats[0].title if(len(pats) > 0) else ""),
+          fname = common.getkeyvalue(avars,'fname', pats[0].fname if(len(pats) > 0) else ""),
+          mname = common.getkeyvalue(avars,'mname', pats[0].mname if(len(pats) > 0) else ""),
+          lname = common.getkeyvalue(avars,'lname', pats[0].lname if(len(pats) > 0) else ""),
+          dob = dob,
+          cell = common.getkeyvalue(avars,'cell', pats[0].cell if(len(pats) > 0) else ""),
+          email = common.getkeyvalue(avars,'email', pats[0].email if(len(pats) > 0) else ""),
+          gender = common.getkeyvalue(avars,'gender', pats[0].gender if(len(pats) > 0) else ""),
+          address1 = common.getkeyvalue(avars,'address1', pats[0].address1 if(len(pats) > 0) else ""),
+          address2 = common.getkeyvalue(avars,'address2', pats[0].address2 if(len(pats) > 0) else ""),
+          address3 =common.getkeyvalue(avars,'address3', pats[0].address3 if(len(pats) > 0) else ""),
+          city = common.getkeyvalue(avars,'city', pats[0].city if(len(pats) > 0) else ""),
+          st = common.getkeyvalue(avars,'st', pats[0].st if(len(pats) > 0) else ""),
+          pin = common.getkeyvalue(avars,'pin', pats[0].pin if(len(pats) > 0) else ""),
+          status = common.getkeyvalue(avars,'status', pats[0].status if(len(pats) > 0) else ""),
+          enrollmentdate = enrollmentdate,
+          modified_on = common.getISTFormatCurrentLocatTime(),
+          modified_by = 1 if(auth.user == None) else auth.user.id     
+        )
+        rspobj = {"result":"success","error_message":"","memberid":memberid}    
+      else:
+        
+        dobstr = common.getkeyvalue(avars,"dob","1990-01-01")  #y-m-d from CRM
+        dob = common.getdatefromstring(dobstr, "%Y-%m-%d")
+        dobstr = common.getstringfromdate(dob,"%d/%m/%Y")       #to be sent to newpatientfromcustomer API
+        
+        enrollmentdatestr = common.getkeyvalue(avars,"enrollmentdate","")  #y-m-d from CRM
+        enrolldate = common.getdatefromstring(enrollmentdatestr,"%Y-%m-%d")
+        enrollmentdatestr = common.getstringfromdate(enrolldate,"%d/%m/%Y") #str in this format to send to newpatientfromcustomer API
+
+        premstartdtstr = common.getkeyvalue(avars,"planstartdate","")  #y-m-d from CRM
+        premstartdt = common.getdatefromstring(premstartdtstr,"%Y-%m-%d")
+        premstartdtstr = common.getstringfromdate(premstartdt,"%d/%m/%Y") #str in this format to send to newpatientfromcustomer API
+
+        premenddtstr = common.getkeyvalue(avars,"planenddate","")  #y-m-d from CRM
+        premenddt = common.getdatefromstring(premenddtstr,"%Y-%m-%d")
+        premenddtstr = common.getstringfromdate(premenddt,"%d/%m/%Y") #str in this format to send to newpatientfromcustomer API
+
+
+        provider_code  =  common.getkeyvalue(avars,"providercode","P0001")       
+        pr = db((db.provider.provider == provider_code) & (db.provider.is_active == True)).select(db.provider.id)
+        providerid = 0 if(len(pr) <= 0) else int(common.getid(pr[0].id))
+
+        company_code  =  common.getkeyvalue(avars,"companycode","WALKIN")       
+        c = db((db.company.company == company_code) & (db.company.is_active == True)).select(db.company.id)
+        companyid = 0 if(len(c) <= 0) else int(common.getid(c[0].id))
+
+        plan_code  =  common.getkeyvalue(avars,"plancode","PREMWALKIN")       
+        p = db((db.hmoplan.hmoplancode == plan_code) & (db.hmoplan.is_active == True)).select(db.hmoplan.id)
+        planid = 0 if(len(p) <= 0) else int(common.getid(p[0].id))
+        
+        region_code  =  common.getkeyvalue(avars,"region","ALL")       
+        r = db((db.groupregion.groupregion == region_code) & (db.groupregion.is_active == True)).select(db.groupregion.id)
+        regionid = 0 if(len(r) <= 0) else int(common.getid(r[0].id))
+        
+        avars1={}
+        
+        avars1["providerid"] = providerid
+        avars1["companyid"] = companyid
+        avars1["planid"] = planid
+        avars1["regionid"] = regionid
+        
+        avars1["title"] = common.getkeyvalue(avars,'title', "")
+        avars1["customer_ref"] = common.getkeyvalue(avars,'customer_ref', "")
+        avars1["fname"] = common.getkeyvalue(avars,'fname', "")
+        avars1["mname"] = common.getkeyvalue(avars,'mname', "")
+        avars1["lname"] = common.getkeyvalue(avars,'lname', "")
+        avars1["dob"] = dobstr
+        avars1["cell"] = common.getkeyvalue(avars,'cell', "")
+        avars1["email"] = common.getkeyvalue(avars,'email', "")
+        avars1["gender"] = common.getkeyvalue(avars,'gender',  "")
+        avars1["address1"] = common.getkeyvalue(avars,'address1', "")
+        avars1["address2"] = common.getkeyvalue(avars,'address2', "")
+        avars1["address3"] =common.getkeyvalue(avars,'address3',  "")
+        avars1["city"] = common.getkeyvalue(avars,'city', "")
+        avars1["st"] = common.getkeyvalue(avars,'st', "")
+        avars1["pin"] = common.getkeyvalue(avars,'pin', "")
+        avars1["status"] = common.getkeyvalue(avars,'status',  "")
+        avars1["enrolldate"] = enrollmentdatestr
+        
+        avars1["premstartdt"] =premstartdtstr
+        avars1["premenddt"] = premenddtstr
+        
+        rspobj1 = json.loads(self.newpatientfromcustomer(avars1))
+        #logger.loggerpms2.info("CRM Update Patient " + json.dumps(rspobj))
+        rspobj = {"result":"success","error_message":"","memberid":rspobj1["primarypatientid"]} 
+    except Exception as e:
+      logger.loggerpms2.info("CRM Update Patient Exception:\n" + str(e))
+      excpobj = {}
+      
+      excpobj["result"] = "fail"
+      excpobj["error_message"] = "CRM Update Patient API Exception Error - " + str(e)
+      return json.dumps(excpobj)  
+
+    return json.dumps(rspobj)
+  
+  
+  #this method retrieves member/patient information
+  #{
+  # "profile":{}
+  # "contact":{}
+  # "plan":{}
+  # "dependants":{[]}
+  #}
+  def crm_getpatient(self,avars):
+    logger.loggerpms2.info("Enter crm_getpatient API =>> " + json.dumps(avars))
+    
+    
+    db = self.db
+    providerid = self.providerid
+    memobj = {}
+    planObj = {}
+    patlist = []
+    patobj  = {}
+    message = "success"
+
+    try:
+      cell = common.strip_cell(common.getkeyvalue(avars,"cell","0000000000"))
+      cellno = common.modify_cell(cell)   #in standard with 91
+      
+      pats = db((db.vw_memberpatientlist_fast.cell == cell)|(db.vw_memberpatientlist_fast.cell == cellno)).select()   #compare with 91 or without 91
+      
+      for pat in pats:
+
+        
+  
+        #Assume there is unique cell nos
+        memberid = pat.primarypatientid
+        patientid = pat.patientid
+        mem = db(db.patientmember.id == memberid).select(db.patientmember.ALL, db.groupregion.groupregion,db.groupregion.id,db.company.name,
+                                                         db.hmoplan.name,db.hmoplan.id,db.hmoplan.hmoplancode,db.hmoplan.procedurepriceplancode,
+                                                         left=[db.groupregion.on(db.groupregion.id == db.patientmember.groupregion),
+                                                               db.company.on(db.company.id == db.patientmember.company),
+                                                               db.hmoplan.on(db.hmoplan.id == db.patientmember.hmoplan)])
+        
+        planObj = json.loads(mdputils.getplandetailsformember(db, providerid,memberid, patientid))
+        
+        deps = db((db.patientmemberdependants.patientmember == memberid) & (db.patientmemberdependants.is_active == True)).select()
+        
+        deplist=[]
+        depobj = {}
+        
+        for dep in deps:
+          depobj = {
+            "name":common.getstring(dep.fname) + " " + common.getstring(dep.mname) + " " + common.getstring(dep.lname),
+            "dob": dep.depdob.strftime("%d/%m/%Y"),
+            "relation":dep.relation,
+            "groupref":common.getstring(dep.title),   # for Religare patient (policy 399)  for others it may be title
+            "patientid":int(common.getid(dep.id))
+          }
+          deplist.append(depobj)
+        
+        memobj = {}
+        memobj["memberid"] = int(common.getid(mem[0].patientmember.id))
+        memobj["patientid"] = int(common.getid(mem[0].patientmember.id))
+        
+        memprofile = {}
+        memprofile = {
+            "patientid":int(common.getid(mem[0].patientmember.id)), 
+            "memberid":int(common.getid(mem[0].patientmember.id)), 
+            "patientmember":common.getstring(mem[0].patientmember.patientmember), 
+            "groupref":common.getstring(mem[0].patientmember.groupref), 
+            "title":common.getstring(mem[0].patientmember.title), 
+            "fname":common.getstring(mem[0].patientmember.fname), 
+            "mname":common.getstring(mem[0].patientmember.mname), 
+            "lname":common.getstring(mem[0].patientmember.lname), 
+            "dob":mem[0].patientmember.dob.strftime("%Y-%m-%d")  if(mem[0].patientmember.dob != None) else "1900-01-01",
+            "gender":common.getstring(mem[0].patientmember.gender), 
+            "relationship":"Self", 
+            "newmember":common.getboolean(mem[0].patientmember.newmember), 
+            "freetreatment":common.getboolean(mem[0].patientmember.freetreatment),   
+            "status":common.getstring(mem[0].patientmember.status),
+            "hmopatientmember":common.getboolean(mem[0].patientmember.hmopatientmember),
+            "image":common.getstring(mem[0].patientmember.image),
+            "imageid":common.getid(mem[0].patientmember.imageid),
+            "primarysecondary":"P"
+        
+           
+            }
+        memobj["profile"] = memprofile
+        
+        memcontact = {}
+        memcontact = {
+            "address1":common.getstring(mem[0].patientmember.address1),
+            "address2":common.getstring(mem[0].patientmember.address2),
+            "address3":common.getstring(mem[0].patientmember.address3),
+            "city":common.getstring(mem[0].patientmember.city),
+            "st":common.getstring(mem[0].patientmember.st),
+            "pin":common.getstring(mem[0].patientmember.pin),
+            "cell":common.getstring(mem[0].patientmember.cell),
+            "cell91":common.modify_cell(common.getstring(mem[0].patientmember.cell)),
+            "email":common.getstring(mem[0].patientmember.email),         
+            "region":common.getstring(mem[0].groupregion.groupregion),
+            "regionid":int(common.getid(mem[0].groupregion.id))
+          }
+        memobj["contact"] = memcontact
+        
+        
+            
+  
+        if(common.getboolean(mem[0].patientmember.hmopatientmember) == True):
+          memplan = {
+              "company":common.getstring(planObj["companycode"]),
+              "plan":common.getstring(planObj["planname"]),
+              "plancode":common.getstring(planObj["plancode"]),
+              "planid": int(common.getid(planObj["planid"])),
+              'procedurepriceplancode':common.getstring(planObj["procedurepriceplancode"]),
+              "enrollment":mem[0].patientmember.enrollmentdate.strftime("%Y-%m-%d"),
+              "premenddate":mem[0].patientmember.premenddt.strftime("%Y-%m-%d"),
+              "premstartdate":mem[0].patientmember.premstartdt.strftime("%Y-%m-%d"),
+              "premium":common.getvalue(mem[0].patientmember.premium)
+          }
+        else:
+          #walkin member
+          memplan = {
+              "company":"WALKIN",
+              "plan":"Premium Walkin",
+              "plancode":"PREMWALKIN",
+              "planid": int(common.getid(mem[0].hmoplan.id)),
+              'procedurepriceplancode':"PREMWALKIN",
+              "enrollment":"",
+              "premenddate":"",
+          }
+          
+        
+        memobj["plan"] = memplan
+        
+      
+        memdep = {
+          "count": len(deplist),
+          "deplist":deplist
+        }
+        memobj["dependants"] = memdep
+        
+        
+        patlist.append(memobj)
+      
+      respobj = {}
+      respobj["result"] = "success"
+      respobj["error_message"] = "" 
+      respobj["patientcount"] = len(patlist)
+      respobj["patientlist"] = patlist
+      
+    except Exception as e:
+      logger.loggerpms2.info("Get Patient Exception:\n" + str(e))
+      excpobj = {}
+      excpobj["patientlist"] = []
+      excpobj["result"] = "fail"
+      excpobj["error_message"] = "Get Patient API Exception Error - " + str(e)
+      return json.dumps(excpobj)  
+                   
+    #logger.loggerpms2.info(json.dumps(respobj))
+    return json.dumps(respobj)
+  
+
   
   #this api gets patient details based on either customer_ref or cell
   #it returns patient details
@@ -1400,6 +1710,7 @@ class Patient:
             "st":common.getstring(mem[0].patientmember.st),
             "pin":common.getstring(mem[0].patientmember.pin),
             "cell ":common.getstring(mem[0].patientmember.cell), 
+            "91cell ":common.modify_cell(common.getstring(mem[0].patientmember.cell)), 
             "email ":common.getstring(mem[0].patientmember.email),         
             "region":common.getstring(mem[0].groupregion.groupregion),
             "regionid":int(common.getid(mem[0].groupregion.id))
@@ -1829,6 +2140,7 @@ class Patient:
         "fullname ":common.getstring(pat[0].fullname), 
         "patient ":common.getstring(pat[0].patient), 
         "cell ":common.getstring(pat[0].cell), 
+        "91cell ":common.modify_cell(common.getstring(pat[0].cell)),
         "email ":common.getstring(pat[0].email), 
         "dob ":pat[0].dob.strftime("%d/%m/%Y"),
         "gender ":common.getstring(pat[0].gender), 
@@ -1948,6 +2260,163 @@ class Patient:
     return json.dumps(noteobj)
   
   
+  #this method is called to delete a dependant
+  #{
+  #   "patientmember":"JAIVIT14210174"
+  #   dependants":[
+    #{
+       #"fname":"dep1_FN227",
+       #"lname":"dep1_LN227",
+       #"dependantid":1234
+    #}
+  #}
+  def del_dependant(self,avars):
+    logger.loggerpms2.info("Enter delete dependant API ==" + json.dumps(avars))
+    db = self.db
+    providerid = self.providerid
+    auth = current.auth    
+    rspobj = {}
+    
+    try:
+      patientmember = common.getkeyvalue(avars,"patientmember","")
+      pats = db((db.patientmember.patientmember == patientmember) & (db.patientmember.is_active == True)).select()
+      patid = int(common.getid(pats[0].id)) if (len(pats) >0) else 0
+      
+      #Add new dependants to the current patient
+      deps = common.getkeyvalue(avars,"dependants",None)
+      for dep in deps:
+        depid = common.getkeyvalue(dep,"dependantid",0)
+        r = db((db.patientmemberdependants.id == depid) & (db.patientmemberdependants.patientmember == patid)).select()
+        webdepid = int(common.getid(r[0].webdepid)) if(len(r) > 0) else 0
+        db(db.patientmember.id == webdepid).update(is_active = False)
+        db((db.patientmemberdependants.id == depid) & (db.patientmemberdependants.patientmember == patid)).\
+          update(is_active = False,webdepid = 0, patientmember = 0)
+      
+      rspobj["message"] = "Dependant(s) deleted from " + patientmember
+      rspobj["result"] = "success"
+      rspobj["error_message"] = ""
+    except Exception as e:
+      mssg = "Deleting Dependant API Exception Error - " + str(e)
+      logger.loggerpms2.info(mssg)
+      excpobj = {}
+      excpobj["result"] = "fail"
+      excpobj["error_message"] = mssg
+      return json.dumps(excpobj)       
+  
+    return json.dumps(rspobj)
+    
+  #This method is called when to add a new dependant to a Patient
+  #avars = {
+  #"patientmember": "JAIVIT14210174",
+  #"dependants":[
+    #{
+       #"fname":"dep1_FN227",
+       #"lname":"dep1_LN227",
+       #"depdob":"31/01/2000",
+       #"relation":"Spouse",
+       #"gender":"Female"
+    #}
+   #]
+  #}
+  def add_dependant(self,avars):
+    logger.loggerpms2.info("Enter add_dependant " + json.dumps(avars))
+    db = self.db
+    providerid = self.providerid
+    auth = current.auth    
+    rspobj = {}
+    
+    try:
+      patienmember = common.getkeyvalue(avars,"patientmember","")
+      pats = db((db.patientmember.patientmember == patienmember) & (db.patientmember.is_active == True)).select()
+      patid = int(common.getid(pats[0].id)) if (len(pats) >0) else 0
+      planid = common.getstring(pats[0].hmoplan) if (len(pats) >0) else 1
+      plans = db((db.hmoplan.id == planid) & (db.hmoplan.is_active == True)).select()
+      mdp_family = bool(common.getboolean(plans[0].mdp_family)) if(len(plans) > 0) else False
+      
+      sql = "SELECT * FROM hmoplanbenfits WHERE hmoplanid = " +str(planid)
+      ds =  db.executesql(sql)
+      maxdepcount = depcount = ds[0][11] - 1
+      rows = db(db.patientmemberdependants.patientmember == patid).count()
+      depcount = depcount - rows
+      
+      #Add new dependants to the current patient
+      deps = common.getkeyvalue(avars,"dependants",None)
+      #check for 3 dependants
+      if(len(deps) > depcount):
+        rspobj["result"] = "fail"
+        rspobj["error_message"] = "Cannot add more than " + str(maxdepcount) +  " dependants to " + patienmember
+        return json.dumps(rspobj)
+      
+      for dep in deps:
+        depid = db.patientmemberdependants.insert(
+          title = "",
+          fname = common.getkeyvalue(dep,"fname",""),
+          mname = common.getkeyvalue(dep,"mname",""),
+          lname = common.getkeyvalue(dep,"lname",""),
+          depdob = common.getdatefromstring(dep["depdob"],"%d/%m/%Y"),
+          gender = dep["gender"],
+          relation = dep["relation"],
+          patientmember = patid,
+          webdepid = patid,    #for normal !mdp_family wedpid = patid, but for mdp_family true, wedpid= <patid for the patientmember created for dependant)
+          newmember = True,
+          created_on = common.getISTFormatCurrentLocatTime(),
+          created_by = 1,
+          modified_on = common.getISTFormatCurrentLocatTime(),
+          modified_by = 1                 
+        )
+        dep["dependantid"] = depid
+        db.commit()
+
+      if(mdp_family == True):
+        avars1 = {}
+        avars1["primarypatientid"] = patid
+        avars1["patientmember"] =  pats[0]["patientmember"] if(len(pats)>0) else ""
+        avars1["plan_code"]= plans[0]["hmoplancode"] if(len(plans)>0) else "PREMWALKIN"
+        avars1["company_code"]= plans[0]["company_code"] if(len(plans)>0) else "WALKIN"
+        avars1["groupref"]= pats[0]["groupref"] if(len(pats)>0) else ""
+        avars1["fname"]= pats[0]["fname"] if(len(pats)>0) else ""
+        avars1["mname"]= pats[0]["mname"] if(len(pats)>0) else ""
+        avars1["lname"]= pats[0]["lname"] if(len(pats)>0) else ""
+        avars1["address1"]= pats[0]["address1"] if(len(pats)>0) else ""
+        avars1["address2"]= pats[0]["address2"] if(len(pats)>0) else ""
+        avars1["address3"]= pats[0]["address3"] if(len(pats)>0) else ""
+        avars1["city"]= pats[0]["city"] if(len(pats)>0) else ""
+        avars1["st"]= pats[0]["st"] if(len(pats)>0) else ""
+        avars1["pin"]= pats[0]["pin"] if(len(pats)>0) else ""
+        avars1["cell"]= pats[0]["cell"] if(len(pats)>0) else ""
+        avars1["email"]= pats[0]["email"] if(len(pats)>0) else ""
+        avars1["gender"]= pats[0]["gender"] if(len(pats)>0) else ""
+        avars1["dob"]= common.getstringfromdate(pats[0]["dob"],"%d/%m/%Y") if(len(pats)>0) else "01/01/1990"
+        
+        deplist = avars["dependants"]
+        for dep in deplist:
+          dep["patientmember"] = patid
+          
+        avars1["dependants"] = deplist
+        
+        avars1["regionid"] = pats[0]["groupregion"] if(len(pats) > 0 ) else "0"
+        avars1["providerid"] = pats[0]["provider"] if(len(pats) > 0 ) else "0"
+        avars1["company"] = pats[0]["company"] if(len(pats) > 0 ) else "0"
+        avars1["hmoplan"] = pats[0]["hmoplan"] if(len(pats) > 0 ) else "0"
+        avars1["premstartdt"] = common.getstringfromdate(pats[0]["premstartdt"],"%d/%m/%Y") if(len(pats) > 0 ) else common.getstringfromdate(common.getISTFormatCurrentLocatTime(),"%d/%m/%Y")
+        avars1["premenddt"] = common.getstringfromdate(pats[0]["premenddt"],"%d/%m/%Y") if(len(pats) > 0 ) else common.getstringfromdate(common.getISTFormatCurrentLocatTime(),"%d/%m/%Y")
+        
+        self.newmemberfordependant(json.dumps(avars1))
+      
+      rspobj["message"] = "Dependant(s) added to " + patienmember
+      rspobj["result"] = "success"
+      rspobj["error_message"] = ""
+    except Exception as e:
+      mssg = "Add Dependant API Exception Error - " + str(e)
+      logger.loggerpms2.info(mssg)
+      excpobj = {}
+      excpobj["result"] = "fail"
+      excpobj["error_message"] = mssg
+      return json.dumps(excpobj)       
+  
+    return json.dumps(rspobj)
+  
+  
   def newmemberfordependant(self, avars):
     
     logger.loggerpms2.info("Enter newmemberfordependant " + json.dumps(avars))
@@ -1968,7 +2437,7 @@ class Patient:
       mem = mems[0] if(len(mems) > 0) else None
       depcount = 0
       for dep in deplist:
-
+        
         
         #create member dep obj
         #insert into patientmember <primaty patient patientmember>_<primary patient id>_<rel>_<family member order>
@@ -1979,12 +2448,12 @@ class Patient:
         patid = db.patientmember.insert(\
           patientmember = x ,
          
-          groupref = patobj["groupref"],
-          fname = dep["fname"],
-          mname = dep["mname"],
-          lname = dep["lname"],
-          cell = patobj["cell"],
-          email = patobj["email"],
+          groupref = common.getkeyvalue(patobj,"groupref",""),
+          fname = common.getkeyvalue(dep,"fname",""),
+          mname = common.getkeyvalue(dep,"mname",""),
+          lname = common.getkeyvalue(dep,"lname",""),
+          cell = common.getkeyvalue(patobj,"cell",""),
+          email = common.getkeyvalue(patobj,"email",""),
           
           gender = dep["gender"],
           dob = common.getdatefromstring(dep["depdob"],"%d/%m/%Y"),
@@ -2017,8 +2486,12 @@ class Patient:
           modified_by = 1     
         
         )
+        #now that member objects have been created for each dependant member, then need to make these dependants inactive for Plans which are distinct for each dependant
+        db(db.patientmemberdependants.patientmember == memberid).update(is_active=False,modified_on = common.getISTFormatCurrentLocatTime(),modified_by = 1 )
+        db(db.patientmemberdependants.id == dep["dependantid"]).update(webdepid = patid)
+        db.commit()        
         
-        db.commit()
+        
         planid = int(common.getid(common.getkeyvalue(patobj,"hmoplan",0)))
         h = db((db.hmoplan.id == planid) & (db.hmoplan.is_active == True)).select()
         plan_code = h[0].hmoplancode if(len(h) > 0) else "PREMWALKIN"      
@@ -2062,9 +2535,7 @@ class Patient:
           logger.loggerpms2.info("Error Create Wallet in NewMemberforDependant B " + json.dumps(rspobj))         
           continue
 
-      #now that member objects have been created for each dependant member, then need to make these dependants inactive for Plans which are distinct for each dependant
-      db(db.patientmemberdependants.patientmember == memberid).update(is_active=False,modified_on = common.getISTFormatCurrentLocatTime(),modified_by = 1 )
-      db.commit()
+   
       
       rspobj = {}
       rspobj["result"] = "success"
@@ -2197,10 +2668,23 @@ class Patient:
       }
       bnft = mdpbenefits.Benefit(db)
       bnft.map_member_benefit(obj)
+      
+ 
+      sql = "SELECT * FROM hmoplanbenfits WHERE hmoplanid = " +str(planid)
+      ds =  db.executesql(sql)
+      maxdepcount = depcount = ds[0][11] - 1
+      
+      
+            
+      
       depid = 0
+     
       deps = common.getkeyvalue(avars,"dependants",None)
       if(deps != None):
         for dep in deps:
+          if(depcount == 0 ):
+            break;
+          
           depid = db.patientmemberdependants.insert(
             
             title = "",
@@ -2211,7 +2695,9 @@ class Patient:
             gender = dep["gender"],
             relation = dep["relation"],
             patientmember = patid,
+            webdepid = patid,    #for normal !mdp_family wedpid = patid, but for mdp_family true, wedpid= <patid for the patientmember created for dependant)
             newmember = True,
+            
             
             created_on = common.getISTFormatCurrentLocatTime(),
             created_by = 1,
@@ -2219,14 +2705,16 @@ class Patient:
             modified_by = 1                 
           
           )
+          depcount = depcount - 1
           obj={
                   "plan":plan_code,
                   "memberid":patid,
-                  "patientid":depid
+                  "patientid":depid,
+                  "dependantid":depid
                 }      
           
           bnft.map_member_benefit(obj)
-     
+           
 
       
   
@@ -2251,6 +2739,7 @@ class Patient:
         "fullname":common.getstring(pat[0].fullname), 
         "patient":common.getstring(pat[0].patient), 
         "cell":common.getstring(pat[0].cell), 
+        "91cell":common.modify_cell(common.getstring(pat[0].cell)), 
         "email":common.getstring(pat[0].email), 
         "dob":common.getstringfromdate(pat[0].dob,"%d/%m/%Y"),  #pat[0].dob.strftime("%d/%m/%Y"),
         "gender":common.getstring(pat[0].gender), 
@@ -2288,7 +2777,10 @@ class Patient:
          "depdob":common.getstringfromdate(dep["depdob"],"%d/%m/%Y"),
          "gender":dep["gender"],
          "relation":dep["relation"],
-         "patientmember":dep["patientmember"] 
+         "patientmember":dep["patientmember"],
+         "dependantid":dep["id"],
+         "webdepid":dep["webdepid"]
+         
         }
         deplist.append(depobj)
       
@@ -2377,6 +2869,7 @@ class Patient:
         "fname":fname,
         "lname":lname,
         "cell":cell,
+        "91cell":common.modify_cell(cell),
         "email":email,
         "dob": dobstr
       }
