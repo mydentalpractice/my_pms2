@@ -2321,13 +2321,15 @@ def getdistance(avars):
     return rsp
 
 #Returns list of providers within a radius of the origin provider
+#companyid should be in avars
 def getproviderswithinradius(avars):
     
     oloc = mdplocation.Location(current.globalenv['db'])
     rsp = oloc.getproviderswithinradius(float(common.getstring(avars["originlat"])) if "originlat" in avars else 0,
                                            float(common.getstring(avars["originlong"])) if "originlong" in avars else 0,                                           
                                            float(common.getstring(avars["radius"])) if "radius" in avars else 0,                                           
-                                           avars["unit"] if "unit" in avars else "km"                                          
+                                           avars["unit"] if "unit" in avars else "km" ,
+                                           avars["companyid"] if "companyid" in avars else "0"
                                            )
     #rsp = oloc.getproviderswithinradius(int(common.getstring(avars["providerid"])) if "providerid" in avars else 0,
                                            #float(common.getstring(avars["radius"])) if "radius" in avars else 0,                                           
@@ -2335,14 +2337,15 @@ def getproviderswithinradius(avars):
                                            #)
     
     return rsp
-
+#companyid should be in avars
 def getclinicswithinradius(avars):
     logger.loggerpms2.info("Enter getclinics within radius " + json.dumps(avars))
     oloc = mdplocation.Location(current.globalenv['db'])
     rsp = oloc.getclinicswithinradius(float(common.getstring(avars["originlat"])) if "originlat" in avars else 0,
                                            float(common.getstring(avars["originlong"])) if "originlong" in avars else 0,                                           
-                                           float(common.getstring(avars["radius"])) if "radius" in avars else 0,                                           
-                                           avars["unit"] if "unit" in avars else "km"                                          
+                                           float(common.getstring(avars["radius"])) if "radius" in avars else 0,
+                                           avars["unit"] if "unit" in avars else "km",
+                                           avars["companyid"] if "companyid" in avars else "0"
                                            )
     
     return rsp

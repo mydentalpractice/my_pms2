@@ -9324,6 +9324,12 @@ Added netcopay field
 8. ZMade changes in mdpappointment module
 9. ZMade changes in mdprules module
 
+17/01/2023
+==========
+1. YYZZAdded company_provider_eligibility table
+2. YYZZZimport company_provider_eligibility table
+
+
 
 Script file to clear user for sign-up
 =====================================

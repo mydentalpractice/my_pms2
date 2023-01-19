@@ -149,13 +149,13 @@ class Location:
  
   
   #Returns list of providers within a radius of the origin location
-  def getproviderswithinradius(self,originlat,originlong,radius,unit):
+  def getproviderswithinradius(self,originlat,originlong,radius,unit,companyid=0):
         
       db = self.db
       auth = current.auth
       
       try:
-        
+        eligible = True
         provlist = []
         provobj = {}
         
@@ -183,6 +183,14 @@ class Location:
             continue
           
           
+          #for eligibility criteria if(company in table & provider not in table then eligibility = False)
+          providerid = int(common.getid(prov.id))
+          r = db((db.company_provider_eligibility.companyid == companyid)&\
+            (db.company_provider_eligibility.providerid == providerid)&\
+            (db.company_provider_eligibility.is_active  == True)).select()
+          
+          eligible = False if(len(r) <= 0) else eligible          
+
         
           #logger.loggerpms2.info("Long/Lat :" + prov.provider + ":" + str(prov.pa_longitude) + ":" + str(prov.pa_latitude))
           destlat = float(common.getid(prov.pa_latitude))
@@ -193,7 +201,7 @@ class Location:
           dist = round(float(common.getstring(jsonobj.get("distance","0.0"))),2)
           
           #if provider distance is within radius, then add to the list
-          if(dist <= radius):
+          if((dist <= radius) & (eligible)):
             provobj={
             
               "providerid":int(common.getid(prov.id)),
@@ -247,7 +255,7 @@ class Location:
     auth = current.auth
     
     try:
-      
+     
       provs = db( ((1==1) if(pin == None) else (db.provider.pin == pin )) &\
                  (db.provider.registered == True) &\
                  (db.provider.pa_accepted == True) &\
@@ -318,9 +326,12 @@ class Location:
   
     
   #Returns list of clinics within a radius of the origin location
-  def getclinicswithinradius(self,originlat,originlong,radius,unit):
+  #The list is going to be filtered on company_provider_eligibility
+  #this will return a list of all those clinics (provider) who are 
+  #listed as eligible for a company, hence we are going to pass companyid
+  def getclinicswithinradius(self,originlat,originlong,radius,unit,companyid):
       
-      logger.loggerpms2.info("Enter getclinicwithinradius" + str(originlat) + " " + str(originlong) + " " + str(radius))
+      logger.loggerpms2.info("Enter getclinicwithinradius" + str(originlat) + " " + str(originlong) + " " + str(radius) + " " + str(companyid))
       db = self.db
       auth = current.auth
       
@@ -331,6 +342,7 @@ class Location:
         mdp_contact_cell = props[0].mdp_contact_cell if(len(props) > 0) else ""
         mdp_contact_email = props[0].mdp_contact_email if(len(props) > 0) else ""
         
+        eligible = True
         clnlist = []
         clnobj = {}
         dlist = []
@@ -360,11 +372,19 @@ class Location:
         for cln in clns:
           if((common.isfloat(common.getvalue(cln.vw_clinic.latitude)) == False) | (common.isfloat(common.getvalue(cln.vw_clinic.longitude)) == False)):
             
+            
             #logger.loggerpms2.info("GetClinics within radius Clinics Loop - Null Lat Long\n")
             #logger.loggerpms2.info(str(cln.vw_clinic.clinicid) + " " + common.getstring(cln.vw_clinic.name) + " " + \
             #common.getstring(cln.vw_clinic.city) + " " + common.getstring(cln.vw_clinic.pin))
             continue
-        
+          
+          #for eligibility criteria if(company in table & provider not in table then eligibility = False)
+          providerid = int(common.getid(cln.provider.id))
+          r = db((db.company_provider_eligibility.companyid == companyid)&\
+            (db.company_provider_eligibility.providerid == providerid)&\
+            (db.company_provider_eligibility.is_active  == True)).select()
+          
+          eligible = False if(len(r) <= 0) else eligible
           
           destlat = float(common.getid(cln.vw_clinic.latitude))
           destlong = float(common.getid(cln.vw_clinic.longitude))
@@ -374,7 +394,7 @@ class Location:
           dist = round(float(common.getstring(jsonobj.get("distance","0.0"))),2)
           
           #if provider distance is within radius, then add to the list
-          if((dist <= radius) & (common.getboolean(cln.provider.available == True))):
+          if((dist <= radius) & (common.getboolean(cln.provider.available == True)) & (eligible)):
             #logger.loggerpms2.info("Distance="+ str(dist) + "-Long/Lat:" + cln.vw_clinic.name + ":" + str(cln.vw_clinic.longitude) + ":" + str(cln.vw_clinic.latitude))
             dlist.append(dist)
             clnobj={

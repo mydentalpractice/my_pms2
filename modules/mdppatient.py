@@ -1152,15 +1152,17 @@ class Patient:
       cell = common.strip_cell(cell)
       pats = db((db.patientmember.cell == cell) &  (db.patientmember.is_active == True)).select()
       memberid = 0 if(len(pats) <= 0) else int(common.getid(pats[0].id))
-                                              
+      P_D = common.getkeyvalue(avars,"primarysecondary", "P")                               
       
-      #update if already present, else create a new patient
-      if(memberid > 0):
+      #update if primary member already present, else create a new patient
+      if((memberid > 0) & (P_D == "P")):
         dobstr = common.getkeyvalue(avars,"dob","")
         dob = common.getdatefromstring(dobstr,"%Y-%m-%d") if(dobstr != "") else (None if(len(pats) <= 0) else pats[0].dob)
       
         enrollmentdatestr = common.getkeyvalue(avars,"enrollmentdate","")
-        
+        enrollmentdatestr = common.getkeyvalue(avars,"enrollmentdate","")  #y-m-d from CRM
+        enrolldate = common.getdatefromstring(enrollmentdatestr,"%Y-%m-%d")
+
         
         db(db.patientmember.id == memberid).update(\
           title = common.getkeyvalue(avars,'title', pats[0].title if(len(pats) > 0) else ""),
@@ -1168,22 +1170,50 @@ class Patient:
           mname = common.getkeyvalue(avars,'mname', pats[0].mname if(len(pats) > 0) else ""),
           lname = common.getkeyvalue(avars,'lname', pats[0].lname if(len(pats) > 0) else ""),
           dob = dob,
-          cell = common.getkeyvalue(avars,'cell', pats[0].cell if(len(pats) > 0) else ""),
+          cell = cell if(len(pats) > 0) else "",
           email = common.getkeyvalue(avars,'email', pats[0].email if(len(pats) > 0) else ""),
           gender = common.getkeyvalue(avars,'gender', pats[0].gender if(len(pats) > 0) else ""),
           address1 = common.getkeyvalue(avars,'address1', pats[0].address1 if(len(pats) > 0) else ""),
           address2 = common.getkeyvalue(avars,'address2', pats[0].address2 if(len(pats) > 0) else ""),
           address3 =common.getkeyvalue(avars,'address3', pats[0].address3 if(len(pats) > 0) else ""),
           city = common.getkeyvalue(avars,'city', pats[0].city if(len(pats) > 0) else ""),
-          st = common.getkeyvalue(avars,'st', pats[0].st if(len(pats) > 0) else ""),
+          st = common.getkeyvalue(avars,'state', pats[0].st if(len(pats) > 0) else ""),
           pin = common.getkeyvalue(avars,'pin', pats[0].pin if(len(pats) > 0) else ""),
           status = common.getkeyvalue(avars,'status', pats[0].status if(len(pats) > 0) else ""),
-          enrollmentdate = enrollmentdate,
+          enrollmentdate = enrolldate,
           modified_on = common.getISTFormatCurrentLocatTime(),
           modified_by = 1 if(auth.user == None) else auth.user.id     
         )
         rspobj = {"result":"success","error_message":"","memberid":memberid}    
-      else:
+      
+      elif ((memberid > 0) & (P_D == "D")):
+        #create a dependant
+        dobstr = common.getkeyvalue(avars,"dob","")
+        dob = common.getdatefromstring(dobstr,"%Y-%m-%d") if(dobstr != "") else "1990-01-01"
+        
+        depid = db.patientmemberdependants.insert(
+                    
+            title = "",
+            fname = common.getkeyvalue(avars,'fname', ""),
+            mname = common.getkeyvalue(avars,'mname', ""),
+            lname = common.getkeyvalue(avars,'lname', ""),
+            depdob = dob,
+            gender = common.getkeyvalue(avars,'gender', "Male"),
+            relation = common.getkeyvalue(avars,'relationship', "Self"),
+            patientmember = memberid,
+            webdepid = memberid,    #for normal !mdp_family wedpid = patid, but for mdp_family true, wedpid= <patid for the patientmember created for dependant)
+            newmember = True,
+            created_on = common.getISTFormatCurrentLocatTime(),
+            created_by = 1,
+            modified_on = common.getISTFormatCurrentLocatTime(),
+            modified_by = 1                 
+          )        
+
+        logger.loggerpms2.info("CRM_UPDATE:Dependant created " + str(depid))        
+        #logger.loggerpms2.info("CRM Update Patient " + json.dumps(rspobj))
+        rspobj = {"result":"success","error_message":"","Dependant Id":str(depid)}  
+        
+      else: # create a new member
         
         dobstr = common.getkeyvalue(avars,"dob","1990-01-01")  #y-m-d from CRM
         dob = common.getdatefromstring(dobstr, "%Y-%m-%d")
@@ -1231,14 +1261,14 @@ class Patient:
         avars1["mname"] = common.getkeyvalue(avars,'mname', "")
         avars1["lname"] = common.getkeyvalue(avars,'lname', "")
         avars1["dob"] = dobstr
-        avars1["cell"] = common.getkeyvalue(avars,'cell', "")
+        avars1["cell"] = common.strip_cell(common.getkeyvalue(avars,'cell', ""))
         avars1["email"] = common.getkeyvalue(avars,'email', "")
         avars1["gender"] = common.getkeyvalue(avars,'gender',  "")
         avars1["address1"] = common.getkeyvalue(avars,'address1', "")
         avars1["address2"] = common.getkeyvalue(avars,'address2', "")
         avars1["address3"] =common.getkeyvalue(avars,'address3',  "")
         avars1["city"] = common.getkeyvalue(avars,'city', "")
-        avars1["st"] = common.getkeyvalue(avars,'st', "")
+        avars1["st"] = common.getkeyvalue(avars,'state', "")
         avars1["pin"] = common.getkeyvalue(avars,'pin', "")
         avars1["status"] = common.getkeyvalue(avars,'status',  "")
         avars1["enrolldate"] = enrollmentdatestr
@@ -1247,6 +1277,37 @@ class Patient:
         avars1["premenddt"] = premenddtstr
         
         rspobj1 = json.loads(self.newpatientfromcustomer(avars1))
+        
+        if(rspobj1["result"] != 'success'):
+          rspobj = {"result":"fail","error_message":"CRM Update Patient - Error creating pating"}
+          return json.dumps(rspobj)
+        
+        #if a customer/member is successfully enrolled, then we have to create a wallet and credit it with voucher amount
+        plan_id = int(common.getid(common.getkeyvalue(rspobj1,"hmoplan","0")))
+        company_id = int(common.getid(common.getkeyvalue(rspobj1,"company","0")))
+        member_id = int(common.getid(common.getkeyvalue(rspobj1,"primarypatientid","0")))
+      
+        plans = db((db.hmoplan.id == plan_id) & (db.hmoplan.is_active == True)).select()
+        cos = db((db.company.id == company_id) & (db.company.is_active == True)).select(db.company.company)
+      
+        avars2={}
+        avars2["plan_code"] = plans[0].hmoplancode if(len(plans) == 1) else "PREMWALKIN"
+        avars2["company_code"] = cos[0].company if(len(plans) == 1) else "WALKIN"                            
+        avars2["member_id"] = member_id
+        avars2["patient_id"] = member_id
+        avars2["rule_event"] = "enroll_customer"
+        avars2["mdp_wallet_usase"] = float(common.getvalue(plans[0].walletamount)) if(len(plans) == 1) else 0
+        avars2["super_wallet_amount"] = float(common.getvalue(plans[0].discount_amount)) if(len(plans) == 1) else 0
+        avars2["mdp_wallet_amount"] = 0
+      
+      
+        rspobj2 = {}
+        rulesobj = mdprules.Plan_Rules(db)
+        rspobj2  = json.loads(rulesobj.Get_Plan_Rules(avars2))
+      
+        logger.loggerpms2.info("CRM_UPDATE:Create Wallet After Get_Plan_Rules " + json.dumps(rspobj2))        
+
+
         #logger.loggerpms2.info("CRM Update Patient " + json.dumps(rspobj))
         rspobj = {"result":"success","error_message":"","memberid":rspobj1["primarypatientid"]} 
     except Exception as e:
@@ -2624,6 +2685,7 @@ class Patient:
       
       patid = db.patientmember.insert(\
         patientmember = patientmember,
+        title = common.getkeyvalue(avars,"title",""),
         groupref = common.getkeyvalue(avars,"customer_ref",""),
         fname = common.getkeyvalue(avars,"fname",""),
         mname = common.getkeyvalue(avars,"mname",""),
@@ -2673,6 +2735,7 @@ class Patient:
       sql = "SELECT * FROM hmoplanbenfits WHERE hmoplanid = " +str(planid)
       ds =  db.executesql(sql)
       maxdepcount = depcount = ds[0][11] - 1
+      
       
       
             

@@ -5084,6 +5084,14 @@ db.define_table('dashboard_appt_count',
 db.dashboard_appt_count._singular = "dashboard_appt_count"
 db.dashboard_appt_count._plural   = "dashboard_appt_count"  
 
+db.define_table('company_provider_eligibility',
+                Field('companyid', 'integer'),
+                Field('providerid',  'integer'),
+                Field('is_active', 'boolean')
+                )
+db.company_provider_eligibility._singular = "company_provider_eligibility"
+db.company_provider_eligibility._plural   = "company_provider_eligibility"
+
 def geocode2(form):
     from gluon.tools import geocode
     lo,la= geocode(form.vars.f_location+' USA')
