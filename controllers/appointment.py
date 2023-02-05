@@ -21,6 +21,7 @@ import os;
 
 #import sys
 #sys.path.append('/my_pms2/modules')
+from applications.my_pms2.modules import mdpCRM
 from applications.my_pms2.modules import common
 from applications.my_pms2.modules import mail
 from applications.my_pms2.modules import cycle
@@ -178,7 +179,22 @@ def saveNewAppt(userid,form2,providerid):
 
                 #save in case report
                 common.logapptnotes(db,common.getstring(form2.vars.title),common.getstring(form2.vars.description),apptid)
+                
+                db.commit()
+                
+                #new CRM Appointment
+                #{
+                        #"appointment_id":<3308>
+                #}          
         
+                u = db(db.urlproperties.id > 0).select()
+                crm = bool(common.getboolean(u[0].crm_integration)) if(len(u) >0) else False
+                crm_avars = {}
+                if(crm):
+                        crm_avars["appointment_id"] = apptid
+                        crmobj = mdpCRM.CRM(db)
+                        rsp = crmobj.mdp_crm_bookappointment(crm_avars)                
+                
             
         return retval
         
@@ -2092,7 +2108,6 @@ def appointment_update():
         
         
         #save in case report
-        
         if((patientid > 0) & ((title.strip().upper() != chiefcomplaint.strip().upper()) | (description.strip().upper() != newdescription.strip().upper() ))):
             
             common.logapptnotes(db,chiefcomplaint,newdescription,apptid)
@@ -2109,7 +2124,23 @@ def appointment_update():
                 db(db.t_appointment.id == apptid).update(sendsms = True, sendrem = True,smsaction=smsaction)
                 session.flash = "Appointment updated! SMS confirmation will be sent to the patient and the doctor!"
     
-        #return HTML(BODY(SCRIPT('window.close()'))).xml()        
+        #return HTML(BODY(SCRIPT('window.close()'))).xml()  
+        
+        db.commit()
+        
+        #new CRM Appointment
+        #{
+                #"appointment_id":<3308>
+        #}          
+
+        u = db(db.urlproperties.id > 0).select()
+        crm = bool(common.getboolean(u[0].crm_integration)) if(len(u) >0) else False
+        crm_avars = {}
+        if(crm):
+                crm_avars["appointment_id"] = apptid
+                crmobj = mdpCRM.CRM(db)
+                rsp = crmobj.mdp_crm_updateappointment(crm_avars)                
+        
         redirect(returnurl)
 
     elif form2.errors:

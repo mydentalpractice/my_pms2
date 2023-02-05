@@ -712,29 +712,30 @@ def getimages(db,providerid, patientid,limitby,is_active):
 
 
 def impersonate():
-    user_id = 1
-    impersonatorid = auth.user.id
-    
-    provdict=common.getproviderfromid(db, int(common.getid(request.vars.providerid)))
-    session.religare = False
-    impersonateid  = int(common.getid(request.vars.providerid))
-    
-    r = db((db.provider.id == impersonateid) & (db.provider.registered==True)).select()
-    sitekey = r[0].sitekey
-    
-    r = db(db.auth_user.sitekey == sitekey).select()
-    if(len(r) > 0):
-        user_id = int(common.getstring(r[0].id))
-        
-    auth.user.id = user_id
-    auth.user.sitekey = sitekey
-    auth.user.impersonated = True
-    auth.user.impersonatorid = impersonatorid
-    
-    providerdict = common.getprovider(auth, db);
-    
-    redirect(URL('admin','providerhome'))
-    return dict()    
+     user_id = 1
+     impersonatorid = auth.user.id
+     
+     provdict=common.getproviderfromid(db, int(common.getid(request.vars.providerid)))
+     session.religare = False
+     impersonateid  = int(common.getid(request.vars.providerid))
+     
+     r = db((db.provider.id == impersonateid) & (db.provider.registered==True)).select()
+     sitekey = r[0].sitekey
+     
+     r = db(db.auth_user.sitekey == sitekey).select()
+     if(len(r) > 0):
+          user_id = int(common.getstring(r[0].id))
+         
+     auth.user.id = user_id
+     auth.user.sitekey = sitekey
+     auth.user.impersonated = True
+     auth.user.impersonatorid = impersonatorid
+     
+     providerdict = common.getprovider(auth, db);
+     
+     redirect(URL('admin','select_clinic', vars=dict(providerid=impersonateid)))
+     #redirect(URL('admin','providerhome'))
+     return dict()    
 
 @auth.requires(auth.has_membership('provider') or auth.has_membership('webadmin')) 
 @auth.requires_login()    

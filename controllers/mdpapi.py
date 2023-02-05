@@ -54,6 +54,7 @@ from applications.my_pms2.modules import mdpbenefits
 from applications.my_pms2.modules import mdpdevice
 from applications.my_pms2.modules import mdpplan
 from applications.my_pms2.modules import mdprules
+from applications.my_pms2.modules import mdpCRM
 
 from applications.my_pms2.modules import logger
 
@@ -3521,7 +3522,79 @@ def crm_updatepatient(avars):
     
     return rsp
 
-############################# END OF PATIENT API  ###################################################
+#CRM Update Appointment Request
+#action = crm_updateappointment
+#appointmentid
+#providerid
+#f_status
+#date_start = 2003-01-23 %Y-%m-%d
+#time_start = 10:00 AM %H:%M %p
+
+def crm_updateappointment(avars):
+    logger.loggerpms2.info("Enter CRM Update Appointment " + json.dumps(avars))
+    
+    #convert start date & time into a single datetimestring : %d/%m/%Y hh:mm and pass it to update appointment API
+    loctime = common.getISTFormatCurrentLocatDate()
+    
+    date_start = common.getkeyvalue(avars,"date_start","")
+    time_start = common.getkeyvalue(avars,"time_start","")
+    startdtstr = date_start + " " + time_start
+    
+    #Update appointment requires "provider" key instead of "providerid"
+    avars["provider"] = common.getkeyvalue(avars,"providerid","0")
+    
+    if (date_start == ""):
+	avars["startdt"] = ""
+    else:
+	startdt = common.getdatefromstring(startdtstr, "%Y-%m-%d %H:%M %p")
+	avars["startdt"] = common.getstringfromdate(startdt,"%d/%m/%Y %H:%M")
+    
+    oappt = mdpappointment.Appointment(db,common.getkeyvalue(avars,"providerid",0))
+    
+    rsp = oappt.updateappointment(avars)
+    
+    
+    return rsp
+
+#{
+   #"firstName':<fname">
+   #"lastName':<fname">
+   #"toMobNumber":<+911234567890>
+   #"toEmail":<crm251jan@mydentalplan.in>
+   #"patientMember":<JAIMED03271954>
+   #"primarySecondary":<"P">
+   #"relationship":"Self"
+   #"gender":<Male/Female>
+   #"companyCode":<"MEDI">
+   #"planCode":<"MEDI_NDPC">
+   #"planStartDate":<"2023-01-24"> YYYY-mm-dd
+   #"customerReference":<"crf_crm25jan_911234567890">
+   #"providerCode":<"P0001">
+   #}    
+def mdp_crm_createpatient(avars):
+    logger.loggerpms2.info("Enter MDP CRM Create Patient " + json.dumps(avars))
+    crmobj = mdpCRM.CRM(db)
+    rsp = crmobj.mdp_crm_createpatient(avars)
+    return rsp
+
+#
+#{
+  #"cf_events_mdpaptid":31931
+  #"subject":"Appointment Created using vTiger CRM"
+#}
+def mdp_crm_bookappointment(avars):
+    logger.loggerpms2.info("Enter MDP CRM Book Appointment " + json.dumps(avars))
+    crmobj = mdpCRM.CRM(db)
+    rsp = crmobj.mdp_crm_bookappointment(avars)
+    return rsp
+
+def mdp_crm_updateappointment(avars):
+    logger.loggerpms2.info("Enter MDP CRM Update Appointment " + json.dumps(avars))
+    crmobj = mdpCRM.CRM(db)
+    rsp = crmobj.mdp_crm_updateappointment(avars)
+    return rsp
+
+############################# END OF CRM API  ###################################################
 
 def unknown(avars):
     return dict()
@@ -3530,9 +3603,13 @@ def unknown(avars):
 crmAPI_switcher={
 
     "crm_getpatient":crm_getpatient,
-    "crm_updatepatient":crm_updatepatient
-
+    "crm_updatepatient":crm_updatepatient,
+    "crm_updateappointment":crm_updateappointment,
+    "mdp_crm_createpatient":mdp_crm_createpatient,  #crmCreatePatient MDP->CRM Create Patient
+    "mdp_crm_bookappointment":mdp_crm_bookappointment, #crmBookAppointment MDP->CRM Book Appointment
+    "mdp_crm_updateappointment":mdp_crm_updateappointment #crmUpdateAppointment MDP->CRM Book Appointment
 }
+
 rulesAPI_switcher={
     
     "get_procedure_fees":get_procedure_fees

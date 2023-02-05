@@ -1819,6 +1819,8 @@ db.define_table('urlproperties',
                 Field('mdp_contact_cell','string',default='18001027526'),
                 Field('mdp_contact_email','string',default='appointments@mydentalplan.in'),
 
+                Field('crm_integration','boolean',default=False),
+                Field('mdp_crm_url','text',default="https://api.mydentalpractice.in/vtigercrmapi/"),
                 auth.signature
                 )
 db.urlproperties._singular = "URL_Properties"

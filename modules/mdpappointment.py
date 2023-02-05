@@ -23,6 +23,7 @@ from applications.my_pms2.modules import status
 from applications.my_pms2.modules import cycle
 from applications.my_pms2.modules import logger
 from applications.my_pms2.modules import mdptimings
+from applications.my_pms2.modules import mdpCRM
 
 datefmt = "%d/%m/%Y"
 datetimefmt = "%d/%m/%Y %H:%M:%S"
@@ -1368,6 +1369,9 @@ class Appointment:
             #if they are different then, it is Reschedule else it is normal update
             curraptdt = appt[0].f_start_time
             startdt = common.getkeyvalue(avars,"startdt",common.getstringfromdate(curraptdt,"%d/%m/%Y %H:%M"))
+            if(startdt == ""):
+                startdt = common.getstringfromdate(curraptdt,"%d/%m/%Y %H:%M")
+                
             newapptdt    = common.getdt(datetime.datetime.strptime(startdt,"%d/%m/%Y %H:%M"))
             
             
@@ -2005,12 +2009,26 @@ class Appointment:
                 
                 #save in case report
                 common.logapptnotes(db,complaint,notes,apptid)
-
-                                          
-                
                 dobstr = "" if(len(pat) == 0) else common.getstringfromdate(pat[0].dob,"%d/%m/%Y")
                 email = "" if(len(pat) == 0) else common.getstring(pat[0].email)
                 cell = "" if(len(pat) == 0) else common.getstring(pat[0].cell)
+                
+                db.commit()
+                
+                #new CRM Appointment
+                #{
+                    #"appointment_id":<3308>
+                #}          
+                
+                u = db(db.urlproperties.id > 0).select()
+                crm = bool(common.getboolean(u[0].crm_integration)) if(len(u) >0) else False
+                crm_avars = {}
+                if(crm):
+                    crm_avars["appointment_id"] = apptid
+                    crmobj = mdpCRM.CRM(db)
+                    rsp = crmobj.mdp_crm_bookappointment(crm_avars)                
+                                          
+                
                 
                 newapptobj= {"result":"success","error_message":"","appointment_ref":appointment_ref,"appointmentid":apptid,"appointment_start":startdtstr,"message":"success","dob":dobstr,"email":email,"cell":cell}    
             else:
@@ -2103,6 +2121,23 @@ class Appointment:
                 dobstr = "" if(len(pat) == 0) else common.getstringfromdate(pat[0].dob,"%d/%m/%Y")
                 email = "" if(len(pat) == 0) else common.getstring(pat[0].email)
                 cell = "" if(len(pat) == 0) else common.getstring(pat[0].cell)
+
+                db.commit()
+                
+                #new CRM Appointment
+                #{
+                    #"appointment_id":<3308>
+                #}          
+                
+                u = db(db.urlproperties.id > 0).select()
+                crm = bool(common.getboolean(u[0].crm_integration)) if(len(u) >0) else False
+                crm_avars = {}
+                if(crm):
+                    crm_avars["appointment_id"] = appointmentid
+                    crmobj = mdpCRM.CRM(db)
+                    rsp = crmobj.mdp_crm_updateappointment(crm_avars)                
+                                          
+                
                 
                 apptobj= {"result":"success", "appointmentid":appointmentid,"dob":dobstr,"email":email,"cell":cell,"error_message":"","message":"Appointment updated successfully"}
                 

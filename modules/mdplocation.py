@@ -378,13 +378,20 @@ class Location:
             #common.getstring(cln.vw_clinic.city) + " " + common.getstring(cln.vw_clinic.pin))
             continue
           
-          #for eligibility criteria if(company in table & provider not in table then eligibility = False)
+          #for eligibility criteria if(company in table & provider not in table then eligibility = False) else true
           providerid = int(common.getid(cln.provider.id))
           r = db((db.company_provider_eligibility.companyid == companyid)&\
-            (db.company_provider_eligibility.providerid == providerid)&\
             (db.company_provider_eligibility.is_active  == True)).select()
           
-          eligible = False if(len(r) <= 0) else eligible
+          if(len(r) <= 0): #company not in table, all providers are eligible
+            eligible = True
+          else:
+            r = db((db.company_provider_eligibility.companyid == companyid)&\
+              (db.company_provider_eligibility.providerid == providerid)&\
+              (db.company_provider_eligibility.is_active  == True)).select()
+            
+            eligible = False if(len(r) <=0) else True
+
           
           destlat = float(common.getid(cln.vw_clinic.latitude))
           destlong = float(common.getid(cln.vw_clinic.longitude))

@@ -9314,11 +9314,11 @@ Added netcopay field
 
 22/11/2022
 ==========
-1. ZZZmodified vw_appointments
-2. ZZZNew view vw_dashboard
-3. ZZZNew view vw_dasboard_appt_count
-4. ZZZNew table dashboard_appt_count
-5. ZZZNew table importappointment
+1. XXXYYYZZZmodified vw_appointments
+2. XXXYYYZZZNew view vw_dashboard
+3. XXXYYYZZZNew view vw_dasboard_appt_count
+4. XXXYYYZZZNew table dashboard_appt_count
+5. XXXYYYZZZNew table importappointment
 6. ZMade chhanges in rules function
 7. ZMade changes in Appointment function controller
 8. ZMade changes in mdpappointment module
@@ -9326,10 +9326,15 @@ Added netcopay field
 
 17/01/2023
 ==========
-1. YYZZAdded company_provider_eligibility table
-2. YYZZZimport company_provider_eligibility table
+1. XXXYYZZAdded company_provider_eligibility table
+2. XXXYYZZZimport company_provider_eligibility table
 
-
+25/01/2023
+============
+1. XXXZZZModified urlproperties table to add crm_integration and mdp_crm_url
+ALTER TABLE `mydp_prod`.`urlproperties` 
+ADD COLUMN `crm_integration` CHAR(1) NULL DEFAULT 'F' AFTER `tpapi_url`,
+ADD COLUMN `mdp_crm_url` TEXT NULL AFTER `crm_integration`;
 
 Script file to clear user for sign-up
 =====================================

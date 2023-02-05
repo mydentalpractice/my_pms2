@@ -16,6 +16,8 @@ from applications.my_pms2.modules import mdputils
 from applications.my_pms2.modules import mdpmedia
 from applications.my_pms2.modules import mdpbenefits
 from applications.my_pms2.modules import mdprules
+from applications.my_pms2.modules import mdpCRM
+
 from applications.my_pms2.modules import logger
 
 class Patient:
@@ -1226,10 +1228,17 @@ class Patient:
         premstartdtstr = common.getkeyvalue(avars,"planstartdate","")  #y-m-d from CRM
         premstartdt = common.getdatefromstring(premstartdtstr,"%Y-%m-%d")
         premstartdtstr = common.getstringfromdate(premstartdt,"%d/%m/%Y") #str in this format to send to newpatientfromcustomer API
-
-        premenddtstr = common.getkeyvalue(avars,"planenddate","")  #y-m-d from CRM
-        premenddt = common.getdatefromstring(premenddtstr,"%Y-%m-%d")
-        premenddtstr = common.getstringfromdate(premenddt,"%d/%m/%Y") #str in this format to send to newpatientfromcustomer API
+        
+        
+        #Prem End Date is automatically set to PremStartDate + 1 year
+        day = timedelta(days = 1)
+        year = timedelta(days = 365)
+        premenddt = (premstartdt + year) - day        
+        premenddtstr = common.getstringfromdate(premenddt,"%d/%m/%Y") 
+          
+        #premenddtstr = common.getkeyvalue(avars,"planenddate","")  #y-m-d from CRM
+        #premenddt = common.getdatefromstring(premenddtstr,"%Y-%m-%d")
+        #premenddtstr = common.getstringfromdate(premenddt,"%d/%m/%Y") #str in this format to send to newpatientfromcustomer API
 
 
         provider_code  =  common.getkeyvalue(avars,"providercode","P0001")       
@@ -1275,6 +1284,7 @@ class Patient:
         
         avars1["premstartdt"] =premstartdtstr
         avars1["premenddt"] = premenddtstr
+        avars1["fromcrm"] = "fromcrm"
         
         rspobj1 = json.loads(self.newpatientfromcustomer(avars1))
         
@@ -2085,7 +2095,7 @@ class Patient:
            modified_by = 1 if(auth.user == None) else auth.user.id     
          
          )
-      
+      db.commit()
       newpatobj={
            "result":"success",
            "error_message":"",
@@ -2094,6 +2104,45 @@ class Patient:
            "patientid":patid
          }    
       
+      #new CRM Patient
+      #{
+        #"patient_id":<3308>
+        #"firstName':<fname">
+        #"lastName':<fname">
+        #"toMobNumber":<+911234567890>
+        #"toEmail":<crm251jan@mydentalplan.in>
+        #"patientMember":<JAIMED03271954>
+        #"primarySecondary":<"P">
+        #"relationship":"Self"
+        #"gender":<Male/Female>
+        #"companyCode":<"MEDI">
+        #"planCode":<"MEDI_NDPC">
+        #"planStartDate":<"2023-01-24"> YYYY-mm-dd
+        #"customerReference":<"crf_crm25jan_911234567890">
+        #"providerCode":<"P0001">
+        #}          
+      
+      u = db(db.urlproperties.id > 0).select()
+      crm = bool(common.getboolean(u[0].crm_integration)) if(len(u) >0) else False
+      crm_avars = {}
+      if(crm):
+        crm_avars["patient_id"] = patid
+        #crm_avars["firstName"] = common.getkeyvalue(patobj,"fname",patientmember + "_FN"),
+        #crm_avars["lastName"] = common.getkeyvalue(patobj,"lname",patientmember + "_FN"),
+        #crm_avars["toMobNumber"] = common.modify_cell(common.getkeyvalue(patobj,"cell","18001027526"))
+        #crm_avars["toEmail"] = common.getkeyvalue(patobj,"email","customersupport@mydentalplan.in")
+        #crm_avars["patientMember"] = patientmember
+        #crm_avars["primarySecondary"] = "P"
+        #crm_avars["relationship"] = "Self"
+        #crm_avars["gender"] = common.getkeyvalue(patobj,"gender","Male")
+        #crm_avars["companyCode"] = "WALKIN"
+        #crm_avars["planCode"] = "PREMWALKIN"
+        #crm_avars["planStartDate"] = common.getstringfromdate(todaydt,"%Y-%m-%m")
+        #crm_avars["customerReference"] = "WALKIN"
+        #crm_avars["providerCode"] = provider
+        
+        crm = mdpCRM.CRM(db)
+        rsp = crm.mdp_crm_createpatient(crm_avars)       
     except Exception as e:
       logger.loggerpms2.info("New Walkin Patient Exception:\n" + str(e))
       excpobj = {}
@@ -2171,6 +2220,7 @@ class Patient:
         modified_by = 1     
       
       )
+      db.commit()
       
       obj={
         "plan":company,
@@ -2224,6 +2274,46 @@ class Patient:
         "result":"success",
         "error_message":""
       }    
+      
+      c = db(db.company.id == int(common.getid(pat[0].company))  & (db.company.is_active == False)).select(db.company.company)
+      #new CRM Patient
+      #{
+        #"firstName':<fname">
+        #"lastName':<fname">
+        #"toMobNumber":<+911234567890>
+        #"toEmail":<crm251jan@mydentalplan.in>
+        #"patientMember":<JAIMED03271954>
+        #"primarySecondary":<"P">
+        #"relationship":"Self"
+        #"gender":<Male/Female>
+        #"companyCode":<"MEDI">
+        #"planCode":<"MEDI_NDPC">
+        #"planStartDate":<"2023-01-24"> YYYY-mm-dd
+        #"customerReference":<"crf_crm25jan_911234567890">
+        #"providerCode":<"P0001">
+        #}          
+      u = db(db.urlproperties.id > 0).select()
+      crm = bool(common.getboolean(u[0].crm_integration)) if(len(u) >0) else False
+      crm_avars = {}      
+
+      if(crm):
+        crm_avars["patient_id"] = patid
+        #crm_avars["firstName"] = patobj["fname"]
+        #crm_avars["lastName"] = patobj["lname"]
+        #crm_avars["toMobNumber"] = patobj["91cell"]
+        #crm_avars["toEmail"] = patobj["email"]
+        #crm_avars["patientMember"] = patobj["patientmember"]
+        #crm_avars["primarySecondary"] = "P"
+        #crm_avars["relationship"] = patobj["relation"]
+        #crm_avars["gender"] = patobj["gender"]
+        #crm_avars["companyCode"] = 'MYDP' if(len(c) <= 0) else c[0].company
+        #crm_avars["planCode"] = pat[0].hmoplancode
+        #crm_avars["planStartDate"] = common.getstringfromdate(pat[0].premstartdt,"%Y-%m-%m")
+        #crm_avars["customerReference"] = patobj["groupref"]
+        #crm_avars["providerCode"] = provider
+        
+        crm = mdpCRM.CRM(db)
+        rsp = crm.mdp_crm_createpatient(crm_avars)
       
     except Exception as e:
       logger.loggerpms2.info("New Patient API  Exception:\n" + str(e))      
@@ -2626,6 +2716,9 @@ class Patient:
       planid = common.getkeyvalue(avars,"planid",0)
       regionid = common.getkeyvalue(avars,"regionid",0)
       
+      p= db((db.provider.id == providerid) & (db.provider.is_active == True)).select()
+      provider = "P0001" if(len(p) <=0) else p[0].provider
+      
       premstartdt_str = common.getkeyvalue(avars,"premstartdt","")
       premenddt_str = common.getkeyvalue(avars,"premenddt","")
       
@@ -2722,6 +2815,7 @@ class Patient:
         modified_by = 1     
       
       )
+      db.commit()
       
       obj={
         "plan":plan_code,
@@ -2747,6 +2841,8 @@ class Patient:
         for dep in deps:
           if(depcount == 0 ):
             break;
+          
+          
           
           depid = db.patientmemberdependants.insert(
             
@@ -2777,7 +2873,8 @@ class Patient:
                 }      
           
           bnft.map_member_benefit(obj)
-           
+          
+          
 
       
   
@@ -2849,7 +2946,52 @@ class Patient:
       
       patobj["dependants"] = deplist
       db.commit()  
+      
+      
+      #new CRM Patient
+      #{
+        #"patient_id":<3308>
+      #}          
+      
+      u = db(db.urlproperties.id > 0).select()
+      crm = bool(common.getboolean(u[0].crm_integration)) if(len(u) >0) else False
+      fromcrm = common.getkeyvalue(avars,"fromcrm","")
+      crm = crm if(fromcrm == "") else False
+      crm_avars = {}
+      if(crm):
+        crm_avars["patient_id"] = patid
+        crmobj = mdpCRM.CRM(db)
+        rsp = crmobj.mdp_crm_createpatient(crm_avars)
         
+        ##"fname":dep["fname"],
+        ##"mname":dep["mname"],
+        ##"lname":dep["lname"],
+        ##"depdob":common.getstringfromdate(dep["depdob"],"%d/%m/%Y"),
+        ##"gender":dep["gender"],
+        ##"relation":dep["relation"],
+        ##"patientmember":dep["patientmember"],
+        ##"dependantid":dep["id"],
+        ##"webdepid":dep["webdepid"]        
+        #depcount = 0
+        #for dep in deplist:
+          #depcount = depcount+1
+          #crm_avars = {}
+          #crm_avars["firstName"] = dep["fname"]
+          #crm_avars["lastName"] = dep["lname"]
+          #crm_avars["toMobNumber"] = patobj["91cell"]
+          #crm_avars["toEmail"] = patobj["email"]
+          #crm_avars["patientMember"] = patobj["patientmember"] + "_" + str(depcount) + "_" + dep["relation"]
+          #crm_avars["primarySecondary"] = "D"
+          #crm_avars["relationship"] = dep["relation"]
+          #crm_avars["gender"] = dep["gender"]
+          #crm_avars["companyCode"] = companycode
+          #crm_avars["planCode"] = plan_code
+          #crm_avars["planStartDate"] = common.getstringfromdate(pat[0].premstartdt,"%Y-%m-%m")
+          #crm_avars["customerReference"] = patobj["groupref"]
+          #crm_avars["providerCode"] = provider           
+          #crmobj = mdpCRM.CRM(db)
+          #rsp = crmobj.mdp_crm_createpatient(crm_avars)          
+          
     except Exception as e:
       logger.loggerpms2.info("New Patient API  Exception:\n" + str(e))      
       excpobj = {}
