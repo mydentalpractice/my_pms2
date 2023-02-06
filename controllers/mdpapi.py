@@ -3546,7 +3546,7 @@ def crm_updateappointment(avars):
     if (date_start == ""):
 	avars["startdt"] = ""
     else:
-	startdt = common.getdatefromstring(startdtstr, "%Y-%m-%d %H:%M %p")
+	startdt = common.getdatefromstring(startdtstr, "%Y-%m-%d %I:%M %p")
 	avars["startdt"] = common.getstringfromdate(startdt,"%d/%m/%Y %H:%M")
     
     oappt = mdpappointment.Appointment(db,common.getkeyvalue(avars,"providerid",0))
