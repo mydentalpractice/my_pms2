@@ -3550,7 +3550,13 @@ def crm_updateappointment(avars):
 	avars["startdt"] = common.getstringfromdate(startdt,"%d/%m/%Y %H:%M")
     
     oappt = mdpappointment.Appointment(db,common.getkeyvalue(avars,"providerid",0))
+    avars["sendsms"] = True
+    avars["sendrem"] = True
     
+    if((avars["f_status"].lower() == "canceled") | (avars["f_status"].lower() == "cancelled")):
+	avars["smsaction"] = "cancelled"
+    else:
+	avars["smsaction"] = "update"
     rsp = oappt.updateappointment(avars)
     
     
@@ -3594,6 +3600,53 @@ def mdp_crm_updateappointment(avars):
     rsp = crmobj.mdp_crm_updateappointment(avars)
     return rsp
 
+#provider_id
+def mdp_crm_createprovider(avars):
+    logger.loggerpms2.info("Enter MDP CRM mdp_crm_createprovider " + json.dumps(avars))
+    crmobj = mdpCRM.CRM(db)
+    rsp = crmobj.mdp_crm_createprovider(avars)
+    return rsp
+#provider_id
+def mdp_crm_updateprovider(avars):
+    logger.loggerpms2.info("Enter MDP CRM mdp_crm_updateprovider " + json.dumps(avars))
+    crmobj = mdpCRM.CRM(db)
+    rsp = crmobj.mdp_crm_updateprovider(avars)
+    return rsp
+#clinic_id
+def mdp_crm_createclinic(avars):
+    logger.loggerpms2.info("Enter MDP CRM mdp_crm_createclinic " + json.dumps(avars))
+    crmobj = mdpCRM.CRM(db)
+    rsp = crmobj.mdp_crm_createclinic(avars)
+    return rsp
+#clinic_id
+def mdp_crm_updateclinic(avars):
+    logger.loggerpms2.info("Enter MDP CRM mdp_crm_updateclinic " + json.dumps(avars))
+    crmobj = mdpCRM.CRM(db)
+    rsp = crmobj.mdp_crm_updateclinic(avars)
+    return rsp
+#this function will create new appointments in CRM from Appointments in MDP.
+#this is instead of doing Import Appointments in CRM
+#avars["f_start_time"]  yyyy-mm-dd HH:MM
+#avars["f_end_time"]
+def mdp_crm_bookappointments(avars):
+    logger.loggerpms2.info("Enter mdp_crm_bookappointments")
+    appts = db((db.t_appointment.f_start_time >= common.getkeyvalue(avars,"f_start_time","2000-01-01 00:00")) &\
+               (db.t_appointment.f_start_time <= common.getkeyvalue(avars,"f_end_time","2100-12-31 23:59")) &\
+               (db.t_appointment.is_active == True)).select(db.t_appointment.id)
+    
+    rsp = {}
+    count  = 0
+    for appt in appts:
+	avars["appointment_id"] = appt.id
+	crmobj = mdpCRM.CRM(db)
+	rsp = crmobj.mdp_crm_bookappointment(avars)
+	count  = count+1
+    
+    rsp = "Exit mdp_crm_bookappointments:Number of appointments => " + str(count)
+    return rsp
+
+    
+    
 ############################# END OF CRM API  ###################################################
 
 def unknown(avars):
@@ -3607,7 +3660,13 @@ crmAPI_switcher={
     "crm_updateappointment":crm_updateappointment,
     "mdp_crm_createpatient":mdp_crm_createpatient,  #crmCreatePatient MDP->CRM Create Patient
     "mdp_crm_bookappointment":mdp_crm_bookappointment, #crmBookAppointment MDP->CRM Book Appointment
-    "mdp_crm_updateappointment":mdp_crm_updateappointment #crmUpdateAppointment MDP->CRM Book Appointment
+    "mdp_crm_updateappointment":mdp_crm_updateappointment, #crmUpdateAppointment MDP->CRM Book Appointment
+    "mdp_crm_bookappointments":mdp_crm_bookappointments, #crmBookAppointment MDP->CRM Book Appointment
+    "mdp_crm_createprovider":mdp_crm_createprovider,
+    "mdp_crm_updateprovider":mdp_crm_updateprovider,
+    "mdp_crm_createclinic":mdp_crm_createclinic,
+    "mdp_crm_updateclinic":mdp_crm_updateclinic
+    
 }
 
 rulesAPI_switcher={

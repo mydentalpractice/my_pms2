@@ -181,7 +181,7 @@ def changeinnotes(currnotes, newnotes):
 
 
 def logapptnotes(db,chiefcomplaint,notes,apptid):
-    
+        
         treatment = ""
         doctorname = ""
         providerid = 0
@@ -189,22 +189,26 @@ def logapptnotes(db,chiefcomplaint,notes,apptid):
         patientid = 0
         memberid = 0
         apptdate = getISTCurrentLocatTime()
-        
-        appts = db(db.vw_appointments.id == apptid).select(db.vw_appointments.provider,db.vw_appointments.patient,db.vw_appointments.patientmember,db.vw_appointments.doctor,db.vw_appointments.docname,db.vw_appointments.f_start_time)
-        if(len(appts)>0):
-                providerid = int(getid(appts[0].provider))
-                patientid  = int(getid(appts[0].patient))
-                memberid = int(getid(appts[0].patientmember))
-                doctorid = int(int(getid(appts[0].doctor)))
-                doctorname = getstring(appts[0].docname)
-                apptdate   = appts[0].f_start_time
-                
-        if((notes != None) & (notes != "")):
-                csr = getISTCurrentLocatTime().strftime('%d/%m/%Y %I:%M %p') + "\r\n" + "Appointment:" + apptdate.strftime('%d/%m/%Y %I:%M %p') + "\r\n" + chiefcomplaint + "\r\n" + notes
-                csrid = db.casereport.insert(patientid = patientid, memberid = memberid,providerid=providerid, doctorid=doctorid,appointmentid=apptid, \
-                                             casereport = csr, is_active=True,\
-                                             created_on = getISTFormatCurrentLocatTime(), created_by = providerid, \
-                                             modified_on = getISTFormatCurrentLocatTime(), modified_by = providerid)
+        try:
+                appts = db(db.vw_appointments.id == apptid).select(db.vw_appointments.provider,db.vw_appointments.patient,db.vw_appointments.patientmember,db.vw_appointments.doctor,db.vw_appointments.docname,db.vw_appointments.f_start_time)
+                if(len(appts)>0):
+                        providerid = int(getid(appts[0].provider))
+                        patientid  = int(getid(appts[0].patient))
+                        memberid = int(getid(appts[0].patientmember))
+                        doctorid = int(int(getid(appts[0].doctor)))
+                        doctorname = getstring(appts[0].docname)
+                        apptdate   = appts[0].f_start_time
+                        
+                if((notes != None) & (notes != "")):
+                        csr = getISTCurrentLocatTime().strftime('%d/%m/%Y %I:%M %p') + "\r\n" + "Appointment:" + apptdate.strftime('%d/%m/%Y %I:%M %p') + "\r\n" + chiefcomplaint + "\r\n" + notes
+                        csrid = db.casereport.insert(patientid = patientid, memberid = memberid,providerid=providerid, doctorid=doctorid,appointmentid=apptid, \
+                                                     casereport = csr, is_active=True,\
+                                                     created_on = getISTFormatCurrentLocatTime(), created_by = providerid, \
+                                                     modified_on = getISTFormatCurrentLocatTime(), modified_by = providerid)
+        except Exception as e:
+              
+                logger.loggerpms2.info("Log App Notes Exception Error - " + str(e))
+                return
             
         return
     

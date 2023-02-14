@@ -2004,24 +2004,29 @@ class Appointment:
                                                   modified_by = 1 if(auth.user == None) else auth.user.id
                                                   )  
                 
-                appointment_ref = apptid if(appointment_ref == "") else appointment_ref
-                db(db.t_appointment.id == apptid).update(f_uniqueid = appointment_ref)
+                logger.loggerpms2.info("A")
+                #appointment_ref = str(apptid) if(appointment_ref == "") else appointment_ref
+                #db(db.t_appointment.id == apptid).update(f_uniqueid = apptid)
                 
                 #save in case report
+                logger.loggerpms2.info("B")
+                
                 common.logapptnotes(db,complaint,notes,apptid)
                 dobstr = "" if(len(pat) == 0) else common.getstringfromdate(pat[0].dob,"%d/%m/%Y")
                 email = "" if(len(pat) == 0) else common.getstring(pat[0].email)
                 cell = "" if(len(pat) == 0) else common.getstring(pat[0].cell)
                 
                 db.commit()
+                logger.loggerpms2.info("C")
                 
                 #new CRM Appointment
                 #{
                     #"appointment_id":<3308>
                 #}          
-                
                 u = db(db.urlproperties.id > 0).select()
                 crm = bool(common.getboolean(u[0].crm_integration)) if(len(u) >0) else False
+                logger.loggerpms2.info("Calling CRM Appointment creation " + str(crm))
+                
                 crm_avars = {}
                 if(crm):
                     crm_avars["appointment_id"] = apptid
@@ -2111,6 +2116,7 @@ class Appointment:
                     blockappt = blockappt,
                     sendsms = common.getboolean(common.getkeyvalue(avars,"sendsms","False")),
                     sendrem = common.getboolean(common.getkeyvalue(avars,"sendrem","False")),
+                   
                     
                     modified_on=common.getISTFormatCurrentLocatTime(),
                     modified_by= 1 if(auth.user == None) else auth.user.id

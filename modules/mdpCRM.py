@@ -65,7 +65,187 @@ class CRM:
         
         logger.loggerpms2.info("Exit MD CRM CreatePatientAPI API " + json.dumps(jsonresp))
         return json.dumps(jsonresp)
-    
+
+        #{
+        #"provider_id":<3308>
+        #}    
+    def mdp_crm_createprovider(self,avars):
+        logger.loggerpms2.info("Enter MDP CRM CreateProvider API " + json.dumps(avars))
+        auth  = current.auth
+        db = self.db
+        rspobj = {}
+        
+        try:
+            #create URL
+            apiURL =self.apiURL
+            apiURL = apiURL+"crmCreateProvider"
+            #crm_header = {"Content-Type":"application/json"}
+            crm_header = {"Content-Type":"application/json","x-api-key":"MYDP~mc3b1q2o"}
+            
+            jsonreqdata = {
+                "provider_id":common.getkeyvalue(avars,"provider_id","0")
+            }            
+            
+            logger.loggerpms2.info("CRM Create Provider REQUEST\n" + json.dumps(jsonreqdata) + "URL " + apiURL + " Header " + json.dumps(crm_header))
+            
+            #call API
+            resp = requests.post(apiURL,headers=crm_header,json=jsonreqdata)
+            jsonresp = {}
+            if((resp.status_code == 200)|(resp.status_code == 201)|(resp.status_code == 202)|(resp.status_code == 203)):
+                respstr =   resp.text
+                #jsonresp = json.loads(respstr)
+                jsonresp["response"] = respstr
+                jsonresp["result"] = "success"
+                jsonresp["error_message"] = ""
+            
+            
+        except Exception as e:
+            mssg = " MDP CRM CreateProvider API Exception:\n" + str(e)
+            logger.loggerpms2.info(mssg)      
+            excpobj = {}
+            excpobj["result"] = "fail"
+            excpobj["error_code"] = ""
+            excpobj["error_message"] = mssg
+            return json.dumps(excpobj)           
+        
+        logger.loggerpms2.info("Exit MD CRM CreateProvider API " + json.dumps(jsonresp))
+        return json.dumps(jsonresp)
+
+    #{
+    #"provider_id":<3308>
+    #}    
+    def mdp_crm_updateprovider(self,avars):
+        logger.loggerpms2.info("Enter MDP CRM mdp_crm_updateprovider API " + json.dumps(avars))
+        auth  = current.auth
+        db = self.db
+        rspobj = {}
+        
+        try:
+            #create URL
+            apiURL =self.apiURL
+            apiURL = apiURL+"crmUpdateProvider"
+            #crm_header = {"Content-Type":"application/json"}
+            crm_header = {"Content-Type":"application/json","x-api-key":"MYDP~mc3b1q2o"}
+            
+            jsonreqdata = {
+                "provider_id":common.getkeyvalue(avars,"provider_id","0")
+            }            
+            
+            logger.loggerpms2.info("CRM mdp_crm_updateprovider REQUEST\n" + json.dumps(jsonreqdata) + "URL " + apiURL + " Header " + json.dumps(crm_header))
+            
+            #call API
+            resp = requests.post(apiURL,headers=crm_header,json=jsonreqdata)
+            jsonresp = {}
+            if((resp.status_code == 200)|(resp.status_code == 201)|(resp.status_code == 202)|(resp.status_code == 203)):
+                respstr =   resp.text
+                #jsonresp = json.loads(respstr)
+                jsonresp["response"] = respstr
+                jsonresp["result"] = "success"
+                jsonresp["error_message"] = ""
+            
+            
+        except Exception as e:
+            mssg = " MDP CRM mdp_crm_updateprovider API Exception:\n" + str(e)
+            logger.loggerpms2.info(mssg)      
+            excpobj = {}
+            excpobj["result"] = "fail"
+            excpobj["error_code"] = ""
+            excpobj["error_message"] = mssg
+            return json.dumps(excpobj)           
+        
+        logger.loggerpms2.info("Exit MD CRM mdp_crm_updateprovider API " + json.dumps(jsonresp))
+        return json.dumps(jsonresp)
+    #{
+    #"clinic_id":<3308>
+    #}    
+    def mdp_crm_createclinic(self,avars):
+        logger.loggerpms2.info("Enter MDP CRM mdp_crm_createclinic API " + json.dumps(avars))
+        auth  = current.auth
+        db = self.db
+        rspobj = {}
+        
+        try:
+            #create URL
+            apiURL =self.apiURL
+            apiURL = apiURL+"crmCreateClinic"
+            #crm_header = {"Content-Type":"application/json"}
+            crm_header = {"Content-Type":"application/json","x-api-key":"MYDP~mc3b1q2o"}
+            
+            jsonreqdata = {
+                "clinic_id":common.getkeyvalue(avars,"clinic_id","0")
+            }            
+            
+            logger.loggerpms2.info("CRM mdp_crm_createclinic REQUEST\n" + json.dumps(jsonreqdata) + "URL " + apiURL + " Header " + json.dumps(crm_header))
+            
+            #call API
+            resp = requests.post(apiURL,headers=crm_header,json=jsonreqdata)
+            jsonresp = {}
+            if((resp.status_code == 200)|(resp.status_code == 201)|(resp.status_code == 202)|(resp.status_code == 203)):
+                respstr =   resp.text
+                #jsonresp = json.loads(respstr)
+                jsonresp["response"] = respstr
+                jsonresp["result"] = "success"
+                jsonresp["error_message"] = ""
+            
+            
+        except Exception as e:
+            mssg = " MDP CRM mdp_crm_createclinic API Exception:\n" + str(e)
+            logger.loggerpms2.info(mssg)      
+            excpobj = {}
+            excpobj["result"] = "fail"
+            excpobj["error_code"] = ""
+            excpobj["error_message"] = mssg
+            return json.dumps(excpobj)           
+        
+        logger.loggerpms2.info("Exit MD CRM mdp_crm_updateprovider API " + json.dumps(jsonresp))
+        return json.dumps(jsonresp)
+
+    #{
+    #"clinic_id":<3308>
+    #}    
+    def mdp_crm_updateclinic(self,avars):
+        logger.loggerpms2.info("Enter MDP CRM mdp_crm_updateclinic API " + json.dumps(avars))
+        auth  = current.auth
+        db = self.db
+        rspobj = {}
+        
+        try:
+            #create URL
+            apiURL =self.apiURL
+            apiURL = apiURL+"crmUpdateClinic"
+            #crm_header = {"Content-Type":"application/json"}
+            crm_header = {"Content-Type":"application/json","x-api-key":"MYDP~mc3b1q2o"}
+            
+            jsonreqdata = {
+                "clinic_id":common.getkeyvalue(avars,"clinic_id","0")
+            }            
+            
+            logger.loggerpms2.info("CRM mdp_crm_updateclinic REQUEST\n" + json.dumps(jsonreqdata) + "URL " + apiURL + " Header " + json.dumps(crm_header))
+            
+            #call API
+            resp = requests.post(apiURL,headers=crm_header,json=jsonreqdata)
+            jsonresp = {}
+            if((resp.status_code == 200)|(resp.status_code == 201)|(resp.status_code == 202)|(resp.status_code == 203)):
+                respstr =   resp.text
+                #jsonresp = json.loads(respstr)
+                jsonresp["response"] = respstr
+                jsonresp["result"] = "success"
+                jsonresp["error_message"] = ""
+            
+            
+        except Exception as e:
+            mssg = " MDP CRM mdp_crm_updateclinic API Exception:\n" + str(e)
+            logger.loggerpms2.info(mssg)      
+            excpobj = {}
+            excpobj["result"] = "fail"
+            excpobj["error_code"] = ""
+            excpobj["error_message"] = mssg
+            return json.dumps(excpobj)           
+        
+        logger.loggerpms2.info("Exit MD CRM mdp_crm_updateclinic API " + json.dumps(jsonresp))
+        return json.dumps(jsonresp)
+            
+
    #{
     #"cf_events_mdpaptid":31931
     #"subject":"Appointment Created using vTiger CRM"
@@ -110,7 +290,7 @@ class CRM:
             excpobj["error_message"] = mssg
             return json.dumps(excpobj)           
         
-        logger.loggerpms2.info("Exit MD CRM CreatePatientAPI API " + json.dumps(jsonresp))
+        logger.loggerpms2.info("Exit MD CRM Book Appointment " + json.dumps(jsonresp))
         return json.dumps(jsonresp)             
     
     
@@ -192,5 +372,5 @@ class CRM:
             excpobj["error_message"] = mssg
             return json.dumps(excpobj)           
         
-        logger.loggerpms2.info("Exit MD CRM CreatePatientAPI API " + json.dumps(jsonresp))
+        logger.loggerpms2.info("Exit MD CRM UpdateAppointment API API " + json.dumps(jsonresp))
         return json.dumps(jsonresp)                 

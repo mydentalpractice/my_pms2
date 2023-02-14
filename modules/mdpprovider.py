@@ -8,6 +8,7 @@ from applications.my_pms2.modules import gender
 from applications.my_pms2.modules import states
 from applications.my_pms2.modules import status
 from applications.my_pms2.modules import relations
+from applications.my_pms2.modules import mdpCRM
 
 from applications.my_pms2.modules import mdpmedia
 
@@ -163,6 +164,8 @@ class Provider:
         modified_by= 1 if(auth.user == None) else auth.user.id
   
       )
+      
+      db.commit()
   
      
   
@@ -179,6 +182,23 @@ class Provider:
         "error_code":""
       }            
   
+      #new CRM Provider
+      #{
+        #"provider_id":<3308>
+      #}          
+    
+      u = db(db.urlproperties.id > 0).select()
+      crm = bool(common.getboolean(u[0].crm_integration)) if(len(u) >0) else False
+      fromcrm = common.getkeyvalue(avars,"fromcrm","")
+      crm = crm if(fromcrm == "") else False
+      crm_avars = {}
+     
+    
+      if(crm==True):
+        crm_avars["provider_id"] = providerid
+        crmobj = mdpCRM.CRM(db)
+        rsp = crmobj.mdp_crm_createprovider(crm_avars)
+
   
     except Exception as e:
       mssg = "New Provider Exception:\n" + str(e)

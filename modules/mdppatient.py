@@ -2104,7 +2104,7 @@ class Patient:
            "patientid":patid
          }    
       
-      #new CRM Patient
+      #No new CRM Patient for Walkin Patient
       #{
         #"patient_id":<3308>
         #"firstName':<fname">
@@ -2122,27 +2122,14 @@ class Patient:
         #"providerCode":<"P0001">
         #}          
       
-      u = db(db.urlproperties.id > 0).select()
-      crm = bool(common.getboolean(u[0].crm_integration)) if(len(u) >0) else False
-      crm_avars = {}
-      if(crm):
-        crm_avars["patient_id"] = patid
-        #crm_avars["firstName"] = common.getkeyvalue(patobj,"fname",patientmember + "_FN"),
-        #crm_avars["lastName"] = common.getkeyvalue(patobj,"lname",patientmember + "_FN"),
-        #crm_avars["toMobNumber"] = common.modify_cell(common.getkeyvalue(patobj,"cell","18001027526"))
-        #crm_avars["toEmail"] = common.getkeyvalue(patobj,"email","customersupport@mydentalplan.in")
-        #crm_avars["patientMember"] = patientmember
-        #crm_avars["primarySecondary"] = "P"
-        #crm_avars["relationship"] = "Self"
-        #crm_avars["gender"] = common.getkeyvalue(patobj,"gender","Male")
-        #crm_avars["companyCode"] = "WALKIN"
-        #crm_avars["planCode"] = "PREMWALKIN"
-        #crm_avars["planStartDate"] = common.getstringfromdate(todaydt,"%Y-%m-%m")
-        #crm_avars["customerReference"] = "WALKIN"
-        #crm_avars["providerCode"] = provider
+      #u = db(db.urlproperties.id > 0).select()
+      #crm = bool(common.getboolean(u[0].crm_integration)) if(len(u) >0) else False
+      #crm_avars = {}
+      #if(crm):
+        #crm_avars["patient_id"] = patid
+        #crm = mdpCRM.CRM(db)
+        #rsp = crm.mdp_crm_createpatient(crm_avars)       
         
-        crm = mdpCRM.CRM(db)
-        rsp = crm.mdp_crm_createpatient(crm_avars)       
     except Exception as e:
       logger.loggerpms2.info("New Walkin Patient Exception:\n" + str(e))
       excpobj = {}
@@ -2958,7 +2945,9 @@ class Patient:
       fromcrm = common.getkeyvalue(avars,"fromcrm","")
       crm = crm if(fromcrm == "") else False
       crm_avars = {}
-      if(crm):
+      hmopatientmember = bool(common.getboolean(patobj["hmopatientmember"]))
+      
+      if((crm==True) & (hmopatientmember == True)):
         crm_avars["patient_id"] = patid
         crmobj = mdpCRM.CRM(db)
         rsp = crmobj.mdp_crm_createpatient(crm_avars)

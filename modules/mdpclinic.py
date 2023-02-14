@@ -4,6 +4,7 @@ import datetime
 import json
 
 from applications.my_pms2.modules import common
+from applications.my_pms2.modules import mdpCRM
 from applications.my_pms2.modules import logger
 #
 
@@ -560,13 +561,29 @@ class Clinic:
                 modified_on=common.getISTFormatCurrentLocatTime(),
                 modified_by= 1 if(auth.user == None) else auth.user.id
                 )
-            
+            db.commit()
             rspobj = {
                           "clinicid":str(clinicid),
                           "result":"success",
                           "error_message":"",
                           "error_code":""
-                      }                        
+                      }
+            
+            #{
+                #"clinic_id":<3308>
+            #}          
+                   
+            u = db(db.urlproperties.id > 0).select()
+            crm = bool(common.getboolean(u[0].crm_integration)) if(len(u) >0) else False
+            fromcrm = common.getkeyvalue(avars,"fromcrm","")
+            crm = crm if(fromcrm == "") else False
+            crm_avars = {}
+
+            if(crm==True):
+                crm_avars["clinic_id"] = clinicid
+                crmobj = mdpCRM.CRM(db)
+                rsp = crmobj.mdp_crm_updateclinic(crm_avars)
+                
         except Exception as e:
             mssg = "New Clinic Exception:\n" + str(e)
             logger.loggerpms2.info(mssg)      
@@ -667,6 +684,7 @@ class Clinic:
                 modified_by= 1 if(auth.user == None) else auth.user.id
                 
             )
+            db.commit()
             
             clinic_ref = common.getkeyvalue(avars,'clinic_ref',"CLN" + str(clinicid).zfill(4))
             db(db.clinic.id == clinicid).update(clinic_ref = clinic_ref)
@@ -686,6 +704,23 @@ class Clinic:
                 "error_code":""
             }            
         
+            #new CRM Provider
+            #{
+                #"clinic_id":<3308>
+            #}          
+        
+            u = db(db.urlproperties.id > 0).select()
+            crm = bool(common.getboolean(u[0].crm_integration)) if(len(u) >0) else False
+            fromcrm = common.getkeyvalue(avars,"fromcrm","")
+            crm = crm if(fromcrm == "") else False
+            crm_avars = {}
+        
+        
+            if(crm==True):
+                crm_avars["clinic_id"] = clinicid
+                crmobj = mdpCRM.CRM(db)
+                rsp = crmobj.mdp_crm_createclinic(crm_avars)  
+                
         except Exception as e:
             mssg = "New Clinic Exception:\n" + str(e)
             logger.loggerpms2.info(mssg)      
