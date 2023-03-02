@@ -4520,6 +4520,7 @@ db.define_table('customer',
                
                
                Field('notes','text'),
+               Field('appointment_status','string'),
                
                auth.signature,
                  format='%(customer)s'

@@ -1469,7 +1469,7 @@ class Customer:
                 
                 cobj["appointment_id"] = c[0].appointment_id
                 cobj["appointment_datetime"] =None if (c[0].appointment_datetime == None) else  c[0].appointment_datetime.strftime("%d/%m/%Y %H:%M")
-                
+                cobj["appointment_status"] = c[0].appointment_status
                 cobj["enrolldate"] = None if (c[0].enrolldate == None) else c[0].enrolldate.strftime("%d/%m/%Y")
                 
                 cobj["notes"] = c[0].notes

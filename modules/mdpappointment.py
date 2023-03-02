@@ -1071,6 +1071,7 @@ class Appointment:
                 avars["block"] = self.isBlocked(startapptdt,endapptdt,doctorid,clinicid)
                 avars["providerid"] = providerid
                 avars["appointment_start"] = common.getstringfromdate(startapptdt,"%d/%m/%Y %H:%M")
+                avars["notes"] = common.getkeyvalue(avars,"appointment_status","Open")
                 avars["notes"] = common.getkeyvalue(avars,"providernotes","")
                 newapptobj = json.loads(self.new_appointment(avars))
                 newapptobj["appointment_ref"] = str(newapptobj["appointment_ref"])
@@ -1555,8 +1556,10 @@ class Appointment:
             sendemail = common.getboolean(common.getkeyvalue(avars,"sendemail","True"))
             retVal = True
             retVal1 = True
-            
+            #logger.loggerpms2.info("Enter Appt Loop SendPatSMSEmail - Appts " + str(len(appts)))
             for appt in appts:
+                #logger.loggerpms2.info("Enter Appt Loop SendPatSMSEmail - Apptid " + str(appt.id))
+                
                 memberid = int(common.getid(appt.vw_appointments.patientmember))
                 patientid = int(common.getid(appt.vw_appointments.patient))
                 providerid = int(common.getid(appt.vw_appointments.provider))
@@ -1657,25 +1660,25 @@ class Appointment:
         
                 retVal = True
                
-                if((patcell != "") & (sendsms)):
-                    retVal = mail.sendAPI_SMS2Email(db,patcell,patmessage)
+                #if((patcell != "") & (sendsms)):
+                    #retVal = mail.sendAPI_SMS2Email(db,patcell,patmessage)
                     
                 if((patemail != "")&(sendemail)):
                     #retVal1= mail.groupEmail(db, patemail, ccs, "Appointment: " + appttime, patemailmssg)  # send email to patient        
                     retVal1= mail._groupEmail(db, _mail, patemail, ccs, sub + "Appointment: " + appttime, patemailmssg)  # send email to patient        
                 
-                rspobj = {}
-                if(retVal == True):
-                    mssg = "sendPatSMSEmail: Patient SMS sent successfully to this patient " + fname + "(" + patcell + ")"
-                    rspobj["appointmentid"] = str(apptid)
-                    rspobj["result"] = "success"
-                    rspobj["error_message"] = ""
-                    rspobj["message"] = mssg
-                else:
-                    rspobj["appointmentid"] = str(apptid)
-                    mssg = "sendPatSMSEmail:  Error sending Patient SMS to this patient " + fname + "(" + patcell + ")"
-                    rspobj["result"] = "fail"
-                    rspobj["error_message"] = mssg
+                #rspobj = {}
+                #if(retVal == True):
+                    #mssg = "sendPatSMSEmail: Patient SMS sent successfully to this patient " + fname + "(" + patcell + ")"
+                    #rspobj["appointmentid"] = str(apptid)
+                    #rspobj["result"] = "success"
+                    #rspobj["error_message"] = ""
+                    #rspobj["message"] = mssg
+                #else:
+                    #rspobj["appointmentid"] = str(apptid)
+                    #mssg = "sendPatSMSEmail:  Error sending Patient SMS to this patient " + fname + "(" + patcell + ")"
+                    #rspobj["result"] = "fail"
+                    #rspobj["error_message"] = mssg
                     
                
                 
@@ -1733,8 +1736,9 @@ class Appointment:
             sendemail = common.getboolean(common.getkeyvalue(avars,"sendemail","True"))
             retVal = True
             retVal1 = True
-            
+            #logger.loggerpms2.info("Enter Appt Loop SendDocSMSEmail - Appts " + str(len(appts)))
             for appt in appts:
+                #logger.loggerpms2.info("Enter Appt Loop SendDocSMSEmail - Apptid " + str(appt.id))
                 clinicname = common.getstring(appt.clinic.name)
                 memberid = int(common.getid(appt.vw_appointments.patientmember))
                 patientid = int(common.getid(appt.vw_appointments.patient))
@@ -1817,14 +1821,14 @@ class Appointment:
                 if((provcell != "") & (sendsms)):
                     #retVal = mail.sendSMS2Email(db,doccell,docmessage)
                     retVal = mail.sendAPI_SMS2Email(db,provcell,docmessage)
-                    if(doccell != ""):
+                    if((doccell != "") & (doccell != provcell)):
                         retVal = mail.sendAPI_SMS2Email(db,doccell,docmessage)
                     
                 if((provemail != "")&(sendemail)):
                     #retVal1 = mail.groupEmail(db, docemail, ccs, "Appointment: " + appttime, docmessage)  # send email to patient        
                     
                     emails = provemail
-                    if(docemail != ""):
+                    if((docemail != "") & (docemail != provemail)):
                         emails = emails + "," + docemail
                     retVal1 = mail._groupEmail(db, _mail, emails, ccs, "Appointment: " + appttime, docmessage)  # send email to provider        
                 
@@ -1880,7 +1884,7 @@ class Appointment:
    
     
     def sendAllAppointmentsSMSEmail(self,avars):
-        #logger.loggerpms2.info("Enter sendAllAppointmentsSMSEmail " + json.dumps(avars))
+        logger.loggerpms2.info("Enter sendAllAppointmentsSMSEmail " + json.dumps(avars))
          
         db = self.db
         rspObj = {}
@@ -1899,8 +1903,10 @@ class Appointment:
             
             
          
-            
+            #logger.loggerpms2.info("Enter Appt Loop All - Appts " + str(len(appts)))
+                                                                            
             for appt in appts:
+                #logger.loggerpms2.info("Enter Appt Loop All - Apptid " + str(appt.id))
                 #send SMS to Patient
                 avars["appointmentid"]  = str(appt.id)
                 avars["ccs"]  = ccs
@@ -1993,11 +1999,25 @@ class Appointment:
                 
                 #22/07/22 - As per new appointment confirmation process, we are setting initial stattus as Open rather than confirmed
                 #sts = "Blocked" if(blockappt == True) else "Confirmed"
-                sts = "Blocked" if(blockappt == True) else "Open"
+                
+                sts = "Blocked" if(blockappt == True) else common.getkeyvalue(avars,"appointment_status",'Open')
+                
+                sendsms = True
+                sendrem = True
+                smsaction = 'create'
+                if(sts.lower() == "confirmed"):
+                    sendsms = False
+                    sendrem = False
+                    smsaction = 'update'
+                if((sts.lower() == "canceled")|(sts.lower() == "cancelled")):
+                    sendsms = False
+                    sendrem = False
+                    smsaction = 'Canceled'
+                
                 apptid  = db.t_appointment.insert(f_start_time=startapptdt, f_end_time = endapptdt, f_duration = duration, f_status = sts, \
                                                   cell = cell,f_title = complaint,f_treatmentid = 0,blockappt = blockappt,\
                                                   f_patientname = common.getstring("" if (len(pat) == 0) else pat[0].fullname),
-                                                  description = notes,f_location = location, sendsms = True, smsaction = 'create',sendrem = True,
+                                                  description = notes,f_location = location, sendsms = sendsms, smsaction = smsaction,sendrem = sendrem,
                                                   doctor = doctorid, provider=providerid, patient=patientid,patientmember=memberid, clinicid=clinicid, is_active=True,
                                                   created_on=common.getISTFormatCurrentLocatTime(),modified_on=common.getISTFormatCurrentLocatTime(),
                                                   created_by = 1 if(auth.user == None) else auth.user.id,

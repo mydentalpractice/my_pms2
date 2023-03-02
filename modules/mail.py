@@ -1923,7 +1923,7 @@ def _groupEmail(db,mail,emails,ccs, subject,message):
         subject =  subject
         message = message
         
-        #logger.loggerpms2.info("GropuEmail:Before Send Email " + message)
+        #logger.loggerpms2.info("GropuEmail:Before Send Email " + message + " tos " + emails )
         retVal = mail.send(to,subject,message,cc=createMailCC(ccs))
         #logger.loggerpms2.info("GropuEmail:After Send Email " + message)
         
